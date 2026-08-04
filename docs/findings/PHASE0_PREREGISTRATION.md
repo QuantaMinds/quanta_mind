@@ -82,6 +82,8 @@ reclassification this log exists to prevent.
 
 | **A25** | 4.14 | A PR with **no changed function body** is excluded as a **restricted estimand**, counted apart from resource attrition and carried into the bounds. Attrition is reported **cross-tabulated by commit count and corpus file count**, never pooled; if it tracks either, A17's bounds must cover `parent_commit` failures and not only the file-set gate. The estimand is stated as **function-body changes only**. | A smoke run lost 32% of PRs with `parent_commit` dominating — shape detection failing when the corpus file list does not match the change, which tracks patch size. That is differential exclusion on the study's own confounder, and a single attrition percentage cannot show it. Coding zero-symbol PRs as UNEXPOSED would put real breakage (import and constant edits do break callers) into the unexposed arm — the error that manufactured RR 8.0, arriving from the other side. |
 
+| **A26** | 4.15 | **Tightens the outcome rule on its two named defects, before the labels are drawn.** The breakage pattern matches the commit **subject** only, not the squash body; and a later commit counts as a repair only if the PR's files are at least a quarter of what that commit touched. Adds **clone timeout** as a named exclusion in A17's bounds. | The pilot's rate came back at **27.3%** against the published PR-level figure of 11.3% — 2.4x the reference, on a corpus skewed toward small single-commit changes that should sit *below* it. Both causes were already diagnosed, so fixing them after labelling would burn an iteration of the gate on a rule known to be broken. Both changes can only remove verdicts, never add them. |
+
 **A8 is the one that most needed to be pre-registered.** Switching to cluster-robust
 inference after seeing a confidence interval would be indistinguishable from moving the
 goalposts, whatever the motivation.
@@ -1188,6 +1190,49 @@ multi-site fraction, no-static-callee share, `EXCLUDED_SYNTAX` share, instant-me
 star-band split, repository concentration, and the exposure-versus-patch-size correlation
 that decides whether a pooled result is quotable at all. The last of these needs the
 measurement stage, not just record construction.
+
+---
+
+### 4.15 The outcome rule, tightened before the labels are spent [A26]
+
+The pilot measured a breakage rate of **27.3%**. The published PR-level rate for agent
+changes is **11.3%**. Ours is 2.4x that — on a corpus the attrition has skewed toward
+small, single-commit changes, which is the end of the distribution that should sit *below*
+the reference, not above it. Read with the dry run finding the rule too loose in eight of
+nine disagreements, the likeliest explanation is that a large share of those events are
+ordinary follow-up commits rather than repairs.
+
+That is not a power problem. It is a measurement problem wearing a power problem's
+clothes, and it decides whether the corpus holds twenty real events or eight.
+
+**Both causes were already named, so both are fixed now — before the sample is drawn.**
+Fixing them afterwards would spend one of the three permitted iterations on a rule already
+known to be broken.
+
+1. **Match the subject, not the body.** A squash merge concatenates every constituent
+   commit message, so a feature branch containing one commit that began `fix:` produced a
+   body matching the pattern. `scan_outcome._subject` takes the first line. The revert
+   check still reads the whole message, because `git revert` writes its marker in the body.
+2. **A repair is aimed at what it repairs.** A commit touching two hundred files that
+   happens to include one of ours is a release or a sweep; it overlaps almost any PR by
+   construction. The PR's files must now be at least **`MIN_COMMIT_FOCUS` = 0.25** of what
+   the commit touched. Chosen a priori, not fitted: the pilot's admitted records have a
+   median of two changed files, so a genuine follow-up is small.
+
+**Both changes can only remove BROKE verdicts, never add them.** The direction is toward
+the null, which is the direction an amendment made without seeing the answer must take.
+
+**Convergence toward roughly 11% is the signal to look for.** It would mean the tightened
+rule agrees with an independently published measurement on the same population — worth
+knowing before three hours are spent reading pull requests, and worth recording whether it
+happens or not.
+
+**Clone timeout becomes a named exclusion.** `dagster-io/dagster` exceeded the 900-second
+clone budget. Large repositories time out, and large repositories hold large pull
+requests, so this compounds the commit-count gradient in the same direction as
+`parent_commit`. It is counted as `resource` attrition and **carried into A17's bounds
+alongside `parent_commit` and `file_set`** — otherwise it is loss that never appears in
+the accounting at all.
 
 ---
 

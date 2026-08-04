@@ -72,3 +72,38 @@ def looks_like_a_revert(message: str) -> bool:
     would attribute any revert in the window to this PR.
     """
     return bool(REVERT_SUBJECT.match(message))
+
+
+# A repair is aimed at the thing it repairs. A commit touching two hundred files that
+# happens to include one of ours is a release, a reformat or a sweeping refactor -- it
+# overlaps almost any PR by construction. Requiring the PR's files to be a real share of
+# what the commit touched separates "aimed at this" from "passed over this".
+#
+# Chosen a priori at one quarter, not fitted: the pilot's admitted records have a median
+# of two changed files, so a genuine follow-up fix is small. The direction is toward the
+# null -- it can only remove BROKE verdicts, never add them.
+MIN_COMMIT_FOCUS = 0.25
+
+
+def subject(message: str) -> str:
+    """The first line, which is the only part that describes the commit.
+
+    A squash merge concatenates every constituent commit message into the body, so a
+    feature branch containing one commit that began `fix:` produced a body matching
+    FIX_PATTERN -- and the rule fired on large feature PRs as a class. Matching the
+    subject alone is what the pattern always meant.
+    """
+    return message.splitlines()[0] if message else ""
+
+
+def is_focused(touched: frozenset[str], changed: frozenset[str]) -> bool:
+    """Whether a later commit is substantially about the PR's files.
+
+    Takes filename sets rather than a Commit so the rules stay free of GitPython: what
+    counts as a breakage signal is a decision, and decisions should be testable without
+    a repository.
+    """
+    if not touched:
+        return False
+    overlap = touched & changed
+    return bool(overlap) and len(overlap) / len(touched) >= MIN_COMMIT_FOCUS

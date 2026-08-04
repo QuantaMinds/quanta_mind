@@ -97,12 +97,15 @@ def _merged_at(pr: PRRecord) -> datetime | None:
 
 
 def _touches_pr_files(commit: Commit, changed: frozenset[str]) -> bool:
-    """True if this commit modifies any file the PR modified."""
+    """True if this commit is substantially about the files the PR modified.
+
+    The git extraction lives here; the rule lives in `fix_signals.is_focused`.
+    """
     try:
-        touched = set(commit.stats.files)
+        touched = frozenset(str(name) for name in commit.stats.files)
     except GIT_LOOKUP_ERRORS:
         return False
-    return any(str(name) in changed for name in touched)
+    return fix_signals.is_focused(touched, changed)
 
 
 def _candidates(repo: Repo, start: datetime, end: datetime, exclude: str) -> list[Commit]:
@@ -165,7 +168,13 @@ def scan(repo_path: Path, pr: PRRecord, window_days: int = WINDOW_DAYS) -> Outco
 
             overlaps = _touches_pr_files(commit, changed)
             if overlaps and (
-                fix_signals.mentions_breakage(message) or fix_signals.looks_like_a_revert(message)
+                # SUBJECT only. A squash merge concatenates every constituent commit
+                # message into the body, so any feature branch containing one commit
+                # that said "fix:" produced a body matching the pattern -- which made
+                # the rule fire on large feature PRs as a class. `looks_like_a_revert`
+                # keeps the whole message: `git revert` writes its marker in the body.
+                fix_signals.mentions_breakage(fix_signals.subject(message))
+                or fix_signals.looks_like_a_revert(message)
             ):
                 return OutcomeRecord(
                     outcome=Outcome.BROKE,
