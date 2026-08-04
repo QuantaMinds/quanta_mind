@@ -204,6 +204,26 @@ difference-in-differences with matched controls) found agent adoption raises
 static-analysis warnings ~18% and cognitive complexity ~39%, and calls for **provenance
 tracking** by name.
 
+### The gap in our own evidence — say it before they find it
+
+Phase 0 tests whether unresolved call sites predict breakage in agent-authored Python
+changes, on a corpus that is **65% OpenAI Codex and 1.4% Claude Code** (459 PRs). The
+mechanism is agent-agnostic — it is about what the codebase makes knowable, not which model
+is reading it. But the evidence is Codex evidence, and the product's first integration is
+Claude Code. **That gap is real and Phase 0 does not close it.**
+
+Two things make it survivable rather than fatal, and both should be said in the same breath:
+
+- Codex has the **lowest** breaking rate of the five agents measured (2.62%, against Claude
+  Code's 5.10%). The corpus is two-thirds the safest agent, so an effect that shows up
+  anyway shows up under unfavourable conditions.
+- If the mechanism is real, agent **retrieval strategy** should moderate it — Claude Code
+  greps without an index, Cursor embeds, Devin indexes. That prediction is registered before
+  the run, so if it appears it is evidence rather than a story.
+
+An investor who reads the source paper finds the 1.4% in ten minutes. Better that it is
+already in the deck, with the two mitigations attached.
+
 ### Willingness to pay is already demonstrated
 
 An enterprise deployed language servers **org-wide**, at their own cost, before rolling

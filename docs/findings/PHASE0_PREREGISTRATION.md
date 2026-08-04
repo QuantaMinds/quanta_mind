@@ -28,7 +28,7 @@ papers, and from review of the execution plan.
 
 **No amendment moves a decision boundary.** The RR thresholds (3.0 / 1.5), the CI rules,
 the 7-day window, the `a ≥ 20` floor and the stop rule in §6 are byte-identical to the
-first commit. A1–A5 are factual corrections or newly discovered prerequisites; A6–A16
+first commit. A1–A5 are factual corrections or newly discovered prerequisites; A6–A17
 change *what is measured* (A6), *how it is matched* (A9), *what is excluded* (A7), *how it
 is estimated* (A8), or *what may be claimed from the result* (A10), so that all of them
 match what the instrument can actually deliver.
@@ -64,8 +64,9 @@ reclassification this log exists to prevent.
 | **A12** | 4.2 | Control corpus: **if an exposed unit is excluded, its matched control twin is excluded with it.** Unseeable mechanisms go to the capability table only; the firing mechanism scales to 40/40. Gate unchanged. | The first run computed RR = 8.0 from 50 of 80 units, with all 30 exclusions in the exposed arm and none in the control arm. Coding them the other way gives 2.0 — a 4× swing from asymmetric absence alone. |
 | **A13** | 4.3 | **Differential exclusion by arm**, for the main study: exclusions reported by arm and reason; pooled RR demoted if the exposed-arm rate exceeds the control arm's by >10pp or the bounds diverge; every exclusion category bounded both ways, or declared unbounded. | Every exclusion category plausibly removes exposed units faster than unexposed ones. The control measured the magnitude at 4×; on the real corpus nobody plants it deliberately. |
 | **A14** | 4.4 | RR reported **by agent**; §6 scopes the finding; non-identical arm time windows recorded. | Computed: Codex is 64.9% of the corpus and Claude Code 1.4% (459 PRs). A general-sounding claim would rest on one agent — and the product targets the agent with 1.4% of the evidence. |
-| **A15** | 4.5 | Human-arm star-band mismatch confirmed **by computing `min(stars)`**, not by citation; handled by stratifying on star band rather than restricting. | Published sources conflict (>500 vs >100). `repository.parquet` gives min 101, median 564, so AIDev-pop is >100 and the human arm's >500 floor is a real confound. |
+| **A15** | 4.5 | Human-arm star-band mismatch confirmed by **joining `human_pull_request` to `repository`**, not by a superset statistic; handled by stratifying on star band. | The human arm's true floor is 503 stars with 0% below 500; the agent arm has 47.3% below 500 and a median of 564 against the human Python slice's 14,933. A 26× popularity gap. |
 | **A16** | 4.6 | **Supersedes A13's mechanism.** Distinguishes the control's *restricted estimand* (no measurement to be missing) from the study's genuine, likely **MNAR** loss to follow-up. Primary labelled complete-case; worst-case bounds; **tipping-point multiplier** run only if the primary is positive; IPCW as supporting. | The §3.3 2×2 is a complete-case analysis, unbiased only under MCAR. The bias is not identifiable, so the question is how much of it the conclusion survives — which is a number, not a caveat. |
+| **A17** | 4.7, 6 | Agent-stratified RR **reportable for Codex only**; Claude Code descriptive at best; corpus composition recorded in §6 as *conservative*; retrieval-strategy moderation **pre-registered as a prediction**. | Codex is 64.9% of the corpus and has the lowest breaking rate (2.62%) of the five, so a positive appears under unfavourable conditions. Claude Code is 459 PRs — below the power floor before the filters. A moderation found post-hoc is a story; predicted, it is mechanism evidence. |
 
 **A8 is the one that most needed to be pre-registered.** Switching to cluster-robust
 inference after seeing a confidence interval would be indistinguishable from moving the
@@ -538,25 +539,33 @@ comparability.
 
 ### 4.5 The human arm is not a matched control [A15]
 
-**Settled empirically, because published sources contradict each other.** arXiv 2606.28125
-describes AIDev-pop as ">500 stars"; the dataset card, the MSR challenge page and arXiv
-2606.13468 all say ">100". Rather than weigh citations, the statistic was computed from
-`repository.parquet`:
+**Settled by joining the two tables, not by computing a related quantity.** An earlier
+version of this amendment cited `min(stars) = 101` over all 2,807 repositories. That
+measures the **agent** arm's floor; the dataset card's claim is about the **human** subset.
+Correct measurement, wrong quantity — the same error shape as the confidence column.
 
-> **`min(stars) = 101`**, max 203,424, median 564, over all 2,807 repositories.
+The join that answers it: `human_pull_request ⋈ repository`, 6,569 of 6,618 PRs matched.
 
-AIDev-pop is **>100 stars**. The median of 564 is the likely source of the error. The
-dataset card states human PRs were *"sampled from the same repositories as Agentic-PRs, but
-only from those that have more than 500 stars."*
+| | min stars | median | max | repos below 500 |
+|---|---|---|---|---|
+| **Human arm** (810 repos) | **503** | 4,194 | 203,424 | **0.0%** |
+| **Agent arm** (2,807 repos) | 101 | 564 | 203,424 | **47.3%** |
 
-**So the mismatch is real:** the agent arm reaches down to 101 stars, the human arm stops at
-500. Comparing them confounds *agent vs human* with *repository popularity*, and §5 already
-names repository activity as a confounder.
+The dataset card is correct, and **the mismatch is far larger than a threshold difference
+suggests: 47.3% of agent repositories sit entirely below the human arm's floor.** The
+Python slice joins to exactly **1,402 human PRs across 162 repositories** — matching the
+breaking-changes paper's figure precisely, which confirms it is this table — with a median
+of **14,933 stars** against the agent arm's 564. A 26× difference in median popularity.
+
+Comparing the arms therefore confounds *agent vs human* with *repository popularity* to a
+degree that would dominate any modest effect, and §5 already names repository activity as a
+confounder.
 
 **Handling: stratify by star band (≤500, >500) and report both**, rather than restricting.
-Restriction would discard the majority of the agent arm — the median is 564, so roughly half
-the agent repositories fall below the human arm's floor. Stratification keeps them and makes
-the comparison legible.
+Restriction would discard 47.3% of the agent arm. Stratification keeps them, and the >500
+stratum is the only band where an agent-vs-human comparison is even defined.
+
+49 human PRs did not join to a repository row and are corpus attrition, counted.
 
 ### 4.6 Missing data — and what is *not* missing [A16]
 
@@ -613,6 +622,41 @@ neither imputation nor weighting removes the bias. The bias is **not identifiabl
    limited and an unfamiliar headline estimator invites the wrong argument.
 5. **The pilot reports exclusion rate by arm.** If the difference is material, §6 leads with
    the bounds and the tipping point, not the point estimate.
+
+### 4.7 Agent stratification, and a predicted moderation [A17]
+
+Extends A14 with what the composition means once it is crossed against the source paper's
+per-agent breaking rates.
+
+| Agent | Share of corpus | Breaking rate (arXiv 2603.27524) |
+|---|---|---|
+| **OpenAI Codex** | **64.9%** | **2.62% — lowest of five** |
+| GitHub Copilot | 14.8% | 3.04% |
+| Devin | 14.4% | 4.09% |
+| Cursor | 4.6% | 4.20% |
+| **Claude Code** | **1.4%** (459 PRs) | **5.10% — highest** |
+
+**The corpus is two-thirds the safest agent, and that is conservative.** If the effect
+appears anyway, it appears under unfavourable conditions. **Recorded in §6 as strengthening
+a positive**, since a reader will otherwise see only "65% one agent" and read it as a
+weakness.
+
+**Agent-stratified RR is reportable for Codex only.** 459 Claude Code PRs, through the
+structural filter, the merged filter and into the exposed arm, lands far below the `a ≥ 20`
+floor. Stating this now stops someone computing it at analysis time and reading noise.
+Claude Code is **descriptive at best**, and said as such.
+
+**A moderation hypothesis, pre-registered rather than discovered.** The five agents differ
+in retrieval strategy — Claude Code greps with no index, Cursor uses embeddings, Devin
+maintains its own index, Codex operates in a sandboxed checkout. If unresolvability predicts
+breakage **because the agent could not see the caller**, then retrieval strategy should
+*moderate* the effect, and Codex-heavy pooling would wash it out.
+
+> Predicted: RR differs by agent retrieval strategy, where power permits.
+
+If it appears, it is mechanism evidence for the causal story. Found afterwards, it is a
+story fitted to a number. This paragraph is the difference between the two, and it costs
+nothing to write now.
 
 ### Power
 
