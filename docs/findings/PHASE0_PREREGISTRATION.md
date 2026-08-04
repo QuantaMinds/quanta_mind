@@ -75,6 +75,9 @@ reclassification this log exists to prevent.
 
 | **A21** | 4.11 | Fixes `PHASE0_PREREGISTRATION.md` “Timeline”'s day-2 gate protocol before it runs: **human arm**, eligibility, a **stride draw** across the id range, a manifest hash binding labelling to scoring, and **Cohen's kappa reported as a diagnostic beside the unchanged ≥16/20 threshold**. A PR whose history is unreadable is **not labellable** and invalidates the gate. | The gate's validity is entirely an ordering property, and ordering is the one thing a green test does not check. Also: raw agreement on an all-clean sample is 20/20 for a classifier that always answers "clean" — the same degeneracy `controls/analysis.py` already refuses in the negative controls, reappearing a layer up. |
 
+| **A22** | 4.12 | **Blind stratified sampling.** The sample is 10 PRs the classifier called BROKE and 10 it called CLEAN, shuffled, exported as URLs only; the answers are sealed in a gitignored key. Supersedes A21's stride draw. | At the corpus base rate a random twenty holds about two broken PRs, so labelling everything CLEAN scores ~18/20 and passes a gate that proved nothing. Balanced, always-CLEAN scores 10/20 and fails. The cost is representativeness: agreement now estimates the mean of sensitivity and specificity, not agreement in the wild. |
+| **A23** | 4.12 | **The human judges breakage, not the rule.** The rendered seven-day commit window is withdrawn; the labeller works from the pull request and may use any evidence, including linked issues and CI runs the classifier cannot see. `UNSURE` becomes a first-class verdict, scored as disagreement. | The withdrawn sheet showed exactly the classifier's own input, so agreement would have been partly true by construction — it tested whether a human can apply the regex, not whether the regex captures breakage. The gate only means something if the two sources of evidence can differ. |
+
 **A8 is the one that most needed to be pre-registered.** Switching to cluster-robust
 inference after seeing a confidence interval would be indistinguishable from moving the
 goalposts, whatever the motivation.
@@ -872,7 +875,12 @@ suspicion. The metric is reported; the boundary does not move.
 
 ---
 
-### 4.11 The day-2 gate's protocol, fixed before it runs [A21]
+### 4.11 The 20-PR gate's protocol, first attempt [A21 — superseded by A22/A23]
+
+> **Superseded. Read “The 20-PR gate, as it will actually run” instead.** The stride draw below is replaced by a
+> stratified one (A22) and the rendered evidence sheet is withdrawn entirely (A23),
+> because it showed the labeller the classifier's own input. What survives is the
+> ≥ 16/20 floor, the refusal to score an incomplete sheet, and kappa as context.
 
 `PHASE0_PREREGISTRATION.md` “Timeline” requires the outcome classifier to agree with hand-labelling on **≥16 of 20 PRs**, and
 `PHASE0_PREREGISTRATION.md` “Timeline” is the only measurement in the correlation test whose validity is purely a property of *what order
@@ -925,6 +933,64 @@ sample is single-class, an explicit statement that **the gate had no discriminat
 marked not-labellable, is excluded from labelling, and invalidates the gate until it is
 readable. This is stated because the first implementation got it wrong in the most
 instructive way available — see `ENVIRONMENT.lock`, finding 4.
+
+---
+
+### 4.12 The 20-PR gate, as it will actually run [A22, A23]
+
+Supersedes “The 20-PR gate's protocol, first attempt”. Both changes are pre-data and both make the gate
+harder to pass.
+
+**A22 — the sample is stratified on the classifier's own verdict.** Ten PRs it called
+BROKE, ten it called CLEAN, shuffled, exported as `label_id` and `pr_url` and nothing
+else. The answers are written to a gitignored key that is not opened until the labels are
+committed.
+
+The arithmetic is the reason. A revert-or-fix inside seven days is well under a 50% base
+rate, so a random twenty contains roughly **two** broken PRs — and a labeller who wrote
+CLEAN twenty times would score about **18/20 and pass**. Balanced, that same labeller
+scores **10/20 and fails**. The gate now tests the classifier rather than the base rate.
+
+**This changes the estimand, and the change must be stated wherever the number is.**
+Agreement on a balanced sample estimates the *average of sensitivity and specificity*,
+not agreement over the corpus. It is a validation quantity, not a prevalence one. "80%
+agreement" here does **not** mean the classifier is right 80% of the time in the wild, and
+Results must not imply that it does.
+
+Repositories are shuffled and capped at three PRs each rather than shuffling PRs directly:
+one clone per PR is unaffordable, and stopping as soon as the buckets fill would otherwise
+concentrate the sample in whichever repositories came first.
+
+**A23 — the labeller judges breakage, not the rule.** The rendered seven-day commit window
+built under A21 is withdrawn. It presented precisely the classifier's own input, which
+would have made agreement partly true by construction — measuring whether a human can
+apply a regex, not whether that regex is a good proxy for breakage. The gate is only
+informative if the two sources of evidence are allowed to differ.
+
+So the labeller gets the pull request URL and works from GitHub: the diff, the commit
+history, **linked issues, CI runs, and discussion the classifier cannot read**. The
+question is "did this PR cause something to stop working?", not "did the seven-day rule
+fire correctly?" — the latter is a unit test and already exists.
+
+**`UNSURE` is a first-class verdict**, scored as disagreement and reported separately. A
+PR nobody can resolve in ten minutes is one the rule almost certainly cannot resolve
+either, and a run with many of them is a finding about how much breakage is determinable
+from history at all — which belongs in the limits section, not hidden in a forced guess.
+
+**What survives from the superseded protocol, unchanged:** the ≥ 16/20 floor, the refusal to score an
+incomplete sheet, and kappa reported as context rather than as a second threshold. Kappa
+now excludes `UNSURE` rows, because coding them as either class would invent a judgement
+the labeller explicitly declined to make.
+
+**Iteration is bounded at three rounds and the count is recorded.** If the rule is
+adjusted after a failure, the next round draws a **fresh sample under a new seed**.
+Re-scoring the same twenty after adjusting the rule is fitting to one's own labels, and
+three rounds is tuning where ten is fitting a classifier to a hope.
+
+**The audit trail is a commit, not an assertion.** `human_labels.csv` is committed before
+the key is opened, and `results/labelling.json` records that commit's SHA alongside the
+seed and both bucket sizes. That is what makes the ordering checkable by someone who was
+not present — including the author later, when the result is inconvenient.
 
 ---
 

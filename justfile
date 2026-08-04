@@ -53,25 +53,24 @@ test-unit:
 test-property:
     uv run pytest tests/property -x --timeout=120
 
-# The the correlation test harness runs in its own virtual environment on its own interpreter
+# The correlation-test harness runs in its own virtual environment, on its own interpreter
 # (Python 3.10 — PyCG does not run on 3.11+). See research/phase0/ENVIRONMENT.lock.
 test-phase0:
     cd research/phase0 && uv run pytest -x --timeout=120
 
-# ------------------------------------------------------- `PHASE0_PREREGISTRATION.md` “Timeline” day-2 gate (human)
+# ------------------------------------------------- the 20-PR labelling gate (human)
 
-# Build the blind labelling sheet. Reads the replication package, clones the 13
-# repositories the draw lands in, and writes results/handlabel_sheet.md.
-# Exits non-zero if any window is unreadable — a sheet built from failed clones
-# renders twenty quiet weeks and the gate would pass on no data.
-handlabel-sheet:
-    cd research/phase0 && uv run python scripts/make_handlabel_sheet.py
+# Draw the blind, stratified sample: 10 PRs the classifier called BROKE and 10 it
+# called CLEAN, shuffled, exported as URLs only. The seed is required so the draw
+# is reproducible and cannot be quietly redrawn. Seals the answers into _key.csv.
+label-draw SEED:
+    cd research/phase0 && uv run python -m phase0.sample_for_labelling --n-broke 10 --n-clean 10 --seed {{SEED}}
 
-# Score the labels against the classifier. Run this AFTER filling in all twenty;
-# it refuses an incomplete sheet. Running it first turns the gate into a memory
-# test and the result is worth nothing.
-handlabel-score:
-    cd research/phase0 && uv run python scripts/score_handlabel.py
+# Score the labels against the sealed key. Run this AFTER all twenty are filled in
+# AND committed — the commit timestamp is what proves the labels predate the
+# comparison. Refuses an incomplete sheet.
+label-score:
+    cd research/phase0 && uv run python -m phase0.score_labelling
 
 # Branch naming needs a branch, so it runs in CI rather than on every local check.
 check-branch:
@@ -79,7 +78,7 @@ check-branch:
 
 # ---------------------------------------------------------------- honest gate
 
-# ⚠️  THE CALL-SITE CENSUS LAYER GATE — not runnable yet, and that is deliberate.
+# ⚠️  CALL-SITE CENSUS GATE — not runnable yet, and that is deliberate.
 #
 # Every recipe below operates on the SQLite pack, which does not exist: docs/BUILD_PLAN.md
 # gates all product code on the correlation test reporting a verdict, and the three scripts under
@@ -94,11 +93,11 @@ _phase1-gate:
     set -uo pipefail
     if [ ! -f scripts/verify/compare_golden.py ]; then
       echo "" >&2
-      echo "⛔ 'just verify' is a THE CALL-SITE CENSUS LAYER gate and is not runnable yet." >&2
+      echo "⛔ 'just verify' gates on the call-site census layer and is not runnable yet." >&2
       echo "" >&2
       echo "   It operates on the SQLite pack, and there is no pack. docs/BUILD_PLAN.md" >&2
       echo "   gates every layer of product code on the correlation test reporting a verdict, and" >&2
-      echo "   docs/findings/PHASE0_PREREGISTRATION.md `PHASE0_PREREGISTRATION.md` “Results” is still empty." >&2
+      echo "   docs/findings/PHASE0_PREREGISTRATION.md “Results” is still empty." >&2
       echo "" >&2
       echo "   This is not a broken checkout. See scripts/verify/README.md." >&2
       echo "   Run 'just check' — that is the gate that must be green today." >&2
@@ -158,7 +157,7 @@ serve:
 view:
     uv run qmctx view --host 127.0.0.1 --port 7332
 
-# ---------------------------------------------------------------- the correlation test
+# ---------------------------------------------------------------- golden files
 
 # One-shot authorisation for a single golden-file update. hook_pre_edit.py deletes
 # the sentinel after one use, so it cannot be left enabled.

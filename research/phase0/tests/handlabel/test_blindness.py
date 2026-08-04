@@ -1,135 +1,125 @@
-"""Verification that the sheet cannot leak an answer to the labeller.
+"""Verification that the sheet cannot carry an answer to the labeller.
 
-WHAT: Pins the structural guarantees on the evidence side — no import path from the
-      sheet or the window walker to a verdict, no per-commit annotation derived from
-      the classifier's pattern, and an unreadable window that refuses to be labelled.
-WHY:  `PHASE0_PREREGISTRATION.md` “Timeline” gate is the one measurement in the correlation test
-whose validity depends entirely on
-      the order two things happen in, and order is not something a green test usually
-      checks. These check it by making the leak impossible rather than discouraged.
-IMPORTS: ast, pytest, phase0.handlabel.{sheet,window,select}, phase0.{fix_signals,scan_outcome}.
+WHAT: Pins the two-column blind export, the URL shape it accepts, and the balance that
+      makes an always-CLEAN labeller fail.
+WHY:  The contamination risk in this gate is one careless column, and no test catches
+      "somebody read the wrong file". So the guarantee is structural: `write_blind`
+      accepts only `(int, str)` pairs, and rejects any URL richer than a plain pull
+      request link -- the one route by which an answer could still be encoded.
+
+      The balance test is the point of the stratified design. At the corpus base rate a
+      random twenty holds about two broken PRs, so always-CLEAN scores ~18/20 and passes
+      a gate that proved nothing. Ten of each makes it score 10/20 and fail.
+IMPORTS: pytest, phase0.handlabel.{files,draw,score,labels}.
 CONSUMED BY: `just test-phase0`.
 """
 
 from __future__ import annotations
 
-import ast
+import csv
 from pathlib import Path
 
 import pytest
 
-from phase0 import fix_signals, scan_outcome
-from phase0.handlabel import sheet as sheet_module
-from phase0.handlabel import window as window_module
-from phase0.handlabel.select import Candidate, Selection
-from phase0.handlabel.sheet import render_sheet
-from phase0.handlabel.window import Window, WindowCommit, unavailable
-
-FORBIDDEN = {"scan_outcome", "fix_signals"}
+from phase0.handlabel.draw import KeyRow
+from phase0.handlabel.files import BLIND_COLUMNS, read_key, write_blind, write_key
+from phase0.handlabel.labels import HumanLabel
+from phase0.handlabel.score import score
 
 
-def _imported_modules(module_path: Path) -> set[str]:
-    tree = ast.parse(module_path.read_text(encoding="utf-8"))
-    names: set[str] = set()
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            names.update(alias.name for alias in node.names)
-        elif isinstance(node, ast.ImportFrom) and node.module:
-            names.add(node.module)
-            names.update(f"{node.module}.{alias.name}" for alias in node.names)
-    return names
+def _key(n_broke: int, n_clean: int) -> list[KeyRow]:
+    rows = []
+    for index in range(1, n_broke + n_clean + 1):
+        verdict = "BROKE" if index <= n_broke else "CLEAN"
+        rows.append(
+            KeyRow(
+                label_id=index,
+                pr_id=1000 + index,
+                repo="acme/widget",
+                number=index,
+                verdict=verdict,
+                criterion="fix_touching_same_file" if verdict == "BROKE" else "none",
+                evidence_sha="a" * 40 if verdict == "BROKE" else "",
+            )
+        )
+    return rows
 
 
-@pytest.mark.parametrize("module", [sheet_module, window_module])
-def test_no_import_path_to_a_verdict(module: object) -> None:
-    """The guarantee is structural: the code that decides is not reachable from here.
-
-    Both modules, because the split into `sheet` and `window` would otherwise let the
-    banned import reappear in the half the test stopped looking at.
-
-    If this ever fails, the fix is to remove the import, never to relax the test — the
-    sheet's whole value is that it cannot render an answer even by accident.
-    """
-    imported = _imported_modules(Path(str(module.__file__)))
-    leaked = {name for name in imported if any(bad in name for bad in FORBIDDEN)}
-    assert leaked == set()
-
-
-def test_the_window_constant_tracks_the_scanner() -> None:
-    """Restated rather than imported, so it must be pinned or it will drift."""
-    assert window_module.WINDOW_DAYS == scan_outcome.WINDOW_DAYS
+def _labels(verdicts: dict[int, str]) -> dict[int, HumanLabel]:
+    return {
+        label_id: HumanLabel(
+            label_id=label_id,
+            verdict=verdict,
+            confidence="high",
+            evidence="none found",
+            reasoning="test",
+            minutes=6.0,
+        )
+        for label_id, verdict in verdicts.items()
+    }
 
 
-def _candidate(index: int) -> Candidate:
-    return Candidate(
-        pr_id=1000 + index,
-        repo="acme/widget",
-        number=index,
-        merged_at="2025-03-01T00:00:00Z",
-        title=f"change {index}",
-        commit_shas=("a" * 40,),
-        changed_files=("acme/widget.py",),
-    )
+def test_the_blind_sheet_has_exactly_two_columns(tmp_path: Path) -> None:
+    path = tmp_path / "sample.csv"
+    write_blind(path, [(1, "https://github.com/acme/widget/pull/7")])
+    with path.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.reader(handle))
+    assert rows[0] == list(BLIND_COLUMNS)
+    assert rows[1] == ["1", "https://github.com/acme/widget/pull/7"]
 
 
-def _selection(count: int = 20) -> Selection:
-    return Selection(
-        candidates=tuple(_candidate(i) for i in range(1, count + 1)),
-        population=count * 3,
-        stride=3,
-        manifest_sha256="deadbeef",
-    )
+def test_a_url_that_could_encode_the_answer_is_refused(tmp_path: Path) -> None:
+    """A compare view or commit link would hand over the evidence the rule used."""
+    for leaky in (
+        "https://github.com/acme/widget/compare/aaa...bbb",
+        "https://github.com/acme/widget/commit/deadbeef",
+        "https://github.com/acme/widget/pull/7/files#diff-1",
+    ):
+        with pytest.raises(ValueError, match="plain pull-request URL"):
+            write_blind(tmp_path / "s.csv", [(1, leaky)])
 
 
-def test_no_commit_is_annotated_from_its_message() -> None:
-    """The leak that matters: marking WHICH commits look like fixes.
-
-    An earlier version of this test asserted the sheet contained none of the regex's
-    vocabulary at all, and it failed on the sheet's own instructions — correctly.
-    `PHASE0_PREREGISTRATION.md` “Outcome variable”
-    defines the outcome as a revert-or-fix, and a labeller who is not told that is
-    labelling a different variable, so the comparison would be meaningless. The words
-    have to be in the prose.
-
-    What must never appear is a per-commit verdict. Two commits, one whose message
-    matches the classifier's pattern and one that does not, must render to byte-identical
-    structure — same lines, same markers, differing only in the message and sha.
-    """
-    matching = "hotfix: repair the regression this introduced"
-    plain = "add a paragraph to the readme"
-    assert fix_signals.mentions_breakage(matching) and not fix_signals.mentions_breakage(plain)
-
-    def shape(message: str) -> list[str]:
-        commit = WindowCommit("f" * 40, "2025-03-02T00:00:00+00:00", "Dev", message, ())
-        rendered = render_sheet(_selection(1), {1001: Window(commits=(commit,))})
-        return [line for line in rendered.splitlines() if message not in line]
-
-    assert shape(matching) == shape(plain)
+def test_always_clean_fails_a_balanced_sample() -> None:
+    """The whole reason for stratifying. Ten of each, so a constant answer scores 10/20."""
+    key = _key(n_broke=10, n_clean=10)
+    result = score(key, _labels(dict.fromkeys(range(1, 21), "CLEAN")))
+    assert result.agreed == 10
+    assert not result.passed
 
 
-def test_an_unreadable_window_is_not_offered_for_labelling() -> None:
-    """The bug this package shipped with, pinned.
-
-    Thirteen of thirteen clones failed and the sheet rendered twenty quiet weeks. A
-    labeller marks those clean, the classifier returns CLEAN on unreadable history for
-    its own reasons, and the gate reports 20/20 PASS on no data whatsoever.
-    """
-    rendered = render_sheet(_selection(1), {1001: unavailable("clone failed")})
-    assert "HISTORY UNAVAILABLE — DO NOT LABEL" in rendered
-    assert "broke / clean" not in rendered  # no label prompt is offered
-    assert "1 of 1 PRs have unreadable history" in rendered
+def test_always_clean_would_have_passed_an_unbalanced_sample() -> None:
+    """Documents the degeneracy the design removes, at the base rate it would occur at."""
+    key = _key(n_broke=2, n_clean=18)
+    result = score(key, _labels(dict.fromkeys(range(1, 21), "CLEAN")))
+    assert result.agreed == 18 and result.passed
 
 
-def test_a_quiet_week_and_an_unreadable_repo_render_differently() -> None:
-    """The distinction is the whole point; assert it survives at the rendered level."""
-    quiet = render_sheet(_selection(1), {1001: Window(commits=())})
-    broken = render_sheet(_selection(1), {1001: unavailable("clone failed")})
-    assert "No commits landed in the window" in quiet
-    assert "DO NOT LABEL" not in quiet
-    assert quiet != broken
+def test_unsure_counts_as_disagreement_and_is_reported(tmp_path: Path) -> None:
+    """A forced guess is worse than an honest gap, but it is not agreement either."""
+    key = _key(n_broke=10, n_clean=10)
+    verdicts = {i: ("BROKE" if i <= 10 else "CLEAN") for i in range(1, 21)}
+    verdicts[3] = "UNSURE"
+    verdicts[15] = "UNSURE"
+    result = score(key, _labels(verdicts))
+    assert result.unsure == 2
+    assert result.agreed == 18
+    assert [d.direction for d in result.disagreements] == ["undetermined", "undetermined"]
 
 
-def test_a_missing_window_is_treated_as_unreadable_not_as_quiet() -> None:
-    """A caller bug must fail loudly rather than default to an empty week."""
-    rendered = render_sheet(_selection(1), {})
-    assert "DO NOT LABEL" in rendered
+def test_the_key_round_trips(tmp_path: Path) -> None:
+    path = tmp_path / "_key.csv"
+    original = _key(n_broke=2, n_clean=2)
+    write_key(path, original)
+    assert read_key(path) == original
+
+
+def test_disagreement_direction_names_the_fix() -> None:
+    """Which way the rule erred is what decides how to change it."""
+    key = _key(n_broke=10, n_clean=10)
+    verdicts = {i: ("BROKE" if i <= 10 else "CLEAN") for i in range(1, 21)}
+    verdicts[1] = "CLEAN"  # machine BROKE, human CLEAN -> too loose
+    verdicts[20] = "BROKE"  # machine CLEAN, human BROKE -> too tight
+    result = score(key, _labels(verdicts))
+    assert {d.direction for d in result.disagreements} == {"rule too loose", "rule too tight"}
+    assert result.machine_broke_human_clean == 1
+    assert result.machine_clean_human_broke == 1

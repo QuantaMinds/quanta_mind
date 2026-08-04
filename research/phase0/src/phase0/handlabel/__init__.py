@@ -1,27 +1,42 @@
-"""The day-2 gate: does the outcome classifier agree with a human on 20 PRs?
+"""The 20-PR gate: does the outcome classifier agree with a human?
 
-WHAT: Three steps kept in separate modules so the order is enforced by the code rather
-      than by intent — `select` fixes which PRs, `sheet` renders the evidence a human
-      needs with no verdict in it, and `score` compares afterwards.
-WHY:  `PHASE0_PREREGISTRATION.md` “Timeline” day-2 gate requires agreement on >=16 of 20,
-hand-labelled **before** any
-      classifier output is seen. That ordering is the whole value of the gate and it is
-      the easiest thing in this project to compromise without noticing — one glance at a
-      `broke`/`clean` column and the exercise measures nothing but recall of what you
-      just read.
+WHAT: Four modules kept separate so the order is enforced by code rather than intent --
+      `select` fixes the population, `draw` buckets by classifier verdict and seals the
+      answers, `labels` reads what the human wrote, `score` compares afterwards.
+WHY:  The gate requires agreement on at least 16 of 20, hand-labelled BEFORE any
+      classifier output is seen. That ordering is the whole value of the exercise and is
+      the easiest thing in this project to compromise without noticing.
 
-      So `sheet` does not import `scan_outcome` or `fix_signals` at all, and a test
-      asserts that it does not. It is not a convention to be remembered; the sheet
-      literally cannot render a verdict, because the code that computes one is not
-      reachable from it.
-IMPORTS: phase0.handlabel.{select,sheet,score}.
-CONSUMED BY: `just handlabel-sheet`, `just handlabel-score`; tests/test_handlabel.py.
+      The sample is stratified: ten PRs the classifier called BROKE, ten it called CLEAN,
+      shuffled, exported as URLs only. At the corpus base rate a random twenty holds
+      about two broken PRs, so labelling everything CLEAN would score ~18/20 and pass a
+      gate that proved nothing. Balanced, always-CLEAN scores 10/20 and fails.
+
+      The labeller works from the pull request on GitHub, not from a rendered window of
+      the classifier's own evidence. An earlier version of this package rendered the
+      seven-day commit window -- exactly the classifier's input -- which would have made
+      agreement partly true by construction. The human must be free to use evidence the
+      rule cannot see: linked issues, CI runs, discussion.
+IMPORTS: phase0.handlabel.{select,draw,labels,score,files}.
+CONSUMED BY: phase0/sample_for_labelling.py, phase0/score_labelling.py; tests/handlabel/.
 """
 
 from __future__ import annotations
 
-from phase0.handlabel.score import Agreement, score
-from phase0.handlabel.select import Selection, select_prs
-from phase0.handlabel.sheet import render_sheet
+from phase0.handlabel.draw import Drawn, KeyRow, draw
+from phase0.handlabel.labels import HumanLabel, read_labels
+from phase0.handlabel.score import Agreement, Disagreement, score
+from phase0.handlabel.select import Candidate, eligible_prs
 
-__all__ = ["Agreement", "Selection", "render_sheet", "score", "select_prs"]
+__all__ = [
+    "Agreement",
+    "Candidate",
+    "Disagreement",
+    "Drawn",
+    "HumanLabel",
+    "KeyRow",
+    "draw",
+    "eligible_prs",
+    "read_labels",
+    "score",
+]

@@ -1,39 +1,56 @@
-"""Agreement between the human labels and the classifier — computed last, on purpose.
+"""Compare human labels against the sealed key -- the step that must run last.
 
-WHAT: Reads the completed labels, runs `scan_outcome` over the same PRs, and reports
-      raw agreement against `PHASE0_PREREGISTRATION.md` “Timeline” >=16/20 gate, plus Cohen's kappa
-      and the label
-      distribution as diagnostics.
-WHY:  Raw agreement is the pre-registered gate and is not changed here. But raw
-      agreement alone can certify a classifier that has learned nothing: if all twenty
-      PRs happen to be clean — plausible, since the base rate of a revert-or-fix inside
-      seven days is well under half — then answering "clean" every time scores 20/20.
-      That is the degeneracy `controls/analysis.py` already refuses to score as a pass
-      in the negative controls, appearing again at a different layer.
+WHAT: Reads `human_labels.csv` and `_key.csv`, and reports agreement against the
+      pre-registered floor, Cohen's kappa, the 2x2, and every disagreement itemised.
+WHY:  Separate from drawing so producing the questions and producing the answers are two
+      commands a person runs in order, not one that could emit both. `read_labels`
+      refuses an incomplete file, so this cannot be run early to "just have a look".
 
-      So kappa is reported alongside, because it is exactly the correction for chance
-      agreement given the observed margins, and the source paper we are checking
-      ourselves against reports kappa = 0.79 for the same kind of exercise. It is a
-      diagnostic and NOT a gate: adding a second threshold after the fact would move a
-      decision boundary, which this study does not do. If the sample turns out to be
-      single-class, the honest report is "this gate had no discriminating power", not a
-      pass and not a fail.
-IMPORTS: phase0.extract_prs, phase0.scan_outcome, phase0.handlabel.select.
-CONSUMED BY: `just handlabel-score`; tests/test_handlabel.py.
+      `UNSURE` scores as disagreement and is reported separately. It is information, not
+      failure: a PR the labeller could not resolve in ten minutes is one the seven-day
+      rule almost certainly cannot resolve either, and a run with many of them is a
+      finding about how much breakage is determinable from history at all.
+
+      Reading the sheet lives in `labels.py`; this module only compares.
+
+      Kappa is reported as context, never as a gate. Twenty items is thin, and adding a
+      second threshold after the design is fixed would move a decision boundary --
+      tightening is as much a degree of freedom as loosening.
+IMPORTS: phase0.handlabel.draw, phase0.handlabel.labels.
+CONSUMED BY: phase0/score_labelling.py; tests/handlabel/.
 """
 
 from __future__ import annotations
 
-import re
-from dataclasses import dataclass
-from pathlib import Path
+from dataclasses import dataclass, field
 
-from phase0.handlabel.select import Selection
-from phase0.scan_outcome import Outcome
+from phase0.handlabel.draw import KeyRow
+from phase0.handlabel.labels import HumanLabel
 
-VALID_LABELS = {"broke": Outcome.BROKE, "clean": Outcome.CLEAN}
-GATE_MINIMUM = 16  # day-2 gate, `PHASE0_PREREGISTRATION.md` “Timeline”. Never relaxed.
-_LINE = re.compile(r"^\s*(\d+)\s*[:.]\s*(broke|clean)\s*$", re.IGNORECASE)
+GATE_MINIMUM = 16  # of 20. Pre-registered; never relaxed to fit a result.
+
+
+@dataclass(frozen=True, slots=True)
+class Disagreement:
+    """One PR the human and the classifier read differently."""
+
+    label_id: int
+    repo: str
+    number: int
+    human: str
+    machine: str
+    human_reasoning: str
+    machine_criterion: str
+    machine_evidence: str
+
+    @property
+    def direction(self) -> str:
+        """Which way the rule erred, which is what decides how to fix it."""
+        if self.human == "UNSURE":
+            return "undetermined"
+        if self.machine == "BROKE":
+            return "rule too loose"
+        return "rule too tight"
 
 
 @dataclass(frozen=True, slots=True)
@@ -42,111 +59,117 @@ class Agreement:
 
     total: int
     agreed: int
-    human_broke: int
-    machine_broke: int
     both_broke: int
-    manifest_sha256: str
+    both_clean: int
+    machine_broke_human_clean: int
+    machine_clean_human_broke: int
+    unsure: int
+    minutes_median: float
+    disagreements: tuple[Disagreement, ...] = field(default_factory=tuple)
 
     @property
     def rate(self) -> float:
         return self.agreed / self.total if self.total else 0.0
 
     @property
-    def is_discriminating(self) -> bool:
-        """False when the human labelled every PR the same way.
-
-        Agreement on a single-class sample says nothing about the classifier, so the
-        report must say so rather than presenting a number that looks like a pass.
-        """
-        return 0 < self.human_broke < self.total
+    def passed(self) -> bool:
+        """The pre-registered floor, unchanged."""
+        return self.agreed >= GATE_MINIMUM and self.total >= 20
 
     @property
     def kappa(self) -> float:
-        """Cohen's kappa. NaN when a margin is empty, which `is_discriminating` flags."""
-        n = self.total
-        if not n:
+        """Cohen's kappa over the resolved rows. NaN when a margin is empty.
+
+        `UNSURE` rows are excluded here but still counted as disagreement in `rate`.
+        Coding them as one class or the other would invent a judgement the labeller
+        explicitly declined to make.
+        """
+        n = self.total - self.unsure
+        if n <= 0:
             return float("nan")
-        observed = self.rate
-        p_broke = (self.human_broke / n) * (self.machine_broke / n)
-        p_clean = ((n - self.human_broke) / n) * ((n - self.machine_broke) / n)
-        expected = p_broke + p_clean
+        machine_broke = self.both_broke + self.machine_broke_human_clean
+        human_broke = self.both_broke + self.machine_clean_human_broke
+        observed = (self.both_broke + self.both_clean) / n
+        expected = (machine_broke / n) * (human_broke / n) + ((n - machine_broke) / n) * (
+            (n - human_broke) / n
+        )
         if expected >= 1.0:
             return float("nan")
         return (observed - expected) / (1.0 - expected)
 
-    @property
-    def passed(self) -> bool:
-        """`PHASE0_PREREGISTRATION.md` “Timeline” gate, unchanged: >=16 of 20 agree. Read next to
-        `is_discriminating`.
-        """
-        return self.agreed >= GATE_MINIMUM and self.total >= 20
+    def matrix(self) -> str:
+        return (
+            "                 human BROKE   human CLEAN\n"
+            f"machine BROKE  {self.both_broke:>12}  {self.machine_broke_human_clean:>13}\n"
+            f"machine CLEAN  {self.machine_clean_human_broke:>12}  {self.both_clean:>13}"
+        )
 
     def describe(self) -> str:
+        resolved = self.total - self.unsure
         lines = [
-            f"manifest      {self.manifest_sha256}",
             f"agreement     {self.agreed}/{self.total} ({self.rate:.0%})"
             f"   gate: >={GATE_MINIMUM}  ->  {'PASS' if self.passed else 'FAIL'}",
-            f"human broke   {self.human_broke}/{self.total}",
-            f"machine broke {self.machine_broke}/{self.total}   both: {self.both_broke}",
-            f"kappa         {self.kappa:.3f}   (diagnostic, not a gate)",
+            f"kappa         {self.kappa:.3f}   (context, not a threshold; n={resolved})",
+            f"unsure        {self.unsure}   (scored as disagreement)",
+            f"median mins   {self.minutes_median:.1f}",
+            "",
+            self.matrix(),
         ]
-        if not self.is_discriminating:
-            lines.append(
-                "WARNING: every PR carries the same human label, so this agreement "
-                "figure is achievable by a classifier that always answers the same "
-                "way. It is not evidence either direction. Draw a larger sample."
-            )
+        if self.disagreements:
+            lines += ["", "disagreements:"]
+            for item in self.disagreements:
+                lines += [
+                    f"  [{item.label_id}] {item.repo}#{item.number}"
+                    f"  human={item.human} machine={item.machine}  ({item.direction})",
+                    f"      human:   {item.human_reasoning}",
+                    f"      machine: {item.machine_criterion} {item.machine_evidence[:12]}",
+                ]
         return "\n".join(lines)
 
 
-def read_labels(path: Path, expected: int) -> dict[int, Outcome]:
-    """Parse `<index>: broke|clean`, refusing anything incomplete.
+def score(key: list[KeyRow], human: dict[int, HumanLabel]) -> Agreement:
+    """Compare the two label sets, keyed by `label_id`."""
+    agreed = both_broke = both_clean = loose = tight = unsure = 0
+    disagreements: list[Disagreement] = []
+    durations: list[float] = []
 
-    Refusing is the point. A partially filled sheet scored against whatever is present
-    would let the gate be satisfied by labelling only the easy ones.
-    """
-    if not path.is_file():
-        raise FileNotFoundError(
-            f"{path} not found. Fill in the sheet from `just handlabel-sheet` first — "
-            f"the labels must exist before the classifier is run."
-        )
-    labels: dict[int, Outcome] = {}
-    for number, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
-        if not raw.strip() or raw.lstrip().startswith("#"):
+    for row in sorted(key, key=lambda r: r.label_id):
+        mine, theirs = row.verdict, human[row.label_id].verdict
+        durations.append(human[row.label_id].minutes)
+        if theirs == "UNSURE":
+            unsure += 1
+        elif theirs == mine:
+            agreed += 1
+            both_broke += mine == "BROKE"
+            both_clean += mine == "CLEAN"
             continue
-        match = _LINE.match(raw)
-        if match is None:
-            raise ValueError(f"{path}:{number}: expected `<index>: broke|clean`, got {raw!r}")
-        labels[int(match.group(1))] = VALID_LABELS[match.group(2).lower()]
-
-    missing = sorted(set(range(1, expected + 1)) - labels.keys())
-    if missing:
-        raise ValueError(
-            f"{path}: missing labels for {missing}. All {expected} must be labelled "
-            f"before scoring; a partial sheet would let the gate be met on the easy ones."
+        elif mine == "BROKE":
+            loose += 1
+        else:
+            tight += 1
+        disagreements.append(
+            Disagreement(
+                label_id=row.label_id,
+                repo=row.repo,
+                number=row.number,
+                human=theirs,
+                machine=mine,
+                human_reasoning=human[row.label_id].reasoning,
+                machine_criterion=row.criterion,
+                machine_evidence=row.evidence_sha,
+            )
         )
-    return labels
 
-
-def score(
-    selection: Selection,
-    human: dict[int, Outcome],
-    machine: dict[int, Outcome],
-) -> Agreement:
-    """Compare the two label sets over the drawn sample, keyed by sheet index."""
-    total = len(selection.candidates)
-    agreed = human_broke = machine_broke = both = 0
-    for index in range(1, total + 1):
-        theirs, ours = human[index], machine[index]
-        agreed += theirs is ours
-        human_broke += theirs is Outcome.BROKE
-        machine_broke += ours is Outcome.BROKE
-        both += theirs is Outcome.BROKE and ours is Outcome.BROKE
+    ordered = sorted(durations)
+    median = ordered[len(ordered) // 2] if ordered else 0.0
     return Agreement(
-        total=total,
+        total=len(key),
         agreed=agreed,
-        human_broke=human_broke,
-        machine_broke=machine_broke,
-        both_broke=both,
-        manifest_sha256=selection.manifest_sha256,
+        both_broke=both_broke,
+        both_clean=both_clean,
+        machine_broke_human_clean=loose,
+        machine_clean_human_broke=tight,
+        unsure=unsure,
+        minutes_median=median,
+        disagreements=tuple(disagreements),
     )

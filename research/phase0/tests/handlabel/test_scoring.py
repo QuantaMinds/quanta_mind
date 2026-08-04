@@ -1,120 +1,159 @@
 """Verification that the gate refuses to certify what it did not measure.
 
-WHAT: Pins label parsing (incomplete sheets refused), the pre-registered >=16/20
-      threshold, and the single-class degeneracy that raw agreement cannot see.
-WHY:  Raw agreement on an all-clean sample is 20/20 for a classifier that always
-      answers "clean". `controls/analysis.py` already refuses that shape in the
-      negative controls; it reappears here at a different layer, so kappa is reported
-      beside the gate and a single-class sample is labelled as uninformative.
-IMPORTS: pytest, phase0.handlabel.{score,select}, phase0.scan_outcome.
+WHAT: Pins label parsing (incomplete and malformed sheets refused), the pre-registered
+      threshold, kappa's treatment of `UNSURE`, and the repository cap on the draw.
+WHY:  Every refusal here exists because the alternative is a number that looks like a
+      result. A partial sheet scored against what is present lets the gate be met on the
+      easy ones; a mistyped verdict silently coerced to CLEAN is a fabricated judgement.
+IMPORTS: pytest, phase0.handlabel.{labels,score,draw,select}.
 CONSUMED BY: `just test-phase0`.
 """
 
 from __future__ import annotations
 
+import random
 from pathlib import Path
 
 import pytest
 
-from phase0.handlabel.score import GATE_MINIMUM, Agreement, read_labels, score
-from phase0.handlabel.select import Candidate, Selection, select_prs
-from phase0.scan_outcome import Outcome
+from phase0.handlabel.draw import MAX_PER_REPO, KeyRow, _shuffled_by_repo
+from phase0.handlabel.labels import read_labels
+from phase0.handlabel.score import GATE_MINIMUM, Agreement, score
+from phase0.handlabel.select import Candidate
 
-PACKAGE = Path(__file__).resolve().parents[2] / "data" / "AIDev_BC_Analyser.zip"
-
-
-def _candidate(index: int) -> Candidate:
-    return Candidate(
-        pr_id=1000 + index,
-        repo="acme/widget",
-        number=index,
-        merged_at="2025-03-01T00:00:00Z",
-        title=f"change {index}",
-        commit_shas=("a" * 40,),
-        changed_files=("acme/widget.py",),
-    )
+HEADER = "label_id,verdict,confidence,evidence,reasoning,minutes\n"
 
 
-def _selection(count: int = 20) -> Selection:
-    return Selection(
-        candidates=tuple(_candidate(i) for i in range(1, count + 1)),
-        population=count * 3,
-        stride=3,
-        manifest_sha256="deadbeef",
-    )
+def _sheet(tmp_path: Path, body: str, header: str = HEADER) -> Path:
+    path = tmp_path / "human_labels.csv"
+    path.write_text(header + body, encoding="utf-8")
+    return path
 
 
-def test_partial_labels_are_refused(tmp_path: Path) -> None:
-    """Scoring only what was labelled would let the gate be met on the easy ones."""
-    path = tmp_path / "answers.txt"
-    path.write_text("1: broke\n2: clean\n", encoding="utf-8")
+def _key(n: int) -> list[KeyRow]:
+    return [
+        KeyRow(
+            label_id=i,
+            pr_id=i,
+            repo="acme/widget",
+            number=i,
+            verdict="BROKE" if i % 2 else "CLEAN",
+            criterion="revert",
+            evidence_sha="b" * 40,
+        )
+        for i in range(1, n + 1)
+    ]
+
+
+def test_the_threshold_is_the_pre_registered_one() -> None:
+    """A boundary the pre-registration forbids moving. Pinned against refactors."""
+    assert GATE_MINIMUM == 16
+
+
+def test_a_partial_sheet_is_refused(tmp_path: Path) -> None:
+    path = _sheet(tmp_path, "1,BROKE,high,abc,because,5\n2,CLEAN,low,none found,unrelated,4\n")
     with pytest.raises(ValueError, match="missing labels"):
         read_labels(path, expected=20)
 
 
-def test_a_malformed_line_names_the_line(tmp_path: Path) -> None:
-    path = tmp_path / "answers.txt"
-    path.write_text("1: broke\n2: probably?\n", encoding="utf-8")
-    with pytest.raises(ValueError, match=r"answers\.txt:2"):
+def test_an_unrecognised_verdict_names_the_line(tmp_path: Path) -> None:
+    path = _sheet(tmp_path, "1,BROKE,high,abc,because,5\n2,probably,low,x,y,4\n")
+    with pytest.raises(ValueError, match=r"human_labels\.csv:3: verdict must be"):
         read_labels(path, expected=2)
 
 
-def test_missing_answers_file_says_to_label_first(tmp_path: Path) -> None:
-    with pytest.raises(FileNotFoundError, match="labels must exist before"):
-        read_labels(tmp_path / "nope.txt", expected=20)
+def test_an_unrecognised_confidence_is_refused(tmp_path: Path) -> None:
+    path = _sheet(tmp_path, "1,BROKE,certain,abc,because,5\n")
+    with pytest.raises(ValueError, match="confidence must be"):
+        read_labels(path, expected=1)
 
 
-def test_comments_and_blank_lines_are_allowed(tmp_path: Path) -> None:
-    path = tmp_path / "answers.txt"
-    path.write_text("# my notes\n\n1: broke\n2. clean\n", encoding="utf-8")
-    assert read_labels(path, expected=2) == {1: Outcome.BROKE, 2: Outcome.CLEAN}
-
-
-def test_a_single_class_sample_is_flagged_rather_than_passed() -> None:
-    """20/20 on an all-clean sample is what "always answer clean" scores.
-
-    The gate still reports PASS because `PHASE0_PREREGISTRATION.md` “Timeline” threshold is not
-    modified here, but the
-    report must carry the warning beside it or the number reads as evidence.
-    """
-    selection = _selection()
-    labels = dict.fromkeys(range(1, 21), Outcome.CLEAN)
-    result = score(selection, labels, dict(labels))
-    assert result.passed and result.agreed == 20
-    assert not result.is_discriminating
-    assert "always answers the same way" in result.describe()
-
-
-def test_a_mixed_sample_is_discriminating_and_kappa_is_finite() -> None:
-    selection = _selection()
-    human = {i: (Outcome.BROKE if i <= 6 else Outcome.CLEAN) for i in range(1, 21)}
-    machine = {i: (Outcome.BROKE if i <= 5 else Outcome.CLEAN) for i in range(1, 21)}
-    result = score(selection, human, machine)
-    assert result.is_discriminating and result.passed
-    assert result.agreed == 19 and 0.0 < result.kappa < 1.0
-
-
-def test_kappa_is_below_raw_agreement_when_one_class_dominates() -> None:
-    """The correction that makes the degeneracy visible as a number."""
-    result = Agreement(
-        total=20, agreed=18, human_broke=1, machine_broke=1, both_broke=0, manifest_sha256=""
+def test_a_missing_column_is_refused(tmp_path: Path) -> None:
+    path = _sheet(
+        tmp_path,
+        "1,BROKE,high,abc,because\n",
+        header="label_id,verdict,confidence,evidence,reasoning\n",
     )
-    assert result.rate == 0.9
-    assert result.kappa < result.rate
+    with pytest.raises(ValueError, match=r"missing column\(s\) \['minutes'\]"):
+        read_labels(path, expected=1)
 
 
-def test_the_gate_threshold_is_the_pre_registered_one() -> None:
-    """A boundary this document forbids moving. Pinned so a refactor cannot drift it."""
-    assert GATE_MINIMUM == 16
+def test_a_missing_sheet_says_to_label_first(tmp_path: Path) -> None:
+    with pytest.raises(FileNotFoundError, match="before the key is opened"):
+        read_labels(tmp_path / "nope.csv", expected=20)
 
 
-@pytest.mark.skipif(not PACKAGE.is_file(), reason="replication package not downloaded")
-def test_selection_is_deterministic_and_spread_on_the_real_package() -> None:
-    """Same package, same twenty, same hash — and drawn across the range, not the head."""
-    first = select_prs(PACKAGE)
-    second = select_prs(PACKAGE)
-    assert first.manifest_sha256 == second.manifest_sha256
-    assert len(first.candidates) == 20
-    assert first.stride > 1, "a stride of 1 would draw one narrow slice of calendar time"
-    assert len({c.repo for c in first.candidates}) > 1
-    assert all(c.commit_shas and c.changed_files for c in first.candidates)
+def test_verdicts_and_minutes_are_parsed(tmp_path: Path) -> None:
+    path = _sheet(tmp_path, "1,broke,HIGH,sha123,it reverted,~7 min\n")
+    parsed = read_labels(path, expected=1)
+    assert parsed[1].verdict == "BROKE" and parsed[1].confidence == "high"
+    assert parsed[1].minutes == 7.0 and parsed[1].evidence == "sha123"
+
+
+def test_kappa_excludes_unsure_but_the_rate_does_not() -> None:
+    """Coding UNSURE as a class would invent a judgement the labeller declined to make."""
+    perfect = Agreement(
+        total=20,
+        agreed=18,
+        both_broke=9,
+        both_clean=9,
+        machine_broke_human_clean=0,
+        machine_clean_human_broke=0,
+        unsure=2,
+        minutes_median=6.0,
+    )
+    assert perfect.rate == 0.9  # UNSURE counted against
+    assert perfect.kappa == pytest.approx(1.0)  # but excluded from kappa's 18
+
+
+def test_kappa_is_below_the_rate_when_one_class_dominates() -> None:
+    lopsided = Agreement(
+        total=20,
+        agreed=18,
+        both_broke=1,
+        both_clean=17,
+        machine_broke_human_clean=1,
+        machine_clean_human_broke=1,
+        unsure=0,
+        minutes_median=6.0,
+    )
+    assert lopsided.kappa < lopsided.rate
+
+
+def test_the_confusion_matrix_totals_the_sample(tmp_path: Path) -> None:
+    key = _key(20)
+    labels = read_labels(
+        _sheet(
+            tmp_path,
+            "".join(f"{i},{'BROKE' if i % 2 else 'CLEAN'},high,x,y,5\n" for i in range(1, 21)),
+        ),
+        expected=20,
+    )
+    result = score(key, labels)
+    cells = (
+        result.both_broke
+        + result.both_clean
+        + result.machine_broke_human_clean
+        + result.machine_clean_human_broke
+    )
+    assert cells + result.unsure == result.total == 20
+    assert result.agreed == 20 and result.passed
+
+
+def test_no_repository_can_supply_the_whole_sample() -> None:
+    """Without the cap, one project with 40 eligible PRs would be the entire gate."""
+    population = [
+        Candidate(
+            pr_id=i,
+            repo="acme/big" if i < 40 else "acme/small",
+            number=i,
+            merged_at="2025-03-01T00:00:00Z",
+            title="t",
+            commit_shas=("a" * 40,),
+            changed_files=("m.py",),
+        )
+        for i in range(50)
+    ]
+    grouped = dict(_shuffled_by_repo(population, random.Random(20260804)))
+    assert len(grouped["acme/big"]) == MAX_PER_REPO
+    assert max(len(v) for v in grouped.values()) <= MAX_PER_REPO

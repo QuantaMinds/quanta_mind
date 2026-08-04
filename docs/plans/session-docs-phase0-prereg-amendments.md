@@ -1,10 +1,10 @@
 # Session record — docs/phase0-prereg-amendments
 
-Written by scripts/guard/hook_session_end.py at 2026-08-04T13:01:12Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-04T14:29:50Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `docs/phase0-prereg-amendments`
-- Files changed vs `main`: 91
+- Files changed vs `main`: 106
 - Uncommitted at session end: 0
 - `docs/CODEBASE.md` updated: yes
 
@@ -41,8 +41,13 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/pyproject.toml`
 - `research/phase0/results/.gitkeep`
 - `research/phase0/results/controls.json`
+- `research/phase0/scripts/make_handlabel_sheet.py`
+- `research/phase0/scripts/score_handlabel.py`
 - `research/phase0/src/phase0/__init__.py`
-- `research/phase0/src/phase0/build_table.py`
+- `research/phase0/src/phase0/analysis/__init__.py`
+- `research/phase0/src/phase0/analysis/build_table.py`
+- `research/phase0/src/phase0/analysis/risk.py`
+- `research/phase0/src/phase0/analysis/verdict.py`
 - `research/phase0/src/phase0/census.py`
 - `research/phase0/src/phase0/classify_exposure.py`
 - `research/phase0/src/phase0/controls/__init__.py`
@@ -53,34 +58,43 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/src/phase0/extract_prs.py`
 - `research/phase0/src/phase0/fix_signals.py`
 - `research/phase0/src/phase0/github_pulls.py`
+- `research/phase0/src/phase0/handlabel/__init__.py`
+- `research/phase0/src/phase0/handlabel/score.py`
+- `research/phase0/src/phase0/handlabel/select.py`
+- `research/phase0/src/phase0/handlabel/sheet.py`
+- `research/phase0/src/phase0/handlabel/window.py`
+- `research/phase0/src/phase0/joins.py`
 - `research/phase0/src/phase0/parent_commit.py`
 - `research/phase0/src/phase0/pipeline/__init__.py`
 - `research/phase0/src/phase0/pipeline/measure.py`
 - `research/phase0/src/phase0/pipeline/record.py`
 - `research/phase0/src/phase0/pipeline/worktree.py`
 - `research/phase0/src/phase0/pycg_failure.py`
-- `research/phase0/src/phase0/risk.py`
 - `research/phase0/src/phase0/run_graph.py`
 - `research/phase0/src/phase0/run_pipeline.py`
 - `research/phase0/src/phase0/scan_outcome.py`
 - `research/phase0/src/phase0/scope.py`
 - `research/phase0/src/phase0/syntax.py`
+- `research/phase0/tests/controls/test_controls.py`
+- `research/phase0/tests/controls/test_controls_corpus.py`
 - `research/phase0/tests/fixtures/hand_counted.expected`
 - `research/phase0/tests/fixtures/hand_counted.py`
+- `research/phase0/tests/handlabel/test_blindness.py`
+- `research/phase0/tests/handlabel/test_scoring.py`
 - `research/phase0/tests/test_build_table.py`
 - `research/phase0/tests/test_census.py`
 - `research/phase0/tests/test_classify_exposure.py`
-- `research/phase0/tests/test_controls.py`
-- `research/phase0/tests/test_controls_corpus.py`
 - `research/phase0/tests/test_extract_prs.py`
 - `research/phase0/tests/test_github_pulls.py`
 - `research/phase0/tests/test_join_end_to_end.py`
+- `research/phase0/tests/test_joins.py`
 - `research/phase0/tests/test_parent_commit.py`
 - `research/phase0/tests/test_risk.py`
 - `research/phase0/tests/test_run_graph.py`
 - `research/phase0/tests/test_run_pipeline.py`
 - `research/phase0/tests/test_scan_outcome.py`
 - `research/phase0/tests/test_scope.py`
+- `research/phase0/tests/test_worktree.py`
 - `research/phase0/uv.lock`
 - `scripts/guard/check_agents_md.py`
 - `scripts/guard/check_assert_quality.py`
@@ -89,6 +103,7 @@ Informational. Nothing here was blocked or enforced.
 - `scripts/guard/check_docs_sync.py`
 - `scripts/guard/check_enforcement_map.py`
 - `scripts/guard/check_no_research_imports.py`
+- `scripts/guard/check_no_vague_refs.py`
 - `scripts/guard/check_structure.py`
 - `scripts/guard/discovery.py`
 - `scripts/guard/hook_post_edit.py`
