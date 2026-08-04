@@ -1,0 +1,117 @@
+{
+  "agreement": 11,
+  "total": 20,
+  "rate": 0.55,
+  "passed": false,
+  "kappa": 0.10000000000000009,
+  "unsure": 0,
+  "minutes_median": 6.0,
+  "confusion": {
+    "both_broke": 2,
+    "both_clean": 9,
+    "machine_broke_human_clean": 8,
+    "machine_clean_human_broke": 1
+  },
+  "disagreements": [
+    {
+      "label_id": 2,
+      "repo": "PrunaAI/pruna",
+      "number": 174,
+      "human": "CLEAN",
+      "machine": "BROKE",
+      "human_reasoning": "the one nearby fix is about failing docs tests, not the rewrapping bug",
+      "machine_criterion": "fix_touching_same_file",
+      "machine_evidence": "017dc9a14448e947276d5590d200336281e741b4",
+      "direction": "rule too loose"
+    },
+    {
+      "label_id": 6,
+      "repo": "test-zeus-ai/testzeus-hercules",
+      "number": 42,
+      "human": "CLEAN",
+      "machine": "BROKE",
+      "human_reasoning": "later commits are version-bump releases and an unrelated picklist fix",
+      "machine_criterion": "fix_touching_same_file",
+      "machine_evidence": "d75da77ce87a2db956dc9ad14d8282b25208460f",
+      "direction": "rule too loose"
+    },
+    {
+      "label_id": 7,
+      "repo": "whitphx/streamlit-webrtc",
+      "number": 1901,
+      "human": "CLEAN",
+      "machine": "BROKE",
+      "human_reasoning": "every follow-up on the shared file is CI workflow maintenance, unrelated to the frontend callback fix",
+      "machine_criterion": "fix_touching_same_file",
+      "machine_evidence": "1ed790e24403fc3916c18ef0c8e05210ee513c91",
+      "direction": "rule too loose"
+    },
+    {
+      "label_id": 8,
+      "repo": "microsoft/autogen",
+      "number": 4881,
+      "human": "CLEAN",
+      "machine": "BROKE",
+      "human_reasoning": "later README edits fix a different example; the links this PR changed were not touched again",
+      "machine_criterion": "fix_touching_same_file",
+      "machine_evidence": "6abc70044ad5ba782099f1bb0912078714b45128",
+      "direction": "rule too loose"
+    },
+    {
+      "label_id": 9,
+      "repo": "Kiln-AI/Kiln",
+      "number": 145,
+      "human": "BROKE",
+      "machine": "CLEAN",
+      "human_reasoning": "105 minutes after merge, sync code wrongly marked async is repaired across the adapter files this refactor restructured",
+      "machine_criterion": "none",
+      "machine_evidence": "",
+      "direction": "rule too tight"
+    },
+    {
+      "label_id": 10,
+      "repo": "zenml-io/zenml",
+      "number": 3757,
+      "human": "CLEAN",
+      "machine": "BROKE",
+      "human_reasoning": "no follow-up at all, and the author demonstrated the built docs working",
+      "machine_criterion": "fix_touching_same_file",
+      "machine_evidence": "0f6345b0567e00f47f8a33c0f5878946d98882d9",
+      "direction": "rule too loose"
+    },
+    {
+      "label_id": 12,
+      "repo": "a16z/halmos",
+      "number": 481,
+      "human": "CLEAN",
+      "machine": "BROKE",
+      "human_reasoning": "the only nearby fix closes issue #480, which predates this PR, so it repairs something older",
+      "machine_criterion": "fix_touching_same_file",
+      "machine_evidence": "44b4ab108f846fe76c09fe901802c5081094d7f2",
+      "direction": "rule too loose"
+    },
+    {
+      "label_id": 19,
+      "repo": "keephq/keep",
+      "number": 4207,
+      "human": "CLEAN",
+      "machine": "BROKE",
+      "human_reasoning": "db.py is edited constantly; no in-window fix references the incident-alert refactor",
+      "machine_criterion": "fix_touching_same_file",
+      "machine_evidence": "f10b55039f00146cd7f9e2160d6576114931c453",
+      "direction": "rule too loose"
+    },
+    {
+      "label_id": 20,
+      "repo": "keephq/keep",
+      "number": 4302,
+      "human": "CLEAN",
+      "machine": "BROKE",
+      "human_reasoning": "#4356 closes issue #4286, which predates this PR, so the symptom is pre-existing",
+      "machine_criterion": "fix_touching_same_file",
+      "machine_evidence": "c34d29445416f82b03431f98eea72992a1a43abf",
+      "direction": "rule too loose"
+    }
+  ],
+  "human_labels_commit": "UNCOMMITTED -- the ordering claim is unverifiable"
+}

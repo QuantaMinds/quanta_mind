@@ -78,6 +78,8 @@ reclassification this log exists to prevent.
 | **A22** | 4.12 | **Blind stratified sampling.** The sample is 10 PRs the classifier called BROKE and 10 it called CLEAN, shuffled, exported as URLs only; the answers are sealed in a gitignored key. Supersedes A21's stride draw. | At the corpus base rate a random twenty holds about two broken PRs, so labelling everything CLEAN scores ~18/20 and passes a gate that proved nothing. Balanced, always-CLEAN scores 10/20 and fails. The cost is representativeness: agreement now estimates the mean of sensitivity and specificity, not agreement in the wild. |
 | **A23** | 4.12 | **The human judges breakage, not the rule.** The rendered seven-day commit window is withdrawn; the labeller works from the pull request and may use any evidence, including linked issues and CI runs the classifier cannot see. `UNSURE` becomes a first-class verdict, scored as disagreement. | The withdrawn sheet showed exactly the classifier's own input, so agreement would have been partly true by construction — it tested whether a human can apply the regex, not whether the regex captures breakage. The gate only means something if the two sources of evidence can differ. |
 
+| **A24** | 4.13 | Records an **agent-labelled dry run** of the 20-PR gate (11/20, kappa 0.10) and the two defects it exposed: `FIX_PATTERN` matching **squash-merge bodies**, and the replication package **over-attributing files to a PR** (92 `.py` files on a PR that changed 2; 15.9% of PRs get more than 30). Makes the file-set consistency gate **blocking**, not precautionary. | Both defects manufacture BROKE, both scale with PR size, and so both re-enter as A16's confounder through a third door. A dry run is not the gate and does not satisfy it — but it found two corpus-level faults that would have inflated the outcome variable silently. |
+
 **A8 is the one that most needed to be pre-registered.** Switching to cluster-robust
 inference after seeing a confidence interval would be indistinguishable from moving the
 goalposts, whatever the motivation.
@@ -991,6 +993,78 @@ three rounds is tuning where ten is fitting a classifier to a hope.
 the key is opened, and `results/labelling.json` records that commit's SHA alongside the
 seed and both bucket sizes. That is what makes the ordering checkable by someone who was
 not present — including the author later, when the result is inconvenient.
+
+---
+
+### 4.13 What an agent-labelled dry run exposed [A24]
+
+**This is not the gate and does not satisfy it.** The protocol requires a human, and the
+reasons are recorded in “The 20-PR gate, as it will actually run”. A dry run was
+performed by the assistant on a **separate sample under a different seed**, precisely so
+the human sample stays unlabelled and its key sealed. Its value is not the agreement
+number — an agent that has read the classifier cannot be assumed independent of it — but
+the two corpus faults it surfaced.
+
+**Result:** 11/20 (55%), kappa 0.100, no `UNSURE`. **Eight of nine disagreements point the
+same way:** the classifier said BROKE where the labeller said CLEAN, every one of them via
+`fix_touching_same_file`. Under the reading table that is *rule too loose*, unambiguously.
+
+Two distinct root causes, both verified against specific commits.
+
+**1. `FIX_PATTERN` matches squash-merge bodies.** `PrunaAI/pruna` commit `017dc9a144` is
+titled `feat: accelerate support (#128)` — a feature. Its squashed body enumerates the
+branch's commits, six of which begin `fix:`. The pattern is applied to the whole message,
+so the commit reads as a repair.
+
+> Most repositories squash-merge, and any sizeable feature branch contains a commit
+> beginning `fix:`. The outcome rule therefore fires on **large feature PRs as a class**,
+> and PR size is the variable that already reaches AUC 0.957 on its own.
+
+**2. The replication package over-attributes files to a PR.** `zenml-io/zenml#3757`
+changed **two** files, both under `docs/`. The package attributes **170 file rows and 92
+distinct `.py` files** to it, spanning the entire server surface. The classifier duly
+matched a later commit named `small bug` touching `runs_endpoints.py` — a file the pull
+request never opened.
+
+Measured across the package, per PR, distinct `.py` files attributed:
+
+| p50 | p75 | p90 | p95 | p99 | max |
+|---|---|---|---|---|---|
+| 4 | 15 | 52 | 94 | 237 | **28,180** |
+
+**15.9% of PRs are attributed more than 30 `.py` files; 10.3% more than 50.** The median
+of 4 is plausible, so this is a long tail rather than a uniform error — and a tail that
+grows with how far the PR's base had diverged, which again tracks size.
+
+**Both faults inflate the exposed arm and the outcome together, and both scale with patch
+size.** That is A16's confounder arriving through a third door, after the two already
+mapped.
+
+**Consequences, all pre-data:**
+
+1. **The file-set consistency gate becomes blocking.** Re-derive `changed_files` from
+   `git diff parent..merged` and compare against the package's list. A PR whose sets
+   disagree beyond the pre-specified threshold is **excluded as attrition**, not analysed.
+   It was previously described as a precaution; it is now the thing standing between the
+   study and a manufactured result.
+2. **The outcome rule is applied to the commit *subject*, not the whole message.** The
+   body of a squash merge is a changelog of the branch, not a statement about the commit.
+   Recorded here rather than changed silently, and the pilot reports how many outcomes
+   move.
+3. **Both must be re-checked in the pilot** as explicit shape metrics: the file-set
+   disagreement rate, and the share of BROKE verdicts whose evidence commit matches only
+   in the body.
+
+**A limitation of the dry run itself, recorded because it cuts against its own findings.**
+The labeller gathered later commits through the GitHub API filtered by path on the default
+branch, which misses commits landing on other branches. For one PR the stated reasoning
+— “no follow-up at all” — was therefore wrong, even though the verdict survived scrutiny.
+A human labeller working from the pull request page has the same blind spot.
+
+**And one flaw in the design of the gate, found by running it.** The labeller knows the
+sample is balanced ten and ten, because the protocol says so. That is an anchoring channel
+the blind sheet does not close: a labeller who has counted fourteen CLEANs may feel pressure
+toward BROKE. The bucket sizes should not be disclosed to whoever labels.
 
 ---
 

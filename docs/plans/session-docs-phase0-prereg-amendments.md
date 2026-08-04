@@ -1,11 +1,11 @@
 # Session record — docs/phase0-prereg-amendments
 
-Written by scripts/guard/hook_session_end.py at 2026-08-04T14:29:50Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-04T15:03:19Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `docs/phase0-prereg-amendments`
-- Files changed vs `main`: 106
-- Uncommitted at session end: 0
+- Files changed vs `main`: 107
+- Uncommitted at session end: 1
 - `docs/CODEBASE.md` updated: yes
 
 ## Changed
@@ -41,8 +41,6 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/pyproject.toml`
 - `research/phase0/results/.gitkeep`
 - `research/phase0/results/controls.json`
-- `research/phase0/scripts/make_handlabel_sheet.py`
-- `research/phase0/scripts/score_handlabel.py`
 - `research/phase0/src/phase0/__init__.py`
 - `research/phase0/src/phase0/analysis/__init__.py`
 - `research/phase0/src/phase0/analysis/build_table.py`
@@ -59,10 +57,11 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/src/phase0/fix_signals.py`
 - `research/phase0/src/phase0/github_pulls.py`
 - `research/phase0/src/phase0/handlabel/__init__.py`
+- `research/phase0/src/phase0/handlabel/draw.py`
+- `research/phase0/src/phase0/handlabel/files.py`
+- `research/phase0/src/phase0/handlabel/labels.py`
 - `research/phase0/src/phase0/handlabel/score.py`
 - `research/phase0/src/phase0/handlabel/select.py`
-- `research/phase0/src/phase0/handlabel/sheet.py`
-- `research/phase0/src/phase0/handlabel/window.py`
 - `research/phase0/src/phase0/joins.py`
 - `research/phase0/src/phase0/parent_commit.py`
 - `research/phase0/src/phase0/pipeline/__init__.py`
@@ -72,8 +71,10 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/src/phase0/pycg_failure.py`
 - `research/phase0/src/phase0/run_graph.py`
 - `research/phase0/src/phase0/run_pipeline.py`
+- `research/phase0/src/phase0/sample_for_labelling.py`
 - `research/phase0/src/phase0/scan_outcome.py`
 - `research/phase0/src/phase0/scope.py`
+- `research/phase0/src/phase0/score_labelling.py`
 - `research/phase0/src/phase0/syntax.py`
 - `research/phase0/tests/controls/test_controls.py`
 - `research/phase0/tests/controls/test_controls_corpus.py`
