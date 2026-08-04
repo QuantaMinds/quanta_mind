@@ -28,9 +28,15 @@ papers, and from review of the execution plan.
 
 **No amendment moves a decision boundary.** The RR thresholds (3.0 / 1.5), the CI rules,
 the 7-day window, the `a ≥ 20` floor and the stop rule in §6 are byte-identical to the
-first commit. A1–A5 are factual corrections or newly discovered prerequisites; A6–A8
-change *what is measured* or *how it is estimated* so that both match what the instrument
-can actually deliver.
+first commit. A1–A5 are factual corrections or newly discovered prerequisites; A6–A9
+change *what is measured* (A6), *how it is matched* (A9), *what is excluded* (A7) or *how
+it is estimated* (A8), so that all four match what the instrument can actually deliver.
+
+**Every one of A6, A7 and A9 was forced by a property of PyCG established by running it,
+not by reading about it** — the set-valued edge map, the 3.10 parse ceiling, and two
+distinct naming defects. Each is recorded with its bias direction, and in every case the
+direction chosen is the one that errs toward the null. An amendment that made a positive
+result easier would deserve far more scepticism than these do.
 
 **One amendment does touch the outcome definition, and it is A4.** The third of §3.2's
 three BROKE criteria — the issue link — becomes conditional on API quota. The first two,
@@ -50,6 +56,7 @@ reclassification this log exists to prevent.
 | **A6** | 3.1 | Primary analysis restricted to single-site (caller, callee) pairs; multi-site pairs to a bounded sensitivity analysis; fallback pre-specified. | PyCG resolves at pair granularity, so call-site granularity is not measurable. Bias ran toward the null — toward the stop rule. |
 | **A7** | 3.1 | `EXCLUDED_SYNTAX` split out of `UNANALYZED` and excluded from the study. | PyCG parses on CPython 3.10; 3.11+ syntax fails because our toolchain is behind, not because the code is dynamic. §4.4 reads that arm to decide what company this is. |
 | **A8** | 3.4, 4 | Primary inference is cluster-robust at repository level; naive Katz CI reported alongside; power restated in clustered terms. | Symbols cluster in PRs, PRs cluster in repos. Katz assumes independence and understates variance at exactly the boundary §4 turns on. |
+| **A9** | 3.1 | Edge matching normalises PyCG's path separators and is lenient about the package prefix, requiring a dot boundary. | PyCG names the same function two ways and leaks path separators into module names. Strict equality would mark nested-package callers unresolved wholesale. |
 
 **A8 is the one that most needed to be pre-registered.** Switching to cluster-robust
 inference after seeing a confidence interval would be indistinguishable from moving the
@@ -195,6 +202,33 @@ The **opposite** bias is also measured rather than disclosed: matching call site
 name over-matches, since `validate` also catches `other.validate` and
 `UnrelatedClass.validate`. Fifty matched sites from the pilot are hand-checked and the
 false-match rate reported.
+
+**Matching an edge to a symbol. [A9]** Two defects in PyCG's naming were found by
+running it, not by reading about it. Both are silent: a name mismatch does not error, it
+returns no edge, and the site reads as unresolved.
+
+1. **Path separators leak into module names.** `acme/sub/deep.py` is named `sub\deep` on
+   Windows and `sub/deep` elsewhere — a path separator where a dot belongs. Normalised to
+   dots at the point PyCG's output is parsed.
+2. **The same function has two names.** At its definition site it is `sub.deep.helper_fn`;
+   where an import resolved it, `acme.sub.deep.helper_fn`. This is the name-resolution
+   mismatch DyPyBench measured at roughly 12% of observed differences, and it lands on the
+   join directly.
+
+An edge target therefore matches a symbol when the two are equal, **or when either is a
+dot-boundary suffix of the other**. The dot boundary is required so `revalidate` never
+matches `validate`.
+
+**Bias direction, stated before the run: leniency errs toward UNEXPOSED**, because it finds
+edges a strict comparison would miss. That is toward the null and toward the stop rule —
+the same conservative direction as A6, and the reverse of a rescue. Strict equality was
+rejected precisely because its bias runs the other way: it would inflate the exposed arm
+for every layered repository in the corpus, which is the direction that manufactures a
+positive.
+
+**Diagnostic:** the pilot reports how many matches were exact and how many required
+prefix tolerance. If tolerance is doing most of the work, the join is resting on a
+heuristic rather than on agreement, and that must be visible before the full run.
 
 **Parse failures are attrition, not an arm. [A7]** PyCG parses with its host interpreter's
 `ast`, pinned at CPython 3.10 (`research/phase0/ENVIRONMENT.lock`). A repository using
