@@ -699,9 +699,33 @@ agent-authored code, predicted from **textual** features at AUC 0.671. Adjacent 
 revert/fix window, and notably weaker than the AUC 0.957 that patch size and file count
 achieve (A16) — which is the confounder, not the mechanism.
 
-**Scan is incomplete and recorded as such:** ~23 of 62+ assessed. The challenge corpus
-predates our snapshot, so the "papers using" list was prioritised and is now exhausted;
-the remaining challenge abstracts are the lower-yield half.
+**Live check, 2026-08-04.** Search indexes lag, so the arXiv `cs.SE` recent listing was
+read directly — 201 entries covering 4–5 August 2026. Nothing there uses resolvability as
+an exposure either. Two entries matter:
+
+- **arXiv:2608.01927, DyRetriever** — repository-level code generation with context
+  retrieved over a *partial dependency graph*, built on demand and discarded after use.
+  Reports **+25.63% relative Pass@1 on CoderEval and +59.73% on DevEval**, 7.4× faster than
+  static-graph baselines.
+- arXiv:2608.01507 (agentic search for repo-level QA) and arXiv:2608.02499 (SWE-Touch) are
+  adjacent but concern retrieval quality, not resolvability.
+
+**DyRetriever is the first third-party evidence pointing *toward* our mechanism, and it
+sharpens Phase 0c rather than settling it.** SWE-PRBench found structured context
+*degrades* code **review** when **pushed** into the prompt. DyRetriever finds
+dependency-graph context *substantially improves* code **generation** when **retrieved on
+demand**. Those are compatible, and the axis separating them is exactly the pull-vs-push
+distinction `ARCHITECTURE.md §0.3` bets the serving layer on.
+
+It is not a substitute for Phase 0c: different task (generation, not review), different
+benchmark, and no measurement of whether the retrieved context *carries* resolvability
+labels. But it moves the prior — the delivery mechanism we chose is the one that works in
+the one published comparison available.
+
+**Scan is incomplete and recorded as such:** ~25 of 62+ assessed, plus the live listing for
+this month. The challenge corpus predates our snapshot, so the "papers using" list was
+prioritised and is now exhausted; the remaining challenge abstracts are the lower-yield
+half.
 
 ### Power
 
