@@ -7,7 +7,8 @@ WHY:  Split from scan_outcome.py, which owns walking history. This module owns t
       because the Day 2 gate (>=16/20 agreement with hand-labelling) is really a
       gate on these patterns.
 
-      Word boundaries are not cosmetic. §3.2 writes the pattern as
+      Word boundaries are not cosmetic. `PHASE0_PREREGISTRATION.md` “Outcome variable” writes the
+      pattern as
       `fix|bug|broke|regress|hotfix|revert`, and matched as a bare substring that
       fires on "prefix", "suffix", "debug" and "prefixes" — none of which say
       anything about breakage. RUNBOOK section 2.3 expects a 5-20% base rate and

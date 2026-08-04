@@ -54,12 +54,12 @@ Architectural consequence, binding on every surface in `serve/`:
 - **Anything that resembles "here is more context, good luck" is forbidden by this section.**
 
 Whether pull-based delivery actually escapes the effect is **untested** — see
-`docs/BUILD_PLAN.md` Phase 0c, which measures it against their public harness before any
+`docs/BUILD_PLAN.md` the pull-based retrieval test, which measures it against their public harness before any
 code in `serve/` is written.
 
 ### 0.4 Languages: Python and TypeScript/JavaScript only
 
-Nothing else until both arms of Phase 0 report. The architecture below the probe layer is
+Nothing else until both arms of the correlation test report. The architecture below the probe layer is
 language-agnostic; `probe/` is not, and each language is a separate research problem rather
 than a new adapter. Rust and Go are explicitly excluded as lead products: their residual is
 small enough that a coverage number would read 95%+ and carry no information.
@@ -99,7 +99,7 @@ Enforced by `scripts/guard/check_conventions.py`.
 
 ```
 types → discover → ingest → resolve → probe → label → store → serve
-                            (Phase 4, optional)
+                            (the MRO and framework resolvers, optional)
 ```
 
 `resolve/` sits between `ingest/` and `probe/`: it may consume the upstream graph and adds
@@ -123,7 +123,7 @@ Two jobs, deliberately paired because they must agree on symbol identity.
 
 1. **Adapt an upstream graph.** One adapter per source (`codegraph.py`, `graphify.py`,
    `pycg.py`), behind a single `GraphSource` protocol. Swapping adapters must change the
-   edges and leave the coverage arithmetic untouched — that is a Phase 1 gate.
+   edges and leave the coverage arithmetic untouched — that is a the call-site census layer gate.
 2. **Call-site census.** A thin tree-sitter pass counting *every* call site, including
    ones nothing resolves. Upstream tools emit edges; none emits the denominator, and
    without a denominator there is no coverage number.
@@ -131,11 +131,11 @@ Two jobs, deliberately paired because they must agree on symbol identity.
 **Output:** `Graph` (edges from upstream) + `CallSite[]` (ours).
 **Must not:** attempt resolution, rank edges, or improve on upstream. If an adapter starts
 growing resolution logic, that logic belongs in `resolve/` and must be argued for.
-**Why this is not `parse/` + `resolve/static.py`:** see §0.1. Building our own graph is a
+**Why this is not `parse/` + `resolve/static.py`:** see `ARCHITECTURE.md` “We do not build a call graph”. Building our own graph is a
 race against 165k stars of MIT code shipping daily.
 
-### `resolve/` — narrow recovery only (Phase 4, conditional)
-Exists **only** for edges upstream tools structurally cannot produce, and only where Phase 0
+### `resolve/` — narrow recovery only (the MRO and framework resolvers, conditional)
+Exists **only** for edges upstream tools structurally cannot produce, and only where the correlation test
 exposure data shows the risk concentrates.
 
 | Resolver | Mechanism | Handles |
@@ -149,10 +149,10 @@ exposure data shows the risk concentrates.
 Each resolver returns `(edges, unresolved)`. **Returning fewer edges is legitimate.
 Returning a guess is not.**
 **Must not:** call an LLM; duplicate what the upstream graph already resolves; or attempt
-general-purpose analysis. Soundness → imprecision → unscalability is causal (§2). Narrow
+general-purpose analysis. Soundness → imprecision → unscalability is causal (`ARCHITECTURE.md` “Why this design”). Narrow
 resolvers escape that chain because framework semantics *guarantee* the answer; a general
 analyzer does not.
-**Deleted by decision:** `static.py` (upstream's job) and `runtime.py` (§0.2).
+**Deleted by decision:** `static.py` (upstream's job) and `runtime.py` (`ARCHITECTURE.md` “We do not build a runtime oracle in v1”).
 
 ### `probe/` — where is this repo unknowable?
 The Python row of the soundiness table, which does not exist in the literature. Scans for
@@ -200,7 +200,7 @@ security review from the sales cycle.
 | Language | **Python 3.12+** | The thing we analyze is Python; resolvers need `ast`, `symtable`, `importlib`. 3.12 gives us `sys.monitoring`, which is dramatically cheaper than the source-rewriting instrumentation DyPyBench measured at ~180× overhead. |
 | Packaging | **uv** | Deterministic, fast, single tool for venv + lock + run. |
 | Call-site census | **tree-sitter** (vendored grammars) | Thin pass, ours. Produces the coverage denominator, which no upstream tool emits. Grammars pinned — a bump silently changes parse trees. |
-| Call graph | **upstream, via adapter** (CodeGraph / Graphify / PyCG) | See §0.1. We do not build a graph. PyCG remains a supported adapter and is what Phase 0 measures with, because it is the crudest and therefore the conservative instrument. |
+| Call graph | **upstream, via adapter** (CodeGraph / Graphify / PyCG) | See `ARCHITECTURE.md` “We do not build a call graph”. We do not build a graph. PyCG remains a supported adapter and is what the correlation test measures with, because it is the crudest and therefore the conservative instrument. |
 | Storage | **SQLite** (embedded) | Local-first, zero-ops, no server, ships inside the customer boundary. The winning pattern in this category. |
 | Serving | **MCP over stdio + local HTTP** | One integration serves Claude Code, Codex, Cursor. Survives any single vendor shipping its own indexer. |
 | CLI | **Typer** | Type-hint driven, matches the mypy-strict discipline. |
@@ -213,7 +213,7 @@ security review from the sales cycle.
 **Deliberately not used:** vector databases (code drifts, embeddings leak, and Anthropic
 publicly abandoned this path); Neo4j (an external server breaks the local-first
 constraint); LangChain (we make no LLM calls in the core pipeline); Rust (revisit only if
-Phase 2 profiling shows tree-sitter binding overhead dominates — do not pre-optimize).
+The label layer profiling shows tree-sitter binding overhead dominates — do not pre-optimize).
 
 ---
 
@@ -234,11 +234,11 @@ qmctx/
 ├── justfile                   requires bash — Git Bash on Windows
 ├── pyproject.toml             every version pinned exactly
 ├── src/qmctx/
-│   ├── __init__.py            ⏳ the only file until Phase 0 reports
+│   ├── __init__.py            ⏳ the only file until the correlation test reports
 │   ├── types/                 ⏳ shared frozen dataclasses and enums
 │   ├── discover/              ⏳ ≤15 files
 │   ├── ingest/                ⏳ upstream graph adapters + call-site census
-│   ├── resolve/               ⏳ Phase 4 only, narrow recovery
+│   ├── resolve/               ⏳ the MRO and framework resolvers only, narrow recovery
 │   │   └── frameworks/        ⏳ one file per framework
 │   ├── probe/                 ⏳
 │   ├── label/                 ⏳
@@ -249,7 +249,7 @@ qmctx/
 │   ├── unit/                  fast, hermetic
 │   ├── property/              hypothesis invariants
 │   ├── live/                  ⏳ real pipeline, real repos, golden files
-│   ├── adversarial/           ⏳ fault injection, VALIDATION.md §5
+│   ├── adversarial/           ⏳ fault injection, `VALIDATION.md` “Fault injection”
 │   └── fixtures/              ⏳ repos/ (submodules) + golden/
 ├── research/                  measurement, NOT the product
 │   └── phase0/                standalone uv project: own lock, own interpreter (3.10)
@@ -260,7 +260,7 @@ qmctx/
 │       └── results/           committed — the published artifact
 ├── scripts/
 │   ├── guard/                 the enforcement layer, stdlib only
-│   └── verify/                ⏳ Phase 1 — see its README for why it is empty
+│   └── verify/                ⏳ the call-site census layer — see its README for why it is empty
 ├── .claude/settings.json      hooks; inert if moved back to the root
 ├── .github/workflows/         ci.yml + guards.yml
 ├── docs/
@@ -290,15 +290,15 @@ qmctx/
 
 ## 7. Known limitations — state these to customers before they find them
 
-- **The founding correlation is unmeasured.** Until Phase 0 reports, we do not know that
+- **The founding correlation is unmeasured.** Until the correlation test reports, we do not know that
   `unresolved` predicts breakage. Do not claim it to a customer.
 - **The delivery mechanism is unvalidated.** Structured context degrades review quality when
-  pushed into a prompt (§0.3). We assume pull-based tool calls behave differently. Phase 0c
+  pushed into a prompt (`ARCHITECTURE.md` “Delivery is pull, never push”). We assume pull-based tool calls behave differently. The pull-based retrieval test
   measures it. Until then this is a hypothesis, and it should be stated as one.
 - Our coverage is inherited from the upstream graph's limits plus our own resolvers'.
   When upstream regresses, our numbers move. Adapter versions are pinned and recorded in
   every pack for exactly this reason.
-- There is **no runtime oracle in v1** (§0.2). Coverage reflects what is statically
+- There is **no runtime oracle in v1** (`ARCHITECTURE.md` “We do not build a runtime oracle in v1”). Coverage reflects what is statically
   knowable, not what actually executes. Say so.
 - `eval`, computed identifiers, deploy-time plugin loading and C extensions are
   **undecidable**, not unimplemented. They will always land in `UNRESOLVED`.

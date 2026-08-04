@@ -3,14 +3,15 @@
 WHAT: Measures the synthetic corpus with the real stages, computes per-mechanism
       detection, and writes results/controls.json.
 WHY:  Split from corpus.py, which builds repositories. This module evaluates them,
-      and evaluation is where the gate lives: RUNBOOK §2.1's pooled RR >= 5, plus
+      and evaluation is where the gate lives: `PHASE0_RUNBOOK.md` “Positive control” pooled RR >= 5,
+      plus
       A11's per-mechanism table reported alongside so a pass carried entirely by
       `super()` is visible rather than implied.
 
       Exposure and outcome are derived by `run_pipeline.one_pr` and
       `scan_outcome.scan` — the same code the corpus run uses. A control that
       assigned its own answers would test the arithmetic and nothing else.
-IMPORTS: phase0.build_table, classify_exposure, run_pipeline, scan_outcome, and
+IMPORTS: phase0.analysis.build_table, classify_exposure, run_pipeline, scan_outcome, and
       controls.{corpus,analysis}.
 CONSUMED BY: `python -m phase0.controls.gate`; tests/test_controls_corpus.py.
 """
@@ -21,7 +22,7 @@ import json
 import tempfile
 from pathlib import Path
 
-from phase0.build_table import Observation, by_primary, tabulate
+from phase0.analysis.build_table import Observation, by_primary, tabulate
 from phase0.classify_exposure import Exposure
 from phase0.controls.analysis import run_negative_controls, run_positive_control
 from phase0.controls.corpus import DEFAULT_PER_MECHANISM, SyntheticPR, build_corpus
@@ -85,7 +86,7 @@ def broke_rate(measured: list[tuple[SyntheticPR, Observation]]) -> float:
 def reconcile(measured: list[tuple[SyntheticPR, Observation]]) -> dict[str, object]:
     """Account for every unit: a + b + c + d + excluded must equal the corpus.
 
-    ARCHITECTURE.md §6 invariant 3 -- nothing is lost between stages -- applied to
+    `ARCHITECTURE.md` “Invariants” invariant 3 -- nothing is lost between stages -- applied to
     the control itself. It exists because the pooled RR of 8.0 was computed from 50
     of 80 units, with all 30 exclusions falling in the EXPOSED arm and none in the
     control arm. That asymmetry is what produced the 8.0, and no output said so.

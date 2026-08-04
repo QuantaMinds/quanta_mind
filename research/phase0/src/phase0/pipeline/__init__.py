@@ -1,4 +1,4 @@
-"""Orchestration support for the Phase 0 run.
+"""Orchestration support for the the correlation test run.
 
 A subpackage because src/phase0/ is at the 15-file directory cap, and because
 these three concerns are genuinely separate from the measurement stages:

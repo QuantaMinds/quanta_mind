@@ -1,9 +1,11 @@
 """Verification of corpus extraction and the population filters.
 
-WHAT: Asserts PRRecord's contract, that each population filter removes what §3
+WHAT: Asserts PRRecord's contract, that each population filter removes what
+`PHASE0_PREREGISTRATION.md` “Design”
       says it removes, and that attrition is counted rather than dropped.
-WHY:  §3's corpus arithmetic — 7,191 to 4,798 structural to ~3,300 merged — is a
-      prediction. These filters are what make it a measurement, and RUNBOOK §3
+WHY:  `PHASE0_PREREGISTRATION.md` “Design” corpus arithmetic — 7,191 to 4,798 structural to ~3,300
+merged — is a
+      prediction. These filters are what make it a measurement, and `PHASE0_RUNBOOK.md` “Days 3-5”
       treats a large deviation as a stop condition rather than a curiosity, so the
       counts have to be produced rather than inferred.
 
@@ -82,12 +84,17 @@ def test_record_is_immutable() -> None:
 
 
 def test_structural_task_types_exclude_docs_and_test() -> None:
-    """§3: the five types that "directly impact program structure", and only those."""
+    """`PHASE0_PREREGISTRATION.md` “Design”: the five types that "directly impact program
+    structure",
+    and only those.
+    """
     assert {"feat", "fix", "perf", "refactor", "chore"} == STRUCTURAL_TASK_TYPES
 
 
 def test_publishable_licence_gate() -> None:
-    """RUNBOOK §5 requires publishing raw inputs; licences decide which may be."""
+    """`PHASE0_RUNBOOK.md` “Authenticity checklist” requires publishing raw inputs; licences decide
+    which may be.
+    """
     permissive = PRRecord("1", "o/r", "python", "a", "b", "t", (), (), licence="MIT")
     restricted = PRRecord("2", "o/r", "python", "a", "b", "t", (), (), licence="GPL-3.0")
     assert (permissive.is_publishable, restricted.is_publishable) == (True, False)
@@ -105,7 +112,9 @@ def test_population_filters_remove_exactly_what_section_three_says(tmp_path: Pat
 
 
 def test_attrition_totals_are_reported(tmp_path: Path) -> None:
-    """Rows never leave silently: §3's arithmetic is checked against these."""
+    """Rows never leave silently: `PHASE0_PREREGISTRATION.md` “Design” arithmetic is checked against
+    these.
+    """
     _, attrition, _ = population_counts(_dataset(tmp_path))
     assert attrition.total == 3
 

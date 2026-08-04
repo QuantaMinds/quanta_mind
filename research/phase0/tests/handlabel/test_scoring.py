@@ -73,7 +73,8 @@ def test_comments_and_blank_lines_are_allowed(tmp_path: Path) -> None:
 def test_a_single_class_sample_is_flagged_rather_than_passed() -> None:
     """20/20 on an all-clean sample is what "always answer clean" scores.
 
-    The gate still reports PASS because §7's threshold is not modified here, but the
+    The gate still reports PASS because `PHASE0_PREREGISTRATION.md` “Timeline” threshold is not
+    modified here, but the
     report must carry the warning beside it or the number reads as evidence.
     """
     selection = _selection()

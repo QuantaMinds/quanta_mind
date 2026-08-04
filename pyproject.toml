@@ -8,7 +8,7 @@
 #       either. Versions read from PyPI on 2026-08-03.
 # CONSUMED BY: uv, ruff, mypy, pytest, and the justfile recipes that wrap them.
 #
-# NOTE: the Phase 0 research harness is deliberately NOT a workspace member. uv's
+# NOTE: the the correlation test research harness is deliberately NOT a workspace member. uv's
 #       own documentation states it "can't ensure that packages don't import
 #       dependencies declared by another workspace member" and that workspaces are
 #       "not suited for cases in which members ... desire a separate virtual
@@ -27,7 +27,7 @@ description = "Tells a coding agent what it does not know about a repository."
 readme = "README.md"
 requires-python = ">=3.12"
 
-# Deliberately empty. No runtime dependency is chosen before Phase 0 reports.
+# Deliberately empty. No runtime dependency is chosen before the correlation test reports.
 dependencies = []
 
 # Deliberately no [project.scripts]. `qmctx` gets an entry point when serve/
@@ -54,7 +54,7 @@ target-version = "py312"
 # Markdown is excluded deliberately. ruff 0.16 formats fenced Python inside .md
 # files, and our docs contain illustrative snippets that are not real code --
 # VALIDATION.md's `@given(pack=packs())` references a Pack type that will not
-# exist until Phase 1. Letting the formatter rewrite prose would put churn into
+# exist until the call-site census layer. Letting the formatter rewrite prose would put churn into
 # the documents reviewers are supposed to read closely.
 extend-exclude = ["vendor", "research/phase0/data", "*.md"]
 

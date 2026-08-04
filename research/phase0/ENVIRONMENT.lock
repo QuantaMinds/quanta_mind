@@ -1,4 +1,4 @@
-# Phase 0 environment record
+# the correlation test environment record
 #
 # PHASE0_RUNBOOK.md section 0: "Pin everything. Record versions in
 # phase0/ENVIRONMENT.lock. A study you cannot re-run is a study you cannot
@@ -77,7 +77,7 @@ completion and reported 100% attrition as a result rather than as a broken envir
 The hand-labelling sheet is where it surfaced, and it surfaced badly: 13 of 13 clones
 failed, the sheet rendered 20 PRs as having no commits in their window, and a labeller
 reading it would have marked 20 clean. The outcome classifier returns CLEAN on
-unreadable history for its own (defensible) reasons, so the §7 gate would have reported
+unreadable history for its own (defensible) reasons, so the `PHASE0_PREREGISTRATION.md` “Timeline” gate would have reported
 20/20 PASS on no data whatsoever.
 
 Fixed by calling git through `subprocess.run(..., timeout=CLONE_TIMEOUT_S)`, which is
@@ -166,7 +166,7 @@ Agent composition, config `pull_request`, 33,596 rows:
     Cursor         1,541    4.6%
     Claude_Code      459    1.4%
 
-Any Phase 0 result is predominantly a result about Codex. See amendment A14.
+Any the correlation test result is predominantly a result about Codex. See amendment A14.
 
 
 ## External inputs — pinned by hash

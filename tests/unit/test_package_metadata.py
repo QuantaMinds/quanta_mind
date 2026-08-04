@@ -17,7 +17,7 @@ import qmctx
 
 
 def test_version_is_pre_phase_zero() -> None:
-    """0.0.0 is a claim: nothing here is validated until Phase 0 reports."""
+    """0.0.0 is a claim: nothing here is validated until the correlation test reports."""
     assert qmctx.__version__ == "0.0.0"
 
 

@@ -3,7 +3,8 @@
 WHAT: Three steps kept in separate modules so the order is enforced by the code rather
       than by intent — `select` fixes which PRs, `sheet` renders the evidence a human
       needs with no verdict in it, and `score` compares afterwards.
-WHY:  §7's day-2 gate requires agreement on >=16 of 20, hand-labelled **before** any
+WHY:  `PHASE0_PREREGISTRATION.md` “Timeline” day-2 gate requires agreement on >=16 of 20,
+hand-labelled **before** any
       classifier output is seen. That ordering is the whole value of the gate and it is
       the easiest thing in this project to compromise without noticing — one glance at a
       `broke`/`clean` column and the exercise measures nothing but recall of what you

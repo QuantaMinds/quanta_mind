@@ -2,7 +2,7 @@
 
 WHAT: Source templates for four ways a caller can exist that PyCG will not emit an
       edge for, and a probe reporting which the exposure variable detects.
-WHY:  RUNBOOK §2.1 requires a positive control. `super()` is PyCG's single
+WHY:  `PHASE0_RUNBOOK.md` “Positive control” requires a positive control. `super()` is PyCG's single
       best-documented blind spot and therefore the easiest possible positive; a
       control that fires only there says the instrument is narrow, and A11 fixes
       the reading of each pattern before the numbers exist.
@@ -83,5 +83,7 @@ def probe_mechanism(
 
 
 def probe_all_mechanisms() -> list[MechanismProbe]:
-    """RUNBOOK §2.1's diversification, as a capability profile of our own variable."""
+    """`PHASE0_RUNBOOK.md` “Positive control” diversification, as a capability profile of our own
+    variable.
+    """
     return [probe_mechanism(name, source) for name, source in MECHANISMS.items()]

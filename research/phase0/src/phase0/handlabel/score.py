@@ -1,7 +1,8 @@
 """Agreement between the human labels and the classifier — computed last, on purpose.
 
 WHAT: Reads the completed labels, runs `scan_outcome` over the same PRs, and reports
-      raw agreement against §7's >=16/20 gate, plus Cohen's kappa and the label
+      raw agreement against `PHASE0_PREREGISTRATION.md` “Timeline” >=16/20 gate, plus Cohen's kappa
+      and the label
       distribution as diagnostics.
 WHY:  Raw agreement is the pre-registered gate and is not changed here. But raw
       agreement alone can certify a classifier that has learned nothing: if all twenty
@@ -31,7 +32,7 @@ from phase0.handlabel.select import Selection
 from phase0.scan_outcome import Outcome
 
 VALID_LABELS = {"broke": Outcome.BROKE, "clean": Outcome.CLEAN}
-GATE_MINIMUM = 16  # §7 day-2 gate: >=16 of 20. Not modified here.
+GATE_MINIMUM = 16  # day-2 gate, `PHASE0_PREREGISTRATION.md` “Timeline”. Never relaxed.
 _LINE = re.compile(r"^\s*(\d+)\s*[:.]\s*(broke|clean)\s*$", re.IGNORECASE)
 
 
@@ -75,7 +76,9 @@ class Agreement:
 
     @property
     def passed(self) -> bool:
-        """§7's gate, unchanged: >=16 of 20 agree. Read next to `is_discriminating`."""
+        """`PHASE0_PREREGISTRATION.md` “Timeline” gate, unchanged: >=16 of 20 agree. Read next to
+        `is_discriminating`.
+        """
         return self.agreed >= GATE_MINIMUM and self.total >= 20
 
     def describe(self) -> str:

@@ -43,7 +43,7 @@ jobs:
       - name: Test quality — product
         run: python scripts/guard/check_assert_quality.py tests
 
-      - name: Test quality — Phase 0 harness
+      - name: Test quality — the correlation test harness
         run: python scripts/guard/check_assert_quality.py research/phase0/tests
 
       - name: AGENTS.md budget and pointers

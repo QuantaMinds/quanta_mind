@@ -1,4 +1,4 @@
-# Phase 0 research harness — a STANDALONE project, deliberately not a workspace member.
+# the correlation test research harness — a STANDALONE project, deliberately not a workspace member.
 #
 # WHAT: The measurement instrument for docs/findings/PHASE0_RUNBOOK.md. Its own
 #       lockfile, its own virtual environment, and its own interpreter.

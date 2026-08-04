@@ -8,7 +8,8 @@ WHY:  Split from run_pipeline.py, which owns the loop — grouping, checkpointin
 
       It never imports scan_outcome. The outcome is scanned in a separate pass so
       that nothing on the exposure path can see whether a PR broke, which is the
-      leakage RUNBOOK §1.2 calls the likeliest way to fake a positive by accident.
+      leakage `PHASE0_RUNBOOK.md` “Exposure classifier tests” calls the likeliest way to fake a
+      positive by accident.
 IMPORTS: phase0.scope, census, classify_exposure, run_graph, extract_prs, and
       pipeline.record. Never phase0.scan_outcome.
 CONSUMED BY: run_pipeline.py; tests/test_measure.py.

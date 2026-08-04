@@ -12,7 +12,7 @@ WHY:  RUNBOOK section 2.1 calls the positive control the most important gate in
       means the instrument is narrow, and RUNBOOK section 2.1 wants that known
       BEFORE a null is interpreted. Written down as data so any change to the
       exposure variable's reach shows up as a diff.
-IMPORTS: phase0.controls, phase0.build_table, phase0.scan_outcome, pytest.
+IMPORTS: phase0.controls, phase0.analysis.build_table, phase0.scan_outcome, pytest.
 CONSUMED BY: `just test-phase0`.
 """
 
@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import pytest
 
-from phase0.build_table import Observation
+from phase0.analysis.build_table import Observation
 from phase0.classify_exposure import Exposure
 from phase0.controls import (
     MECHANISMS,
@@ -34,7 +34,8 @@ from phase0.controls import (
 )
 from phase0.scan_outcome import Outcome
 
-# The measured reach of the exposure variable as defined in §3.1. Established by
+# The measured reach of the exposure variable as defined in `PHASE0_PREREGISTRATION.md` “Exposure
+# variable”. Established by
 # running the probe with an EMPTY edge set, so a miss is structural rather than
 # something PyCG happened to resolve.
 #
@@ -97,7 +98,8 @@ def test_only_named_call_sites_are_detectable() -> None:
 
     Three of four mechanisms dispatch through a value and carry no callee name.
     Exposure is therefore "named call sites whose edge is missing", not "call
-    sites we cannot resolve" -- narrower than §3.1's prose suggests.
+    sites we cannot resolve" -- narrower than `PHASE0_PREREGISTRATION.md` “Exposure variable” prose
+    suggests.
     """
     detected = [p.mechanism for p in probe_all_mechanisms() if p.detected]
     assert detected == ["super_chain"]

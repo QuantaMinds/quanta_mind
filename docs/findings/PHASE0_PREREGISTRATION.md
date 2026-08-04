@@ -1,4 +1,4 @@
-# Phase 0 Pre-Registration — Does Unresolved Predict Breakage?
+# the correlation test Pre-Registration — Does Unresolved Predict Breakage?
 
 > **Status: PRE-REGISTERED. Not yet run.**
 >
@@ -23,11 +23,11 @@
 
 Every change to this file after its first commit is recorded here. All amendments below
 were made **before any data was touched** — the harness existed but had not been run, and
-`§8 Results` was and is empty. They arise from reading the corpus schema and the source
+``PHASE0_PREREGISTRATION.md` “Results” Results` was and is empty. They arise from reading the corpus schema and the source
 papers, and from review of the execution plan.
 
 **No amendment moves a decision boundary.** The RR thresholds (3.0 / 1.5), the CI rules,
-the 7-day window, the `a ≥ 20` floor and the stop rule in §6 are byte-identical to the
+the 7-day window, the `a ≥ 20` floor and the stop rule in `PHASE0_PREREGISTRATION.md` “If the result is null” are byte-identical to the
 first commit. A1–A5 are factual corrections or newly discovered prerequisites; A6–A18
 change *what is measured* (A6), *how it is matched* (A9), *what is excluded* (A7), *how it
 is estimated* (A8), or *what may be claimed from the result* (A10), so that all of them
@@ -40,15 +40,15 @@ recorded with its bias direction, and in every case the direction is toward the 
 amendment that made a positive result *easier* would deserve far more scepticism than
 these do.
 
-**One amendment does touch the outcome definition, and it is A4.** The third of §3.2's
+**One amendment does touch the outcome definition, and it is A4.** The third of `PHASE0_PREREGISTRATION.md` “Outcome variable”'s
 three BROKE criteria — the issue link — becomes conditional on API quota. The first two,
 which do the overwhelming majority of the work and need no quota, are unchanged. This is
 recorded here rather than filed under "factual correction" because a criterion that may or
-may not execute is a real change to the outcome variable, and §3.2 now requires Results to
+may not execute is a real change to the outcome variable, and `PHASE0_PREREGISTRATION.md` “Outcome variable” now requires Results to
 state whether it ran. Calling that a clarification would be exactly the kind of quiet
 reclassification this log exists to prevent.
 
-| # | § | Change | Why |
+| # | Section | Change | Why |
 |---|---|---|---|
 | **A1** | 3 | Population restated: 7,191 → 4,798 structural → ~3,300 merged. Human arm runs in the same pass. | 7,191 was the pre-filter count. The analysed population is 2.2× smaller and saying so is cheaper than discovering it at Day 6. |
 | **A2** | 3.1 | Parent commit is `merge_commit_sha^1`, obtained from the GitHub API, with a diff-coverage rule for rebase merges. | AIDev carries no base, head or merge SHA. `base.sha` would be the commit the PR was *opened against*, potentially weeks stale. |
@@ -56,24 +56,24 @@ reclassification this log exists to prevent.
 | **A4** | 3.2 | Issue-link outcome criterion marked optional and API-dependent; whether it ran is stated in Results. | It needs quota the other two criteria do not. Silent non-execution would give two runs different outcome variables under one name. |
 | **A5** | 7 | Pilot added as Day 2.5, with its gate table. | The Day 1–2 gates test the harness against fixtures, never against the corpus. |
 | **A6** | 3.1 | Primary analysis restricted to single-site (caller, callee) pairs; multi-site pairs to a bounded sensitivity analysis; fallback pre-specified. | PyCG resolves at pair granularity, so call-site granularity is not measurable. Bias ran toward the null — toward the stop rule. |
-| **A7** | 3.1 | `EXCLUDED_SYNTAX` split out of `UNANALYZED` and excluded from the study. | PyCG parses on CPython 3.10; 3.11+ syntax fails because our toolchain is behind, not because the code is dynamic. §4.4 reads that arm to decide what company this is. |
-| **A8** | 3.4, 4 | Primary inference is cluster-robust at repository level; naive Katz CI reported alongside; power restated in clustered terms. | Symbols cluster in PRs, PRs cluster in repos. Katz assumes independence and understates variance at exactly the boundary §4 turns on. |
+| **A7** | 3.1 | `EXCLUDED_SYNTAX` split out of `UNANALYZED` and excluded from the study. | PyCG parses on CPython 3.10; 3.11+ syntax fails because our toolchain is behind, not because the code is dynamic. `PHASE0_PREREGISTRATION.md` “Agent composition” reads that arm to decide what company this is. |
+| **A8** | 3.4, 4 | Primary inference is cluster-robust at repository level; naive Katz CI reported alongside; power restated in clustered terms. | Symbols cluster in PRs, PRs cluster in repos. Katz assumes independence and understates variance at exactly the boundary `PHASE0_PREREGISTRATION.md` “Decision thresholds” turns on. |
 | **A9** | 3.1 | Edge matching normalises PyCG's path separators and is lenient about the package prefix, requiring a dot boundary. | PyCG names the same function two ways and leaks path separators into module names. Strict equality would mark nested-package callers unresolved wholesale. |
 | **A10** | 3.1, 6 | The exposure variable's **capability profile** is recorded, and the scope of a null is narrowed to match it. | Measured: the variable detects 1 of 4 unresolvable-caller mechanisms. Value-dispatched calls carry no callee name, so they produce no pair and read UNEXPOSED. A null therefore cannot be reported as a null about unresolvability in general. |
 | **A11** | 4.1 | Control corpus is synthetic repositories plus one real repository, not a Django fixture; per-mechanism detection reported against a fixed reading table; gate unchanged at pooled RR ≥ 5. | A control that times out measures our timeout, not our instrument. Synthetic repos guarantee `graph_status == OK`, so a non-detection is unambiguously a detection failure. |
 | **A12** | 4.2 | Control corpus: **if an exposed unit is excluded, its matched control twin is excluded with it.** Unseeable mechanisms go to the capability table only; the firing mechanism scales to 40/40. Gate unchanged. | The first run computed RR = 8.0 from 50 of 80 units, with all 30 exclusions in the exposed arm and none in the control arm. Coding them the other way gives 2.0 — a 4× swing from asymmetric absence alone. |
 | **A13** | 4.3 | **Differential exclusion by arm**, for the main study: exclusions reported by arm and reason; pooled RR demoted if the exposed-arm rate exceeds the control arm's by >10pp or the bounds diverge; every exclusion category bounded both ways, or declared unbounded. | Every exclusion category plausibly removes exposed units faster than unexposed ones. The control measured the magnitude at 4×; on the real corpus nobody plants it deliberately. |
-| **A14** | 4.4 | RR reported **by agent**; §6 scopes the finding; non-identical arm time windows recorded. | Computed: Codex is 64.9% of the corpus and Claude Code 1.4% (459 PRs). A general-sounding claim would rest on one agent — and the product targets the agent with 1.4% of the evidence. |
+| **A14** | 4.4 | RR reported **by agent**; `PHASE0_PREREGISTRATION.md` “If the result is null” scopes the finding; non-identical arm time windows recorded. | Computed: Codex is 64.9% of the corpus and Claude Code 1.4% (459 PRs). A general-sounding claim would rest on one agent — and the product targets the agent with 1.4% of the evidence. |
 | **A15** | 4.5 | Human-arm star-band mismatch confirmed by **joining `human_pull_request` to `repository`**, not by a superset statistic; handled by stratifying on star band. | The human arm's true floor is 503 stars with 0% below 500; the agent arm has 47.3% below 500 and a median of 564 against the human Python slice's 14,933. A 26× popularity gap. |
-| **A16** | 4.6 | **Supersedes A13's mechanism.** Distinguishes the control's *restricted estimand* (no measurement to be missing) from the study's genuine, likely **MNAR** loss to follow-up. Primary labelled complete-case; worst-case bounds; **tipping-point multiplier** run only if the primary is positive; IPCW as supporting. | The §3.3 2×2 is a complete-case analysis, unbiased only under MCAR. The bias is not identifiable, so the question is how much of it the conclusion survives — which is a number, not a caveat. |
-| **A17** | 4.7, 6 | Agent-stratified RR **reportable for Codex only**; Claude Code descriptive at best; corpus composition recorded in §6 as *conservative*; retrieval-strategy moderation **pre-registered as a prediction**. | Codex is 64.9% of the corpus and has the lowest breaking rate (2.62%) of the five, so a positive appears under unfavourable conditions. Claude Code is 459 PRs — below the power floor before the filters. A moderation found post-hoc is a story; predicted, it is mechanism evidence. |
-| **A18** | 4.8 | Prior-work scan recorded: terms, date, coverage (~23 of 62+), and the precise novelty claim. | Three adjacent literatures exist — call-graph *accuracy*, call-graph *defect prediction*, and AIDev empirical studies — and none uses the analyzer's failure to resolve as an exposure. Also found: InferCG beats PyCG by 13.9% recall, which is a Phase 4 option, not a threat to a deliberately crude instrument. |
+| **A16** | 4.6 | **Supersedes A13's mechanism.** Distinguishes the control's *restricted estimand* (no measurement to be missing) from the study's genuine, likely **MNAR** loss to follow-up. Primary labelled complete-case; worst-case bounds; **tipping-point multiplier** run only if the primary is positive; IPCW as supporting. | The `PHASE0_PREREGISTRATION.md` “The table” 2×2 is a complete-case analysis, unbiased only under MCAR. The bias is not identifiable, so the question is how much of it the conclusion survives — which is a number, not a caveat. |
+| **A17** | 4.7, 6 | Agent-stratified RR **reportable for Codex only**; Claude Code descriptive at best; corpus composition recorded in `PHASE0_PREREGISTRATION.md` “If the result is null” as *conservative*; retrieval-strategy moderation **pre-registered as a prediction**. | Codex is 64.9% of the corpus and has the lowest breaking rate (2.62%) of the five, so a positive appears under unfavourable conditions. Claude Code is 459 PRs — below the power floor before the filters. A moderation found post-hoc is a story; predicted, it is mechanism evidence. |
+| **A18** | 4.8 | Prior-work scan recorded: terms, date, coverage (~23 of 62+), and the precise novelty claim. | Three adjacent literatures exist — call-graph *accuracy*, call-graph *defect prediction*, and AIDev empirical studies — and none uses the analyzer's failure to resolve as an exposure. Also found: InferCG beats PyCG by 13.9% recall, which is a the MRO and framework resolvers option, not a threat to a deliberately crude instrument. |
 
 | **A19** | 4.9 | Human-arm commit data is **sourced from the AIDev_BC_Analyser replication package**, not mined. Coverage measured, not assumed: 1,009 of 1,042 merged human Python PRs (96.8%). The 3.2% without commits are attrition under A2, counted by resolution case. | AIDev ships no `pr_commits` for human PRs, so A2's parent resolution could not run on that arm at all. The package supplies commit SHAs for effectively all of it, removing a GitHub-API mining workstream whose quota cost was the human arm's largest unknown. Sourcing beats mining: it is fixed, citable, and re-runnable without a token. |
 
 | **A20** | 4.10 | Traces missing patch text through to A16's confounder. Link 1 **fails, in our favour** — shape detection reads filenames, which are complete. Link 2 holds but is an **outlier, not a gradient**. Adds one pilot metric: **file-set disagreement rate by changed-lines quartile**. Corrects A19's patch-weighted 31.1%. | The chain is real — text is missing precisely for the largest changes, so the tertiary outcome loses big patches differentially, on exactly the variable that achieves AUC 0.957 on its own. It needed measuring rather than asserting, and measuring changed the shape of the answer twice. |
 
-| **A21** | 4.11 | Fixes §7's day-2 gate protocol before it runs: **human arm**, eligibility, a **stride draw** across the id range, a manifest hash binding labelling to scoring, and **Cohen's kappa reported as a diagnostic beside the unchanged ≥16/20 threshold**. A PR whose history is unreadable is **not labellable** and invalidates the gate. | The gate's validity is entirely an ordering property, and ordering is the one thing a green test does not check. Also: raw agreement on an all-clean sample is 20/20 for a classifier that always answers "clean" — the same degeneracy `controls/analysis.py` already refuses in the negative controls, reappearing a layer up. |
+| **A21** | 4.11 | Fixes `PHASE0_PREREGISTRATION.md` “Timeline”'s day-2 gate protocol before it runs: **human arm**, eligibility, a **stride draw** across the id range, a manifest hash binding labelling to scoring, and **Cohen's kappa reported as a diagnostic beside the unchanged ≥16/20 threshold**. A PR whose history is unreadable is **not labellable** and invalidates the gate. | The gate's validity is entirely an ordering property, and ordering is the one thing a green test does not check. Also: raw agreement on an all-clean sample is 20/20 for a classifier that always answers "clean" — the same degeneracy `controls/analysis.py` already refuses in the negative controls, reappearing a layer up. |
 
 **A8 is the one that most needed to be pre-registered.** Switching to cluster-robust
 inference after seeing a confidence interval would be indistinguishable from moving the
@@ -123,7 +123,7 @@ Retrospective cohort study over AI-authored pull requests.
 | Merged only — required, the outcome is a 7-day post-merge scan (69.3% acceptance) | **~3,300** | ~700 |
 | PyCG succeeds (~78%; the rest is the UNANALYZED arm, not discarded) | ~2,570 | ~550 |
 
-`docs/findings/PHASE0_RUNBOOK.md` §3 carries the per-stage expected shape and the stop
+`docs/findings/PHASE0_RUNBOOK.md` `PHASE0_PREREGISTRATION.md` “Design” carries the per-stage expected shape and the stop
 conditions if any of these come out far off.
 
 ### 3.1 Exposure variable — fixed
@@ -138,7 +138,7 @@ ordering field, so the PR's first commit cannot be identified from it either. Me
 metadata is therefore fetched once per PR from
 `GET /repos/{owner}/{repo}/pulls/{number}` and cached. **A GitHub token is a prerequisite
 of this study**, not an implementation detail. Responses are cached to disk so a re-run
-consumes no quota — §5 of the runbook requires the whole thing be reproducible from raw
+consumes no quota — `PHASE0_PREREGISTRATION.md` “Pre-specified confounders” of the runbook requires the whole thing be reproducible from raw
 data.
 
 **The parent is `merge_commit_sha^1`, not `base.sha`.** `base.sha` is the commit the PR was
@@ -175,7 +175,7 @@ so "a call site PyCG did not resolve" is not something PyCG reports — it is co
 joining our tree-sitter census against PyCG's edge set. If the census walks a wider file
 set than PyCG was given, every call site outside PyCG's scope has no possible edge and
 exposure inflates toward 100%. One function computes the file set and both stages consume
-it. `PHASE0_RUNBOOK.md` §6 Q4 lists "exposure ≈ 100% → classifier degenerate" as a stop
+it. `PHASE0_RUNBOOK.md` `PHASE0_PREREGISTRATION.md` “If the result is null” Q4 lists "exposure ≈ 100% → classifier degenerate" as a stop
 condition; this is the mechanism that would cause it.
 
 For each changed symbol `S`, enumerate every call site referring to `S` and classify:
@@ -190,7 +190,7 @@ definition above is stated at *call-site* granularity. PyCG resolves at
 `F` calling `S` both directly and through `getattr` produces one edge `F → S`, and asking
 whether that edge exists marks **both** sites resolved. The unresolved one is invisible,
 and the bias runs toward UNEXPOSED, toward RR ≈ 1, and therefore toward the stop rule in
-§4. It is the most expensive direction for an artefact to point.
+`PHASE0_PREREGISTRATION.md` “Decision thresholds”. It is the most expensive direction for an artefact to point.
 
 The property is not measurable at pair granularity. It is measurable *exactly* on a subset:
 
@@ -211,7 +211,7 @@ The census already counts sites per pair, so the split costs nothing.
    the single-site exposed arm, the primary analysis reverts to the full sample with the
    bias documented. The switch and the projection that triggered it are recorded in the
    amendment log **before** the full run. **That projection is read against the
-   cluster-adjusted effective sample size of §3.4, not the raw event count** — the
+   cluster-adjusted effective sample size of `PHASE0_PREREGISTRATION.md` “Observations are clustered, and the CI must say so”, not the raw event count** — the
    restriction and the clustering both shrink effective N, and evaluating either alone
    would trip the fallback at the wrong threshold.
 
@@ -286,7 +286,7 @@ what we measure and what the product claims is large too, and that belongs in
 behind, not because the code is dynamic.**
 
 - **`UNANALYZED_RESOURCE`** — timeout or OOM. This is the third arm, and the only thing
-  `PHASE0_RUNBOOK.md §4.4` reads when deciding whether this is a scalability product rather
+  `PHASE0_RUNBOOK.md `PHASE0_PREREGISTRATION.md` “Agent composition”` reads when deciding whether this is a scalability product rather
   than an unsoundness product.
 - **`EXCLUDED_SYNTAX`** — parse failure attributable to interpreter version. **Excluded
   from the study**, reported as corpus attrition exactly like a repository that will not
@@ -360,11 +360,11 @@ The unit of analysis is a changed symbol, but symbols are **not independent obse
   commit assigns the same outcome to every symbol the PR touched in that file.
 - Many PRs share one repository, and repositories differ systematically in fix-commit
   rate, review culture, test coverage and framework density. Three of those are already
-  named as confounders in §5.
+  named as confounders in `PHASE0_PREREGISTRATION.md` “Pre-specified confounders”.
 
 The Katz log method assumes independent Bernoulli trials. Under clustering it **understates
 variance**, so the confidence interval comes out too narrow — and it comes out too narrow at
-precisely the boundary that decides the project, since §4 turns on whether the CI lower
+precisely the boundary that decides the project, since `PHASE0_PREREGISTRATION.md` “Decision thresholds” turns on whether the CI lower
 bound clears 1.5 and whether it includes 1.0. A naive CI could clear a threshold that a
 correct one would not.
 
@@ -393,18 +393,18 @@ motivation.
 
 ## 4. Decision thresholds — fixed before data
 
-Every CI below is the **cluster-robust** one from §3.4. The naive Katz interval never
+Every CI below is the **cluster-robust** one from `PHASE0_PREREGISTRATION.md` “Observations are clustered, and the CI must say so”. The naive Katz interval never
 decides anything; it is reported for comparison only.
 
 | Result | Verdict | Action |
 |---|---|---|
-| **RR ≥ 3.0**, CI lower bound > 1.5 | Strong | Proceed to Phase 1. The label predicts breakage. |
-| **RR 1.5 – 3.0**, CI excludes 1 | Weak but real | Proceed, **but the pitch changes** from "we prevent breakage" to "we prioritise review attention." Re-do the business case in `PROJECT_CONTEXT.md §5` before building. |
-| **RR < 1.5** or **CI includes 1.0** | Null / underpowered | **Stop.** See §6. |
+| **RR ≥ 3.0**, CI lower bound > 1.5 | Strong | Proceed to the call-site census layer. The label predicts breakage. |
+| **RR 1.5 – 3.0**, CI excludes 1 | Weak but real | Proceed, **but the pitch changes** from "we prevent breakage" to "we prioritise review attention." Re-do the business case in ``PROJECT_CONTEXT.md` “Business case”` before building. |
+| **RR < 1.5** or **CI includes 1.0** | Null / underpowered | **Stop.** See `PHASE0_PREREGISTRATION.md` “If the result is null”. |
 
 ### 4.1 Control design [A11]
 
-`PHASE0_RUNBOOK.md §2.1` names a Django fixture. This amends that, and it lands before the
+`PHASE0_RUNBOOK.md` “Positive control” names a Django fixture. This amends that, and it lands before the
 control runs.
 
 **Why not Django.** A control that times out returns `UNANALYZED_RESOURCE`. The gate would
@@ -431,7 +431,7 @@ under-represents scale by construction. Stated here so no reader mistakes it for
 
 **Gate unchanged: pooled RR ≥ 5.** Requiring all four mechanisms to fire was rejected —
 that converts the control into a *capability requirement*, forcing resolvers to be built
-before the thesis may be tested, which inverts the point of Phase 0. The control
+before the thesis may be tested, which inverts the point of the correlation test. The control
 characterises the instrument; it does not certify it.
 
 **Per-mechanism detection is reported alongside, and the reading is fixed now:**
@@ -439,14 +439,14 @@ characterises the instrument; it does not certify it.
 | Pattern | Meaning | Consequence |
 |---|---|---|
 | 4/4 fire | broad | Null scope: unresolvability generally |
-| 2–3 fire | partial | Null scoped to the detected mechanisms, **named individually** in §6 |
+| 2–3 fire | partial | Null scoped to the detected mechanisms, **named individually** in `PHASE0_PREREGISTRATION.md` “If the result is null” |
 | **1/4 — only `super()`** | narrow | Null scoped to statically-named unresolved sites, per A10. **Explicitly not a claim about dynamic dispatch.** |
 | 0/4 | broken | **Stop.** Not a null — fix the instrument. |
 
 The third row is the likely one given A10, and the point of fixing the reading now is that
 the headline sentence gets written before anyone is motivated to write it generously.
 
-**Into `PHASE0_RUNBOOK.md §5`'s authenticity checklist:** if only `super()` fires, record
+**Into `PHASE0_RUNBOOK.md `PHASE0_PREREGISTRATION.md` “Pre-specified confounders”`'s authenticity checklist:** if only `super()` fires, record
 that `super()` is PyCG's single best-documented blind spot — the easiest possible positive,
 and therefore weak evidence of general detection capability. Better said by us than worked
 out by a reader.
@@ -506,7 +506,7 @@ nobody plants it deliberately, which makes it harder to notice, not weaker.
 1. Exclusion counts are reported **by arm and by reason** — never a single attrition total.
 2. **Differential-exclusion check.** If the exposed-arm exclusion rate exceeds the
    control-arm rate by more than **10 percentage points**, or if the bounds below diverge on
-   the §4 verdict, the pooled RR is **not** the headline result; the bounded reading leads.
+   the `PHASE0_PREREGISTRATION.md` “Decision thresholds” verdict, the pooled RR is **not** the headline result; the bounded reading leads.
 3. **Bound every exclusion**, as A6 bounds multi-site: code all excluded units UNEXPOSED
    (lower) and EXPOSED (upper), report both. **Divergent bounds mean no general claim.**
 4. **The pilot reports exclusion rate by arm**, so this is known before the full run rather
@@ -535,7 +535,7 @@ Computed from the live `pull_request` table, 33,596 rows:
 
 **Two consequences, fixed before the run:**
 
-1. **RR is reported by agent**, and §6 scopes the finding accordingly. "Unresolved sites
+1. **RR is reported by agent**, and `PHASE0_PREREGISTRATION.md` “If the result is null” scopes the finding accordingly. "Unresolved sites
    predict breakage in agent PRs" reads as a general claim while resting on one agent.
 2. **The product targets Claude Code users, and the evidence will contain 459 of their
    PRs.** That belongs in `BRIEFING.md` beside the market argument, not only here.
@@ -565,7 +565,7 @@ breaking-changes paper's figure precisely, which confirms it is this table — w
 of **14,933 stars** against the agent arm's 564. A 26× difference in median popularity.
 
 Comparing the arms therefore confounds *agent vs human* with *repository popularity* to a
-degree that would dominate any modest effect, and §5 already names repository activity as a
+degree that would dominate any modest effect, and `PHASE0_PREREGISTRATION.md` “Pre-specified confounders” already names repository activity as a
 confounder.
 
 **Handling: stratify by star band (≤500, >500) and report both**, rather than restricting.
@@ -603,7 +603,7 @@ these are units with a **real exposure status we failed to observe**. That is lo
 follow-up, and the mechanism is plausibly *not* at random: complex dynamic code both times
 out more (exposure-related) and breaks more (outcome-related). Missing-not-at-random.
 
-**The §3.3 2×2 is a complete-case analysis**, which is unbiased only under MCAR and biased
+**The `PHASE0_PREREGISTRATION.md` “The table” 2×2 is a complete-case analysis**, which is unbiased only under MCAR and biased
 under MAR and MNAR. The control measured what asymmetric absence alone can do to this
 estimate: **RR 2.0 → 8.0**.
 
@@ -618,7 +618,7 @@ neither imputation nor weighting removes the bias. The bias is **not identifiabl
 2. **Worst-case bounds** — all excluded coded UNEXPOSED (lower) and EXPOSED (upper). This is
    the outer envelope. **Divergent verdicts across the bounds mean no general claim.**
 3. **Tipping-point analysis.** Report the *breakage-rate multiplier* among excluded PRs
-   required to push RR below the §4 threshold of 3.0. A multiplier of 4× is implausible and
+   required to push RR below the `PHASE0_PREREGISTRATION.md` “Decision thresholds” threshold of 3.0. A multiplier of 4× is implausible and
    the result is robust; 1.2× is not and it is fragile. **Run only if the primary analysis
    is positive** — stress-testing a null is a fishing exercise, and pre-specifying the
    direction prevents it.
@@ -627,7 +627,7 @@ neither imputation nor weighting removes the bias. The bias is **not identifiabl
    patch size, files touched — so exclusion probability can be modelled and observed units
    weighted. Recorded as supporting because uptake of the method in applied epidemiology is
    limited and an unfamiliar headline estimator invites the wrong argument.
-5. **The pilot reports exclusion rate by arm.** If the difference is material, §6 leads with
+5. **The pilot reports exclusion rate by arm.** If the difference is material, `PHASE0_PREREGISTRATION.md` “If the result is null” leads with
    the bounds and the tipping point, not the point estimate.
 
 ### 4.7 Agent stratification, and a predicted moderation [A17]
@@ -644,7 +644,7 @@ per-agent breaking rates.
 | **Claude Code** | **1.4%** (459 PRs) | **5.10% — highest** |
 
 **The corpus is two-thirds the safest agent, and that is conservative.** If the effect
-appears anyway, it appears under unfavourable conditions. **Recorded in §6 as strengthening
+appears anyway, it appears under unfavourable conditions. **Recorded in `PHASE0_PREREGISTRATION.md` “If the result is null” as strengthening
 a positive**, since a reader will otherwise see only "65% one agent" and read it as a
 weakness.
 
@@ -689,9 +689,9 @@ predicts. Nobody asks what the graph's *inability to answer* predicts.
 
 1. **A better instrument exists.** InferCG (TOSEM, March 2026) reports **+13.9% recall and
    +5.0% F1 over PyCG**, hybridising static analysis with LLM filtering. This does **not**
-   invalidate §3.1's choice — vanilla PyCG was selected *because* it is the crudest
+   invalidate `PHASE0_PREREGISTRATION.md` “Exposure variable”'s choice — vanilla PyCG was selected *because* it is the crudest
    available and therefore conservative, and a better instrument can only shrink the
-   exposed arm. It is the natural Phase 4 upgrade and is recorded in
+   exposed arm. It is the natural the MRO and framework resolvers upgrade and is recorded in
    `PROJECT_CONTEXT.md` thread #5 beside Jarvis.
 2. ***Total Recall?* (ISSTA 2024) is third-party support for A10's method.** Java rather
    than Python, but it establishes that ground truth for real-world programs is generally
@@ -717,13 +717,13 @@ an exposure either. Two entries matter:
   adjacent but concern retrieval quality, not resolvability.
 
 **DyRetriever is the first third-party evidence pointing *toward* our mechanism, and it
-sharpens Phase 0c rather than settling it.** SWE-PRBench found structured context
+sharpens the pull-based retrieval test rather than settling it.** SWE-PRBench found structured context
 *degrades* code **review** when **pushed** into the prompt. DyRetriever finds
 dependency-graph context *substantially improves* code **generation** when **retrieved on
 demand**. Those are compatible, and the axis separating them is exactly the pull-vs-push
-distinction `ARCHITECTURE.md §0.3` bets the serving layer on.
+distinction ``ARCHITECTURE.md` “Delivery is pull, never push”` bets the serving layer on.
 
-It is not a substitute for Phase 0c: different task (generation, not review), different
+It is not a substitute for the pull-based retrieval test: different task (generation, not review), different
 benchmark, and no measurement of whether the retrieved context *carries* resolvability
 labels. But it moves the prior — the delivery mechanism we chose is the one that works in
 the one published comparison available.
@@ -742,7 +742,7 @@ as reporting it as a positive. Widen the corpus (more repos, longer window) befo
 concluding anything.
 
 Record the achieved `a` in the Results section whatever happens, together with the number
-of distinct repositories contributing to it (§3.4) — 20 events from two repositories do not
+of distinct repositories contributing to it (`PHASE0_PREREGISTRATION.md` “Observations are clustered, and the CI must say so”) — 20 events from two repositories do not
 meet this floor.
 
 ---
@@ -777,7 +777,7 @@ A second figure gates less and must not be confused with the first: **607** merg
 across **90** repositories have at least one non-empty `.py` patch, because GitHub omits
 patch text for large files. *(Corrected in A20: the "31.1% of `.py` patches" figure first
 recorded here is patch-weighted and misleads at the PR level — one PR holds 79.3% of it.
-At PR level 85.6% are complete. §4.10 carries the properly denominated numbers.)* Patch text
+At PR level 85.6% are complete. `PHASE0_PREREGISTRATION.md` “Missing patch text, traced to A16's confounder” carries the properly denominated numbers.)* Patch text
 feeds only A2's shape *heuristic* and the tertiary AST outcome. The primary variable is
 re-derived from `git diff parent..merged` against the checked-out tree (step 5's consistency
 gate), so it depends on the SHA, not on the patch. **1,009 is the number that binds the
@@ -802,7 +802,7 @@ so that the difference is not later mistaken for a corrupted download.
    indistinguishable from a hunk containing no breaking change. Their validation was
    **precision only** — 95.7% / 93.6% on 94 sampled patches, κ = 0.79 — and precision
    sampling draws from what the tool *flagged*, so it cannot see this class at all. This is
-   why §3.2 declines AST detection as the primary outcome; the reason is now sourced from
+   why `PHASE0_PREREGISTRATION.md` “Outcome variable” declines AST detection as the primary outcome; the reason is now sourced from
    the implementation rather than inferred from the paper.
 2. **The gap they name in their own threats to validity is visible in the code.** The tool
    detects a changed signature and never asks whether anything calls it — there is no
@@ -821,7 +821,7 @@ counted against the human arm.
 ### 4.10 Missing patch text, traced to A16's confounder [A20]
 
 A19 recorded that patch text is missing for large files. The chain that follows is worth
-stating in full, because it enters A16's confounder through a door §5 had not mapped:
+stating in full, because it enters A16's confounder through a door `PHASE0_PREREGISTRATION.md` “Pre-specified confounders” had not mapped:
 
 > patch text absent → A2's shape heuristic degraded → parent resolved wrongly → step 5's
 > consistency gate excludes the PR → **exclusion concentrates in large patches** → the
@@ -864,7 +864,7 @@ size-driven effect would live if size is doing the work.
 > pre-specified is that the attrition must be *read by size*. If disagreement rises across
 > quartiles, A16's stratified RR is not merely co-primary but the only quotable result, and
 > A17's bounds must be computed over the size-stratified exclusion rather than the pooled
-> one. §6 states this outcome explicitly.
+> one. `PHASE0_PREREGISTRATION.md` “If the result is null” states this outcome explicitly.
 
 Adding a size cap on PRs would be the tempting alternative and is refused: it moves who is
 in the corpus, which is a decision boundary, and it would do so on the exact variable under
@@ -874,8 +874,8 @@ suspicion. The metric is reported; the boundary does not move.
 
 ### 4.11 The day-2 gate's protocol, fixed before it runs [A21]
 
-§7 requires the outcome classifier to agree with hand-labelling on **≥16 of 20 PRs**, and
-§7 is the only measurement in Phase 0 whose validity is purely a property of *what order
+`PHASE0_PREREGISTRATION.md` “Timeline” requires the outcome classifier to agree with hand-labelling on **≥16 of 20 PRs**, and
+`PHASE0_PREREGISTRATION.md` “Timeline” is the only measurement in the correlation test whose validity is purely a property of *what order
 two things happen in*. Nothing about that is checkable after the fact. So the protocol is
 fixed here, and the ordering is enforced by the code rather than by intention.
 
@@ -901,7 +901,7 @@ labelled to the set that is scored.
 1. **The sheet has no import path to a verdict.** `handlabel/sheet.py` and
    `handlabel/window.py` do not import `scan_outcome` or `fix_signals`, and a test parses
    their ASTs and asserts they never will. The sheet cannot render an answer by accident.
-2. **No commit is annotated from its message.** §3.2's *definition* is shown — a labeller
+2. **No commit is annotated from its message.** `PHASE0_PREREGISTRATION.md` “Outcome variable”'s *definition* is shown — a labeller
    not told that a revert-or-fix is what counts is labelling a different variable — but a
    commit matching the classifier's pattern and one that does not must render to identical
    structure. Showing the regex would validate the classifier against itself.
@@ -949,7 +949,7 @@ product is a scalability product, not an unsoundness product. That is a differen
 
 **We stop, and we publish — but we publish the null we actually measured. [A10]**
 
-The capability profile in §3.1 narrows what a null is entitled to claim. The variable
+The capability profile in `PHASE0_PREREGISTRATION.md` “Exposure variable” narrows what a null is entitled to claim. The variable
 detects named call sites whose edge is missing; it is structurally blind to calls
 dispatched through a value. So the defensible null is:
 
@@ -990,7 +990,7 @@ the repos where it worked. If any of those becomes tempting, re-read this paragr
 | 3–5 | Full run: checkout parent commits, scoped PyCG, call-site enumeration, 7-day history scan. |
 | 6 | Fill the 2×2. Compute RR + CI. Stratify by the five confounders. |
 | 7 | Write the Results section below. Convene the go/no-go. |
-| 8–12 | Repeat the identical protocol for the TS/JS arm (`RUNBOOK §7`). |
+| 8–12 | Repeat the identical protocol for the TS/JS arm (``PHASE0_RUNBOOK.md` “TS/JS arm”`). |
 
 **Day 2 gate:** the outcome classifier must agree with hand-labelling on ≥16 of 20 PRs.
 If it does not, the outcome variable is unreliable and the whole study is unreliable — fix
@@ -1013,25 +1013,25 @@ repositories and reports, before ~3,300 PRs of compute is committed:
 | Breakage rate | 5–20% | outcome classifier calibrated |
 | **Multi-site pair fraction** | — | **whether the A6 restriction costs real power** |
 | **Short-name false-match rate** | — | magnitude of the opposite bias |
-| **Design effect** (§3.4) | — | how much clustering widens the CI |
+| **Design effect** (`PHASE0_PREREGISTRATION.md` “Observations are clustered, and the CI must say so”) | — | how much clustering widens the CI |
 
 Any of the first seven far outside its range is a **stop and fix**, not a "proceed
-carefully" — `PHASE0_RUNBOOK.md §6` carries the diagnosis tree. The last three carry no
+carefully" — `PHASE0_RUNBOOK.md `PHASE0_PREREGISTRATION.md` “If the result is null”` carries the diagnosis tree. The last three carry no
 expected range because nobody has measured them; they exist so that the A6 fallback and the
-§4 power reading are made on numbers rather than on assumption.
+`PHASE0_PREREGISTRATION.md` “Decision thresholds” power reading are made on numbers rather than on assumption.
 
 ---
 
 ## 8. Results
 
-> **Empty. Do not fill until the run is complete. Do not start Phase 1 until this is filled.**
+> **Empty. Do not fill until the run is complete. Do not start the call-site census layer until this is filled.**
 >
 > Two blocks below: one per language arm. A strong Python result with a null TS/JS result
 > is a valid and useful outcome — it means the product is Python-first, and that is a
 > narrower company than the one currently described in `PROJECT_CONTEXT.md`.
 >
 > **Before filling either block, complete the authenticity checklist in
-> `PHASE0_RUNBOOK.md §5`. All eight items. A result that fails a control is not a result.**
+> `PHASE0_RUNBOOK.md `PHASE0_PREREGISTRATION.md` “Pre-specified confounders”`. All eight items. A result that fails a control is not a result.**
 
 ```
 Run date:
@@ -1068,7 +1068,7 @@ Date:
 `docs/PROJECT_CONTEXT.md` open thread **#7**: we found blogs and vendor content, not raw
 practitioner complaints.
 
-**Protocol, one week, run only after §8 is filled and non-null:**
+**Protocol, one week, run only after `PHASE0_PREREGISTRATION.md` “Results” is filled and non-null:**
 
 Collect **50 verbatim complaints** from r/ExperiencedDevs, r/programming, Hacker News and
 the Cursor forum. Code each one for the vocabulary the developer used:

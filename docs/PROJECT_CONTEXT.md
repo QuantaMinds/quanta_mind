@@ -143,7 +143,7 @@ harness public: `huggingface.co/datasets/foundry-ai/swe-prbench`.
   does not help and actively harms performance across all tested models."*
 
 **The context they added is our Oracle 1 + Oracle 2, delivered in-prompt.** It made review
-worse. See open thread #8 and `docs/BUILD_PLAN.md` Phase 0c.
+worse. See open thread #8 and `docs/BUILD_PLAN.md` the pull-based retrieval test.
 
 **✅ What supports us:**
 
@@ -165,7 +165,7 @@ into the prompt. Our design has the agent *pull* via MCP tool calls. A tool resu
 answering `callers_of(symbol)` is not 800 tokens of file content sitting beside a diff.
 Their own limitations section points here — *"Context provision strategies encoding
 relevance at the token level... may produce different outcomes and are a direct priority
-for future work."* **This is a hypothesis, not a rebuttal. Phase 0c tests it.**
+for future work."* **This is a hypothesis, not a rebuttal. The pull-based retrieval test tests it.**
 
 🟡 **Caveats:** 100-PR sample not the full 350; Python-dominant (69.1%); no human baseline
 (the 20–40pp gap is estimated from prior literature); judge-family bias not excluded
@@ -284,10 +284,10 @@ symptom, prove with the cause, sell the fix.**
 5. **Category velocity.** CodeGraph went 0 → 47k stars in five months; Graphify ships
    daily. We cannot win a feature race and must not enter one. **Consequence, taken:** we
    consume their graph as a dependency and own only `probe/` + `label/` — the number none
-   of them computes. See `ARCHITECTURE.md §0.1`.
+   of them computes. See ``ARCHITECTURE.md` “We do not build a call graph”`.
 6. **Runtime economics do not close.** ~180× overhead for a graph 12% the size, of which
    ~59% is builtins. **Consequence, taken:** the runtime oracle is deleted from v1, not
-   deferred. See `ARCHITECTURE.md §0.2`.
+   deferred. See ``ARCHITECTURE.md` “We do not build a runtime oracle in v1”`.
 
 ---
 
@@ -328,11 +328,11 @@ novelty. Pitch it that way. Investors who read these papers will check.
 | 1 | **PyCG Section III-C** unread | Authors' own limitation list = the resolver backlog | 1 hour |
 | 2 | **Judge full text** unread | Their feature taxonomy should shape ours | 2 hours |
 | 3 | **Martian leaderboard** never opened directly | The GTM plan rests on it | 1 hour |
-| 4 | **PyXray** — 🔴 claims dynamic analysis *without inputs*, NumPy/PyTorch in minutes | If true, Phase 9 is a different design | 2 hours |
-| 5 | **Jarvis / PyPt / InferCG** availability, licence, maintenance | Phase 1 decision. **InferCG (TOSEM, Mar 2026) reports +13.9% recall and +5.0% F1 over PyCG**, hybridising static analysis with LLM filtering. Phase 0 deliberately uses crude vanilla PyCG — a better instrument can only shrink the exposed arm — but this is the upgrade path. | 1 day |
+| 4 | **PyXray** — 🔴 claims dynamic analysis *without inputs*, NumPy/PyTorch in minutes | If true, the runtime-oracle design changes | 2 hours |
+| 5 | **Jarvis / PyPt / InferCG** availability, licence, maintenance | the call-site census layer decision. **InferCG (TOSEM, Mar 2026) reports +13.9% recall and +5.0% F1 over PyCG**, hybridising static analysis with LLM filtering. The correlation test deliberately uses crude vanilla PyCG — a better instrument can only shrink the exposed arm — but this is the upgrade path. | 1 day |
 | 6 | **Does unresolved ⇒ breakage?** | **The thesis. Blocks all product code.** Pre-registered at `docs/findings/PHASE0_PREREGISTRATION.md`. Outcome must be behavioural (revert/fix ≤7d), not the AIDev AST labels — those are produced by static analysis and are structurally blind to the breakage in question. Analysis is relative risk, not a count. | 1 week — **next step** |
-| 8 | **Does pull-based MCP retrieval escape the attention-dilution result?** | 🔴 **Precondition for the product, not just the study.** SWE-PRBench shows in-prompt structured context (AST + import graph) degrades review quality across all 8 models. Our mechanism assumes better context helps. Untested for tool-call delivery. | 1 week — `BUILD_PLAN.md` Phase 0c |
-| 7 | **Reddit / HN primary research** — we found blogs, not raw practitioner complaints | Do developers ever name the *missing-caller* mechanism, or only symptoms? Protocol at `PHASE0_PREREGISTRATION.md §9`. Skipping this cost six weeks last time. **Run without a prior** — the SWE-PRBench author writes *"The biggest risk isn't the bugs these tools miss — it's the false confidence they create when a green AI checkmark makes human reviewers lower their guard."* That is one confirmed counter-example to the no-vocabulary assumption. | 1 week, immediately after #6 |
+| 8 | **Does pull-based MCP retrieval escape the attention-dilution result?** | 🔴 **Precondition for the product, not just the study.** SWE-PRBench shows in-prompt structured context (AST + import graph) degrades review quality across all 8 models. Our mechanism assumes better context helps. Untested for tool-call delivery. | 1 week — `BUILD_PLAN.md` the pull-based retrieval test |
+| 7 | **Reddit / HN primary research** — we found blogs, not raw practitioner complaints | Do developers ever name the *missing-caller* mechanism, or only symptoms? Protocol at `PHASE0_PREREGISTRATION.md` “Related open thread”. Skipping this cost six weeks last time. **Run without a prior** — the SWE-PRBench author writes *"The biggest risk isn't the bugs these tools miss — it's the false confidence they create when a green AI checkmark makes human reviewers lower their guard."* That is one confirmed counter-example to the no-vocabulary assumption. | 1 week, immediately after #6 |
 
 ---
 
@@ -342,19 +342,19 @@ Recorded so nobody re-derives an error we already paid for.
 
 | Believed | Corrected to | Source |
 |---|---|---|
-| 51% of the graph is recoverable signal | ~15%; 59% builtins, 12% naming artifacts | DyPyBench §4.1.2 |
-| Runtime trace ≈ one CI run, free | ~180× overhead, 215 min/project | DyPyBench §4.1.2 |
+| 51% of the graph is recoverable signal | ~15%; 59% builtins, 12% naming artifacts | DyPyBench, section 4.1.2 |
+| Runtime trace ≈ one CI run, free | ~180× overhead, 215 min/project | DyPyBench, section 4.1.2 |
 | Fork the analyzer, instrument bail-outs | Annotated fixtures + capability profile | Judge |
 | Nobody has done Judge for Python | JCG already ships Python adapters | JCG README |
 | EU AI Act high-risk lands Aug 2 2026 | Deferred to Dec 2 2027 (Reg. EU 2026/1744) | Council, 29 Jun 2026 |
 | Martian launched Feb 2026 | March 2026 (🟡 sources still conflict) | vendor blogs |
 | Strict rules belong in CLAUDE.md | Rules belong in hooks/CI; memory file ≤200 lines | Anthropic docs + 2026 practice |
-| Phase 0 = classify DyPyBench's missing edges | Phase 0 = **correlation test**: does unresolved predict breakage? Classification is interesting; correlation is load-bearing. | internal review |
+| the correlation test = classify DyPyBench's missing edges | the correlation test = **correlation test**: does unresolved predict breakage? Classification is interesting; correlation is load-bearing. | internal review |
 | Framework resolvers are the moat | The **probe layer** is the moat. Resolvers are a feature race against projects shipping daily. | internal review |
 | We build parse + static resolution | We **consume** an upstream graph. ~165k stars of MIT code, iterating faster than three people can. | internal review |
-| Runtime oracle in Phase 9 | Runtime oracle **deleted from v1**. ~180× overhead, 12%-size graph, 59% builtins. | DyPyBench §4.1.2 |
+| Runtime oracle as a later layer | Runtime oracle **deleted from v1**. ~180× overhead, 12%-size graph, 59% builtins. | DyPyBench, section 4.1.2 |
 | "Nobody measures what these tools missed" | **False.** SWE-PRBench, CR-Bench, Atlassian and independent planted-bug studies all measure misses with denominators. Corrected claim: researchers measure it, vendors don't report it, and nobody measures it per-repo at runtime. | arXiv 2603.26130, 2603.11078 |
-| More structural context improves agent output | **Contradicted for in-prompt delivery.** AST extraction + import graph resolution degraded review quality across all 8 models tested. Whether pull-based MCP retrieval differs is untested — open thread #8. | SWE-PRBench §6.3 |
+| More structural context improves agent output | **Contradicted for in-prompt delivery.** AST extraction + import graph resolution degraded review quality across all 8 models tested. Whether pull-based MCP retrieval differs is untested — open thread #8. | SWE-PRBench “Invariants”, item 3 |
 | AIDev contains ~7,191 PRs | AIDev is **932,791** PRs / 116,211 repos; AIDev-pop is **33,596** / 2,807 repos (>100 stars). 7,191 is one paper's Python filter. Dataset cutoff **1 Aug 2025** — the corpus describes mid-2025 agent behaviour, not 2026. | arXiv 2602.09185, HF dataset card |
 | `pr_task_type.confidence` has zero variance | **False, and the error was ours.** Sampling 26 consecutive rows gave 10 every time; the full-column statistics over all 33,596 rows are min 3, max 10, mean 9.25, std 0.63 (3–4: 4 · 5–6: 6 · 7–8: 26 · 8–9: 3,236 · 9–10: 30,324). The field varies. It is still not a stratifier, for the opposite reason: breaking rate is **flat across levels** — 3.94% (8), 3.96% (9), 3.16% (10) — so confidence is *uninformative*, which is the paper's actual Confidence Trap. **Rule adopted: a distributional claim cites a full-population statistic, never a row sample.** | HF datasets-server `/statistics`; arXiv 2603.27524 |
 | Human and agent arms are comparable | **Star-band mismatch.** Dataset card: *"Human-PRs were sampled from the same repositories as Agentic-PRs, but only from those that have more than 500 stars."* Agent subset is >100. Also: "AIDev-pop" meant ≥500 stars in the Jul 2025 version (7,122 PRs) and >100 in Feb 2026. **Resolved:** the paper states its own source — *"The repository table lists 2,807 GitHub repositories with at least 100 stars, including 530 Python projects"* — so it used the >100 subset and the mismatch is real. A15 pre-registered. | HF dataset card; arXiv 2507.15003 |

@@ -112,6 +112,21 @@ def iter_python_files(root: Path) -> Iterator[Path]:
             yield path
 
 
+# Prose lives in .md and .lock as much as in .py, and a reference that stops resolving
+# does so wherever it was written. check_no_vague_refs.py needs the wider net.
+TEXT_SUFFIXES: frozenset[str] = SOURCE_SUFFIXES | frozenset({".md", ".lock", ".cfg"})
+TEXT_STEMS: frozenset[str] = frozenset({"justfile", "Justfile", "Makefile"})
+
+
+def iter_text_files(root: Path) -> Iterator[Path]:
+    """Yield every human-readable tracked file, source and prose alike."""
+    for path in sorted(root.rglob("*")):
+        if not path.is_file() or is_excluded(path):
+            continue
+        if path.suffix in TEXT_SUFFIXES or path.name in TEXT_STEMS:
+            yield path
+
+
 def iter_package_dirs(root: Path) -> Iterator[Path]:
     """Yield every non-excluded directory beneath root."""
     for path in sorted(root.rglob("*")):

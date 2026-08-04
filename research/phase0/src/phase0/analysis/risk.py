@@ -1,16 +1,19 @@
 """Relative risk, two ways: the naive interval and the one that decides.
 
 WHAT: A 2x2 count, the Katz log-method interval, and the cluster-robust interval
-      that §4 actually reads. Plus the design effect between them.
+      that `PHASE0_PREREGISTRATION.md` “Decision thresholds” actually reads. Plus the design effect
+      between them.
 WHY:  Amendment A8. The unit of analysis is a changed symbol, but symbols are not
       independent: many share one PR, whose outcome is measured per file, and many
       PRs share one repository, and repositories differ systematically in
-      fix-commit rate, review culture and test coverage -- three of which §5
+      fix-commit rate, review culture and test coverage -- three of which
+      `PHASE0_PREREGISTRATION.md` “Pre-specified confounders”
       already names as confounders.
 
       Katz assumes independent Bernoulli trials. Under clustering it understates
       variance, so the interval comes out too narrow, and it does so at exactly the
-      boundary that decides the project: §4 turns on whether the lower bound clears
+      boundary that decides the project: `PHASE0_PREREGISTRATION.md` “Decision thresholds” turns on
+      whether the lower bound clears
       1.5 and whether it includes 1.0. A naive interval could clear a threshold a
       correct one would not.
 
@@ -44,7 +47,7 @@ CIMethod = Literal["katz", "cluster-robust", "unavailable"]
 
 @dataclass(frozen=True, slots=True)
 class Counts:
-    """The 2x2, in the orientation §3.3 fixes."""
+    """The 2x2, in the orientation `PHASE0_PREREGISTRATION.md` “The table” fixes."""
 
     exposed_broke: int  # a
     exposed_clean: int  # b
@@ -77,9 +80,11 @@ class RiskResult:
 
     @property
     def is_powered(self) -> bool:
-        """§4: below 20 breakages in the exposed arm, stop reading.
+        """`PHASE0_PREREGISTRATION.md` “Decision thresholds”: below 20 breakages in the exposed arm,
+        stop reading.
 
-        Counted in events. §3.4 additionally requires the number of distinct
+        Counted in events. `PHASE0_PREREGISTRATION.md` “Observations are clustered, and the CI must
+        say so” additionally requires the number of distinct
         repositories behind them, because 20 events from two repositories are not
         20 independent observations -- `clusters` carries that.
         """
@@ -166,7 +171,8 @@ def design_effect(naive: RiskResult, robust: RiskResult) -> float:
     """How much wider clustering makes the interval, on the log scale.
 
     1.0 means clustering cost nothing. Above 1.0 means the naive interval was
-    overconfident by that factor in variance, and §3.4 requires it reported
+    overconfident by that factor in variance, and `PHASE0_PREREGISTRATION.md` “Observations are
+    clustered, and the CI must say so” requires it reported
     whatever it is.
     """
     for result in (naive, robust):

@@ -17,7 +17,7 @@ WHY:  RUNBOOK section 2.1 calls the positive control the most important gate in
       out near 1. Anything above 1.5 means the pipeline manufactures signal, most
       likely because the outcome scan is contaminated by repository identity
       rather than by the PR.
-IMPORTS: phase0.build_table, phase0.classify_exposure, phase0.risk.
+IMPORTS: phase0.analysis.build_table, phase0.classify_exposure, phase0.analysis.risk.
 CONSUMED BY: run_pipeline.py; tests/test_controls.py. Results to results/controls.json.
 """
 
@@ -26,9 +26,9 @@ from __future__ import annotations
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
-from phase0.build_table import Observation, estimate
+from phase0.analysis.build_table import Observation, estimate
+from phase0.analysis.risk import RiskResult
 from phase0.classify_exposure import Exposure
-from phase0.risk import RiskResult
 
 POSITIVE_CONTROL_N = 30
 POSITIVE_CONTROL_MIN_RR = 5.0

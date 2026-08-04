@@ -1,4 +1,4 @@
-"""Phase 0 measurement harness.
+"""the correlation test measurement harness.
 
 Research code, not product code. It answers one question and is then finished:
 does an unresolved call site predict breakage in AI-authored changes?

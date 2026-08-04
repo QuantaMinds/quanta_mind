@@ -1,7 +1,7 @@
 """The qmctx package root.
 
 WHAT: Declares the package and its version. Nothing else.
-WHY:  docs/BUILD_PLAN.md gates all product code on Phase 0 reporting a non-null
+WHY:  docs/BUILD_PLAN.md gates all product code on the correlation test reporting a non-null
       verdict, so the layer packages (types/, discover/, ingest/, resolve/,
       probe/, label/, store/, serve/) do not exist yet -- each arrives in its own
       phase PR. This file exists because scripts/guard/check_conventions.py
@@ -15,6 +15,6 @@ from __future__ import annotations
 
 __all__ = ["__version__"]
 
-# Stays 0.0.0 until Phase 0 fills docs/findings/PHASE0_PREREGISTRATION.md section 8.
+# Stays 0.0.0 until the correlation test fills docs/findings/PHASE0_PREREGISTRATION.md section 8.
 # A version number implies a thing that works; there is no such thing here yet.
 __version__ = "0.0.0"

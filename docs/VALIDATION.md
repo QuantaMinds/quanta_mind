@@ -32,7 +32,7 @@ Hermetic, fast, controlled input. Mocks permitted here and **only** here.
 `check_assert_quality.py`; `assert result.confidence is Confidence.FRAMEWORK` is what we want.
 
 ### Tier 2 — Property (`tests/property/`, <2min)
-Hypothesis. These encode the invariants from `ARCHITECTURE.md §6`. They are the only
+Hypothesis. These encode the invariants from ``ARCHITECTURE.md` “Invariants”`. They are the only
 tests that can find bugs nobody thought to look for.
 
 ```python
@@ -75,7 +75,7 @@ regenerated.** `--update-golden` exists, is logged, and any PR that uses it with
 reviewer comment explaining the delta is rejected.
 
 ### Tier 5 — Adversarial / silent-failure suite (`tests/adversarial/`)
-See §4. This is the tier that separates us from every competitor.
+See `VALIDATION.md` “The silent-failure suite”. This is the tier that separates us from every competitor.
 
 ---
 
@@ -112,7 +112,7 @@ someone must write before the corresponding resolver ships.
 | # | Silent failure | Blast radius | Detection |
 |---|---|---|---|
 | 1 | An edge is emitted with `confidence` defaulted rather than derived | Agent trusts a guess. Product's core claim is false. | Property test: no default is reachable — `Confidence` has no default in the dataclass |
-| 2 | A call site is dropped between `parse` and `label` | Coverage looks *higher* than reality. Worst possible direction of error. | Log conservation assertion (§3) |
+| 2 | A call site is dropped between `parse` and `label` | Coverage looks *higher* than reality. Worst possible direction of error. | Log conservation assertion (`VALIDATION.md` “What we log, and why logs are test output”) |
 | 3 | Builtin calls counted in the coverage denominator | Coverage is deflated ~59% and the number becomes meaningless | Golden diff on a fixture with a known builtin count |
 | 4 | Name resolution mismatch between two resolvers | Same function under two names → "0 callers" for a live function | Cross-resolver identity test: every symbol has exactly one canonical FQN |
 | 5 | Framework resolver silently disabled by a version bump | Whole class of edges vanishes; no error | Live test asserts a minimum edge count per framework resolver |

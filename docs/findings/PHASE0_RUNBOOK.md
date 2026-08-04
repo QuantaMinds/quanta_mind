@@ -1,14 +1,14 @@
-# Phase 0 Runbook — Executable Protocol
+# the correlation test Runbook — Executable Protocol
 
 > Companion to `PHASE0_PREREGISTRATION.md`. That file fixes **what** we measure and the
 > thresholds. This file is **how**, day by day, with the expected output at every step and
 > what to do when a step produces something unexpected.
 >
 > **Scope: Python and TypeScript/JavaScript only.** No other language until both arms
-> report. See §8.
+> report. See `PHASE0_RUNBOOK.md` “Deliverables”.
 >
 > **The single rule that makes this study worth running:** you must prove the instrument
-> can detect a positive *before* you are allowed to believe a null. §2 is not optional.
+> can detect a positive *before* you are allowed to believe a null. `PHASE0_RUNBOOK.md` “Day 2” is not optional.
 
 ---
 
@@ -51,15 +51,15 @@ research/phase0/src/phase0/
   extract_prs.py       AIDev  → PRRecord[]
   census.py            source → CallSite[]        (tree-sitter, the denominator)
   run_graph.py         repo   → Edge[]            (PyCG / Jelly, scoped)
-  run_pipeline.py      drives the per-PR loop, writes the audit log  ← §3
+  run_pipeline.py      drives the per-PR loop, writes the audit log  ← `PHASE0_RUNBOOK.md` “Days 3–5”
   classify_exposure.py PR     → EXPOSED | UNEXPOSED | UNANALYZED
   scan_outcome.py      PR     → BROKE | CLEAN     (7-day revert/fix scan)
-  controls.py          positive + negative controls  ← §2
+  controls.py          positive + negative controls  ← `PHASE0_RUNBOOK.md` “Day 2”
   build_table.py       → 2×2, RR, CI, strata
 research/phase0/tests/  one test file per module above
 ```
 
-Eight modules, not seven: §3 invokes `run_pipeline.py`, which an earlier version of this
+Eight modules, not seven: `PHASE0_RUNBOOK.md` “Days 3–5” invokes `run_pipeline.py`, which an earlier version of this
 list omitted.
 
 ---
@@ -140,7 +140,7 @@ positive. This day exists to earn the right to believe your own answer.
 Construct 30 synthetic PRs on a real repository (Django fixture) where breakage **is**
 caused by an unresolvable edge:
 
-1. Add a subclass calling `super().method()` — PyCG misses it entirely (DyPyBench §4.1.2)
+1. Add a subclass calling `super().method()` — PyCG misses it entirely (DyPyBench, section 4.1.2)
 2. Change the base method's signature
 3. Commit; the subclass now breaks
 4. Commit a fix 2 days later
@@ -216,7 +216,7 @@ uv run python -m phase0.scan_outcome \
 | PyCG timeout/OOM | ~22%, into `UNANALYZED` | 0% → the third arm is empty and something is wrong |
 | Changed symbols per PR | 1–5 median | >20 → you are counting private helpers; restrict to public symbols |
 | Exposure rate (EXPOSED share) | 10–30% | ~0% or ~100% → classifier is degenerate, stop |
-| Overall breakage rate | 5–20% (§2.3) | see §2.3 |
+| Overall breakage rate | 5–20% (`PHASE0_RUNBOOK.md` “Base-rate sanity check”) | see `PHASE0_RUNBOOK.md` “Base-rate sanity check” |
 
 **Log everything per PR.** `pr_id, repo, parent_sha, symbols[], call_sites, resolved,
 unresolved, pycg_status, pycg_duration_ms, outcome, outcome_evidence`. The
@@ -255,10 +255,10 @@ because it kills a live thesis on noise.
 
 | RR | CI lower | Verdict | Action |
 |---|---|---|---|
-| ≥ 3.0 | > 1.5 | **Strong** | Proceed to Phase 1 |
-| 1.5–3.0 | > 1.0 | **Weak but real** | Proceed — but rewrite `PROJECT_CONTEXT.md §5` first. Pitch becomes "prioritise review," not "prevent breakage." |
-| < 1.5 | any | **Null** | §6 |
-| any | ≤ 1.0 | **No result** | §6 |
+| ≥ 3.0 | > 1.5 | **Strong** | Proceed to the call-site census layer |
+| 1.5–3.0 | > 1.0 | **Weak but real** | Proceed — but rewrite ``PROJECT_CONTEXT.md` “Business case”` first. Pitch becomes "prioritise review," not "prevent breakage." |
+| < 1.5 | any | **Null** | `PHASE0_RUNBOOK.md` “Failure deep-dive” |
+| any | ≤ 1.0 | **No result** | `PHASE0_RUNBOOK.md` “Failure deep-dive” |
 
 ### 4.4 The `UNANALYZED` arm decides what company this is
 
@@ -277,9 +277,9 @@ Compute `RR_unanalyzed` separately.
 Before any number leaves this document, all eight must be true.
 
 - [ ] **Pre-registration SHA recorded** and predates the first data commit — `git log` proves it
-- [ ] **Positive control passed** (§2.1, RR ≥ 5 on synthetic)
-- [ ] **Negative controls passed** (§2.2, RR ≈ 1 on nonsense variables)
-- [ ] **Base rate within 5–20%** or the deviation explained in writing (§2.3)
+- [ ] **Positive control passed** (`PHASE0_RUNBOOK.md` “Positive control”, RR ≥ 5 on synthetic)
+- [ ] **Negative controls passed** (`PHASE0_RUNBOOK.md` “Negative control”, RR ≈ 1 on nonsense variables)
+- [ ] **Base rate within 5–20%** or the deviation explained in writing (`PHASE0_RUNBOOK.md` “Base-rate sanity check”)
 - [ ] **Exposure computed at parent commit only** — leakage test in the harness suite is green
 - [ ] **Hand-label agreement ≥16/20**, with the iteration count recorded
 - [ ] **`a ≥ 20`** — the study is powered
@@ -298,7 +298,7 @@ first.** Every branch above it is a bug in us, not a fact about the world.
 ```
 Null or no result
 │
-├─ Q1. Did the positive control pass? (§2.1)
+├─ Q1. Did the positive control pass? (`PHASE0_RUNBOOK.md` “Positive control”)
 │   └─ NO → INSTRUMENT BROKEN. The null means nothing. Fix and re-run.
 │           Usual causes: exposure computed post-merge; symbol identity
 │           mismatch between census and graph; outcome scan on the wrong branch.
@@ -335,7 +335,7 @@ Null or no result
 │           AST-based methods. Write it up. It is an original contribution and
 │           it is true whether or not we build anything.
 │
-├─ Q7. Is the effect concentrated entirely in UNANALYZED? (§4.4)
+├─ Q7. Is the effect concentrated entirely in UNANALYZED? (`PHASE0_RUNBOOK.md` “The `UNANALYZED` arm decides what company this is”)
 │   └─ YES → WRONG PRODUCT, NOT WRONG THESIS. Scalability, not unsoundness.
 │           Rewrite the thesis before writing code.
 │
@@ -402,7 +402,7 @@ whole arm is suspect.
 | `results/controls.json` | positive and negative control results |
 | `data/exposure.jsonl`, `data/outcome.jsonl` | raw per-PR records, published |
 | `ENVIRONMENT.lock` | every pinned version |
-| `PHASE0_PREREGISTRATION.md §8` | filled and signed |
+| `PHASE0_PREREGISTRATION.md `PHASE0_RUNBOOK.md` “Deliverables”` | filled and signed |
 | `docs/findings/phase0-writeup.md` | the narrative, **including the failure path taken if any** |
 
 The writeup is written **whatever the answer is.** A null with clean controls is a real

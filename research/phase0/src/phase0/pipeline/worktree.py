@@ -56,8 +56,20 @@ def cloned(repo_full_name: str, workspace: Path, keep: bool = False) -> Iterator
     # attrition. subprocess.run's timeout is portable, and AGENTS.md requires one on
     # every subprocess — dropping the flag to make it work would have removed it.
     try:
+        # core.longpaths: Windows caps paths at 260 chars without it, and two AutoGPT
+        # PRs failed checkout on a deeply nested frontend route. That surfaced as
+        # "unable to access <path>" mid-clone, i.e. as corpus attrition concentrated in
+        # repositories with deep trees -- a selection effect, not a random one.
         subprocess.run(
-            ["git", "clone", "--quiet", f"https://github.com/{repo_full_name}.git", str(target)],
+            [
+                "git",
+                "-c",
+                "core.longpaths=true",
+                "clone",
+                "--quiet",
+                f"https://github.com/{repo_full_name}.git",
+                str(target),
+            ],
             check=True,
             timeout=CLONE_TIMEOUT_S,
             capture_output=True,

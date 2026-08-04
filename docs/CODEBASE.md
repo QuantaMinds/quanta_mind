@@ -25,7 +25,7 @@ Pack format: `v0` · Phase: **pre-Phase-0, no product code written**
 | `tests/` | Evidence | five tiers, see `docs/VALIDATION.md` |
 | `research/` | Measurement | separate uv projects, separate interpreters. Never on the product's dependency graph |
 | `scripts/guard/` | Rule enforcement | stdlib only — must run before the package installs |
-| `scripts/verify/` | Data verification | golden diff, source-leak proof, determinism. **Empty until Phase 1** — see its README |
+| `scripts/verify/` | Data verification | golden diff, source-leak proof, determinism. **Empty until the call-site census layer** — see its README |
 | `vendor/` | Pinned third-party source | **never edited**, blocked by `hook_pre_edit.py` |
 | `docs/` | Reasoning | exempt from the line cap |
 | `BRIEFING.md` | The founder-facing account: pitch, risks, the five questions | root, beside README — it is the outward story, not internal reasoning |
@@ -66,7 +66,7 @@ Dependencies flow **left to right only**. Enforced by `check_conventions.py`.
 
 ```
 types → discover → ingest → resolve → probe → label → store → serve
-                            (Phase 4, optional)
+                            (the MRO and framework resolvers, optional)
 ```
 
 The order is declared once, in `discovery.LAYER_ORDER`, and that declaration is what
@@ -91,7 +91,7 @@ present, package layout, entry points, test command.
 (b) a thin tree-sitter call-site census producing the coverage **denominator**.
 **Output:** `Graph` + `CallSite[]`.
 **Why we do not build the graph:** ~165k stars of MIT code ships daily in this category.
-We consume it. See `ARCHITECTURE.md §0.1`.
+We consume it. See ``ARCHITECTURE.md` “We do not build a call graph”`.
 **Why the census is ours:** upstream emits edges; nobody emits the denominator. Mixing
 counting with resolving is how the denominator silently shrinks — silent failure #2.
 
@@ -100,11 +100,11 @@ counting with resolving is how the denominator silently shrinks — silent failu
 | `protocol.py` | — | the `GraphSource` interface |
 | `codegraph.py` | CodeGraph (MIT) | default adapter |
 | `graphify.py` | Graphify (MIT) | alternative |
-| `pycg.py` | PyCG (archived, MIT) | the Phase 0 instrument |
+| `pycg.py` | PyCG (archived, MIT) | the the correlation test instrument |
 | `census.py` | tree-sitter | call-site denominator — **ours** |
 
-### `resolve/` — Phase 4 only, conditional
-**Owns:** edges upstream structurally cannot produce. Built only where Phase 0 exposure
+### `resolve/` — the MRO and framework resolvers only, conditional
+**Owns:** edges upstream structurally cannot produce. Built only where the correlation test exposure
 data shows the risk concentrates.
 
 | File | Handles | Known limits |
@@ -118,7 +118,7 @@ data shows the risk concentrates.
 **Contract:** every resolver returns `(edges, unresolved)`. Returning fewer edges is
 legitimate. Returning a guess is not. **No LLM calls in this layer.**
 **Deleted by decision:** `static.py` (upstream's job), `runtime.py` (~180× overhead —
-`ARCHITECTURE.md §0.2`).
+``ARCHITECTURE.md` “We do not build a runtime oracle in v1”`).
 
 ### `probe/`
 **Owns:** the Python feature-prevalence scanner — where this repo is unknowable.

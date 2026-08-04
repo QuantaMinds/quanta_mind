@@ -10,7 +10,7 @@
 
 ---
 
-## Phase 0 — The correlation test (1 week, zero product code)
+## The correlation test (1 week, zero product code)
 
 **Thresholds: `docs/findings/PHASE0_PREREGISTRATION.md`.**
 **Execution: `docs/findings/PHASE0_RUNBOOK.md` — day by day, with harness tests, controls,
@@ -35,8 +35,8 @@ Three design decisions make this test valid. Each is argued in the pre-registrat
   Adding resolvers can only shrink the exposed group, so a crude null stays null. It also
   removes any dependency on code we have not written.
 
-**Gate:** RR ≥ 3.0, CI lower bound > 1.5 → proceed to Phase 1.
-**Soft gate:** RR 1.5–3.0 → proceed, but rewrite `PROJECT_CONTEXT.md §5` first; the pitch
+**Gate:** RR ≥ 3.0, CI lower bound > 1.5 → proceed to the call-site census layer.
+**Soft gate:** RR 1.5–3.0 → proceed, but rewrite ``PROJECT_CONTEXT.md` “Business case”` first; the pitch
 becomes "prioritise review attention," not "prevent breakage."
 **Kill criterion:** RR < 1.5, or CI includes 1.0 → **stop and publish the null.**
 **No-result criterion:** fewer than 20 breakages in the exposed arm → underpowered. Widen
@@ -48,12 +48,12 @@ breakage is *known* to be caused by an unresolvable `super()` edge — must yiel
 uninterpretable and must not be believed.** Negative controls on nonsense variables
 (filename initial, line-count parity) must yield RR ≈ 1.
 
-**Deliverable:** `PHASE0_PREREGISTRATION.md §8` filled and signed, both arms, with the
-eight-item authenticity checklist in `PHASE0_RUNBOOK.md §5` complete.
+**Deliverable:** `PHASE0_PREREGISTRATION.md` “Results” filled and signed, both arms, with the
+eight-item authenticity checklist in `PHASE0_RUNBOOK.md` “Authenticity checklist” complete.
 
 ---
 
-## Phase 0b — Symptom vocabulary (1 week, only if Phase 0 is non-null)
+## Symptom vocabulary (1 week, only if the correlation test is non-null)
 
 Run for both Python and JS/TS communities — the vocabulary may differ, and JS developers
 face a failure mode Python does not (the bundler boundary).
@@ -63,16 +63,16 @@ r/programming, HN and the Cursor forum, coded for whether developers ever descri
 *missing-caller* mechanism rather than context-window or hallucination.
 
 **Decision rule:** <5 of 50 using missing-caller language → the sales motion starts with
-education. Price and plan for it, and record it in `PROJECT_CONTEXT.md §5` before any
+education. Price and plan for it, and record it in ``PROJECT_CONTEXT.md` “Business case”` before any
 sales conversation.
 
 This is the step that was skipped last time. One week now, six weeks later.
 
 ---
 
-## Phase 0c — Does pull-based retrieval escape attention dilution? (1 week)
+## Does pull-based retrieval escape attention dilution? (1 week)
 
-**Runs after Phase 0, before any Phase 1 code. This is a precondition for the product, not
+**Runs after the correlation test, before any the call-site census layer code. This is a precondition for the product, not
 a nice-to-have.**
 
 **The problem.** SWE-PRBench (arXiv 2603.26130) evaluated 8 frontier models across three
@@ -110,17 +110,17 @@ line, that is a clean signal.
 tool-call delivery escapes attention dilution — and a publishable result.
 
 **Kill criterion:** (b) ≤ (a). Then the delivery mechanism is wrong, and no amount of graph
-quality fixes it. Redesign before Phase 1 rather than after.
+quality fixes it. Redesign before the call-site census layer rather than after.
 
 **Cost:** one week, someone else's dataset, someone else's harness, no product code.
 
-**Note the sequencing logic:** Phase 0 asks whether unresolved sites predict breakage.
-Phase 0c asks whether telling an agent about them helps. **Both must be true.** A positive
-Phase 0 with a negative Phase 0c means the signal is real and undeliverable.
+**Note the sequencing logic:** the correlation test asks whether unresolved sites predict breakage.
+The pull-based retrieval test asks whether telling an agent about them helps. **Both must be true.** A positive
+The correlation test with a negative the pull-based retrieval test means the signal is real and undeliverable.
 
 ---
 
-## Scope decision — taken before Phase 1, recorded so it is not silently reversed
+## Scope decision — taken before the call-site census layer, recorded so it is not silently reversed
 
 ### We do not build a graph
 
@@ -157,7 +157,7 @@ and one number. That is the entire defensible surface, and three people can buil
 
 ---
 
-## Phase 1 — Ingest + call-site census (4 days)
+## Ingest + call-site census (4 days)
 
 `types/`, `discover/`, `ingest/`, `store/`.
 
@@ -176,7 +176,7 @@ re-argue it in a PR, never reverse it silently.
 
 ---
 
-## Phase 2 — The label layer (1 week) ← **half the product**
+## The label layer (1 week) ← **half the product**
 
 `label/`. `Confidence`, `Provenance`, `Unresolved`, coverage math with builtins excluded
 from both numerator and denominator.
@@ -184,12 +184,12 @@ from both numerator and denominator.
 Built **before** the probe layer so that no code path ever emits a bare edge. Retrofitting
 provenance is how default confidence values get introduced — silent failure #1.
 
-**Gate:** all six invariants in `ARCHITECTURE.md §6` pass as property tests, especially
+**Gate:** all six invariants in ``ARCHITECTURE.md` “Invariants”` pass as property tests, especially
 conservation: no call site may vanish between stages.
 
 ---
 
-## Phase 3 — The probe layer (1–2 weeks) ← **the other half, and the moat**
+## The probe layer (1–2 weeks) ← **the other half, and the moat**
 
 `probe/`. The Python feature-prevalence scanner: `eval`, `exec`, computed
 `getattr`/`setattr`, `importlib`, metaclasses, `__getattr__`, registering decorators,
@@ -208,10 +208,10 @@ commercial outcome.
 
 ---
 
-## Phase 4 — MRO and framework resolvers (2–3 weeks)
+## MRO and framework resolvers (2–3 weeks)
 
 Only the resolvers that recover edges upstream tools structurally cannot, ordered by where
-Phase 0's exposure data showed the risk concentrates:
+The correlation test's exposure data showed the risk concentrates:
 
 1. `resolve/mro.py` — `super()` chains. PyCG misses these entirely; pure inheritance
    structure, so recovery is exact.
@@ -224,12 +224,12 @@ count on its fixture.
 changes target.** A resolver that moves existing edges is a regression, not a feature.
 
 **Note the demotion.** In the previous plan this was called the moat. It is not — it is a
-feature race against projects shipping daily. The moat is Phase 3. Build resolvers only
-where Phase 0 says it pays.
+feature race against projects shipping daily. The moat is the probe layer. Build resolvers only
+where the correlation test says it pays.
 
 ---
 
-## Phase 5 — MCP server (3 days)
+## MCP server (3 days)
 
 `serve/`. Four tools: `callers_of`, `reaches`, `coverage`, `unresolved`. Every response
 carries `pack_sha`; a mismatch with `git rev-parse HEAD` marks it stale.
@@ -239,7 +239,7 @@ declines to edit an `UNRESOLVED` site and says why. That recording is the demo.
 
 ---
 
-## Phase 6 — PR comment + free tier (1 week)
+## PR comment + free tier (1 week)
 
 Blast-radius comment per PR. Free forever on public repositories — that is the distribution
 loop, because the comments appear in other people's pull requests.
@@ -263,16 +263,16 @@ just verify-determinism     # if store/ or label/ changed
 - [ ] `docs/CODEBASE.md` regenerated, diff reviewed
 - [ ] New modules carry WHAT / WHY / IMPORTS docstrings
 - [ ] New rules registered in `.claude/settings.json` `$enforcement_map`, or tagged ADVISORY
-- [ ] New failure mode added to `docs/VALIDATION.md §4`
+- [ ] New failure mode added to `docs/`VALIDATION.md` “The silent-failure suite”`
 - [ ] PR answers: *what could still silently fail here?*
 
 ---
 
 ## Sequencing rationale
 
-Phase 0 can end the project for one week's cost, and until it is done every other phase is
-speculation with good file structure. Phases 1–2 are assembly plus arithmetic. Phase 3 is
-the only thing nobody else is doing. Phase 4 is a feature race we enter only where the data
+The correlation test can end the project for one week's cost, and until it is done every other phase is
+speculation with good file structure. Phases 1–2 are assembly plus arithmetic. The probe layer is
+the only thing nobody else is doing. The MRO and framework resolvers is a feature race we enter only where the data
 says it pays.
 
 Two temptations, named so they can be recognised in the moment:

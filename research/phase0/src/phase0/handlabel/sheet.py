@@ -2,7 +2,8 @@
 
 WHAT: Renders each selected PR as the merge, the files it touched, and every commit in
       the following window — sha, date, message, files — for a human to judge.
-WHY:  §7's gate is only worth running if the human decides before the machine does. The
+WHY:  `PHASE0_PREREGISTRATION.md` “Timeline” gate is only worth running if the human decides before
+the machine does. The
       protection is structural rather than procedural: this module does not import
       `scan_outcome` or `fix_signals`, so there is no code path from here to a verdict,
       and `tests/test_handlabel.py` asserts that the imports stay that way.
@@ -14,7 +15,8 @@ WHY:  §7's gate is only worth running if the human decides before the machine d
       byte-identical structure. Commits appear in plain chronological order, never
       sorted or grouped by anything the classifier derives.
 
-      §3.2's *definition* is shown, deliberately. A labeller who is not told that a
+      `PHASE0_PREREGISTRATION.md` “Outcome variable” *definition* is shown, deliberately. A labeller
+      who is not told that a
       revert-or-fix is what counts is labelling a different variable, and the comparison
       would measure nothing. The definition is not the leak; per-commit verdicts are.
 
@@ -107,7 +109,7 @@ def render_sheet(selection: Selection, windows: dict[int, Window]) -> str:
         if not windows.get(c.pr_id, Window(available=False, reason="not gathered")).is_labellable
     )
     header = [
-        "# Hand-labelling sheet — Phase 0 day-2 gate",
+        "# Hand-labelling sheet — the correlation test day-2 gate",
         "",
         f"Manifest sha256: `{selection.manifest_sha256}`",
         f"Drawn from {selection.population} eligible PRs at stride {selection.stride}.",

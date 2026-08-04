@@ -2,7 +2,7 @@
 #
 # WHY: this is `just check` split into named jobs so a failure says which claim broke
 #      without anyone reading a log. The live tiers are deliberately absent -- they need
-#      pinned submodules and a pack format that does not exist before Phase 1. See
+#      pinned submodules and a pack format that does not exist before the call-site census layer. See
 #      scripts/verify/README.md.
 
 name: ci

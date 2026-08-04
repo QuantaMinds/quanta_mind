@@ -3,7 +3,8 @@
 WHAT: Pins the structural guarantees on the evidence side — no import path from the
       sheet or the window walker to a verdict, no per-commit annotation derived from
       the classifier's pattern, and an unreadable window that refuses to be labelled.
-WHY:  §7's gate is the one measurement in Phase 0 whose validity depends entirely on
+WHY:  `PHASE0_PREREGISTRATION.md` “Timeline” gate is the one measurement in the correlation test
+whose validity depends entirely on
       the order two things happen in, and order is not something a green test usually
       checks. These check it by making the leak impossible rather than discouraged.
 IMPORTS: ast, pytest, phase0.handlabel.{sheet,window,select}, phase0.{fix_signals,scan_outcome}.
@@ -84,7 +85,8 @@ def test_no_commit_is_annotated_from_its_message() -> None:
     """The leak that matters: marking WHICH commits look like fixes.
 
     An earlier version of this test asserted the sheet contained none of the regex's
-    vocabulary at all, and it failed on the sheet's own instructions — correctly. §3.2
+    vocabulary at all, and it failed on the sheet's own instructions — correctly.
+    `PHASE0_PREREGISTRATION.md` “Outcome variable”
     defines the outcome as a revert-or-fix, and a labeller who is not told that is
     labelling a different variable, so the comparison would be meaningless. The words
     have to be in the prose.

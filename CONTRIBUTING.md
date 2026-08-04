@@ -19,7 +19,7 @@
 not cmd.exe- or PowerShell-compatible and are not trying to be. This is stated rather
 than assumed because it is the kind of requirement that silently costs someone an hour.
 
-The Phase 0 harness pins a *different* interpreter (Python 3.10) in its own environment;
+The the correlation test harness pins a *different* interpreter (Python 3.10) in its own environment;
 uv fetches it. See `research/phase0/ENVIRONMENT.lock` for why.
 
 ## First hour
@@ -34,7 +34,7 @@ just check            # must be green before you change anything
 `ln -sf` needed Developer Mode on Windows and failed silently without it.
 
 `just fixtures` pulls the pinned repositories for live tests. It is not needed yet:
-`tests/live/` has no tests before Phase 1.
+`tests/live/` has no tests before the call-site census layer.
 
 Then read, in this order: `ARCHITECTURE.md` → `docs/PROJECT_CONTEXT.md` →
 `docs/VALIDATION.md`. Skip `docs/BUILD_PLAN.md` unless you are picking up a phase.
@@ -43,7 +43,7 @@ If `just check` is red on a fresh clone, that is a bug and it is the highest-pri
 issue in the repository. Report it before doing anything else.
 
 **`just verify` does not run yet, and that is deliberate** — it operates on a pack format
-that Phase 0 has not authorised anyone to build. `scripts/verify/README.md` says so.
+that the correlation test has not authorised anyone to build. `scripts/verify/README.md` says so.
 A green `just check` means the code is well-formed. It says nothing about whether output
 data is correct, because there is no output data.
 

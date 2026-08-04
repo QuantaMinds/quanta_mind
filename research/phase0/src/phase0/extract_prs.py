@@ -1,6 +1,7 @@
 """Corpus extraction: the AIDev dataset to a flat list of merged PRs.
 
-WHAT: Loads the AIDev parquet tables, joins them, filters to the population §3
+WHAT: Loads the AIDev parquet tables, joins them, filters to the population
+`PHASE0_PREREGISTRATION.md` “Design”
       fixes, and emits one PRRecord per PR. Both arms — agent and human — in the
       same pass.
 WHY:  Every later stage keys off `parent_sha`, which must be the commit the change
@@ -11,11 +12,13 @@ WHY:  Every later stage keys off `parent_sha`, which must be the commit the chan
 
       Merged-only is a hard filter, not a convenience. The outcome is a 7-day
       post-merge scan, so an unmerged PR has no window and cannot be classified.
-      §3's corpus arithmetic already accounts for it: ~4,798 structural PRs become
+      `PHASE0_PREREGISTRATION.md` “Design” corpus arithmetic already accounts for it: ~4,798
+      structural PRs become
       ~3,300 merged at the 69.3% acceptance rate.
 
       Licences are recorded per repository. AIDev's terms are that "each source
-      repository retains its original copyright", and RUNBOOK §5 requires
+      repository retains its original copyright", and `PHASE0_RUNBOOK.md` “Authenticity checklist”
+      requires
       publishing the raw inputs alongside the result — so the publishable subset
       is filtered before anything reaches results/, not after.
 IMPORTS: pandas, phase0.joins, phase0.github_pulls, phase0.parent_commit.
@@ -32,9 +35,10 @@ import pandas as pd
 
 from phase0.joins import JoinReport, checked_merge
 
-Language = str  # "python" | "typescript" — the two arms in scope, RUNBOOK §7
+Language = str  # "python" | "typescript" — the two arms in scope, `PHASE0_RUNBOOK.md` “TS/JS arm”
 
-# §3: the five task types that "directly impact program structure". docs and test
+# `PHASE0_PREREGISTRATION.md` “Design”: the five task types that "directly impact program
+# structure". docs and test
 # are excluded, which is what turns 7,191 agent PRs into 4,798.
 STRUCTURAL_TASK_TYPES: frozenset[str] = frozenset({"feat", "fix", "perf", "refactor", "chore"})
 
@@ -66,7 +70,10 @@ class PRRecord:
 
     @property
     def is_publishable(self) -> bool:
-        """RUNBOOK §5 requires publishing raw inputs; licences decide which."""
+        """`PHASE0_RUNBOOK.md` “Authenticity checklist” requires publishing raw inputs; licences
+        decide
+        which.
+        """
         return self.licence.lower() in PUBLISHABLE_LICENCES
 
 
@@ -94,7 +101,8 @@ class Attrition:
 def load_table(dataset: Path, name: str) -> pd.DataFrame:
     """One AIDev table, from a local parquet directory.
 
-    Kept separate so a re-run reads the same bytes. RUNBOOK §5 requires the study
+    Kept separate so a re-run reads the same bytes. `PHASE0_RUNBOOK.md` “Authenticity checklist”
+    requires the study
     reproduce from raw data, and a loader that reached for the network would make
     the corpus a moving target.
     """
@@ -110,7 +118,8 @@ def load_table(dataset: Path, name: str) -> pd.DataFrame:
 def _select(
     pulls: pd.DataFrame, tasks: pd.DataFrame, repos: pd.DataFrame
 ) -> tuple[pd.DataFrame, list[JoinReport]]:
-    """Join the three tables and keep only the population §3 fixes.
+    """Join the three tables and keep only the population `PHASE0_PREREGISTRATION.md` “Design”
+    fixes.
 
     Both joins are LEFT, which is the dangerous shape: a zero-match join returns the
     full frame with `type` and `language` all null, `_filter` then drops every row for
@@ -172,7 +181,8 @@ def iter_candidates(dataset: Path, arm: str = "agent") -> Iterator[dict[str, obj
 def population_counts(dataset: Path, arm: str = "agent") -> tuple[int, Attrition, list[JoinReport]]:
     """How many survive, why the rest did not, and what the joins actually matched.
 
-    §3's arithmetic is a prediction; this is the measurement. RUNBOOK §3 treats a
+    `PHASE0_PREREGISTRATION.md` “Design” arithmetic is a prediction; this is the measurement.
+    `PHASE0_RUNBOOK.md` “Days 3-5” treats a
     large deviation as a stop condition, not a curiosity.
 
     The join reports are returned rather than logged because the pilot has to report

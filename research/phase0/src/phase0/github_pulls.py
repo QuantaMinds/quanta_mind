@@ -69,7 +69,7 @@ def require_token() -> str:
     token = os.environ.get(TOKEN_VAR, "").strip()
     if not token:
         raise MissingTokenError(
-            f"{TOKEN_VAR} is not set. Phase 0 needs a GitHub token with the "
+            f"{TOKEN_VAR} is not set. The correlation test needs a GitHub token with the "
             f"`public_repo` scope to resolve each PR's parent commit -- AIDev does not "
             f"carry it (PHASE0_PREREGISTRATION.md amendment A2). Unauthenticated "
             f"requests are capped at 60/hour, which would look like a working run while "

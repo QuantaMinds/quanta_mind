@@ -3,25 +3,26 @@
 WHAT: Joins exposure and outcome records into contingency tables, and reports the
       primary result, A6's sensitivity bounds, the UNANALYZED_RESOURCE arm and the
       pre-specified strata.
-WHY:  The analysis is relative risk, NOT a count. With roughly 15% of call sites
+WHY:  The statistic is relative risk, NOT a count. With ~15% of call sites
       unresolved, "15% of breakages were at unresolved sites" is zero signal that
-      reads as confirmation. §3.3 rejects the count explicitly, and fixing RR as
-      the statistic before any data is seen is what stops the number being chosen
-      after the fact.
+      reads as confirmation; `PHASE0_PREREGISTRATION.md` “The table” rejects the
+      count explicitly. Fixing RR before any data is seen stops the number being
+      chosen after the fact.
 
-      Power is read BEFORE the point estimate. §4: if `a < 20` there is no result,
-      only an underpowered null, and reporting that as negative is the most
-      expensive mistake available -- it kills a live thesis on noise.
+      Power is read BEFORE the point estimate -- `PHASE0_PREREGISTRATION.md`
+      “Decision thresholds”. Below `a = 20` there is no result, only an
+      underpowered null, and reporting that as negative kills a live thesis on
+      noise.
 
       A6: the primary table is the single-site subset, where the instrument
-      measures exposure exactly. Multi-site pairs are held out and reported as
-      bounds. When the bounds agree, the collapse provably changed no conclusion.
+      measures exposure exactly. Multi-site pairs are held out as bounds; when the
+      bounds agree, the collapse provably changed no conclusion.
 
-      A7/§4.4: RR_unanalyzed is computed over UNANALYZED_RESOURCE only and never
-      pooled. If the effect lives there, this is a scalability product rather than
-      an unsoundness product -- a different company, and the thesis gets rewritten
-      before any code is.
-IMPORTS: phase0.risk for the statistics, phase0.classify_exposure and
+      A7: RR_unanalyzed covers UNANALYZED_RESOURCE only and is never pooled --
+      `PHASE0_RUNBOOK.md` “The `UNANALYZED` arm decides what company this is”. An
+      effect living there makes this a scalability product, not an unsoundness
+      product: a different company, and the thesis gets rewritten first.
+IMPORTS: phase0.analysis.risk, phase0.analysis.verdict, phase0.classify_exposure and
       phase0.scan_outcome for the arm types.
 CONSUMED BY: controls.py, run_pipeline.py; tests/test_build_table.py.
 """
@@ -31,14 +32,11 @@ from __future__ import annotations
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 
+from phase0.analysis.risk import Counts, RiskResult, cluster_robust, design_effect
+from phase0.analysis.risk import katz as katz_ci
+from phase0.analysis.verdict import Verdict, read_verdict
 from phase0.classify_exposure import Exposure
-from phase0.risk import MIN_BREAKAGES_FOR_POWER, Counts, RiskResult, cluster_robust, design_effect
-from phase0.risk import katz as katz_ci
 from phase0.scan_outcome import Outcome
-
-STRONG_RR = 3.0
-STRONG_CI_LOW = 1.5
-WEAK_RR = 1.5
 
 ArmOf = Callable[["Observation"], Exposure | None]
 
@@ -57,16 +55,8 @@ class Observation:
 
 
 @dataclass(frozen=True, slots=True)
-class Verdict:
-    """The §4 reading, with power checked first."""
-
-    label: str
-    reason: str
-
-
-@dataclass(frozen=True, slots=True)
 class Analysis:
-    """Everything Results §8 needs, and nothing it does not."""
+    """Everything Results `PHASE0_PREREGISTRATION.md` “Results” needs, and nothing it does not."""
 
     primary: RiskResult
     primary_naive: RiskResult
@@ -146,27 +136,6 @@ def estimate(
     """Return (cluster-robust, naive). The first decides; the second is context."""
     counts, exposed, broke, repo = tabulate(observations, arm_of, exposed_arm)
     return cluster_robust(exposed, broke, repo, counts), katz_ci(counts)
-
-
-def read_verdict(result: RiskResult) -> Verdict:
-    """§4, with the power check first and unconditional."""
-    if not result.is_powered:
-        return Verdict(
-            "no result",
-            f"a={result.counts.exposed_broke} < {MIN_BREAKAGES_FOR_POWER}: underpowered, "
-            f"which is not a negative. Widen the corpus before concluding anything.",
-        )
-    if result.ci_method == "unavailable":
-        return Verdict("no result", result.note or "interval unavailable")
-    if result.relative_risk >= STRONG_RR and result.ci_low > STRONG_CI_LOW:
-        return Verdict("strong", "RR >= 3.0 with CI lower bound > 1.5. Proceed to Phase 1.")
-    if result.relative_risk >= WEAK_RR and result.excludes_unity:
-        return Verdict(
-            "weak but real",
-            "RR in [1.5, 3.0) excluding 1. Proceed, but rewrite PROJECT_CONTEXT.md §5 "
-            "first: the pitch becomes 'prioritise review attention', not 'prevent breakage'.",
-        )
-    return Verdict("null", "RR < 1.5 or CI includes 1.0. Stop and publish -- see §6.")
 
 
 def build(observations: Sequence[Observation], strata: Sequence[str] = ()) -> Analysis:

@@ -16,7 +16,7 @@ WHY:  If the sample is chosen after seeing anything about breakage, the day-2 ga
       (A19) supplies commit SHAs and changed filenames directly, so the gate can run
       while the token is still the blocker for everything else. The classifier reads git
       history and is arm-agnostic, but this choice is recorded rather than assumed —
-      §7's gate does not specify an arm, and a reviewer will ask.
+      `PHASE0_PREREGISTRATION.md` “Timeline” gate does not specify an arm, and a reviewer will ask.
 IMPORTS: pandas, phase0.joins. No outcome code — see the package docstring.
 CONSUMED BY: sheet.py, score.py; tests/test_handlabel.py.
 """

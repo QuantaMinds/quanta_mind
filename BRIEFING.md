@@ -1,9 +1,9 @@
 # Founder Briefing
 
 > How to explain this project to someone smart who has never heard of it. Read top to
-> bottom once. After that, §9 is the part you re-read before a conversation.
+> bottom once. After that, `BRIEFING.md` “The five questions, and your answers” is the part you re-read before a conversation.
 >
-> **Rule for every conversation: never claim more than §8 allows.** The thesis is not yet
+> **Rule for every conversation: never claim more than `BRIEFING.md` “What is not yet true” allows.** The thesis is not yet
 > measured. A co-founder who finds that out later trusts you less than one who hears it now.
 
 ---
@@ -143,7 +143,7 @@ denominators. The defensible claim is narrower:
 > them count.*
 
 Do not say "nobody measures what they missed." It does not survive contact with anyone who
-reads arXiv. See `PROJECT_CONTEXT.md §3`.
+reads arXiv. See ``PROJECT_CONTEXT.md` “Market evidence”`.
 
 ---
 
@@ -217,7 +217,7 @@ even in principle. Add the 66% of patches discarded before analysis: their numbe
 floor, not an estimate.
 
 **Say this carefully, because the temptation is to oversell it.** None of the above means
-their result is wrong — it is the best measurement of this that exists, and our own Phase 0
+their result is wrong — it is the best measurement of this that exists, and our own the correlation test
 uses their corpus. It means their instrument answers "did a signature change?" and ours
 answers "does anyone depend on it, and do we actually know?". Two different questions, and
 only the second one is a product.
@@ -229,11 +229,11 @@ tracking** by name.
 
 ### The gap in our own evidence — say it before they find it
 
-Phase 0 tests whether unresolved call sites predict breakage in agent-authored Python
+The correlation test tests whether unresolved call sites predict breakage in agent-authored Python
 changes, on a corpus that is **65% OpenAI Codex and 1.4% Claude Code** (459 PRs). The
 mechanism is agent-agnostic — it is about what the codebase makes knowable, not which model
 is reading it. But the evidence is Codex evidence, and the product's first integration is
-Claude Code. **That gap is real and Phase 0 does not close it.**
+Claude Code. **That gap is real and the correlation test does not close it.**
 
 Two things make it survivable rather than fatal, and both should be said in the same breath:
 
@@ -366,7 +366,7 @@ one.**
 **The core assumption is unmeasured.** We believe an unresolved call site predicts
 breakage. **Nobody has shown that**, including us.
 
-Phase 0 is a one-week pre-registered study — ~3,300 agent PRs plus ~1,000 human ones,
+The correlation test is a one-week pre-registered study — ~3,300 agent PRs plus ~1,000 human ones,
 relative risk with a confidence interval, thresholds fixed **before** the data is touched:
 
 | Result | What we do |
@@ -384,7 +384,7 @@ across all tested models."*
 
 Our defence is that they tested *pushing* context into a prompt while we have the agent
 *pull* via tool calls — a different position and volume in the context window. **That is a
-hypothesis and it is untested.** Phase 0c tests it against their public harness before any
+hypothesis and it is untested.** the pull-based retrieval test tests it against their public harness before any
 product code is written. If you are asked "why will your context help when the benchmark
 says context hurts," this is the honest answer: *we don't know yet, and it is the next thing
 we measure.*
@@ -405,7 +405,7 @@ Two more honest points:
   service. Our moat is execution — resolvers, incremental updates, developer experience —
   not novelty. An investor who reads the papers will check.
 
-**Volunteering §8 is what makes §1–§7 credible.** A founder who has already found the holes
+**Volunteering `BRIEFING.md` “What is not yet true” is what makes `BRIEFING.md` “The one sentence”–`BRIEFING.md` “The minute differentiators” credible.** A founder who has already found the holes
 in their own thesis is trusted more than one who hasn't looked.
 
 ---
@@ -434,5 +434,5 @@ of the time — nothing tells you the tool was blind to that call site. We do, b
 merges, with a receipt.
 
 **"What if you're wrong?"**
-Then Phase 0 tells us in one week for about $25, and we publish the null. That is a real
+Then the correlation test tells us in one week for about $25, and we publish the null. That is a real
 result and it costs us a week instead of a year.

@@ -15,7 +15,8 @@ WHY:  Each property was chosen because getting it wrong costs a re-run of a
       - RunSummary carries no arm counts, so a pilot cannot surface an effect size
         before the controls have cleared.
       - run_pipeline must never import scan_outcome: if exposure could see
-        outcomes, RUNBOOK §1.2's leakage becomes possible by accident.
+        outcomes, `PHASE0_RUNBOOK.md` “Exposure classifier tests” leakage becomes possible by
+        accident.
 IMPORTS: phase0.run_pipeline, phase0.pipeline.record, phase0.extract_prs, pytest.
 CONSUMED BY: `just test-phase0`. No network: the clone step is substituted.
 """

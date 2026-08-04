@@ -14,7 +14,7 @@ We build the layer that tells a coding agent **what it does not know** about a r
 Static analysis is unsound by design. We measure the unsoundness, label it per call site,
 and serve the labels over MCP so agents abstain instead of guessing.
 
-**Phase 0 is not done.** The founding correlation is unmeasured, so no product code is
+**The correlation test is not done.** The founding correlation is unmeasured, so no product code is
 written yet — see `docs/findings/PHASE0_PREREGISTRATION.md`. If you are asked to implement
 a layer, check that file has a filled Results section first. If it does not, say so.
 
@@ -57,7 +57,7 @@ you remember to obey — the machine will stop you either way.
 3. **Silence must be typed.** When we cannot resolve a call site we emit an
    `Unresolved(site, reason, construct)` record. We never emit nothing. "No edge here" and
    "we failed here" must never be the same value on the wire.
-   → `tests/property/` conservation invariant (ARCHITECTURE.md §6.3)
+   → `tests/property/` conservation invariant (`ARCHITECTURE.md` “Invariants”, item 3)
 
 4. **≤200 lines per source file**, docs and `.md` excluded.
    → `scripts/guard/check_structure.py`
@@ -88,6 +88,23 @@ you remember to obey — the machine will stop you either way.
     project on a different interpreter. Nothing in `src/` or `scripts/` may import
     pandas, scipy, statsmodels, gitpython, pyyaml, pycg or tree-sitter.
     → `scripts/guard/check_no_research_imports.py`
+
+12. **Every reference names something, never a number.** No section symbols, no phase
+    numbers. A reference points at a file path, a class, a function, or a heading's text
+    — something that cannot change without someone renaming it on purpose. Section and
+    phase numbers break silently: insert one heading and every citation in the repo now
+    points somewhere else, no test fails, and the sentence still reads correctly. Eight
+    such references were already dangling when this rule was written.
+
+    ```
+    §7's gate       →  `PHASE0_RUNBOOK.md` “The 20-PR hand-labelling gate”  no-vague-refs:allow
+    RUNBOOK §2.1    →  `PHASE0_RUNBOOK.md` “Positive control”               no-vague-refs:allow
+    Phase 0         →  the correlation test                                 no-vague-refs:allow
+    Phase 3         →  the probe layer                                      no-vague-refs:allow
+    ```
+    The trailing marker suppresses the guard on that line so the rule can show what it
+    bans. It is counted and printed on every run; it is not a general escape hatch.
+    → `scripts/guard/check_no_vague_refs.py`
 
 ---
 

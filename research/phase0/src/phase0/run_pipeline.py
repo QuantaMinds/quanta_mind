@@ -2,7 +2,8 @@
 
 WHAT: Drives the exposure pass — grouped by repository, checkpointed, isolated per
       PR — and appends one audit line each time a PR completes.
-WHY:  RUNBOOK §3 invokes this by name. It is separate from the measurement stages
+WHY:  `PHASE0_RUNBOOK.md` “Days 3-5” invokes this by name. It is separate from the measurement
+stages
       because the audit log is the study's evidence trail and must be written by
       one place with one schema.
 
@@ -23,7 +24,8 @@ WHY:  RUNBOOK §3 invokes this by name. It is separate from the measurement stag
          controls have cleared.
 
       Never imports scan_outcome. Outcomes are scanned in a separate pass so
-      nothing here can see whether a PR broke — the leakage RUNBOOK §1.2 calls the
+      nothing here can see whether a PR broke — the leakage `PHASE0_RUNBOOK.md` “Exposure classifier
+      tests” calls the
       likeliest way to fake a positive by accident. tests/test_run_pipeline.py
       asserts that import is absent.
 IMPORTS: phase0.parent_commit, extract_prs, pycg_failure, run_graph, and
@@ -53,7 +55,7 @@ class RunSummary:
     """Operational counts. Deliberately not a result.
 
     Carries no arm counts and no ratio, so a pilot cannot surface an effect size
-    even by accident. RUNBOOK §2 requires the controls to clear first.
+    even by accident. `PHASE0_RUNBOOK.md` “Day 2” requires the controls to clear first.
     """
 
     prs_seen: int = 0

@@ -1,7 +1,8 @@
 """Score the hand labels against the classifier — the step that must run last.
 
 WHAT: Reads the completed answers, runs `scan_outcome.scan` over the same twenty PRs,
-      and prints agreement against §7's >=16/20 gate with kappa and the label
+      and prints agreement against `PHASE0_PREREGISTRATION.md` “Timeline” >=16/20 gate with kappa
+      and the label
       distribution beside it.
 WHY:  Separate from sheet generation so that producing the evidence and producing the
       verdict are two commands a person runs in order, not one command that could emit

@@ -5,7 +5,7 @@ WHAT: Hypothesis properties over discovery.LAYER_ORDER and discovery.layer_of --
       against.
 WHY:  This is the seed of invariant 4 in ARCHITECTURE.md section 6 ("the layer
       import graph is a DAG with the declared topological order"). The full
-      invariant needs a Pack, which does not exist before Phase 1; what is
+      invariant needs a Pack, which does not exist before the call-site census layer; what is
       checkable today is that the declaration itself is coherent and that
       layer_of round-trips against it. A layering guard built on a declaration
       with a duplicate or an unrecoverable path would pass while enforcing the

@@ -44,6 +44,7 @@ guards:
     uv run python scripts/guard/check_agents_md.py AGENTS.md
     uv run python scripts/guard/check_enforcement_map.py .
     uv run python scripts/guard/check_no_research_imports.py .
+    uv run python scripts/guard/check_no_vague_refs.py .
     uv run python scripts/guard/check_docs_sync.py .
 
 test-unit:
@@ -52,12 +53,12 @@ test-unit:
 test-property:
     uv run pytest tests/property -x --timeout=120
 
-# The Phase 0 harness runs in its own virtual environment on its own interpreter
+# The the correlation test harness runs in its own virtual environment on its own interpreter
 # (Python 3.10 — PyCG does not run on 3.11+). See research/phase0/ENVIRONMENT.lock.
 test-phase0:
     cd research/phase0 && uv run pytest -x --timeout=120
 
-# ------------------------------------------------------- §7 day-2 gate (human)
+# ------------------------------------------------------- `PHASE0_PREREGISTRATION.md` “Timeline” day-2 gate (human)
 
 # Build the blind labelling sheet. Reads the replication package, clones the 13
 # repositories the draw lands in, and writes results/handlabel_sheet.md.
@@ -78,10 +79,10 @@ check-branch:
 
 # ---------------------------------------------------------------- honest gate
 
-# ⚠️  PHASE 1 GATE — not runnable yet, and that is deliberate.
+# ⚠️  THE CALL-SITE CENSUS LAYER GATE — not runnable yet, and that is deliberate.
 #
 # Every recipe below operates on the SQLite pack, which does not exist: docs/BUILD_PLAN.md
-# gates all product code on Phase 0 reporting a verdict, and the three scripts under
+# gates all product code on the correlation test reporting a verdict, and the three scripts under
 # scripts/verify/ cannot be written before the format they verify exists. They are listed
 # here rather than deleted so the gap is documented instead of silent — see
 # scripts/verify/README.md. `just check` is the gate that must be green today.
@@ -93,11 +94,11 @@ _phase1-gate:
     set -uo pipefail
     if [ ! -f scripts/verify/compare_golden.py ]; then
       echo "" >&2
-      echo "⛔ 'just verify' is a PHASE 1 gate and is not runnable yet." >&2
+      echo "⛔ 'just verify' is a THE CALL-SITE CENSUS LAYER gate and is not runnable yet." >&2
       echo "" >&2
       echo "   It operates on the SQLite pack, and there is no pack. docs/BUILD_PLAN.md" >&2
-      echo "   gates every layer of product code on Phase 0 reporting a verdict, and" >&2
-      echo "   docs/findings/PHASE0_PREREGISTRATION.md §8 is still empty." >&2
+      echo "   gates every layer of product code on the correlation test reporting a verdict, and" >&2
+      echo "   docs/findings/PHASE0_PREREGISTRATION.md `PHASE0_PREREGISTRATION.md` “Results” is still empty." >&2
       echo "" >&2
       echo "   This is not a broken checkout. See scripts/verify/README.md." >&2
       echo "   Run 'just check' — that is the gate that must be green today." >&2
@@ -157,7 +158,7 @@ serve:
 view:
     uv run qmctx view --host 127.0.0.1 --port 7332
 
-# ---------------------------------------------------------------- phase 0
+# ---------------------------------------------------------------- the correlation test
 
 # One-shot authorisation for a single golden-file update. hook_pre_edit.py deletes
 # the sentinel after one use, so it cannot be left enabled.

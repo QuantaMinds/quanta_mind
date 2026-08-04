@@ -3,7 +3,8 @@
 WHAT: Constructs repositories where breakage IS caused by an unresolvable edge,
       plus matched controls where the caller is directly resolvable, then derives
       exposure and outcome by running the actual stages over them.
-WHY:  This is the piece whose absence meant the RUNBOOK §2.1 gate could not run at
+WHY:  This is the piece whose absence meant the `PHASE0_RUNBOOK.md` “Positive control” gate could
+not run at
       all — `run_positive_control` computed a ratio *from* observations and nothing
       built them.
 
@@ -20,7 +21,7 @@ WHY:  This is the piece whose absence meant the RUNBOOK §2.1 gate could not run
       A11: synthetic repositories guarantee `graph_status == OK`, so a failure to
       detect is unambiguously a *detection* failure. That is the only condition
       under which RR ≥ 5 carries meaning.
-IMPORTS: GitPython, phase0.build_table, extract_prs, run_pipeline, scan_outcome,
+IMPORTS: GitPython, phase0.analysis.build_table, extract_prs, run_pipeline, scan_outcome,
       and controls.mechanisms.
 CONSUMED BY: controls/gate.py; tests/test_controls_corpus.py.
 """

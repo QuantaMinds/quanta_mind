@@ -14,7 +14,8 @@ WHY:  The outcome is deliberately BEHAVIOURAL, not AST-based. AIDev ships
       requires them per PR.
 
       Runs entirely from a local clone. No GitHub quota is consumed here, which is
-      why the third §3.2 criterion — an issue opened within 7 days referencing the
+      why the third `PHASE0_PREREGISTRATION.md` “Outcome variable” criterion — an issue opened
+      within 7 days referencing the
       PR — is optional under amendment A4 and its execution is recorded rather
       than assumed.
 
@@ -58,7 +59,10 @@ class Outcome(Enum):
 
 
 class Criterion(Enum):
-    """Which §3.2 rule fired. Recorded so Results can report their relative weight."""
+    """Which `PHASE0_PREREGISTRATION.md` “Outcome variable” rule fired. Recorded so Results can
+    report
+    their relative weight.
+    """
 
     REVERT = "revert"  # explicit `This reverts commit <sha>`
     FIX_TOUCHING_SAME_FILE = "fix_touching_same_file"

@@ -1,4 +1,4 @@
-"""Generate the blind hand-labelling sheet for §7's day-2 gate.
+"""Generate the blind hand-labelling sheet for `PHASE0_PREREGISTRATION.md` “Timeline” day-2 gate.
 
 WHAT: Draws the sample, clones each repository once, walks the seven-day window after
       every selected merge, and writes `results/handlabel_sheet.md` plus a blank

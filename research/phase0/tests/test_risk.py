@@ -5,13 +5,14 @@ WHAT: Asserts the Katz interval against a hand-computable table, that the
       interval, and that an undefined ratio is a value rather than a crash.
 WHY:  A8 exists because Katz assumes independent trials and our observations are
       not independent. The naive interval comes out too narrow at exactly the
-      boundary §4 turns on, so a naive CI could clear a threshold a correct one
+      boundary `PHASE0_PREREGISTRATION.md` “Decision thresholds” turns on, so a naive CI could clear
+      a threshold a correct one
       would not. test_clustering_widens_the_interval is the one that would catch a
       regression back to naive inference.
 
       An undefined ratio must never surface as an exception: a crashed analysis
       and an analysis that found nothing must not be the same value on the wire.
-IMPORTS: phase0.risk, pytest.
+IMPORTS: phase0.analysis.risk, pytest.
 CONSUMED BY: `just test-phase0`.
 """
 
@@ -19,7 +20,7 @@ from __future__ import annotations
 
 import math
 
-from phase0.risk import (
+from phase0.analysis.risk import (
     MIN_BREAKAGES_FOR_POWER,
     Counts,
     cluster_robust,
@@ -80,7 +81,10 @@ def test_cluster_robust_recovers_a_known_ratio() -> None:
 
 
 def test_cluster_robust_reports_its_method() -> None:
-    """§4 reads this interval. It must say which one it is."""
+    """`PHASE0_PREREGISTRATION.md` “Decision thresholds” reads this interval. It must say which one
+    it
+    is.
+    """
     exposed = [i % 2 for i in range(200)]
     broke = [1 if i % 5 == 0 else 0 for i in range(200)]
     repo = [f"repo{i % 10}" for i in range(200)]

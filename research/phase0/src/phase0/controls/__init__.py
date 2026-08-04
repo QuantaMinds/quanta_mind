@@ -1,6 +1,7 @@
 """The controls: the gate that outranks the thesis.
 
-RUNBOOK §2.1 calls the positive control the most important gate in the study — you
+`PHASE0_RUNBOOK.md` “Positive control” calls the positive control the most important gate in the
+study — you
 cannot interpret a null from an instrument you have not shown can produce a
 positive, because you would probably believe it.
 

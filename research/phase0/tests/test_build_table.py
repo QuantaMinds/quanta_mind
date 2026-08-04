@@ -1,37 +1,32 @@
-"""Verification of the analysis: the A6 split, the arms, and the §4 verdict.
+"""Verification of the analysis: the A6 split, the arms, and the `PHASE0_PREREGISTRATION.md`
+“Decision thresholds” verdict.
 
 WHAT: Asserts that the primary table holds only measurable pairs, that multi-site
       pairs are bounded instead of guessed, that UNANALYZED_RESOURCE is never
       pooled, and that power is read before the point estimate.
 WHY:  Three pre-registered decisions are enforced here rather than remembered.
 
-      §4: `a < 20` is no result, not a null. Reporting an underpowered null as a
+      `PHASE0_PREREGISTRATION.md` “Decision thresholds”: `a < 20` is no result, not a null.
+      Reporting an underpowered null as a
       negative is the most expensive mistake available -- it kills a live thesis on
       noise -- so the verdict function checks power first and unconditionally.
 
       A6: the primary table is the single-site subset. A symbol with no measurable
       pair must be excluded, not defaulted into an arm.
 
-      §4.4: RR_unanalyzed is computed separately. If the effect lives there, this
-      is a scalability product, not an unsoundness product, and that is a different
-      company. Pooling the arms would hide the distinction the section exists on.
-IMPORTS: phase0.build_table, phase0.classify_exposure, phase0.scan_outcome.
-CONSUMED BY: `just test-phase0`.
+      `PHASE0_RUNBOOK.md` “The `UNANALYZED` arm decides what company this is”: RR_unanalyzed is
+      computed separately. If the effect lives there, this is a scalability product, not an
+      unsoundness product, and that is a different company. Pooling the arms would hide the
+      distinction the section exists on. IMPORTS: phase0.analysis.{build_table,risk,verdict},
+      phase0.classify_exposure, phase0.scan_outcome. CONSUMED BY: `just test-phase0`.
 """
 
 from __future__ import annotations
 
-from phase0.build_table import (
-    STRONG_CI_LOW,
-    STRONG_RR,
-    WEAK_RR,
-    Observation,
-    build,
-    read_verdict,
-    tabulate,
-)
+from phase0.analysis.build_table import Observation, build, tabulate
+from phase0.analysis.risk import Counts, katz
+from phase0.analysis.verdict import STRONG_CI_LOW, STRONG_RR, WEAK_RR, read_verdict
 from phase0.classify_exposure import Exposure
-from phase0.risk import Counts, katz
 from phase0.scan_outcome import Outcome
 
 
@@ -66,7 +61,9 @@ def test_unmeasurable_pairs_are_excluded_from_the_primary_table() -> None:
 
 
 def test_unanalyzed_is_never_pooled_into_exposed() -> None:
-    """§4.4 reads this arm alone. Pooling it would hide what kind of product this is."""
+    """`PHASE0_RUNBOOK.md` “The `UNANALYZED` arm decides what company this is” reads this arm alone.
+    Pooling it would hide what kind of product this is.
+    """
     rows = [
         _row(0, Exposure.EXPOSED, True),
         _row(1, Exposure.UNANALYZED_RESOURCE, True),
@@ -77,7 +74,9 @@ def test_unanalyzed_is_never_pooled_into_exposed() -> None:
 
 
 def test_underpowered_result_reads_as_no_result_not_null() -> None:
-    """The distinction §4 turns on, and the one most easily reported wrongly."""
+    """The distinction `PHASE0_PREREGISTRATION.md` “Decision thresholds” turns on, and the one most
+    easily reported wrongly.
+    """
     rows = [_row(i, Exposure.EXPOSED, i < 5, f"r{i % 4}") for i in range(20)]
     rows += [_row(100 + i, Exposure.UNEXPOSED, False, f"r{i % 4}") for i in range(20)]
     assert read_verdict(build(rows).primary).label == "no result"
@@ -91,7 +90,9 @@ def test_powered_null_reads_as_null() -> None:
 
 
 def test_strong_result_is_reported_as_strong() -> None:
-    """A planted, powered, clustered effect must clear both §4 conditions."""
+    """A planted, powered, clustered effect must clear both `PHASE0_PREREGISTRATION.md` “Decision
+    thresholds” conditions.
+    """
     rows = [_row(i, Exposure.EXPOSED, i % 10 < 6, f"r{i % 12}") for i in range(200)]
     rows += [_row(500 + i, Exposure.UNEXPOSED, i % 10 < 1, f"r{i % 12}") for i in range(200)]
     assert read_verdict(build(rows).primary).label == "strong"
@@ -120,7 +121,9 @@ def test_naive_and_robust_intervals_are_both_kept() -> None:
 
 
 def test_strata_are_reported_separately() -> None:
-    """§5 pre-specifies stratification so adjusting later is not a rescue attempt."""
+    """`PHASE0_PREREGISTRATION.md` “Pre-specified confounders” pre-specifies stratification so
+    adjusting later is not a rescue attempt.
+    """
     rows = [_row(i, Exposure.EXPOSED, i % 2 == 0, f"r{i % 6}", "django") for i in range(60)]
     rows += [_row(500 + i, Exposure.UNEXPOSED, False, f"r{i % 6}", "none") for i in range(60)]
     assert sorted(build(rows, strata=["framework"]).strata) == [

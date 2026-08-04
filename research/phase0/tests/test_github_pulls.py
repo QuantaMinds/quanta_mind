@@ -92,7 +92,7 @@ def test_deleted_repository_is_attrition_not_an_error(
     """A gone repository yields no metadata, and must not raise.
 
     The 2025-08 snapshot ages: repositories are deleted, renamed and made private.
-    RUNBOOK §3 expects 80-95% clone success, so this is the common path, and a
+    `PHASE0_RUNBOOK.md` “Days 3-5” expects 80-95% clone success, so this is the common path, and a
     raise here would end a 3,300-PR run on the first casualty.
     """
     monkeypatch.delenv(TOKEN_VAR, raising=False)
