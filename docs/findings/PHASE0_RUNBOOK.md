@@ -14,30 +14,53 @@
 
 ## 0. Prerequisites
 
+The harness is already scaffolded. It is a **standalone uv project**, not part of the
+product's environment:
+
 ```bash
-mkdir -p phase0 && cd phase0
-uv init && uv add pandas scipy statsmodels tree-sitter tree-sitter-python \
-                  tree-sitter-typescript gitpython pyyaml
-uv add --dev pytest pytest-timeout hypothesis
-pip install pycg --break-system-packages      # archived, pinned, MIT
+cd research/phase0
+uv sync
+uv run pytest        # 33 contract tests; every stage still raises NotImplementedError
 ```
 
-Pin everything. Record versions in `phase0/ENVIRONMENT.lock`. A study you cannot re-run is
-a study you cannot defend.
+Everything is pinned in `research/phase0/pyproject.toml` and locked in `uv.lock`. **Read
+`research/phase0/ENVIRONMENT.lock` before touching the instrument** — it records three
+findings about PyCG that were established by running it, not assumed:
+
+| | |
+|---|---|
+| `pycg==0.0.7`, **not 0.0.8** | the 0.0.8 wheel installs as `PyCG/` while its own `__main__.py` imports `pycg`. Broken on every interpreter. |
+| `setuptools==80.10.2` | 0.0.7 imports `pkg_resources`, removed in setuptools 81 |
+| **Python 3.10** | on 3.11+, `importlib.invalidate_caches()` re-enters PyCG's own import hook and it dies. Works on 3.10/3.9/3.8. |
+
+That last one is why this is a separate project: the product targets ≥3.12 for
+`sys.monitoring`, and one environment cannot hold both interpreters. It is also why
+`pip install --break-system-packages` is gone — it bypasses uv and breaks the
+reproducibility this section demands two lines later.
+
+PyCG ships **no console script**. Invoke it as a module:
+
+```bash
+uv run python -m pycg --package <pkg_dir> <files...>
+```
 
 **Harness layout** — each module ≤200 lines, each with its own test file:
 
 ```
-scripts/phase0/
+research/phase0/src/phase0/
   extract_prs.py       AIDev  → PRRecord[]
   census.py            source → CallSite[]        (tree-sitter, the denominator)
   run_graph.py         repo   → Edge[]            (PyCG / Jelly, scoped)
+  run_pipeline.py      drives the per-PR loop, writes the audit log  ← §3
   classify_exposure.py PR     → EXPOSED | UNEXPOSED | UNANALYZED
   scan_outcome.py      PR     → BROKE | CLEAN     (7-day revert/fix scan)
   controls.py          positive + negative controls  ← §2
   build_table.py       → 2×2, RR, CI, strata
-tests/phase0/          one test file per module above
+research/phase0/tests/  one test file per module above
 ```
+
+Eight modules, not seven: §3 invokes `run_pipeline.py`, which an earlier version of this
+list omitted.
 
 ---
 
@@ -46,7 +69,7 @@ tests/phase0/          one test file per module above
 **Nothing is run against real data until every test below passes.** A measurement
 instrument you have not tested produces numbers you cannot interpret.
 
-### 1.1 Census tests (`tests/phase0/test_census.py`)
+### 1.1 Census tests (`research/phase0/tests/test_census.py`)
 
 The denominator is the number everything else divides by. Get it wrong and every result is
 wrong by a constant nobody can see.
@@ -66,7 +89,7 @@ wrong by a constant nobody can see.
 approximately. If it does not, find out why before proceeding — an off-by-N in the
 denominator is invisible in every downstream number.
 
-### 1.2 Exposure classifier tests (`tests/phase0/test_classify_exposure.py`)
+### 1.2 Exposure classifier tests (`research/phase0/tests/test_classify_exposure.py`)
 
 | Test | Setup | Expected |
 |---|---|---|
@@ -80,7 +103,7 @@ That last one is the leakage test. **Classifying against the merged state leaks 
 outcome into the exposure** and produces a spurious correlation. It is the single most
 likely way to fake a positive result by accident.
 
-### 1.3 Outcome classifier tests (`tests/phase0/test_scan_outcome.py`)
+### 1.3 Outcome classifier tests (`research/phase0/tests/test_scan_outcome.py`)
 
 | Test | Setup | Expected |
 |---|---|---|
@@ -170,15 +193,15 @@ reason to pause, not a reason to proceed carefully.
 ## 3. Days 3–5 — The run (Python arm)
 
 ```bash
-uv run python scripts/phase0/extract_prs.py \
+uv run python -m phase0.extract_prs \
     --dataset aidev --lang python --out data/prs.jsonl
 
-uv run python scripts/phase0/run_pipeline.py \
+uv run python -m phase0.run_pipeline \
     --prs data/prs.jsonl \
     --graph pycg --scoped --timeout 600 --mem-limit 16G \
     --out data/exposure.jsonl
 
-uv run python scripts/phase0/scan_outcome.py \
+uv run python -m phase0.scan_outcome \
     --prs data/prs.jsonl --window-days 7 \
     --out data/outcome.jsonl
 ```
@@ -205,7 +228,7 @@ makes the result auditable by someone who does not trust you.
 ## 4. Day 6 — Analysis
 
 ```bash
-uv run python scripts/phase0/build_table.py \
+uv run python -m phase0.build_table \
     --exposure data/exposure.jsonl \
     --outcome  data/outcome.jsonl \
     --strata changed_lines_quartile,framework_present,repo_fix_rate,test_coverage \

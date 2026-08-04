@@ -57,29 +57,37 @@ you remember to obey — the machine will stop you either way.
 3. **Silence must be typed.** When we cannot resolve a call site we emit an
    `Unresolved(site, reason, construct)` record. We never emit nothing. "No edge here" and
    "we failed here" must never be the same value on the wire.
+   → `tests/property/` conservation invariant (ARCHITECTURE.md §6.3)
 
 4. **≤200 lines per source file**, docs and `.md` excluded.
-   → `scripts/guard/check_file_length.py`
+   → `scripts/guard/check_structure.py`
 
 5. **≤15 files per directory**, excluding `__init__.py`.
-   → `scripts/guard/check_dir_fanout.py`
+   → `scripts/guard/check_structure.py`
 
 6. **One public concern per module.** A module exports one class or one function family.
    If you need "and" to describe what a file does, split it.
+   → **ADVISORY** — no mechanism. Judgement call, caught in review or not at all.
 
-7. **No cross-layer imports.** Layers are `types → discover → ingest → probe → label →
-   store → serve`. Left only — never right, never sideways into a sibling's internals.
-   → `scripts/guard/check_conventions.py`
+7. **No cross-layer imports.** Layers are `types → discover → ingest → resolve → probe →
+   label → store → serve`. Left only — never right, never sideways into a sibling's
+   internals. → `scripts/guard/check_conventions.py`
 
 8. **Every file opens with a docstring** stating: what it does, why it exists, what it
    imports and from which layer, and who consumes it.
-   → `scripts/guard/check_module_docstring.py`
+   → `scripts/guard/check_conventions.py`
 
 9. **Branch per change.** `feat/`, `fix/`, `chore/`, `docs/`, `spike/`. No direct commits
-   to `main`. One logical change per PR. → branch protection + `check_branch_name.py`
+   to `main`. One logical change per PR.
+   → `scripts/guard/check_branch_name.py` + `scripts/guard/hook_pre_edit.py` + branch protection
 
 10. **Docs move with code.** A PR that changes behaviour and does not touch
     `docs/CODEBASE.md` fails CI. → `scripts/guard/check_docs_sync.py`
+
+11. **Research dependencies stay out of the product.** `research/` is a separate uv
+    project on a different interpreter. Nothing in `src/` or `scripts/` may import
+    pandas, scipy, statsmodels, gitpython, pyyaml, pycg or tree-sitter.
+    → `scripts/guard/check_no_research_imports.py`
 
 ---
 
@@ -89,8 +97,8 @@ you remember to obey — the machine will stop you either way.
 - `mypy --strict`. No `Any` without an adjacent comment explaining the escape.
 - Dataclasses are `frozen=True, slots=True` unless mutation is the point.
 - No banned name tokens: `util`, `utils`, `helper`, `helpers`, `manager`, `common`,
-  `misc`, `base`, `core`, `data`, `stuff`. They hide missing abstractions.
-  → `scripts/guard/check_naming.py`
+  `misc`, `shared`, `base`, `core`, `data`, `stuff`. They hide missing abstractions.
+  → `scripts/guard/check_conventions.py`
 - Errors carry the call site: `raise ResolveError(site=site, reason=...)`, never bare
   `raise ValueError("failed")`.
 - No bare `except:`. No `except Exception: pass`. Ever.

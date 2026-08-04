@@ -1,0 +1,63 @@
+# Pre-commit hooks. Installed by `just install`.
+#
+# WHAT: Formatting, lint, and the structural guards, run before a commit is written.
+# WHY:  The same checks run in .github/workflows/guards.yml, which is what actually
+#       blocks. This exists to shorten the loop, not to replace CI.
+#
+# VERSION PINS: the ruff rev below MUST match the `ruff==` pin in pyproject.toml.
+#       Nothing enforces that mechanically -- two tools, two files, one version -- so
+#       when you bump one, bump the other in the same commit. pyproject.toml is the
+#       source of truth; this file follows it.
+
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Keep in sync with ruff== in pyproject.toml [dependency-groups] dev.
+    rev: v0.16.1
+    hooks:
+      - id: ruff-format
+      - id: ruff
+        args: [--fix]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        exclude: '\.md$'
+      - id: check-toml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+  - repo: local
+    hooks:
+      - id: guards
+        name: structural and convention guards
+        entry: python scripts/guard/check_structure.py .
+        language: system
+        pass_filenames: false
+
+      - id: conventions
+        name: layering, docstrings and naming
+        entry: python scripts/guard/check_conventions.py .
+        language: system
+        pass_filenames: false
+
+      - id: agents-md
+        name: AGENTS.md budget and pointers
+        entry: python scripts/guard/check_agents_md.py AGENTS.md
+        language: system
+        pass_filenames: false
+
+      - id: enforcement-map
+        name: enforcement map resolves, no orphan guards
+        entry: python scripts/guard/check_enforcement_map.py .
+        language: system
+        pass_filenames: false
+
+      - id: research-imports
+        name: research dependencies stay out of the product
+        entry: python scripts/guard/check_no_research_imports.py .
+        language: system
+        pass_filenames: false

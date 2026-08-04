@@ -70,10 +70,19 @@ Strict left-to-right dependency. A layer imports only from layers to its left.
 Enforced by `scripts/guard/check_conventions.py`.
 
 ```
-types → discover → ingest → probe → label → store → serve
-                              ↑
-                    resolve/ (Phase 4, optional)
+types → discover → ingest → resolve → probe → label → store → serve
+                            (Phase 4, optional)
 ```
+
+`resolve/` sits between `ingest/` and `probe/`: it may consume the upstream graph and
+adds narrow recovery on top, but nothing downstream distinguishes an edge by which of the
+two produced it — that is what `Provenance` is for.
+
+**The order is declared once, in `discovery.LAYER_ORDER`, and that declaration is
+authoritative.** It previously appeared three different ways across this file, `AGENTS.md`
+and the guard's own docstring — including a `parse` layer that `docs/BUILD_PLAN.md` had
+deleted. A layering guard reading one order while the documentation states another is a
+guard that passes while enforcing the wrong thing.
 
 ### `discover/` — what is this repository?
 Walks the tree. Detects language, Python version, frameworks (Django / Flask / FastAPI /
@@ -182,37 +191,56 @@ Phase 2 profiling shows tree-sitter binding overhead dominates — do not pre-op
 
 ## 5. Repository layout
 
+Directories marked ⏳ are declared here but do not exist yet — they arrive in the phase
+that authorises them. `docs/CODEBASE.md` describes what is on disk today.
+
 ```
 qmctx/
-├── AGENTS.md                  (CLAUDE.md → symlink)
+├── AGENTS.md                  agent memory, ≤200 lines
+├── CLAUDE.md                  one line: @AGENTS.md  (committed, not a symlink)
 ├── ARCHITECTURE.md            this file
 ├── README.md
-├── CONTRIBUTING.md            branch and PR protocol
-├── justfile
-├── pyproject.toml
+├── CONTRIBUTING.md            branch and PR protocol, prerequisites
+├── justfile                   requires bash — Git Bash on Windows
+├── pyproject.toml             every version pinned exactly
 ├── src/qmctx/
-│   ├── discover/              ≤15 files
-│   ├── ingest/                upstream graph adapters + call-site census
-│   ├── resolve/               Phase 4 only, narrow recovery
-│   │   └── frameworks/        one file per framework
-│   ├── probe/
-│   ├── label/
-│   ├── store/
-│   ├── serve/
-│   └── types/                 shared frozen dataclasses and enums
+│   ├── __init__.py            ⏳ the only file until Phase 0 reports
+│   ├── types/                 ⏳ shared frozen dataclasses and enums
+│   ├── discover/              ⏳ ≤15 files
+│   ├── ingest/                ⏳ upstream graph adapters + call-site census
+│   ├── resolve/               ⏳ Phase 4 only, narrow recovery
+│   │   └── frameworks/        ⏳ one file per framework
+│   ├── probe/                 ⏳
+│   ├── label/                 ⏳
+│   ├── store/                 ⏳
+│   └── serve/                 ⏳
 ├── tests/
+│   ├── conftest.py            puts scripts/guard on sys.path
 │   ├── unit/                  fast, hermetic
 │   ├── property/              hypothesis invariants
-│   ├── live/                  real pipeline, real repos, golden files
-│   └── fixtures/
-├── scripts/guard/             the enforcement layer
+│   ├── live/                  ⏳ real pipeline, real repos, golden files
+│   ├── adversarial/           ⏳ fault injection, VALIDATION.md §5
+│   └── fixtures/              ⏳ repos/ (submodules) + golden/
+├── research/                  measurement, NOT the product
+│   └── phase0/                standalone uv project: own lock, own interpreter
+│       ├── ENVIRONMENT.lock   read this before touching the instrument
+│       ├── src/phase0/        8 modules, ≤200 lines each
+│       ├── tests/             one file per module
+│       ├── data/              gitignored — raw jsonl
+│       └── results/           committed — the published artifact
+├── scripts/
+│   ├── guard/                 the enforcement layer, stdlib only
+│   └── verify/                ⏳ Phase 1 — see its README for why it is empty
+├── .claude/settings.json      hooks; inert if moved back to the root
+├── .github/workflows/         ci.yml + guards.yml
 ├── docs/
 │   ├── PROJECT_CONTEXT.md     research + business + competitors
 │   ├── BUILD_PLAN.md          phased plan with gates
 │   ├── VALIDATION.md          anti-silent-failure doctrine
 │   ├── CODEBASE.md            folder-wise map, updated every PR
-│   └── plans/                 per-branch design notes
-└── vendor/                    pinned third-party source (pycg, grammars)
+│   ├── findings/              PHASE0_PREREGISTRATION.md, PHASE0_RUNBOOK.md
+│   └── plans/                 per-branch design notes, session records
+└── vendor/                    ⏳ pinned third-party source (grammars)
 ```
 
 ---

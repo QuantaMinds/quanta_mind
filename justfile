@@ -7,6 +7,10 @@
 #       a green `verify` means the data is right. Those are different claims and the
 #       distinction is the whole point of this project.
 # CONSUMED BY: developers, .claude/settings.json hooks, .github/workflows/.
+#
+# REQUIRES: just 1.58.0, uv 0.12.1, and bash. On Windows that means Git Bash, which
+#       ships with Git for Windows — see CONTRIBUTING.md. The recipes are not
+#       cmd.exe-compatible and are not trying to be.
 
 set shell := ["bash", "-uc"]
 
@@ -16,22 +20,30 @@ default:
 # ---------------------------------------------------------------- fast gate
 
 # Everything that must pass before a commit. Target: under 60 seconds.
-check: lint types guards test-unit test-property
+check: lint types guards test-unit test-property test-phase0
     @echo "✅ check passed — code is well-formed. This does NOT mean the data is right."
     @echo "   Run 'just verify' before opening a PR."
 
 lint:
     uv run ruff format --check .
     uv run ruff check .
+    cd research/phase0 && uv run ruff format --check .
+    cd research/phase0 && uv run ruff check .
 
 types:
     uv run mypy --strict src/ scripts/
+    # The harness is checked, but not strictly: it is research code with a finite
+    # life, and pandas/scipy/pycg ship no type information. Rationale in its pyproject.
+    cd research/phase0 && uv run mypy src/
 
 guards:
     uv run python scripts/guard/check_structure.py .
     uv run python scripts/guard/check_conventions.py .
     uv run python scripts/guard/check_assert_quality.py tests
+    uv run python scripts/guard/check_assert_quality.py research/phase0/tests
     uv run python scripts/guard/check_agents_md.py AGENTS.md
+    uv run python scripts/guard/check_enforcement_map.py .
+    uv run python scripts/guard/check_no_research_imports.py .
     uv run python scripts/guard/check_docs_sync.py .
 
 test-unit:
@@ -40,7 +52,24 @@ test-unit:
 test-property:
     uv run pytest tests/property -x --timeout=120
 
+# The Phase 0 harness runs in its own virtual environment on its own interpreter
+# (Python 3.10 — PyCG does not run on 3.11+). See research/phase0/ENVIRONMENT.lock.
+test-phase0:
+    cd research/phase0 && uv run pytest -x --timeout=120
+
+# Branch naming needs a branch, so it runs in CI rather than on every local check.
+check-branch:
+    uv run python scripts/guard/check_branch_name.py .
+
 # ---------------------------------------------------------------- honest gate
+
+# ⚠️  PHASE 1 GATE — not runnable yet, and that is deliberate.
+#
+# Every recipe below operates on the SQLite pack, which does not exist: docs/BUILD_PLAN.md
+# gates all product code on Phase 0 reporting a verdict, and the three scripts under
+# scripts/verify/ cannot be written before the format they verify exists. They are listed
+# here rather than deleted so the gap is documented instead of silent — see
+# scripts/verify/README.md. `just check` is the gate that must be green today.
 
 # Everything in `check`, plus real runs against real data. Target: under 10 minutes.
 verify: check test-live verify-data verify-no-source-leak
@@ -78,8 +107,9 @@ fixtures:
 
 install:
     uv sync --all-extras
-    pre-commit install
-    ln -sf AGENTS.md CLAUDE.md
+    cd research/phase0 && uv sync
+    uv run pre-commit install
+    @echo "Installed. CLAUDE.md is committed and imports AGENTS.md — no symlink needed."
 
 # ---------------------------------------------------------------- product
 
@@ -93,9 +123,10 @@ serve:
 view:
     uv run qmctx view --host 127.0.0.1 --port 7332
 
-# ---------------------------------------------------------------- docs
+# ---------------------------------------------------------------- phase 0
 
-# Regenerates the folder-wise map in docs/CODEBASE.md from the actual tree.
-docs-sync:
-    uv run python scripts/docs/regenerate_codebase_map.py > docs/CODEBASE.md
-    @echo "docs/CODEBASE.md regenerated — review the diff before committing."
+# One-shot authorisation for a single golden-file update. hook_pre_edit.py deletes
+# the sentinel after one use, so it cannot be left enabled.
+allow-golden:
+    touch .qmctx-allow-golden
+    @echo "Next golden-file write is authorised. State in the PR why the output changed."

@@ -2,8 +2,11 @@
 
 WHAT: Three checks that protect separation of concerns and readability.
       1. Layering  — a module may import only from layers to its left in the declared
-                     order (types < discover < parse < resolve < probe < label < store
+                     order (types < discover < ingest < resolve < probe < label < store
                      < serve). Sideways imports into a sibling's internals are banned.
+                     The order lives in discovery.LAYER_ORDER and is authoritative;
+                     `parse` was removed when we decided to consume an upstream graph
+                     rather than build one (docs/BUILD_PLAN.md).
       2. Docstring — every module opens with a docstring containing WHAT, WHY and
                      IMPORTS, so a new contributor can read any single file cold.
       3. Naming    — bans placeholder tokens (util, helper, manager, ...) that mark a
@@ -25,8 +28,23 @@ from discovery import LAYER_ORDER, Violation, iter_python_files, layer_of, repor
 
 PACKAGE = "qmctx"
 
+# The union of what this guard banned and what AGENTS.md's style section listed --
+# the two had drifted apart, each holding tokens the other did not.
 BANNED_TOKENS: frozenset[str] = frozenset(
-    {"util", "utils", "helper", "helpers", "manager", "common", "misc", "stuff", "shared"}
+    {
+        "util",
+        "utils",
+        "helper",
+        "helpers",
+        "manager",
+        "common",
+        "misc",
+        "shared",
+        "stuff",
+        "base",
+        "core",
+        "data",
+    }
 )
 
 REQUIRED_DOCSTRING_SECTIONS: tuple[str, ...] = ("WHAT:", "WHY:", "IMPORTS:")
