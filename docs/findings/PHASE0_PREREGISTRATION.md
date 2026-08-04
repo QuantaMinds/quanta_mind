@@ -28,7 +28,7 @@ papers, and from review of the execution plan.
 
 **No amendment moves a decision boundary.** The RR thresholds (3.0 / 1.5), the CI rules,
 the 7-day window, the `a ≥ 20` floor and the stop rule in §6 are byte-identical to the
-first commit. A1–A5 are factual corrections or newly discovered prerequisites; A6–A17
+first commit. A1–A5 are factual corrections or newly discovered prerequisites; A6–A18
 change *what is measured* (A6), *how it is matched* (A9), *what is excluded* (A7), *how it
 is estimated* (A8), or *what may be claimed from the result* (A10), so that all of them
 match what the instrument can actually deliver.
@@ -67,6 +67,7 @@ reclassification this log exists to prevent.
 | **A15** | 4.5 | Human-arm star-band mismatch confirmed by **joining `human_pull_request` to `repository`**, not by a superset statistic; handled by stratifying on star band. | The human arm's true floor is 503 stars with 0% below 500; the agent arm has 47.3% below 500 and a median of 564 against the human Python slice's 14,933. A 26× popularity gap. |
 | **A16** | 4.6 | **Supersedes A13's mechanism.** Distinguishes the control's *restricted estimand* (no measurement to be missing) from the study's genuine, likely **MNAR** loss to follow-up. Primary labelled complete-case; worst-case bounds; **tipping-point multiplier** run only if the primary is positive; IPCW as supporting. | The §3.3 2×2 is a complete-case analysis, unbiased only under MCAR. The bias is not identifiable, so the question is how much of it the conclusion survives — which is a number, not a caveat. |
 | **A17** | 4.7, 6 | Agent-stratified RR **reportable for Codex only**; Claude Code descriptive at best; corpus composition recorded in §6 as *conservative*; retrieval-strategy moderation **pre-registered as a prediction**. | Codex is 64.9% of the corpus and has the lowest breaking rate (2.62%) of the five, so a positive appears under unfavourable conditions. Claude Code is 459 PRs — below the power floor before the filters. A moderation found post-hoc is a story; predicted, it is mechanism evidence. |
+| **A18** | 4.8 | Prior-work scan recorded: terms, date, coverage (~23 of 62+), and the precise novelty claim. | Three adjacent literatures exist — call-graph *accuracy*, call-graph *defect prediction*, and AIDev empirical studies — and none uses the analyzer's failure to resolve as an exposure. Also found: InferCG beats PyCG by 13.9% recall, which is a Phase 4 option, not a threat to a deliberately crude instrument. |
 
 **A8 is the one that most needed to be pre-registered.** Switching to cluster-robust
 inference after seeing a confidence interval would be indistinguishable from moving the
@@ -657,6 +658,50 @@ breakage **because the agent could not see the caller**, then retrieval strategy
 If it appears, it is mechanism evidence for the causal story. Found afterwards, it is a
 story fitted to a number. This paragraph is the difference between the two, and it costs
 nothing to write now.
+
+### 4.8 Prior-work scan — novelty holds, and is now stated precisely [A18]
+
+Run 2026-08-04, before the pilot. Sources: the AIDev "papers using" list (15 papers, all
+assessed), the MSR 2026 mining-challenge list (~8 assessed of 62), and targeted searches on
+call-graph analysis, call-graph-based defect prediction, and static-analysis coverage as an
+exposure.
+
+**No paper uses static resolvability of a changed symbol's callers as an exposure variable
+predicting downstream breakage.** The claim is now sharper than "nobody has done this",
+because three adjacent literatures exist and each is genuinely different:
+
+| Literature | What it does with the call graph | Why it is not this |
+|---|---|---|
+| **Call-graph accuracy** — PyCG, Jarvis, InferCG, *Total Recall?* (ISSTA 2024), ML-based pruning | Measures and improves it | Treats unresolvability as **the thing to fix**. We treat it as **the signal**. |
+| **Call-graph defect prediction** — CGBR, DeMuVGN | Uses graph *features* (centrality, coupling) to predict defects | Uses the graph where it **succeeds**. We use where it **fails**. |
+| **AIDev empirical studies** — all 15 | PR metadata, textual similarity, task types, survival, security signals | Deepest structural work reaches **package manifests**, never call graphs. |
+
+**The distinction in one line:** everyone else asks how good the graph is, or what the graph
+predicts. Nobody asks what the graph's *inability to answer* predicts.
+
+**Two findings with operational consequences:**
+
+1. **A better instrument exists.** InferCG (TOSEM, March 2026) reports **+13.9% recall and
+   +5.0% F1 over PyCG**, hybridising static analysis with LLM filtering. This does **not**
+   invalidate §3.1's choice — vanilla PyCG was selected *because* it is the crudest
+   available and therefore conservative, and a better instrument can only shrink the
+   exposed arm. It is the natural Phase 4 upgrade and is recorded in
+   `PROJECT_CONTEXT.md` thread #5 beside Jarvis.
+2. ***Total Recall?* (ISSTA 2024) is third-party support for A10's method.** Java rather
+   than Python, but it establishes that ground truth for real-world programs is generally
+   unobtainable and that dynamic baselines are the workaround. That is the same constraint
+   that makes Judge's capability × prevalence decomposition the right approach here — and
+   the reason A10 reports a *measured capability profile* rather than claiming coverage.
+
+**Closest outcome variable found:** *Will It Survive?* (arXiv 2601.16809) — survival
+analysis over 201 projects and 200k code units, modification hazard HR = 0.842 for
+agent-authored code, predicted from **textual** features at AUC 0.671. Adjacent to our
+revert/fix window, and notably weaker than the AUC 0.957 that patch size and file count
+achieve (A16) — which is the confounder, not the mechanism.
+
+**Scan is incomplete and recorded as such:** ~23 of 62+ assessed. The challenge corpus
+predates our snapshot, so the "papers using" list was prioritised and is now exhausted;
+the remaining challenge abstracts are the lower-yield half.
 
 ### Power
 
