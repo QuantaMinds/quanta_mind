@@ -1222,10 +1222,37 @@ known to be broken.
 **Both changes can only remove BROKE verdicts, never add them.** The direction is toward
 the null, which is the direction an amendment made without seeing the answer must take.
 
-**Convergence toward roughly 11% is the signal to look for.** It would mean the tightened
-rule agrees with an independently published measurement on the same population — worth
-knowing before three hours are spent reading pull requests, and worth recording whether it
-happens or not.
+**How the re-measured rate is read — fixed before it is seen.**
+
+11.3% is a **plausibility anchor, not a target**, and treating it as a target would be the
+same error in better clothes. The two measurements are of different things:
+
+| | measures |
+|---|---|
+| The published 11.3% | AST-detected API breaking changes, per PR |
+| This study | a behavioural repair within seven days |
+
+Ours should catch what an AST cannot — runtime, semantic and integration breakage — and
+miss what it can: a changed signature nobody ever repaired because nothing called it,
+which is that paper's own stated limitation. **The two should not agree exactly, and exact
+convergence on 11.3% would be mildly suspicious rather than reassuring.**
+
+- **8–20%** — consistent with a rule measuring the right thing. Proceed.
+- **below ~5%** — over-correction. Inspect what the two fixes removed, by hand, before
+  accepting it.
+- **still above ~25%** — the tightening did not address the cause and the remaining
+  events need diagnosis, not another threshold.
+
+**No further tuning against this number.** The rule has now been changed once on named
+defects; changing it again to land inside a band would be fitting to a figure from a
+different study on a different outcome variable.
+
+**Over-removal is the risk the "can only remove verdicts" argument does not cover.** It
+protects against inflation and not against losing real events, and `a >= 20` binds on the
+exposed arm. So the drop is attributed to each fix **separately** — a legitimate repair
+that also does unrelated cleanup across ten files scores 2/10 = 0.2 and is excluded by the
+focus threshold. If `MIN_COMMIT_FOCUS` removes more than subject-matching does, the
+excluded set is read by hand before the threshold stands.
 
 **Clone timeout becomes a named exclusion.** `dagster-io/dagster` exceeded the 900-second
 clone budget. Large repositories time out, and large repositories hold large pull

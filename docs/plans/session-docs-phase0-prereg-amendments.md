@@ -1,10 +1,10 @@
 # Session record — docs/phase0-prereg-amendments
 
-Written by scripts/guard/hook_session_end.py at 2026-08-04T23:06:37Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-04T23:22:12Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `docs/phase0-prereg-amendments`
-- Files changed vs `main`: 127
+- Files changed vs `main`: 129
 - Uncommitted at session end: 0
 - `docs/CODEBASE.md` updated: yes
 
@@ -48,6 +48,7 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/results/pilot.json`
 - `research/phase0/results/pilot_full.json`
 - `research/phase0/results/power.json`
+- `research/phase0/results/rate_journal.md`
 - `research/phase0/results/scan_journal.md`
 - `research/phase0/src/phase0/__init__.py`
 - `research/phase0/src/phase0/analysis/__init__.py`
@@ -107,6 +108,7 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/tests/test_github_pulls.py`
 - `research/phase0/tests/test_join_end_to_end.py`
 - `research/phase0/tests/test_joins.py`
+- `research/phase0/tests/test_outcome_rule.py`
 - `research/phase0/tests/test_parent_commit.py`
 - `research/phase0/tests/test_risk.py`
 - `research/phase0/tests/test_run_graph.py`
