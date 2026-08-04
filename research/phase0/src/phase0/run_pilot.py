@@ -40,7 +40,7 @@ from phase0.handlabel.select import Candidate, eligible_prs
 from phase0.pilot_report import Attempt, report, star_counts
 from phase0.pipeline import journal
 from phase0.pipeline.assemble import Rejection, build_record
-from phase0.pipeline.worktree import CloneFailed, cloned
+from phase0.pipeline.worktree import CloneFailed, cloned, sweep
 from phase0.scan_outcome import scan
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -86,6 +86,9 @@ def main(argv: list[str] | None = None) -> int:
     chosen = sorted(grouped)[: args.repos]
     print(f"{len(population)} eligible PRs across {len(grouped)} repos; taking {len(chosen)}")
 
+    swept = sweep(args.workspace)
+    if swept:
+        print(f"swept {swept} clone(s) left by a previous run")
     stars = star_counts(ROOT / "data" / "aidev" / "repository.parquet")
     already = journal.completed_repos(args.journal)
     attempts: list[Attempt] = journal.read_attempts(args.journal)

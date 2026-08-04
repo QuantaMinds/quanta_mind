@@ -31,6 +31,7 @@ CONSUMED BY: run_pipeline.py, build_table.py; tests/test_scan_outcome.py.
 
 from __future__ import annotations
 
+from contextlib import closing
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from enum import Enum
@@ -137,36 +138,41 @@ def scan(repo_path: Path, pr: PRRecord, window_days: int = WINDOW_DAYS) -> Outco
     if merged is None:
         return OutcomeRecord(outcome=Outcome.CLEAN)
 
+    repo = None
     try:
         repo = Repo(repo_path)
     except GIT_LOOKUP_ERRORS:
         return OutcomeRecord(outcome=Outcome.CLEAN)
 
-    changed = frozenset(pr.changed_files)
-    commits = _candidates(repo, merged, merged + timedelta(days=window_days), pr.merged_sha)
+    # `closing` rather than a finally: the scan has several early returns and each
+    # one must release the handle. Windows keeps pack files mapped while a Repo is
+    # open, so a missed close means the clone cannot be deleted afterwards.
+    with closing(repo):
+        changed = frozenset(pr.changed_files)
+        commits = _candidates(repo, merged, merged + timedelta(days=window_days), pr.merged_sha)
 
-    for commit in commits:
-        message = str(commit.message)
+        for commit in commits:
+            message = str(commit.message)
 
-        if fix_signals.reverts(message, pr.merged_sha):
-            return OutcomeRecord(
-                outcome=Outcome.BROKE,
-                criterion=Criterion.REVERT,
-                evidence_sha=commit.hexsha,
-                evidence_message=message.strip()[:200],
-                commits_examined=len(commits),
-            )
+            if fix_signals.reverts(message, pr.merged_sha):
+                return OutcomeRecord(
+                    outcome=Outcome.BROKE,
+                    criterion=Criterion.REVERT,
+                    evidence_sha=commit.hexsha,
+                    evidence_message=message.strip()[:200],
+                    commits_examined=len(commits),
+                )
 
-        overlaps = _touches_pr_files(commit, changed)
-        if overlaps and (
-            fix_signals.mentions_breakage(message) or fix_signals.looks_like_a_revert(message)
-        ):
-            return OutcomeRecord(
-                outcome=Outcome.BROKE,
-                criterion=Criterion.FIX_TOUCHING_SAME_FILE,
-                evidence_sha=commit.hexsha,
-                evidence_message=message.strip()[:200],
-                commits_examined=len(commits),
-            )
+            overlaps = _touches_pr_files(commit, changed)
+            if overlaps and (
+                fix_signals.mentions_breakage(message) or fix_signals.looks_like_a_revert(message)
+            ):
+                return OutcomeRecord(
+                    outcome=Outcome.BROKE,
+                    criterion=Criterion.FIX_TOUCHING_SAME_FILE,
+                    evidence_sha=commit.hexsha,
+                    evidence_message=message.strip()[:200],
+                    commits_examined=len(commits),
+                )
 
-    return OutcomeRecord(outcome=Outcome.CLEAN, commits_examined=len(commits))
+        return OutcomeRecord(outcome=Outcome.CLEAN, commits_examined=len(commits))

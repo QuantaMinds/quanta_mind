@@ -25,7 +25,7 @@ import shutil
 import stat
 import subprocess
 from collections.abc import Iterator
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 from pathlib import Path
 
 from git import Repo
@@ -56,8 +56,11 @@ def _remove_tree(target: Path, *, strict: bool) -> None:
     named the wrong cause entirely.
 
     Strict on the way in, because reusing a stale clone would analyse the wrong tree.
-    Lenient on the way out, because a leftover directory is caught by the strict pass
-    on the next attempt rather than lost.
+    Lenient on the way out -- but the reason first written here, "a leftover is caught
+    by the strict pass on the next attempt", was wrong. The next attempt is a DIFFERENT
+    repository, so nothing ever checked, and 1.6 GB of clones accumulated over 41
+    repositories. `sweep` is what actually catches them, and it reports the count rather
+    than tidying quietly.
     """
     if not target.exists():
         return
@@ -69,6 +72,29 @@ def _remove_tree(target: Path, *, strict: bool) -> None:
         return
     if strict and target.exists():
         raise CloneFailed(f"{target}: stale clone survived removal; refusing to reuse it")
+
+
+def sweep(workspace: Path) -> int:
+    """Delete clones a previous run left behind, and say how many there were.
+
+    `cloned` removes leniently on the way out, and the justification written there --
+    "a leftover is caught by the strict pass on the next attempt" -- was wrong. The next
+    attempt is a DIFFERENT repository, so nothing ever checked. 1.6 GB accumulated over
+    41 repositories before anyone looked, and the docstring above warns that disk
+    exhaustion arrives at hour thirty of a multi-day run.
+
+    Returning the count rather than cleaning quietly: a run that had to sweep leftovers
+    is a run whose previous attempt failed to release file handles, and that is worth
+    seeing rather than tidying away.
+    """
+    if not workspace.is_dir():
+        return 0
+    swept = 0
+    for entry in sorted(workspace.iterdir()):
+        if entry.is_dir():
+            _remove_tree(entry, strict=False)
+            swept += not entry.exists()
+    return swept
 
 
 @contextmanager
@@ -133,16 +159,20 @@ def at_commit(repo_path: Path, sha: str, slot: str) -> Iterator[Path | None]:
     tree = repo_path.parent / f"{repo_path.name}--wt-{slot}"
     created = False
     try:
-        try:
-            Repo(repo_path).git.worktree("add", "--detach", "--force", str(tree), sha)
-            created = True
-        except GIT_ERRORS:
-            yield None
-            return
+        # Closed on every path: an open Repo keeps the pack files mapped on Windows, and
+        # the clone this worktree belongs to then cannot be deleted at all.
+        with closing(Repo(repo_path)) as repo:
+            try:
+                repo.git.worktree("add", "--detach", "--force", str(tree), sha)
+                created = True
+            except GIT_ERRORS:
+                yield None
+                return
         yield tree
     finally:
         if created:
             try:
-                Repo(repo_path).git.worktree("remove", "--force", str(tree))
+                with closing(Repo(repo_path)) as repo:
+                    repo.git.worktree("remove", "--force", str(tree))
             except GIT_ERRORS:
                 _remove_tree(tree, strict=False)

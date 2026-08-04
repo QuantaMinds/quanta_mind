@@ -83,6 +83,7 @@ def resolve(
     attrition, reported alongside clone failures, because classifying against the
     wrong commit is worse than classifying nothing.
     """
+    repo = None
     try:
         repo = Repo(repo_path)
         merge = repo.commit(merge_commit_sha)
@@ -93,6 +94,13 @@ def resolve(
         parents = merge.parents
     except GIT_LOOKUP_ERRORS as exc:
         return ParentResolution(MergeShape.AMBIGUOUS, "", reason=f"commit unavailable: {exc}")
+    finally:
+        # Windows keeps the pack files mapped while a Repo is open, so the clone cannot
+        # be deleted afterwards and 1.6 GB accumulated over 41 repositories. Closing is
+        # a no-op on POSIX and the difference between finishing and filling the disk on
+        # Windows -- at hour thirty of a multi-day run, which is when it would show up.
+        if repo is not None:
+            repo.close()
 
     if not parents:
         return ParentResolution(MergeShape.AMBIGUOUS, "", reason="root commit has no parent")

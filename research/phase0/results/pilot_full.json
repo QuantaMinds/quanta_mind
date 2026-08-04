@@ -1,0 +1,109 @@
+{
+  "repositories_visited": 90,
+  "clone_failures": 6,
+  "prs_attempted": 275,
+  "records_built": 154,
+  "admission_rate": 0.56,
+  "rejected_by_stage": {
+    "parent_commit": 43,
+    "no_symbols": 50,
+    "file_set": 24,
+    "merge_metadata": 3,
+    "no_python": 1
+  },
+  "rejected_by_category": {
+    "integrity": 67,
+    "restricted": 51,
+    "resource": 3
+  },
+  "attrition_by_commit_count": {
+    "1": {
+      "n": 104,
+      "admitted": 66,
+      "admission_rate": 0.6346,
+      "by_stage": {
+        "no_symbols": 35,
+        "parent_commit": 3
+      }
+    },
+    "2-5": {
+      "n": 115,
+      "admitted": 67,
+      "admission_rate": 0.5826,
+      "by_stage": {
+        "no_symbols": 14,
+        "parent_commit": 20,
+        "file_set": 14
+      }
+    },
+    "6-20": {
+      "n": 43,
+      "admitted": 18,
+      "admission_rate": 0.4186,
+      "by_stage": {
+        "parent_commit": 13,
+        "file_set": 10,
+        "no_symbols": 1,
+        "no_python": 1
+      }
+    },
+    "21+": {
+      "n": 10,
+      "admitted": 3,
+      "admission_rate": 0.3,
+      "by_stage": {
+        "parent_commit": 7
+      }
+    }
+  },
+  "attrition_by_corpus_file_count": {
+    "1-4": {
+      "n": 169,
+      "admitted": 103,
+      "admission_rate": 0.6095,
+      "by_stage": {
+        "no_symbols": 48,
+        "parent_commit": 10,
+        "file_set": 5,
+        "merge_metadata": 3
+      }
+    },
+    "5-15": {
+      "n": 62,
+      "admitted": 39,
+      "admission_rate": 0.629,
+      "by_stage": {
+        "parent_commit": 16,
+        "file_set": 6,
+        "no_symbols": 1
+      }
+    },
+    "16-50": {
+      "n": 30,
+      "admitted": 7,
+      "admission_rate": 0.2333,
+      "by_stage": {
+        "parent_commit": 11,
+        "file_set": 10,
+        "no_symbols": 1,
+        "no_python": 1
+      }
+    },
+    "51+": {
+      "n": 14,
+      "admitted": 5,
+      "admission_rate": 0.3571,
+      "by_stage": {
+        "parent_commit": 6,
+        "file_set": 3
+      }
+    }
+  },
+  "median_changed_files": 2,
+  "median_changed_symbols": 2,
+  "distinct_repos_in_records": 65,
+  "top_repo_share": 0.0455,
+  "star_band": {
+    ">=500": 154
+  }
+}
