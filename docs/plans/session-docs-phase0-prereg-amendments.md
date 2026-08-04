@@ -1,11 +1,11 @@
 # Session record — docs/phase0-prereg-amendments
 
-Written by scripts/guard/hook_session_end.py at 2026-08-04T18:49:32Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-04T19:41:55Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `docs/phase0-prereg-amendments`
-- Files changed vs `main`: 109
-- Uncommitted at session end: 0
+- Files changed vs `main`: 116
+- Uncommitted at session end: 1
 - `docs/CODEBASE.md` updated: yes
 
 ## Changed
@@ -58,6 +58,9 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/src/phase0/extract_prs.py`
 - `research/phase0/src/phase0/fix_signals.py`
 - `research/phase0/src/phase0/github_pulls.py`
+- `research/phase0/src/phase0/graph/__init__.py`
+- `research/phase0/src/phase0/graph/pycg_failure.py`
+- `research/phase0/src/phase0/graph/run_graph.py`
 - `research/phase0/src/phase0/handlabel/__init__.py`
 - `research/phase0/src/phase0/handlabel/draw.py`
 - `research/phase0/src/phase0/handlabel/files.py`
@@ -67,11 +70,12 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/src/phase0/joins.py`
 - `research/phase0/src/phase0/parent_commit.py`
 - `research/phase0/src/phase0/pipeline/__init__.py`
+- `research/phase0/src/phase0/pipeline/assemble.py`
+- `research/phase0/src/phase0/pipeline/changed.py`
 - `research/phase0/src/phase0/pipeline/measure.py`
 - `research/phase0/src/phase0/pipeline/record.py`
 - `research/phase0/src/phase0/pipeline/worktree.py`
-- `research/phase0/src/phase0/pycg_failure.py`
-- `research/phase0/src/phase0/run_graph.py`
+- `research/phase0/src/phase0/run_pilot.py`
 - `research/phase0/src/phase0/run_pipeline.py`
 - `research/phase0/src/phase0/sample_for_labelling.py`
 - `research/phase0/src/phase0/scan_outcome.py`
@@ -84,6 +88,9 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/tests/fixtures/hand_counted.py`
 - `research/phase0/tests/handlabel/test_blindness.py`
 - `research/phase0/tests/handlabel/test_scoring.py`
+- `research/phase0/tests/pipeline/conftest.py`
+- `research/phase0/tests/pipeline/test_assemble.py`
+- `research/phase0/tests/pipeline/test_changed.py`
 - `research/phase0/tests/test_build_table.py`
 - `research/phase0/tests/test_census.py`
 - `research/phase0/tests/test_classify_exposure.py`

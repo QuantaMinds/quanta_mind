@@ -8,15 +8,18 @@ WHY:  The pilot exists to answer "is the instrument measuring what we think" bef
       exposure classification and the outcome scan are the next stage, and a pilot that
       produced a relative risk would invite reading it.
 
-      Every metric printed is an attrition count. The one that matters most is the
-      file-set disagreement rate, because A24 measured the corpus attributing 92 `.py`
-      files to a pull request that changed two -- if that rate is high, the corpus is
-      not usable as shipped and no downstream number means anything.
+      Every metric printed is an attrition count, and none is pooled. The first smoke
+      run lost 32% of PRs with `parent_commit` dominating, which is shape detection
+      failing when the corpus file list does not match the change -- and that tracks
+      patch size. Differential exclusion on the study's own confounder is not something
+      a single percentage can show, so attrition is cross-tabulated against commit
+      count and corpus file count instead.
 
       Needs a GitHub token. `require_token` fails loudly rather than falling back to
       unauthenticated requests, which at 60/hour would look like a working run while
       silently dropping most of the corpus.
-IMPORTS: phase0.{github_pulls,handlabel.select}, phase0.pipeline.{assemble,worktree}.
+IMPORTS: pandas, phase0.{github_pulls,handlabel.select,pilot_report},
+      phase0.pipeline.{assemble,worktree}.
 CONSUMED BY: `just pilot`.
 """
 
@@ -25,16 +28,19 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from collections import Counter
 from pathlib import Path
+
+import pandas as pd
 
 from phase0.extract_prs import PRRecord
 from phase0.github_pulls import merge_info, require_token
 from phase0.handlabel.select import Candidate, eligible_prs
+from phase0.pilot_report import Attempt, report
 from phase0.pipeline.assemble import Rejection, build_record
 from phase0.pipeline.worktree import CloneFailed, cloned
 
 ROOT = Path(__file__).resolve().parents[2]
+REPOSITORY_TABLE = ROOT / "data" / "aidev" / "repository.parquet"
 PACKAGE = ROOT / "data" / "AIDev_BC_Analyser.zip"
 WORKSPACE = ROOT / "data" / "pilot_clones"
 CACHE = ROOT / "data" / "gh_cache"
@@ -47,29 +53,16 @@ def _by_repo(population: list[Candidate]) -> dict[str, list[Candidate]]:
     return grouped
 
 
-def _report(
-    records: list[PRRecord], rejects: list[Rejection], clone_failures: int, repos: int
-) -> dict[str, object]:
-    stages = Counter(r.stage for r in rejects)
-    attempted = len(records) + len(rejects)
-    disagreements = [r for r in rejects if r.stage == "file_set"]
-    symbols = [len(r.changed_symbols) for r in records]
-    files = [len(r.changed_files) for r in records]
-    return {
-        "repositories_visited": repos,
-        "clone_failures": clone_failures,
-        "prs_attempted": attempted,
-        "records_built": len(records),
-        "admission_rate": round(len(records) / attempted, 4) if attempted else 0.0,
-        "rejected_by_stage": dict(stages),
-        "file_set_disagreement_rate": round(len(disagreements) / attempted, 4)
-        if attempted
-        else 0.0,
-        "records_with_no_symbols": sum(1 for s in symbols if s == 0),
-        "median_changed_files": sorted(files)[len(files) // 2] if files else 0,
-        "median_changed_symbols": sorted(symbols)[len(symbols) // 2] if symbols else 0,
-        "distinct_repos_in_records": len({r.repo for r in records}),
-    }
+def _stars() -> dict[str, int]:
+    """Star count per repository, for the star-band split the human arm needs.
+
+    Returns empty when the table is absent rather than failing: the band is reported as
+    `unknown`, which is visibly different from reporting a band we did not measure.
+    """
+    if not REPOSITORY_TABLE.is_file():
+        return {}
+    frame = pd.read_parquet(REPOSITORY_TABLE)
+    return {str(r.full_name): int(r.stars) for r in frame.itertuples() if r.full_name}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -85,9 +78,36 @@ def main(argv: list[str] | None = None) -> int:
     chosen = sorted(grouped)[: args.repos]
     print(f"{len(population)} eligible PRs across {len(grouped)} repos; taking {len(chosen)}")
 
-    records: list[PRRecord] = []
-    rejects: list[Rejection] = []
+    stars = _stars()
+    attempts: list[Attempt] = []
     clone_failures = 0
+
+    def note(
+        candidate: Candidate,
+        outcome: PRRecord | Rejection,
+        commit_count: int,
+    ) -> None:
+        """One attempt, with the covariates attrition may track. Never a verdict."""
+        corpus_py = sum(1 for f in candidate.changed_files if f.endswith(".py"))
+        stage, category, files, symbols = "", "", 0, 0
+        if isinstance(outcome, Rejection):
+            stage, category = outcome.stage, outcome.category
+        else:
+            files, symbols = len(outcome.changed_files), len(outcome.changed_symbols)
+        attempts.append(
+            Attempt(
+                pr_id=str(candidate.pr_id),
+                repo=candidate.repo,
+                admitted=not isinstance(outcome, Rejection),
+                stage=stage,
+                category=category,
+                commit_count=commit_count,
+                corpus_py_files=corpus_py,
+                derived_files=files,
+                changed_symbols=symbols,
+                stars=stars.get(candidate.repo, -1),
+            )
+        )
 
     for position, repo in enumerate(chosen, start=1):
         candidates = grouped[repo][: args.per_repo]
@@ -97,8 +117,10 @@ def main(argv: list[str] | None = None) -> int:
                 for candidate in candidates:
                     merge = merge_info(repo, candidate.number, str(candidate.pr_id), CACHE, token)
                     if merge is None:
-                        rejects.append(
-                            Rejection(str(candidate.pr_id), "merge_metadata", "PR or repo gone")
+                        note(
+                            candidate,
+                            Rejection(str(candidate.pr_id), "merge_metadata", "PR or repo gone"),
+                            0,
                         )
                         continue
                     outcome = build_record(
@@ -109,11 +131,14 @@ def main(argv: list[str] | None = None) -> int:
                         merged_at=candidate.merged_at,
                         corpus_files=candidate.changed_files,
                     )
+                    note(candidate, outcome, merge.commit_count)
                     if isinstance(outcome, Rejection):
-                        rejects.append(outcome)
-                        print(f"     #{candidate.number}: rejected [{outcome.stage}]", flush=True)
+                        print(
+                            f"     #{candidate.number}: rejected [{outcome.stage}"
+                            f"/{outcome.category}]",
+                            flush=True,
+                        )
                     else:
-                        records.append(outcome)
                         print(
                             f"     #{candidate.number}: {len(outcome.changed_files)} files, "
                             f"{len(outcome.changed_symbols)} symbols",
@@ -123,7 +148,7 @@ def main(argv: list[str] | None = None) -> int:
             clone_failures += 1
             print(f"     clone failed: {exc}", flush=True)
 
-    summary = _report(records, rejects, clone_failures, len(chosen))
+    summary = report(attempts, clone_failures, len(chosen))
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     print("\n" + json.dumps(summary, indent=2))

@@ -49,6 +49,24 @@ from phase0.pipeline.changed import (
 MIN_FILE_AGREEMENT = 0.6
 
 
+# Why a PR left the corpus, at the level that decides how it is analysed. The three are
+# different claims and must not be pooled into one attrition number.
+#
+#   resource   -- the unit exists, we could not obtain it. Missing data.
+#   integrity  -- obtained, but the corpus's account of it cannot be trusted. Missing
+#                 data, and the reason correlates with patch size, so A17's bounds
+#                 must cover it rather than treat it as noise.
+#   restricted -- nothing to measure. Not missing data: the estimand does not cover
+#                 this unit, which narrows the claim rather than biasing it.
+CATEGORIES: dict[str, str] = {
+    "merge_metadata": "resource",
+    "parent_commit": "integrity",
+    "file_set": "integrity",
+    "no_python": "restricted",
+    "no_symbols": "restricted",
+}
+
+
 @dataclass(frozen=True, slots=True)
 class Rejection:
     """Why a PR did not become a record. Counted, never silently dropped."""
@@ -57,6 +75,11 @@ class Rejection:
     stage: str
     reason: str
     agreement: float = -1.0
+
+    @property
+    def category(self) -> str:
+        """`resource`, `integrity` or `restricted` -- see CATEGORIES."""
+        return CATEGORIES.get(self.stage, "resource")
 
 
 def build_record(
@@ -106,6 +129,18 @@ def build_record(
         ranges = touched_line_ranges(clone, parent.parent_sha, merge.merge_commit_sha, path)
         symbols |= symbols_touched(
             source_at(clone, parent.parent_sha, path), ranges, module_name(path)
+        )
+
+    if not symbols:
+        # No exposure to measure, rather than an unexposed one. Import edits and
+        # module-constant changes can and do break callers, so coding them UNEXPOSED
+        # would put real breakage in the unexposed arm -- the same error that
+        # manufactured RR 8.0 in the control corpus, arriving from the other side.
+        return Rejection(
+            pr_id,
+            "no_symbols",
+            f"{len(derived)} .py file(s) changed but no function body did; there is no "
+            f"exposure to measure. The estimand covers function-body changes only.",
         )
 
     return PRRecord(

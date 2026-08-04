@@ -80,6 +80,8 @@ reclassification this log exists to prevent.
 
 | **A24** | 4.13 | Records an **agent-labelled dry run** of the 20-PR gate (11/20, kappa 0.10) and the two defects it exposed: `FIX_PATTERN` matching **squash-merge bodies**, and the replication package **over-attributing files to a PR** (92 `.py` files on a PR that changed 2; 15.9% of PRs get more than 30). Makes the file-set consistency gate **blocking**, not precautionary. | Both defects manufacture BROKE, both scale with PR size, and so both re-enter as A16's confounder through a third door. A dry run is not the gate and does not satisfy it — but it found two corpus-level faults that would have inflated the outcome variable silently. |
 
+| **A25** | 4.14 | A PR with **no changed function body** is excluded as a **restricted estimand**, counted apart from resource attrition and carried into the bounds. Attrition is reported **cross-tabulated by commit count and corpus file count**, never pooled; if it tracks either, A17's bounds must cover `parent_commit` failures and not only the file-set gate. The estimand is stated as **function-body changes only**. | A smoke run lost 32% of PRs with `parent_commit` dominating — shape detection failing when the corpus file list does not match the change, which tracks patch size. That is differential exclusion on the study's own confounder, and a single attrition percentage cannot show it. Coding zero-symbol PRs as UNEXPOSED would put real breakage (import and constant edits do break callers) into the unexposed arm — the error that manufactured RR 8.0, arriving from the other side. |
+
 **A8 is the one that most needed to be pre-registered.** Switching to cluster-robust
 inference after seeing a confidence interval would be indistinguishable from moving the
 goalposts, whatever the motivation.
@@ -1065,6 +1067,67 @@ A human labeller working from the pull request page has the same blind spot.
 sample is balanced ten and ten, because the protocol says so. That is an anchoring channel
 the blind sheet does not close: a labeller who has counted fourteen CLEANs may feel pressure
 toward BROKE. The bucket sizes should not be disclosed to whoever labels.
+
+---
+
+### 4.14 Zero-symbol PRs, and attrition that is not one number [A25]
+
+A smoke run over 28 PRs in 12 repositories admitted 19. It is **not** the pilot — the
+plan specifies 30 repositories and roughly 200 PRs, and at this size every rate carries
+an interval too wide to plan against (attrition 32.1%, 95% CI **[18%, 51%]**). It
+confirmed the plumbing and nothing else, and must not be quoted as a pilot result.
+
+Two things it did settle, both pre-data.
+
+**1. A PR that changes no function body is excluded, and it is not missing data.**
+
+Three of nineteen records had zero changed symbols: `.py` files edited without any
+function body changing — imports, module constants, docstrings. There is no exposure to
+measure on such a unit. That is the same structure as a symbol with no statically named
+call sites: the quantity is *undefined*, not *unobserved*.
+
+Coding them UNEXPOSED would be the error that produced RR 8.0 in the control corpus,
+arriving from the opposite direction. Import and module-constant changes **do** break
+callers, so those units would sit in the unexposed arm carrying real breakage, and the
+resulting bias runs in a direction nobody can predict in advance.
+
+> **Excluded, counted as `restricted` attrition separately from `resource` and
+> `integrity`, and carried into A17's bounds.** The estimand covers **function-body
+> changes only**, and the limits section says so. That narrows the claim, which is the
+> honest cost.
+
+`pipeline/assemble.py` gives every rejection one of three categories, because they are
+different claims and pooling them hides the one that matters:
+
+| Category | Meaning | Effect on the estimate |
+|---|---|---|
+| `resource` | the unit exists, we could not obtain it | missing data |
+| `integrity` | obtained, but the corpus's account cannot be trusted | missing data, **and correlated with size** |
+| `restricted` | nothing to measure | narrows the estimand, does not bias it |
+
+**2. Attrition is reported cross-tabulated, never pooled.**
+
+The smoke run's dominant loss was `parent_commit` (7 of 9), not the file-set gate (2).
+Shape detection fails when the corpus file list does not match the change — which is
+exactly the divergent-base condition A24 measured, and which grows with commit count and
+patch size. Rebase-merging projects skew larger and more process-heavy still.
+
+So this is **A17's differential exclusion appearing at 32%**, not the residual the gate
+was designed to catch. The pilot therefore reports admission rate **within** bands of
+commit count and corpus file count (`pilot_report.py`), with the bands fixed here rather
+than cut from the data — a boundary chosen after seeing the distribution is a degree of
+freedom.
+
+> **If admission falls monotonically across either set of bands, A17's worst-case bounds
+> must be computed over `parent_commit` and `file_set` exclusions as well as the
+> outcome's own loss to follow-up.** At 32% those bounds will be wide. Knowing the width
+> before the point estimate exists is the entire reason this is written now.
+
+**What the smoke run did not produce, and the pilot must.** Exposure rate, breakage rate,
+multi-site fraction, no-static-callee share, `EXCLUDED_SYNTAX` share, instant-merge share,
+star-band split, repository concentration, and the exposure-versus-patch-size correlation
+that decides whether a pooled result is quotable at all. The last of these needs the
+measurement stage, not just record construction.
 
 ---
 

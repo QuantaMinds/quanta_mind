@@ -1,0 +1,108 @@
+"""Pilot metrics: attrition split by the covariates that decide whether it is differential.
+
+WHAT: Turns per-PR attempt records into the shape report — admission by category, and
+      attrition cross-tabulated against commit count, corpus file count and merge shape.
+WHY:  A single attrition percentage is the wrong summary. The first smoke run lost 32%
+      of PRs, and the dominant stage was `parent_commit`: shape detection fails when the
+      corpus file list does not match the change, which happens when the branch base has
+      diverged, which tracks patch size and commit count.
+
+      That is differential exclusion on the study's own confounder, not noise. So the
+      report cross-tabulates rather than totals, and the three categories are kept apart:
+      `restricted` narrows the estimand, `resource` and `integrity` bias it.
+IMPORTS: phase0.pipeline.assemble.
+CONSUMED BY: run_pilot.py; tests/test_pilot_report.py.
+"""
+
+from __future__ import annotations
+
+from collections import Counter
+from dataclasses import dataclass
+
+# Commit-count bands. Chosen before the run and kept coarse: with a few hundred PRs,
+# quartiles cut from the data would move with it, and a moving boundary is a degree of
+# freedom. 1 is a squash, 2-5 an ordinary branch, 6+ a long-lived one.
+COMMIT_BANDS: tuple[tuple[str, int, int], ...] = (
+    ("1", 1, 1),
+    ("2-5", 2, 5),
+    ("6-20", 6, 20),
+    ("21+", 21, 10**9),
+)
+
+# Corpus-attributed .py file counts. The package's median is 4 and its p90 is 52, so the
+# top band is where over-attribution lives.
+FILE_BANDS: tuple[tuple[str, int, int], ...] = (
+    ("1-4", 1, 4),
+    ("5-15", 5, 15),
+    ("16-50", 16, 50),
+    ("51+", 51, 10**9),
+)
+
+
+@dataclass(frozen=True, slots=True)
+class Attempt:
+    """One PR the pilot tried to admit, with the covariates attrition may track."""
+
+    pr_id: str
+    repo: str
+    admitted: bool
+    stage: str  # "" when admitted
+    category: str  # "" when admitted
+    commit_count: int
+    corpus_py_files: int
+    derived_files: int
+    changed_symbols: int
+    stars: int = -1
+
+
+def _band(value: int, bands: tuple[tuple[str, int, int], ...]) -> str:
+    for name, low, high in bands:
+        if low <= value <= high:
+            return name
+    return "unknown"
+
+
+def _cross(attempts: list[Attempt], bands: tuple[tuple[str, int, int], ...], field: str) -> dict:
+    """Admission rate within each band, so a trend is visible rather than pooled away."""
+    out: dict[str, dict[str, object]] = {}
+    for name, _, _ in bands:
+        rows = [a for a in attempts if _band(getattr(a, field), bands) == name]
+        if not rows:
+            continue
+        admitted = sum(1 for a in rows if a.admitted)
+        out[name] = {
+            "n": len(rows),
+            "admitted": admitted,
+            "admission_rate": round(admitted / len(rows), 4),
+            "by_stage": dict(Counter(a.stage for a in rows if not a.admitted)),
+        }
+    return out
+
+
+def report(attempts: list[Attempt], clone_failures: int, repos: int) -> dict[str, object]:
+    """Everything the pilot is for, and no point estimate of an effect."""
+    admitted = [a for a in attempts if a.admitted]
+    rejected = [a for a in attempts if not a.admitted]
+    symbols = sorted(a.changed_symbols for a in admitted)
+    files = sorted(a.derived_files for a in admitted)
+    star_bands = Counter(
+        "unknown" if a.stars < 0 else ("<500" if a.stars < 500 else ">=500") for a in admitted
+    )
+    repo_counts = Counter(a.repo for a in admitted)
+
+    return {
+        "repositories_visited": repos,
+        "clone_failures": clone_failures,
+        "prs_attempted": len(attempts),
+        "records_built": len(admitted),
+        "admission_rate": round(len(admitted) / len(attempts), 4) if attempts else 0.0,
+        "rejected_by_stage": dict(Counter(a.stage for a in rejected)),
+        "rejected_by_category": dict(Counter(a.category for a in rejected)),
+        "attrition_by_commit_count": _cross(attempts, COMMIT_BANDS, "commit_count"),
+        "attrition_by_corpus_file_count": _cross(attempts, FILE_BANDS, "corpus_py_files"),
+        "median_changed_files": files[len(files) // 2] if files else 0,
+        "median_changed_symbols": symbols[len(symbols) // 2] if symbols else 0,
+        "distinct_repos_in_records": len(repo_counts),
+        "top_repo_share": round(max(repo_counts.values()) / len(admitted), 4) if admitted else 0.0,
+        "star_band": dict(star_bands),
+    }

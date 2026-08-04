@@ -1,0 +1,16 @@
+{
+  "repositories_visited": 12,
+  "clone_failures": 1,
+  "prs_attempted": 28,
+  "records_built": 19,
+  "admission_rate": 0.6786,
+  "rejected_by_stage": {
+    "parent_commit": 7,
+    "file_set": 2
+  },
+  "file_set_disagreement_rate": 0.0714,
+  "records_with_no_symbols": 3,
+  "median_changed_files": 4,
+  "median_changed_symbols": 3,
+  "distinct_repos_in_records": 10
+}

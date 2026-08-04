@@ -195,6 +195,35 @@ Agent composition, config `pull_request`, 33,596 rows:
 Any the correlation test result is predominantly a result about Codex. See amendment A14.
 
 
+## GitHub credential — recorded because the measurement depends on it
+
+The parent-commit resolution needs an authenticated token. `require_token` refuses to
+fall back to unauthenticated requests: 60/hour looks like a working run while silently
+dropping most of the corpus.
+
+    identity   Dhanush295
+    supplied   gh auth token       <- NOT a fine-grained PAT
+    kind       gho_ OAuth (user session)
+    scopes     gist, read:org, repo, workflow
+    rate       5000 req/hr core
+
+**This is not the credential the design assumes, and two things do not transfer.**
+
+1. Timing and rate limits measured under this token do not predict CI or a deployment
+   running a fine-grained read-only PAT. Any throughput figure taken here is provisional.
+2. `repo` grants WRITE to the user's own repositories. The architecture claims read-only
+   access to customer code; that claim cannot be made while the study runs on a
+   write-capable session token.
+
+    REQUIRED BEFORE THE NUMBERS ARE USED FOR TIMING OR ACCESS CLAIMS:
+      re-run under a fine-grained PAT scoped to public repositories, contents:read.
+      Structural metrics -- attrition, exposure, symbol counts -- are unaffected by
+      scope and do transfer.
+
+`just pilot` shells out to `gh auth token` at run time, so it works locally and will not
+work in CI. CI needs a real secret.
+
+
 ## External inputs — pinned by hash
 
 ### AIDev_BC_Analyser replication package
