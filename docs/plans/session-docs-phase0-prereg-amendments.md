@@ -1,10 +1,10 @@
 # Session record — docs/phase0-prereg-amendments
 
-Written by scripts/guard/hook_session_end.py at 2026-08-04T19:41:55Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-04T20:43:10Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `docs/phase0-prereg-amendments`
-- Files changed vs `main`: 116
+- Files changed vs `main`: 119
 - Uncommitted at session end: 1
 - `docs/CODEBASE.md` updated: yes
 
@@ -43,11 +43,13 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/results/.gitkeep`
 - `research/phase0/results/controls.json`
 - `research/phase0/results/labelling_dryrun.json`
+- `research/phase0/results/pilot.json`
 - `research/phase0/src/phase0/__init__.py`
 - `research/phase0/src/phase0/analysis/__init__.py`
 - `research/phase0/src/phase0/analysis/build_table.py`
 - `research/phase0/src/phase0/analysis/risk.py`
 - `research/phase0/src/phase0/analysis/verdict.py`
+- `research/phase0/src/phase0/assemble.py`
 - `research/phase0/src/phase0/census.py`
 - `research/phase0/src/phase0/classify_exposure.py`
 - `research/phase0/src/phase0/controls/__init__.py`
@@ -69,6 +71,7 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/src/phase0/handlabel/select.py`
 - `research/phase0/src/phase0/joins.py`
 - `research/phase0/src/phase0/parent_commit.py`
+- `research/phase0/src/phase0/pilot_report.py`
 - `research/phase0/src/phase0/pipeline/__init__.py`
 - `research/phase0/src/phase0/pipeline/assemble.py`
 - `research/phase0/src/phase0/pipeline/changed.py`

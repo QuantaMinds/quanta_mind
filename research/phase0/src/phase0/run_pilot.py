@@ -15,6 +15,10 @@ WHY:  The pilot exists to answer "is the instrument measuring what we think" bef
       a single percentage can show, so attrition is cross-tabulated against commit
       count and corpus file count instead.
 
+      Progress is flushed to a markdown journal after every repository and a restart
+      resumes from it. The full run is over thirty hours; holding results in memory
+      until the end means a dropped connection costs the whole thing twice.
+
       Needs a GitHub token. `require_token` fails loudly rather than falling back to
       unauthenticated requests, which at 60/hour would look like a working run while
       silently dropping most of the corpus.
@@ -36,6 +40,7 @@ from phase0.extract_prs import PRRecord
 from phase0.github_pulls import merge_info, require_token
 from phase0.handlabel.select import Candidate, eligible_prs
 from phase0.pilot_report import Attempt, report
+from phase0.pipeline import journal
 from phase0.pipeline.assemble import Rejection, build_record
 from phase0.pipeline.worktree import CloneFailed, cloned
 
@@ -70,6 +75,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--repos", type=int, default=10)
     parser.add_argument("--per-repo", type=int, default=4)
     parser.add_argument("--out", type=Path, default=ROOT / "results" / "pilot.json")
+    parser.add_argument(
+        "--journal",
+        type=Path,
+        default=ROOT / "results" / "pilot_journal.md",
+        help="append-only progress, flushed per repository; a restart resumes from it",
+    )
     args = parser.parse_args(argv if argv is not None else sys.argv[1:])
 
     token = require_token()
@@ -79,8 +90,11 @@ def main(argv: list[str] | None = None) -> int:
     print(f"{len(population)} eligible PRs across {len(grouped)} repos; taking {len(chosen)}")
 
     stars = _stars()
-    attempts: list[Attempt] = []
+    already = journal.completed_repos(args.journal)
+    attempts: list[Attempt] = journal.read_attempts(args.journal)
     clone_failures = 0
+    if already:
+        print(f"resuming: {len(already)} repos already journalled, {len(attempts)} attempts")
 
     def note(
         candidate: Candidate,
@@ -110,7 +124,10 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     for position, repo in enumerate(chosen, start=1):
+        if repo in already:
+            continue
         candidates = grouped[repo][: args.per_repo]
+        before = len(attempts)
         print(f"[{position}/{len(chosen)}] {repo} ({len(candidates)} PRs)", flush=True)
         try:
             with cloned(repo, WORKSPACE) as clone:
@@ -147,6 +164,9 @@ def main(argv: list[str] | None = None) -> int:
         except CloneFailed as exc:
             clone_failures += 1
             print(f"     clone failed: {exc}", flush=True)
+        # Flushed here, not at the end. A repository that yielded nothing is still
+        # marked done, or a restart would retry it forever.
+        journal.append_repo(args.journal, repo, attempts[before:])
 
     summary = report(attempts, clone_failures, len(chosen))
     args.out.parent.mkdir(parents=True, exist_ok=True)

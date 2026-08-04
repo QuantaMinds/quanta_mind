@@ -97,20 +97,38 @@ def is_excluded(path: Path) -> bool:
     return any(part in EXCLUDED_DIRS for part in path.parts)
 
 
-def iter_source_files(root: Path) -> Iterator[Path]:
-    """Yield every inspectable source file beneath root, in deterministic order.
+def walk(root: Path) -> Iterator[Path]:
+    """Every file beneath root, in deterministic order, PRUNING excluded directories.
 
-    Deterministic ordering matters: guard output is diffed in CI, and a nondeterministic
-    walk produces spurious diffs that train people to ignore guard output.
+    Pruning during the walk rather than filtering after it. `rglob("*")` enumerates
+    everything first, so with a multi-gigabyte clone under `data/` the guards spent
+    minutes listing paths they were about to discard -- and the pre-edit hook, which has
+    a sixty-second budget, simply timed out. A guard that times out is a guard that gets
+    switched off.
+
+    Deterministic ordering matters too: guard output is diffed in CI, and a
+    nondeterministic walk produces spurious diffs that train people to ignore it.
     """
-    for path in sorted(root.rglob("*")):
-        if not path.is_file():
-            continue
-        if is_excluded(path):
-            continue
-        if path.suffix not in SOURCE_SUFFIXES:
-            continue
-        yield path
+    stack = [root]
+    while stack:
+        current = stack.pop()
+        try:
+            entries = sorted(current.iterdir())
+        except OSError:
+            continue  # vanished mid-walk, or unreadable; not this guard's business
+        for entry in entries:
+            if entry.is_dir():
+                if entry.name not in EXCLUDED_DIRS:
+                    stack.append(entry)
+            elif entry.is_file():
+                yield entry
+
+
+def iter_source_files(root: Path) -> Iterator[Path]:
+    """Yield every inspectable source file beneath root."""
+    for path in walk(root):
+        if path.suffix in SOURCE_SUFFIXES:
+            yield path
 
 
 def iter_python_files(root: Path) -> Iterator[Path]:
@@ -128,18 +146,24 @@ TEXT_STEMS: frozenset[str] = frozenset({"justfile", "Justfile", "Makefile"})
 
 def iter_text_files(root: Path) -> Iterator[Path]:
     """Yield every human-readable tracked file, source and prose alike."""
-    for path in sorted(root.rglob("*")):
-        if not path.is_file() or is_excluded(path):
-            continue
+    for path in walk(root):
         if path.suffix in TEXT_SUFFIXES or path.name in TEXT_STEMS:
             yield path
 
 
 def iter_package_dirs(root: Path) -> Iterator[Path]:
-    """Yield every non-excluded directory beneath root."""
-    for path in sorted(root.rglob("*")):
-        if path.is_dir() and not is_excluded(path):
-            yield path
+    """Yield every non-excluded directory beneath root, pruning as it goes."""
+    stack = [root]
+    while stack:
+        current = stack.pop()
+        try:
+            entries = sorted(current.iterdir())
+        except OSError:
+            continue
+        for entry in entries:
+            if entry.is_dir() and entry.name not in EXCLUDED_DIRS:
+                stack.append(entry)
+                yield entry
 
 
 def layer_of(path: Path, package_root: Path) -> str | None:
