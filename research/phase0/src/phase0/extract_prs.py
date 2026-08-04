@@ -18,7 +18,7 @@ WHY:  Every later stage keys off `parent_sha`, which must be the commit the chan
       repository retains its original copyright", and RUNBOOK §5 requires
       publishing the raw inputs alongside the result — so the publishable subset
       is filtered before anything reaches results/, not after.
-IMPORTS: pandas, phase0.github_pulls, phase0.parent_commit.
+IMPORTS: pandas, phase0.joins, phase0.github_pulls, phase0.parent_commit.
 CONSUMED BY: run_pipeline.py; tests/test_extract_prs.py.
 """
 
@@ -29,6 +29,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import pandas as pd
+
+from phase0.joins import JoinReport, checked_merge
 
 Language = str  # "python" | "typescript" — the two arms in scope, RUNBOOK §7
 
@@ -105,15 +107,39 @@ def load_table(dataset: Path, name: str) -> pd.DataFrame:
     return pd.read_parquet(path)
 
 
-def _select(pulls: pd.DataFrame, tasks: pd.DataFrame, repos: pd.DataFrame) -> pd.DataFrame:
-    """Join the three tables and keep only the population §3 fixes."""
-    merged = pulls.merge(tasks[["id", "type"]], on="id", how="left")
-    merged = merged.merge(
+def _select(
+    pulls: pd.DataFrame, tasks: pd.DataFrame, repos: pd.DataFrame
+) -> tuple[pd.DataFrame, list[JoinReport]]:
+    """Join the three tables and keep only the population §3 fixes.
+
+    Both joins are LEFT, which is the dangerous shape: a zero-match join returns the
+    full frame with `type` and `language` all null, `_filter` then drops every row for
+    not being Python, and the attrition counter reports `not_python = total`. That is
+    a computed-looking number with no data behind it. The floors below make it raise.
+
+    The floors are deliberately loose. They are a tripwire for a broken key, not a
+    claim about the corpus — AIDev does not label every PR with a task type, and the
+    real rates are measured and reported rather than asserted here.
+    """
+    with_type, task_join = checked_merge(
+        pulls,
+        tasks[["id", "type"]],
+        on="id",
+        how="left",
+        name="pull_request x pr_task_type",
+        minimum_match_rate=0.5,
+    )
+    with_repo, repo_join = checked_merge(
+        with_type,
         repos[["id", "language", "license"]].rename(columns={"id": "repo_id"}),
         on="repo_id",
         how="left",
+        name="pull_request x repository",
+        # Every PR belongs to a repository, so anything below near-total is a key
+        # fault. `language` gates the Python filter, which is the population itself.
+        minimum_match_rate=0.99,
     )
-    return merged
+    return with_repo, [task_join, repo_join]
 
 
 def _filter(frame: pd.DataFrame) -> tuple[pd.DataFrame, Attrition]:
@@ -133,7 +159,7 @@ def _filter(frame: pd.DataFrame) -> tuple[pd.DataFrame, Attrition]:
 def iter_candidates(dataset: Path, arm: str = "agent") -> Iterator[dict[str, object]]:
     """Every row that survives the population filters, as plain dicts."""
     pull_table, task_table = AGENT_TABLES if arm == "agent" else HUMAN_TABLES
-    frame = _select(
+    frame, _ = _select(
         load_table(dataset, pull_table),
         load_table(dataset, task_table),
         load_table(dataset, "repository"),
@@ -143,17 +169,21 @@ def iter_candidates(dataset: Path, arm: str = "agent") -> Iterator[dict[str, obj
         yield dict(row)
 
 
-def population_counts(dataset: Path, arm: str = "agent") -> tuple[int, Attrition]:
-    """How many survive, and why the rest did not.
+def population_counts(dataset: Path, arm: str = "agent") -> tuple[int, Attrition, list[JoinReport]]:
+    """How many survive, why the rest did not, and what the joins actually matched.
 
     §3's arithmetic is a prediction; this is the measurement. RUNBOOK §3 treats a
     large deviation as a stop condition, not a curiosity.
+
+    The join reports are returned rather than logged because the pilot has to report
+    them as shape metrics. An attrition count is only interpretable next to the match
+    rate of the join that produced the column it filters on.
     """
     pull_table, task_table = AGENT_TABLES if arm == "agent" else HUMAN_TABLES
-    frame = _select(
+    frame, joins = _select(
         load_table(dataset, pull_table),
         load_table(dataset, task_table),
         load_table(dataset, "repository"),
     )
     kept, attrition = _filter(frame)
-    return len(kept), attrition
+    return len(kept), attrition, joins

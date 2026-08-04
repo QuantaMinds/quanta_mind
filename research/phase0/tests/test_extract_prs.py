@@ -95,7 +95,7 @@ def test_publishable_licence_gate() -> None:
 
 def test_population_filters_remove_exactly_what_section_three_says(tmp_path: Path) -> None:
     """One PR survives: Python, structural, merged. The other four each fail one gate."""
-    kept, attrition = population_counts(_dataset(tmp_path))
+    kept, attrition, _ = population_counts(_dataset(tmp_path))
     assert (kept, attrition.not_python, attrition.not_structural, attrition.not_merged) == (
         2,
         1,
@@ -106,7 +106,7 @@ def test_population_filters_remove_exactly_what_section_three_says(tmp_path: Pat
 
 def test_attrition_totals_are_reported(tmp_path: Path) -> None:
     """Rows never leave silently: §3's arithmetic is checked against these."""
-    _, attrition = population_counts(_dataset(tmp_path))
+    _, attrition, _ = population_counts(_dataset(tmp_path))
     assert attrition.total == 3
 
 

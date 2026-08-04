@@ -193,11 +193,34 @@ From that paper's own Threats to Validity:
 They detect that a signature changed. They never check whether anything calls it. **That
 gap is the product**, named by a peer-reviewed paper as its own limitation.
 
-Two more things about their tool, both of which cut our way. It was validated for
+**And it is no longer a quotation — we have read their tool.** Their replication package is
+public (figshare, CC BY 4.0), and `code_analyzer.py` is 318 lines. Two claims that were
+inference are now statements about source:
+
+> **A peer-reviewed MSR 2026 tool classifies breaking changes across 60,324 patches and
+> contains no step, anywhere in its 318 lines, that asks whether anything calls the changed
+> symbol.**
+
+That sentence is checkable by anyone in about four minutes, which is exactly why it is the
+one to say. Their Threats-to-Validity line reads as a caveat and is in fact an accurate
+description of the architecture. *(60,324 is their own two arms summed — 23,333 agent and
+36,991 human analysed patches.)*
+
+Their unmeasured recall also has a **named mechanism** now. The tool reconstructs before-
+and-after source from git hunk text alone, calls `ast.parse` on it, and returns `None` on
+`SyntaxError` — after which the hunk is skipped. **A hunk that fails to parse is
+indistinguishable from a hunk containing no breaking change.** Their validation was
 **precision only** — 95.7% and 93.6% agreement on 94 sampled patches, Cohen's κ = 0.79 —
-with **no recall validation**, so the false-negative rate of AST-based breaking-change
-detection is unmeasured. And 66% of patches were discarded before analysis. Their number is
-a floor, not an estimate.
+and precision sampling draws only from what the tool *flagged*. Skipped hunks are never
+flagged, so they can never be sampled, and the design cannot detect this class of error
+even in principle. Add the 66% of patches discarded before analysis: their number is a
+floor, not an estimate.
+
+**Say this carefully, because the temptation is to oversell it.** None of the above means
+their result is wrong — it is the best measurement of this that exists, and our own Phase 0
+uses their corpus. It means their instrument answers "did a signature change?" and ours
+answers "does anyone depend on it, and do we actually know?". Two different questions, and
+only the second one is a product.
 
 Independent support for the market rather than the mechanism: a causal study (staggered
 difference-in-differences with matched controls) found agent adoption raises

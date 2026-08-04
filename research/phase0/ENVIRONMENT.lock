@@ -171,7 +171,17 @@ Measured coverage (not assumed — see amendment A19):
     ... with >=1 mined commit SHA                1,009   96.8%   <- gates the primary
     ... with >=1 non-empty .py patch               607           <- gates the tertiary
     repositories in that patch-bearing set          90
-    .py patches with no patch text              20,091   31.1%   GitHub omits large files
+    .py patches with no patch text              20,091   31.1%   <- patch-weighted, see below
+    PRs whose .py patch text is complete           710   85.6%   <- the PR-level truth
+
+The 31.1% is real but is NOT a property of the corpus. It is a property of one pull
+request that touches 35,884 .py files and holds 79.3% of all missing patch text on its
+own; the top five hold 93.1%. Excluding those five, the rate is 5.7%. The unit of
+analysis is the PR, so 85.6% is the figure to quote and 31.1% is the figure that will
+be quoted back at you if you state it without its denominator. See amendment A20.
+
+Filenames, unlike patch text, are complete: 0 null of 110,047 rows. This is what makes
+A2's shape detection immune to the problem — it consumes filenames, not patches.
 
 The package is PRE-filter and therefore a superset of the paper's 5,788 commits / 93,044
 patches. Not a corrupted download.

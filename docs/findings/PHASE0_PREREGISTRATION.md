@@ -71,6 +71,8 @@ reclassification this log exists to prevent.
 
 | **A19** | 4.9 | Human-arm commit data is **sourced from the AIDev_BC_Analyser replication package**, not mined. Coverage measured, not assumed: 1,009 of 1,042 merged human Python PRs (96.8%). The 3.2% without commits are attrition under A2, counted by resolution case. | AIDev ships no `pr_commits` for human PRs, so A2's parent resolution could not run on that arm at all. The package supplies commit SHAs for effectively all of it, removing a GitHub-API mining workstream whose quota cost was the human arm's largest unknown. Sourcing beats mining: it is fixed, citable, and re-runnable without a token. |
 
+| **A20** | 4.10 | Traces missing patch text through to A16's confounder. Link 1 **fails, in our favour** — shape detection reads filenames, which are complete. Link 2 holds but is an **outlier, not a gradient**. Adds one pilot metric: **file-set disagreement rate by changed-lines quartile**. Corrects A19's patch-weighted 31.1%. | The chain is real — text is missing precisely for the largest changes, so the tertiary outcome loses big patches differentially, on exactly the variable that achieves AUC 0.957 on its own. It needed measuring rather than asserting, and measuring changed the shape of the answer twice. |
+
 **A8 is the one that most needed to be pre-registered.** Switching to cluster-robust
 inference after seeing a confidence interval would be indistinguishable from moving the
 goalposts, whatever the motivation.
@@ -771,7 +773,9 @@ counted by resolution case — not a new exclusion.
 
 A second figure gates less and must not be confused with the first: **607** merged PRs
 across **90** repositories have at least one non-empty `.py` patch, because GitHub omits
-patch text for large files and **31.1% of the 64,698 `.py` patches have none**. Patch text
+patch text for large files. *(Corrected in A20: the "31.1% of `.py` patches" figure first
+recorded here is patch-weighted and misleads at the PR level — one PR holds 79.3% of it.
+At PR level 85.6% are complete. §4.10 carries the properly denominated numbers.)* Patch text
 feeds only A2's shape *heuristic* and the tertiary AST outcome. The primary variable is
 re-derived from `git diff parent..merged` against the checked-out tree (step 5's consistency
 gate), so it depends on the SHA, not on the patch. **1,009 is the number that binds the
@@ -809,6 +813,60 @@ records what fraction exists. The thresholds, the window, the outcome definition
 floor and A15's star-band stratification are untouched. The direction is toward feasibility,
 not toward a positive: sourcing the data cannot make an effect appear, and the 3.2% loss is
 counted against the human arm.
+
+---
+
+### 4.10 Missing patch text, traced to A16's confounder [A20]
+
+A19 recorded that patch text is missing for large files. The chain that follows is worth
+stating in full, because it enters A16's confounder through a door §5 had not mapped:
+
+> patch text absent → A2's shape heuristic degraded → parent resolved wrongly → step 5's
+> consistency gate excludes the PR → **exclusion concentrates in large patches** → the
+> corpus is differentially thinned on the one variable that reaches AUC 0.957 by itself.
+
+Three links. Measured, not assumed — and measuring changed the answer at two of them.
+
+**Link 1 fails, and in our favour.** A2's shape detection consumes **filenames**, not
+patch bodies. Filenames are complete: **0 null of 110,047 rows**. So the primary path —
+shape → parent → exposure — is not degraded by this at all. The chain does not reach the
+primary variable.
+
+**Link 2 holds, but it is an outlier phenomenon rather than a gradient.** The
+patch-weighted rate of 31.1% recorded in A19 is a true number that misleads at the unit of
+analysis:
+
+| | |
+|---|---|
+| `.py` patches with no text | 20,091 of 64,698 — **31.1%**, patch-weighted |
+| held by a single PR touching 35,884 `.py` files | **79.3%** |
+| held by the top 5 PRs | **93.1%** |
+| rate excluding those 5 PRs | **5.7%** |
+| **PRs whose patch text is complete** | **710 of 829 — 85.6%** |
+
+The unit of analysis is the PR. **85.6% is the honest figure; 31.1% describes one pull
+request.** This is the same error the corrections log already records twice — a
+distributional claim stated at the wrong denominator — and it is now caught by the rule
+that a distributional claim cites a full-population statistic. It was recorded here one
+commit earlier without its denominator, and is corrected rather than quietly rewritten.
+
+**Link 3 survives, and the direction is what matters.** Whether it is a gradient or five
+outliers, the PRs that lose patch text are the enormous ones. The **tertiary** AST outcome
+is therefore size-biased, and biased toward losing the largest changes — which is where a
+size-driven effect would live if size is doing the work.
+
+**One pilot metric is added, and no exclusion is introduced.**
+
+> **File-set disagreement rate by changed-lines quartile.** Step 5's consistency gate
+> already converts a suspected wrong parent into counted attrition. What was not
+> pre-specified is that the attrition must be *read by size*. If disagreement rises across
+> quartiles, A16's stratified RR is not merely co-primary but the only quotable result, and
+> A17's bounds must be computed over the size-stratified exclusion rather than the pooled
+> one. §6 states this outcome explicitly.
+
+Adding a size cap on PRs would be the tempting alternative and is refused: it moves who is
+in the corpus, which is a decision boundary, and it would do so on the exact variable under
+suspicion. The metric is reported; the boundary does not move.
 
 ---
 

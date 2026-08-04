@@ -1,6 +1,6 @@
 # Session record — docs/phase0-prereg-amendments
 
-Written by scripts/guard/hook_session_end.py at 2026-08-04T12:47:55Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-04T13:01:12Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `docs/phase0-prereg-amendments`
