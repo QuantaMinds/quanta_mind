@@ -1,86 +1,80 @@
 {
+  "capability_profile": {
+    "computed_getattr": false,
+    "registering_decorator": false,
+    "string_registry": false,
+    "super_chain": true
+  },
   "clusters": 80,
-  "detection_by_mechanism": {
-    "computed_getattr": [
-      0,
-      10
-    ],
-    "registering_decorator": [
-      0,
-      10
-    ],
-    "string_registry": [
-      0,
-      10
-    ],
+  "detection_in_corpus": {
     "super_chain": [
-      10,
-      10
+      40,
+      40
     ]
   },
   "gate_passed": true,
-  "mechanisms_firing": 1,
+  "mechanisms_firing_of_four": 1,
   "negative_controls": [
     {
       "ci": [
-        0.5715113358962423,
-        1.7497465705239303
+        0.641046532116256,
+        1.809171808138166
       ],
       "detail": "method=cluster-robust",
       "name": "negative:symbol_initial_a_to_m",
       "passed": true,
-      "relative_risk": 1.0
+      "relative_risk": 1.076923076923077
     },
     {
       "ci": [
-        0.5715113358962427,
-        1.7497465705239286
+        0.5715113358962426,
+        1.7497465705239308
       ],
       "detail": "method=cluster-robust",
       "name": "negative:symbol_length_even",
       "passed": true,
-      "relative_risk": 0.9999999999999999
+      "relative_risk": 1.0000000000000002
     },
     {
       "ci": [
-        0.5715113358962427,
-        1.7497465705239286
+        0.5715113358962426,
+        1.7497465705239308
       ],
       "detail": "method=cluster-robust",
       "name": "negative:repo_name_length_odd",
       "passed": true,
-      "relative_risk": 0.9999999999999999
+      "relative_risk": 1.0000000000000002
     }
   ],
   "planted_break_detection_rate": 1.0,
   "positive_control": {
     "ci": [
-      3.0025428593054135,
-      21.31526609242318
+      3.1171684508250337,
+      20.531453788793783
     ],
     "detail": "n=80 synthetic, method=cluster-robust",
     "passed": true,
-    "relative_risk": 8.000000000000002
+    "relative_risk": 8.000000000000005
   },
   "reconciliation": {
-    "bounds_agree_on_gate": false,
+    "bounds_agree_on_gate": true,
     "conserved": true,
     "corpus_units": 80,
-    "detection_recall": 0.25,
+    "detection_recall": 1.0,
     "excluded_from_control_arm": 0,
-    "excluded_from_exposed_arm": 30,
-    "excluded_total": 30,
-    "planted_exposure_detected": "10/40",
+    "excluded_from_exposed_arm": 0,
+    "excluded_total": 0,
+    "planted_exposure_detected": "40/40",
     "rr_bounds_over_exclusions": [
-      2.0,
+      8.0,
       8.0
     ],
     "table": {
-      "a": 8,
-      "b": 2,
+      "a": 32,
+      "b": 8,
       "c": 4,
       "d": 36,
-      "in_table": 50
+      "in_table": 80
     }
   },
   "synthetic_repos": 80

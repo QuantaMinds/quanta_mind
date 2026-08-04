@@ -24,7 +24,8 @@ from pathlib import Path
 from phase0.build_table import Observation, by_primary, tabulate
 from phase0.classify_exposure import Exposure
 from phase0.controls.analysis import run_negative_controls, run_positive_control
-from phase0.controls.corpus import SyntheticPR, build_corpus
+from phase0.controls.corpus import DEFAULT_PER_MECHANISM, SyntheticPR, build_corpus
+from phase0.controls.mechanisms import probe_all_mechanisms
 from phase0.run_pipeline import one_pr
 from phase0.scan_outcome import Outcome, scan
 
@@ -134,7 +135,7 @@ def reconcile(measured: list[tuple[SyntheticPR, Observation]]) -> dict[str, obje
     }
 
 
-def report(per_mechanism: int = 10, timeout_s: int = 120) -> dict[str, object]:
+def report(per_mechanism: int = DEFAULT_PER_MECHANISM, timeout_s: int = 120) -> dict[str, object]:
     """Build, measure, and reduce to the gate's verdict plus its diagnostics."""
     root = Path(tempfile.mkdtemp(prefix="phase0-controls-"))
     built = build_corpus(root, per_mechanism=per_mechanism)
@@ -148,8 +149,13 @@ def report(per_mechanism: int = 10, timeout_s: int = 120) -> dict[str, object]:
     return {
         "synthetic_repos": len(built),
         "clusters": len({o.repo_id for o in observations}),
-        "detection_by_mechanism": {k: list(v) for k, v in tally.items()},
-        "mechanisms_firing": sum(1 for _, (hit, _) in tally.items() if hit),
+        # Detection within the pooled corpus, which by A12 contains only
+        # mechanisms the instrument can see.
+        "detection_in_corpus": {k: list(v) for k, v in tally.items()},
+        # The capability profile stays over ALL FOUR mechanisms, from the probe.
+        # Reporting "firing" against the corpus would read 1/1 and hide A10.
+        "capability_profile": {p.mechanism: p.detected for p in probe_all_mechanisms()},
+        "mechanisms_firing_of_four": sum(1 for p in probe_all_mechanisms() if p.detected),
         "planted_break_detection_rate": broke_rate(measured),
         "positive_control": {
             "relative_risk": positive.relative_risk,

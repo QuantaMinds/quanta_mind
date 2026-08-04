@@ -55,12 +55,36 @@ def test_every_repository_is_its_own_cluster(tmp_path: Path) -> None:
 
 
 def test_symbols_vary_enough_for_the_nonsense_variables(tmp_path: Path) -> None:
-    """A negative control with a constant predicate has an empty margin and tests nothing."""
-    built = build_corpus(tmp_path, per_mechanism=5)
+    """A negative control with a constant predicate has an empty margin and tests nothing.
+
+    Sized past two boundaries on purpose. The module name embeds the index, so
+    length only varies once indices reach 10; the leading letter rotates a-z, so the
+    a-m predicate only varies once indices reach 13. Below either, the corresponding
+    control is degenerate — which the variance check refuses to score as a pass,
+    correctly. The default corpus of 40 clears both.
+    """
+    built = build_corpus(tmp_path, per_mechanism=20)
     symbols = [b.record.changed_symbols[0] for b in built]
     initials = {s[:1].lower() < "n" for s in symbols}
     lengths = {len(s) % 2 == 0 for s in symbols}
     assert initials == {True, False} and lengths == {True, False}
+
+
+def test_planted_breakage_is_decorrelated_from_index_magnitude(tmp_path: Path) -> None:
+    """Nonsense variables must not proxy for the planted outcome.
+
+    A contiguous `index < k` rule made breakage correlate with module-name length,
+    and `symbol_length_even` came back at RR = 1.909 — a "nonsense" variable that
+    was in fact a proxy. The break rate must be equal either side of the digit
+    boundary that changes name length.
+    """
+    built = build_corpus(tmp_path, per_mechanism=20)
+    exposed = [b for b in built if "-exp-" in b.record.pr_id]
+    single = [b for b in exposed if int(b.record.pr_id.rsplit("-", 1)[1]) < 10]
+    double = [b for b in exposed if int(b.record.pr_id.rsplit("-", 1)[1]) >= 10]
+    rate_single = sum(1 for b in single if b.planted_break) / len(single)
+    rate_double = sum(1 for b in double if b.planted_break) / len(double)
+    assert rate_single == rate_double
 
 
 def test_changed_files_match_the_commits(tmp_path: Path) -> None:

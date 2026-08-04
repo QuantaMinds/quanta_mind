@@ -28,7 +28,7 @@ papers, and from review of the execution plan.
 
 **No amendment moves a decision boundary.** The RR thresholds (3.0 / 1.5), the CI rules,
 the 7-day window, the `a ≥ 20` floor and the stop rule in §6 are byte-identical to the
-first commit. A1–A5 are factual corrections or newly discovered prerequisites; A6–A13
+first commit. A1–A5 are factual corrections or newly discovered prerequisites; A6–A16
 change *what is measured* (A6), *how it is matched* (A9), *what is excluded* (A7), *how it
 is estimated* (A8), or *what may be claimed from the result* (A10), so that all of them
 match what the instrument can actually deliver.
@@ -63,6 +63,9 @@ reclassification this log exists to prevent.
 | **A11** | 4.1 | Control corpus is synthetic repositories plus one real repository, not a Django fixture; per-mechanism detection reported against a fixed reading table; gate unchanged at pooled RR ≥ 5. | A control that times out measures our timeout, not our instrument. Synthetic repos guarantee `graph_status == OK`, so a non-detection is unambiguously a detection failure. |
 | **A12** | 4.2 | Control corpus: **if an exposed unit is excluded, its matched control twin is excluded with it.** Unseeable mechanisms go to the capability table only; the firing mechanism scales to 40/40. Gate unchanged. | The first run computed RR = 8.0 from 50 of 80 units, with all 30 exclusions in the exposed arm and none in the control arm. Coding them the other way gives 2.0 — a 4× swing from asymmetric absence alone. |
 | **A13** | 4.3 | **Differential exclusion by arm**, for the main study: exclusions reported by arm and reason; pooled RR demoted if the exposed-arm rate exceeds the control arm's by >10pp or the bounds diverge; every exclusion category bounded both ways, or declared unbounded. | Every exclusion category plausibly removes exposed units faster than unexposed ones. The control measured the magnitude at 4×; on the real corpus nobody plants it deliberately. |
+| **A14** | 4.4 | RR reported **by agent**; §6 scopes the finding; non-identical arm time windows recorded. | Computed: Codex is 64.9% of the corpus and Claude Code 1.4% (459 PRs). A general-sounding claim would rest on one agent — and the product targets the agent with 1.4% of the evidence. |
+| **A15** | 4.5 | Human-arm star-band mismatch confirmed **by computing `min(stars)`**, not by citation; handled by stratifying on star band rather than restricting. | Published sources conflict (>500 vs >100). `repository.parquet` gives min 101, median 564, so AIDev-pop is >100 and the human arm's >500 floor is a real confound. |
+| **A16** | 4.6 | **Supersedes A13's mechanism.** Distinguishes the control's *restricted estimand* (no measurement to be missing) from the study's genuine, likely **MNAR** loss to follow-up. Primary labelled complete-case; worst-case bounds; **tipping-point multiplier** run only if the primary is positive; IPCW as supporting. | The §3.3 2×2 is a complete-case analysis, unbiased only under MCAR. The bias is not identifiable, so the question is how much of it the conclusion survives — which is a number, not a caveat. |
 
 **A8 is the one that most needed to be pre-registered.** Switching to cluster-robust
 inference after seeing a confidence interval would be indistinguishable from moving the
@@ -509,6 +512,107 @@ to the very mechanism built to make exclusions visible.
 > unbounded and must say so.**
 
 That is the typed-absence principle turned on our own sensitivity analysis.
+
+### 4.4 Agent composition — the result is mostly about Codex [A14]
+
+Computed from the live `pull_request` table, 33,596 rows:
+
+| Agent | PRs | Share |
+|---|---|---|
+| **OpenAI Codex** | 21,799 | **64.9%** |
+| GitHub Copilot | 4,970 | 14.8% |
+| Devin | 4,827 | 14.4% |
+| Cursor | 1,541 | 4.6% |
+| **Claude Code** | **459** | **1.4%** |
+
+**Two consequences, fixed before the run:**
+
+1. **RR is reported by agent**, and §6 scopes the finding accordingly. "Unresolved sites
+   predict breakage in agent PRs" reads as a general claim while resting on one agent.
+2. **The product targets Claude Code users, and the evidence will contain 459 of their
+   PRs.** That belongs in `BRIEFING.md` beside the market argument, not only here.
+
+Recorded with it: the arms cover overlapping but non-identical windows — agent PRs
+2024-12→2025-07, human PRs 2025-01→2025-06. A limitation, not an assumption of
+comparability.
+
+### 4.5 The human arm is not a matched control [A15]
+
+**Settled empirically, because published sources contradict each other.** arXiv 2606.28125
+describes AIDev-pop as ">500 stars"; the dataset card, the MSR challenge page and arXiv
+2606.13468 all say ">100". Rather than weigh citations, the statistic was computed from
+`repository.parquet`:
+
+> **`min(stars) = 101`**, max 203,424, median 564, over all 2,807 repositories.
+
+AIDev-pop is **>100 stars**. The median of 564 is the likely source of the error. The
+dataset card states human PRs were *"sampled from the same repositories as Agentic-PRs, but
+only from those that have more than 500 stars."*
+
+**So the mismatch is real:** the agent arm reaches down to 101 stars, the human arm stops at
+500. Comparing them confounds *agent vs human* with *repository popularity*, and §5 already
+names repository activity as a confounder.
+
+**Handling: stratify by star band (≤500, >500) and report both**, rather than restricting.
+Restriction would discard the majority of the agent arm — the median is 564, so roughly half
+the agent repositories fall below the human arm's floor. Stratification keeps them and makes
+the comparison legible.
+
+### 4.6 Missing data — and what is *not* missing [A16]
+
+**Supersedes A13's mechanism.** A13 correctly identified differential exclusion as a
+threat and specified an ad-hoc margin. This replaces that with named methods, and it first
+draws a distinction A13 merged.
+
+#### The control's exclusion is not missing data
+
+The units excluded from the control are not cases whose exposure status exists and went
+unobserved. A symbol with **zero statically-named call sites has no measurement to be
+missing** — the instrument definitionally cannot classify it. That is not loss to
+follow-up; it is a **restricted estimand**.
+
+So the control needs no imputation and no bounding. It needs an honest label:
+
+> RR = 8.0 **among symbols with ≥1 statically-named unresolved call site.** Recall against
+> planted exposure: 25%. Not an estimate for dynamically-dispatched unresolvability, which
+> the instrument cannot measure.
+
+That is what A11's reading table already said. The corpus hid it by including unseeable
+mechanisms in the pooled arm; A12 removes them. The estimand was always restricted.
+
+#### The real study does have missing data, and it is likely MNAR
+
+`UNANALYZED_RESOURCE`, `EXCLUDED_SYNTAX`, ambiguous parents, unreadable repositories —
+these are units with a **real exposure status we failed to observe**. That is loss to
+follow-up, and the mechanism is plausibly *not* at random: complex dynamic code both times
+out more (exposure-related) and breaks more (outcome-related). Missing-not-at-random.
+
+**The §3.3 2×2 is a complete-case analysis**, which is unbiased only under MCAR and biased
+under MAR and MNAR. The control measured what asymmetric absence alone can do to this
+estimate: **RR 2.0 → 8.0**.
+
+And the honest limit, stated up front: where missingness depends on unmeasured causes,
+neither imputation nor weighting removes the bias. The bias is **not identifiable**. What
+*is* available is quantifying how much of it the conclusion survives.
+
+#### Fixed before the run
+
+1. **Primary: complete-case RR, cluster-robust, labelled `complete-case`** in Results, with
+   exclusion counts **by arm and by reason**. Never a single attrition total.
+2. **Worst-case bounds** — all excluded coded UNEXPOSED (lower) and EXPOSED (upper). This is
+   the outer envelope. **Divergent verdicts across the bounds mean no general claim.**
+3. **Tipping-point analysis.** Report the *breakage-rate multiplier* among excluded PRs
+   required to push RR below the §4 threshold of 3.0. A multiplier of 4× is implausible and
+   the result is robust; 1.2× is not and it is fragile. **Run only if the primary analysis
+   is positive** — stress-testing a null is a fishing exercise, and pre-specifying the
+   direction prevents it.
+4. **IPCW as a supporting analysis, never the headline.** Missingness here is predictable
+   from measured variables — `graph_status`, multi-site count, no-static-callee share,
+   patch size, files touched — so exclusion probability can be modelled and observed units
+   weighted. Recorded as supporting because uptake of the method in applied epidemiology is
+   limited and an unfamiliar headline estimator invites the wrong argument.
+5. **The pilot reports exclusion rate by arm.** If the difference is material, §6 leads with
+   the bounds and the tipping point, not the point estimate.
 
 ### Power
 

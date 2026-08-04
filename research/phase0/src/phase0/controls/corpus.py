@@ -65,7 +65,11 @@ def _module_for(mechanism: str, index: int) -> str:
     variable was constant across the corpus and its 2x2 had an empty margin. A
     negative control with no variance tests nothing.
     """
-    return f"{mechanism}_{index}"
+    # The leading letter rotates so symbol-derived nonsense variables have
+    # variance. With one mechanism every module would otherwise share an initial
+    # and a length, leaving the negative controls degenerate -- which the variance
+    # check correctly refuses to score as a pass.
+    return f"{chr(97 + index % 26)}_{mechanism}_{index}"
 
 
 def _stamp(when: datetime) -> str:
@@ -83,6 +87,19 @@ def _commit(repo: Repo, rel: str, body: str, message: str, when: datetime) -> st
         message, author=AUTHOR, committer=AUTHOR, author_date=stamp, commit_date=stamp
     )
     return made.hexsha
+
+
+def _plant(index: int, fraction: float) -> bool:
+    """Whether this index gets a planted break, decorrelated from index magnitude.
+
+    A contiguous `index < k` rule makes breakage correlate with anything derived
+    from the index -- including module-name length, which changes at index 10. The
+    negative controls caught exactly that: `symbol_length_even` came back at
+    RR = 1.909, because it was not nonsense, it was a proxy for the planted
+    outcome. Cycling with period 10 gives the same rate in every decade, so
+    string-derived properties carry no information about breakage.
+    """
+    return (index * 7 + 3) % 10 < round(10 * fraction)
 
 
 def build_one(
@@ -138,19 +155,34 @@ def build_one(
     return SyntheticPR(record, path, mechanism, planted_break)
 
 
-def build_corpus(root: Path, per_mechanism: int = 8) -> list[SyntheticPR]:
-    """Exposed and control arms across all four mechanisms, deterministically."""
+# A12: mechanisms the instrument cannot see belong to the capability table only.
+# Including them in the pooled corpus excluded their exposed units while keeping
+# their control twins, which is what produced RR = 8.0 from 50 of 80 units.
+DETECTABLE_MECHANISMS: tuple[str, ...] = ("super_chain",)
+
+# A12: with one mechanism firing, 10-vs-10 gives a fragile point estimate.
+DEFAULT_PER_MECHANISM = 40
+
+
+def build_corpus(
+    root: Path,
+    per_mechanism: int = DEFAULT_PER_MECHANISM,
+    mechanisms: tuple[str, ...] | None = None,
+) -> list[SyntheticPR]:
+    """Matched exposed/control pairs, deterministically, for detectable mechanisms.
+
+    **A12's invariant: an exposed unit and its control twin are built together and
+    excluded together.** A corpus that drops 75% of one arm and none of the other is
+    broken whichever way it moves the ratio — the first run's asymmetry took RR from
+    2.0 to 8.0 with no output saying so.
+
+    Mechanisms the exposure variable cannot see are therefore not in the pooled
+    corpus at all. They are measured by `controls.mechanisms.probe_all_mechanisms`,
+    which is where a capability profile belongs, and reported beside the gate.
+    """
     built: list[SyntheticPR] = []
-    for mechanism in sorted(MECHANISMS):
+    for mechanism in sorted(mechanisms or DETECTABLE_MECHANISMS):
         for i in range(per_mechanism):
-            built.append(
-                build_one(
-                    root, i, mechanism, True, i < round(per_mechanism * BREAK_FRACTION_EXPOSED)
-                )
-            )
-            built.append(
-                build_one(
-                    root, i, mechanism, False, i < round(per_mechanism * BREAK_FRACTION_CONTROL)
-                )
-            )
+            built.append(build_one(root, i, mechanism, True, _plant(i, BREAK_FRACTION_EXPOSED)))
+            built.append(build_one(root, i, mechanism, False, _plant(i, BREAK_FRACTION_CONTROL)))
     return built

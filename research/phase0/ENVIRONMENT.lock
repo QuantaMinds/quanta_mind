@@ -119,3 +119,25 @@ exist and the runbook has been corrected.
 
 - TS/JS arm (RUNBOOK section 7) needs a JS graph tool -- Jelly, js-callgraph or
   TAJS. Not selected, not pinned. The Python arm runs first by design.
+
+
+## Corpus facts computed from the live dataset, not cited
+
+Published sources disagree about AIDev-pop's star threshold, so it was computed.
+HuggingFace datasets-server `/statistics`, config `repository`, 2,807 rows:
+
+    stars   min 101   median 564   max 203,424
+
+AIDev-pop is >100 stars. arXiv 2606.28125 describes it as ">500"; the dataset card,
+the MSR 2026 challenge page and arXiv 2606.13468 say ">100". The median of 564 is
+the likely source of that error. See amendment A15.
+
+Agent composition, config `pull_request`, 33,596 rows:
+
+    OpenAI_Codex  21,799   64.9%
+    Copilot        4,970   14.8%
+    Devin          4,827   14.4%
+    Cursor         1,541    4.6%
+    Claude_Code      459    1.4%
+
+Any Phase 0 result is predominantly a result about Codex. See amendment A14.
