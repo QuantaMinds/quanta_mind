@@ -17,7 +17,7 @@ WHY:  RUNBOOK section 2.1 calls the positive control the most important gate in
       out near 1. Anything above 1.5 means the pipeline manufactures signal, most
       likely because the outcome scan is contaminated by repository identity
       rather than by the PR.
-IMPORTS: phase0.census, phase0.classify_exposure, phase0.build_table, phase0.risk.
+IMPORTS: phase0.build_table, phase0.classify_exposure, phase0.risk.
 CONSUMED BY: run_pipeline.py; tests/test_controls.py. Results to results/controls.json.
 """
 
@@ -27,44 +27,12 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
 from phase0.build_table import Observation, estimate
-from phase0.census import count_call_sites
-from phase0.classify_exposure import Exposure, classify
-from phase0.pycg_failure import GraphStatus
+from phase0.classify_exposure import Exposure
 from phase0.risk import RiskResult
 
 POSITIVE_CONTROL_N = 30
 POSITIVE_CONTROL_MIN_RR = 5.0
 NEGATIVE_CONTROL_MAX_RR = 1.5
-
-# Four ways a caller can exist that PyCG will not emit an edge for. Each source
-# defines `target` and calls it ONLY through the named mechanism.
-MECHANISMS: dict[str, str] = {
-    "super_chain": (
-        "class Base:\n    def target(self, r):\n        return r\n\n\n"
-        "class Child(Base):\n    def target(self, r):\n        return super().target(r)\n"
-    ),
-    "computed_getattr": (
-        "def target(r):\n    return r\n\n\n"
-        "def caller(mod, cfg):\n    return getattr(mod, cfg['name'])(1)\n"
-    ),
-    "string_registry": (
-        "REGISTRY = {}\n\n\ndef target(r):\n    return r\n\n\n"
-        "REGISTRY['t'] = target\n\n\ndef caller(k):\n    return REGISTRY[k](1)\n"
-    ),
-    "registering_decorator": (
-        "HOOKS = []\n\n\ndef register(fn):\n    HOOKS.append(fn)\n    return fn\n\n\n"
-        "@register\ndef target(r):\n    return r\n\n\ndef caller():\n    return HOOKS[0](1)\n"
-    ),
-}
-
-
-@dataclass(frozen=True, slots=True)
-class MechanismProbe:
-    """Whether the exposure variable can see one kind of hidden caller."""
-
-    mechanism: str
-    detected: bool
-    reason: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -77,36 +45,6 @@ class ControlResult:
     ci_high: float
     passed: bool
     detail: str = ""
-
-
-def probe_mechanism(
-    name: str, source: str, edges: dict[str, set[str]] | None = None
-) -> MechanismProbe:
-    """Can the exposure variable detect a hidden caller of `target` via `name`?
-
-    Runs the real census and asks classify with an empty edge set -- i.e. PyCG
-    resolved nothing -- so a mechanism that still comes out UNEXPOSED is one the
-    variable is structurally blind to, not one PyCG happened to handle.
-
-    A site whose callee has no static name (`getattr(m, k)()`) cannot be attributed
-    to any symbol, so it produces no pair at all. That is a FALSE NEGATIVE, biased
-    toward the null, and it is the reason this probe exists.
-    """
-    sites = count_call_sites(source, path=f"{name}.py", module=name)
-    result = classify(f"{name}.target", "target", sites, edges or {}, GraphStatus.OK)
-
-    if result.primary is Exposure.EXPOSED:
-        return MechanismProbe(name, True, "named call site with no edge")
-    if result.primary is None:
-        return MechanismProbe(
-            name, False, "no call site names the symbol: invisible to the variable"
-        )
-    return MechanismProbe(name, False, f"classified {result.primary.value}")
-
-
-def probe_all_mechanisms() -> list[MechanismProbe]:
-    """RUNBOOK 2.1's diversification, as a capability profile of our own variable."""
-    return [probe_mechanism(name, source) for name, source in MECHANISMS.items()]
 
 
 def run_positive_control(observations: Sequence[Observation]) -> ControlResult:
@@ -129,7 +67,10 @@ def run_positive_control(observations: Sequence[Observation]) -> ControlResult:
 
 # Variables that cannot possibly cause breakage. RUNBOOK 2.2.
 NONSENSE: dict[str, Callable[[Observation], bool]] = {
-    "symbol_initial_a_to_m": lambda o: o.symbol.rsplit(".", 1)[-1][:1].lower() < "n",
+    # Full symbol, not the trailing name: every symbol in a corpus may share a
+    # short name, which leaves the variable constant and the 2x2 with an empty
+    # margin. RUNBOOK 2.2 specifies the FILE initial for the same reason.
+    "symbol_initial_a_to_m": lambda o: o.symbol[:1].lower() < "n",
     "symbol_length_even": lambda o: len(o.symbol) % 2 == 0,
     "repo_name_length_odd": lambda o: len(o.repo_id) % 2 == 1,
 }
@@ -163,10 +104,36 @@ def run_negative_controls(observations: Sequence[Observation]) -> list[ControlRe
     """
     results: list[ControlResult] = []
     for name, predicate in NONSENSE.items():
+        # A predicate that is constant across the corpus assigns every row to one
+        # arm, leaves the 2x2 with an empty margin, and yields "unavailable" -- which
+        # looks identical to a control that ran and found nothing. Three separate
+        # fixtures were degenerate this way before the check existed, so the cause
+        # is named rather than left to be inferred from a NaN.
+        values = {predicate(o) for o in observations}
+        if len(values) < 2:
+            results.append(
+                ControlResult(
+                    name=f"negative:{name}",
+                    relative_risk=float("nan"),
+                    ci_low=float("nan"),
+                    ci_high=float("nan"),
+                    passed=False,
+                    detail=(
+                        f"predicate is constant ({values.pop() if values else 'no rows'}) "
+                        f"across all {len(observations)} rows: this control tests nothing"
+                    ),
+                )
+            )
+            continue
+
         robust, naive = estimate(_recoded(observations, predicate))
         chosen: RiskResult = robust if robust.ci_method != "unavailable" else naive
+        # An uncomputable control FAILS. It previously passed, which made
+        # "we could not compute this" indistinguishable from "this cleared" --
+        # the exact confusion between silence and success that VALIDATION.md
+        # exists to forbid, sitting inside the control logic itself.
         passed = (
-            chosen.ci_method == "unavailable" or chosen.relative_risk <= NEGATIVE_CONTROL_MAX_RR
+            chosen.ci_method != "unavailable" and chosen.relative_risk <= NEGATIVE_CONTROL_MAX_RR
         )
         results.append(
             ControlResult(

@@ -60,6 +60,7 @@ reclassification this log exists to prevent.
 | **A8** | 3.4, 4 | Primary inference is cluster-robust at repository level; naive Katz CI reported alongside; power restated in clustered terms. | Symbols cluster in PRs, PRs cluster in repos. Katz assumes independence and understates variance at exactly the boundary §4 turns on. |
 | **A9** | 3.1 | Edge matching normalises PyCG's path separators and is lenient about the package prefix, requiring a dot boundary. | PyCG names the same function two ways and leaks path separators into module names. Strict equality would mark nested-package callers unresolved wholesale. |
 | **A10** | 3.1, 6 | The exposure variable's **capability profile** is recorded, and the scope of a null is narrowed to match it. | Measured: the variable detects 1 of 4 unresolvable-caller mechanisms. Value-dispatched calls carry no callee name, so they produce no pair and read UNEXPOSED. A null therefore cannot be reported as a null about unresolvability in general. |
+| **A11** | 4.1 | Control corpus is synthetic repositories plus one real repository, not a Django fixture; per-mechanism detection reported against a fixed reading table; gate unchanged at pooled RR ≥ 5. | A control that times out measures our timeout, not our instrument. Synthetic repos guarantee `graph_status == OK`, so a non-detection is unambiguously a detection failure. |
 
 **A8 is the one that most needed to be pre-registered.** Switching to cluster-robust
 inference after seeing a confidence interval would be indistinguishable from moving the
@@ -387,6 +388,55 @@ decides anything; it is reported for comparison only.
 | **RR ≥ 3.0**, CI lower bound > 1.5 | Strong | Proceed to Phase 1. The label predicts breakage. |
 | **RR 1.5 – 3.0**, CI excludes 1 | Weak but real | Proceed, **but the pitch changes** from "we prevent breakage" to "we prioritise review attention." Re-do the business case in `PROJECT_CONTEXT.md §5` before building. |
 | **RR < 1.5** or **CI includes 1.0** | Null / underpowered | **Stop.** See §6. |
+
+### 4.1 Control design [A11]
+
+`PHASE0_RUNBOOK.md §2.1` names a Django fixture. This amends that, and it lands before the
+control runs.
+
+**Why not Django.** A control that times out returns `UNANALYZED_RESOURCE`. The gate would
+then be measuring our timeout rather than our instrument, which tests nothing about
+detection. RUNBOOK itself expects ~22% of real repositories to time out.
+
+**Two halves, each establishing something the other cannot:**
+
+| Half | What it establishes |
+|---|---|
+| **Synthetic repositories** — small, purpose-built, one mechanism each | `graph_status == OK` is guaranteed, so a failure to detect is **unambiguously a detection failure**. This is the only place RR ≥ 5 carries meaning. |
+| **One real repository** (5–20k LOC, genuine package structure) | The pipeline survives nested packages, `__init__.py` re-exports, relative and conditional imports, C extensions — all things synthetic repos are clean of by construction. |
+
+The real repository is chosen to run **comfortably inside 600 s, not to stress it**. Scale
+is what the pilot measures, on real corpus repositories, where a timeout is a legitimate
+recorded outcome rather than a broken control.
+
+**Its `graph_status` and duration are reported.** If the real control repository times out,
+that is a finding about instrument viability and it surfaces — never grounds for quietly
+substituting a smaller repository until one passes.
+
+**The control corpus is not representative of the study corpus.** It isolates detection and
+under-represents scale by construction. Stated here so no reader mistakes it for a sample.
+
+**Gate unchanged: pooled RR ≥ 5.** Requiring all four mechanisms to fire was rejected —
+that converts the control into a *capability requirement*, forcing resolvers to be built
+before the thesis may be tested, which inverts the point of Phase 0. The control
+characterises the instrument; it does not certify it.
+
+**Per-mechanism detection is reported alongside, and the reading is fixed now:**
+
+| Pattern | Meaning | Consequence |
+|---|---|---|
+| 4/4 fire | broad | Null scope: unresolvability generally |
+| 2–3 fire | partial | Null scoped to the detected mechanisms, **named individually** in §6 |
+| **1/4 — only `super()`** | narrow | Null scoped to statically-named unresolved sites, per A10. **Explicitly not a claim about dynamic dispatch.** |
+| 0/4 | broken | **Stop.** Not a null — fix the instrument. |
+
+The third row is the likely one given A10, and the point of fixing the reading now is that
+the headline sentence gets written before anyone is motivated to write it generously.
+
+**Into `PHASE0_RUNBOOK.md §5`'s authenticity checklist:** if only `super()` fires, record
+that `super()` is PyCG's single best-documented blind spot — the easiest possible positive,
+and therefore weak evidence of general detection capability. Better said by us than worked
+out by a reader.
 
 ### Power
 

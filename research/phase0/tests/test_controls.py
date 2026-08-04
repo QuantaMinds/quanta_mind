@@ -123,12 +123,32 @@ def test_positive_control_fails_when_there_is_no_effect() -> None:
 
 
 def test_negative_controls_find_nothing_on_unrelated_outcomes() -> None:
-    """Nonsense exposure against outcomes it cannot cause must sit near 1."""
-    rows = [_observation(f"m.s{i}", f"repo{i % 8}", i % 2 == 0, i % 7 == 0) for i in range(120)]
+    """Nonsense exposure against outcomes it cannot cause must sit near 1.
+
+    Symbols vary by initial letter and length on purpose. An earlier version named
+    every row `m.s{i}`, which made each symbol-derived predicate constant, left the
+    2x2 with an empty margin, and produced an uncomputable control that the old
+    logic scored as a pass. The fixture was degenerate in exactly the way the
+    synthetic corpus was.
+    """
+    rows = [
+        _observation(
+            f"{chr(97 + i % 26)}{'x' * (i % 3)}.s{i}",
+            f"repo{i % 8}{'x' * (i % 2)}",
+            i % 2 == 0,
+            i % 7 == 0,
+        )
+        for i in range(120)
+    ]
     assert [r.passed for r in run_negative_controls(rows)] == [True, True, True]
 
 
 def test_every_negative_control_is_reported() -> None:
     """All three run and all three are reported, pass or fail."""
-    rows = [_observation(f"m.s{i}", f"repo{i % 4}", i % 2 == 0, i % 5 == 0) for i in range(40)]
+    rows = [
+        _observation(
+            f"{chr(97 + i % 26)}.s{i}", f"repo{i % 4}{'x' * (i % 2)}", i % 2 == 0, i % 5 == 0
+        )
+        for i in range(40)
+    ]
     assert len(run_negative_controls(rows)) == 3

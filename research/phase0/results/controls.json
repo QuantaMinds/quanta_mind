@@ -1,0 +1,66 @@
+{
+  "clusters": 80,
+  "detection_by_mechanism": {
+    "computed_getattr": [
+      0,
+      10
+    ],
+    "registering_decorator": [
+      0,
+      10
+    ],
+    "string_registry": [
+      0,
+      10
+    ],
+    "super_chain": [
+      10,
+      10
+    ]
+  },
+  "gate_passed": true,
+  "mechanisms_firing": 1,
+  "negative_controls": [
+    {
+      "ci": [
+        0.5715113358962423,
+        1.7497465705239303
+      ],
+      "detail": "method=cluster-robust",
+      "name": "negative:symbol_initial_a_to_m",
+      "passed": true,
+      "relative_risk": 1.0
+    },
+    {
+      "ci": [
+        0.5715113358962427,
+        1.7497465705239286
+      ],
+      "detail": "method=cluster-robust",
+      "name": "negative:symbol_length_even",
+      "passed": true,
+      "relative_risk": 0.9999999999999999
+    },
+    {
+      "ci": [
+        0.5715113358962427,
+        1.7497465705239286
+      ],
+      "detail": "method=cluster-robust",
+      "name": "negative:repo_name_length_odd",
+      "passed": true,
+      "relative_risk": 0.9999999999999999
+    }
+  ],
+  "planted_break_detection_rate": 1.0,
+  "positive_control": {
+    "ci": [
+      3.0025428593054135,
+      21.31526609242318
+    ],
+    "detail": "n=80 synthetic, method=cluster-robust",
+    "passed": true,
+    "relative_risk": 8.000000000000002
+  },
+  "synthetic_repos": 80
+}
