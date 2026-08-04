@@ -28,6 +28,7 @@ Pack format: `v0` · Phase: **pre-Phase-0, no product code written**
 | `scripts/verify/` | Data verification | golden diff, source-leak proof, determinism. **Empty until Phase 1** — see its README |
 | `vendor/` | Pinned third-party source | **never edited**, blocked by `hook_pre_edit.py` |
 | `docs/` | Reasoning | exempt from the line cap |
+| `BRIEFING.md` | The founder-facing account: pitch, risks, the five questions | root, beside README — it is the outward story, not internal reasoning |
 
 ### `research/` — not the product
 
@@ -64,10 +65,13 @@ Read `research/phase0/ENVIRONMENT.lock` before touching the instrument.
 Dependencies flow **left to right only**. Enforced by `check_conventions.py`.
 
 ```
-types → discover → ingest → probe → label → store → serve
-                              ↑
-                    resolve/ (Phase 4, optional)
+types → discover → ingest → resolve → probe → label → store → serve
+                            (Phase 4, optional)
 ```
+
+The order is declared once, in `discovery.LAYER_ORDER`, and that declaration is what
+`check_conventions.py` enforces. If this diagram and that tuple ever disagree, the tuple
+wins and this file is the bug.
 
 ### `types/`
 **Owns:** the vocabulary. Frozen dataclasses and enums shared across layers —

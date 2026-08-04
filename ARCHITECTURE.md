@@ -36,6 +36,34 @@ not deferred.** Revisit only if PyXray's "no inputs required" claim survives ver
 **What remains is `probe/` + `label/` over someone else's graph** — roughly 800 lines and
 one number. That is the entire defensible surface.
 
+### 0.3 Delivery is pull, never push — and this is load-bearing
+
+SWE-PRBench (arXiv 2603.26130) measured 8 frontier models across three context
+configurations and found all of them degrade as structured context is added, *"even when
+context is provided via structured semantic layers including AST-extracted function context
+and import graph resolution."* Cause identified: attention representation, not content
+selection. Not a length effect — configs A and C differ by 500 tokens.
+
+**That is our Oracle 1 + Oracle 2, delivered in-prompt, making review worse.**
+
+Architectural consequence, binding on every surface in `serve/`:
+
+- The MCP server answers **specific queries**. It never emits a context blob.
+- `callers_of(symbol)` returns the edges for that symbol. Not the file. Not the module.
+- PR comments carry the blast radius for changed symbols only, never a coverage dump.
+- **Anything that resembles "here is more context, good luck" is forbidden by this section.**
+
+Whether pull-based delivery actually escapes the effect is **untested** — see
+`docs/BUILD_PLAN.md` Phase 0c, which measures it against their public harness before any
+code in `serve/` is written.
+
+### 0.4 Languages: Python and TypeScript/JavaScript only
+
+Nothing else until both arms of Phase 0 report. The architecture below the probe layer is
+language-agnostic; `probe/` is not, and each language is a separate research problem rather
+than a new adapter. Rust and Go are explicitly excluded as lead products: their residual is
+small enough that a coverage number would read 95%+ and carry no information.
+
 ---
 
 ## 1. What the system does, in one paragraph
@@ -74,15 +102,15 @@ types → discover → ingest → resolve → probe → label → store → serv
                             (Phase 4, optional)
 ```
 
-`resolve/` sits between `ingest/` and `probe/`: it may consume the upstream graph and
-adds narrow recovery on top, but nothing downstream distinguishes an edge by which of the
-two produced it — that is what `Provenance` is for.
+`resolve/` sits between `ingest/` and `probe/`: it may consume the upstream graph and adds
+narrow recovery on top, but nothing downstream distinguishes an edge by which of the two
+produced it — that is what `Provenance` is for.
 
 **The order is declared once, in `discovery.LAYER_ORDER`, and that declaration is
-authoritative.** It previously appeared three different ways across this file, `AGENTS.md`
-and the guard's own docstring — including a `parse` layer that `docs/BUILD_PLAN.md` had
-deleted. A layering guard reading one order while the documentation states another is a
-guard that passes while enforcing the wrong thing.
+authoritative.** It has previously appeared three different ways across this file,
+`AGENTS.md` and the guard's own docstring — including a `parse` layer that
+`docs/BUILD_PLAN.md` had deleted. A layering guard reading one order while the
+documentation states another is a guard that passes while enforcing the wrong thing.
 
 ### `discover/` — what is this repository?
 Walks the tree. Detects language, Python version, frameworks (Django / Flask / FastAPI /
@@ -191,14 +219,16 @@ Phase 2 profiling shows tree-sitter binding overhead dominates — do not pre-op
 
 ## 5. Repository layout
 
-Directories marked ⏳ are declared here but do not exist yet — they arrive in the phase
-that authorises them. `docs/CODEBASE.md` describes what is on disk today.
+Directories marked ⏳ are declared here but do not exist yet — they arrive in the phase that
+authorises them. `docs/CODEBASE.md` describes what is on disk today.
 
 ```
 qmctx/
 ├── AGENTS.md                  agent memory, ≤200 lines
-├── CLAUDE.md                  one line: @AGENTS.md  (committed, not a symlink)
+├── CLAUDE.md                  one line: @AGENTS.md  (committed, NOT a symlink —
+│                              `ln -sf` needs Developer Mode on Windows and fails silently)
 ├── ARCHITECTURE.md            this file
+├── BRIEFING.md                founder-facing: the pitch, the risks, the five questions
 ├── README.md
 ├── CONTRIBUTING.md            branch and PR protocol, prerequisites
 ├── justfile                   requires bash — Git Bash on Windows
@@ -222,10 +252,10 @@ qmctx/
 │   ├── adversarial/           ⏳ fault injection, VALIDATION.md §5
 │   └── fixtures/              ⏳ repos/ (submodules) + golden/
 ├── research/                  measurement, NOT the product
-│   └── phase0/                standalone uv project: own lock, own interpreter
+│   └── phase0/                standalone uv project: own lock, own interpreter (3.10)
 │       ├── ENVIRONMENT.lock   read this before touching the instrument
-│       ├── src/phase0/        8 modules, ≤200 lines each
-│       ├── tests/             one file per module
+│       ├── src/phase0/        15 modules + pipeline/ subpackage
+│       ├── tests/             125 tests
 │       ├── data/              gitignored — raw jsonl
 │       └── results/           committed — the published artifact
 ├── scripts/
@@ -262,6 +292,9 @@ qmctx/
 
 - **The founding correlation is unmeasured.** Until Phase 0 reports, we do not know that
   `unresolved` predicts breakage. Do not claim it to a customer.
+- **The delivery mechanism is unvalidated.** Structured context degrades review quality when
+  pushed into a prompt (§0.3). We assume pull-based tool calls behave differently. Phase 0c
+  measures it. Until then this is a hypothesis, and it should be stated as one.
 - Our coverage is inherited from the upstream graph's limits plus our own resolvers'.
   When upstream regresses, our numbers move. Adapter versions are pinned and recorded in
   every pack for exactly this reason.

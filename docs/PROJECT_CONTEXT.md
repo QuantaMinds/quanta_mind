@@ -118,33 +118,74 @@ arXiv serves the abstract; ACM is paywalled; ResearchGate rate-limits.
 
 ---
 
+### 2.5 *SWE-PRBench* (arXiv 2603.26130, Mar 2026) — ✅ read in full
+
+**The most consequential paper for this thesis, and it cuts both ways.** 350 PRs with
+human-annotated ground truth, 8 frontier models, three frozen context configurations.
+arXiv preprint, single author (Deepak Kumar, independent), not peer-reviewed. Dataset and
+harness public: `huggingface.co/datasets/foundry-ai/swe-prbench`.
+
+**⚠️ The finding that pressures our mechanism:**
+
+- ✅ *"All 8 models degrade monotonically from config A to config C even when context is
+  provided via structured semantic layers including AST-extracted function context and
+  import graph resolution."*
+- ✅ Not a token-length effect: *"config A and config C differ by only 500 tokens (2,000
+  vs. 2,500). The A>B>C degradation therefore cannot be attributed to context length
+  alone."*
+- ✅ Cause identified: *"The V2 context builder uses AST-based function extraction and
+  import graph resolution, ruling out content selection as the cause. The failure is in
+  attention representation: once relevant context is provided as a flat token sequence
+  alongside the diff, models cannot reliably direct attention to the changed lines."*
+- ✅ Magnitude: Sonnet drops 0.22 → 0.10 on contextual issues when execution context is
+  added; DeepSeek 0.20 → 0.10.
+- ✅ Their deployment guidance: *"Use diff-only context (config A): adding file content
+  does not help and actively harms performance across all tested models."*
+
+**The context they added is our Oracle 1 + Oracle 2, delivered in-prompt.** It made review
+worse. See open thread #8 and `docs/BUILD_PLAN.md` Phase 0c.
+
+**✅ What supports us:**
+
+- Their **Type3 Latent** category is our thesis, verbatim: *"The issue resides in files
+  that import or depend on the changed files."*
+- Type3 does **not** improve with full context. Config C existed to make it accessible.
+  Sonnet 0.17→0.13→0.14; DeepSeek 0.12→0.12→0.11; GPT-4o-mini 0.10→0.10→0.11. All flat.
+  Listed among hard categories as *"Type3 near-zero."*
+- ✅ *"Python has the highest absolute Type3 count (32 of 43, 74.4%), consistent with
+  Python's dynamic import patterns."* — **independent empirical support for our root-cause
+  claim.**
+- ✅ Ceiling is low and public: *"no model detects more than 31% of human-flagged issues
+  on any configuration."*
+- Abstention points the **opposite** direction from what degraded. They added context and
+  lost accuracy; abstention removes confident output. Nothing here suggests that hurts.
+
+**The untested distinction that may save the mechanism:** they tested *pushing* context
+into the prompt. Our design has the agent *pull* via MCP tool calls. A tool result
+answering `callers_of(symbol)` is not 800 tokens of file content sitting beside a diff.
+Their own limitations section points here — *"Context provision strategies encoding
+relevance at the token level... may produce different outcomes and are a direct priority
+for future work."* **This is a hypothesis, not a rebuttal. Phase 0c tests it.**
+
+🟡 **Caveats:** 100-PR sample not the full 350; Python-dominant (69.1%); no human baseline
+(the 20–40pp gap is estimated from prior literature); judge-family bias not excluded
+(primary judge GPT-5.2, cross-validation κ=0.616 only); Type2/Type3 deliberately
+over-sampled in the eval (40/40/20 vs 21%/13% prevalence); contamination not fully
+excluded.
+
+---
+
 ## 3. Market evidence
 
 ### The downstream pain is measured
 
-- ✅ **Agents break maintenance work more than humans do.** *Safer Builders, Risky
-  Maintainers* (arXiv 2603.27524, MSR 2026), 7,191 agent vs 1,402 human PRs from **530**
-  Python repositories in AIDev, filtered to five structural task types → 4,798 agent /
-  1,026 human PRs and 60,324 file-level patches. Breaking changes detected by their own
-  AST tool applying 17 patterns from Du et al.; validated at 95.7% / 93.6% against two
-  independent reviewers, Cohen's κ = 0.79.
-
-  | Task type | Agent | Human |
-  |---|---|---|
-  | feat | 2.89% | 7.74% |
-  | fix | 2.69% | 5.32% |
-  | perf | 4.12% | — |
-  | refactor | **6.72%** | 4.36% |
-  | chore | **9.35%** | 4.95% |
-
-  **The trends invert** — that is the paper's title. Agents are safer building and riskier
-  maintaining. The authors name a *"Confidence Trap"*: highly confident agentic PRs still
-  break things.
+- 🟡 **Agents break maintenance work more than humans do.** 7,191 agent PRs vs 1,402 human
+  PRs from Python repos (AIDev dataset, AST-based detection): agents introduce **fewer**
+  breaking changes in code generation (3.45% vs 7.40%) but **more** during maintenance —
+  **6.72% refactoring, 9.35% chore.** The authors name a *"Confidence Trap"* where highly
+  confident agentic PRs still break things. *(arXiv 2603.27524 — abstract only.)*
   → **This is the single best framing for the product.** Greenfield has no hidden callers;
   refactoring does.
-  ⚠️ **These are the PR-level population, not ours.** Phase 0 requires *merged* PRs (the
-  outcome is a 7-day post-merge scan), which at a 69.3% acceptance rate leaves ~3,300.
-  See `docs/findings/PHASE0_PREREGISTRATION.md` amendment **A1**.
 - 🟡 **The safety net is a coin flip.** Martian Code Review Bench, an independent
   open-source benchmark tracking real developer behaviour across ~200k–300k PRs: the #1
   tool scores **49.2% precision** — roughly one in two comments leads to a code change.
@@ -166,6 +207,32 @@ arXiv serves the abstract; ACM is paywalled; ResearchGate rate-limits.
 - ✅ Cursor: *"On large monorepos, indexing... may not include all files if the index size
   limit is exceeded... If critical files are consistently missing from context, add them
   explicitly with @-mentions."* → The remedy is the human noticing.
+
+### ⚠️ CORRECTED — researchers *do* measure misses; vendors don't report them
+
+An earlier version of this file claimed nobody measures what these tools miss. **That is
+false.** Multiple 2026 benchmarks measure it with denominators:
+
+| Source | Miss measurement |
+|---|---|
+| SWE-PRBench (arXiv 2603.26130) | 350 PRs, human-annotated; 8 frontier models detect 15–31% of human-flagged issues |
+| CR-Bench (arXiv 2603.11078, Nutanix) | *"they either prioritize precision and risk missing critical vulnerabilities, or prioritize recall at the cost of producing noisy and low-actionable feedback"* |
+| Atlassian study, 1,900+ repos | AI resolves 38.70% of security issues vs 44.45% by humans |
+| Planted-bug study (DEV, Mar 2026) | 23 planted bugs; *"the union of bugs caught across all tools was 21 of 23"* |
+
+**The corrected, narrower claim — three distinctions that survive:**
+
+1. **Researchers measure it. No vendor reports it.** Every measurement above is academic or
+   independent. No vendor landing page carries one.
+2. **Wrong granularity.** All ask *"did the tool find this known bug?"* — requiring
+   hand-annotated ground truth on 23 planted bugs or 350 curated PRs. None asks *"what
+   fraction of the dependency graph did the tool resolve?"* Our capability × prevalence
+   decomposition needs no ground truth, so it runs per-repo, per-commit, in production.
+3. **Nobody measures it per-repository at runtime.** A benchmark number describes the
+   tool. A coverage number describes *your* codebase today.
+
+Do not repeat *"nobody measures what they missed."* It does not survive contact with
+anyone who reads arXiv.
 
 ### What nobody is saying
 
@@ -264,7 +331,8 @@ novelty. Pitch it that way. Investors who read these papers will check.
 | 4 | **PyXray** — 🔴 claims dynamic analysis *without inputs*, NumPy/PyTorch in minutes | If true, Phase 9 is a different design | 2 hours |
 | 5 | **Jarvis / PyPt** availability, licence, maintenance | Phase 1 decision | 1 day |
 | 6 | **Does unresolved ⇒ breakage?** | **The thesis. Blocks all product code.** Pre-registered at `docs/findings/PHASE0_PREREGISTRATION.md`. Outcome must be behavioural (revert/fix ≤7d), not the AIDev AST labels — those are produced by static analysis and are structurally blind to the breakage in question. Analysis is relative risk, not a count. | 1 week — **next step** |
-| 7 | **Reddit / HN primary research** — we found blogs, not raw practitioner complaints | Do developers ever name the *missing-caller* mechanism, or only symptoms? Protocol at `PHASE0_PREREGISTRATION.md §9`. Skipping this cost six weeks last time. | 1 week, immediately after #6 |
+| 8 | **Does pull-based MCP retrieval escape the attention-dilution result?** | 🔴 **Precondition for the product, not just the study.** SWE-PRBench shows in-prompt structured context (AST + import graph) degrades review quality across all 8 models. Our mechanism assumes better context helps. Untested for tool-call delivery. | 1 week — `BUILD_PLAN.md` Phase 0c |
+| 7 | **Reddit / HN primary research** — we found blogs, not raw practitioner complaints | Do developers ever name the *missing-caller* mechanism, or only symptoms? Protocol at `PHASE0_PREREGISTRATION.md §9`. Skipping this cost six weeks last time. **Run without a prior** — the SWE-PRBench author writes *"The biggest risk isn't the bugs these tools miss — it's the false confidence they create when a green AI checkmark makes human reviewers lower their guard."* That is one confirmed counter-example to the no-vocabulary assumption. | 1 week, immediately after #6 |
 
 ---
 
@@ -285,7 +353,8 @@ Recorded so nobody re-derives an error we already paid for.
 | Framework resolvers are the moat | The **probe layer** is the moat. Resolvers are a feature race against projects shipping daily. | internal review |
 | We build parse + static resolution | We **consume** an upstream graph. ~165k stars of MIT code, iterating faster than three people can. | internal review |
 | Runtime oracle in Phase 9 | Runtime oracle **deleted from v1**. ~180× overhead, 12%-size graph, 59% builtins. | DyPyBench §4.1.2 |
-| Phase 0 corpus is ~7,191 agent PRs | 7,191 is pre-filter. Structural task types → 4,798; merged-only (69.3% acceptance) → **~3,300**. The analysed population is 2.2× smaller. | AIDev + arXiv 2602.08915, via PHASE0_PREREGISTRATION.md **A1** |
-| Agent breaking-change rate is "3.45% code generation vs 7.40% human" | That pairing appears nowhere in the paper. Per task type, agents: feat 2.89, fix 2.69, perf 4.12, refactor 6.72, chore 9.35. Humans invert it. | arXiv 2603.27524, full text |
-| `pr_task_type.confidence` is the "Confidence Trap" variable | It is the task-type **classifier's** confidence in its own label, and it is 10 on every row sampled. Zero variance; useless as a stratum. Dropped. | AIDev live schema |
-| AIDev supplies the PR's parent commit | It supplies no base, head or merge SHA. Parent = `merge_commit_sha^1` via the GitHub API. | AIDev live schema, **A2** |
+| "Nobody measures what these tools missed" | **False.** SWE-PRBench, CR-Bench, Atlassian and independent planted-bug studies all measure misses with denominators. Corrected claim: researchers measure it, vendors don't report it, and nobody measures it per-repo at runtime. | arXiv 2603.26130, 2603.11078 |
+| More structural context improves agent output | **Contradicted for in-prompt delivery.** AST extraction + import graph resolution degraded review quality across all 8 models tested. Whether pull-based MCP retrieval differs is untested — open thread #8. | SWE-PRBench §6.3 |
+| AIDev contains ~7,191 PRs | AIDev is **932,791** PRs / 116,211 repos; AIDev-pop is **33,596** / 2,807 repos (>100 stars). 7,191 is one paper's Python filter. Dataset cutoff **1 Aug 2025** — the corpus describes mid-2025 agent behaviour, not 2026. | arXiv 2602.09185, HF dataset card |
+| `pr_task_type.confidence` has zero variance | **False, and the error was ours.** Sampling 26 consecutive rows gave 10 every time; the full-column statistics over all 33,596 rows are min 3, max 10, mean 9.25, std 0.63 (3–4: 4 · 5–6: 6 · 7–8: 26 · 8–9: 3,236 · 9–10: 30,324). The field varies. It is still not a stratifier, for the opposite reason: breaking rate is **flat across levels** — 3.94% (8), 3.96% (9), 3.16% (10) — so confidence is *uninformative*, which is the paper's actual Confidence Trap. **Rule adopted: a distributional claim cites a full-population statistic, never a row sample.** | HF datasets-server `/statistics`; arXiv 2603.27524 |
+| Human and agent arms are comparable | **Star-band mismatch.** Dataset card: *"Human-PRs were sampled from the same repositories as Agentic-PRs, but only from those that have more than 500 stars."* Agent subset is >100. Also: "AIDev-pop" meant ≥500 stars in the Jul 2025 version (7,122 PRs) and >100 in Feb 2026. **Resolved:** the paper states its own source — *"The repository table lists 2,807 GitHub repositories with at least 100 stars, including 530 Python projects"* — so it used the >100 subset and the mismatch is real. A15 pre-registered. | HF dataset card; arXiv 2507.15003 |

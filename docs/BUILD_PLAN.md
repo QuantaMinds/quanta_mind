@@ -70,6 +70,56 @@ This is the step that was skipped last time. One week now, six weeks later.
 
 ---
 
+## Phase 0c — Does pull-based retrieval escape attention dilution? (1 week)
+
+**Runs after Phase 0, before any Phase 1 code. This is a precondition for the product, not
+a nice-to-have.**
+
+**The problem.** SWE-PRBench (arXiv 2603.26130) evaluated 8 frontier models across three
+context configurations and found all of them degrade as structured context is added — *"even
+when context is provided via structured semantic layers including AST-extracted function
+context and import graph resolution."* Not a length effect: config A and C differ by 500
+tokens. The identified cause is attention representation, not content selection.
+
+**That context is our Oracle 1 + Oracle 2, delivered in-prompt.** Our entire mechanism
+assumes better structural context improves agent output. For prompt-delivered context, that
+is now contradicted by direct measurement.
+
+**The untested distinction.** They *pushed* context into the prompt. We have the agent
+*pull* via MCP tool calls. `callers_of(symbol)` returning 7 labeled edges is not 800 tokens
+of file content beside a diff — different position, different volume, different attention
+profile. Their limitations section points here but does not test it.
+
+**Experiment.** Take 30 Type3 PRs from SWE-PRBench — their Type3 Latent category is our
+thesis verbatim: *"The issue resides in files that import or depend on the changed files."*
+Using their public harness and dataset, compare:
+
+| Arm | Context |
+|---|---|
+| (a) | config A, diff-only — their best-performing configuration |
+| (b) | config A **plus an MCP tool** the model may call for callers of changed symbols |
+
+Same model, same judge, same scoring formula. Their judge is validated at κ=0.75.
+
+**Why Type3 specifically:** it does not improve with full context in their results —
+Sonnet 0.17→0.13→0.14, DeepSeek 0.12→0.12→0.11, GPT-4o-mini 0.10→0.10→0.11, all flat, and
+listed among hard categories as *"Type3 near-zero."* If pull-based retrieval moves a flat
+line, that is a clean signal.
+
+**Gate:** (b) beats (a) on Type3 composite score. Then we have direct evidence that
+tool-call delivery escapes attention dilution — and a publishable result.
+
+**Kill criterion:** (b) ≤ (a). Then the delivery mechanism is wrong, and no amount of graph
+quality fixes it. Redesign before Phase 1 rather than after.
+
+**Cost:** one week, someone else's dataset, someone else's harness, no product code.
+
+**Note the sequencing logic:** Phase 0 asks whether unresolved sites predict breakage.
+Phase 0c asks whether telling an agent about them helps. **Both must be true.** A positive
+Phase 0 with a negative Phase 0c means the signal is real and undeliverable.
+
+---
+
 ## Scope decision — taken before Phase 1, recorded so it is not silently reversed
 
 ### We do not build a graph
