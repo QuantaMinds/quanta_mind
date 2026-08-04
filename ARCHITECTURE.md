@@ -1,8 +1,40 @@
 # Architecture
 
+> **STATUS: PROVISIONAL.** This document describes a system whose founding assumption has
+> not been measured. Until `docs/findings/PHASE0_PREREGISTRATION.md` has a filled Results
+> section with a non-null verdict, treat everything here as a draft that survives only if
+> the correlation clears RR ≥ 3.0. **No product code is written before that.**
+>
 > Read this before your first change. It explains the layering, the contracts between
 > layers, and the reasoning behind every stack choice. If something here contradicts the
 > code, the code is wrong or this file is stale — fix one of them in the same PR.
+
+---
+
+## 0. Scope decisions — what we deliberately do not build
+
+Recorded at the top because they are the two most likely things to be reversed by
+enthusiasm. Reversing either requires a PR that re-argues it.
+
+### 0.1 We do not build a call graph
+
+Graphify, CodeGraph and GitNexus hold ~165k GitHub stars between them, are MIT or
+near-MIT, ship over MCP, and iterate faster than three people can. **We consume one.**
+`ingest/` adapts an upstream graph and adds a thin call-site census, because upstream
+tools emit edges but none emits the *denominator* — and the denominator is coverage.
+
+Every improvement they ship improves our product. Competing with them is a feature race
+we lose.
+
+### 0.2 We do not build a runtime oracle in v1
+
+~180× tracing overhead, a dynamic graph ~12% the size of the static one at 82% statement
+coverage, and ~59% of what it recovers is builtins we discard. The economics do not close,
+and designing around a layer that will not ship distorts everything upstream. **Removed,
+not deferred.** Revisit only if PyXray's "no inputs required" claim survives verification.
+
+**What remains is `probe/` + `label/` over someone else's graph** — roughly 800 lines and
+one number. That is the entire defensible surface.
 
 ---
 
@@ -35,10 +67,12 @@ Full reasoning and citations: `docs/PROJECT_CONTEXT.md`.
 ## 3. Layers
 
 Strict left-to-right dependency. A layer imports only from layers to its left.
-Enforced by `scripts/guard/check_layering.py`.
+Enforced by `scripts/guard/check_conventions.py`.
 
 ```
-discover → parse → resolve → probe → label → store → serve
+types → discover → ingest → probe → label → store → serve
+                              ↑
+                    resolve/ (Phase 4, optional)
 ```
 
 ### `discover/` — what is this repository?
@@ -47,31 +81,41 @@ Celery / SQLAlchemy / pytest), package layout, entry points, test command.
 **Output:** `RepoProfile` (frozen dataclass).
 **Must not:** parse code, run anything, touch the network.
 
-### `parse/` — what symbols and call sites exist?
-tree-sitter over every source file. Produces symbol definitions, import statements, and
-**every call site**, including ones we cannot resolve. Counting call sites is how we get a
-denominator; without it there is no coverage number.
-**Output:** `ParseUnit` per file → `SymbolTable`, `CallSite[]`.
-**Must not:** attempt resolution. Parsing and resolving are different jobs.
+### `ingest/` — the graph, and the denominator
+Two jobs, deliberately paired because they must agree on symbol identity.
 
-### `resolve/` — which call site points where?
-Independent resolvers, each declaring what it can and cannot handle:
+1. **Adapt an upstream graph.** One adapter per source (`codegraph.py`, `graphify.py`,
+   `pycg.py`), behind a single `GraphSource` protocol. Swapping adapters must change the
+   edges and leave the coverage arithmetic untouched — that is a Phase 1 gate.
+2. **Call-site census.** A thin tree-sitter pass counting *every* call site, including
+   ones nothing resolves. Upstream tools emit edges; none emits the denominator, and
+   without a denominator there is no coverage number.
+
+**Output:** `Graph` (edges from upstream) + `CallSite[]` (ours).
+**Must not:** attempt resolution, rank edges, or improve on upstream. If an adapter starts
+growing resolution logic, that logic belongs in `resolve/` and must be argued for.
+**Why this is not `parse/` + `resolve/static.py`:** see §0.1. Building our own graph is a
+race against 165k stars of MIT code shipping daily.
+
+### `resolve/` — narrow recovery only (Phase 4, conditional)
+Exists **only** for edges upstream tools structurally cannot produce, and only where Phase 0
+exposure data shows the risk concentrates.
 
 | Resolver | Mechanism | Handles |
 |---|---|---|
-| `static.py` | vendored PyCG fork, entry-point scoped | direct calls, imports, closures |
-| `types.py` | pyright / LSP | cross-file resolution, inheritance, generics |
-| `mro.py` | AST + class graph | `super()` chains (PyCG misses these entirely) |
+| `mro.py` | AST + class graph | `super()` chains — PyCG misses these entirely |
 | `frameworks/django.py` | `urls.py`, signals, admin registry | URL→view, signal→receiver |
 | `frameworks/celery.py` | task registry | string-dispatched tasks |
 | `frameworks/sqlalchemy.py` | relationship declarations | ORM lazy edges |
 | `frameworks/pytest.py` | fixture graph | fixture→test |
-| `runtime.py` | `sys.monitoring` trace, nightly | anything the tests actually executed |
 
 Each resolver returns `(edges, unresolved)`. **Returning fewer edges is legitimate.
 Returning a guess is not.**
-**Must not:** call an LLM. Resolution is deterministic. (LLM candidate filtering is a
-future `resolve/llm.py`, and it will be gated behind an explicit confidence downgrade.)
+**Must not:** call an LLM; duplicate what the upstream graph already resolves; or attempt
+general-purpose analysis. Soundness → imprecision → unscalability is causal (§2). Narrow
+resolvers escape that chain because framework semantics *guarantee* the answer; a general
+analyzer does not.
+**Deleted by decision:** `static.py` (upstream's job) and `runtime.py` (§0.2).
 
 ### `probe/` — where is this repo unknowable?
 The Python row of the soundiness table, which does not exist in the literature. Scans for
@@ -118,9 +162,8 @@ security review from the sales cycle.
 |---|---|---|
 | Language | **Python 3.12+** | The thing we analyze is Python; resolvers need `ast`, `symtable`, `importlib`. 3.12 gives us `sys.monitoring`, which is dramatically cheaper than the source-rewriting instrumentation DyPyBench measured at ~180× overhead. |
 | Packaging | **uv** | Deterministic, fast, single tool for venv + lock + run. |
-| Parsing | **tree-sitter** (vendored grammars) | Incremental, error-tolerant, multi-language. Grammars are pinned because a grammar bump silently changes parse trees. |
-| Static CG base | **fork of PyCG** (vendored) | Pure Python, zero dependencies, MIT, and upstream is archived with forks explicitly invited. Its weaknesses are documented (flow-insensitive, analyzes unreachable dependencies, OOMs past ~2k LOC unscoped). We fix entry-point scoping first. Evaluate Jarvis as an alternative base — see `docs/BUILD_PLAN.md` Phase 1. |
-| Type resolution | **pyright** via LSP | Best-in-class Python inference, runs as a subprocess, no license entanglement. |
+| Call-site census | **tree-sitter** (vendored grammars) | Thin pass, ours. Produces the coverage denominator, which no upstream tool emits. Grammars pinned — a bump silently changes parse trees. |
+| Call graph | **upstream, via adapter** (CodeGraph / Graphify / PyCG) | See §0.1. We do not build a graph. PyCG remains a supported adapter and is what Phase 0 measures with, because it is the crudest and therefore the conservative instrument. |
 | Storage | **SQLite** (embedded) | Local-first, zero-ops, no server, ships inside the customer boundary. The winning pattern in this category. |
 | Serving | **MCP over stdio + local HTTP** | One integration serves Claude Code, Codex, Cursor. Survives any single vendor shipping its own indexer. |
 | CLI | **Typer** | Type-hint driven, matches the mypy-strict discipline. |
@@ -149,8 +192,8 @@ qmctx/
 ├── pyproject.toml
 ├── src/qmctx/
 │   ├── discover/              ≤15 files
-│   ├── parse/
-│   ├── resolve/
+│   ├── ingest/                upstream graph adapters + call-site census
+│   ├── resolve/               Phase 4 only, narrow recovery
 │   │   └── frameworks/        one file per framework
 │   ├── probe/
 │   ├── label/
@@ -189,9 +232,13 @@ qmctx/
 
 ## 7. Known limitations — state these to customers before they find them
 
-- Runtime coverage is bounded by the customer's test coverage, and test coverage skews
-  away from the messy integration paths where agents break things. Our weakest oracle is
-  thinnest at the highest-risk code. Say so.
+- **The founding correlation is unmeasured.** Until Phase 0 reports, we do not know that
+  `unresolved` predicts breakage. Do not claim it to a customer.
+- Our coverage is inherited from the upstream graph's limits plus our own resolvers'.
+  When upstream regresses, our numbers move. Adapter versions are pinned and recorded in
+  every pack for exactly this reason.
+- There is **no runtime oracle in v1** (§0.2). Coverage reflects what is statically
+  knowable, not what actually executes. Say so.
 - `eval`, computed identifiers, deploy-time plugin loading and C extensions are
   **undecidable**, not unimplemented. They will always land in `UNRESOLVED`.
 - Coverage is a measure of *our* certainty, not of *code quality*. A 100%-coverage module

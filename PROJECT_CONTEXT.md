@@ -186,12 +186,25 @@ symptom, prove with the cause, sell the fix.**
 
 ### Honest competitive risks
 
-1. 🔴 **Signal size unproven.** ~15% actionable, and nobody has shown unresolved call sites
-   correlate with agent-caused breakage. **This is the #1 unknown.** Phase 0 tests it.
+1. 🔴 **THE THESIS IS UNMEASURED.** Nobody — including us — has shown that unresolved call
+   sites correlate with agent-caused breakage. Signal size is ~15% at best. **This is not
+   a risk to manage, it is a precondition to test.** Pre-registered protocol:
+   `docs/findings/PHASE0_PREREGISTRATION.md`. **No product code until it reports.**
+   Recorded failure mode: this is exactly where the previous project stalled — a real
+   problem, a plausible mechanism, no evidence anyone bleeds from it and no evidence they
+   would pay.
 2. **Free tools may be good enough.** 🟡 CodeGraph reports 60% lower cost / 69% fewer tokens
    with a plain tree-sitter graph and zero unsoundness reporting.
 3. **Anthropic ships it.** Mitigated only by multi-provider MCP from day one.
-4. **The scalability wall is inherited.** PyCG dies well before our target scale.
+4. **The scalability wall is inherited.** PyCG dies well before our target scale — which
+   is one reason we consume an upstream graph rather than maintaining one.
+5. **Category velocity.** CodeGraph went 0 → 47k stars in five months; Graphify ships
+   daily. We cannot win a feature race and must not enter one. **Consequence, taken:** we
+   consume their graph as a dependency and own only `probe/` + `label/` — the number none
+   of them computes. See `ARCHITECTURE.md §0.1`.
+6. **Runtime economics do not close.** ~180× overhead for a graph 12% the size, of which
+   ~59% is builtins. **Consequence, taken:** the runtime oracle is deleted from v1, not
+   deferred. See `ARCHITECTURE.md §0.2`.
 
 ---
 
@@ -234,8 +247,8 @@ novelty. Pitch it that way. Investors who read these papers will check.
 | 3 | **Martian leaderboard** never opened directly | The GTM plan rests on it | 1 hour |
 | 4 | **PyXray** — 🔴 claims dynamic analysis *without inputs*, NumPy/PyTorch in minutes | If true, Phase 9 is a different design | 2 hours |
 | 5 | **Jarvis / PyPt** availability, licence, maintenance | Phase 1 decision | 1 day |
-| 6 | **Does unresolved ⇒ breakage?** | The thesis | Phase 0 |
-| 7 | **Reddit / HN primary research** — we found blogs, not raw practitioner complaints | Validates the symptom vocabulary | 1 week of reading |
+| 6 | **Does unresolved ⇒ breakage?** | **The thesis. Blocks all product code.** Pre-registered at `docs/findings/PHASE0_PREREGISTRATION.md`. Outcome must be behavioural (revert/fix ≤7d), not the AIDev AST labels — those are produced by static analysis and are structurally blind to the breakage in question. Analysis is relative risk, not a count. | 1 week — **next step** |
+| 7 | **Reddit / HN primary research** — we found blogs, not raw practitioner complaints | Do developers ever name the *missing-caller* mechanism, or only symptoms? Protocol at `PHASE0_PREREGISTRATION.md §9`. Skipping this cost six weeks last time. | 1 week, immediately after #6 |
 
 ---
 
@@ -252,3 +265,7 @@ Recorded so nobody re-derives an error we already paid for.
 | EU AI Act high-risk lands Aug 2 2026 | Deferred to Dec 2 2027 (Reg. EU 2026/1744) | Council, 29 Jun 2026 |
 | Martian launched Feb 2026 | March 2026 (🟡 sources still conflict) | vendor blogs |
 | Strict rules belong in CLAUDE.md | Rules belong in hooks/CI; memory file ≤200 lines | Anthropic docs + 2026 practice |
+| Phase 0 = classify DyPyBench's missing edges | Phase 0 = **correlation test**: does unresolved predict breakage? Classification is interesting; correlation is load-bearing. | internal review |
+| Framework resolvers are the moat | The **probe layer** is the moat. Resolvers are a feature race against projects shipping daily. | internal review |
+| We build parse + static resolution | We **consume** an upstream graph. ~165k stars of MIT code, iterating faster than three people can. | internal review |
+| Runtime oracle in Phase 9 | Runtime oracle **deleted from v1**. ~180× overhead, 12%-size graph, 59% builtins. | DyPyBench §4.1.2 |

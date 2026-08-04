@@ -14,6 +14,10 @@ We build the layer that tells a coding agent **what it does not know** about a r
 Static analysis is unsound by design. We measure the unsoundness, label it per call site,
 and serve the labels over MCP so agents abstain instead of guessing.
 
+**Phase 0 is not done.** The founding correlation is unmeasured, so no product code is
+written yet — see `docs/findings/PHASE0_PREREGISTRATION.md`. If you are asked to implement
+a layer, check that file has a filled Results section first. If it does not, say so.
+
 Read `ARCHITECTURE.md` before your first change. Read `docs/PROJECT_CONTEXT.md` for why.
 
 ---
@@ -63,9 +67,9 @@ you remember to obey — the machine will stop you either way.
 6. **One public concern per module.** A module exports one class or one function family.
    If you need "and" to describe what a file does, split it.
 
-7. **No cross-layer imports.** Layers are `discover → parse → resolve → probe → label →
-   store → serve`. A layer may import from layers to its left, never right, never sideways
-   into a sibling's internals. → `scripts/guard/check_layering.py`
+7. **No cross-layer imports.** Layers are `types → discover → ingest → probe → label →
+   store → serve`. Left only — never right, never sideways into a sibling's internals.
+   → `scripts/guard/check_conventions.py`
 
 8. **Every file opens with a docstring** stating: what it does, why it exists, what it
    imports and from which layer, and who consumes it.
@@ -142,5 +146,8 @@ A change is done when all seven are true. Not six.
 - **Deterministic beats clever.** If a parser can answer it, a model must not.
 - **The residual is the product.** What we cannot resolve is not our failure to hide; it
   is the thing the customer is paying us to find.
+- **We do not build a graph.** Upstream MIT projects ship daily and we cannot outrun them.
+  We consume one and own the number none of them computes. Resist every temptation to
+  improve their graph instead of measuring it.
 - **Assume the next reader knows nothing.** Every file explains itself to someone who
   joined this morning.

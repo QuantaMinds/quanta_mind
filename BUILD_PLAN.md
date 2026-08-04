@@ -1,175 +1,192 @@
 # Build Plan
 
-> Sequenced so that the cheapest thing that could kill the thesis is tested first.
-> Every phase has a **gate** (what must be true to proceed) and a **kill criterion**
-> (what result means stop). Do not start Phase N+1 until Phase N's gate is green.
+> **Nothing in Phases 1+ is authorised until `docs/findings/PHASE0_PREREGISTRATION.md`
+> has a filled Results section and a non-null verdict.**
 >
-> The single most valuable property of this plan is Phase 0. It costs two days and it can
-> end the project. Run it before writing product code.
+> The previous version of this file described nine phases of architecture built on an
+> unmeasured assumption. That is the same shape as the failure we have already paid for:
+> a real problem, a plausible mechanism, and no evidence anyone bleeds from it. This
+> version front-loads the measurement and cuts everything that is not defensible.
 
 ---
 
-## Phase 0 — Prove the thesis (2 days, no product code)
+## Phase 0 — The correlation test (1 week, zero product code)
 
-**Question:** after excluding builtins and name-resolution artifacts, what fraction of the
-edges static analysis misses are *framework idioms we can deterministically recover*?
+**Full protocol: `docs/findings/PHASE0_PREREGISTRATION.md`. Read it, do not summarise it.**
 
-The published finding is that static Python call graphs miss ~51% of observed runtime
-edges, but that ~59% of the missing callees are builtin methods (`str.strip`) and ~12% are
-fully-qualified-name mismatches. Neither is useful to a developer. **Nobody has classified
-the remainder.** That classification is our founding number.
+**Question:** does `unresolved` predict breakage in AI-authored changes?
 
-**Steps**
-1. Pull the DyPyBench Docker image; reproduce the PyCG vs DynaPyt comparison.
-2. Extract the set of dynamic-only edges.
-3. Classify each: `builtin` / `name-artifact` / `framework-idiom` / `true-dynamism`.
-4. Write up the distribution.
+**Method in one line:** 2×2 over AIDev agent PRs — exposure is *vanilla PyCG could not
+resolve a call site to the changed symbol at the parent commit*; outcome is *a revert or
+fix commit touched that file within 7 days*. Report relative risk with a 95% CI.
 
-**Gate:** ≥40% of the non-builtin, non-artifact remainder is framework idiom.
-**Kill criterion:** <20% framework idiom. If the residual is mostly `eval`-class true
-dynamism, the recoverable ceiling is too low to build a company on. Stop, and publish the
-result — it is a useful paper either way.
+Three design decisions make this test valid. Each is argued in the pre-registration:
 
-**Deliverable:** `docs/findings/phase0-edge-classification.md` + the raw data.
+- **Outcome is behavioural, not AST-based.** The AIDev breaking-change labels are produced
+  by static analysis, which is structurally blind to the breakage this thesis is about.
+  Using them as ground truth would manufacture a false null.
+- **Analysis is relative risk, not a count.** With ~15% of call sites unresolved, "15% of
+  breakages were at unresolved sites" is zero signal that reads as confirmation.
+- **Instrument is vanilla PyCG.** The crudest available, therefore the conservative one.
+  Adding resolvers can only shrink the exposed group, so a crude null stays null. It also
+  removes any dependency on code we have not written.
 
----
+**Gate:** RR ≥ 3.0, CI lower bound > 1.5 → proceed to Phase 1.
+**Soft gate:** RR 1.5–3.0 → proceed, but rewrite `PROJECT_CONTEXT.md §5` first; the pitch
+becomes "prioritise review attention," not "prevent breakage."
+**Kill criterion:** RR < 1.5, or CI includes 1.0 → **stop and publish the null.**
+**No-result criterion:** fewer than 20 breakages in the exposed arm → underpowered. Widen
+the corpus. Do not report it as negative.
 
-## Phase 1 — Choose the static base (3 days)
-
-PyCG is archived, pure Python, zero-dependency, and its authors explicitly invite forks.
-It is also flow-insensitive, analyzes unreachable dependencies, and failed outright on 11
-of 50 DyPyBench projects (6 timeouts, 3 OOM at 60GB, 2 crashes). Jarvis reuses PyCG's code
-and claims to fix scoping and precision. PyPt is a third option.
-
-**Steps**
-1. Run PyCG, Jarvis and PyPt against the JCG Python test adapters (they already exist at
-   `github.com/opalj/JCG` — do not rebuild this).
-2. Measure: which fails, on what, how fast, and how instrumentable each is.
-3. Pick one. Vendor it under `vendor/`. Pin it.
-
-**Gate:** the chosen base completes on all six live fixtures within 10 minutes each, with
-entry-point scoping applied.
-**Kill criterion:** none complete on the ≥1M-line fixture even when scoped. Then scale is
-the product problem, not unsoundness, and the plan changes.
+**Deliverable:** `PHASE0_PREREGISTRATION.md §8` filled and signed.
 
 ---
 
-## Phase 2 — Skeleton + parse + store (1 week)
+## Phase 0b — Symptom vocabulary (1 week, only if Phase 0 is non-null)
 
-`discover/`, `parse/`, `store/`, and the CLI. No resolution yet.
+Open thread #7. Fifty verbatim practitioner complaints from r/ExperiencedDevs,
+r/programming, HN and the Cursor forum, coded for whether developers ever describe the
+*missing-caller* mechanism rather than context-window or hallucination.
 
-**Why parse before resolve:** counting call sites gives us the coverage *denominator*. A
-system that can honestly say "this file has 412 call sites and I resolved none of them"
-is already more useful than one that silently returns an empty graph.
+**Decision rule:** <5 of 50 using missing-caller language → the sales motion starts with
+education. Price and plan for it, and record it in `PROJECT_CONTEXT.md §5` before any
+sales conversation.
+
+This is the step that was skipped last time. One week now, six weeks later.
+
+---
+
+## Scope decision — taken before Phase 1, recorded so it is not silently reversed
+
+### We do not build a graph
+
+Graphify, CodeGraph and GitNexus hold roughly 165k GitHub stars between them, are MIT or
+near-MIT, ship over MCP, and iterate faster than three people can. CodeGraph went 0 → 47k
+stars in five months.
+
+**We consume one as a dependency.** `ingest/` adapts an upstream graph and adds a thin
+tree-sitter call-site census — because upstream tools emit edges but none of them emits the
+*denominator*, and the denominator is what coverage is computed from.
+
+Every improvement they ship becomes an improvement to our product. We stop competing with
+projects we cannot outrun and start depending on them.
+
+**Deleted from the plan:** `parse/` as a layer, `resolve/static.py`, and any ambition to
+resolve better than upstream.
+
+### We do not build a runtime oracle in v1
+
+DyPyBench measured DynaPyt-style tracing at ~215 minutes per project against a ~71-second
+uninstrumented baseline — roughly 180×. The dynamic graph came out ~12% the size of the
+static one, even at 82% statement coverage. Of what it recovers, ~59% is builtin calls we
+discard anyway.
+
+**The economics do not close, and designing around a layer that will not ship distorts
+everything upstream of it.** `resolve/runtime.py` is removed, not deferred.
+
+If PyXray's claim — dynamic analysis without requiring inputs, NumPy and PyTorch in
+minutes — survives verification, this returns as a clean new module. Verify first,
+reinstate second.
+
+**Result: the product is `probe/` + `label/` over someone else's graph.** Roughly 800 lines
+and one number. That is the entire defensible surface, and three people can build it.
+
+---
+
+## Phase 1 — Ingest + call-site census (4 days)
+
+`types/`, `discover/`, `ingest/`, `store/`.
+
+Adapters for CodeGraph and Graphify behind one interface. Tree-sitter call-site census
+producing the denominator. SQLite pack, SHA-pinned.
 
 **Gate**
-- `just check` green
-- `just verify-determinism` green (3 runs byte-identical)
+- `just verify-determinism` green — 3 runs byte-identical
 - `just verify-no-source-leak` green — invariant 6 proven, not asserted
-- call-site counts match a hand-count on a 200-line fixture
+- call-site count matches a hand-count on a 200-line fixture
+- swapping the upstream adapter changes edges but not the coverage arithmetic
+
+**Kill criterion:** no upstream graph exposes enough per-call-site detail to compute a
+denominator. Then we do need our own parse layer, and the scope decision above reverses —
+re-argue it in a PR, never reverse it silently.
 
 ---
 
-## Phase 3 — The label layer (1 week)
+## Phase 2 — The label layer (1 week) ← **half the product**
 
-`label/` and `types/`. `Confidence`, `Provenance`, `Unresolved`, coverage math with
-builtins excluded from both numerator and denominator.
+`label/`. `Confidence`, `Provenance`, `Unresolved`, coverage math with builtins excluded
+from both numerator and denominator.
 
-**Gate:** all six invariants from `ARCHITECTURE.md §6` pass as property tests. Specifically
-invariant 3 (conservation) — no call site may vanish between stages.
+Built **before** the probe layer so that no code path ever emits a bare edge. Retrofitting
+provenance is how default confidence values get introduced — silent failure #1.
 
-**Note:** build this *before* the resolvers. If the labeling contract is added afterwards,
-resolvers will have been written to return bare edges and you will retrofit provenance,
-which is how default confidence values get introduced. That is silent failure #1.
-
----
-
-## Phase 4 — Static + type resolvers (1 week)
-
-`resolve/static.py` (vendored base, entry-point scoped) and `resolve/types.py` (pyright).
-
-**Gate:** on the Flask fixture, every symbol has exactly one canonical FQN across both
-resolvers — this is silent failure #4, and Flask is the repository where the published
-mismatch was observed.
+**Gate:** all six invariants in `ARCHITECTURE.md §6` pass as property tests, especially
+conservation: no call site may vanish between stages.
 
 ---
 
-## Phase 5 — MRO and framework resolvers (2–3 weeks) ← **the moat**
+## Phase 3 — The probe layer (1–2 weeks) ← **the other half, and the moat**
 
-In order of expected yield from Phase 0:
-1. `resolve/mro.py` — `super()` chains. The static base misses these entirely, and they
-   are pure inheritance structure, so recovery is exact.
-2. `resolve/frameworks/django.py` — URL dispatch, signals.
-3. `resolve/frameworks/celery.py` — task registry.
-4. `resolve/frameworks/sqlalchemy.py` — relationships.
-5. `resolve/frameworks/pytest.py` — fixtures.
+`probe/`. The Python feature-prevalence scanner: `eval`, `exec`, computed
+`getattr`/`setattr`, `importlib`, metaclasses, `__getattr__`, registering decorators,
+monkeypatching, C extensions, `globals()`/`locals()`.
 
-**One resolver per PR. One branch per resolver.** Each ships with: a live test asserting a
-minimum edge count on its fixture, and an entry in the capability profile.
+This is the prevalence half of the capability × prevalence decomposition. JCG already ships
+Python *capability* adapters — use them, do not rebuild them. The prevalence half is
+JVM-bytecode-specific and does not exist for Python.
 
-**Gate per resolver:** coverage on its fixture increases, and no previously-`RESOLVED`
-edge changes target. A resolver that *moves* existing edges is a regression, not a feature.
+**Deliverable that doubles as marketing:** the Python row of the soundiness table. The 2015
+manifesto covers C/C++, Java/C# and JavaScript, notes no reliable survey of
+dangerous-feature usage exists, and asks for precisely this. Publishable regardless of
+commercial outcome.
 
-**This is the only phase a competitor cannot copy from a paper.** Everything before it is
-assembly of published work. Budget accordingly.
+**Gate:** prevalence scan completes on a ≥1M-line fixture in under 60 seconds.
 
 ---
 
-## Phase 6 — The probe layer (1 week)
+## Phase 4 — MRO and framework resolvers (2–3 weeks)
 
-`probe/` — the Python feature-prevalence scanner. This is the half of the Judge
-decomposition that does not exist for Python: JCG has Python *adapters* (capability
-profiles), but the prevalence infrastructure is JVM-bytecode-specific.
+Only the resolvers that recover edges upstream tools structurally cannot, ordered by where
+Phase 0's exposure data showed the risk concentrates:
 
-**Deliverable that doubles as marketing:** the Python row of the soundiness table.
-The 2015 manifesto's table covers C/C++, Java/C# and JavaScript. There is no Python row,
-and the authors noted no reliable survey of dangerous-feature usage exists. Writing it is
-a publishable original contribution regardless of whether the company works.
+1. `resolve/mro.py` — `super()` chains. PyCG misses these entirely; pure inheritance
+   structure, so recovery is exact.
+2. `resolve/frameworks/django.py`, `celery.py`, `sqlalchemy.py`, `pytest.py`
 
-**Gate:** prevalence scan completes on the ≥1M-line fixture in under 60 seconds.
+One resolver per PR, per branch, each shipping with a live test asserting a minimum edge
+count on its fixture.
 
----
+**Gate per resolver:** coverage on its fixture rises, and **no previously-`RESOLVED` edge
+changes target.** A resolver that moves existing edges is a regression, not a feature.
 
-## Phase 7 — MCP server (3 days)
-
-Four tools: `callers_of`, `reaches`, `coverage`, `unresolved`. Every response carries
-`pack_sha`, and it must match `git rev-parse HEAD` or the response is marked stale.
-
-**Gate:** a real Claude Code session against the Django fixture, in which the agent
-declines to edit an `UNRESOLVED` site and says why. Record it. That recording is the demo.
+**Note the demotion.** In the previous plan this was called the moat. It is not — it is a
+feature race against projects shipping daily. The moat is Phase 3. Build resolvers only
+where Phase 0 says it pays.
 
 ---
 
-## Phase 8 — PR comment + free tier (1 week)
+## Phase 5 — MCP server (3 days)
 
-Blast-radius comment on every PR. Free forever for public repositories — that is how the
-comments appear in other people's pull requests, which is the distribution loop.
+`serve/`. Four tools: `callers_of`, `reaches`, `coverage`, `unresolved`. Every response
+carries `pack_sha`; a mismatch with `git rev-parse HEAD` marks it stale.
 
-**Gate:** 20 external repositories install it and 8+ are still active at day 30.
+**Gate:** a recorded Claude Code session against the Django fixture in which the agent
+declines to edit an `UNRESOLVED` site and says why. That recording is the demo.
+
+---
+
+## Phase 6 — PR comment + free tier (1 week)
+
+Blast-radius comment per PR. Free forever on public repositories — that is the distribution
+loop, because the comments appear in other people's pull requests.
+
+**Gate:** 20 external repos install, ≥8 still active at day 30.
 **Kill criterion:** <15% day-30 retention. The abstention story does not land with
-developers regardless of what the benchmark says.
+developers, whatever the benchmark says.
 
 ---
 
-## Phase 9 — Runtime tier (2 weeks, deliberately last)
-
-`resolve/runtime.py` via `sys.monitoring`.
-
-Deliberately last because the published DynaPyt measurement was ~215 minutes per project
-against a ~71-second uninstrumented baseline — roughly 180× overhead — and because ~59% of
-what it recovers is builtins we discard anyway. It is a nightly confirmation oracle, not a
-primary source.
-
-**Investigate first:** PyXray claims dynamic analysis without requiring inputs, analyzing
-NumPy and PyTorch in minutes. If that holds, this phase is a different design. **Verify the
-claim before building.**
-
-**Gate:** overhead under 20× on the Django fixture, and a run that observes zero edges is
-reported as a failed run, not as "no dynamic edges."
-
----
-
-## Validation checklist — run at every phase gate
+## Validation checklist — every phase gate
 
 ```bash
 just check                  # fast gate
@@ -177,27 +194,27 @@ just verify                 # live data verification
 just verify-determinism     # if store/ or label/ changed
 ```
 
-Then, in writing:
-
-- [ ] Phase gate condition met, with the number recorded in `docs/findings/`
+- [ ] Gate condition met, number recorded in `docs/findings/`
 - [ ] Kill criterion explicitly evaluated and not triggered
-- [ ] `docs/CODEBASE.md` regenerated and the diff reviewed
-- [ ] Every new module has a WHAT/WHY/IMPORTS docstring
-- [ ] Every new rule added to AGENTS.md has an entry in `.claude/settings.json`
-      `$enforcement_map`, or is tagged ADVISORY
-- [ ] `docs/VALIDATION.md` silent-failure table extended if this phase introduced a new
-      way to fail quietly
+- [ ] `docs/CODEBASE.md` regenerated, diff reviewed
+- [ ] New modules carry WHAT / WHY / IMPORTS docstrings
+- [ ] New rules registered in `.claude/settings.json` `$enforcement_map`, or tagged ADVISORY
+- [ ] New failure mode added to `docs/VALIDATION.md §4`
 - [ ] PR answers: *what could still silently fail here?*
 
 ---
 
-## Sequencing rationale, stated plainly
+## Sequencing rationale
 
-Phase 0 can kill the project for the cost of two days. Phases 2–4 assemble published work
-and carry low technical risk. Phase 5 is the only defensible engineering. Phase 9 is the
-most expensive and least informative, which is why it is last despite being the most
-exciting.
+Phase 0 can end the project for one week's cost, and until it is done every other phase is
+speculation with good file structure. Phases 1–2 are assembly plus arithmetic. Phase 3 is
+the only thing nobody else is doing. Phase 4 is a feature race we enter only where the data
+says it pays.
 
-If you find yourself wanting to start with Phase 9 because runtime tracing is more
-interesting than writing Django URL resolvers — that instinct is the reason most projects
-in this space fail.
+Two temptations, named so they can be recognised in the moment:
+
+**Building a better graph.** It is the fun part, it is tractable, and you will lose to a
+47k-star MIT project. Consume theirs.
+
+**Building the runtime tracer.** It is the most interesting engineering here and the least
+economically viable. Deleted, not deferred, for exactly that reason.

@@ -31,7 +31,9 @@ Last regenerated: *(set by `just docs-sync`)* · Pack format: `v0` · Phase: pre
 Dependencies flow **left to right only**. Enforced by `check_conventions.py`.
 
 ```
-types → discover → parse → resolve → probe → label → store → serve
+types → discover → ingest → probe → label → store → serve
+                              ↑
+                    resolve/ (Phase 4, optional)
 ```
 
 ### `types/`
@@ -47,31 +49,39 @@ present, package layout, entry points, test command.
 **Output:** `RepoProfile`.
 **Must not:** parse code, execute anything, touch the network.
 
-### `parse/`
-**Owns:** tree-sitter parsing. Symbol definitions, imports, and **every call site,
-including ones nothing can resolve.**
-**Output:** `SymbolTable`, `CallSite[]` per file.
-**Why it must not resolve:** the call-site count is the coverage denominator. Mixing
-counting with resolving is how the denominator silently shrinks — silent failure #2 in
-`docs/VALIDATION.md`.
+### `ingest/`
+**Owns:** (a) adapting an upstream call graph behind one `GraphSource` protocol, and
+(b) a thin tree-sitter call-site census producing the coverage **denominator**.
+**Output:** `Graph` + `CallSite[]`.
+**Why we do not build the graph:** ~165k stars of MIT code ships daily in this category.
+We consume it. See `ARCHITECTURE.md §0.1`.
+**Why the census is ours:** upstream emits edges; nobody emits the denominator. Mixing
+counting with resolving is how the denominator silently shrinks — silent failure #2.
 
-### `resolve/`
-**Owns:** turning call sites into edges. One resolver per file, each declaring what it
-cannot handle.
+| File | Source | Notes |
+|---|---|---|
+| `protocol.py` | — | the `GraphSource` interface |
+| `codegraph.py` | CodeGraph (MIT) | default adapter |
+| `graphify.py` | Graphify (MIT) | alternative |
+| `pycg.py` | PyCG (archived, MIT) | the Phase 0 instrument |
+| `census.py` | tree-sitter | call-site denominator — **ours** |
+
+### `resolve/` — Phase 4 only, conditional
+**Owns:** edges upstream structurally cannot produce. Built only where Phase 0 exposure
+data shows the risk concentrates.
 
 | File | Handles | Known limits |
 |---|---|---|
-| `static.py` | vendored PyCG fork, entry-point scoped | flow-insensitive; misses `super()`, builtins |
-| `types.py` | pyright/LSP — cross-file, inheritance, generics | needs a working env |
-| `mro.py` | `super()` chains | — |
+| `mro.py` | `super()` chains — PyCG misses these entirely | — |
 | `frameworks/django.py` | URL dispatch, signals, admin | version-coupled |
 | `frameworks/celery.py` | task registry | — |
 | `frameworks/sqlalchemy.py` | relationships | — |
 | `frameworks/pytest.py` | fixture graph | — |
-| `runtime.py` | `sys.monitoring` trace, nightly | bounded by test coverage; high overhead |
 
 **Contract:** every resolver returns `(edges, unresolved)`. Returning fewer edges is
 legitimate. Returning a guess is not. **No LLM calls in this layer.**
+**Deleted by decision:** `static.py` (upstream's job), `runtime.py` (~180× overhead —
+`ARCHITECTURE.md §0.2`).
 
 ### `probe/`
 **Owns:** the Python feature-prevalence scanner — where this repo is unknowable.

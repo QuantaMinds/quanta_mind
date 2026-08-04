@@ -112,9 +112,17 @@ repositories and diffing against golden files a human reviewed.
 
 ## Status
 
-Pre-Phase-0. The founding measurement has not been taken yet — see
-`docs/BUILD_PLAN.md#phase-0`, which can end this project in two days and should be run
-before any product code is written.
+**Pre-Phase-0. No product code exists, and none will be written until the founding
+correlation is measured.**
+
+The thesis — that `unresolved` predicts breakage in AI-authored changes — is **plausible
+and unverified.** The protocol to test it is pre-registered at
+`docs/findings/PHASE0_PREREGISTRATION.md`: a 2×2 over ~7,191 agent-authored PRs, relative
+risk with a confidence interval, thresholds fixed before the data is touched. One week.
+It can end this project, and if it does we publish the null.
+
+Everything else in this repository — the architecture, the build plan, the guards — is a
+draft that survives only if that number clears RR ≥ 3.0.
 
 Read `docs/PROJECT_CONTEXT.md#7-corrections-log` before repeating any number from this
 README to anyone outside the team. Several early estimates were wrong and are recorded

@@ -43,7 +43,7 @@ SOURCE_SUFFIXES: frozenset[str] = frozenset({".py", ".pyi", ".toml", ".yaml", ".
 LAYER_ORDER: tuple[str, ...] = (
     "types",
     "discover",
-    "parse",
+    "ingest",
     "resolve",
     "probe",
     "label",
