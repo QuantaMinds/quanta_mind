@@ -1,42 +1,159 @@
-"""Corpus extraction: the AIDev dataset to a flat list of agent-authored PRs.
+"""Corpus extraction: the AIDev dataset to a flat list of merged PRs.
 
-WHAT: Reads the AIDev dataset and emits one PRRecord per merged agent PR, filtered
-      to a single language arm. Output is data/prs.jsonl.
-WHY:  Every later stage keys off `parent_sha` -- exposure must be computed at the
-      commit the agent branched from, never at the merged state. Capturing it here,
-      once, is what makes that guarantee auditable rather than a convention each
-      module is trusted to follow. RUNBOOK section 3 expects ~7,191 PRs total and
-      calls extraction silently lossy below 3,000.
-IMPORTS: stdlib only. Downstream: run_pipeline, classify_exposure, scan_outcome.
+WHAT: Loads the AIDev parquet tables, joins them, filters to the population §3
+      fixes, and emits one PRRecord per PR. Both arms — agent and human — in the
+      same pass.
+WHY:  Every later stage keys off `parent_sha`, which must be the commit the change
+      LANDED on, never the merged state and never `base.sha`. AIDev carries no SHA
+      at all, so it is resolved here, once, by amendment A2's decision table. Doing
+      it in one place is what makes the guarantee auditable rather than a
+      convention each stage is trusted to follow.
+
+      Merged-only is a hard filter, not a convenience. The outcome is a 7-day
+      post-merge scan, so an unmerged PR has no window and cannot be classified.
+      §3's corpus arithmetic already accounts for it: ~4,798 structural PRs become
+      ~3,300 merged at the 69.3% acceptance rate.
+
+      Licences are recorded per repository. AIDev's terms are that "each source
+      repository retains its original copyright", and RUNBOOK §5 requires
+      publishing the raw inputs alongside the result — so the publishable subset
+      is filtered before anything reaches results/, not after.
+IMPORTS: pandas, phase0.github_pulls, phase0.parent_commit.
 CONSUMED BY: run_pipeline.py; tests/test_extract_prs.py.
 """
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 
-Language = str  # "python" | "typescript" -- the two arms in scope, RUNBOOK section 7
+import pandas as pd
+
+Language = str  # "python" | "typescript" — the two arms in scope, RUNBOOK §7
+
+# §3: the five task types that "directly impact program structure". docs and test
+# are excluded, which is what turns 7,191 agent PRs into 4,798.
+STRUCTURAL_TASK_TYPES: frozenset[str] = frozenset({"feat", "fix", "perf", "refactor", "chore"})
+
+# Redistributable licences. Anything else is analysed but never published.
+PUBLISHABLE_LICENCES: frozenset[str] = frozenset(
+    {"mit", "apache-2.0", "bsd-3-clause", "bsd-2-clause", "isc", "unlicense", "cc0-1.0"}
+)
+
+AGENT_TABLES = ("pull_request", "pr_task_type")
+HUMAN_TABLES = ("human_pull_request", "human_pr_task_type")
 
 
 @dataclass(frozen=True, slots=True)
 class PRRecord:
-    """One merged, agent-authored pull request."""
+    """One merged pull request, with everything the later stages need."""
 
     pr_id: str
-    repo: str
+    repo: str  # owner/name
     language: Language
     parent_sha: str
     merged_sha: str
     merged_at: str  # ISO 8601 UTC
     changed_files: tuple[str, ...]
     changed_symbols: tuple[str, ...]
+    arm: str = "agent"  # "agent" | "human"
+    task_type: str = ""
+    licence: str = ""
+    repo_id: str = ""  # the clustering unit, per A8
+
+    @property
+    def is_publishable(self) -> bool:
+        """RUNBOOK §5 requires publishing raw inputs; licences decide which."""
+        return self.licence.lower() in PUBLISHABLE_LICENCES
 
 
-def extract(dataset: Path, language: Language) -> list[PRRecord]:
-    """Load agent PRs for one language arm.
+@dataclass(frozen=True, slots=True)
+class Attrition:
+    """Why rows left the corpus. Reported, never silently dropped."""
 
-    Raises:
-        NotImplementedError: Day 1 of the run. See RUNBOOK section 1.
+    not_python: int = 0
+    not_structural: int = 0
+    not_merged: int = 0
+    no_merge_metadata: int = 0
+    unresolvable_parent: int = 0
+
+    @property
+    def total(self) -> int:
+        return (
+            self.not_python
+            + self.not_structural
+            + self.not_merged
+            + self.no_merge_metadata
+            + self.unresolvable_parent
+        )
+
+
+def load_table(dataset: Path, name: str) -> pd.DataFrame:
+    """One AIDev table, from a local parquet directory.
+
+    Kept separate so a re-run reads the same bytes. RUNBOOK §5 requires the study
+    reproduce from raw data, and a loader that reached for the network would make
+    the corpus a moving target.
     """
-    raise NotImplementedError("Phase 0 Day 1 — see docs/findings/PHASE0_RUNBOOK.md")
+    path = dataset / f"{name}.parquet"
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"{path} not found. Download the AIDev tables first:\n"
+            f"  huggingface-cli download hao-li/AIDev --repo-type dataset --local-dir {dataset}"
+        )
+    return pd.read_parquet(path)
+
+
+def _select(pulls: pd.DataFrame, tasks: pd.DataFrame, repos: pd.DataFrame) -> pd.DataFrame:
+    """Join the three tables and keep only the population §3 fixes."""
+    merged = pulls.merge(tasks[["id", "type"]], on="id", how="left")
+    merged = merged.merge(
+        repos[["id", "language", "license"]].rename(columns={"id": "repo_id"}),
+        on="repo_id",
+        how="left",
+    )
+    return merged
+
+
+def _filter(frame: pd.DataFrame) -> tuple[pd.DataFrame, Attrition]:
+    """Apply the population filters, counting what each one removes."""
+    total = len(frame)
+    python_only = frame[frame["language"].str.lower() == "python"]
+    structural = python_only[python_only["type"].isin(STRUCTURAL_TASK_TYPES)]
+    merged = structural[structural["merged_at"].notna() & (structural["merged_at"] != "")]
+
+    return merged, Attrition(
+        not_python=total - len(python_only),
+        not_structural=len(python_only) - len(structural),
+        not_merged=len(structural) - len(merged),
+    )
+
+
+def iter_candidates(dataset: Path, arm: str = "agent") -> Iterator[dict[str, object]]:
+    """Every row that survives the population filters, as plain dicts."""
+    pull_table, task_table = AGENT_TABLES if arm == "agent" else HUMAN_TABLES
+    frame = _select(
+        load_table(dataset, pull_table),
+        load_table(dataset, task_table),
+        load_table(dataset, "repository"),
+    )
+    kept, _ = _filter(frame)
+    for row in kept.to_dict(orient="records"):
+        yield dict(row)
+
+
+def population_counts(dataset: Path, arm: str = "agent") -> tuple[int, Attrition]:
+    """How many survive, and why the rest did not.
+
+    §3's arithmetic is a prediction; this is the measurement. RUNBOOK §3 treats a
+    large deviation as a stop condition, not a curiosity.
+    """
+    pull_table, task_table = AGENT_TABLES if arm == "agent" else HUMAN_TABLES
+    frame = _select(
+        load_table(dataset, pull_table),
+        load_table(dataset, task_table),
+        load_table(dataset, "repository"),
+    )
+    kept, attrition = _filter(frame)
+    return len(kept), attrition

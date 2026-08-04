@@ -32,6 +32,9 @@ requires-python = ">=3.10,<3.11"
 dependencies = [
     # Analysis
     "pandas==2.3.3",
+    # AIDev ships parquet; pandas needs an engine to read it, and does not bundle
+    # one. Without this the corpus cannot be loaded at all.
+    "pyarrow==21.0.0",
     "scipy==1.15.3",
     "statsmodels==0.14.6",
     # Corpus and outcome scan
