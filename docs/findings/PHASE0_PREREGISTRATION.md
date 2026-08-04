@@ -436,6 +436,13 @@ Reporting instead that *"unresolvability does not predict breakage"* would overc
 null, because most unresolvability was never measured. That is the same error as
 overclaiming a positive, and it is easier to make because a null feels modest.
 
+**The same limit binds a positive.** The excluded sites are **non-randomly the most dynamic
+in the corpus** — computed dispatch, string registries, plugin loading. The direction of
+bias on the point estimate is *unknown*, because their breakage rate is unmeasured. So a
+positive result on statically-named sites alone is a result about the **tamest** form of
+unresolvability, and generalisation beyond it is not claimed. Neither verdict may be
+stated more broadly than the instrument reached.
+
 A rigorous null of the narrower kind is still a genuine contribution. The
 soundiness literature has asked since 2015 for empirical work on whether unsoundness
 matters in practice, and explicitly noted that no reliable survey exists. Answering "less

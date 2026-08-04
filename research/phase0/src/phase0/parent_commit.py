@@ -31,7 +31,14 @@ from enum import Enum
 from pathlib import Path
 
 from git import Commit, Repo
-from git.exc import GitError
+from git.exc import GitError, ODBError
+
+# GitPython raises across two unrelated hierarchies. GitError covers command
+# failures; BadName and BadObject derive from gitdb's ODBError, which is NOT a
+# GitError and NOT a ValueError. Catching only the first two lets a malformed ref
+# escape -- and merge_commit_sha arrives from an API payload, so malformed is a
+# realistic input rather than a hypothetical one.
+GIT_LOOKUP_ERRORS = (GitError, ODBError, ValueError)
 
 
 class MergeShape(Enum):
@@ -60,7 +67,7 @@ class ParentResolution:
 def _files_of(commit: Commit) -> set[str]:
     try:
         return {str(name) for name in commit.stats.files}
-    except (GitError, ValueError):
+    except GIT_LOOKUP_ERRORS:
         return set()
 
 
@@ -84,7 +91,7 @@ def resolve(
         # failure inside this handler. A commit deleted or rewritten since the
         # 2025-08 snapshot is corpus attrition, and attrition must not crash a run.
         parents = merge.parents
-    except (GitError, ValueError) as exc:
+    except GIT_LOOKUP_ERRORS as exc:
         return ParentResolution(MergeShape.AMBIGUOUS, "", reason=f"commit unavailable: {exc}")
 
     if not parents:

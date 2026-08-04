@@ -36,10 +36,14 @@ from enum import Enum
 from pathlib import Path
 
 from git import Commit, Repo
-from git.exc import GitError
+from git.exc import GitError, ODBError
 
 from phase0 import fix_signals
 from phase0.extract_prs import PRRecord
+
+# See parent_commit.py: BadName/BadObject derive from gitdb's ODBError, which is
+# neither a GitError nor a ValueError, so a narrower catch lets them escape.
+GIT_LOOKUP_ERRORS = (GitError, ODBError, ValueError)
 
 WINDOW_DAYS = 7
 
@@ -91,7 +95,7 @@ def _touches_pr_files(commit: Commit, changed: frozenset[str]) -> bool:
     """True if this commit modifies any file the PR modified."""
     try:
         touched = set(commit.stats.files)
-    except (GitError, ValueError):
+    except GIT_LOOKUP_ERRORS:
         return False
     return any(str(name) in changed for name in touched)
 
@@ -101,7 +105,7 @@ def _candidates(repo: Repo, start: datetime, end: datetime, exclude: str) -> lis
     found: list[Commit] = []
     try:
         walk = repo.iter_commits(max_count=MAX_COMMITS)
-    except GitError:
+    except GIT_LOOKUP_ERRORS:
         return found
 
     for commit in walk:
@@ -131,7 +135,7 @@ def scan(repo_path: Path, pr: PRRecord, window_days: int = WINDOW_DAYS) -> Outco
 
     try:
         repo = Repo(repo_path)
-    except GitError:
+    except GIT_LOOKUP_ERRORS:
         return OutcomeRecord(outcome=Outcome.CLEAN)
 
     changed = frozenset(pr.changed_files)

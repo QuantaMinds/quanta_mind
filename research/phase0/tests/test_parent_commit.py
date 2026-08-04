@@ -25,7 +25,7 @@ from pathlib import Path
 
 from git import Actor, Repo
 
-from phase0.parent_commit import MergeShape, resolve
+from phase0.parent_commit import GIT_LOOKUP_ERRORS, MergeShape, resolve
 
 AUTHOR = Actor("Tester", "tester@example.com")
 PR_FILES = frozenset({"acme/one.py", "acme/two.py"})
@@ -100,11 +100,30 @@ def test_rebase_stops_at_a_commit_outside_the_prs_files(tmp_path: Path) -> None:
     assert result.parent_sha == interloper
 
 
-def test_unknown_commit_is_ambiguous_not_an_exception(tmp_path: Path) -> None:
-    """A deleted or rewritten commit is corpus attrition, counted, not fatal."""
+def test_unresolvable_refs_are_ambiguous_not_exceptions(tmp_path: Path) -> None:
+    """Every shape of bad ref is attrition, counted, and never fatal.
+
+    Two distinct GitPython failure modes are covered here, and they raise across
+    UNRELATED hierarchies. A 40-hex SHA that is simply absent raises ValueError; a
+    ref that is not a SHA at all raises BadName, which derives from gitdb's
+    ODBError and is neither a GitError nor a ValueError. A handler catching only
+    the obvious two lets the second escape and end the run -- and merge_commit_sha
+    arrives from an API payload, so a malformed value is a realistic input.
+    """
     _trunk(tmp_path)
-    result = resolve(tmp_path, "0" * 40, PR_FILES, 1)
-    assert (result.shape, result.is_resolved) == (MergeShape.AMBIGUOUS, False)
+    shapes = {
+        "absent 40-hex": resolve(tmp_path, "0" * 40, PR_FILES, 1).shape,
+        "not a sha": resolve(tmp_path, "not-a-sha", PR_FILES, 1).shape,
+        "empty": resolve(tmp_path, "", PR_FILES, 1).shape,
+    }
+    assert set(shapes.values()) == {MergeShape.AMBIGUOUS}
+
+
+def test_git_lookup_errors_span_both_hierarchies() -> None:
+    """Pinned so a future narrowing of the handler fails loudly here."""
+    from git.exc import GitError, ODBError
+
+    assert (GitError, ODBError, ValueError) == GIT_LOOKUP_ERRORS
 
 
 def test_merge_touching_unrelated_files_is_ambiguous(tmp_path: Path) -> None:

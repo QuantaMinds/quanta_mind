@@ -1,10 +1,10 @@
 # Session record — docs/phase0-prereg-amendments
 
-Written by scripts/guard/hook_session_end.py at 2026-08-04T08:18:54Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-04T08:28:28Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `docs/phase0-prereg-amendments`
-- Files changed vs `main`: 76
+- Files changed vs `main`: 80
 - Uncommitted at session end: 0
 - `docs/CODEBASE.md` updated: yes
 
@@ -46,6 +46,8 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/src/phase0/controls.py`
 - `research/phase0/src/phase0/extract_prs.py`
 - `research/phase0/src/phase0/fix_signals.py`
+- `research/phase0/src/phase0/github_pulls.py`
+- `research/phase0/src/phase0/parent_commit.py`
 - `research/phase0/src/phase0/pycg_failure.py`
 - `research/phase0/src/phase0/risk.py`
 - `research/phase0/src/phase0/run_graph.py`
@@ -60,7 +62,9 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/tests/test_classify_exposure.py`
 - `research/phase0/tests/test_controls.py`
 - `research/phase0/tests/test_extract_prs.py`
+- `research/phase0/tests/test_github_pulls.py`
 - `research/phase0/tests/test_join_end_to_end.py`
+- `research/phase0/tests/test_parent_commit.py`
 - `research/phase0/tests/test_risk.py`
 - `research/phase0/tests/test_run_graph.py`
 - `research/phase0/tests/test_run_pipeline.py`
