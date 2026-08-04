@@ -10,7 +10,7 @@ WHY:  A single attrition percentage is the wrong summary. The first smoke run lo
       That is differential exclusion on the study's own confounder, not noise. So the
       report cross-tabulates rather than totals, and the three categories are kept apart:
       `restricted` narrows the estimand, `resource` and `integrity` bias it.
-IMPORTS: phase0.pipeline.assemble.
+IMPORTS: pandas, stdlib collections.
 CONSUMED BY: run_pilot.py; tests/test_pilot_report.py.
 """
 
@@ -18,6 +18,9 @@ from __future__ import annotations
 
 from collections import Counter
 from dataclasses import dataclass
+from pathlib import Path
+
+import pandas as pd
 
 # Commit-count bands. Chosen before the run and kept coarse: with a few hundred PRs,
 # quartiles cut from the data would move with it, and a moving boundary is a degree of
@@ -53,6 +56,25 @@ class Attempt:
     derived_files: int
     changed_symbols: int
     stars: int = -1
+    # "broke" | "clean" | "" when the outcome was not scanned. Three states, not two:
+    # an unscanned PR and a clean one must not be the same value, or the breakage rate
+    # silently divides by the wrong denominator.
+    outcome: str = ""
+
+
+def star_counts(table: Path) -> dict[str, int]:
+    """Star count per repository, keyed by `owner/name`.
+
+    Lives beside the banding rather than in the runner: the band is a report dimension,
+    and a loader separated from the thing that interprets it is how the two drift.
+
+    Returns empty when the table is absent rather than failing. The band then reports
+    `unknown`, which is visibly different from reporting a band that was never measured.
+    """
+    if not table.is_file():
+        return {}
+    frame = pd.read_parquet(table)
+    return {str(r.full_name): int(r.stars) for r in frame.itertuples() if r.full_name}
 
 
 def _band(value: int, bands: tuple[tuple[str, int, int], ...]) -> str:
@@ -85,6 +107,8 @@ def report(attempts: list[Attempt], clone_failures: int, repos: int) -> dict[str
     rejected = [a for a in attempts if not a.admitted]
     symbols = sorted(a.changed_symbols for a in admitted)
     files = sorted(a.derived_files for a in admitted)
+    scanned = [a for a in admitted if a.outcome]
+    broke = [a for a in scanned if a.outcome == "broke"]
     star_bands = Counter(
         "unknown" if a.stars < 0 else ("<500" if a.stars < 500 else ">=500") for a in admitted
     )
@@ -105,4 +129,12 @@ def report(attempts: list[Attempt], clone_failures: int, repos: int) -> dict[str
         "distinct_repos_in_records": len(repo_counts),
         "top_repo_share": round(max(repo_counts.values()) / len(admitted), 4) if admitted else 0.0,
         "star_band": dict(star_bands),
+        # The power projection. `a >= 20` in the exposed arm is the binding constraint,
+        # and the corpus is skewed toward small single-commit changes by the attrition
+        # above -- the end of the distribution least likely to break anything. A rate
+        # near 3% means the planned corpus is underpowered and the window or the size
+        # has to change before the full run, not after.
+        "outcome_scanned": len(scanned),
+        "outcome_broke": len(broke),
+        "breakage_rate": round(len(broke) / len(scanned), 4) if scanned else None,
     }

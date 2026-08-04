@@ -1,10 +1,10 @@
 # Session record — docs/phase0-prereg-amendments
 
-Written by scripts/guard/hook_session_end.py at 2026-08-04T21:07:40Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-04T21:22:37Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `docs/phase0-prereg-amendments`
-- Files changed vs `main`: 120
+- Files changed vs `main`: 124
 - Uncommitted at session end: 0
 - `docs/CODEBASE.md` updated: yes
 
@@ -23,8 +23,10 @@ Informational. Nothing here was blocked or enforced.
 - `ARCHITECTURE.md`
 - `BRIEFING.md`
 - `CLAUDE.md`
+- `CODEBASE.md`
 - `CONTRIBUTING.md`
 - `PHASE0_PREREGISTRATION.md`
+- `discovery.py`
 - `docs/BUILD_PLAN.md`
 - `docs/CODEBASE.md`
 - `docs/PROJECT_CONTEXT.md`
@@ -116,6 +118,7 @@ Informational. Nothing here was blocked or enforced.
 - `scripts/guard/check_conventions.py`
 - `scripts/guard/check_docs_sync.py`
 - `scripts/guard/check_enforcement_map.py`
+- `scripts/guard/check_module_identity.py`
 - `scripts/guard/check_no_research_imports.py`
 - `scripts/guard/check_no_vague_refs.py`
 - `scripts/guard/check_structure.py`
@@ -128,5 +131,6 @@ Informational. Nothing here was blocked or enforced.
 - `src/qmctx/__init__.py`
 - `tests/conftest.py`
 - `tests/property/test_layer_order.py`
+- `tests/unit/test_discovery_walk.py`
 - `tests/unit/test_package_metadata.py`
 - `uv.lock`

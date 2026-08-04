@@ -37,6 +37,7 @@ COLUMNS = (
     "derived",
     "symbols",
     "stars",
+    "outcome",
 )
 DONE = re.compile(r"^<!-- repo-done: (?P<repo>\S+) -->$")
 HEADER = (
@@ -89,6 +90,7 @@ def read_attempts(path: Path) -> list[Attempt]:
                     derived_files=int(cells[7]),
                     changed_symbols=int(cells[8]),
                     stars=int(cells[9]),
+                    outcome="" if cells[10] == "-" else cells[10],
                 )
             )
         except ValueError:
@@ -116,6 +118,7 @@ def append_repo(path: Path, repo: str, attempts: list[Attempt]) -> None:
                 str(a.derived_files),
                 str(a.changed_symbols),
                 str(a.stars),
+                a.outcome or "-",
             )
         )
         + " |"

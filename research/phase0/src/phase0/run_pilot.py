@@ -34,18 +34,16 @@ import json
 import sys
 from pathlib import Path
 
-import pandas as pd
-
 from phase0.extract_prs import PRRecord
 from phase0.github_pulls import merge_info, require_token
 from phase0.handlabel.select import Candidate, eligible_prs
-from phase0.pilot_report import Attempt, report
+from phase0.pilot_report import Attempt, report, star_counts
 from phase0.pipeline import journal
 from phase0.pipeline.assemble import Rejection, build_record
 from phase0.pipeline.worktree import CloneFailed, cloned
+from phase0.scan_outcome import scan
 
 ROOT = Path(__file__).resolve().parents[2]
-REPOSITORY_TABLE = ROOT / "data" / "aidev" / "repository.parquet"
 PACKAGE = ROOT / "data" / "AIDev_BC_Analyser.zip"
 WORKSPACE = ROOT / "data" / "pilot_clones"
 CACHE = ROOT / "data" / "gh_cache"
@@ -58,22 +56,21 @@ def _by_repo(population: list[Candidate]) -> dict[str, list[Candidate]]:
     return grouped
 
 
-def _stars() -> dict[str, int]:
-    """Star count per repository, for the star-band split the human arm needs.
-
-    Returns empty when the table is absent rather than failing: the band is reported as
-    `unknown`, which is visibly different from reporting a band we did not measure.
-    """
-    if not REPOSITORY_TABLE.is_file():
-        return {}
-    frame = pd.read_parquet(REPOSITORY_TABLE)
-    return {str(r.full_name): int(r.stars) for r in frame.itertuples() if r.full_name}
-
-
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Pilot: build records and report shape.")
     parser.add_argument("--repos", type=int, default=10)
+    parser.add_argument(
+        "--scan",
+        action="store_true",
+        help="also scan the outcome window, for the power projection",
+    )
     parser.add_argument("--per-repo", type=int, default=4)
+    parser.add_argument(
+        "--workspace",
+        type=Path,
+        default=WORKSPACE,
+        help="clone directory; a second concurrent run needs its own",
+    )
     parser.add_argument("--out", type=Path, default=ROOT / "results" / "pilot.json")
     parser.add_argument(
         "--journal",
@@ -89,7 +86,7 @@ def main(argv: list[str] | None = None) -> int:
     chosen = sorted(grouped)[: args.repos]
     print(f"{len(population)} eligible PRs across {len(grouped)} repos; taking {len(chosen)}")
 
-    stars = _stars()
+    stars = star_counts(ROOT / "data" / "aidev" / "repository.parquet")
     already = journal.completed_repos(args.journal)
     attempts: list[Attempt] = journal.read_attempts(args.journal)
     clone_failures = 0
@@ -100,6 +97,7 @@ def main(argv: list[str] | None = None) -> int:
         candidate: Candidate,
         outcome: PRRecord | Rejection,
         commit_count: int,
+        breakage: str = "",
     ) -> None:
         """One attempt, with the covariates attrition may track. Never a verdict."""
         corpus_py = sum(1 for f in candidate.changed_files if f.endswith(".py"))
@@ -120,6 +118,7 @@ def main(argv: list[str] | None = None) -> int:
                 derived_files=files,
                 changed_symbols=symbols,
                 stars=stars.get(candidate.repo, -1),
+                outcome=breakage,
             )
         )
 
@@ -130,7 +129,7 @@ def main(argv: list[str] | None = None) -> int:
         before = len(attempts)
         print(f"[{position}/{len(chosen)}] {repo} ({len(candidates)} PRs)", flush=True)
         try:
-            with cloned(repo, WORKSPACE) as clone:
+            with cloned(repo, args.workspace) as clone:
                 for candidate in candidates:
                     merge = merge_info(repo, candidate.number, str(candidate.pr_id), CACHE, token)
                     if merge is None:
@@ -148,7 +147,13 @@ def main(argv: list[str] | None = None) -> int:
                         merged_at=candidate.merged_at,
                         corpus_files=candidate.changed_files,
                     )
-                    note(candidate, outcome, merge.commit_count)
+                    breakage = ""
+                    if args.scan and not isinstance(outcome, Rejection):
+                        # The clone is already open and at the right repository, so the
+                        # scan costs a history walk and no network. Doing it in a second
+                        # pass would mean cloning every repository twice.
+                        breakage = scan(clone, outcome).outcome.value
+                    note(candidate, outcome, merge.commit_count, breakage)
                     if isinstance(outcome, Rejection):
                         print(
                             f"     #{candidate.number}: rejected [{outcome.stage}"
@@ -158,7 +163,8 @@ def main(argv: list[str] | None = None) -> int:
                     else:
                         print(
                             f"     #{candidate.number}: {len(outcome.changed_files)} files, "
-                            f"{len(outcome.changed_symbols)} symbols",
+                            f"{len(outcome.changed_symbols)} symbols"
+                            + (f", {breakage}" if breakage else ""),
                             flush=True,
                         )
         except CloneFailed as exc:
