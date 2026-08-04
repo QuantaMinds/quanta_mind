@@ -1,0 +1,121 @@
+# Phase 0 environment record
+#
+# PHASE0_RUNBOOK.md section 0: "Pin everything. Record versions in
+# phase0/ENVIRONMENT.lock. A study you cannot re-run is a study you cannot
+# defend." Section 5 requires a full re-run from raw data, on a different
+# machine, from this file.
+#
+# uv.lock is the machine-readable lock. This file records the decisions behind
+# it -- specifically the three that are not obvious and would otherwise be
+# rediscovered painfully.
+
+interpreter:  CPython 3.10.20        # NOT the product's >=3.12 -- see finding 3
+uv:           0.12.0                 # local; CI pins 0.12.1 via astral-sh/setup-uv
+platform_verified: win32 x86_64
+date_verified: 2026-08-03
+
+
+## Step 0 findings — PyCG, verified by direct execution, not assumed
+
+The pre-registration names vanilla PyCG as the instrument "because it is the
+crudest and therefore the conservative one". Three things had to be established
+before that sentence was executable. All three were found by running it.
+
+### Finding 1 — pycg 0.0.8 is broken on every interpreter. Use 0.0.7.
+
+The 0.0.8 wheel installs the package directory as `PyCG/`, while its own
+`PyCG/__main__.py` line 4 reads `from pycg import formats`. The import fails
+immediately:
+
+    ModuleNotFoundError: No module named 'pycg'
+
+Reproduced identically on 3.12 and 3.11, so it is a packaging defect, not an
+interpreter incompatibility. 0.0.8 was the last release before the project was
+archived on 2023-11-26 (final commit message: "Archival message"), and the
+commit before it was "Fix deprecation issues with pyproject file (#74)" -- the
+packaging change that appears to have introduced this. Nobody caught it because
+nothing was released afterwards.
+
+    PINNED: pycg==0.0.7
+
+### Finding 2 — 0.0.7 needs setuptools<81.
+
+`pycg/formats/fasten.py:23` does `from pkg_resources import Requirement`.
+setuptools removed pkg_resources in 81; with setuptools 83 installed the import
+still fails. Pinned below the removal.
+
+    PINNED: setuptools==80.10.2
+
+### Finding 3 — PyCG's ceiling is Python 3.10. This is why the harness is standalone.
+
+On 3.11 and 3.12, `install_hooks()` -> `_clear_caches()` ->
+`importlib.invalidate_caches()` now triggers a lazy import of
+`importlib.metadata`, which re-enters the import hook PyCG has just installed:
+
+    pycg.machinery.imports.ImportManagerError: Can't add edge to a non existing node
+
+Verified working: 3.10.20, 3.9.25, 3.8.20.
+Verified failing:  3.11.15, 3.12.x.
+
+The product targets >=3.12 for sys.monitoring (ARCHITECTURE.md section 4). One
+environment cannot satisfy both, which is the second independent reason
+research/phase0/ is a standalone uv project rather than a workspace member.
+
+    PINNED: .python-version = 3.10
+
+### Sanity check on the instrument — it reproduces the founding example
+
+Fixture: a base class, a subclass calling `super().validate(req)`, a decorator.
+PyCG 0.0.7 output, verbatim:
+
+    "handlers.StripeHandler.validate": [
+        "handlers.StripeHandler._check_currency",
+        "<builtin>.super"
+    ]
+
+`super().validate(req)` resolved to `<builtin>.super`, NOT to
+`handlers.BasePaymentHandler.validate`. The base method appears in the graph
+with no incoming edge from its subclass. This is DyPyBench's finding that
+super() calls are absent from PyCG's graph entirely, confirmed on our own
+instrument, and it is the exact example in README.md.
+
+It also means the instrument behaves as the pre-registration assumes: crude, and
+crude in the direction that makes a null result conservative.
+
+
+## Resolved versions
+
+Read back from uv.lock after resolution on CPython 3.10.20. pandas and scipy
+resolve BELOW what the product environment would pick (3.0.5 / 1.18.0) because
+those releases require a newer interpreter than PyCG tolerates.
+
+pandas                 2.3.3
+scipy                  1.15.3
+statsmodels            0.14.6
+GitPython              3.1.57
+PyYAML                 6.0.3
+tree-sitter            0.26.0
+tree-sitter-python     0.25.0
+tree-sitter-typescript 0.23.2
+pycg                   0.0.7
+setuptools             80.10.2
+pytest                 9.1.1
+pytest-timeout         2.4.0
+hypothesis             6.165.0
+
+
+## Invocation
+
+PyCG ships no console script -- `uvx pycg` fails with "Package `pycg` does not
+provide any executables". It is invoked as a module:
+
+    uv run python -m pycg --package <pkg_dir> <files...>
+
+PHASE0_RUNBOOK.md section 3 shows a bare `pycg` CLI call; that form does not
+exist and the runbook has been corrected.
+
+
+## Open
+
+- TS/JS arm (RUNBOOK section 7) needs a JS graph tool -- Jelly, js-callgraph or
+  TAJS. Not selected, not pinned. The Python arm runs first by design.
