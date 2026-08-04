@@ -71,17 +71,36 @@ check-branch:
 # here rather than deleted so the gap is documented instead of silent — see
 # scripts/verify/README.md. `just check` is the gate that must be green today.
 
+# Refuses with an explanation rather than an opaque pytest exit 4 or a FileNotFoundError.
+# A gate that fails confusingly gets worked around; one that says why does not.
+_phase1-gate:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    if [ ! -f scripts/verify/compare_golden.py ]; then
+      echo "" >&2
+      echo "⛔ 'just verify' is a PHASE 1 gate and is not runnable yet." >&2
+      echo "" >&2
+      echo "   It operates on the SQLite pack, and there is no pack. docs/BUILD_PLAN.md" >&2
+      echo "   gates every layer of product code on Phase 0 reporting a verdict, and" >&2
+      echo "   docs/findings/PHASE0_PREREGISTRATION.md §8 is still empty." >&2
+      echo "" >&2
+      echo "   This is not a broken checkout. See scripts/verify/README.md." >&2
+      echo "   Run 'just check' — that is the gate that must be green today." >&2
+      echo "" >&2
+      exit 1
+    fi
+
 # Everything in `check`, plus real runs against real data. Target: under 10 minutes.
-verify: check test-live verify-data verify-no-source-leak
+verify: _phase1-gate check test-live verify-data verify-no-source-leak
     @echo "✅ verify passed — output was produced by a real run and matches golden data."
 
 # Runs the full pipeline against pinned real repositories. No mocks, by guard rule.
-test-live:
+test-live: _phase1-gate
     uv run pytest tests/live -x --timeout=900
 
 # Re-runs the pipeline and diffs the produced pack against the reviewed golden pack.
 # A test that passes while the data silently changed is the failure mode we exist to stop.
-verify-data:
+verify-data: _phase1-gate
     uv run python scripts/verify/compare_golden.py \
         --fixtures tests/fixtures/repos \
         --golden   tests/fixtures/golden \
@@ -89,13 +108,13 @@ verify-data:
 
 # Proves — does not assert — that no source text made it into the pack.
 # Invariant 6 in ARCHITECTURE.md. This is a contractual claim we make to customers.
-verify-no-source-leak:
+verify-no-source-leak: _phase1-gate
     uv run python scripts/verify/assert_no_source_in_pack.py \
         --fixtures tests/fixtures/repos \
         --min-match-length 40
 
 # Determinism: indexing the same commit twice must produce byte-identical packs.
-verify-determinism:
+verify-determinism: _phase1-gate
     uv run python scripts/verify/assert_deterministic.py --runs 3
 
 # ---------------------------------------------------------------- setup
