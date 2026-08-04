@@ -21,6 +21,7 @@ CONSUMED BY: run_pipeline.py; tests/test_worktree.py.
 from __future__ import annotations
 
 import shutil
+import subprocess
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
@@ -49,15 +50,26 @@ def cloned(repo_full_name: str, workspace: Path, keep: bool = False) -> Iterator
     if target.exists():
         shutil.rmtree(target, ignore_errors=True)
 
+    # `git` directly rather than Repo.clone_from(kill_after_timeout=…): GitPython
+    # raises "'kill_after_timeout' feature is not supported on Windows" on every call,
+    # so the whole study was unrunnable on this platform and every clone came back as
+    # attrition. subprocess.run's timeout is portable, and AGENTS.md requires one on
+    # every subprocess — dropping the flag to make it work would have removed it.
     try:
-        Repo.clone_from(
-            f"https://github.com/{repo_full_name}.git",
-            target,
-            kill_after_timeout=CLONE_TIMEOUT_S,
+        subprocess.run(
+            ["git", "clone", "--quiet", f"https://github.com/{repo_full_name}.git", str(target)],
+            check=True,
+            timeout=CLONE_TIMEOUT_S,
+            capture_output=True,
+            text=True,
         )
-    except GIT_ERRORS as exc:
+    except subprocess.TimeoutExpired as exc:
         shutil.rmtree(target, ignore_errors=True)
-        raise CloneFailed(f"{repo_full_name}: {exc}") from exc
+        raise CloneFailed(f"{repo_full_name}: clone exceeded {CLONE_TIMEOUT_S}s") from exc
+    except (subprocess.CalledProcessError, OSError) as exc:
+        shutil.rmtree(target, ignore_errors=True)
+        detail = getattr(exc, "stderr", "") or str(exc)
+        raise CloneFailed(f"{repo_full_name}: {str(detail).strip()[:300]}") from exc
 
     try:
         yield target

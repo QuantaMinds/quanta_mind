@@ -73,6 +73,8 @@ reclassification this log exists to prevent.
 
 | **A20** | 4.10 | Traces missing patch text through to A16's confounder. Link 1 **fails, in our favour** — shape detection reads filenames, which are complete. Link 2 holds but is an **outlier, not a gradient**. Adds one pilot metric: **file-set disagreement rate by changed-lines quartile**. Corrects A19's patch-weighted 31.1%. | The chain is real — text is missing precisely for the largest changes, so the tertiary outcome loses big patches differentially, on exactly the variable that achieves AUC 0.957 on its own. It needed measuring rather than asserting, and measuring changed the shape of the answer twice. |
 
+| **A21** | 4.11 | Fixes §7's day-2 gate protocol before it runs: **human arm**, eligibility, a **stride draw** across the id range, a manifest hash binding labelling to scoring, and **Cohen's kappa reported as a diagnostic beside the unchanged ≥16/20 threshold**. A PR whose history is unreadable is **not labellable** and invalidates the gate. | The gate's validity is entirely an ordering property, and ordering is the one thing a green test does not check. Also: raw agreement on an all-clean sample is 20/20 for a classifier that always answers "clean" — the same degeneracy `controls/analysis.py` already refuses in the negative controls, reappearing a layer up. |
+
 **A8 is the one that most needed to be pre-registered.** Switching to cluster-robust
 inference after seeing a confidence interval would be indistinguishable from moving the
 goalposts, whatever the motivation.
@@ -867,6 +869,62 @@ size-driven effect would live if size is doing the work.
 Adding a size cap on PRs would be the tempting alternative and is refused: it moves who is
 in the corpus, which is a decision boundary, and it would do so on the exact variable under
 suspicion. The metric is reported; the boundary does not move.
+
+---
+
+### 4.11 The day-2 gate's protocol, fixed before it runs [A21]
+
+§7 requires the outcome classifier to agree with hand-labelling on **≥16 of 20 PRs**, and
+§7 is the only measurement in Phase 0 whose validity is purely a property of *what order
+two things happen in*. Nothing about that is checkable after the fact. So the protocol is
+fixed here, and the ordering is enforced by the code rather than by intention.
+
+**Arm: human.** The gate does not specify one, and the classifier reads git history and is
+arm-agnostic. Human is chosen because A19's replication package supplies commit SHAs and
+changed filenames directly, so **the gate runs with no GitHub token** — which is the point
+of taking it before the pilot, since the token blocks everything downstream of it. Recorded
+rather than assumed, because a reviewer will ask why the validation arm is not the arm the
+thesis is about.
+
+**Eligibility and draw.** Eligible: merged, at least one mined commit, at least one changed
+`.py` file — everything a labeller needs to be able to judge at all, and nothing that could
+correlate with the outcome. From **608** eligible PRs, sorted by `pr_id`, take every 30th.
+
+The stride is not decoration. Taking the first 20 by id draws one narrow slice of calendar
+time — ids are issued in order — so a classifier keyed on commit-message convention could
+look better or worse purely by era. The realised draw spans **2025-01-01 to 2025-06-15
+across 13 repositories**. Manifest sha256 `17109bac…fea9b93c`, which binds the set that was
+labelled to the set that is scored.
+
+**Three mechanisms, because the discipline is not a promise:**
+
+1. **The sheet has no import path to a verdict.** `handlabel/sheet.py` and
+   `handlabel/window.py` do not import `scan_outcome` or `fix_signals`, and a test parses
+   their ASTs and asserts they never will. The sheet cannot render an answer by accident.
+2. **No commit is annotated from its message.** §3.2's *definition* is shown — a labeller
+   not told that a revert-or-fix is what counts is labelling a different variable — but a
+   commit matching the classifier's pattern and one that does not must render to identical
+   structure. Showing the regex would validate the classifier against itself.
+3. **Scoring refuses an incomplete sheet.** All twenty or nothing; otherwise the gate can
+   be met by labelling only the easy ones.
+
+**Kappa is reported and is NOT a gate.** If all twenty PRs happen to be clean — entirely
+possible, since a revert-or-fix inside seven days is well under a 50% base rate — then
+"always answer clean" scores 20/20 and passes. That is the degeneracy `controls/analysis.py`
+already refuses to score as a pass in the negative controls, reappearing one layer up.
+Cohen's kappa is exactly the correction for chance agreement given the observed margins, and
+the paper we are checking ourselves against reports κ = 0.79 for the same kind of exercise.
+
+**It is a diagnostic only.** Adding a second threshold now would move a decision boundary,
+which this study does not do — and tightening is as much a degree of freedom as loosening.
+The report states raw agreement against the unchanged ≥16/20, kappa beside it, and, when the
+sample is single-class, an explicit statement that **the gate had no discriminating power**
+— which is neither a pass nor a fail but a reason to draw again.
+
+**An unreadable window is not a quiet week.** A PR whose repository could not be cloned is
+marked not-labellable, is excluded from labelling, and invalidates the gate until it is
+readable. This is stated because the first implementation got it wrong in the most
+instructive way available — see `ENVIRONMENT.lock`, finding 4.
 
 ---
 

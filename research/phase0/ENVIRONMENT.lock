@@ -63,6 +63,32 @@ research/phase0/ is a standalone uv project rather than a workspace member.
 
     PINNED: .python-version = 3.10
 
+### Finding 4 — GitPython's clone timeout does not exist on Windows
+
+`Repo.clone_from(..., kill_after_timeout=N)` raises on every call:
+
+    Cmd('git') failed due to: '"kill_after_timeout" feature is not supported on Windows.'
+
+Not a slow clone, not a network fault -- the feature is refused outright. Every clone
+in the study therefore failed on this platform, and because `cloned()` raises
+`CloneFailed` which callers treated as corpus attrition, the pipeline would have run to
+completion and reported 100% attrition as a result rather than as a broken environment.
+
+The hand-labelling sheet is where it surfaced, and it surfaced badly: 13 of 13 clones
+failed, the sheet rendered 20 PRs as having no commits in their window, and a labeller
+reading it would have marked 20 clean. The outcome classifier returns CLEAN on
+unreadable history for its own (defensible) reasons, so the §7 gate would have reported
+20/20 PASS on no data whatsoever.
+
+Fixed by calling git through `subprocess.run(..., timeout=CLONE_TIMEOUT_S)`, which is
+portable and keeps the timeout AGENTS.md requires on every subprocess. Dropping the flag
+would have "fixed" it by removing the timeout.
+
+The second half of the fix is typed: `handlabel/window.py` returns a `Window` carrying
+`available`, so an unreadable repository and a quiet week are no longer the same empty
+list. The sheet refuses to offer an unreadable PR for labelling and the generator exits
+non-zero. See amendment A21.
+
 ### Sanity check on the instrument — it reproduces the founding example
 
 Fixture: a base class, a subclass calling `super().validate(req)`, a decorator.

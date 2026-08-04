@@ -57,6 +57,21 @@ test-property:
 test-phase0:
     cd research/phase0 && uv run pytest -x --timeout=120
 
+# ------------------------------------------------------- §7 day-2 gate (human)
+
+# Build the blind labelling sheet. Reads the replication package, clones the 13
+# repositories the draw lands in, and writes results/handlabel_sheet.md.
+# Exits non-zero if any window is unreadable — a sheet built from failed clones
+# renders twenty quiet weeks and the gate would pass on no data.
+handlabel-sheet:
+    cd research/phase0 && uv run python scripts/make_handlabel_sheet.py
+
+# Score the labels against the classifier. Run this AFTER filling in all twenty;
+# it refuses an incomplete sheet. Running it first turns the gate into a memory
+# test and the result is worth nothing.
+handlabel-score:
+    cd research/phase0 && uv run python scripts/score_handlabel.py
+
 # Branch naming needs a branch, so it runs in CI rather than on every local check.
 check-branch:
     uv run python scripts/guard/check_branch_name.py .
