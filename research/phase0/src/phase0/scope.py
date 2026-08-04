@@ -60,6 +60,28 @@ class Scope:
     def file_count(self) -> int:
         return len(self.files)
 
+    def module_of(self, path: Path) -> str:
+        """The module name PyCG will use for this file.
+
+        Relative to package_root and WITHOUT the package name itself: with
+        `--package .../acme`, the file `acme/handlers.py` is `handlers`, and
+        `acme/sub/deep.py` is `sub.deep`. Verified by running PyCG, not assumed --
+        this convention decides every fully-qualified name in the graph, so a
+        wrong guess here makes the join match nothing.
+        """
+        try:
+            relative = path.relative_to(self.package_root)
+        except ValueError:
+            return ""
+        parts = list(relative.parts)
+        if not parts:
+            return ""
+        if parts[-1] == "__init__.py":
+            parts = parts[:-1]
+        else:
+            parts[-1] = parts[-1].removesuffix(".py")
+        return ".".join(parts)
+
 
 def _is_source(path: Path) -> bool:
     """True for a Python file outside every non-source directory."""

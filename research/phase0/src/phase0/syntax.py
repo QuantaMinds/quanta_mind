@@ -102,6 +102,30 @@ def bare_decorators(root: Node) -> list[tuple[Node, Node]]:
     return pairs
 
 
+def definitions(root: Node, source: bytes) -> dict[str, str]:
+    """Every function and method defined in this file: short name -> qualified name.
+
+    `def validate` inside `class Stripe` yields {"validate": "Stripe.validate"}.
+    The module prefix is added by the caller, which knows the file path.
+
+    A short name defined more than once in a file (an overload on two classes)
+    keeps the FIRST definition. The study's unit is a changed *public symbol*, and
+    a name that is ambiguous within its own module is ambiguous for the join too --
+    classify_exposure.py counts those rather than guessing between them.
+    """
+    found: dict[str, str] = {}
+    for node in _walk(root):
+        if node.type != "function_definition":
+            continue
+        name_node = node.child_by_field_name("name")
+        if name_node is None:
+            continue
+        short = text(name_node, source)
+        qualified = qualified_name(name_node, source)
+        found.setdefault(short, qualified or short)
+    return found
+
+
 def receiver_type(function_node: Node) -> str:
     """Node type of an attribute call's receiver, or '' when there is none.
 

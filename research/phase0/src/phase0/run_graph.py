@@ -91,8 +91,25 @@ def _limit_memory(mem_limit_gb: int) -> Callable[[], None] | None:
     return apply
 
 
+def normalise_fqn(name: str) -> str:
+    """Repair PyCG's path-separator leak in module names.
+
+    PyCG derives a nested module's name from its file path without normalising
+    separators, so `acme/sub/deep.py` becomes `sub\\deep` on Windows and `sub/deep`
+    elsewhere -- a path separator where a dot belongs. Verified by running it.
+
+    Left alone, no nested-package caller would ever match a dotted name, and every
+    call site inside one would read as unresolved. That inflates exposure for
+    exactly the repositories most likely to be large and layered.
+    """
+    return name.replace("\\", ".").replace("/", ".")
+
+
 def _parse_edges(payload: str) -> tuple[Edge, ...]:
-    """PyCG emits {caller_fqn: [callee_fqn, ...]}. No line numbers, by design."""
+    """PyCG emits {caller_fqn: [callee_fqn, ...]}. No line numbers, by design.
+
+    Names are normalised here so nothing downstream sees the raw separator leak.
+    """
     try:
         raw = json.loads(payload)
     except json.JSONDecodeError:
@@ -100,7 +117,7 @@ def _parse_edges(payload: str) -> tuple[Edge, ...]:
     if not isinstance(raw, dict):
         return ()
     return tuple(
-        Edge(src=str(src), dst=str(dst))
+        Edge(src=normalise_fqn(str(src)), dst=normalise_fqn(str(dst)))
         for src, callees in raw.items()
         if isinstance(callees, list)
         for dst in callees
