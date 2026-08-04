@@ -1147,7 +1147,38 @@ constants and no function body. It narrows the claim rather than tilting it.
 records come from repositories with **≥ 500 stars**, with 21 distinct repositories and a
 top-repository share of 14.6%.
 
-**The pilot is short of its planned size.** 93 attempted against the ~200 specified: the
+**The pilot at full size — 90 repositories, 275 PRs, 154 records (56%).** The gradient is
+now monotone across all four bands, at four times the earlier sample:
+
+| commits | n | admitted | `parent_commit` failure |
+|---|---|---|---|
+| 1 | 104 | 63.5% | **2.9%** |
+| 2–5 | 115 | 58.3% | **17.4%** |
+| 6–20 | 43 | 41.9% | **30.2%** |
+| 21+ | 10 | 30.0% | **70.0%** |
+
+Spread is good — 65 distinct repositories, top-repository share 4.6%. **All 154 records
+come from repositories with ≥ 500 stars**, so A15's common-support problem has resolved
+itself through attrition rather than needing stratification; that handling can be dropped.
+
+**And the skew is confirmed in the records themselves:** median 2 changed files and 2
+changed symbols. The surviving corpus is the small, single-commit end of the distribution.
+
+**Power: measured, and it is not the binding constraint.** 33 admitted records scanned,
+**9 broke — 27.3%**, against the 5–20% the design assumed and far above the ~3% that would
+have meant an underpowered corpus. Even discounted heavily this clears `a ≥ 20`.
+
+> **But 27.3% is an upper bound, not an estimate.** The agent-labelled dry run in
+> §"What an agent-labelled dry run exposed" found the outcome rule *too loose* in eight of
+> nine disagreements, from squash-merge bodies and file over-attribution. So the power
+> question resolves into the accuracy question: there are plenty of events, and what is
+> unknown is how many are real.
+>
+> **That makes the 20-PR hand-labelling gate the critical path, not a formality.** It is
+> now the only remaining measurement that can invalidate the outcome variable, and it is
+> the one a machine cannot do.
+
+**The earlier 30-repo run was short of its planned size.** 93 attempted against the ~200 specified: the
 first 30 repositories simply do not hold 200 eligible PRs at seven each. Every rate above
 carries an interval accordingly, and the run is being extended across the remaining
 repositories rather than quoted at this width.
