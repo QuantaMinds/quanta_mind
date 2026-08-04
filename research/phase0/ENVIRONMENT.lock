@@ -89,6 +89,32 @@ The second half of the fix is typed: `handlabel/window.py` returns a `Window` ca
 list. The sheet refuses to offer an unreadable PR for labelling and the generator exits
 non-zero. See amendment A21.
 
+### Finding 5 — two more Windows faults, both of which read as corpus attrition
+
+Found by running the hand-labelling sheet against real repositories. Both produced a
+plausible-looking study result rather than an error, which is what makes them worth
+recording rather than just fixing.
+
+**5a. Paths over 260 characters.** Two Significant-Gravitas/AutoGPT PRs failed checkout
+partway through the clone on a deeply nested frontend route. Git reported "unable to
+access <path>" and carried on, so the clone half-existed. The consequence is not random
+loss: it is attrition concentrated in repositories with deep directory trees, which is a
+selection effect on exactly the kind of repository a large agent-authored PR touches.
+
+    FIX: git -c core.longpaths=true clone ...
+
+**5b. `shutil.rmtree(..., ignore_errors=True)` deletes nothing.** Git writes its object
+files read-only. On Windows unlink then raises EACCES and `ignore_errors` swallows it, so
+the directory survives. The next clone fails with "destination path already exists" and
+19 of 20 PRs came back as unreadable history -- an error naming an entirely different
+cause. `ignore_errors=True` is the same silent-absence pattern AGENTS.md rule 3 forbids,
+sitting in the cleanup path where nobody looks.
+
+    FIX: pipeline/worktree.py::_remove_tree, which clears the read-only bit and RAISES
+         if the directory survives. Strict before cloning (reusing a stale clone would
+         analyse the wrong tree); lenient after (the strict pass catches leftovers).
+    PINNED BY: tests/test_worktree.py
+
 ### Sanity check on the instrument — it reproduces the founding example
 
 Fixture: a base class, a subclass calling `super().validate(req)`, a decorator.

@@ -20,7 +20,9 @@ CONSUMED BY: run_pipeline.py; tests/test_worktree.py.
 
 from __future__ import annotations
 
+import os
 import shutil
+import stat
 import subprocess
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -38,6 +40,37 @@ class CloneFailed(RuntimeError):
     """The repository could not be obtained. Corpus attrition, counted upstream."""
 
 
+def _clear_readonly(func, path, _exc):  # type: ignore[no-untyped-def]  # shutil.onerror
+    """Windows marks git's object files read-only, so unlink fails with EACCES."""
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
+
+
+def _remove_tree(target: Path, *, strict: bool) -> None:
+    """Delete a clone, refusing to pretend it worked.
+
+    `shutil.rmtree(..., ignore_errors=True)` was used here and silently did nothing on
+    Windows: git's object files are read-only, unlink raises EACCES, and the flag
+    swallows it. The directory survived, the NEXT clone failed with "destination path
+    already exists", and 19 of 20 PRs came back as unreadable history -- a failure that
+    named the wrong cause entirely.
+
+    Strict on the way in, because reusing a stale clone would analyse the wrong tree.
+    Lenient on the way out, because a leftover directory is caught by the strict pass
+    on the next attempt rather than lost.
+    """
+    if not target.exists():
+        return
+    try:
+        shutil.rmtree(target, onerror=_clear_readonly)
+    except OSError as exc:
+        if strict:
+            raise CloneFailed(f"{target}: could not remove a stale clone: {exc}") from exc
+        return
+    if strict and target.exists():
+        raise CloneFailed(f"{target}: stale clone survived removal; refusing to reuse it")
+
+
 @contextmanager
 def cloned(repo_full_name: str, workspace: Path, keep: bool = False) -> Iterator[Path]:
     """Clone a repository for the duration of the block, then delete it.
@@ -47,8 +80,7 @@ def cloned(repo_full_name: str, workspace: Path, keep: bool = False) -> Iterator
     clone has neither.
     """
     target = workspace / repo_full_name.replace("/", "__")
-    if target.exists():
-        shutil.rmtree(target, ignore_errors=True)
+    _remove_tree(target, strict=True)
 
     # `git` directly rather than Repo.clone_from(kill_after_timeout=…): GitPython
     # raises "'kill_after_timeout' feature is not supported on Windows" on every call,
@@ -76,10 +108,10 @@ def cloned(repo_full_name: str, workspace: Path, keep: bool = False) -> Iterator
             text=True,
         )
     except subprocess.TimeoutExpired as exc:
-        shutil.rmtree(target, ignore_errors=True)
+        _remove_tree(target, strict=False)
         raise CloneFailed(f"{repo_full_name}: clone exceeded {CLONE_TIMEOUT_S}s") from exc
     except (subprocess.CalledProcessError, OSError) as exc:
-        shutil.rmtree(target, ignore_errors=True)
+        _remove_tree(target, strict=False)
         detail = getattr(exc, "stderr", "") or str(exc)
         raise CloneFailed(f"{repo_full_name}: {str(detail).strip()[:300]}") from exc
 
@@ -87,7 +119,7 @@ def cloned(repo_full_name: str, workspace: Path, keep: bool = False) -> Iterator
         yield target
     finally:
         if not keep:
-            shutil.rmtree(target, ignore_errors=True)
+            _remove_tree(target, strict=False)
 
 
 @contextmanager
@@ -113,4 +145,4 @@ def at_commit(repo_path: Path, sha: str, slot: str) -> Iterator[Path | None]:
             try:
                 Repo(repo_path).git.worktree("remove", "--force", str(tree))
             except GIT_ERRORS:
-                shutil.rmtree(tree, ignore_errors=True)
+                _remove_tree(tree, strict=False)

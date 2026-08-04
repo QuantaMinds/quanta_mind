@@ -33,6 +33,14 @@ EXCLUDED_DIRS: frozenset[str] = frozenset(
         "htmlcov",
         "dist",
         "build",
+        # Scratch corpora. The research harness clones real third-party repositories
+        # into research/phase0/data/ and deletes them when the run ends. While a run is
+        # in flight the guards were walking into them and crashing -- on a 300-character
+        # AutoGPT path, and on a read-only sqlmesh file mid-deletion. Every hook then
+        # fails for reasons that have nothing to do with the edit that triggered it,
+        # which is how guards get switched off.
+        "data",
+        "results",
     }
 )
 
