@@ -141,3 +141,46 @@ Agent composition, config `pull_request`, 33,596 rows:
     Claude_Code      459    1.4%
 
 Any Phase 0 result is predominantly a result about Codex. See amendment A14.
+
+
+## External inputs — pinned by hash
+
+### AIDev_BC_Analyser replication package
+
+Supplies the human arm's commit-level data, which AIDev itself does not ship. Without it
+A2's parent resolution cannot run on that arm. Downloaded 2026-08-03.
+
+    source     https://ndownloader.figshare.com/files/60719872
+    licence    CC BY 4.0, public, not embargoed
+    bytes      78,419,081
+    md5        7fc01c70cb4ed0210fab098d820de743   published == computed
+    path       research/phase0/data/  (gitignored; re-fetch from the URL above)
+
+Contents — 10 entries:
+
+    human_pr_python.parquet          1,402 rows
+    human_commit.parquet             7,376 rows    sha, pr_id, repo_url, pr_number, message
+    human_commit_detail.parquet    110,047 rows    sha, pr_id, filename, patch
+    code_analyzer.py                   318 lines   AST breaking-change detector
+    bc_analysis_ai.ipynb, bc_analysis_human.ipynb, human_data_processing.ipynb
+    README.pdf, requirements.txt
+
+Measured coverage (not assumed — see amendment A19):
+
+    merged human Python PRs                      1,042 of 1,402
+    ... with >=1 mined commit SHA                1,009   96.8%   <- gates the primary
+    ... with >=1 non-empty .py patch               607           <- gates the tertiary
+    repositories in that patch-bearing set          90
+    .py patches with no patch text              20,091   31.1%   GitHub omits large files
+
+The package is PRE-filter and therefore a superset of the paper's 5,788 commits / 93,044
+patches. Not a corrupted download.
+
+### Join hazard — costs a silent empty result
+
+`pr_id` is a STRING in human_commit and human_commit_detail, and int64 in
+human_pr_python. Joining without a cast returns zero rows: no error, no warning, and it
+looks exactly like "the human arm has no commit data". Cast to int64 first, then assert
+the join is non-empty rather than trusting it.
+
+    com["pr_id"] = com.pr_id.astype("int64")

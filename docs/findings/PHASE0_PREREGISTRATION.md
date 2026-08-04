@@ -69,6 +69,8 @@ reclassification this log exists to prevent.
 | **A17** | 4.7, 6 | Agent-stratified RR **reportable for Codex only**; Claude Code descriptive at best; corpus composition recorded in §6 as *conservative*; retrieval-strategy moderation **pre-registered as a prediction**. | Codex is 64.9% of the corpus and has the lowest breaking rate (2.62%) of the five, so a positive appears under unfavourable conditions. Claude Code is 459 PRs — below the power floor before the filters. A moderation found post-hoc is a story; predicted, it is mechanism evidence. |
 | **A18** | 4.8 | Prior-work scan recorded: terms, date, coverage (~23 of 62+), and the precise novelty claim. | Three adjacent literatures exist — call-graph *accuracy*, call-graph *defect prediction*, and AIDev empirical studies — and none uses the analyzer's failure to resolve as an exposure. Also found: InferCG beats PyCG by 13.9% recall, which is a Phase 4 option, not a threat to a deliberately crude instrument. |
 
+| **A19** | 4.9 | Human-arm commit data is **sourced from the AIDev_BC_Analyser replication package**, not mined. Coverage measured, not assumed: 1,009 of 1,042 merged human Python PRs (96.8%). The 3.2% without commits are attrition under A2, counted by resolution case. | AIDev ships no `pr_commits` for human PRs, so A2's parent resolution could not run on that arm at all. The package supplies commit SHAs for effectively all of it, removing a GitHub-API mining workstream whose quota cost was the human arm's largest unknown. Sourcing beats mining: it is fixed, citable, and re-runnable without a token. |
+
 **A8 is the one that most needed to be pre-registered.** Switching to cluster-robust
 inference after seeing a confidence interval would be indistinguishable from moving the
 goalposts, whatever the motivation.
@@ -738,6 +740,75 @@ concluding anything.
 Record the achieved `a` in the Results section whatever happens, together with the number
 of distinct repositories contributing to it (§3.4) — 20 events from two repositories do not
 meet this floor.
+
+---
+
+### 4.9 The human arm's commit data is sourced, not mined [A19]
+
+AIDev ships `human_pull_request` and `human_pr_task_type` but **no commit-level data and no
+file patches** for the human arm. A2's parent resolution walks a PR's commits to decide
+which merge shape applies; with no commits it cannot run at all. Until this was resolved the
+human arm's cost was a GitHub-API mining job of unknown size — the largest open number in
+the plan.
+
+The AIDev_BC_Analyser replication package (figshare, CC BY 4.0) contains that mined data.
+
+```
+AIDev_BC_Analyser.zip   78,419,081 bytes
+md5   7fc01c70cb4ed0210fab098d820de743   (published == computed)
+
+human_pr_python.parquet          1,402 rows   id, number, repo_url, repo_id, merged_at, …
+human_commit.parquet             7,376 rows   sha, pr_id, repo_url, pr_number, commit_message
+human_commit_detail.parquet    110,047 rows   sha, pr_id, filename, patch
+code_analyzer.py                   318 lines  the AST breaking-change detector
+bc_analysis_{ai,human}.ipynb, human_data_processing.ipynb, README.pdf, requirements.txt
+```
+
+**Coverage, measured rather than assumed.** Of 1,402 human Python PRs, 1,042 are merged;
+**1,009 of those 1,042 (96.8%) carry at least one mined commit SHA**. That is what A2 needs,
+and it is effectively complete. The remaining 3.2% are attrition under A2's existing rule,
+counted by resolution case — not a new exclusion.
+
+A second figure gates less and must not be confused with the first: **607** merged PRs
+across **90** repositories have at least one non-empty `.py` patch, because GitHub omits
+patch text for large files and **31.1% of the 64,698 `.py` patches have none**. Patch text
+feeds only A2's shape *heuristic* and the tertiary AST outcome. The primary variable is
+re-derived from `git diff parent..merged` against the checked-out tree (step 5's consistency
+gate), so it depends on the SHA, not on the patch. **1,009 is the number that binds the
+primary; 607 binds the tertiary.**
+
+**A join hazard worth recording.** `pr_id` is `object` (string) in both commit tables and
+`int64` in the PR table. Joining them directly yields **zero rows** — not an error, a silent
+empty result that reads exactly like "the human arm has no commit data". It was caught only
+because 1,325 distinct `pr_id` values against 1,402 PRs is not a plausible zero. Cast before
+joining; the pipeline asserts a non-empty join rather than trusting one.
+
+**The package is a superset of the published figures** — 7,376 commits and 110,047 patches
+here against the paper's 5,788 and 93,044, i.e. pre-filter rather than contradictory. We use
+our own filters, so the paper's post-filter counts are not a target to reproduce. Recorded
+so that the difference is not later mistaken for a corrupted download.
+
+**Reading `code_analyzer.py` sharpens two claims that were previously second-hand.**
+
+1. **Their unmeasured recall has a named mechanism.** The detector reconstructs before/after
+   source from hunk text alone and calls `ast.parse` on it; on `SyntaxError` it returns
+   `None`, and `analyze` then skips the hunk. A hunk that fails to parse is therefore
+   indistinguishable from a hunk containing no breaking change. Their validation was
+   **precision only** — 95.7% / 93.6% on 94 sampled patches, κ = 0.79 — and precision
+   sampling draws from what the tool *flagged*, so it cannot see this class at all. This is
+   why §3.2 declines AST detection as the primary outcome; the reason is now sourced from
+   the implementation rather than inferred from the paper.
+2. **The gap they name in their own threats to validity is visible in the code.** The tool
+   detects a changed signature and never asks whether anything calls it — there is no
+   caller-side step anywhere in the 318 lines. Their sentence — *"some changes may affect
+   functions with no downstream users"* — is not a hedge, it is the design. That gap is the
+   product, conceded by a peer-reviewed paper about its own instrument.
+
+**No decision boundary moves.** A19 changes where the human arm's commit SHAs come from and
+records what fraction exists. The thresholds, the window, the outcome definition, the `a ≥ 20`
+floor and A15's star-band stratification are untouched. The direction is toward feasibility,
+not toward a positive: sourcing the data cannot make an effect appear, and the 3.2% loss is
+counted against the human arm.
 
 ---
 
