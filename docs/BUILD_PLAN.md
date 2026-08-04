@@ -12,7 +12,11 @@
 
 ## Phase 0 — The correlation test (1 week, zero product code)
 
-**Full protocol: `docs/findings/PHASE0_PREREGISTRATION.md`. Read it, do not summarise it.**
+**Thresholds: `docs/findings/PHASE0_PREREGISTRATION.md`.**
+**Execution: `docs/findings/PHASE0_RUNBOOK.md` — day by day, with harness tests, controls,
+expected outputs and the failure-diagnosis tree. Read both, do not summarise either.**
+
+**Scope: Python arm first, then TS/JS. No other language until both report.**
 
 **Question:** does `unresolved` predict breakage in AI-authored changes?
 
@@ -38,11 +42,21 @@ becomes "prioritise review attention," not "prevent breakage."
 **No-result criterion:** fewer than 20 breakages in the exposed arm → underpowered. Widen
 the corpus. Do not report it as negative.
 
-**Deliverable:** `PHASE0_PREREGISTRATION.md §8` filled and signed.
+**Controls gate (Day 2, blocking):** a positive control of 30 synthetic PRs — where
+breakage is *known* to be caused by an unresolvable `super()` edge — must yield RR ≥ 5.
+**Until the instrument is shown capable of detecting a planted positive, a null result is
+uninterpretable and must not be believed.** Negative controls on nonsense variables
+(filename initial, line-count parity) must yield RR ≈ 1.
+
+**Deliverable:** `PHASE0_PREREGISTRATION.md §8` filled and signed, both arms, with the
+eight-item authenticity checklist in `PHASE0_RUNBOOK.md §5` complete.
 
 ---
 
 ## Phase 0b — Symptom vocabulary (1 week, only if Phase 0 is non-null)
+
+Run for both Python and JS/TS communities — the vocabulary may differ, and JS developers
+face a failure mode Python does not (the bundler boundary).
 
 Open thread #7. Fifty verbatim practitioner complaints from r/ExperiencedDevs,
 r/programming, HN and the Cursor forum, coded for whether developers ever describe the

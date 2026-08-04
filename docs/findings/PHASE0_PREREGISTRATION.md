@@ -10,7 +10,12 @@
 > changed, why, and who approved it.** An unamended, unexplained change to the threshold
 > is research misconduct on ourselves.
 >
-> Commit this file. Note the SHA. Then start.
+> Commit this file. Note the SHA. Then follow `PHASE0_RUNBOOK.md` — the executable
+> protocol with harness tests, controls, expected outputs and the failure tree.
+>
+> **Languages in scope: Python and TypeScript/JavaScript.** The Python arm runs first;
+> TS/JS repeats the identical protocol only after Python reports, so that a broken
+> harness is diagnosed once rather than twice. No other language until both report.
 
 ---
 
@@ -168,6 +173,7 @@ the repos where it worked. If any of those becomes tempting, re-read this paragr
 | 3–5 | Full run: checkout parent commits, scoped PyCG, call-site enumeration, 7-day history scan. |
 | 6 | Fill the 2×2. Compute RR + CI. Stratify by the five confounders. |
 | 7 | Write the Results section below. Convene the go/no-go. |
+| 8–12 | Repeat the identical protocol for the TS/JS arm (`RUNBOOK §7`). |
 
 **Day 2 gate:** the outcome classifier must agree with hand-labelling on ≥16 of 20 PRs.
 If it does not, the outcome variable is unreliable and the whole study is unreliable — fix
@@ -178,6 +184,13 @@ the classifier before proceeding, and record how many iterations that took.
 ## 8. Results
 
 > **Empty. Do not fill until the run is complete. Do not start Phase 1 until this is filled.**
+>
+> Two blocks below: one per language arm. A strong Python result with a null TS/JS result
+> is a valid and useful outcome — it means the product is Python-first, and that is a
+> narrower company than the one currently described in `PROJECT_CONTEXT.md`.
+>
+> **Before filling either block, complete the authenticity checklist in
+> `PHASE0_RUNBOOK.md §5`. All eight items. A result that fails a control is not a result.**
 
 ```
 Run date:
