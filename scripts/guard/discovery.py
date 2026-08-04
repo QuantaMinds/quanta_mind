@@ -12,6 +12,7 @@ CONSUMED BY: every module in scripts/guard/.
 
 from __future__ import annotations
 
+import os
 from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
@@ -64,6 +65,23 @@ class Violation:
     def render(self, root: Path) -> str:
         rel = self.path.relative_to(root) if self.path.is_relative_to(root) else self.path
         return f"{rel}:{self.line}: [{self.rule}] {self.detail}"
+
+
+def project_root() -> Path:
+    """The repository root, independent of the current working directory.
+
+    Claude Code sets CLAUDE_PROJECT_DIR for hook commands. Falling back to cwd is
+    wrong for hooks: an agent that has cd'd into research/phase0 would resolve
+    paths against that directory, and the hook would silently do nothing or fail.
+    A hook that does not run is a rule that is not enforced, which is the whole
+    failure mode this directory exists to prevent.
+    """
+    declared = os.environ.get("CLAUDE_PROJECT_DIR")
+    if declared:
+        candidate = Path(declared)
+        if candidate.is_dir():
+            return candidate.resolve()
+    return Path.cwd().resolve()
 
 
 def is_excluded(path: Path) -> bool:

@@ -18,7 +18,8 @@ WHY:  This replaces three shell commands in .claude/settings.json that were brok
       the agent aware of one immediately instead of at CI time twenty minutes
       later. The blocking enforcement of these same rules is ci:guards. Claiming
       otherwise in the map would make the map the wish it exists to prevent.
-IMPORTS: stdlib json, subprocess, sys, pathlib. No project imports.
+IMPORTS: stdlib json, subprocess, sys, pathlib, plus discovery.project_root
+      (stdlib-only, alongside).
 CONSUMED BY: .claude/settings.json, PostToolUse matcher "Write|Edit".
 """
 
@@ -28,6 +29,8 @@ import json
 import subprocess
 import sys
 from pathlib import Path
+
+from discovery import project_root
 
 TOOL_TIMEOUT_S = 60
 GUARDS = ("check_structure.py", "check_conventions.py")
@@ -87,7 +90,7 @@ def run_guards(root: Path) -> list[str]:
 
 
 def main() -> int:
-    root = Path.cwd().resolve()
+    root = project_root()
     raw = _file_path(_read_event())
     if raw:
         format_one_file(Path(raw), root)

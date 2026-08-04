@@ -16,8 +16,9 @@ WHY:  PreToolUse is the only hook that can actually prevent something -- it runs
       A sentinel FILE rather than an environment variable: `export
       QMCTX_UPDATE_GOLDEN=1` survives in a shell profile and quietly disables the
       check forever. A file the hook deletes after one use cannot.
-IMPORTS: stdlib json, subprocess, sys, pathlib. No project imports -- hooks must run
-      before the package is installable.
+IMPORTS: stdlib json, subprocess, sys, pathlib, plus discovery.project_root.
+      discovery.py is stdlib-only and sits alongside, so hooks still run before the
+      package is installable.
 CONSUMED BY: .claude/settings.json, PreToolUse matcher "Write|Edit".
 CONTRACT: event JSON on stdin with tool_input.file_path. Exit 2 denies and feeds
       stderr back to the model. Exit 0 with hookSpecificOutput on stdout can ask.
@@ -29,6 +30,8 @@ import json
 import subprocess
 import sys
 from pathlib import Path
+
+from discovery import project_root
 
 SENTINEL = ".qmctx-allow-golden"
 GOLDEN_DIR = "tests/fixtures/golden"
@@ -133,7 +136,7 @@ def decide(rel: str, root: Path) -> int:
 
 
 def main() -> int:
-    root = Path.cwd().resolve()
+    root = project_root()
     return decide(_relative(_file_path(_read_event()), root), root)
 
 

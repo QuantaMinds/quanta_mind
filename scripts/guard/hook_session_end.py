@@ -11,7 +11,8 @@ WHY:  The definition of done in AGENTS.md has seven items, and the ones that get
       It never blocks. A Stop hook that fails is a session that ends in an error
       the developer did not ask for, and the record is worth less than the
       interruption costs.
-IMPORTS: stdlib json, subprocess, sys, datetime, pathlib. No project imports.
+IMPORTS: stdlib subprocess, sys, datetime, pathlib, plus discovery.project_root
+      (stdlib-only, alongside).
 CONSUMED BY: .claude/settings.json, Stop.
 """
 
@@ -21,6 +22,8 @@ import subprocess
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
+
+from discovery import project_root
 
 PLANS_DIR = Path("docs") / "plans"
 MAP_PATH = "docs/CODEBASE.md"
@@ -89,7 +92,7 @@ def build_record(root: Path) -> tuple[str, str] | None:
 
 
 def main() -> int:
-    root = Path.cwd().resolve()
+    root = project_root()
     record = build_record(root)
     if record is None:
         return 0
