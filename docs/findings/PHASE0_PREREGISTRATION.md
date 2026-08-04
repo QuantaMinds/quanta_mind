@@ -1171,7 +1171,7 @@ changed symbols. The surviving corpus is the small, single-commit end of the dis
 have meant an underpowered corpus. Even discounted heavily this clears `a ≥ 20`.
 
 > **But 27.3% is an upper bound, not an estimate.** The agent-labelled dry run in
-> §"What an agent-labelled dry run exposed" found the outcome rule *too loose* in eight of
+> “What an agent-labelled dry run exposed” found the outcome rule *too loose* in eight of
 > nine disagreements, from squash-merge bodies and file over-attribution. So the power
 > question resolves into the accuracy question: there are plenty of events, and what is
 > unknown is how many are real.

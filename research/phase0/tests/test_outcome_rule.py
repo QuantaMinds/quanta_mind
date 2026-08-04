@@ -20,7 +20,8 @@ CONSUMED BY: `just test-phase0`.
 from __future__ import annotations
 
 from phase0 import fix_signals
-from phase0.fix_signals import MIN_COMMIT_FOCUS, subject as _subject
+from phase0.fix_signals import MIN_COMMIT_FOCUS
+from phase0.fix_signals import subject as _subject
 
 # PrunaAI/pruna 017dc9a144 — a FEATURE whose squashed body lists six `fix:` commits.
 SQUASH_BODY = (
@@ -39,13 +40,24 @@ def test_a_squash_body_no_longer_fires_the_pattern() -> None:
 
 
 def test_a_real_fix_subject_still_fires() -> None:
-    """Tightening must not silence the thing the rule exists to catch."""
-    for subject in (
+    """Tightening must not silence the thing the rule exists to catch.
+
+    Asserted as a full mapping rather than a loop of truthiness checks, so a change that
+    silenced one of the three shows which one.
+    """
+    subjects = (
         "fix: null dereference in the request handler",
         "hotfix: revert the broken migration",
         "Fix regression introduced by #4207",
-    ):
-        assert fix_signals.mentions_breakage(_subject(subject))
+        "docs: add a paragraph about the api",
+    )
+    fired = {s: fix_signals.mentions_breakage(_subject(s)) for s in subjects}
+    assert fired == {
+        "fix: null dereference in the request handler": True,
+        "hotfix: revert the broken migration": True,
+        "Fix regression introduced by #4207": True,
+        "docs: add a paragraph about the api": False,
+    }
 
 
 def test_subject_extraction_is_the_first_line_only() -> None:
