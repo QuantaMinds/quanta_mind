@@ -17,7 +17,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from discovery import Violation, iter_package_dirs, iter_source_files, is_excluded, report
+from discovery import Violation, is_excluded, iter_package_dirs, iter_source_files, report
 
 MAX_FILE_LINES = 200
 MAX_DIR_FILES = 15

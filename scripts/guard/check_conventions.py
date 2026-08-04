@@ -135,9 +135,7 @@ def main(argv: list[str]) -> int:
         return 2
 
     violations = (
-        check_layering(root, package_root)
-        + check_module_docstrings(root)
-        + check_naming(root)
+        check_layering(root, package_root) + check_module_docstrings(root) + check_naming(root)
     )
     return report(violations, root, "conventions")
 

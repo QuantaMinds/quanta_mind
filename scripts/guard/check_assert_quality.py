@@ -141,9 +141,10 @@ def main(argv: list[str]) -> int:
             continue
         violations.extend(_check_live_purity(path, tree))
         for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
-                if node.name.startswith("test_"):
-                    violations.extend(_check_function(path, node))
+            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef) and node.name.startswith(
+                "test_"
+            ):
+                violations.extend(_check_function(path, node))
 
     return report(violations, root, "assert-quality")
 

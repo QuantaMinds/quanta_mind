@@ -1,0 +1,80 @@
+# Project and tool configuration for qmctx.
+#
+# WHAT: Package metadata, the pinned toolchain, and configuration for ruff, mypy
+#       and pytest.
+# WHY:  Every version is pinned exactly. docs/findings/PHASE0_RUNBOOK.md section 0
+#       says "Pin everything. A study you cannot re-run is a study you cannot
+#       defend," and a correctness product does not get to float its own linter
+#       either. Versions read from PyPI on 2026-08-03.
+# CONSUMED BY: uv, ruff, mypy, pytest, and the justfile recipes that wrap them.
+#
+# NOTE: the Phase 0 research harness is deliberately NOT a workspace member. uv's
+#       own documentation states it "can't ensure that packages don't import
+#       dependencies declared by another workspace member" and that workspaces are
+#       "not suited for cases in which members ... desire a separate virtual
+#       environment for each member". research/phase0/ is a standalone project so
+#       pandas, scipy and PyCG genuinely cannot reach the product. It also pins a
+#       different interpreter -- see research/phase0/ENVIRONMENT.lock.
+
+[build-system]
+requires = ["hatchling==1.31.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "qmctx"
+version = "0.0.0"
+description = "Tells a coding agent what it does not know about a repository."
+readme = "README.md"
+requires-python = ">=3.12"
+
+# Deliberately empty. No runtime dependency is chosen before Phase 0 reports.
+dependencies = []
+
+# Deliberately no [project.scripts]. `qmctx` gets an entry point when serve/
+# exists; until then `uv run qmctx` should fail loudly rather than half-work.
+
+[dependency-groups]
+dev = [
+    "ruff==0.16.1",
+    "mypy==2.3.0",
+    "pytest==9.1.1",
+    "pytest-timeout==2.4.0",
+    "hypothesis==6.165.0",
+    "pre-commit==4.6.1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/qmctx"]
+
+# ------------------------------------------------------------------ ruff
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+# Markdown is excluded deliberately. ruff 0.16 formats fenced Python inside .md
+# files, and our docs contain illustrative snippets that are not real code --
+# VALIDATION.md's `@given(pack=packs())` references a Pack type that will not
+# exist until Phase 1. Letting the formatter rewrite prose would put churn into
+# the documents reviewers are supposed to read closely.
+extend-exclude = ["vendor", "research/phase0/data", "*.md"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "UP", "B", "SIM", "C4", "RUF"]
+
+# ------------------------------------------------------------------ mypy
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+# Guard scripts import each other by bare name (`from discovery import ...`)
+# because they run as plain scripts before the package is installable. Without
+# this, `mypy --strict src/ scripts/` cannot resolve those imports.
+mypy_path = "scripts/guard"
+exclude = ["^vendor/", "^research/"]
+
+# ------------------------------------------------------------------ pytest
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-markers --strict-config"
+xfail_strict = true

@@ -12,9 +12,9 @@ CONSUMED BY: every module in scripts/guard/.
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterator
 
 # Directories never inspected. Vendored code is third-party and exempt from our
 # style rules; caches are generated; docs are exempt from the line cap by policy.
