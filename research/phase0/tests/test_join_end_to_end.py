@@ -18,7 +18,7 @@ WHY:  Every other exposure test hands `classify` a hand-built edge dictionary,
         `sub.deep.helper_fn` at its definition and `acme.sub.deep.helper_fn`
         where an import resolved it. It must come out UNEXPOSED; strict equality
         would make it a false positive.
-IMPORTS: phase0.scope, phase0.census, phase0.run_graph, phase0.classify_exposure.
+IMPORTS: phase0.scope, phase0.census, phase0.graph.run_graph, phase0.classify_exposure.
       No mocks -- a mock could not tell us PyCG's naming convention.
 CONSUMED BY: `just test-phase0`.
 """
@@ -32,7 +32,7 @@ import pytest
 from phase0 import scope
 from phase0.census import count_call_sites
 from phase0.classify_exposure import Exposure, classify
-from phase0.run_graph import GraphStatus, run
+from phase0.graph.run_graph import GraphStatus, run
 
 HANDLERS = """\
 from acme.sub.deep import helper_fn

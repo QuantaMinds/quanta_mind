@@ -15,7 +15,7 @@ WHY:  `PHASE0_RUNBOOK.md` “Positive control” requires a positive control. `s
       Measured result, recorded in A10: one of four. Calls dispatched through a
       value carry no callee name, so nothing can be attributed to the symbol and
       it produces no pair at all — a false negative, biased toward the null.
-IMPORTS: phase0.census, phase0.classify_exposure, phase0.pycg_failure.
+IMPORTS: phase0.census, phase0.classify_exposure, phase0.graph.pycg_failure.
 CONSUMED BY: controls/corpus.py, controls/__init__.py; tests/test_controls.py.
 """
 
@@ -25,7 +25,7 @@ from dataclasses import dataclass
 
 from phase0.census import count_call_sites
 from phase0.classify_exposure import Exposure, classify
-from phase0.pycg_failure import GraphStatus
+from phase0.graph.pycg_failure import GraphStatus
 
 # Each source defines `target` and calls it ONLY through the named mechanism.
 MECHANISMS: dict[str, str] = {

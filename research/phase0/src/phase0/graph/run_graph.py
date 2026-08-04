@@ -31,7 +31,7 @@ import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from phase0.pycg_failure import GraphStatus, classify, syntax_location
+from phase0.graph.pycg_failure import GraphStatus, classify, syntax_location
 from phase0.scope import Scope
 
 DEFAULT_TIMEOUT_S = 600

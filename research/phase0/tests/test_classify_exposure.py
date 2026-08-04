@@ -16,7 +16,7 @@ WHY:  The join is the most failure-prone code in the study, and its failures are
       function two ways: `sub.deep.helper_fn` at its definition and
       `acme.sub.deep.helper_fn` where an import resolved it. Verified by running
       it. Strict equality would mark nested-package callers unresolved wholesale.
-IMPORTS: phase0.classify_exposure, phase0.census, phase0.pycg_failure, pytest.
+IMPORTS: phase0.classify_exposure, phase0.census, phase0.graph.pycg_failure, pytest.
 CONSUMED BY: `just test-phase0`.
 """
 
@@ -26,7 +26,7 @@ import pytest
 
 from phase0.census import CallSite
 from phase0.classify_exposure import Cardinality, Exposure, classify
-from phase0.pycg_failure import GraphStatus
+from phase0.graph.pycg_failure import GraphStatus
 
 
 def _site(caller: str, name: str, line: int = 1) -> CallSite:

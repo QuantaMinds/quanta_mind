@@ -28,7 +28,7 @@ WHY:  Three design decisions carry the study, and each is pre-registered.
       nested-package callers unresolved wholesale and inflate exposure. Leniency
       errs toward UNEXPOSED, i.e. toward the null, which is the conservative
       direction and the same one A6 already documents.
-IMPORTS: phase0.census, phase0.run_graph, phase0.pycg_failure, phase0.scope,
+IMPORTS: phase0.census, phase0.graph.run_graph, phase0.graph.pycg_failure, phase0.scope,
       phase0.syntax. Never phase0.scan_outcome — see run_pipeline.py.
 CONSUMED BY: run_pipeline.py, build_table.py; tests/test_classify_exposure.py.
 """
@@ -39,7 +39,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from phase0.census import CallSite
-from phase0.pycg_failure import GraphStatus
+from phase0.graph.pycg_failure import GraphStatus
 
 
 class Exposure(Enum):

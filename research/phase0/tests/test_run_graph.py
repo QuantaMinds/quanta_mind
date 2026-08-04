@@ -14,7 +14,7 @@ WHY:  Two things are being protected.
       attrition, while TIMEOUT and OOM form the UNANALYZED_RESOURCE arm that
       RUNBOOK section 4.4 reads to decide what kind of product this is. Merging
       them would let the age of our interpreter decide that question.
-IMPORTS: phase0.run_graph, phase0.scope, pytest.
+IMPORTS: phase0.graph.run_graph, phase0.scope, pytest.
 CONSUMED BY: `just test-phase0`.
 """
 
@@ -25,7 +25,7 @@ from pathlib import Path
 import pytest
 
 from phase0 import scope
-from phase0.run_graph import DEFAULT_TIMEOUT_S, GraphStatus, run
+from phase0.graph.run_graph import DEFAULT_TIMEOUT_S, GraphStatus, run
 
 # Reproduces README.md's example: the base method has no incoming edge.
 SWITCHBOARD = '''\

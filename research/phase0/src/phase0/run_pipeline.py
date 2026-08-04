@@ -40,12 +40,12 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 
 from phase0.extract_prs import PRRecord
+from phase0.graph.pycg_failure import GraphStatus
+from phase0.graph.run_graph import DEFAULT_TIMEOUT_S
 from phase0.parent_commit import MergeShape
 from phase0.parent_commit import resolve as resolve_parent
 from phase0.pipeline import record, worktree
 from phase0.pipeline.measure import measure
-from phase0.pycg_failure import GraphStatus
-from phase0.run_graph import DEFAULT_TIMEOUT_S
 
 PILOT_REPOS = 30
 

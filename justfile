@@ -164,3 +164,12 @@ view:
 allow-golden:
     touch .qmctx-allow-golden
     @echo "Next golden-file write is authorised. State in the PR why the output changed."
+
+# ---------------------------------------------------------------- pilot
+
+# Build records from the corpus and report where rows are lost and why. Needs a
+# GitHub token; require_token fails loudly rather than dropping to 60/hour.
+# Stops at record construction on purpose: a pilot that produced a relative risk
+# would invite reading it.
+pilot REPOS="10":
+    cd research/phase0 && GITHUB_TOKEN="$(gh auth token)" uv run python -m phase0.run_pilot --repos {{REPOS}}

@@ -1,0 +1,137 @@
+"""Verification that a PR is refused when the corpus's file list is not the change.
+
+WHAT: Pins the file-set gate, and pins that the corpus really does over-attribute on the
+      pull request that exposed it.
+WHY:  `scan_outcome` matches later commits by file overlap, so an inflated file list
+      manufactures breakage in proportion to how far the branch had diverged. That is
+      the study's own confounder arriving disguised as measurement error, which is why
+      the gate excludes rather than warns.
+IMPORTS: pytest, pandas, phase0.github_pulls, phase0.pipeline.assemble.
+CONSUMED BY: `just test-phase0`.
+"""
+
+from __future__ import annotations
+
+import io
+import zipfile
+from pathlib import Path
+
+import pandas as pd
+import pytest
+
+from phase0.github_pulls import MergeInfo
+from phase0.pipeline.assemble import MIN_FILE_AGREEMENT, Rejection, build_record
+
+PACKAGE = Path(__file__).resolve().parents[2] / "data" / "AIDev_BC_Analyser.zip"
+ZENML_3757 = 2607442037
+
+
+def _merge(sha: str, count: int = 1) -> MergeInfo:
+    return MergeInfo(
+        pr_id="1",
+        number=1,
+        merged=True,
+        merge_commit_sha=sha,
+        merged_at="2025-06-24T22:46:29Z",
+        base_ref="main",
+        commit_count=count,
+    )
+
+
+def test_a_pr_whose_file_sets_disagree_is_refused(repo: tuple[Path, str, str]) -> None:
+    """The zenml shape: the corpus names files the diff denies, so the PR is excluded.
+
+    Sized to clear shape detection and fail on agreement, because the two exclusions are
+    different findings and a test that cannot tell them apart pins neither.
+    """
+    root, _, child = repo
+    corpus = ("pkg/mod.py", "pkg/added.py", "src/other/a.py", "src/other/b.py")
+    outcome = build_record(
+        root,
+        _merge(child),
+        pr_id="1",
+        repo="acme/widget",
+        merged_at="2025-06-24T22:46:29Z",
+        corpus_files=corpus,
+    )
+    assert isinstance(outcome, Rejection)
+    assert outcome.stage == "file_set"
+    assert 0.0 <= outcome.agreement < MIN_FILE_AGREEMENT
+    assert "the change never touched" in outcome.reason
+
+
+def test_a_wildly_inflated_list_is_refused_at_shape_detection(
+    repo: tuple[Path, str, str],
+) -> None:
+    """The real zenml case never reaches the file-set gate, and that is fine.
+
+    A 92-file list on a 2-file change breaks `parent_commit`'s squash-versus-rebase test
+    first. Both paths exclude and count the PR; recorded so a future reader does not
+    assume the agreement gate is the only thing catching this.
+    """
+    root, _, child = repo
+    inflated = (*(f"src/unrelated/f{i}.py" for i in range(60)), "pkg/mod.py")
+    outcome = build_record(
+        root,
+        _merge(child),
+        pr_id="1",
+        repo="acme/widget",
+        merged_at="2025-06-24T22:46:29Z",
+        corpus_files=inflated,
+    )
+    assert isinstance(outcome, Rejection) and outcome.stage == "parent_commit"
+
+
+def test_an_honest_pr_becomes_a_record(repo: tuple[Path, str, str]) -> None:
+    root, _, child = repo
+    outcome = build_record(
+        root,
+        _merge(child),
+        pr_id="2",
+        repo="acme/widget",
+        merged_at="2025-06-24T22:46:29Z",
+        corpus_files=("pkg/mod.py", "pkg/added.py"),
+    )
+    assert not isinstance(outcome, Rejection), getattr(outcome, "reason", "")
+    assert outcome.changed_files == ("pkg/added.py", "pkg/mod.py")
+    assert outcome.changed_symbols == ("pkg.mod.Handler.validate",)
+    assert outcome.parent_sha and outcome.repo_id == "acme/widget"
+
+
+def test_an_unmerged_pr_is_refused_before_anything_else(tmp_path: Path) -> None:
+    merge = MergeInfo(
+        pr_id="3",
+        number=3,
+        merged=False,
+        merge_commit_sha="",
+        merged_at="",
+        base_ref="main",
+        commit_count=0,
+    )
+    outcome = build_record(
+        tmp_path,
+        merge,
+        pr_id="3",
+        repo="acme/widget",
+        merged_at="",
+        corpus_files=("pkg/mod.py",),
+    )
+    assert isinstance(outcome, Rejection) and outcome.stage == "merge_metadata"
+
+
+@pytest.mark.skipif(not PACKAGE.is_file(), reason="replication package not downloaded")
+def test_the_corpus_file_list_for_zenml_3757_is_not_the_change() -> None:
+    """The measurement behind A24, asserted rather than described.
+
+    Fails if the package is ever replaced by one without the defect, which is worth
+    knowing: the gate's threshold was chosen against this distribution.
+    """
+    with zipfile.ZipFile(PACKAGE) as archive:
+        detail = pd.read_parquet(
+            io.BytesIO(archive.read("AIDev_BC_Analyser/human_commit_detail.parquet"))
+        )
+    detail["pr_id"] = detail["pr_id"].astype("int64")
+    attributed = {f for f in set(detail[detail.pr_id == ZENML_3757].filename) if f.endswith(".py")}
+    assert len(attributed) > 50, "the package no longer over-attributes; revisit A24"
+    assert "src/zenml/zen_server/routers/runs_endpoints.py" in attributed
+    assert "docs/mkdocstrings_helper.py" in attributed

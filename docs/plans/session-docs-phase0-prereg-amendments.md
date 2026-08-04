@@ -1,11 +1,11 @@
 # Session record — docs/phase0-prereg-amendments
 
-Written by scripts/guard/hook_session_end.py at 2026-08-04T15:03:19Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-04T18:49:32Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `docs/phase0-prereg-amendments`
-- Files changed vs `main`: 107
-- Uncommitted at session end: 1
+- Files changed vs `main`: 109
+- Uncommitted at session end: 0
 - `docs/CODEBASE.md` updated: yes
 
 ## Changed
@@ -38,9 +38,11 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/.python-version`
 - `research/phase0/ENVIRONMENT.lock`
 - `research/phase0/data/.gitkeep`
+- `research/phase0/data/labelling/human_labels.csv`
 - `research/phase0/pyproject.toml`
 - `research/phase0/results/.gitkeep`
 - `research/phase0/results/controls.json`
+- `research/phase0/results/labelling_dryrun.json`
 - `research/phase0/src/phase0/__init__.py`
 - `research/phase0/src/phase0/analysis/__init__.py`
 - `research/phase0/src/phase0/analysis/build_table.py`

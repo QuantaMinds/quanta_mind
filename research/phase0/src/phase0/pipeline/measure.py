@@ -24,9 +24,9 @@ from phase0 import scope
 from phase0.census import CallSite, count_call_sites, non_builtin
 from phase0.classify_exposure import classify
 from phase0.extract_prs import PRRecord
+from phase0.graph.run_graph import GraphResult
+from phase0.graph.run_graph import run as run_graph
 from phase0.pipeline import record
-from phase0.run_graph import GraphResult
-from phase0.run_graph import run as run_graph
 
 
 def symbol_rows(
