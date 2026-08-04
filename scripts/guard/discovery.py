@@ -106,22 +106,22 @@ def walk(root: Path) -> Iterator[Path]:
     a sixty-second budget, simply timed out. A guard that times out is a guard that gets
     switched off.
 
-    Deterministic ordering matters too: guard output is diffed in CI, and a
-    nondeterministic walk produces spurious diffs that train people to ignore it.
+    Pre-order, entries sorted by name, so the sequence is byte-identical to the
+    `sorted(rglob("*"))` it replaces. That is not cosmetic: guard output is diffed in
+    CI, and an ordering change would look like a finding. A stack-based version passed
+    the set comparison and silently reordered everything, which is the same
+    faster-and-quietly-different failure this walk was written to avoid.
     """
-    stack = [root]
-    while stack:
-        current = stack.pop()
-        try:
-            entries = sorted(current.iterdir())
-        except OSError:
-            continue  # vanished mid-walk, or unreadable; not this guard's business
-        for entry in entries:
-            if entry.is_dir():
-                if entry.name not in EXCLUDED_DIRS:
-                    stack.append(entry)
-            elif entry.is_file():
-                yield entry
+    try:
+        entries = sorted(root.iterdir())
+    except OSError:
+        return  # vanished mid-walk, or unreadable; not this guard's business
+    for entry in entries:
+        if entry.is_dir():
+            if entry.name not in EXCLUDED_DIRS:
+                yield from walk(entry)
+        elif entry.is_file():
+            yield entry
 
 
 def iter_source_files(root: Path) -> Iterator[Path]:
@@ -153,17 +153,14 @@ def iter_text_files(root: Path) -> Iterator[Path]:
 
 def iter_package_dirs(root: Path) -> Iterator[Path]:
     """Yield every non-excluded directory beneath root, pruning as it goes."""
-    stack = [root]
-    while stack:
-        current = stack.pop()
-        try:
-            entries = sorted(current.iterdir())
-        except OSError:
-            continue
-        for entry in entries:
-            if entry.is_dir() and entry.name not in EXCLUDED_DIRS:
-                stack.append(entry)
-                yield entry
+    try:
+        entries = sorted(root.iterdir())
+    except OSError:
+        return
+    for entry in entries:
+        if entry.is_dir() and entry.name not in EXCLUDED_DIRS:
+            yield entry
+            yield from iter_package_dirs(entry)
 
 
 def layer_of(path: Path, package_root: Path) -> str | None:

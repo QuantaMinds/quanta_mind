@@ -45,6 +45,7 @@ guards:
     uv run python scripts/guard/check_enforcement_map.py .
     uv run python scripts/guard/check_no_research_imports.py .
     uv run python scripts/guard/check_no_vague_refs.py .
+    uv run python scripts/guard/check_module_identity.py .
     uv run python scripts/guard/check_docs_sync.py .
 
 test-unit:

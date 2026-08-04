@@ -49,6 +49,18 @@ data is correct, because there is no output data.
 
 ---
 
+## Moving files
+
+Use `git mv`, never `mv`. A plain `mv` followed by `git add -A` records a delete and an
+add; if the new copy lands somewhere git has not yet noticed, both survive and nothing
+tells you. That happened here: a stale `assemble.py` sat alongside its replacement
+through a full commit, missing the two pieces the attrition analysis depends on, and
+every guard passed because nothing imported either name.
+
+`scripts/guard/check_module_identity.py` now catches it. Use `git mv` anyway — on a
+project whose thesis is provenance, letting git lose track of a rename is not a small
+irony.
+
 ## One change, one branch, one PR
 
 Every bug, feature or issue gets its own branch. No exceptions, no batching.

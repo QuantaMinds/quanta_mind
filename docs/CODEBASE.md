@@ -54,9 +54,27 @@ Read `research/phase0/ENVIRONMENT.lock` before touching the instrument.
 | `check_docs_sync.py` | this file stays honest |
 | `check_branch_name.py` | branch scheme (CI only — a hook fires too late) |
 | `check_no_research_imports.py` | research deps never reach `src/` or `scripts/` |
+| `check_no_vague_refs.py` | references name files and headings, never section or phase numbers |
+| `check_module_identity.py` | no two modules with one name; no module nothing imports |
 | `hook_pre_edit.py` | denies `vendor/` and writes on `main`; asks on golden files |
 | `hook_post_edit.py` | formats the edited file, reports violations — **advisory** |
 | `hook_session_end.py` | session record to `docs/plans/` |
+
+**A guard's enforcement value is capped by whether people leave it enabled.** The walker
+in `discovery.py` used to enumerate every path under an excluded directory before
+discarding it, which was tolerable until the research harness started cloning
+multi-gigabyte repositories into `data/`. The pre-edit hook has a sixty-second budget and
+began timing out — so the practical effect of a correct, comprehensive guard was zero,
+and the obvious next step for anyone hitting it is to switch the hook off.
+
+Pruning during the walk took it from over sixty seconds to half a second. That is not an
+optimisation; it is the difference between a rule and a wish, which is the same
+distinction `$enforcement_map` exists to make. Treat guard latency as correctness.
+
+The rewrite was then diffed against the implementation it replaced — same files, same
+order, asserted in `tests/unit/test_discovery_walk.py`. A walk that is fast because it
+prunes too much reports clean on files it never opened, and "faster and quietly
+narrower" is the same failure class as every other silent absence in this codebase.
 
 ---
 

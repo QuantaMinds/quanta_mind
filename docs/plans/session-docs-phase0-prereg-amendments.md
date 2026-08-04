@@ -1,11 +1,11 @@
 # Session record — docs/phase0-prereg-amendments
 
-Written by scripts/guard/hook_session_end.py at 2026-08-04T20:43:10Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-04T21:07:40Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `docs/phase0-prereg-amendments`
-- Files changed vs `main`: 119
-- Uncommitted at session end: 1
+- Files changed vs `main`: 120
+- Uncommitted at session end: 0
 - `docs/CODEBASE.md` updated: yes
 
 ## Changed
@@ -49,7 +49,6 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/src/phase0/analysis/build_table.py`
 - `research/phase0/src/phase0/analysis/risk.py`
 - `research/phase0/src/phase0/analysis/verdict.py`
-- `research/phase0/src/phase0/assemble.py`
 - `research/phase0/src/phase0/census.py`
 - `research/phase0/src/phase0/classify_exposure.py`
 - `research/phase0/src/phase0/controls/__init__.py`
@@ -75,6 +74,7 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/src/phase0/pipeline/__init__.py`
 - `research/phase0/src/phase0/pipeline/assemble.py`
 - `research/phase0/src/phase0/pipeline/changed.py`
+- `research/phase0/src/phase0/pipeline/journal.py`
 - `research/phase0/src/phase0/pipeline/measure.py`
 - `research/phase0/src/phase0/pipeline/record.py`
 - `research/phase0/src/phase0/pipeline/worktree.py`
@@ -94,6 +94,7 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/tests/pipeline/conftest.py`
 - `research/phase0/tests/pipeline/test_assemble.py`
 - `research/phase0/tests/pipeline/test_changed.py`
+- `research/phase0/tests/pipeline/test_journal.py`
 - `research/phase0/tests/test_build_table.py`
 - `research/phase0/tests/test_census.py`
 - `research/phase0/tests/test_classify_exposure.py`

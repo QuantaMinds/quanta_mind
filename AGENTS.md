@@ -106,6 +106,12 @@ you remember to obey — the machine will stop you either way.
     bans. It is counted and printed on every run; it is not a general escape hatch.
     → `scripts/guard/check_no_vague_refs.py`
 
+13. **Move files with `git mv`, and never leave two modules with one name.** A stale
+    duplicate passed every guard: git tracked both copies, nothing imported the old
+    name, and the copy left behind was missing the logic the analysis rested on. On a
+    project whose thesis is provenance, letting git lose a rename is not a small irony.
+    → `scripts/guard/check_module_identity.py`
+
 ---
 
 ## Language and style
