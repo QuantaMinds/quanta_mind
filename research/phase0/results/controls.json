@@ -62,5 +62,26 @@
     "passed": true,
     "relative_risk": 8.000000000000002
   },
+  "reconciliation": {
+    "bounds_agree_on_gate": false,
+    "conserved": true,
+    "corpus_units": 80,
+    "detection_recall": 0.25,
+    "excluded_from_control_arm": 0,
+    "excluded_from_exposed_arm": 30,
+    "excluded_total": 30,
+    "planted_exposure_detected": "10/40",
+    "rr_bounds_over_exclusions": [
+      2.0,
+      8.0
+    ],
+    "table": {
+      "a": 8,
+      "b": 2,
+      "c": 4,
+      "d": 36,
+      "in_table": 50
+    }
+  },
   "synthetic_repos": 80
 }

@@ -1,11 +1,11 @@
 # Session record — docs/phase0-prereg-amendments
 
-Written by scripts/guard/hook_session_end.py at 2026-08-04T09:34:45Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-04T11:46:01Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `docs/phase0-prereg-amendments`
-- Files changed vs `main`: 84
-- Uncommitted at session end: 5
+- Files changed vs `main`: 91
+- Uncommitted at session end: 1
 - `docs/CODEBASE.md` updated: yes
 
 ## Changed
@@ -21,6 +21,7 @@ Informational. Nothing here was blocked or enforced.
 - `.python-version`
 - `AGENTS.md`
 - `ARCHITECTURE.md`
+- `BRIEFING.md`
 - `CLAUDE.md`
 - `CONTRIBUTING.md`
 - `PHASE0_PREREGISTRATION.md`
@@ -39,11 +40,16 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/data/.gitkeep`
 - `research/phase0/pyproject.toml`
 - `research/phase0/results/.gitkeep`
+- `research/phase0/results/controls.json`
 - `research/phase0/src/phase0/__init__.py`
 - `research/phase0/src/phase0/build_table.py`
 - `research/phase0/src/phase0/census.py`
 - `research/phase0/src/phase0/classify_exposure.py`
-- `research/phase0/src/phase0/controls.py`
+- `research/phase0/src/phase0/controls/__init__.py`
+- `research/phase0/src/phase0/controls/analysis.py`
+- `research/phase0/src/phase0/controls/corpus.py`
+- `research/phase0/src/phase0/controls/gate.py`
+- `research/phase0/src/phase0/controls/mechanisms.py`
 - `research/phase0/src/phase0/extract_prs.py`
 - `research/phase0/src/phase0/fix_signals.py`
 - `research/phase0/src/phase0/github_pulls.py`
@@ -65,6 +71,7 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/tests/test_census.py`
 - `research/phase0/tests/test_classify_exposure.py`
 - `research/phase0/tests/test_controls.py`
+- `research/phase0/tests/test_controls_corpus.py`
 - `research/phase0/tests/test_extract_prs.py`
 - `research/phase0/tests/test_github_pulls.py`
 - `research/phase0/tests/test_join_end_to_end.py`
