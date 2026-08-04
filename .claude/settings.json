@@ -7,8 +7,20 @@
     "      belongs here, at the shell level, where the model has no vote.",
     "      Rule of thumb: AGENTS.md is what the agent must KNOW. Hooks are what must",
     "      HAPPEN regardless of what it knows.",
-    "CONSUMED BY: Claude Code. Codex and Cursor read AGENTS.md but not this file —",
-    "      the same checks run in CI, so enforcement is identical for every agent."
+    "CONSUMED BY: Claude Code. Codex and Cursor read AGENTS.md but not this file --",
+    "      the same checks run in CI, so enforcement is identical for every agent.",
+    "",
+    "CONTRACT: hooks receive the event as JSON on stdin. The edited path is",
+    "      tool_input.file_path. There is no $CLAUDE_FILE_PATHS variable -- an earlier",
+    "      version of this file used one, so `ruff format $CLAUDE_FILE_PATHS` expanded",
+    "      to `ruff format` and reformatted the entire tree on every edit. Every hook",
+    "      below is now a Python script that parses stdin properly and runs on any OS.",
+    "",
+    "PREVENTION vs FEEDBACK: only PreToolUse can stop something -- it runs before the",
+    "      tool call and exit 2 cancels it. PostToolUse fires after the write has",
+    "      landed, so it can only tell the agent what it just did. The map below says",
+    "      which is which. A map that overstates its own power is the thing it exists",
+    "      to prevent."
   ],
 
   "permissions": {
@@ -21,7 +33,12 @@
       "Read(./secrets/**)",
       "Write(./vendor/**)"
     ],
-    "ask": ["Bash(git push*)", "Bash(gh pr merge*)", "Bash(uv publish*)"]
+    "ask": [
+      "Bash(git push*)",
+      "Bash(gh pr merge*)",
+      "Bash(uv publish*)",
+      "Write(./research/phase0/results/**)"
+    ]
   },
 
   "hooks": {
@@ -32,7 +49,7 @@
           {
             "type": "command",
             "command": "python scripts/guard/hook_pre_edit.py",
-            "$comment": "Blocks edits to vendor/, to golden fixtures without an explicit flag, and blocks any write while on the main branch."
+            "$comment": "Denies edits to vendor/ and any write while on main. Golden fixtures escalate to 'ask' rather than deny -- blocking them outright pushes people to disable the hook, and a human in the loop is the actual requirement. Authorised by a one-shot sentinel file the hook deletes after use, not an env var that can be left set in a shell profile."
           }
         ]
       }
@@ -44,18 +61,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run ruff format $CLAUDE_FILE_PATHS && uv run ruff check --fix $CLAUDE_FILE_PATHS",
-            "$comment": "Formatting and lint are mechanical. They never belong in AGENTS.md — they cost instruction budget and the model applies them inconsistently. Here they are certain."
-          },
-          {
-            "type": "command",
-            "command": "python scripts/guard/check_structure.py .",
-            "$comment": "The 200-line and 15-file caps are checked immediately after every write, so the agent sees the violation on the turn it created it rather than at commit time."
-          },
-          {
-            "type": "command",
-            "command": "python scripts/guard/check_conventions.py .",
-            "$comment": "Layering, docstrings and naming. Same reasoning: immediate feedback beats a CI failure twenty minutes later."
+            "command": "python scripts/guard/hook_post_edit.py",
+            "$comment": "One script, not three. Formats only the file named in tool_input.file_path, then runs the structural and convention guards and reports failures on the turn that caused them. ADVISORY: the write has already happened by the time this runs. ci:guards is what blocks. Three separate hooks would also have run in parallel rather than in order."
           }
         ]
       }
@@ -67,7 +74,7 @@
           {
             "type": "command",
             "command": "python scripts/guard/hook_session_end.py",
-            "$comment": "Runs at the end of every session. Reminds — and records — whether docs/CODEBASE.md was updated to match the changes made, and whether `just verify` was run. Writes a session record to docs/plans/ so the next session (or the next developer) can see what was and was not validated."
+            "$comment": "Writes a session record to docs/plans/ naming what changed and whether docs/CODEBASE.md moved with it. Never blocks -- a Stop hook that fails ends the session in an error nobody asked for, and the record is worth less than the interruption costs."
           }
         ]
       }
@@ -75,20 +82,36 @@
   },
 
   "$enforcement_map": {
-    "$comment": "Every rule in AGENTS.md maps to exactly one enforcement mechanism. A rule with no mechanism is advisory and must be tagged as such in AGENTS.md.",
-    "200-line file cap": "hook:PostToolUse + ci:guards",
-    "15-file directory cap": "hook:PostToolUse + ci:guards",
-    "layer import direction": "hook:PostToolUse + ci:guards",
-    "module docstring required": "hook:PostToolUse + ci:guards",
-    "banned name tokens": "hook:PostToolUse + ci:guards",
+    "$comment": "Every rule in AGENTS.md maps to exactly one enforcement mechanism. A rule with no mechanism is advisory and must be tagged as such in AGENTS.md. Machine-checked in both directions by scripts/guard/check_enforcement_map.py: every guard:/ci:/hook: token below must resolve to a real guard file, justfile recipe, workflow job or registered hook event, and every file in scripts/guard/ must be invoked by something.",
+
+    "200-line file cap": "hook:PostToolUse (advisory) + ci:guards (blocking)",
+    "15-file directory cap": "hook:PostToolUse (advisory) + ci:guards (blocking)",
+    "layer import direction": "hook:PostToolUse (advisory) + ci:guards (blocking)",
+    "module docstring required": "hook:PostToolUse (advisory) + ci:guards (blocking)",
+    "banned name tokens": "hook:PostToolUse (advisory) + ci:guards (blocking)",
+
     "no unlabeled edges": "ci:test-property (invariant 1)",
+    "typed silence, never a bare absence": "ci:test-property (invariant 3)",
     "green test != verified data": "ci:verify-data + guard:check_assert_quality",
     "live tests must not mock": "guard:check_assert_quality",
+
     "no direct commits to main": "hook:PreToolUse + branch protection",
-    "branch naming": "ci:check_branch_name",
-    "docs updated with code": "ci:check_docs_sync",
+    "branch naming": "guard:check_branch_name",
+    "no edits to vendored source": "hook:PreToolUse",
+    "golden files reviewed, not regenerated": "hook:PreToolUse (ask) + ci:verify-data",
+
+    "docs updated with code": "guard:check_docs_sync",
+    "AGENTS.md under 200 lines": "guard:check_agents_md",
+    "every rule names a mechanism": "guard:check_agents_md",
+    "enforcement map resolves": "guard:check_enforcement_map",
+    "no orphan guards": "guard:check_enforcement_map",
+    "research deps stay out of the product": "guard:check_no_research_imports",
+
     "no source text in pack": "ci:verify-no-source-leak (invariant 6)",
     "deterministic re-index": "ci:verify-determinism (invariant 5)",
-    "plan before editing resolve/ or label/": "ADVISORY ONLY — human review in PR"
+
+    "one public concern per module": "ADVISORY -- human review in PR",
+    "plan before editing resolve/ or label/": "ADVISORY -- human review in PR",
+    "session record written at Stop": "hook:Stop (informational)"
   }
 }
