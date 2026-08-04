@@ -1,53 +1,134 @@
-"""Contract test for the analysis stage.
+"""Verification of the analysis: the A6 split, the arms, and the §4 verdict.
 
-WHAT: Asserts build() is unimplemented and pins the pre-registered thresholds and
-      the power floor.
-WHY:  RUNBOOK section 4.2: "If a < 20, stop reading. You have no result." An
-      underpowered null reported as a negative kills a live thesis on noise, so
-      the floor is asserted rather than remembered. The verdict boundaries come
-      from PHASE0_PREREGISTRATION.md and are fixed before data is seen -- that is
-      what makes them a pre-registration rather than a description.
-IMPORTS: phase0.build_table, pytest.
+WHAT: Asserts that the primary table holds only measurable pairs, that multi-site
+      pairs are bounded instead of guessed, that UNANALYZED_RESOURCE is never
+      pooled, and that power is read before the point estimate.
+WHY:  Three pre-registered decisions are enforced here rather than remembered.
+
+      §4: `a < 20` is no result, not a null. Reporting an underpowered null as a
+      negative is the most expensive mistake available -- it kills a live thesis on
+      noise -- so the verdict function checks power first and unconditionally.
+
+      A6: the primary table is the single-site subset. A symbol with no measurable
+      pair must be excluded, not defaulted into an arm.
+
+      §4.4: RR_unanalyzed is computed separately. If the effect lives there, this
+      is a scalability product, not an unsoundness product, and that is a different
+      company. Pooling the arms would hide the distinction the section exists on.
+IMPORTS: phase0.build_table, phase0.classify_exposure, phase0.scan_outcome.
 CONSUMED BY: `just test-phase0`.
 """
 
 from __future__ import annotations
 
-from pathlib import Path
-
-import pytest
-
 from phase0.build_table import (
-    MIN_BREAKAGES_FOR_POWER,
     STRONG_CI_LOW,
     STRONG_RR,
     WEAK_RR,
-    RiskResult,
+    Observation,
     build,
+    read_verdict,
+    tabulate,
 )
+from phase0.classify_exposure import Exposure
+from phase0.risk import Counts, katz
+from phase0.scan_outcome import Outcome
 
 
-def test_build_is_unimplemented() -> None:
-    with pytest.raises(NotImplementedError):
-        build(Path("exposure.jsonl"), Path("outcome.jsonl"))
-
-
-def test_power_floor_is_twenty_breakages() -> None:
-    assert MIN_BREAKAGES_FOR_POWER == 20
-
-
-def test_underpowered_table_is_not_powered() -> None:
-    """19 breakages is not a null result. It is no result."""
-    result = RiskResult(19, 100, 5, 100, relative_risk=3.8, ci_low=1.6, ci_high=9.0)
-    assert result.is_powered is False
-
-
-def test_powered_table_at_the_boundary() -> None:
-    """Exactly 20 clears the floor -- the comparison is >=, not >."""
-    result = RiskResult(20, 100, 5, 100, relative_risk=3.8, ci_low=1.6, ci_high=9.0)
-    assert result.is_powered is True
+def _row(
+    index: int,
+    primary: Exposure | None,
+    broke: bool,
+    repo: str = "r0",
+    stratum: str = "",
+) -> Observation:
+    return Observation(
+        symbol=f"m.s{index}",
+        repo_id=repo,
+        outcome=Outcome.BROKE if broke else Outcome.CLEAN,
+        primary=primary,
+        sensitivity_low=primary or Exposure.UNEXPOSED,
+        sensitivity_high=primary or Exposure.EXPOSED,
+        strata={"framework": stratum} if stratum else {},
+    )
 
 
 def test_verdict_thresholds_match_the_preregistration() -> None:
     """Strong: RR >= 3.0 with CI lower bound > 1.5. Weak but real: RR >= 1.5."""
     assert (STRONG_RR, STRONG_CI_LOW, WEAK_RR) == (3.0, 1.5, 1.5)
+
+
+def test_unmeasurable_pairs_are_excluded_from_the_primary_table() -> None:
+    """A6. A symbol with no single-site pair has no arm, and must not get one."""
+    rows = [_row(0, Exposure.EXPOSED, True), _row(1, None, True), _row(2, None, False)]
+    counts, _, _, _ = tabulate(rows)
+    assert counts.total == 1
+
+
+def test_unanalyzed_is_never_pooled_into_exposed() -> None:
+    """§4.4 reads this arm alone. Pooling it would hide what kind of product this is."""
+    rows = [
+        _row(0, Exposure.EXPOSED, True),
+        _row(1, Exposure.UNANALYZED_RESOURCE, True),
+        _row(2, Exposure.UNEXPOSED, False),
+    ]
+    counts, _, _, _ = tabulate(rows)
+    assert (counts.exposed_broke, counts.total) == (1, 2)
+
+
+def test_underpowered_result_reads_as_no_result_not_null() -> None:
+    """The distinction §4 turns on, and the one most easily reported wrongly."""
+    rows = [_row(i, Exposure.EXPOSED, i < 5, f"r{i % 4}") for i in range(20)]
+    rows += [_row(100 + i, Exposure.UNEXPOSED, False, f"r{i % 4}") for i in range(20)]
+    assert read_verdict(build(rows).primary).label == "no result"
+
+
+def test_powered_null_reads_as_null() -> None:
+    """With enough events and no effect, the verdict is null, not 'no result'."""
+    rows = [_row(i, Exposure.EXPOSED, i % 4 == 0, f"r{i % 8}") for i in range(160)]
+    rows += [_row(500 + i, Exposure.UNEXPOSED, i % 4 == 0, f"r{i % 8}") for i in range(160)]
+    assert read_verdict(build(rows).primary).label == "null"
+
+
+def test_strong_result_is_reported_as_strong() -> None:
+    """A planted, powered, clustered effect must clear both §4 conditions."""
+    rows = [_row(i, Exposure.EXPOSED, i % 10 < 6, f"r{i % 12}") for i in range(200)]
+    rows += [_row(500 + i, Exposure.UNEXPOSED, i % 10 < 1, f"r{i % 12}") for i in range(200)]
+    assert read_verdict(build(rows).primary).label == "strong"
+
+
+def test_sensitivity_bounds_are_both_reported() -> None:
+    """A6: multi-site pairs coded both ways, so the collapse can be bounded."""
+    rows = [_row(i, None, i % 3 == 0, f"r{i % 5}") for i in range(60)]
+    rows += [_row(500 + i, Exposure.UNEXPOSED, False, f"r{i % 5}") for i in range(60)]
+    analysis = build(rows)
+    assert analysis.sensitivity_low.counts.total > 0 and analysis.sensitivity_high.counts.total > 0
+
+
+def test_excluded_multi_site_count_is_reported() -> None:
+    """How much A6's restriction cost has to be visible, not inferred."""
+    rows = [_row(0, None, True), _row(1, None, False), _row(2, Exposure.EXPOSED, True)]
+    assert build(rows).multi_site_excluded == 2
+
+
+def test_naive_and_robust_intervals_are_both_kept() -> None:
+    """A8: the gap between them is the design effect, and it gets reported."""
+    rows = [_row(i, Exposure.EXPOSED, i % 3 == 0, f"r{i % 9}") for i in range(120)]
+    rows += [_row(500 + i, Exposure.UNEXPOSED, i % 9 == 0, f"r{i % 9}") for i in range(120)]
+    analysis = build(rows)
+    assert analysis.primary_naive.ci_method == "katz"
+
+
+def test_strata_are_reported_separately() -> None:
+    """§5 pre-specifies stratification so adjusting later is not a rescue attempt."""
+    rows = [_row(i, Exposure.EXPOSED, i % 2 == 0, f"r{i % 6}", "django") for i in range(60)]
+    rows += [_row(500 + i, Exposure.UNEXPOSED, False, f"r{i % 6}", "none") for i in range(60)]
+    assert sorted(build(rows, strata=["framework"]).strata) == [
+        "framework=django",
+        "framework=none",
+    ]
+
+
+def test_verdict_refuses_an_unavailable_interval() -> None:
+    """A crashed fit is not a null. It reports as no result."""
+    assert read_verdict(katz(Counts(0, 0, 5, 95))).label == "no result"
