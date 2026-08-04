@@ -1,11 +1,11 @@
 # Session record — docs/phase0-prereg-amendments
 
-Written by scripts/guard/hook_session_end.py at 2026-08-04T11:46:01Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-04T11:57:09Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `docs/phase0-prereg-amendments`
 - Files changed vs `main`: 91
-- Uncommitted at session end: 1
+- Uncommitted at session end: 0
 - `docs/CODEBASE.md` updated: yes
 
 ## Changed

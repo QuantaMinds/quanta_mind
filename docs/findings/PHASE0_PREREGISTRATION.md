@@ -28,7 +28,7 @@ papers, and from review of the execution plan.
 
 **No amendment moves a decision boundary.** The RR thresholds (3.0 / 1.5), the CI rules,
 the 7-day window, the `a ≥ 20` floor and the stop rule in §6 are byte-identical to the
-first commit. A1–A5 are factual corrections or newly discovered prerequisites; A6–A10
+first commit. A1–A5 are factual corrections or newly discovered prerequisites; A6–A13
 change *what is measured* (A6), *how it is matched* (A9), *what is excluded* (A7), *how it
 is estimated* (A8), or *what may be claimed from the result* (A10), so that all of them
 match what the instrument can actually deliver.
@@ -61,6 +61,8 @@ reclassification this log exists to prevent.
 | **A9** | 3.1 | Edge matching normalises PyCG's path separators and is lenient about the package prefix, requiring a dot boundary. | PyCG names the same function two ways and leaks path separators into module names. Strict equality would mark nested-package callers unresolved wholesale. |
 | **A10** | 3.1, 6 | The exposure variable's **capability profile** is recorded, and the scope of a null is narrowed to match it. | Measured: the variable detects 1 of 4 unresolvable-caller mechanisms. Value-dispatched calls carry no callee name, so they produce no pair and read UNEXPOSED. A null therefore cannot be reported as a null about unresolvability in general. |
 | **A11** | 4.1 | Control corpus is synthetic repositories plus one real repository, not a Django fixture; per-mechanism detection reported against a fixed reading table; gate unchanged at pooled RR ≥ 5. | A control that times out measures our timeout, not our instrument. Synthetic repos guarantee `graph_status == OK`, so a non-detection is unambiguously a detection failure. |
+| **A12** | 4.2 | Control corpus: **if an exposed unit is excluded, its matched control twin is excluded with it.** Unseeable mechanisms go to the capability table only; the firing mechanism scales to 40/40. Gate unchanged. | The first run computed RR = 8.0 from 50 of 80 units, with all 30 exclusions in the exposed arm and none in the control arm. Coding them the other way gives 2.0 — a 4× swing from asymmetric absence alone. |
+| **A13** | 4.3 | **Differential exclusion by arm**, for the main study: exclusions reported by arm and reason; pooled RR demoted if the exposed-arm rate exceeds the control arm's by >10pp or the bounds diverge; every exclusion category bounded both ways, or declared unbounded. | Every exclusion category plausibly removes exposed units faster than unexposed ones. The control measured the magnitude at 4×; on the real corpus nobody plants it deliberately. |
 
 **A8 is the one that most needed to be pre-registered.** Switching to cluster-robust
 inference after seeing a confidence interval would be indistinguishable from moving the
@@ -437,6 +439,76 @@ the headline sentence gets written before anyone is motivated to write it genero
 that `super()` is PyCG's single best-documented blind spot — the easiest possible positive,
 and therefore weak evidence of general detection capability. Better said by us than worked
 out by a reader.
+
+### 4.2 Control corpus construction [A12]
+
+Written after the first control run, **before** the corrected one, because the first run
+exposed a construction defect rather than a result.
+
+**What happened.** The pooled RR of 8.0 was computed from 50 of 80 units. All 30 exclusions
+fell in the **exposed** arm and none in the control arm: symbols reached only by
+value-dispatch have zero matching call sites, so A6 excludes them, while their matched
+control twins have a resolvable direct call and remain. Coding the excluded units the other
+way gives RR = 2.0. **A 4× swing produced by asymmetric absence alone.**
+
+**Invariant, and it is general rather than a patch:**
+
+> **If an exposed unit is excluded, its matched control twin is excluded with it.**
+
+Pairwise, automatic, and it holds for mechanisms not yet built. A corpus that drops 75% of
+one arm and 0% of the other is broken *whichever way it pushes the ratio* — the test being:
+would this change be made if the result had been RR = 2.0 and failed? Yes. That is what
+separates a fixture correction from motivated reasoning.
+
+**Two consequences:**
+
+1. Mechanisms the instrument cannot see belong to the **capability table only** and never
+   to the pooled RR. A11 already said this in principle; the corpus did not reflect it.
+2. With one mechanism firing, 10-vs-10 is too thin. The firing mechanism scales to
+   **40/40**, so the control has power rather than a wide interval around a fragile point.
+
+**The gate is not changed.** Adding a `bounds_agree` condition after seeing a disliked
+result would be a threshold change, and tightening is as much a degree of freedom as
+loosening. The bounds diverged because the corpus was asymmetric, not because the world is
+uncertain — so the cause is fixed and the unchanged gate is re-run.
+
+### 4.3 Differential exclusion by arm [A13]
+
+**This is a threat to the main study, not only to the control**, and nothing in this
+document previously checked for it.
+
+Every exclusion category plausibly removes exposed units faster than unexposed ones:
+
+| Exclusion | Correlated with exposure? |
+|---|---|
+| `UNANALYZED_RESOURCE` (timeout / OOM) | **Yes** — dynamic code is harder to analyse |
+| `EXCLUDED_SYNTAX` (A7) | plausibly |
+| Multi-site collapse (A6) | **Yes** — more call sites, more chance of collapse |
+| No static callee (A10) | **Yes, by definition** — that is the dynamic-dispatch category |
+| Ambiguous parent (A2) | possibly |
+
+The control measured what this mechanism can do: **RR 2.0 → 8.0**. On the real corpus
+nobody plants it deliberately, which makes it harder to notice, not weaker.
+
+**Fixed before the run:**
+
+1. Exclusion counts are reported **by arm and by reason** — never a single attrition total.
+2. **Differential-exclusion check.** If the exposed-arm exclusion rate exceeds the
+   control-arm rate by more than **10 percentage points**, or if the bounds below diverge on
+   the §4 verdict, the pooled RR is **not** the headline result; the bounded reading leads.
+3. **Bound every exclusion**, as A6 bounds multi-site: code all excluded units UNEXPOSED
+   (lower) and EXPOSED (upper), report both. **Divergent bounds mean no general claim.**
+4. **The pilot reports exclusion rate by arm**, so this is known before the full run rather
+   than at analysis.
+
+**And the defect A6 was found to have generalises.** A zero-site symbol returned `None` for
+`primary` *and* for both sensitivity bounds, so the largest exclusion category was invisible
+to the very mechanism built to make exclusions visible.
+
+> **Every bound must be computable for every exclusion category — or the category is
+> unbounded and must say so.**
+
+That is the typed-absence principle turned on our own sensitivity analysis.
 
 ### Power
 
