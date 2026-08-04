@@ -112,6 +112,19 @@ you remember to obey — the machine will stop you either way.
     project whose thesis is provenance, letting git lose a rename is not a small irony.
     → `scripts/guard/check_module_identity.py`
 
+14. **A comment may explain *why*, never assert *whether*.** If a comment claims a safety
+    property — "this is caught later", "callers always hold the lock", "the next pass
+    checks it" — that claim belongs in an assertion, a test, or a returned value. The
+    comment then explains the reasoning behind the check rather than standing in for it.
+
+    A cleanup path here said "a leftover is caught by the strict pass on the next
+    attempt". The next attempt was a different repository, so nothing ever checked, and
+    1.6 GB of clones accumulated. The code was correct in isolation; the comment asserted
+    an invariant the calling pattern did not provide, and the comment is what made it
+    look safe to review. `sweep()` now returns the count instead — the property is
+    observable rather than claimed.
+    → **ADVISORY** — no mechanism. The only defence is noticing the verb.
+
 ---
 
 ## Language and style

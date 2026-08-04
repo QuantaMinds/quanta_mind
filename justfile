@@ -12,7 +12,12 @@
 #       ships with Git for Windows — see CONTRIBUTING.md. The recipes are not
 #       cmd.exe-compatible and are not trying to be.
 
-set shell := ["bash", "-uc"]
+# -e -o pipefail, not just -u. `just check | tail` masked an exit 1 and a red commit
+# went out: a pipeline's status is its LAST command's, so tail's 0 hid the failure.
+# Verified against a recipe running `false | tail -1` -- it now fails, and the line
+# after it does not run. A rule people must remember is a wish; a rule the shell
+# enforces is a rule.
+set shell := ["bash", "-euo", "pipefail", "-c"]
 
 default:
     @just --list
