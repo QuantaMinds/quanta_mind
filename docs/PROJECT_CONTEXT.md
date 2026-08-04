@@ -122,13 +122,29 @@ arXiv serves the abstract; ACM is paywalled; ResearchGate rate-limits.
 
 ### The downstream pain is measured
 
-- 🟡 **Agents break maintenance work more than humans do.** 7,191 agent PRs vs 1,402 human
-  PRs from Python repos (AIDev dataset, AST-based detection): agents introduce **fewer**
-  breaking changes in code generation (3.45% vs 7.40%) but **more** during maintenance —
-  **6.72% refactoring, 9.35% chore.** The authors name a *"Confidence Trap"* where highly
-  confident agentic PRs still break things. *(arXiv 2603.27524 — abstract only.)*
+- ✅ **Agents break maintenance work more than humans do.** *Safer Builders, Risky
+  Maintainers* (arXiv 2603.27524, MSR 2026), 7,191 agent vs 1,402 human PRs from **530**
+  Python repositories in AIDev, filtered to five structural task types → 4,798 agent /
+  1,026 human PRs and 60,324 file-level patches. Breaking changes detected by their own
+  AST tool applying 17 patterns from Du et al.; validated at 95.7% / 93.6% against two
+  independent reviewers, Cohen's κ = 0.79.
+
+  | Task type | Agent | Human |
+  |---|---|---|
+  | feat | 2.89% | 7.74% |
+  | fix | 2.69% | 5.32% |
+  | perf | 4.12% | — |
+  | refactor | **6.72%** | 4.36% |
+  | chore | **9.35%** | 4.95% |
+
+  **The trends invert** — that is the paper's title. Agents are safer building and riskier
+  maintaining. The authors name a *"Confidence Trap"*: highly confident agentic PRs still
+  break things.
   → **This is the single best framing for the product.** Greenfield has no hidden callers;
   refactoring does.
+  ⚠️ **These are the PR-level population, not ours.** Phase 0 requires *merged* PRs (the
+  outcome is a 7-day post-merge scan), which at a 69.3% acceptance rate leaves ~3,300.
+  See `docs/findings/PHASE0_PREREGISTRATION.md` amendment **A1**.
 - 🟡 **The safety net is a coin flip.** Martian Code Review Bench, an independent
   open-source benchmark tracking real developer behaviour across ~200k–300k PRs: the #1
   tool scores **49.2% precision** — roughly one in two comments leads to a code change.
@@ -269,3 +285,7 @@ Recorded so nobody re-derives an error we already paid for.
 | Framework resolvers are the moat | The **probe layer** is the moat. Resolvers are a feature race against projects shipping daily. | internal review |
 | We build parse + static resolution | We **consume** an upstream graph. ~165k stars of MIT code, iterating faster than three people can. | internal review |
 | Runtime oracle in Phase 9 | Runtime oracle **deleted from v1**. ~180× overhead, 12%-size graph, 59% builtins. | DyPyBench §4.1.2 |
+| Phase 0 corpus is ~7,191 agent PRs | 7,191 is pre-filter. Structural task types → 4,798; merged-only (69.3% acceptance) → **~3,300**. The analysed population is 2.2× smaller. | AIDev + arXiv 2602.08915, via PHASE0_PREREGISTRATION.md **A1** |
+| Agent breaking-change rate is "3.45% code generation vs 7.40% human" | That pairing appears nowhere in the paper. Per task type, agents: feat 2.89, fix 2.69, perf 4.12, refactor 6.72, chore 9.35. Humans invert it. | arXiv 2603.27524, full text |
+| `pr_task_type.confidence` is the "Confidence Trap" variable | It is the task-type **classifier's** confidence in its own label, and it is 10 on every row sampled. Zero variance; useless as a stratum. Dropped. | AIDev live schema |
+| AIDev supplies the PR's parent commit | It supplies no base, head or merge SHA. Parent = `merge_commit_sha^1` via the GitHub API. | AIDev live schema, **A2** |

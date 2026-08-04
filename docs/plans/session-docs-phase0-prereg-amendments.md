@@ -1,0 +1,76 @@
+# Session record — docs/phase0-prereg-amendments
+
+Written by scripts/guard/hook_session_end.py at 2026-08-04T07:14:14Z.
+Informational. Nothing here was blocked or enforced.
+
+- Branch: `docs/phase0-prereg-amendments`
+- Files changed vs `main`: 64
+- Uncommitted at session end: 2
+- `docs/CODEBASE.md` updated: yes
+
+## Changed
+
+- `.claude/settings.json`
+- `.editorconfig`
+- `.gitattributes`
+- `.github/pull_request_template.md`
+- `.github/workflows/ci.yml`
+- `.github/workflows/guards.yml`
+- `.gitignore`
+- `.pre-commit-config.yaml`
+- `.python-version`
+- `AGENTS.md`
+- `ARCHITECTURE.md`
+- `CLAUDE.md`
+- `CONTRIBUTING.md`
+- `docs/BUILD_PLAN.md`
+- `docs/CODEBASE.md`
+- `docs/PROJECT_CONTEXT.md`
+- `docs/VALIDATION.md`
+- `docs/findings/PHASE0_PREREGISTRATION.md`
+- `docs/findings/PHASE0_RUNBOOK.md`
+- `justfile`
+- `pyproject.toml`
+- `research/README.md`
+- `research/phase0/.python-version`
+- `research/phase0/ENVIRONMENT.lock`
+- `research/phase0/data/.gitkeep`
+- `research/phase0/pyproject.toml`
+- `research/phase0/results/.gitkeep`
+- `research/phase0/src/phase0/__init__.py`
+- `research/phase0/src/phase0/build_table.py`
+- `research/phase0/src/phase0/census.py`
+- `research/phase0/src/phase0/classify_exposure.py`
+- `research/phase0/src/phase0/controls.py`
+- `research/phase0/src/phase0/extract_prs.py`
+- `research/phase0/src/phase0/run_graph.py`
+- `research/phase0/src/phase0/run_pipeline.py`
+- `research/phase0/src/phase0/scan_outcome.py`
+- `research/phase0/tests/test_build_table.py`
+- `research/phase0/tests/test_census.py`
+- `research/phase0/tests/test_classify_exposure.py`
+- `research/phase0/tests/test_controls.py`
+- `research/phase0/tests/test_extract_prs.py`
+- `research/phase0/tests/test_run_graph.py`
+- `research/phase0/tests/test_run_pipeline.py`
+- `research/phase0/tests/test_scan_outcome.py`
+- `research/phase0/uv.lock`
+- `scripts/guard/check_agents_md.py`
+- `scripts/guard/check_assert_quality.py`
+- `scripts/guard/check_branch_name.py`
+- `scripts/guard/check_conventions.py`
+- `scripts/guard/check_docs_sync.py`
+- `scripts/guard/check_enforcement_map.py`
+- `scripts/guard/check_no_research_imports.py`
+- `scripts/guard/check_structure.py`
+- `scripts/guard/discovery.py`
+- `scripts/guard/hook_post_edit.py`
+- `scripts/guard/hook_pre_edit.py`
+- `scripts/guard/hook_session_end.py`
+- `scripts/verify/README.md`
+- `settings.json`
+- `src/qmctx/__init__.py`
+- `tests/conftest.py`
+- `tests/property/test_layer_order.py`
+- `tests/unit/test_package_metadata.py`
+- `uv.lock`
