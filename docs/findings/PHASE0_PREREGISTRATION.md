@@ -1123,6 +1123,35 @@ freedom.
 > outcome's own loss to follow-up.** At 32% those bounds will be wide. Knowing the width
 > before the point estimate exists is the entire reason this is written now.
 
+**Pilot result — the trigger fired.** 30 repositories, 93 PRs attempted, 48 admitted
+(51.6%). `parent_commit` failure against commit-count band:
+
+| commits | n | parent_commit failures | rate |
+|---|---|---|---|
+| 1 | 27 | 1 | **3.7%** |
+| 2–5 | 44 | 12 | **27.3%** |
+| 6–20 | 18 | 8 | **44.4%** |
+| 21+ | 4 | 2 | 50.0% |
+
+That is monotone across the three bands carrying almost all the mass, and it is the
+condition this section pre-specified. **A17's worst-case bounds must therefore be
+computed over `parent_commit` and `file_set` exclusions, not only over the outcome's loss
+to follow-up.** 28 of 93 units are `integrity` exclusions correlated with commit count;
+bounds over that fraction will be wide, and that is the honest position.
+
+`no_symbols` runs the other way — 16 of its 17 cases sit in the 1–4 file band, which is
+what a restricted estimand should look like: small changes that touch imports or
+constants and no function body. It narrows the claim rather than tilting it.
+
+**A15 is confirmed on real records, not on a superset statistic:** all 48 admitted
+records come from repositories with **≥ 500 stars**, with 21 distinct repositories and a
+top-repository share of 14.6%.
+
+**The pilot is short of its planned size.** 93 attempted against the ~200 specified: the
+first 30 repositories simply do not hold 200 eligible PRs at seven each. Every rate above
+carries an interval accordingly, and the run is being extended across the remaining
+repositories rather than quoted at this width.
+
 **What the smoke run did not produce, and the pilot must.** Exposure rate, breakage rate,
 multi-site fraction, no-static-callee share, `EXCLUDED_SYNTAX` share, instant-merge share,
 star-band split, repository concentration, and the exposure-versus-patch-size correlation
