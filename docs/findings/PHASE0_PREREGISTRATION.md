@@ -28,15 +28,17 @@ papers, and from review of the execution plan.
 
 **No amendment moves a decision boundary.** The RR thresholds (3.0 / 1.5), the CI rules,
 the 7-day window, the `a ≥ 20` floor and the stop rule in §6 are byte-identical to the
-first commit. A1–A5 are factual corrections or newly discovered prerequisites; A6–A9
-change *what is measured* (A6), *how it is matched* (A9), *what is excluded* (A7) or *how
-it is estimated* (A8), so that all four match what the instrument can actually deliver.
+first commit. A1–A5 are factual corrections or newly discovered prerequisites; A6–A10
+change *what is measured* (A6), *how it is matched* (A9), *what is excluded* (A7), *how it
+is estimated* (A8), or *what may be claimed from the result* (A10), so that all of them
+match what the instrument can actually deliver.
 
-**Every one of A6, A7 and A9 was forced by a property of PyCG established by running it,
-not by reading about it** — the set-valued edge map, the 3.10 parse ceiling, and two
-distinct naming defects. Each is recorded with its bias direction, and in every case the
-direction chosen is the one that errs toward the null. An amendment that made a positive
-result easier would deserve far more scepticism than these do.
+**Every one of A6, A7, A9 and A10 was forced by a property established by running the
+instrument, not by reading about it** — the set-valued edge map, the 3.10 parse ceiling,
+two distinct naming defects, and a capability profile of one mechanism in four. Each is
+recorded with its bias direction, and in every case the direction is toward the null. An
+amendment that made a positive result *easier* would deserve far more scepticism than
+these do.
 
 **One amendment does touch the outcome definition, and it is A4.** The third of §3.2's
 three BROKE criteria — the issue link — becomes conditional on API quota. The first two,
@@ -57,6 +59,7 @@ reclassification this log exists to prevent.
 | **A7** | 3.1 | `EXCLUDED_SYNTAX` split out of `UNANALYZED` and excluded from the study. | PyCG parses on CPython 3.10; 3.11+ syntax fails because our toolchain is behind, not because the code is dynamic. §4.4 reads that arm to decide what company this is. |
 | **A8** | 3.4, 4 | Primary inference is cluster-robust at repository level; naive Katz CI reported alongside; power restated in clustered terms. | Symbols cluster in PRs, PRs cluster in repos. Katz assumes independence and understates variance at exactly the boundary §4 turns on. |
 | **A9** | 3.1 | Edge matching normalises PyCG's path separators and is lenient about the package prefix, requiring a dot boundary. | PyCG names the same function two ways and leaks path separators into module names. Strict equality would mark nested-package callers unresolved wholesale. |
+| **A10** | 3.1, 6 | The exposure variable's **capability profile** is recorded, and the scope of a null is narrowed to match it. | Measured: the variable detects 1 of 4 unresolvable-caller mechanisms. Value-dispatched calls carry no callee name, so they produce no pair and read UNEXPOSED. A null therefore cannot be reported as a null about unresolvability in general. |
 
 **A8 is the one that most needed to be pre-registered.** Switching to cluster-robust
 inference after seeing a confidence interval would be indistinguishable from moving the
@@ -230,6 +233,39 @@ positive.
 prefix tolerance. If tolerance is doing most of the work, the join is resting on a
 heuristic rather than on agreement, and that must be visible before the full run.
 
+**Capability profile of the exposure variable — measured, not assumed. [A10]**
+
+Exposure is operationalised by matching a call site's **callee name** to the changed
+symbol. That has a consequence which was measured before the run, by probing four
+unresolvable-caller mechanisms with an empty edge set, so that a miss is structural rather
+than something PyCG happened to resolve:
+
+| Mechanism | Detected | Why |
+|---|---|---|
+| `super()` chain | **yes** | the site names `validate`; the edge is simply absent |
+| computed `getattr(m, cfg[k])()` | no | no call site carries the symbol's name |
+| string-keyed registry `REGISTRY[k]()` | no | same |
+| registering decorator, `HOOKS[0]()` | no | same |
+
+**One of four.** A call dispatched through a *value* carries no name, so nothing can be
+attributed to the symbol, the symbol produces no pair at all, and it reads **UNEXPOSED
+while having a hidden caller.**
+
+**What this variable actually measures** is therefore *"named call sites whose edge PyCG
+did not emit"* — in practice, largely `super()` chains — and **not** *"call sites we cannot
+resolve"*. That is narrower than the prose above, and narrower than the worked example in
+`README.md`, which is a computed `getattr`.
+
+**Bias direction: false negative, toward the null.** Consistent with A6, A7 and A9, and for
+the same reason: an instrument that under-detects and still shows lift is stronger
+evidence, not weaker.
+
+**Diagnostic:** the pilot reports the share of non-builtin call sites carrying **no static
+callee name**. That is the prevalence half of the Judge decomposition, and it bounds how
+much of the problem this variable is structurally blind to. If it is large, the gap between
+what we measure and what the product claims is large too, and that belongs in
+`PROJECT_CONTEXT.md` before any sales conversation.
+
 **Parse failures are attrition, not an arm. [A7]** PyCG parses with its host interpreter's
 `ast`, pinned at CPython 3.10 (`research/phase0/ENVIRONMENT.lock`). A repository using
 `except*` (3.11) or `type X = …` (3.12) therefore fails to parse **because our toolchain is
@@ -385,10 +421,22 @@ product is a scalability product, not an unsoundness product. That is a differen
 
 ## 6. If the result is null
 
-**We stop, and we publish.**
+**We stop, and we publish — but we publish the null we actually measured. [A10]**
 
-A rigorous null — *"static-analysis resolvability does not predict breakage in AI-authored
-Python changes, RR = 1.1 [0.8–1.5], n = 7,191 PRs"* — is a genuine contribution. The
+The capability profile in §3.1 narrows what a null is entitled to claim. The variable
+detects named call sites whose edge is missing; it is structurally blind to calls
+dispatched through a value. So the defensible null is:
+
+> *"Call sites that are statically **named** but unresolved do not predict breakage in
+> AI-authored Python changes, RR = … [ … ], n = …. Calls dispatched through a value were
+> not measurable with this instrument and are excluded; they were X% of non-builtin call
+> sites in the corpus."*
+
+Reporting instead that *"unresolvability does not predict breakage"* would overclaim the
+null, because most unresolvability was never measured. That is the same error as
+overclaiming a positive, and it is easier to make because a null feels modest.
+
+A rigorous null of the narrower kind is still a genuine contribution. The
 soundiness literature has asked since 2015 for empirical work on whether unsoundness
 matters in practice, and explicitly noted that no reliable survey exists. Answering "less
 than we assumed" is publishable, is an original contribution for the O-1A file, and closes
