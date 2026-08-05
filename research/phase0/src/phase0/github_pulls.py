@@ -29,7 +29,7 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
-from phase0.github_http import TOKEN_VAR, MissingTokenError, fetch, require_token
+from phase0.github_http import TOKEN_VAR, MissingTokenError, cache_payload, fetch, require_token
 
 API_ROOT = "https://api.github.com"
 
@@ -97,7 +97,7 @@ def merge_info(
         payload = fetch(
             f"{API_ROOT}/repos/{repo_full_name}/pulls/{number}", token or require_token()
         )
-        path.write_text(json.dumps(payload), encoding="utf-8")
+        cache_payload(path, payload)
 
     if not payload:
         return None
@@ -140,7 +140,7 @@ def _api_files(
             f"{API_ROOT}/repos/{repo_full_name}/pulls/{number}/files?per_page=100",
             token or require_token(),
         )
-        path.write_text(json.dumps(payload), encoding="utf-8")
+        cache_payload(path, payload)
     if not isinstance(payload, list):
         return ()
     return tuple(str(entry.get("filename") or "") for entry in payload if entry.get("filename"))
@@ -169,7 +169,7 @@ def _commit_subjects(
             f"{API_ROOT}/repos/{repo_full_name}/pulls/{number}/commits?per_page=100",
             token or require_token(),
         )
-        path.write_text(json.dumps(payload), encoding="utf-8")
+        cache_payload(path, payload)
     if not isinstance(payload, list):
         return ()
     return tuple(
