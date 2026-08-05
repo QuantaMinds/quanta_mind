@@ -1253,6 +1253,27 @@ of 34). That is inside the 8–20% band fixed above, and it is deliberately **no
 what is measured predicts. A seven-day behavioural repair window should catch runtime,
 semantic and integration breakage that an AST-based detector cannot see.
 
+**Attributed to each fix separately, over the same 33 records:**
+
+| variant | broke | rate |
+|---|---|---|
+| neither fix | 9 | 27.3% |
+| subject-matching only | 7 | 21.2% |
+| focus threshold only | 7 | 21.2% |
+| **both** | **6** | **18.2%** |
+
+Each fix removes two verdicts on its own; together they remove three, so they overlap on
+one. **Neither dominates**, which is the reassuring shape: had the focus threshold been
+doing most of the work it would have been the more likely of the two to be cutting real
+events, since it discriminates on breadth rather than on wording.
+
+Exactly **one** PR was removed by the threshold that subject-matching had kept, and it was
+inspected blind — verdict written before the counts above were read. It is correctly
+dropped: a 71-file commit named `fix-a-lot`, landing the day after, in a window that also
+holds a 158-file release commit. That is the sweep case the threshold exists to exclude,
+not the "real repair plus unrelated cleanup" case that would have meant the metric rather
+than its value was wrong. Recorded with its own caveat in `results/focus_inspection.md`.
+
 The rule is now closed to further tuning. It was changed once, on two named defects,
 before the labels were drawn.
 
