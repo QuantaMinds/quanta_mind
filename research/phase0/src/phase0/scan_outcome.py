@@ -42,6 +42,7 @@ from git.exc import GitError, ODBError
 
 from phase0 import fix_signals
 from phase0.extract_prs import PRRecord
+from phase0.outcome_window import base_ref_of, candidates, reachable
 
 # See parent_commit.py: BadName/BadObject derive from gitdb's ODBError, which is
 # neither a GitError nor a ValueError, so a narrower catch lets them escape.
@@ -57,6 +58,14 @@ MAX_COMMITS = 2000
 class Outcome(Enum):
     BROKE = "broke"
     CLEAN = "clean"
+    # We could not look. Distinct from CLEAN on purpose: the scan used to walk from the
+    # clone's HEAD, so a PR merged into `dev` or a feature branch had its whole
+    # post-merge history outside that walk and came back CLEAN. 15.5% of the corpus
+    # merges off the default branch, and those repositories are the ones with a release
+    # process -- so the instrument was systematically scoring the more process-mature
+    # projects as unbroken. A false negative leaves no trace anywhere; an UNSCANNABLE
+    # verdict is an exclusion somebody has to count.
+    UNSCANNABLE = "unscannable"
 
 
 class Criterion(Enum):
@@ -108,51 +117,44 @@ def _touches_pr_files(commit: Commit, changed: frozenset[str]) -> bool:
     return fix_signals.is_focused(touched, changed)
 
 
-def _candidates(repo: Repo, start: datetime, end: datetime, exclude: str) -> list[Commit]:
-    """Commits landing strictly after the merge and within the window."""
-    found: list[Commit] = []
-    try:
-        walk = repo.iter_commits(max_count=MAX_COMMITS)
-    except GIT_LOOKUP_ERRORS:
-        return found
-
-    for commit in walk:
-        when = commit.committed_datetime
-        if when.tzinfo is None:
-            when = when.replace(tzinfo=timezone.utc)
-        if when > end:
-            continue
-        if when <= start:
-            break  # history is newest-first; everything below is out of window
-        if exclude and commit.hexsha.startswith(exclude[:7]):
-            continue
-        found.append(commit)
-    return found
-
-
 def scan(repo_path: Path, pr: PRRecord, window_days: int = WINDOW_DAYS) -> OutcomeRecord:
     """Look for a revert or fix touching this PR's files inside the window.
 
-    Returns CLEAN rather than raising when history is unavailable: an
-    unreadable repository is corpus attrition, and run_pipeline.py counts it.
-    A silent exception here would be indistinguishable from "nothing broke".
+    Returns UNSCANNABLE, never CLEAN, when the history cannot be read. The two were the
+    same value until 15.5% of the corpus turned out to merge off the default branch,
+    which the walk never visited.
     """
     merged = _merged_at(pr)
     if merged is None:
-        return OutcomeRecord(outcome=Outcome.CLEAN)
+        return OutcomeRecord(Outcome.UNSCANNABLE, evidence_message="unparseable merged_at")
 
     repo = None
     try:
         repo = Repo(repo_path)
-    except GIT_LOOKUP_ERRORS:
-        return OutcomeRecord(outcome=Outcome.CLEAN)
+    except GIT_LOOKUP_ERRORS as exc:
+        return OutcomeRecord(Outcome.UNSCANNABLE, evidence_message=f"unreadable clone: {exc}")
 
     # `closing` rather than a finally: the scan has several early returns and each
     # one must release the handle. Windows keeps pack files mapped while a Repo is
     # open, so a missed close means the clone cannot be deleted afterwards.
     with closing(repo):
+        ref = base_ref_of(repo, pr.base_ref)
+        if ref is None:
+            return OutcomeRecord(
+                Outcome.UNSCANNABLE,
+                evidence_message=f"base branch {pr.base_ref!r} no longer exists",
+            )
+        if pr.merged_sha and not reachable(repo, pr.merged_sha, ref):
+            # agentops#811 and #817 merged into `dev` and their merge commits have no
+            # common ancestor with it -- force-push, branch recreation, or an indirect
+            # merge. Whatever the cause, the window cannot be walked from a branch the
+            # merge is not on, and guessing another would be inventing the answer.
+            return OutcomeRecord(
+                Outcome.UNSCANNABLE,
+                evidence_message=f"merge commit is not reachable from {ref}",
+            )
         changed = frozenset(pr.changed_files)
-        commits = _candidates(repo, merged, merged + timedelta(days=window_days), pr.merged_sha)
+        commits = candidates(repo, merged, merged + timedelta(days=window_days), pr.merged_sha, ref)
 
         for commit in commits:
             message = str(commit.message)

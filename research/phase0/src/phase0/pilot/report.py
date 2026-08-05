@@ -16,11 +16,14 @@ CONSUMED BY: run_pilot.py; tests/test_pilot_report.py.
 
 from __future__ import annotations
 
+import subprocess
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
 import pandas as pd
+
+from phase0.handlabel.select import Candidate
 
 # Commit-count bands. Chosen before the run and kept coarse: with a few hundred PRs,
 # quartiles cut from the data would move with it, and a moving boundary is a degree of
@@ -60,6 +63,10 @@ class Attempt:
     # an unscanned PR and a clean one must not be the same value, or the breakage rate
     # silently divides by the wrong denominator.
     outcome: str = ""
+    # Whether the PR merged into the repository's default branch. 15.5% do not, and
+    # those repositories have release processes -- so the split is a population
+    # question, not just a bug's footprint.
+    base_is_default: bool = True
 
 
 def star_counts(table: Path) -> dict[str, int]:
@@ -75,6 +82,35 @@ def star_counts(table: Path) -> dict[str, int]:
         return {}
     frame = pd.read_parquet(table)
     return {str(r.full_name): int(r.stars) for r in frame.itertuples() if r.full_name}
+
+
+_DEFAULTS: dict[str, str] = {}
+
+
+def default_branch(repo: str) -> str:
+    """The repository's default branch, cached. Empty when the lookup fails.
+
+    Used only to label a PR's base as default or not; an empty answer makes the label
+    wrong rather than the scan wrong, since the scan uses `base_ref` directly.
+    """
+    if repo not in _DEFAULTS:
+        out = subprocess.run(
+            ["gh", "api", f"repos/{repo}", "--jq", ".default_branch"],
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+        _DEFAULTS[repo] = out.stdout.strip()
+    return _DEFAULTS[repo]
+
+
+def by_repo(population: list[Candidate]) -> dict[str, list[Candidate]]:
+    """Candidates grouped by repository, so each is cloned once."""
+    grouped: dict[str, list[Candidate]] = {}
+    for candidate in population:
+        grouped.setdefault(candidate.repo, []).append(candidate)
+    return grouped
 
 
 def _band(value: int, bands: tuple[tuple[str, int, int], ...]) -> str:
@@ -107,8 +143,13 @@ def report(attempts: list[Attempt], clone_failures: int, repos: int) -> dict[str
     rejected = [a for a in attempts if not a.admitted]
     symbols = sorted(a.changed_symbols for a in admitted)
     files = sorted(a.derived_files for a in admitted)
-    scanned = [a for a in admitted if a.outcome]
+    # UNSCANNABLE is excluded from the denominator, not counted clean. Folding it in
+    # would restore the exact bias the base-branch fix removed, one layer up.
+    scanned = [a for a in admitted if a.outcome in ("broke", "clean")]
+    unscannable = [a for a in admitted if a.outcome == "unscannable"]
     broke = [a for a in scanned if a.outcome == "broke"]
+    on_default = [a for a in scanned if a.base_is_default]
+    off_default = [a for a in scanned if not a.base_is_default]
     star_bands = Counter(
         "unknown" if a.stars < 0 else ("<500" if a.stars < 500 else ">=500") for a in admitted
     )
@@ -134,6 +175,22 @@ def report(attempts: list[Attempt], clone_failures: int, repos: int) -> dict[str
         # above -- the end of the distribution least likely to break anything. A rate
         # near 3% means the planned corpus is underpowered and the window or the size
         # has to change before the full run, not after.
+        "outcome_unscannable": len(unscannable),
+        # Split by base branch: if the two rates differ materially the population really
+        # differs and this becomes a stratum, rather than the fix having merely moved a
+        # number. If they match, the fix was purely corrective and that can be said.
+        "breakage_rate_default_branch": round(
+            sum(a.outcome == "broke" for a in on_default) / len(on_default), 4
+        )
+        if on_default
+        else None,
+        "breakage_rate_other_branch": round(
+            sum(a.outcome == "broke" for a in off_default) / len(off_default), 4
+        )
+        if off_default
+        else None,
+        "scanned_on_default": len(on_default),
+        "scanned_off_default": len(off_default),
         "outcome_scanned": len(scanned),
         "outcome_broke": len(broke),
         "breakage_rate": round(len(broke) / len(scanned), 4) if scanned else None,

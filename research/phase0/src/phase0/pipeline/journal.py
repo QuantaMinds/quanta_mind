@@ -38,6 +38,7 @@ COLUMNS = (
     "symbols",
     "stars",
     "outcome",
+    "on_default",
 )
 DONE = re.compile(r"^<!-- repo-done: (?P<repo>\S+) -->$")
 HEADER = (
@@ -91,6 +92,7 @@ def read_attempts(path: Path) -> list[Attempt]:
                     changed_symbols=int(cells[8]),
                     stars=int(cells[9]),
                     outcome="" if cells[10] == "-" else cells[10],
+                    base_is_default=cells[11] != "no",
                 )
             )
         except ValueError:
@@ -119,6 +121,7 @@ def append_repo(path: Path, repo: str, attempts: list[Attempt]) -> None:
                 str(a.changed_symbols),
                 str(a.stars),
                 a.outcome or "-",
+                "yes" if a.base_is_default else "no",
             )
         )
         + " |"

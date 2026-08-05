@@ -1,10 +1,10 @@
 # Session record — docs/phase0-prereg-amendments
 
-Written by scripts/guard/hook_session_end.py at 2026-08-05T01:24:52Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-05T02:03:15Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `docs/phase0-prereg-amendments`
-- Files changed vs `main`: 136
+- Files changed vs `main`: 138
 - Uncommitted at session end: 0
 - `docs/CODEBASE.md` updated: yes
 
@@ -91,6 +91,8 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/src/phase0/pipeline/measure.py`
 - `research/phase0/src/phase0/pipeline/merge_shape.py`
 - `research/phase0/src/phase0/pipeline/record.py`
+- `research/phase0/src/phase0/pipeline/rejection.py`
+- `research/phase0/src/phase0/pipeline/verify_files.py`
 - `research/phase0/src/phase0/pipeline/worktree.py`
 - `research/phase0/src/phase0/run_pipeline.py`
 - `research/phase0/src/phase0/sample_for_labelling.py`

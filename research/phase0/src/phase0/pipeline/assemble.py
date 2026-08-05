@@ -130,4 +130,5 @@ def build_record(
         task_type=task_type,
         licence=licence,
         repo_id=repo,
+        base_ref=merge.base_ref,
     )

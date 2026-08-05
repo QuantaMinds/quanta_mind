@@ -37,7 +37,7 @@ from pathlib import Path
 from phase0.extract_prs import PRRecord
 from phase0.github_pulls import merge_info, require_token
 from phase0.handlabel.select import Candidate, eligible_prs
-from phase0.pilot.report import Attempt, report, star_counts
+from phase0.pilot.report import Attempt, by_repo, default_branch, report, star_counts
 from phase0.pipeline import journal
 from phase0.pipeline.assemble import build_record
 from phase0.pipeline.rejection import Rejection
@@ -48,13 +48,6 @@ ROOT = Path(__file__).resolve().parents[2]
 PACKAGE = ROOT / "data" / "AIDev_BC_Analyser.zip"
 WORKSPACE = ROOT / "data" / "pilot_clones"
 CACHE = ROOT / "data" / "gh_cache"
-
-
-def _by_repo(population: list[Candidate]) -> dict[str, list[Candidate]]:
-    grouped: dict[str, list[Candidate]] = {}
-    for candidate in population:
-        grouped.setdefault(candidate.repo, []).append(candidate)
-    return grouped
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -83,7 +76,7 @@ def main(argv: list[str] | None = None) -> int:
 
     token = require_token()
     population = eligible_prs(PACKAGE)
-    grouped = _by_repo(population)
+    grouped = by_repo(population)
     chosen = sorted(grouped)[: args.repos]
     print(f"{len(population)} eligible PRs across {len(grouped)} repos; taking {len(chosen)}")
 
@@ -102,6 +95,7 @@ def main(argv: list[str] | None = None) -> int:
         outcome: PRRecord | Rejection,
         commit_count: int,
         breakage: str = "",
+        on_default: bool = True,
     ) -> None:
         """One attempt, with the covariates attrition may track. Never a verdict."""
         corpus_py = sum(1 for f in candidate.changed_files if f.endswith(".py"))
@@ -123,6 +117,7 @@ def main(argv: list[str] | None = None) -> int:
                 changed_symbols=symbols,
                 stars=stars.get(candidate.repo, -1),
                 outcome=breakage,
+                base_is_default=on_default,
             )
         )
 
@@ -157,7 +152,13 @@ def main(argv: list[str] | None = None) -> int:
                         # scan costs a history walk and no network. Doing it in a second
                         # pass would mean cloning every repository twice.
                         breakage = scan(clone, outcome).outcome.value
-                    note(candidate, outcome, merge.commit_count, breakage)
+                    note(
+                        candidate,
+                        outcome,
+                        merge.commit_count,
+                        breakage,
+                        merge.base_ref == default_branch(repo),
+                    )
                     if isinstance(outcome, Rejection):
                         print(
                             f"     #{candidate.number}: rejected [{outcome.stage}"
