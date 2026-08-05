@@ -117,13 +117,13 @@ you remember to obey — the machine will stop you either way.
     checks it" — that claim belongs in an assertion, a test, or a returned value. The
     comment then explains the reasoning behind the check rather than standing in for it.
 
-    A cleanup path here said "a leftover is caught by the strict pass on the next
-    attempt". The next attempt was a different repository, so nothing ever checked, and
-    1.6 GB of clones accumulated. The code was correct in isolation; the comment asserted
-    an invariant the calling pattern did not provide, and the comment is what made it
-    look safe to review. `sweep()` now returns the count instead — the property is
-    observable rather than claimed.
-    → **ADVISORY** — no mechanism. The only defence is noticing the verb.
+    A cleanup path said "a leftover is caught by the strict pass on the next attempt". The
+    next attempt was a different repo, so nothing checked and 1.6 GB accumulated. `sweep()`
+    returns the count instead — observable, not claimed.
+    **Ask what a check outputs when the thing it checks is broken. If the answer is "the
+    same thing", it is not a check.** `all(b >= a)` said True on a flat gradient;
+    `startswith("")` said True for an unresolved parent; a survey reusing the rule it
+    validates agrees by construction. → **ADVISORY** — notice the verb.
 
 15. **A documented command must run, or carry `documented-command:unbuilt`.** `python -m`
     with no `__main__` ignores flags, writes nothing, exits 0 — the runbook's "Days 3–5" reported success and did nothing. → `scripts/guard/check_documented_commands.py`

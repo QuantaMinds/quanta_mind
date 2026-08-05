@@ -1,0 +1,162 @@
+[
+  {
+    "pr_id": "2272183023",
+    "repo": "bespokelabsai/curator",
+    "commits": 6,
+    "consecutive_subject_matches": 6,
+    "shape": "rebase",
+    "structural_committer_run": 6,
+    "structural_shape": "rebase",
+    "agrees": true
+  },
+  {
+    "pr_id": "2317330363",
+    "repo": "bespokelabsai/curator",
+    "commits": 12,
+    "consecutive_subject_matches": 12,
+    "shape": "rebase",
+    "structural_committer_run": 12,
+    "structural_shape": "rebase",
+    "agrees": true
+  },
+  {
+    "pr_id": "2356246191",
+    "repo": "Kanaries/pygwalker",
+    "commits": 2,
+    "consecutive_subject_matches": 2,
+    "shape": "rebase",
+    "structural_committer_run": 2,
+    "structural_shape": "rebase",
+    "agrees": true
+  },
+  {
+    "pr_id": "2465429535",
+    "repo": "PrefectHQ/marvin",
+    "commits": 2,
+    "consecutive_subject_matches": 2,
+    "shape": "rebase",
+    "structural_committer_run": 2,
+    "structural_shape": "rebase",
+    "agrees": true
+  },
+  {
+    "pr_id": "2257424685",
+    "repo": "crewAIInc/crewAI",
+    "commits": 2,
+    "consecutive_subject_matches": 0,
+    "shape": "squash",
+    "structural_committer_run": 1,
+    "structural_shape": "squash",
+    "agrees": true
+  },
+  {
+    "pr_id": "2258407801",
+    "repo": "crewAIInc/crewAI",
+    "commits": 4,
+    "consecutive_subject_matches": 0,
+    "shape": "squash",
+    "structural_committer_run": 1,
+    "structural_shape": "squash",
+    "agrees": true
+  },
+  {
+    "pr_id": "2259409621",
+    "repo": "crewAIInc/crewAI",
+    "commits": 22,
+    "consecutive_subject_matches": 0,
+    "shape": "squash",
+    "structural_committer_run": 1,
+    "structural_shape": "squash",
+    "agrees": true
+  },
+  {
+    "pr_id": "2259921353",
+    "repo": "crewAIInc/crewAI",
+    "commits": 3,
+    "consecutive_subject_matches": 0,
+    "shape": "squash",
+    "structural_committer_run": 1,
+    "structural_shape": "squash",
+    "agrees": true
+  },
+  {
+    "pr_id": "2262012370",
+    "repo": "crewAIInc/crewAI",
+    "commits": 6,
+    "consecutive_subject_matches": 0,
+    "shape": "squash",
+    "structural_committer_run": 1,
+    "structural_shape": "squash",
+    "agrees": true
+  },
+  {
+    "pr_id": "2262339176",
+    "repo": "crewAIInc/crewAI",
+    "commits": 3,
+    "consecutive_subject_matches": 0,
+    "shape": "squash",
+    "structural_committer_run": 1,
+    "structural_shape": "squash",
+    "agrees": true
+  },
+  {
+    "pr_id": "2262795916",
+    "repo": "SirVer/ultisnips",
+    "commits": 3,
+    "consecutive_subject_matches": 0,
+    "shape": "squash",
+    "structural_committer_run": 1,
+    "structural_shape": "squash",
+    "agrees": true
+  },
+  {
+    "pr_id": "2264866046",
+    "repo": "airbytehq/airbyte",
+    "commits": 12,
+    "consecutive_subject_matches": 0,
+    "shape": "squash",
+    "structural_committer_run": 1,
+    "structural_shape": "squash",
+    "agrees": true
+  },
+  {
+    "pr_id": "2272274981",
+    "repo": "Blaizzy/mlx-vlm",
+    "commits": 2,
+    "consecutive_subject_matches": 0,
+    "shape": "squash",
+    "structural_committer_run": 1,
+    "structural_shape": "squash",
+    "agrees": true
+  },
+  {
+    "pr_id": "2272586142",
+    "repo": "Netflix/metaflow",
+    "commits": 8,
+    "consecutive_subject_matches": 0,
+    "shape": "squash",
+    "structural_committer_run": 1,
+    "structural_shape": "squash",
+    "agrees": true
+  },
+  {
+    "pr_id": "2275392075",
+    "repo": "commaai/opendbc",
+    "commits": 2,
+    "consecutive_subject_matches": 0,
+    "shape": "squash",
+    "structural_committer_run": 1,
+    "structural_shape": "squash",
+    "agrees": true
+  },
+  {
+    "pr_id": "2279176635",
+    "repo": "Significant-Gravitas/AutoGPT",
+    "commits": 14,
+    "consecutive_subject_matches": 0,
+    "shape": "squash",
+    "structural_committer_run": 1,
+    "structural_shape": "squash",
+    "agrees": true
+  }
+]
