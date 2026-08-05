@@ -114,6 +114,7 @@
 
     "one public concern per module": "ADVISORY -- human review in PR",
     "plan before editing resolve/ or label/": "ADVISORY -- human review in PR",
+    "documented commands must be runnable": "guard:check_documented_commands",
     "session record written at Stop": "hook:Stop (informational)"
   }
 }

@@ -16,12 +16,24 @@ WHY:  The exposure variable is defined at the parent commit, so this decides wha
       SHAs and no merge commit, so for a PR of N>1 commits the first parent is the
       PR's own second-to-last commit.
 
-      Detection is by DIFF COVERAGE, not by commit message. A squash commit's
-      message is the PR title and body and matches no individual PR commit
-      message, so a message-matching rule would silently reject every squashed
-      multi-commit PR — the most common case on GitHub.
-IMPORTS: GitPython. phase0.github_pulls for the merge metadata.
-CONSUMED BY: extract_prs.py; tests/test_parent_commit.py.
+      Detection tries the SUBJECT SEQUENCE first and falls back to diff coverage
+      only when the API gave us no subjects — see `pipeline/merge_shape.by_subject`.
+      This docstring previously argued the opposite, that detection is by diff
+      coverage and "a message-matching rule would silently reject every squashed
+      multi-commit PR". That objection defeats matching a SINGLE message, which is
+      why the rule matches a sequence of at least two: a squash produces exactly
+      one commit and can never yield two consecutive subjects in order, whatever
+      the repository's message setting.
+
+      The correction matters beyond tidiness. The file rules compare against a file
+      list the corpus supplies, and the corpus attributes 92 files to some
+      three-file PRs, so they failed on exactly the PRs whose file lists were
+      wrong — `parent_commit` became the largest exclusion at 17-70% across
+      commit-count bands, differentially on patch size, which is the study's own
+      confounder. A docstring asserting the corpus-dependent rule was the
+      authoritative one is how that dependence stayed invisible.
+IMPORTS: GitPython. phase0.pipeline.merge_shape for the corpus-free rule.
+CONSUMED BY: pipeline/assemble.py, run_pipeline.py; tests/test_parent_commit.py.
 """
 
 from __future__ import annotations

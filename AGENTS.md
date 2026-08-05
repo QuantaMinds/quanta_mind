@@ -125,6 +125,9 @@ you remember to obey — the machine will stop you either way.
     observable rather than claimed.
     → **ADVISORY** — no mechanism. The only defence is noticing the verb.
 
+15. **A documented command must run, or carry `documented-command:unbuilt`.** `python -m`
+    with no `__main__` ignores flags, writes nothing, exits 0 — the runbook's "Days 3–5" reported success and did nothing. → `scripts/guard/check_documented_commands.py`
+
 ---
 
 ## Language and style

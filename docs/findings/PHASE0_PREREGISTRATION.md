@@ -86,6 +86,8 @@ reclassification this log exists to prevent.
 
 | **A27** | 4.16 | **The outcome scan must walk the PR's own base branch, not the clone's default.** 15.5% of PRs merge into `dev`, `develop` or a feature branch; `scan_outcome` walks from HEAD, so their post-merge history is invisible and every one of them reads CLEAN. Also: `merged_at` asserted before `merge_commit_sha` is read, a merged PR with a null merge sha becomes `no_merge_sha`, and file-set verification requires **exact equality** rather than a ratio. | A superset passes a ratio gate. When a PR's commits land via another pull request the merge sha belongs to that other PR, shape detection resolves a parent confidently, and if the other PR carried nothing else the file sets differ only by what they share — a wrong parent that passes verification, which is the one failure surviving every downstream check. And a false CLEAN on 15.5% of the corpus biases the outcome toward the null in a way no bound would show. |
 
+| **A28** | 4.17 | **Supersedes A2's detection rule.** Shape is decided by the SEQUENCE of the PR's commit subjects — at least two consecutive matches walking back from the merge — with the diff-coverage rules kept only as a fallback when the API returns no subjects. Records the hand-verification: 19 of 20 resolved parents confirmed against `merge_commit_sha`'s first parent, all five of the 21+ band among them. Also makes `UNSCANNABLE` a **counted exclusion at every consumer**, not only at the scan, and adds the unreachable-merge prevalence **measured at admission**. | A2 detected shape by diff coverage against a file list the corpus supplies, and the corpus attributes 92 files to some three-file PRs — so detection failed on exactly the PRs whose file lists were wrong, at 17–70% across commit-count bands, differentially on patch size. Subjects come from the API and are independent of the corpus, which removes the file list from detection entirely. A single-subject match would not do: GitHub's default squash message reuses the title on a one-commit PR, so only a sequence of two distinguishes the shapes. **This changes which units are admitted, never a decision boundary** — no threshold, arm coding or verdict rule moves. |
+
 **A8 is the one that most needed to be pre-registered.** Switching to cluster-robust
 inference after seeing a confidence interval would be indistinguishable from moving the
 goalposts, whatever the motivation.
@@ -1362,6 +1364,88 @@ semantics rather than assuming them:
 repositories using rulesets, so its absence is uninformative and it cannot serve as a
 negative test. What has changed is that the case can no longer pass silently: exact
 equality catches it as `file_set`. Mislabelled, but excluded, which is the safe direction.
+
+---
+
+### 4.17 Detection stops reading the corpus, and the exclusion stops evaporating [A28]
+
+Two changes, made together because the first decides which units enter and the second
+decides whether an unmeasurable one is visible once they have.
+
+**Detection by subject sequence.** A2 told squash from rebase by diff coverage against the
+corpus file list. Both strategies produce a `merge_commit_sha` with one parent, so the
+rule needed a discriminator, and the one it had was the corpus — which attributes 92 `.py`
+files to some three-file PRs. Detection therefore failed on precisely the PRs whose file
+lists were wrong, at 17–70% across commit-count bands, rising with patch size. That is
+differential exclusion on the study's own confounder, arriving through the detector.
+
+Commit subjects come from the API and are independent of the corpus:
+
+| Case | Rule | Parent |
+|---|---|---|
+| two parents | true merge commit | `merge^1` |
+| ≥ 2 consecutive subjects match walking back | rebase | earliest match's parent |
+| otherwise | squash | `merge^1` |
+
+**A sequence, not a single subject.** GitHub's default squash message reuses the commit
+title when a PR has one commit, so a squashed one-commit PR looks like a rebase under a
+single-match rule — harmless there, since both give `merge^1`, but it means the test is
+untested exactly where it would matter. A squash produces exactly one commit and can
+therefore never yield two consecutive matches in order, whatever the repository's
+`squash_merge_commit_title` setting, which the API will not report without push access.
+
+**Detection may guess; verification may not.** The resolved parent is checked by diffing
+`parent..merge` against GitHub's own `/pulls/{n}/files`, requiring **exact set equality**
+(A27). Detection is a heuristic and is allowed to be wrong; the gate that admits a unit is
+not.
+
+**Hand-verified against ground truth, not against the attrition number.** An attrition
+figure improves whether the recovered parents are right or wrong, so it cannot validate
+this. Twenty PRs, five per commit-count band, were checked structurally: GitHub reports
+`merge_commit_sha`, whose FIRST parent is the trunk commit the change landed on — for a
+squash (one parent) and a true merge (`parents[0]`) alike. That relationship cannot be
+reproduced by an indirect merge, which file-set equality alone can.
+
+| Band | Checked | Parent is the trunk first-parent |
+|---|---|---|
+| 1 | 5 | 5 |
+| 2–5 | 5 | 4, plus one whose parent never resolved |
+| 6–20 | 5 | 5 |
+| **21+** | **5** | **5** |
+
+**19 of 20**, and the twentieth is `AgentOps-AI/agentops#819`, whose parent did not resolve
+at all rather than resolving wrongly. The 21+ band is the one that mattered: 70%
+`parent_commit` failure and the highest indirect-merge risk, and all five confirm.
+
+*The first version of that checker reported 20 of 20.* The unresolved parent was stored as
+`""`, and `trunk.startswith("")` is true for every string. A checker written to catch
+silent passes, containing one, returning a number better than the truth — recorded here
+because the tally of these is itself a finding, and `BRIEFING.md` "The checker that passed
+itself" carries it.
+
+**The exclusion stops evaporating.** A27 made the scan return `UNSCANNABLE` instead of a
+false CLEAN. It did not make anyone honour it: `analysis/build_table.py` coded the outcome
+`1 if BROKE else 0`, so an unscannable unit landed in the **clean cell**; `controls/gate.py`
+kept it in the positive control's denominator; the reconciliation folded it into
+`ex_clean`; and the labelling draw would have raised `KeyError` on the first one. The same
+bias, one layer below its own fix, in the same direction and on the same units.
+
+A typed absence is not enough on its own. Every read now goes through one exhaustive
+match, and an unhandled state is a compile error rather than a silent coding — verified by
+adding a fourth state and confirming `mypy --strict` rejects it.
+
+**Prevalence is measured at admission, not at the scan.** The scan only ever sees
+survivors, and all four agentops PRs that exposed the unreachable-merge case are rejected
+at `no_python` before any scan runs. A count taken after the gate describes the residue
+and would be quoted as the population, so `merge_on_base` is recorded on every attempt in
+three values — `yes`, `no`, `unknown` — because "not on the branch" is a fact about the
+repository and "could not check" is a fact about us.
+
+**What this does not change.** No threshold, no arm coding, no verdict rule, no outcome
+criterion. It changes which units are admitted and which exclusions are countable. The
+re-measured breakage rate is reported **split by default-branch versus non-default-branch
+base**, because a fix that merely moves a number and a fix that corrects one are
+distinguishable only by looking inside the stratum the defect selected on.
 
 ---
 

@@ -50,12 +50,12 @@ uv run python -m pycg --package <pkg_dir> <files...>
 research/phase0/src/phase0/
   extract_prs.py       AIDev  → PRRecord[]
   census.py            source → CallSite[]        (tree-sitter, the denominator)
-  run_graph.py         repo   → Edge[]            (PyCG / Jelly, scoped)
+  graph/run_graph.py   repo   → Edge[]            (PyCG / Jelly, scoped)
   run_pipeline.py      drives the per-PR loop, writes the audit log  ← `PHASE0_RUNBOOK.md` “Days 3–5”
   classify_exposure.py PR     → EXPOSED | UNEXPOSED | UNANALYZED
-  scan_outcome.py      PR     → BROKE | CLEAN     (7-day revert/fix scan)
-  controls.py          positive + negative controls  ← `PHASE0_RUNBOOK.md` “Day 2”
-  build_table.py       → 2×2, RR, CI, strata
+  outcome/scan.py      PR     → BROKE | CLEAN | UNSCANNABLE  (7-day scan)
+  controls/gate.py     positive + negative controls  ← `PHASE0_RUNBOOK.md` “Day 2”
+  analysis/build_table.py → 2×2, RR, CI, strata
 research/phase0/tests/  one test file per module above
 ```
 
@@ -192,18 +192,29 @@ reason to pause, not a reason to proceed carefully.
 
 ## 3. Days 3–5 — The run (Python arm)
 
+> **These three commands are NOT BUILT.** The functions behind them are implemented and
+> tested — `run_pipeline.run()` has coverage — but none of the modules has a `__main__`
+> block, so `python -m` executes the module body, ignores every flag, writes no file and
+> **exits 0**. Running the study exactly as written below produces nothing and reports
+> success. Only `phase0.pilot.run`, `phase0.controls.gate`, `phase0.sample_for_labelling`
+> and `phase0.score_labelling` are wired to a command line today.
+>
+> `scripts/guard/check_documented_commands.py` now fails on any `python -m` in the docs
+> whose module has no entry point, and prints the count of those still marked unbuilt on
+> every run — so this gap cannot go quiet again while it is being fixed.
+
 ```bash
 uv run python -m phase0.extract_prs \
-    --dataset aidev --lang python --out data/prs.jsonl
+    --dataset aidev --lang python --out data/prs.jsonl        # documented-command:unbuilt
 
 uv run python -m phase0.run_pipeline \
     --prs data/prs.jsonl \
     --graph pycg --scoped --timeout 600 --mem-limit 16G \
-    --out data/exposure.jsonl
+    --out data/exposure.jsonl                                 # documented-command:unbuilt
 
-uv run python -m phase0.scan_outcome \
+uv run python -m phase0.outcome.scan \
     --prs data/prs.jsonl --window-days 7 \
-    --out data/outcome.jsonl
+    --out data/outcome.jsonl                                  # documented-command:unbuilt
 ```
 
 ### Expected shape and what deviation means
@@ -228,7 +239,7 @@ makes the result auditable by someone who does not trust you.
 ## 4. Day 6 — Analysis
 
 ```bash
-uv run python -m phase0.build_table \
+uv run python -m phase0.analysis.build_table \    # documented-command:unbuilt
     --exposure data/exposure.jsonl \
     --outcome  data/outcome.jsonl \
     --strata changed_lines_quartile,framework_present,repo_fix_rate,test_coverage \
