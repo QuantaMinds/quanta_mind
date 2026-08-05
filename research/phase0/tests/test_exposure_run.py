@@ -97,8 +97,14 @@ def test_from_journal_is_offered_when_no_records_exist(tmp_path: Path) -> None:
 def test_the_refusal_names_both_ways_out(tmp_path: Path, capsys) -> None:  # type: ignore[no-untyped-def]
     """A refusal that does not say what to do next gets worked around, not obeyed."""
     exposure_run.main(
-        ["--records", str(tmp_path / "absent.jsonl"), "--out", str(tmp_path / "o.jsonl"),
-         "--workspace", str(tmp_path / "ws")]
+        [
+            "--records",
+            str(tmp_path / "absent.jsonl"),
+            "--out",
+            str(tmp_path / "o.jsonl"),
+            "--workspace",
+            str(tmp_path / "ws"),
+        ]
     )
 
     message = capsys.readouterr().err
