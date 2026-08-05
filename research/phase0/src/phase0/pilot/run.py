@@ -39,7 +39,8 @@ from phase0.github_pulls import merge_info, require_token
 from phase0.handlabel.select import Candidate, eligible_prs
 from phase0.pilot.report import Attempt, report, star_counts
 from phase0.pipeline import journal
-from phase0.pipeline.assemble import Rejection, build_record
+from phase0.pipeline.assemble import build_record
+from phase0.pipeline.rejection import Rejection
 from phase0.pipeline.worktree import CloneFailed, cloned, sweep
 from phase0.scan_outcome import scan
 

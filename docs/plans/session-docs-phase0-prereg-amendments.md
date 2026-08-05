@@ -1,10 +1,10 @@
 # Session record — docs/phase0-prereg-amendments
 
-Written by scripts/guard/hook_session_end.py at 2026-08-05T00:57:38Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-05T01:24:52Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `docs/phase0-prereg-amendments`
-- Files changed vs `main`: 133
+- Files changed vs `main`: 136
 - Uncommitted at session end: 0
 - `docs/CODEBASE.md` updated: yes
 
@@ -68,6 +68,7 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/src/phase0/controls/mechanisms.py`
 - `research/phase0/src/phase0/extract_prs.py`
 - `research/phase0/src/phase0/fix_signals.py`
+- `research/phase0/src/phase0/github_http.py`
 - `research/phase0/src/phase0/github_pulls.py`
 - `research/phase0/src/phase0/graph/__init__.py`
 - `research/phase0/src/phase0/graph/pycg_failure.py`
@@ -80,15 +81,17 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/src/phase0/handlabel/select.py`
 - `research/phase0/src/phase0/joins.py`
 - `research/phase0/src/phase0/parent_commit.py`
-- `research/phase0/src/phase0/pilot_report.py`
+- `research/phase0/src/phase0/pilot/__init__.py`
+- `research/phase0/src/phase0/pilot/report.py`
+- `research/phase0/src/phase0/pilot/run.py`
 - `research/phase0/src/phase0/pipeline/__init__.py`
 - `research/phase0/src/phase0/pipeline/assemble.py`
 - `research/phase0/src/phase0/pipeline/changed.py`
 - `research/phase0/src/phase0/pipeline/journal.py`
 - `research/phase0/src/phase0/pipeline/measure.py`
+- `research/phase0/src/phase0/pipeline/merge_shape.py`
 - `research/phase0/src/phase0/pipeline/record.py`
 - `research/phase0/src/phase0/pipeline/worktree.py`
-- `research/phase0/src/phase0/run_pilot.py`
 - `research/phase0/src/phase0/run_pipeline.py`
 - `research/phase0/src/phase0/sample_for_labelling.py`
 - `research/phase0/src/phase0/scan_outcome.py`

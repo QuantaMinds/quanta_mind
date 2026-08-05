@@ -28,7 +28,6 @@ CONSUMED BY: run_pipeline.py; tests/test_assemble.py.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from pathlib import Path
 
 from phase0.extract_prs import PRRecord
@@ -36,55 +35,17 @@ from phase0.github_pulls import MergeInfo
 from phase0.parent_commit import resolve
 from phase0.pipeline.changed import (
     changed_python_files,
-    file_agreement,
     module_name,
     source_at,
     symbols_touched,
     touched_line_ranges,
 )
+from phase0.pipeline.rejection import Rejection
+from phase0.pipeline.verify_files import verify_files
 
 # Share of the union the two file sets must share. Set from A24's measurement: the
 # median PR has four files and agrees, while the long tail disagrees by an order of
 # magnitude. Anything short of near-identity is a divergent base, not a rounding error.
-MIN_FILE_AGREEMENT = 0.6
-
-
-# Why a PR left the corpus, at the level that decides how it is analysed. The three are
-# different claims and must not be pooled into one attrition number.
-#
-#   resource   -- the unit exists, we could not obtain it. Missing data.
-#   integrity  -- obtained, but the corpus's account of it cannot be trusted. Missing
-#                 data, and the reason correlates with patch size, so A17's bounds
-#                 must cover it rather than treat it as noise.
-#   restricted -- nothing to measure. Not missing data: the estimand does not cover
-#                 this unit, which narrows the claim rather than biasing it.
-CATEGORIES: dict[str, str] = {
-    # A repository we could not clone must produce a record per PR, not the absence of
-    # one. Absent rows shrink the denominator, so the same corpus scanned twice gave 33
-    # records once and 34 the next -- a 3% swing at that size, larger than several
-    # effects the study needs to tell apart, and nothing reported it.
-    "clone_failed": "resource",
-    "merge_metadata": "resource",
-    "parent_commit": "integrity",
-    "file_set": "integrity",
-    "no_python": "restricted",
-    "no_symbols": "restricted",
-}
-
-
-@dataclass(frozen=True, slots=True)
-class Rejection:
-    """Why a PR did not become a record. Counted, never silently dropped."""
-
-    pr_id: str
-    stage: str
-    reason: str
-    agreement: float = -1.0
-
-    @property
-    def category(self) -> str:
-        """`resource`, `integrity` or `restricted` -- see CATEGORIES."""
-        return CATEGORIES.get(self.stage, "resource")
 
 
 def build_record(
@@ -106,8 +67,14 @@ def build_record(
     so a file count standing in for a commit count would mis-detect the merge shape on
     exactly those PRs whose file lists are wrong.
     """
-    if not merge.is_usable:
-        return Rejection(pr_id, "merge_metadata", "unmerged, or no merge commit recorded")
+    if not merge.merged:
+        return Rejection(pr_id, "merge_metadata", "not merged: no post-merge window exists")
+    if not merge.merge_commit_sha:
+        # A merged PR with a null merge_commit_sha is a real, reported GitHub state.
+        # Named, because falling through would either dereference nothing or land in an
+        # unrelated bucket, and "we never had a merge commit" is not the same claim as
+        # "we could not resolve its parent".
+        return Rejection(pr_id, "no_merge_sha", "merged, but GitHub reports no merge commit")
 
     parent = resolve(
         clone,
@@ -127,19 +94,9 @@ def build_record(
     # we do not. Detection can be a heuristic; verification cannot. The corpus attributes
     # 92 files to some three-file PRs, so a gate built on it was checking the wrong thing
     # against the right diff.
-    authority = merge.api_files or corpus_files
-    source = "github" if merge.api_files else "corpus"
-    corpus_py = frozenset(f for f in authority if f.endswith(".py"))
-    agreement = file_agreement(corpus_py, frozenset(derived))
-    if agreement < MIN_FILE_AGREEMENT:
-        return Rejection(
-            pr_id,
-            "file_set",
-            f"{source} lists {len(corpus_py)} .py files, the diff shows {len(derived)}; "
-            f"agreement {agreement:.2f} < {MIN_FILE_AGREEMENT}. Analysing this PR would "
-            f"scan a file set the change never touched.",
-            agreement,
-        )
+    mismatch = verify_files(pr_id, merge, corpus_files, frozenset(derived))
+    if mismatch is not None:
+        return mismatch
 
     symbols: set[str] = set()
     for path in derived:

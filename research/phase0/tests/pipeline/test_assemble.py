@@ -20,7 +20,9 @@ import pandas as pd
 import pytest
 
 from phase0.github_pulls import MergeInfo
-from phase0.pipeline.assemble import MIN_FILE_AGREEMENT, Rejection, build_record
+from phase0.pipeline.assemble import build_record
+from phase0.pipeline.rejection import Rejection
+from phase0.pipeline.verify_files import MIN_FILE_AGREEMENT
 
 PACKAGE = Path(__file__).resolve().parents[2] / "data" / "AIDev_BC_Analyser.zip"
 ZENML_3757 = 2607442037
@@ -57,7 +59,7 @@ def test_a_pr_whose_file_sets_disagree_is_refused(repo: tuple[Path, str, str]) -
     assert isinstance(outcome, Rejection)
     assert outcome.stage == "file_set"
     assert 0.0 <= outcome.agreement < MIN_FILE_AGREEMENT
-    assert "the change never touched" in outcome.reason
+    assert "agreement" in outcome.reason
 
 
 def test_a_wildly_inflated_list_is_refused_at_shape_detection(
@@ -135,3 +137,59 @@ def test_the_corpus_file_list_for_zenml_3757_is_not_the_change() -> None:
     assert len(attributed) > 50, "the package no longer over-attributes; revisit A24"
     assert "src/zenml/zen_server/routers/runs_endpoints.py" in attributed
     assert "docs/mkdocstrings_helper.py" in attributed
+
+
+def test_a_superset_diff_is_refused_against_githubs_own_list(repo: tuple[Path, str, str]) -> None:
+    """The indirect-merge failure: a confident, resolvable, WRONG parent.
+
+    When a PR's commits land via another PR, `merge_commit_sha` belongs to that other
+    PR. The subject sequence will not match, so it routes to squash and resolves a
+    parent -- and if the other PR carried nothing else, the diff is a SUPERSET by only
+    the files they share, which a ratio threshold waves through. Set equality is the
+    only comparison that refuses it, so it is asserted directly.
+    """
+    root, _, child = repo
+    merge = MergeInfo(
+        pr_id="4",
+        number=4,
+        merged=True,
+        merge_commit_sha=child,
+        merged_at="2025-06-24T22:46:29Z",
+        base_ref="main",
+        commit_count=1,
+        api_files=("pkg/mod.py",),  # GitHub says one file; the diff shows two
+    )
+    outcome = build_record(
+        root,
+        merge,
+        pr_id="4",
+        repo="acme/widget",
+        merged_at=merge.merged_at,
+        corpus_files=("pkg/mod.py",),
+    )
+    assert isinstance(outcome, Rejection)
+    assert outcome.stage == "file_set"
+    assert "not equal" in outcome.reason and "merged indirectly" in outcome.reason
+
+
+def test_a_merged_pr_with_no_merge_commit_is_named(tmp_path: Path) -> None:
+    """A real GitHub state, and not the same claim as an unresolvable parent."""
+    merge = MergeInfo(
+        pr_id="5",
+        number=5,
+        merged=True,
+        merge_commit_sha="",
+        merged_at="2025-06-24T22:46:29Z",
+        base_ref="main",
+        commit_count=1,
+    )
+    outcome = build_record(
+        tmp_path,
+        merge,
+        pr_id="5",
+        repo="acme/widget",
+        merged_at=merge.merged_at,
+        corpus_files=("pkg/mod.py",),
+    )
+    assert isinstance(outcome, Rejection)
+    assert outcome.stage == "no_merge_sha" and outcome.category == "resource"
