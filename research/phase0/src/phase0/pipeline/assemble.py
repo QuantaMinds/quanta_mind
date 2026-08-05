@@ -32,6 +32,7 @@ from pathlib import Path
 
 from phase0.extract_prs import PRRecord
 from phase0.github_pulls import MergeInfo
+from phase0.graph.run_graph import HarnessError
 from phase0.parent_commit import resolve
 from phase0.pipeline.changed import (
     changed_python_files,
@@ -41,7 +42,7 @@ from phase0.pipeline.changed import (
     touched_line_ranges,
 )
 from phase0.pipeline.rejection import Rejection
-from phase0.pipeline.verify_files import verify_files
+from phase0.pipeline.verify_files import API_FILE_PAGE, verify_files
 
 # Share of the union the two file sets must share. Set from A24's measurement: the
 # median PR has four files and agrees, while the long tail disagrees by an order of
@@ -87,6 +88,32 @@ def build_record(
         return Rejection(pr_id, "parent_commit", parent.reason)
 
     derived = changed_python_files(clone, parent.parent_sha, merge.merge_commit_sha)
+
+    # Contents actually arrived, asserted against GitHub's list -- never the corpus's,
+    # which over-attributes by design (92 files on three-file PRs, amendment A28) and
+    # would make a legitimate shortfall indistinguishable from a failed fetch.
+    #
+    # A blobless clone supplies file CONTENTS only by lazy fetch, and a diff over blobs
+    # that never arrived is empty rather than wrong. The emptiness then returned
+    # `no_python` from the line below -- BEFORE verify_files, which is the one check that
+    # would have compared the two lists -- so the harness failure took an exclusion label
+    # and left the corpus looking complete. Measured on the eight recovered repositories:
+    # twelve rejections at derived=0, three of them `no_python` where GitHub lists 104,
+    # 65 and 40 .py files, and the one PR the probe had scored BROKE among them.
+    #
+    # A SHORTFALL raises, not only a zero: deriving 12 of 104 is the same failure at 88%
+    # severity and a zero-check passes it. A superset is left to verify_files, which reads
+    # it as the walk going too far back -- a fact about the repository, not about us.
+    if merge.api_files and len(merge.api_files) < API_FILE_PAGE:
+        expected_py = frozenset(f for f in merge.api_files if f.endswith(".py"))
+        if expected_py and len(derived) < len(expected_py):
+            raise HarnessError(
+                f"{pr_id}: derived {len(derived)} of {len(expected_py)} .py files GitHub "
+                f"lists for this PR. File contents did not reach the working tree -- with "
+                f"--filter=blob:none that means a lazy fetch returned nothing. This is our "
+                f"environment, not the repository, so it is not an exclusion."
+            )
+
     if not derived:
         return Rejection(pr_id, "no_python", "no .py files between parent and merge")
 
