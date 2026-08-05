@@ -55,13 +55,6 @@ VARIANTS = {
 }
 
 
-def _run(args: list[str], cwd: Path | None = None, timeout: int = CLONE_TIMEOUT_S) -> int:
-    out = subprocess.run(
-        args, cwd=cwd, capture_output=True, text=True, timeout=timeout, check=False
-    )
-    return out.returncode
-
-
 def _filter_applied(target: Path) -> str:
     out = subprocess.run(
         ["git", "config", "--get", "remote.origin.partialclonefilter"],
@@ -78,6 +71,18 @@ def _tree_size_kb(target: Path) -> int:
     return sum(f.stat().st_size for f in target.rglob("*") if f.is_file()) // 1024
 
 
+def _promisor_objects(target: Path) -> int:
+    """Packs marked promisor, i.e. arriving from a lazy fetch rather than the clone.
+
+    The tie-breaker, not a threshold. A variant can win on total time while paying it in
+    hundreds of single-blob round trips, which have no delta compression and degrade
+    sharply with network variance; one that fetches the same content in a single pack is
+    more robust at the same wall time. Aggregate seconds cannot show the difference.
+    """
+    packs = target / ".git" / "objects" / "pack"
+    return len(list(packs.glob("*.promisor"))) if packs.is_dir() else 0
+
+
 def probe(repo: str, variant: str, pr: dict) -> dict:
     target = WORK / f"{repo.replace('/', '__')}__{variant}"
     if target.exists():
@@ -86,16 +91,17 @@ def probe(repo: str, variant: str, pr: dict) -> dict:
 
     started = time.monotonic()
     try:
-        code = _run(
-            [
-                "git",
-                "clone",
-                "--quiet",
-                *VARIANTS[variant],
-                f"https://github.com/{repo}.git",
-                str(target),
-            ]
-        )
+        clone = [
+            "git",
+            "clone",
+            "--quiet",
+            *VARIANTS[variant],
+            f"https://github.com/{repo}.git",
+            str(target),
+        ]
+        code = subprocess.run(
+            clone, capture_output=True, text=True, timeout=CLONE_TIMEOUT_S, check=False
+        ).returncode
     except subprocess.TimeoutExpired:
         return {
             "repo": repo,
@@ -115,6 +121,7 @@ def probe(repo: str, variant: str, pr: dict) -> dict:
         }
 
     applied = _filter_applied(target)
+    before_objects = _promisor_objects(target)
     # The pipeline, on one real PR: parent resolution, symbol-bearing file diff, and the
     # outcome walk. This is where a partial clone pays its lazy-fetch cost, if it pays.
     pipeline_started = time.monotonic()
@@ -151,6 +158,8 @@ def probe(repo: str, variant: str, pr: dict) -> dict:
         "total_s": round(total, 1),
         "within_timeout": total < CLONE_TIMEOUT_S,
         "size_kb": _tree_size_kb(target),
+        # Tie-breaker: lazy fetches the pipeline triggered, over and above the clone.
+        "lazy_fetches": _promisor_objects(target) - before_objects,
         "parent_resolved": parent.is_resolved,
         "derived_files": len(derived),
         "scan_outcome": verdict.outcome.value,
@@ -177,9 +186,12 @@ def main() -> int:
         got = [r for r in rows if r["variant"] == variant]
         passed = [r for r in got if r.get("within_timeout")]
         applied = all(r.get("filter_actually_applied", False) for r in got if r["outcome"] == "ok")
+        lazy = sum(int(r.get("lazy_fetches", 0)) for r in got)
         print(
-            f"  {variant:<14} {len(passed)}/{len(got)} within timeout   filter honoured: {applied}"
+            f"  {variant:<14} {len(passed)}/{len(got)} in time | filter honoured: {applied}"
+            f" | lazy fetches: {lazy}"
         )
+    print("Lazy fetches break a tie only. They do not move the rule above.")
     return 0
 
 

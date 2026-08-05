@@ -1387,6 +1387,29 @@ Commit subjects come from the API and are independent of the corpus:
 | ≥ 2 consecutive subjects match walking back | rebase | earliest match's parent |
 | otherwise | squash | `merge^1` |
 
+**Which of these are documented, and which are ours.** GitHub states that the merge-commit
+option *"is merged using the `--no-ff` option"*, so a merge commit is always created rather
+than fast-forwarded. That a two-branch `--no-ff` merge has exactly **two** parents is a git
+invariant — a property of the object format — and is *not* stated in GitHub's
+documentation; citing it there would be citing a source that does not say it. The rule
+reads `parents[0]` and so assumes two. An octopus merge would have more, `parents[0]`
+would still be the trunk side, and no PR merge in this corpus produced one — but the
+assumption is written down rather than left in the code.
+
+The squash and rebase rows rest on documented behaviour rather than on our observations.
+GitHub's rebase-merge *"always updates the committer information and creates new commit
+SHAs"*, which is what the structural check below reads. Squash *"combines all commits in
+the pull request into a single commit"*. And the squash message default is *the commit
+title and message* for a one-commit PR, *the pull request title and list of commits* for
+two or more.
+
+That last one **predicts the data before it is looked at**: a multi-commit squash should
+match zero subjects walking back, a one-commit squash exactly one, and only a rebase should
+produce a run. The observed distribution over 88 multi-commit PRs is `{0: 84, 2: 2, 6: 1,
+12: 1}`. A documented mechanism generating a predicted distribution is a different kind of
+evidence from a rule fitted to a sample, and it is why the k ≥ 2 threshold is defensible
+rather than merely convenient.
+
 **A sequence, not a single subject.** GitHub's default squash message reuses the commit
 title when a PR has one commit, so a squashed one-commit PR looks like a rebase under a
 single-match rule — harmless there, since both give `merge^1`, but it means the test is
