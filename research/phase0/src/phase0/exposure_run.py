@@ -85,9 +85,7 @@ def _rebuild(args: argparse.Namespace) -> list[PRRecord]:
     def clone_for(repo: str):  # type: ignore[no-untyped-def]
         return worktree.cloned(repo, args.workspace)
 
-    for _, outcome in records_for(
-        args.from_journal, PACKAGE, CACHE, require_token(), clone_for
-    ):
+    for _, outcome in records_for(args.from_journal, PACKAGE, CACHE, require_token(), clone_for):
         if isinstance(outcome, Rejection):
             refused.append(outcome)
         else:
