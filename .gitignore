@@ -46,3 +46,11 @@ Thumbs.db
 # scripts/guard/hook_pre_edit.py.
 .qmctx-allow-golden
 
+# Secrets. A GitHub token grants read access to the corpus under a real identity, and a
+# token committed once is a token in the history forever -- rewriting it out is harder
+# than never adding it. Listed BEFORE any such file was created, so there is no window
+# in which one is committable.
+.env
+.env.*
+*.token
+secrets/
