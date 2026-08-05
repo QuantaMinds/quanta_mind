@@ -13,7 +13,7 @@ WHY:  A2 makes a GitHub token a prerequisite of the study rather than an
       cost another full pass of quota and return different data as repositories
       change under it.
       The transport beneath this client -- cache writes and retry delays -- is
-      verified in `test_github_http.py`, which was split out when the two together
+      verified in `test_http.py`, which was split out when the two together
       ran past the 200-line cap.
 IMPORTS: phase0.github_pulls, pytest, monkeypatch.
 CONSUMED BY: `just test-phase0`. No network: every test reads a seeded cache.

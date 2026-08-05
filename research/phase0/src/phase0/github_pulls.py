@@ -19,7 +19,7 @@ WHY:  Amendment A2. AIDev's `pull_request` table has no base, head or merge SHA,
       silently drops most of the corpus.
 IMPORTS: stdlib json, os, time, urllib. No third-party HTTP client: one endpoint,
       one header, and a dependency here would be a dependency in the reproduction.
-CONSUMED BY: extract_prs.py; tests/test_github_pulls.py.
+CONSUMED BY: extract_prs.py; tests/github/test_pulls.py.
 """
 
 from __future__ import annotations

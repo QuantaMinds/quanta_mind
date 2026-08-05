@@ -2,7 +2,7 @@
 
 WHAT: Asserts that a failed fetch is never written to the cache, and that the retry
       delay obeys GitHub's own `Retry-After` before falling back to exponential backoff.
-WHY:  Split from `test_github_pulls.py`, which verifies the pulls client itself. These
+WHY:  Split from `test_pulls.py`, which verifies the pulls client itself. These
       test `github_http`, a different module, and keeping them together took that file
       16 lines past the 200-line cap.
 
