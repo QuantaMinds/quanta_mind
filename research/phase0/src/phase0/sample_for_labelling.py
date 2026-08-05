@@ -9,7 +9,15 @@ WHY:  The seed is required and has no default, so a draw is reproducible and can
       Progress prints the repository and the running bucket totals -- how many, never
       which. Printing a per-PR verdict here would contaminate the labeller through the
       terminal, which is the one channel the file-level split does not cover.
-IMPORTS: phase0.handlabel.{select,draw,files}.
+
+      `--arm` is REQUIRED, for the reason the pilot's is. The gate validates the outcome
+      classifier for the population it will be APPLIED to, and the study runs on agent
+      PRs. Agent fix-commits may differ from human ones in message style and timing, and
+      A26's rules were tuned on human commits -- so a gate passed on the human arm would
+      certify the classifier against the wrong corpus. This module drew from the human
+      package because that was the only population that existed; the agent arm exists
+      now, so the choice becomes explicit rather than inherited.
+IMPORTS: phase0.arm, phase0.handlabel.{draw,files}, phase0.pilot.options, phase0.population.
 CONSUMED BY: `just label-draw`.
 """
 
@@ -19,17 +27,28 @@ import argparse
 import sys
 from pathlib import Path
 
+from phase0 import arm
 from phase0.handlabel.draw import draw
 from phase0.handlabel.files import write_blind, write_key, write_label_template
-from phase0.handlabel.select import Candidate, eligible_prs
+from phase0.handlabel.select import Candidate
+from phase0.population import for_arm
 
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGE = ROOT / "data" / "AIDev_BC_Analyser.zip"
+AIDEV = ROOT / "data" / "aidev"
 WORKSPACE = ROOT / "data" / "labelling_clones"
 
 
 def _parse(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Draw a blind, stratified labelling sample.")
+    parser.add_argument(
+        "--arm",
+        choices=("agent", "human"),
+        required=True,
+        help="which population to draw from. REQUIRED and without a default: the gate "
+        "certifies the classifier for the arm it draws from, and the study runs on "
+        "`agent`. A human-arm gate would validate against the wrong corpus",
+    )
     parser.add_argument("--n-broke", type=int, default=10)
     parser.add_argument("--n-clean", type=int, default=10)
     parser.add_argument(
@@ -45,7 +64,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"{PACKAGE} not found -- see ENVIRONMENT.lock for the figshare URL.")
         return 1
 
-    population = eligible_prs(PACKAGE)
+    population, claimed = for_arm(args.arm, AIDEV, PACKAGE)
+    # Same check the pilot makes, for the same reason: the arm a draw claims must be the
+    # arm AIDev's own `agent` column puts its ids in.
+    tally = arm.verify([c.pr_id for c in population], claimed, AIDEV)
+    print(f"arm verified: {tally}", flush=True)
     print(f"{len(population)} eligible PRs; drawing {args.n_broke} + {args.n_clean}", flush=True)
 
     seen: set[str] = set()

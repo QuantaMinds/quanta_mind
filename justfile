@@ -70,8 +70,12 @@ test-phase0:
 # Draw the blind, stratified sample: 10 PRs the classifier called BROKE and 10 it
 # called CLEAN, shuffled, exported as URLs only. The seed is required so the draw
 # is reproducible and cannot be quietly redrawn. Seals the answers into _key.csv.
-label-draw SEED:
-    cd research/phase0 && uv run python -m phase0.sample_for_labelling --n-broke 10 --n-clean 10 --seed {{SEED}}
+#
+# ARM is required and should be `agent`: the gate certifies the outcome classifier for
+# the population it will be applied to, and the study runs on agent PRs. A26's rules
+# were tuned on human commits, so a human-arm gate would validate the wrong corpus.
+label-draw ARM SEED:
+    cd research/phase0 && uv run python -m phase0.sample_for_labelling --arm {{ARM}} --n-broke 10 --n-clean 10 --seed {{SEED}}
 
 # Score the labels against the sealed key. Run this AFTER all twenty are filled in
 # AND committed — the commit timestamp is what proves the labels predate the
