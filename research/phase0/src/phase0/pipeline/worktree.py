@@ -46,6 +46,24 @@ def _clear_readonly(func, path, _exc):  # type: ignore[no-untyped-def]  # shutil
     func(path)
 
 
+def _extended(target: Path) -> str:
+    """Windows extended-length form, so deletion is not capped at 260 characters.
+
+    `core.longpaths=true` lets git CREATE these paths; it does nothing for Python's own
+    filesystem calls, which still fail with WinError 3 on anything deeper. So a clone
+    that succeeded could not be removed, and the strict pass then refused to reuse the
+    directory -- turning a deep tree into a permanent, repeating clone failure.
+    """
+    resolved = str(target.resolve())
+    # The prefix is the four characters \\?\ — a UNC-style escape, not a regex. Written
+    # wrong the first time as \?\, which Windows rejects outright, so every removal
+    # failed instead of only the deep ones.
+    prefix = "\\\\?\\"
+    if os.name == "nt" and not resolved.startswith(prefix):
+        return prefix + resolved
+    return resolved
+
+
 def _remove_tree(target: Path, *, strict: bool) -> None:
     """Delete a clone, refusing to pretend it worked.
 
@@ -65,7 +83,7 @@ def _remove_tree(target: Path, *, strict: bool) -> None:
     if not target.exists():
         return
     try:
-        shutil.rmtree(target, onerror=_clear_readonly)
+        shutil.rmtree(_extended(target), onerror=_clear_readonly)
     except OSError as exc:
         if strict:
             raise CloneFailed(f"{target}: could not remove a stale clone: {exc}") from exc
