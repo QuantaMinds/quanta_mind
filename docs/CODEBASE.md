@@ -84,6 +84,15 @@ Two consequences bind anything that consumes a verdict:
 an unmeasurable arm still has a known outcome and bounds tightly, while a missing outcome
 can only be bounded by assuming all of them broke and then that none did.
 
+`pilot/compare.py` answers the question a re-run cannot answer on its own: whether a
+measurement fix *corrected* a number or merely changed it. It reports the breakage rate
+split by the stratum the defect selected on (default vs non-default base branch),
+prevalence at admission against prevalence after the gate, and corpus composition against
+a pre-fix baseline. Two things it refuses to do: report a verdict from an empty arm, and
+difference two differently-defined denominators — the baseline counted clone failures per
+repository with no PR rows, the current runner emits one row per PR, so the new run is
+reduced twice and only the baseline-matching reduction is compared.
+
 `window.merge_on_base` answers the same reachability question in three values — `yes`,
 `no`, `unknown` — and the pilot calls it at **admission**, on every attempt, before the
 gate. `reachable` collapses "not an ancestor" and "could not resolve" into one `False`,
