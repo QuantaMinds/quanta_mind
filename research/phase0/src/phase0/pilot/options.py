@@ -31,6 +31,15 @@ CACHE = ROOT / "data" / "gh_cache"
 def parse(argv: list[str] | None = None) -> argparse.Namespace:
     """The pilot's arguments. Defaults are anchored to ROOT, never to the cwd."""
     parser = argparse.ArgumentParser(description="Pilot: build records and report shape.")
+    parser.add_argument(
+        "--arm",
+        choices=("agent", "human"),
+        required=True,
+        help="which population to walk. REQUIRED and deliberately without a default: "
+        "the 90-repo pilot ran entirely on the human arm because a caller took the "
+        "population function it found, and no default here can be the wrong one if "
+        "there is no default. `agent` is the study's primary arm",
+    )
     parser.add_argument("--repos", type=int, default=10)
     parser.add_argument(
         "--only-repo",

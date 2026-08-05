@@ -31,6 +31,11 @@ from pathlib import Path
 import pandas as pd
 
 HUMAN = "Human"
+# The five labels AIDev's `agent` column actually holds. Written out rather than derived
+# from the table at import time: a population that drew a SIXTH label -- a new agent, a
+# renamed one -- must fail `verify` loudly rather than silently widen what counts as the
+# agent arm, and a set computed from the same table it validates agrees by construction.
+AGENTS = frozenset({"OpenAI_Codex", "Copilot", "Devin", "Cursor", "Claude_Code"})
 AGENT_TABLE = "pull_request.parquet"
 HUMAN_TABLE = "human_pull_request.parquet"
 # The column both tables carry. Reading the arm from the FILENAME would restate the
@@ -79,15 +84,21 @@ def arms_present(pr_ids: list[int], aidev: Path) -> dict[str, int]:
     return counts
 
 
-def verify(pr_ids: list[int], claimed: str, aidev: Path) -> dict[str, int]:
-    """Raise unless EVERY id is in the arm this population claims to be.
+def verify(pr_ids: list[int], claimed: str | frozenset[str], aidev: Path) -> dict[str, int]:
+    """Raise unless EVERY id is in the arm(s) this population claims to be.
+
+    `claimed` is a SET for the agent arm because AIDev labels five distinct agents and a
+    population drawn from `pull_request` legitimately mixes them -- A17 reports RR by
+    agent, so collapsing them to one label here would erase the field it stratifies on.
+    The human arm passes the bare string `HUMAN`.
 
     Returns the tally so the caller can print what it verified. An id in neither table
     is a mismatch, not an abstention: it means the population was built from a source
     this index does not cover, and no later stage would notice.
     """
+    allowed = {claimed} if isinstance(claimed, str) else set(claimed)
     counts = arms_present(pr_ids, aidev)
-    wrong = {arm: n for arm, n in counts.items() if arm != claimed}
+    wrong = {arm: n for arm, n in counts.items() if arm not in allowed}
     if wrong:
         raise ArmMismatch(
             f"population claims arm {claimed!r} but {sum(wrong.values())} of {len(pr_ids)} "

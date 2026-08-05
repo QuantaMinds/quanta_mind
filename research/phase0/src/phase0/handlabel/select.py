@@ -64,7 +64,7 @@ def _read(package: Path, name: str) -> pd.DataFrame:
         return pd.read_parquet(BytesIO(archive.read(PACKAGE_MEMBER.format(name=name))))
 
 
-def _repo_full_name(url: str) -> str:
+def repo_full_name(url: str) -> str:
     """`https://api.github.com/repos/owner/name` -> `owner/name`."""
     return "/".join(str(url).rstrip("/").split("/")[-2:])
 
@@ -104,7 +104,7 @@ def eligible_prs(package: Path) -> list[Candidate]:
     return [
         Candidate(
             pr_id=int(row["id"]),
-            repo=_repo_full_name(row["repo_url"]),
+            repo=repo_full_name(row["repo_url"]),
             number=int(row["number"]),
             merged_at=str(row["merged_at"]),
             title=str(row["title"]),

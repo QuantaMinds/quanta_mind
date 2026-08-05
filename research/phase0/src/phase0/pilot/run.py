@@ -35,7 +35,7 @@ import sys
 from phase0 import arm
 from phase0.extract_prs import PRRecord
 from phase0.github_pulls import merge_info, require_token
-from phase0.handlabel.select import Candidate, eligible_prs
+from phase0.handlabel.select import Candidate
 from phase0.outcome.scan import scan
 from phase0.outcome.window import merge_on_base
 from phase0.pilot.attempt import Attempt
@@ -47,19 +47,21 @@ from phase0.pipeline import journal, records_file, resume
 from phase0.pipeline.assemble import build_record
 from phase0.pipeline.rejection import Rejection
 from phase0.pipeline.worktree import CloneFailed, cloned, sweep
+from phase0.population import for_arm
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parse(argv if argv is not None else sys.argv[1:])
 
     token = require_token()
-    population = eligible_prs(PACKAGE)
+    aidev = ROOT / "data" / "aidev"
+    population, claimed = for_arm(args.arm, aidev, PACKAGE)
     # Before the first clone, not after thirty hours. This run's entire 90-repo
     # predecessor was human-arm and every metric it produced was read as the agent arm;
     # nothing objected because no artefact named an arm. `verify` raises unless every
     # id is in the arm the population claims, checked against AIDev's own `agent`
     # column rather than against the filename the population was built from.
-    tally = arm.verify([c.pr_id for c in population], arm.HUMAN, ROOT / "data" / "aidev")
+    tally = arm.verify([c.pr_id for c in population], claimed, aidev)
     grouped = by_repo(population)
     targets = choose(grouped, args.journal, args.repos, args.only_repo, args.rescan_reason)
     print(f"arm verified: {tally}")
