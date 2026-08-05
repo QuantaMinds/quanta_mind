@@ -32,6 +32,7 @@ import pytest
 from phase0.github_pulls import MergeInfo
 from phase0.graph.run_graph import HarnessError
 from phase0.pipeline.assemble import build_record
+from phase0.pipeline.rejection import Rejection
 
 
 def _merge(sha: str, api_files: tuple[str, ...]) -> MergeInfo:
@@ -84,8 +85,12 @@ def test_the_corpus_is_never_the_denominator(repo: tuple[Path, str, str]) -> Non
         merged_at="2025-06-24T22:46:29Z",
         corpus_files=inflated,
     )
-    # Whatever it decides, it is a value about the repository -- never a raise about us.
-    assert outcome is not None
+    # A value about the repository, never a raise about us. Shape detection refuses it
+    # first -- forty attributed files against a two-file merge is neither squash nor
+    # rebase -- which is the correct reading of A28's over-attribution.
+    assert isinstance(outcome, Rejection)
+    assert outcome.stage == "parent_commit"
+    assert "neither squash nor rebase" in outcome.reason
 
 
 def test_a_superset_still_belongs_to_verify_files(repo: tuple[Path, str, str]) -> None:
