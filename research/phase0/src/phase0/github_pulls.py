@@ -59,6 +59,12 @@ class MergeInfo:
     # verified against: the corpus attributes 92 files to some three-file PRs, so a gate
     # built on the corpus list checked the wrong thing. Empty when unavailable.
     api_files: tuple[str, ...] = ()
+    # additions + deletions, from the same payload as everything above, so it costs no
+    # extra request. A20 pre-registers the file-set disagreement rate BY CHANGED-LINES
+    # QUARTILE, and changed lines is the variable it names -- commit count and file count
+    # are correlates, not the thing. 0 when the endpoint was unavailable, which the
+    # quartile banding reports as `unknown` rather than folding into the lowest band.
+    changed_lines: int = 0
 
     @property
     def is_usable(self) -> bool:
@@ -109,6 +115,7 @@ def merge_info(
         commit_count=int(payload.get("commits") or 0),
         commit_subjects=subjects,
         api_files=files,
+        changed_lines=int(payload.get("additions") or 0) + int(payload.get("deletions") or 0),
     )
 
 

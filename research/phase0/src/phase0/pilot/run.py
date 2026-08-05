@@ -72,6 +72,7 @@ def main(argv: list[str] | None = None) -> int:
         breakage: str = "",
         on_default: bool = True,
         on_base: str = "unknown",
+        lines_changed: int = -1,
     ) -> None:
         """One attempt, with the covariates attrition may track. Never a verdict."""
         corpus_py = sum(1 for f in candidate.changed_files if f.endswith(".py"))
@@ -95,6 +96,7 @@ def main(argv: list[str] | None = None) -> int:
                 outcome=breakage,
                 base_is_default=on_default,
                 merge_on_base=on_base,
+                changed_lines=lines_changed,
             )
         )
 
@@ -142,6 +144,7 @@ def main(argv: list[str] | None = None) -> int:
                         breakage,
                         merge.base_ref == default_branch(repo),
                         on_base,
+                        merge.changed_lines,
                     )
                     if isinstance(outcome, Rejection):
                         print(

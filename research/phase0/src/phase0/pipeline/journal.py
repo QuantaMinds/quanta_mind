@@ -44,6 +44,8 @@ COLUMNS = (
     # agentops PRs that exposed this were rejected at `no_python` before any scan ran, so
     # a count taken at scan time measures the post-filter residue rather than prevalence.
     "merge_on_base",
+    # additions + deletions. A20's quartile banding reads this one.
+    "changed_lines",
 )
 DONE = re.compile(r"^<!-- repo-done: (?P<repo>\S+) -->$")
 HEADER = (
@@ -102,6 +104,7 @@ def read_attempts(path: Path) -> list[Attempt]:
                     # collapsed to a bool. "we could not check" and "it is not on the
                     # branch" are different facts, and a bool would have to pick one.
                     merge_on_base=cells[12],
+                    changed_lines=int(cells[13]),
                 )
             )
         except ValueError:
@@ -132,6 +135,7 @@ def append_repo(path: Path, repo: str, attempts: list[Attempt]) -> None:
                 a.outcome or "-",
                 "yes" if a.base_is_default else "no",
                 a.merge_on_base,
+                str(a.changed_lines),
             )
         )
         + " |"

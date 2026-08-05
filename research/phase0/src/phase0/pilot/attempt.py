@@ -49,3 +49,8 @@ class Attempt:
     # and all four were rejected at `no_python` first. Counting only at scan time would
     # report the post-filter residue and call it prevalence.
     merge_on_base: str = "unknown"
+    # additions + deletions from the GitHub API. A20 pre-registers the file-set
+    # disagreement rate by changed-lines QUARTILE; commit count and corpus file count are
+    # correlates of size, not the variable named. -1 when the API did not supply it, so
+    # "not measured" cannot masquerade as "a very small PR".
+    changed_lines: int = -1

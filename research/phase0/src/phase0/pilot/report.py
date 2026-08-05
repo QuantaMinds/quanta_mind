@@ -1,7 +1,8 @@
 """Pilot metrics: attrition split by the covariates that decide whether it is differential.
 
 WHAT: Turns per-PR attempt records into the shape report — admission by category, and
-      attrition cross-tabulated against commit count, corpus file count and merge shape.
+      attrition cross-tabulated against commit count, corpus file count, and
+      A20's changed-lines quartile.
 WHY:  A single attrition percentage is the wrong summary. The first smoke run lost 32%
       of PRs, and the dominant stage was `parent_commit`: shape detection fails when the
       corpus file list does not match the change, which happens when the branch base has
@@ -24,6 +25,7 @@ import pandas as pd
 
 from phase0.handlabel.select import Candidate
 from phase0.pilot.attempt import Attempt
+from phase0.pilot.quartile import by_changed_lines
 
 # Commit-count bands. Chosen before the run and kept coarse: with a few hundred PRs,
 # quartiles cut from the data would move with it, and a moving boundary is a degree of
@@ -141,6 +143,11 @@ def report(attempts: list[Attempt], clone_failures: int, repos: int) -> dict[str
         "rejected_by_category": dict(Counter(a.category for a in rejected)),
         "attrition_by_commit_count": _cross(attempts, COMMIT_BANDS, "commit_count"),
         "attrition_by_corpus_file_count": _cross(attempts, FILE_BANDS, "corpus_py_files"),
+        # A20, pre-registered and previously unimplemented. Commit count and file count
+        # are correlates of patch size; changed lines is the variable A20 names, and
+        # `file_set` is the gate it names. A rising rate across quartiles makes A16's
+        # stratified RR the only quotable result.
+        "file_set_disagreement_by_changed_lines": by_changed_lines(attempts),
         "median_changed_files": files[len(files) // 2] if files else 0,
         "median_changed_symbols": symbols[len(symbols) // 2] if symbols else 0,
         "distinct_repos_in_records": len(repo_counts),
