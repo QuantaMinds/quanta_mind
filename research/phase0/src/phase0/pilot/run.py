@@ -117,11 +117,10 @@ def main(argv: list[str] | None = None) -> int:
                             0,
                         )
                         continue
-                    # Measured BEFORE the admission gate, on every attempt. The outcome
-                    # scan only ever sees survivors, and agentops #811/#817/#818/#819 --
-                    # the PRs that exposed the unreachable-merge case -- were all rejected
-                    # at `no_python` first. A prevalence taken after the gate would
-                    # describe the residue and be quoted as the population.
+                    # BEFORE the gate, on every attempt: the scan only sees survivors,
+                    # and all four agentops PRs that exposed the unreachable-merge case
+                    # were rejected at `no_python` first. A prevalence taken after the
+                    # gate describes the residue and gets quoted as the population.
                     on_base = merge_on_base(clone, merge.merge_commit_sha, merge.base_ref)
                     outcome = build_record(
                         clone,
@@ -132,11 +131,10 @@ def main(argv: list[str] | None = None) -> int:
                         corpus_files=candidate.changed_files,
                     )
                     if not isinstance(outcome, Rejection):
-                        # Persisted as it is built. Every later stage needs a PRRecord,
-                        # and this run has already paid for the clone, the merge
-                        # metadata, the parent resolution and the file derivation --
-                        # discarding them is what made the outcome scan need a whole
-                        # second pass over the corpus.
+                        # Persisted as built. Every later stage needs a PRRecord and
+                        # this run already paid for the clone, the metadata, the parent
+                        # and the file set -- discarding them is what made the outcome
+                        # scan need a second pass over the corpus.
                         records_file.append(args.records, outcome)
                     breakage = ""
                     if args.scan and not isinstance(outcome, Rejection):
@@ -173,25 +171,19 @@ def main(argv: list[str] | None = None) -> int:
             # a denominator that moves with the weather makes every later comparison
             # carry noise nobody declared.
             #
-            # Two causes, kept apart. A timeout removes the LARGEST repositories --
-            # measured at an 11.5x median size difference -- so it selects on the study's
-            # own confounder. A repository that no longer exists selects on nothing and
-            # has no size to measure. Pooling them puts a repo with no measurable size
-            # into the median that quantifies the size bias, and the classification would
-            # otherwise survive only in a log line nobody joins back.
+            # Two causes, kept apart. A timeout removes the LARGEST repositories, so it
+            # selects on the study's own confounder; a repository that no longer exists
+            # selects on nothing and has no size to measure. Pooling them puts a repo
+            # with no measurable size into the median that quantifies the size bias.
             stage = "repo_gone" if "not found" in str(exc).lower() else "clone_timeout"
             for candidate in candidates:
                 if not any(a.pr_id == str(candidate.pr_id) for a in attempts[before:]):
-                    # The corpus's own commit list, because the API's count is only
-                    # fetched inside the clone that just failed. Passing 0 put every
-                    # clone failure outside every commit-count band, so the "lost to
-                    # clone failure" column read 0.0 for all of them -- "cannot tell"
-                    # rendered as "nothing lost", in the column added to prevent it.
-                    note(
-                        candidate,
-                        Rejection(str(candidate.pr_id), stage, str(exc)),
-                        len(candidate.commit_shas),
-                    )
+                    # The corpus's commit list: the API's count is fetched inside the
+                    # clone that just failed, and passing 0 put every clone failure
+                    # outside every band, so `share_lost` read 0.0 -- "cannot tell"
+                    # rendered as "nothing lost".
+                    fail = Rejection(str(candidate.pr_id), stage, str(exc))
+                    note(candidate, fail, len(candidate.commit_shas))
         # Flushed here, not at the end. A repository that yielded nothing is still
         # marked done, or a restart would retry it forever.
         journal.append_repo(args.journal, repo, attempts[before:])
