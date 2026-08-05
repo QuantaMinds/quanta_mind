@@ -84,6 +84,8 @@ reclassification this log exists to prevent.
 
 | **A26** | 4.15 | **Tightens the outcome rule on its two named defects, before the labels are drawn.** The breakage pattern matches the commit **subject** only, not the squash body; and a later commit counts as a repair only if the PR's files are at least a quarter of what that commit touched. Adds **clone timeout** as a named exclusion in A17's bounds. | The pilot's rate came back at **27.3%** against the published PR-level figure of 11.3% — 2.4x the reference, on a corpus skewed toward small single-commit changes that should sit *below* it. Both causes were already diagnosed, so fixing them after labelling would burn an iteration of the gate on a rule known to be broken. Both changes can only remove verdicts, never add them. |
 
+| **A27** | 4.16 | **The outcome scan must walk the PR's own base branch, not the clone's default.** 15.5% of PRs merge into `dev`, `develop` or a feature branch; `scan_outcome` walks from HEAD, so their post-merge history is invisible and every one of them reads CLEAN. Also: `merged_at` asserted before `merge_commit_sha` is read, a merged PR with a null merge sha becomes `no_merge_sha`, and file-set verification requires **exact equality** rather than a ratio. | A superset passes a ratio gate. When a PR's commits land via another pull request the merge sha belongs to that other PR, shape detection resolves a parent confidently, and if the other PR carried nothing else the file sets differ only by what they share — a wrong parent that passes verification, which is the one failure surviving every downstream check. And a false CLEAN on 15.5% of the corpus biases the outcome toward the null in a way no bound would show. |
+
 **A8 is the one that most needed to be pre-registered.** Switching to cluster-robust
 inference after seeing a confidence interval would be indistinguishable from moving the
 goalposts, whatever the motivation.
@@ -1310,6 +1312,56 @@ requests, so this compounds the commit-count gradient in the same direction as
 `parent_commit`. It is counted as `resource` attrition and **carried into A17's bounds
 alongside `parent_commit` and `file_set`** — otherwise it is loss that never appears in
 the accounting at all.
+
+---
+
+### 4.16 The outcome scan was reading the wrong branch [A27]
+
+Hand-verifying resolved parents surfaced something the parents themselves were not the
+point of. Several resolved to commits that are not ancestors of the clone's `HEAD`, and
+the reason is not a bad parent:
+
+| PR | base branch | default | merge commit vs base |
+|---|---|---|---|
+| `AgentOps-AI/agentops#714` | `redesign` | `main` | behind |
+| `AgentOps-AI/agentops#811` | `dev` | `main` | **no common ancestor** |
+| `AgentOps-AI/agentops#817` | `dev` | `main` | **no common ancestor** |
+
+Measured across 271 PRs with cached merge metadata: **42, or 15.5%, merged into a branch
+other than the repository default** — `dev` (16), `develop` (6), and feature branches such
+as `f/switch-to-pg` and `multi_sdfg`.
+
+`scan_outcome._candidates` walks `repo.iter_commits()`, which starts at `HEAD`. For those
+42 PRs the merge commit and everything after it may not be in that history at all, so the
+seven-day window finds nothing and the PR is scored **CLEAN**.
+
+> **That is a false negative, not a missing measurement**, and it is the same shape as
+> every other defect this instrument has produced: an absence read as a result. It biases
+> the outcome variable toward the null on a sixth of the corpus, and no bound computed
+> over declared exclusions would show it, because these units are not excluded — they are
+> counted as clean.
+
+**The scan walks the PR's own `base_ref`.** `MergeInfo` already carries it. A base branch
+that no longer exists, or one whose history has been rewritten so the merge commit is
+unreachable from it, is a **typed exclusion** and never a clean verdict.
+
+**Three smaller corrections land with it,** all from reading GitHub's documented
+semantics rather than assuming them:
+
+1. `merged_at` is asserted before `merge_commit_sha` is read. On an unmerged PR that field
+   holds a *test-merge* commit that exists on neither branch — a different thing entirely.
+2. A merged PR with a **null** `merge_commit_sha` is a real reported state, now the named
+   exclusion `no_merge_sha` rather than a fall-through.
+3. File-set verification requires **exact set equality**, not a ratio. A superset is not a
+   near miss: it is the signature of a walk that went too far back, or of an indirect
+   merge whose `merge_commit_sha` belongs to a different pull request. The ratio survives
+   only where equality cannot be trusted — a corpus-supplied list, or a GitHub list
+   returned at the page limit and possibly truncated.
+
+**`indirect_merge` is still not detected as such.** The timeline signal exists but only on
+repositories using rulesets, so its absence is uninformative and it cannot serve as a
+negative test. What has changed is that the case can no longer pass silently: exact
+equality catches it as `file_set`. Mislabelled, but excluded, which is the safe direction.
 
 ---
 
