@@ -179,7 +179,13 @@ def test_audit_record_carries_the_fields_that_cannot_be_added_later() -> None:
 
 
 def test_provenance_is_stamped_on_every_record() -> None:
-    """If half the corpus is re-run after a fix, this is how you know which half."""
+    """If half the corpus is re-run after a fix, this is how you know which half.
+
+    `platform` joined the set because the memory cap is enforceable on linux and
+    refused on darwin: two records agreeing on all four version fields can still have
+    run under different bounds, and only one of the two platforms can populate the
+    resource-exhaustion arm at all.
+    """
     audit = run_pipeline.failed(_pr("1", "a/a"), "clone", "gone")
     stamped = {f.name for f in fields(audit.provenance)}
     assert stamped == {
@@ -187,4 +193,5 @@ def test_provenance_is_stamped_on_every_record() -> None:
         "tree_sitter_version",
         "python_version",
         "pipeline_git_sha",
+        "platform",
     }

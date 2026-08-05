@@ -32,6 +32,7 @@ from __future__ import annotations
 import json
 import platform
 import subprocess
+import sys
 from collections.abc import Iterator
 from dataclasses import asdict, dataclass, field
 from importlib.metadata import PackageNotFoundError, version
@@ -70,6 +71,10 @@ class Provenance:
     tree_sitter_version: str
     python_version: str
     pipeline_git_sha: str
+    # Which machine. The memory cap is enforceable on linux and refused on darwin, so
+    # two records with identical versions can still have run under different bounds --
+    # and OOM cannot populate the resource arm at all where the cap was refused.
+    platform: str
 
     @classmethod
     def current(cls) -> Provenance:
@@ -78,6 +83,7 @@ class Provenance:
             tree_sitter_version=_package_version("tree-sitter"),
             python_version=platform.python_version(),
             pipeline_git_sha=_pipeline_sha(),
+            platform=f"{sys.platform}-{platform.machine()}",
         )
 
 
@@ -106,6 +112,13 @@ class PRAudit:
     merged_sha: str = ""
     parent_resolution_method: str = ""
     graph_status: str = ""
+    # The memory bound this PR's graph run actually had, from GraphResult.mem_cap.
+    # Empty means UNRECORDED -- a stage that failed before the graph ran. It does not
+    # mean "bounded", and an OOM arm assembled from runs that were never capped
+    # measures the machine. A30 claimed this travelled on the result; it travelled as
+    # far as the in-memory object and was dropped here, so no run on disk stated its
+    # bound. Per-record rather than on Provenance because the limit is a call argument.
+    mem_cap: str = ""
     graph_detail: str = ""
     graph_detail_path: str = ""
     graph_detail_line: int = 0

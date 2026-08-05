@@ -98,6 +98,7 @@ def measure(tree: Path, pr: PRRecord, timeout_s: int) -> record.PRAudit | None:
         parent_sha=pr.parent_sha,
         merged_sha=pr.merged_sha,
         graph_status=graph.status.value,
+        mem_cap=graph.mem_cap,
         graph_detail=graph.detail,
         graph_detail_path=graph.detail_path,
         graph_detail_line=graph.detail_line,
