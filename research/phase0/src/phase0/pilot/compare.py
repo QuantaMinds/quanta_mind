@@ -39,6 +39,7 @@ import sys
 from pathlib import Path
 
 from phase0.pilot.attempt import Attempt
+from phase0.pilot.gradient import parent_gradient
 from phase0.pilot.report import report
 from phase0.pipeline import journal
 
@@ -137,6 +138,10 @@ def compare(
             "by_commit_count": _bands(baseline, comparable, "attrition_by_commit_count"),
             "by_corpus_file_count": _bands(baseline, comparable, "attrition_by_corpus_file_count"),
         },
+        # Whether A28's replacement removed the MECHANISM, not merely the count. A
+        # falling attrition rate proves nothing on its own; a gradient that still climbs
+        # with commit count means a file-set dependence survives somewhere.
+        "parent_commit_gradient": parent_gradient(attempts),
         "file_set_disagreement_by_changed_lines": as_recorded.get(
             "file_set_disagreement_by_changed_lines"
         ),
