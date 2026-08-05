@@ -40,7 +40,7 @@ from phase0.outcome.window import merge_on_base
 from phase0.pilot.attempt import Attempt
 from phase0.pilot.options import CACHE, PACKAGE, ROOT, parse
 from phase0.pilot.report import by_repo, default_branch, report, star_counts
-from phase0.pipeline import journal
+from phase0.pipeline import journal, records_file
 from phase0.pipeline.assemble import build_record
 from phase0.pipeline.rejection import Rejection
 from phase0.pipeline.worktree import CloneFailed, cloned, sweep
@@ -131,6 +131,13 @@ def main(argv: list[str] | None = None) -> int:
                         merged_at=candidate.merged_at,
                         corpus_files=candidate.changed_files,
                     )
+                    if not isinstance(outcome, Rejection):
+                        # Persisted as it is built. Every later stage needs a PRRecord,
+                        # and this run has already paid for the clone, the merge
+                        # metadata, the parent resolution and the file derivation --
+                        # discarding them is what made the outcome scan need a whole
+                        # second pass over the corpus.
+                        records_file.append(args.records, outcome)
                     breakage = ""
                     if args.scan and not isinstance(outcome, Rejection):
                         # The clone is already open and at the right repository, so the

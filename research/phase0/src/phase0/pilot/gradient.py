@@ -30,6 +30,7 @@ from phase0.pilot.attempt import Attempt
 from phase0.pilot.report import COMMIT_BANDS
 
 PARENT_STAGE = "parent_commit"
+CLONE_FAILED = "clone_failed"
 
 # Below this a band's rate is one or two PRs and cannot carry a trend. Fixed here rather
 # than chosen once the bands are in front of us.
@@ -51,6 +52,12 @@ def parent_gradient(attempts: list[Attempt]) -> dict[str, object]:
         if not rows:
             continue
         failed = sum(1 for a in rows if a.stage == PARENT_STAGE)
+        # A band can be populated and still be unrepresentative. Clone timeouts remove
+        # the largest repositories, and the largest repositories hold the multi-commit
+        # PRs -- so a flat rate in the 21+ band could mean "the mechanism is gone" or
+        # "the hard cases never arrived", and those look identical without this column.
+        lost = [a for a in rows if a.stage == CLONE_FAILED]
+        reachable = [a for a in rows if a.stage != CLONE_FAILED]
         bands[name] = {
             "n": len(rows),
             "parent_commit_failures": failed,
@@ -58,6 +65,12 @@ def parent_gradient(attempts: list[Attempt]) -> dict[str, object]:
             # Stated per band, so a verdict computed over three of four bands cannot be
             # read as if it covered all of them.
             "counted_in_trend": len(rows) >= MIN_BAND_N,
+            "lost_to_clone_timeout": len(lost),
+            "repos_lost": sorted({a.repo for a in lost}),
+            "distinct_repos_present": len({a.repo for a in reachable}),
+            # The share of the band that never reached the rule at all. A high value here
+            # makes the band's failure rate a statement about survivors, not about size.
+            "share_lost": round(len(lost) / len(rows), 4),
         }
 
     trend = [

@@ -51,7 +51,7 @@ research/phase0/src/phase0/
   extract_prs.py       AIDev  → PRRecord[]
   census.py            source → CallSite[]        (tree-sitter, the denominator)
   graph/run_graph.py   repo   → Edge[]            (PyCG / Jelly, scoped)
-  run_pipeline.py      drives the per-PR loop, writes the audit log  ← `PHASE0_RUNBOOK.md` “Days 3–5”
+  exposure_run.py      the exposure pass CLI; run_pipeline.py is its library  ← “Days 3–5”
   classify_exposure.py PR     → EXPOSED | UNEXPOSED | UNANALYZED
   outcome/scan.py      PR     → BROKE | CLEAN | UNSCANNABLE  (7-day scan)
   controls/gate.py     positive + negative controls  ← `PHASE0_RUNBOOK.md` “Day 2”
@@ -207,10 +207,10 @@ reason to pause, not a reason to proceed carefully.
 uv run python -m phase0.extract_prs \
     --dataset aidev --lang python --out data/prs.jsonl        # documented-command:unbuilt
 
-uv run python -m phase0.run_pipeline \
-    --prs data/prs.jsonl \
-    --graph pycg --scoped --timeout 600 --mem-limit 16G \
-    --out data/exposure.jsonl                                 # documented-command:unbuilt
+uv run python -m phase0.exposure_run \
+    --records results/records.jsonl \
+    --timeout 600 \
+    --out results/exposure.jsonl
 
 uv run python -m phase0.outcome.scan \
     --prs data/prs.jsonl --window-days 7 \

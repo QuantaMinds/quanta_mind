@@ -46,6 +46,13 @@ def parse(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--out", type=Path, default=ROOT / "results" / "pilot.json")
     parser.add_argument(
+        "--records",
+        type=Path,
+        default=ROOT / "results" / "records.jsonl",
+        help="persist admitted PRRecords here; the exposure pass reads them rather "
+        "than rebuilding what this run already resolved",
+    )
+    parser.add_argument(
         "--journal",
         type=Path,
         default=ROOT / "results" / "pilot_journal.md",

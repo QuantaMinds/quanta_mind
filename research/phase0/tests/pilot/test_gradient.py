@@ -129,3 +129,48 @@ def test_a_dip_then_a_rise_is_not_monotone() -> None:
     result = parent_gradient(attempts)
 
     assert result["still_rises_with_size"] is False
+
+
+def _lost(commits: int, total: int, repo: str = "big/repo") -> list[Attempt]:
+    """Attempts in a band that never reached the rule, because the clone timed out."""
+    return [
+        Attempt(
+            pr_id=f"lost-{commits}-{i}",
+            repo=repo,
+            admitted=False,
+            stage="clone_failed",
+            category="resource",
+            commit_count=commits,
+            corpus_py_files=1,
+            derived_files=0,
+            changed_symbols=0,
+        )
+        for i in range(total)
+    ]
+
+
+def test_a_band_reports_what_it_lost_to_clone_timeouts() -> None:
+    """A populated band can still be unrepresentative, and the two look identical without this.
+
+    Clone timeouts remove the largest repositories, and the largest repositories hold the
+    multi-commit PRs. So a flat failure rate in the 21+ band means either "the mechanism is
+    gone" or "the hard cases never arrived" — and only the share lost distinguishes them.
+    """
+    attempts = _rows(30, 5, 0) + _lost(30, 7, repo="getsentry/sentry")
+
+    band = parent_gradient(attempts)["bands"]["21+"]
+
+    assert band["failure_rate"] == 0.0
+    assert band["lost_to_clone_timeout"] == 7
+    assert band["repos_lost"] == ["getsentry/sentry"]
+    assert band["share_lost"] == 0.5833
+    assert band["distinct_repos_present"] == 1
+
+
+def test_a_band_that_lost_nothing_says_so_with_a_zero() -> None:
+    """Zero lost is a measurement. An absent key would read as "not checked"."""
+    band = parent_gradient(_rows(1, 6, 1))["bands"]["1"]
+
+    assert band["lost_to_clone_timeout"] == 0
+    assert band["share_lost"] == 0.0
+    assert band["repos_lost"] == []
