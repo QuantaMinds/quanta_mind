@@ -1457,6 +1457,29 @@ and would be quoted as the population, so `merge_on_base` is recorded on every a
 three values — `yes`, `no`, `unknown` — because "not on the branch" is a fact about the
 repository and "could not check" is a fact about us.
 
+**The clone timeout selects on repository size, and now by how much.** A26 named clone
+timeout as an exclusion in A17's bounds. Its *direction* was not recorded, and it is not
+neutral. Measured over the re-run's first 41 repositories, against GitHub's reported
+repository size:
+
+| | n | median size | largest |
+|---|---|---|---|
+| clone timed out | 4 | **959,522 KB** | 1,458,859 KB |
+| cloned | 36 | **76,908 KB** | 1,311,233 KB |
+
+A 12.5× difference in median. It is not a clean threshold — `BerriAI/litellm` at 1.31 GB
+cloned successfully, so network variance matters — but the central tendency is not in
+doubt: a resource exclusion is removing the largest repositories, and repository size
+tracks project age, activity and release discipline. That is the same selection the
+base-branch defect made, arriving through a different door, and it is the fourth door on
+to A16's confounder after patch text, shape detection and the outcome scan.
+
+Bounded rather than fixed. Raising the timeout would reduce it without removing it, and
+`AgentOps-AI/agentops` shows the excluded repositories are not exchangeable with the
+included ones. The count and the size distribution are reported so A17's bounds can cover
+it; a run that quietly lost its biggest repositories and reported one attrition figure
+could not.
+
 **What this does not change.** No threshold, no arm coding, no verdict rule, no outcome
 criterion. It changes which units are admitted and which exclusions are countable. The
 re-measured breakage rate is reported **split by default-branch versus non-default-branch
