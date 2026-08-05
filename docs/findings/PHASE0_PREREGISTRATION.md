@@ -86,7 +86,7 @@ reclassification this log exists to prevent.
 
 | **A27** | 4.16 | **The outcome scan must walk the PR's own base branch, not the clone's default.** 15.5% of PRs merge into `dev`, `develop` or a feature branch; `scan_outcome` walks from HEAD, so their post-merge history is invisible and every one of them reads CLEAN. Also: `merged_at` asserted before `merge_commit_sha` is read, a merged PR with a null merge sha becomes `no_merge_sha`, and file-set verification requires **exact equality** rather than a ratio. | A superset passes a ratio gate. When a PR's commits land via another pull request the merge sha belongs to that other PR, shape detection resolves a parent confidently, and if the other PR carried nothing else the file sets differ only by what they share — a wrong parent that passes verification, which is the one failure surviving every downstream check. And a false CLEAN on 15.5% of the corpus biases the outcome toward the null in a way no bound would show. |
 
-| **A28** | 4.17 | **Supersedes A2's detection rule.** Shape is decided by the SEQUENCE of the PR's commit subjects — at least two consecutive matches walking back from the merge — with the diff-coverage rules kept only as a fallback when the API returns no subjects. Records the hand-verification: 19 of 20 resolved parents confirmed against `merge_commit_sha`'s first parent, all five of the 21+ band among them. Also makes `UNSCANNABLE` a **counted exclusion at every consumer**, not only at the scan, and adds the unreachable-merge prevalence **measured at admission**. | A2 detected shape by diff coverage against a file list the corpus supplies, and the corpus attributes 92 files to some three-file PRs — so detection failed on exactly the PRs whose file lists were wrong, at 17–70% across commit-count bands, differentially on patch size. Subjects come from the API and are independent of the corpus, which removes the file list from detection entirely. A single-subject match would not do: GitHub's default squash message reuses the title on a one-commit PR, so only a sequence of two distinguishes the shapes. **This changes which units are admitted, never a decision boundary** — no threshold, arm coding or verdict rule moves. |
+| **A28** | 4.17 | **Supersedes A2's detection rule.** Shape is decided by the SEQUENCE of the PR's commit subjects — at least two consecutive matches walking back from the merge — with the diff-coverage rules kept only as a fallback when the API returns no subjects. Records the hand-verification: 19 of 20 resolved parents agree with `merge_commit_sha`'s first parent, all five of the 21+ band among them — which over a sample of 16 squashes and 3 merge commits confirms that **none was misrouted to rebase**, and, since the resolver returns `merge^1` for both those shapes by construction, is not independent evidence of anything more. The sample contained **no rebases**, so that branch is verified only by unit test. Also makes `UNSCANNABLE` a **counted exclusion at every consumer**, not only at the scan, and adds the unreachable-merge prevalence **measured at admission**. | A2 detected shape by diff coverage against a file list the corpus supplies, and the corpus attributes 92 files to some three-file PRs — so detection failed on exactly the PRs whose file lists were wrong, at 17–70% across commit-count bands, differentially on patch size. Subjects come from the API and are independent of the corpus, which removes the file list from detection entirely. A single-subject match would not do: GitHub's default squash message reuses the title on a one-commit PR, so only a sequence of two distinguishes the shapes. **This changes which units are admitted, never a decision boundary** — no threshold, arm coding or verdict rule moves. |
 
 **A8 is the one that most needed to be pre-registered.** Switching to cluster-robust
 inference after seeing a confidence interval would be indistinguishable from moving the
@@ -1412,6 +1412,22 @@ reproduced by an indirect merge, which file-set equality alone can.
 | 2–5 | 5 | 4, plus one whose parent never resolved |
 | 6–20 | 5 | 5 |
 | **21+** | **5** | **5** |
+
+**What this check can and cannot show.** The sample contains **16 squash, 3 merge commits,
+1 ambiguous — and zero rebases.** For a squash and a merge commit the resolver returns
+`merge^1` and `parents[0]` *by construction*, so agreement with GitHub's first parent is
+not independent evidence there; it confirms the local clone's merge commit matches
+GitHub's and that parent extraction is right. Its real power over this sample is narrower
+and worth stating exactly: a PR **misrouted to REBASE** would walk back and return
+something other than `merge^1`, and the check would catch it. None did.
+
+It says nothing about whether a genuine rebase resolves correctly, because none appeared —
+and for a true rebase the correct parent is *not* `merge^1`, so this test would flag a
+correct resolution as a mismatch. Rebase handling rests on
+`tests/test_parent_commit.py::test_rebase_walks_back_past_the_prs_own_commits`, which
+builds a real repository and asserts the walked parent and the step count. The live corpus
+has not exercised it, and a rule branch that never fires on real data is a residual risk
+recorded here rather than a verified property.
 
 **19 of 20**, and the twentieth is `AgentOps-AI/agentops#819`, whose parent did not resolve
 at all rather than resolving wrongly. The 21+ band is the one that mattered: 70%
