@@ -1,0 +1,46 @@
+[
+  {
+    "pr": "bespokelabsai/curator#345",
+    "commits": 6,
+    "replayed_run": 6,
+    "shape_detected": "rebase",
+    "resolver_parent": "ea6234a43821",
+    "structural_truth": "ea6234a43821",
+    "merge_first_parent": "3e5f4b438bd2",
+    "differs_from_merge_caret_1": true,
+    "verdict": "correct"
+  },
+  {
+    "pr": "bespokelabsai/curator#445",
+    "commits": 12,
+    "replayed_run": 12,
+    "shape_detected": "rebase",
+    "resolver_parent": "48b8a96701f5",
+    "structural_truth": "48b8a96701f5",
+    "merge_first_parent": "45f185a4ef4f",
+    "differs_from_merge_caret_1": true,
+    "verdict": "correct"
+  },
+  {
+    "pr": "Kanaries/pygwalker#673",
+    "commits": 2,
+    "replayed_run": 2,
+    "shape_detected": "rebase",
+    "resolver_parent": "5ed3537c9c7f",
+    "structural_truth": "5ed3537c9c7f",
+    "merge_first_parent": "f8688aeafb66",
+    "differs_from_merge_caret_1": true,
+    "verdict": "correct"
+  },
+  {
+    "pr": "PrefectHQ/marvin#1119",
+    "commits": 2,
+    "replayed_run": 2,
+    "shape_detected": "rebase",
+    "resolver_parent": "22786f991936",
+    "structural_truth": "22786f991936",
+    "merge_first_parent": "4ce30020b242",
+    "differs_from_merge_caret_1": true,
+    "verdict": "correct"
+  }
+]

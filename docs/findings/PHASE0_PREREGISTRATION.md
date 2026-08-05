@@ -1423,11 +1423,43 @@ something other than `merge^1`, and the check would catch it. None did.
 
 It says nothing about whether a genuine rebase resolves correctly, because none appeared —
 and for a true rebase the correct parent is *not* `merge^1`, so this test would flag a
-correct resolution as a mismatch. Rebase handling rests on
-`tests/test_parent_commit.py::test_rebase_walks_back_past_the_prs_own_commits`, which
-builds a real repository and asserts the walked parent and the step count. The live corpus
-has not exercised it, and a rule branch that never fires on real data is a residual risk
-recorded here rather than a verified property.
+correct resolution as a mismatch.
+
+**So the rebase branch was measured and verified separately.** It fires: **4 of 133 PRs,
+4 of 88 multi-commit (4.5%)**, across three repositories — `bespokelabsai/curator` (2),
+`Kanaries/pygwalker` (1), `PrefectHQ/marvin` (1). Rebase-merge is a per-repository
+setting, so prevalence is clustered and depends on which repositories land in the final
+corpus; it is reported per repo rather than pooled, because one rebase repository
+contributing many PRs would make a systematically wrong walk a correlated block, and A8's
+cluster-robust variance corrects outcome correlation within clusters, not a wrong exposure
+measurement.
+
+Shape was confirmed **structurally**, not by re-applying the subject rule to different
+data — that would agree with itself by construction, and the dangerous direction is a real
+rebase with an amended message giving k ≤ 1 and routing to squash. GitHub's rebase-merge
+replays each commit and rewrites committer information, so a rebase of N leaves N commits
+sharing one committer timestamp and a squash leaves exactly one. That reads no message
+text. **16 of 16 agreed** — all 4 rebases (committer-runs of 6, 12, 2, 2, equal to the
+commit count in every case) and 12 multi-commit squashes as controls (run of 1, including
+PRs of 22, 14 and 12 commits).
+
+The parents then verified against that structural truth — the first commit walking back
+whose committer timestamp differs, which is the trunk commit the replay landed on:
+
+| PR | commits | resolver parent | structural truth | differs from `merge^1` |
+|---|---|---|---|---|
+| `bespokelabsai/curator#345` | 6 | `ea6234a43821` | `ea6234a43821` | yes |
+| `bespokelabsai/curator#445` | 12 | `48b8a96701f5` | `48b8a96701f5` | yes |
+| `Kanaries/pygwalker#673` | 2 | `5ed3537c9c7f` | `5ed3537c9c7f` | yes |
+| `PrefectHQ/marvin#1119` | 2 | `22786f991936` | `22786f991936` | yes |
+
+**4 of 4**, and the last column is the point: in every case the resolved parent differs
+from `merge^1`, so the walk did real work and a squash routing would have returned the
+PR's own second-to-last commit — a wrong parent that no downstream check would catch.
+
+The k distribution over multi-commit PRs is `{0: 84, 2: 2, 6: 1, 12: 1}`. **There are no
+k = 1 cases**: the threshold has no data near it, so the boundary the rule could fail at
+has no instances in this sample.
 
 **19 of 20**, and the twentieth is `AgentOps-AI/agentops#819`, whose parent did not resolve
 at all rather than resolving wrongly. The 21+ band is the one that mattered: 70%
