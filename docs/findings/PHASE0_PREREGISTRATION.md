@@ -1263,6 +1263,26 @@ that also does unrelated cleanup across ten files scores 2/10 = 0.2 and is exclu
 focus threshold. If `MIN_COMMIT_FOCUS` removes more than subject-matching does, the
 excluded set is read by hand before the threshold stands.
 
+**And that inspection is itself blind.** The dropped PRs are judged — *is this a genuine
+repair?* — and the verdicts written down **before** the counts are read. Seeing "focus
+removed 14" first means reading fourteen PRs with a number already in mind, and fourteen
+looks like a lot or a little depending on what one was hoping for. Same protocol as the
+20 labels, at smaller scale, and it costs nothing.
+
+**What the inspection is looking for is a distinction, not a tally.** A 200-file
+dependency bump or a formatting sweep that happens to touch one of our files is exactly
+what the threshold exists to remove. A genuine repair that fixes our change *and* does
+unrelated cleanup across ten files scores 0.2 and is removed wrongly. If the dropped set
+is mostly the second kind, **the defect is the metric and not its value**: requiring the
+intersection to contain a file the PR *modified* separates "swept up in a large commit"
+from "repaired alongside other work", and raising or lowering 0.25 does neither.
+
+**The rate is re-measured once more after the shape fix, before the labelling sample is
+drawn.** Recovering the 2–5 and 6–20 commit bands adds back complex PRs, which is where
+breakage concentrates, so 17.6% may move up. The sample must be drawn from the corpus the
+study will actually run on — labels spent on a corpus that then changes are labels spent
+twice.
+
 **Clone timeout becomes a named exclusion.** `dagster-io/dagster` exceeded the 900-second
 clone budget. Large repositories time out, and large repositories hold large pull
 requests, so this compounds the commit-count gradient in the same direction as
