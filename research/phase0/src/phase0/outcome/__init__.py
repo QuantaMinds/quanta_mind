@@ -14,7 +14,7 @@ WHY:  Split out when `scan.py` crossed the 200-line cap and src/phase0/ hit the 
       other, or the correlation measures the instrument agreeing with itself.
 IMPORTS: phase0.outcome.{window,signals,conclusion,scan}.
 CONSUMED BY: run_pipeline.py, analysis/build_table.py, controls/gate.py,
-      handlabel/draw.py, pilot/run.py; tests/test_scan_outcome.py.
+      handlabel/draw.py, pilot/run.py; tests/outcome/test_scan.py.
 """
 
 from __future__ import annotations

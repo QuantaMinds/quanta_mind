@@ -18,7 +18,7 @@ WHY:  Split from scan_outcome.py, which owns walking history. This module owns t
       `refactor` deliberately does not match. RUNBOOK section 1.3 pins it: a
       refactor landing the next day is not evidence the PR broke anything.
 IMPORTS: stdlib re. Nothing from phase0.
-CONSUMED BY: scan_outcome.py; tests/test_scan_outcome.py.
+CONSUMED BY: scan_outcome.py; tests/outcome/test_scan.py.
 """
 
 from __future__ import annotations

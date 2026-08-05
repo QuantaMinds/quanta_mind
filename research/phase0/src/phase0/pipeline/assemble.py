@@ -23,7 +23,7 @@ WHY:  Nothing built a `PRRecord` before this. Merge metadata, parent resolution 
       excluded PR is a number in the attrition table; an analysed one with the wrong
       file set is a wrong answer nobody can see.
 IMPORTS: phase0.{extract_prs,github_pulls,parent_commit}, pipeline.changed.
-CONSUMED BY: run_pipeline.py; tests/test_assemble.py.
+CONSUMED BY: run_pipeline.py; tests/pipeline/test_assemble.py.
 """
 
 from __future__ import annotations

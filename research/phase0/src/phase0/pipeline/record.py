@@ -24,7 +24,7 @@ WHY:  Every field here is one that cannot be added later without re-running the
       loses one PR.
 IMPORTS: stdlib dataclasses, json, platform, subprocess. importlib.metadata for
       pinned versions.
-CONSUMED BY: run_pipeline.py; tests/test_record.py.
+CONSUMED BY: run_pipeline.py; tests/test_run_pipeline.py.
 """
 
 from __future__ import annotations

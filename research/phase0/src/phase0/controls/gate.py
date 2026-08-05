@@ -13,7 +13,7 @@ WHY:  Split from corpus.py, which builds repositories. This module evaluates the
       assigned its own answers would test the arithmetic and nothing else.
 IMPORTS: phase0.analysis.build_table, classify_exposure, run_pipeline, scan_outcome, and
       controls.{corpus,analysis}.
-CONSUMED BY: `python -m phase0.controls.gate`; tests/test_controls_corpus.py.
+CONSUMED BY: `python -m phase0.controls.gate`; tests/controls/test_controls_corpus.py.
 """
 
 from __future__ import annotations

@@ -18,7 +18,7 @@ WHY:  Split from `scan_outcome.py`, which owns walking history. This module owns
       in any exclusion count.
 IMPORTS: phase0.outcome_window for the Exclusion categories. Nothing else.
 CONSUMED BY: scan_outcome.py, analysis/build_table.py, controls/gate.py,
-      handlabel/draw.py; tests/test_scan_outcome.py.
+      handlabel/draw.py; tests/outcome/test_scan.py.
 """
 
 from __future__ import annotations

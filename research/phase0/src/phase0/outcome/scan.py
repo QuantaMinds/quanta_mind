@@ -28,7 +28,7 @@ IMPORTS: GitPython, phase0.extract_prs, and its siblings phase0.outcome.{signals
       conclusion,window}. Never phase0.classify_exposure — the two passes must not see
       each other.
 CONSUMED BY: run_pipeline.py, analysis/build_table.py, controls/gate.py,
-      handlabel/draw.py; tests/test_scan_outcome.py.
+      handlabel/draw.py; tests/outcome/test_scan.py.
 """
 
 from __future__ import annotations

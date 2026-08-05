@@ -23,7 +23,7 @@ not run at
       under which RR ≥ 5 carries meaning.
 IMPORTS: GitPython, phase0.analysis.build_table, extract_prs, run_pipeline, scan_outcome,
       and controls.mechanisms.
-CONSUMED BY: controls/gate.py; tests/test_controls_corpus.py.
+CONSUMED BY: controls/gate.py; tests/controls/test_controls_corpus.py.
 """
 
 from __future__ import annotations

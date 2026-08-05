@@ -12,7 +12,7 @@ WHY:  Split from run_pipeline.py, which owns the loop — grouping, checkpointin
       positive by accident.
 IMPORTS: phase0.scope, census, classify_exposure, run_graph, extract_prs, and
       pipeline.record. Never phase0.scan_outcome.
-CONSUMED BY: run_pipeline.py; tests/test_measure.py.
+CONSUMED BY: run_pipeline.py; tests/controls/test_controls_corpus.py (end-to-end, no direct test).
 """
 
 from __future__ import annotations

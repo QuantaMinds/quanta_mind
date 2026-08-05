@@ -16,7 +16,7 @@ WHY:  Split from `scan_outcome.py` because deciding WHERE to look and deciding W
       `base_ref_of` returns None rather than falling back to HEAD. A fallback would
       reintroduce the same bug in a narrower band and be harder to find the second time.
 IMPORTS: GitPython. Nothing from phase0.
-CONSUMED BY: scan_outcome.py; tests/test_scan_outcome.py.
+CONSUMED BY: scan_outcome.py; tests/outcome/test_scan.py.
 """
 
 from __future__ import annotations

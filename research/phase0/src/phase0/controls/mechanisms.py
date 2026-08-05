@@ -16,7 +16,7 @@ WHY:  `PHASE0_RUNBOOK.md` “Positive control” requires a positive control. `s
       value carry no callee name, so nothing can be attributed to the symbol and
       it produces no pair at all — a false negative, biased toward the null.
 IMPORTS: phase0.census, phase0.classify_exposure, phase0.graph.pycg_failure.
-CONSUMED BY: controls/corpus.py, controls/__init__.py; tests/test_controls.py.
+CONSUMED BY: controls/corpus.py, controls/__init__.py; tests/controls/test_controls.py.
 """
 
 from __future__ import annotations

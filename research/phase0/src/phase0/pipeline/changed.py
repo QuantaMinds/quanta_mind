@@ -15,7 +15,7 @@ WHY:  Split from `assemble.py` because reading a diff and deciding whether a PR 
       have known before the change landed, so a symbol the PR introduces has no
       pre-existing callers and is not what is being measured.
 IMPORTS: stdlib subprocess, re; phase0.syntax.
-CONSUMED BY: pipeline/assemble.py; tests/test_assemble.py.
+CONSUMED BY: pipeline/assemble.py; tests/pipeline/test_assemble.py.
 """
 
 from __future__ import annotations

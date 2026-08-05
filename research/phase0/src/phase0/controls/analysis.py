@@ -18,7 +18,7 @@ WHY:  RUNBOOK section 2.1 calls the positive control the most important gate in
       likely because the outcome scan is contaminated by repository identity
       rather than by the PR.
 IMPORTS: phase0.analysis.build_table, phase0.classify_exposure, phase0.analysis.risk.
-CONSUMED BY: run_pipeline.py; tests/test_controls.py. Results to results/controls.json.
+CONSUMED BY: run_pipeline.py; tests/controls/test_controls.py. Results to results/controls.json.
 """
 
 from __future__ import annotations

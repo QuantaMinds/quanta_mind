@@ -12,7 +12,7 @@ WHY:  A single attrition percentage is the wrong summary. The first smoke run lo
       report cross-tabulates rather than totals, and the three categories are kept apart:
       `restricted` narrows the estimand, `resource` and `integrity` bias it.
 IMPORTS: pandas, stdlib collections.
-CONSUMED BY: run_pilot.py; tests/test_pilot_report.py.
+CONSUMED BY: run_pilot.py; tests/pilot/test_compare.py.
 """
 
 from __future__ import annotations
