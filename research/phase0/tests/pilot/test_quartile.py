@@ -71,7 +71,15 @@ def test_a_rejection_at_another_stage_is_not_a_disagreement() -> None:
 
     quartiles = by_changed_lines(attempts)["quartiles"]
     assert isinstance(quartiles, dict)
-    assert all(band["file_set_rejections"] == 0 for band in quartiles.values())
+
+    # Named, not `all(...)`: an empty mapping satisfies `all` vacuously, so the version
+    # of this test that used one would have passed had the bands never been built.
+    # Two attempts populate two bands, so the band set is pinned here as well: it is the
+    # denominator the zeros are counted over, and a silently empty one proves nothing.
+    assert {band: quartiles[band]["file_set_rejections"] for band in quartiles} == {
+        "Q1": 0,
+        "Q3": 0,
+    }
 
 
 def test_unmeasured_size_is_its_own_band_not_the_smallest() -> None:

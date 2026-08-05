@@ -112,6 +112,12 @@ def test_no_subjects_declines_rather_than_guessing(tmp_path: Path) -> None:
     repo, _ = _trunk(tmp_path)
     head = _commit(repo, "acme/one.py", "feat: one")
 
+    # The same commit WITH its subject line resolves to a shape. That is what makes the
+    # None below attributable to the missing input rather than to a fixture the rule
+    # could not read either way -- which would decline for a reason this test never names.
+    supplied = by_subject(repo.commit(head), ("feat: one",), 1)
+    assert supplied is not None and supplied.shape == MergeShape.SQUASH
+
     assert by_subject(repo.commit(head), (), 1) is None
 
 

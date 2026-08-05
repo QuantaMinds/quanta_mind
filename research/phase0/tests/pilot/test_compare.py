@@ -100,6 +100,11 @@ def test_an_empty_arm_is_unmeasured_not_corrective() -> None:
     rate = compare(BASELINE, attempts)["breakage_rate"]
     assert isinstance(rate, dict)
 
+    # The populated arm was measured, which is what makes the three Nones below mean
+    # "the other arm is missing" rather than "the whole computation declined". Without
+    # it a compare() that returned None for everything would pass this test.
+    assert (rate["default_branch"], rate["n_default"], rate["n_other"]) == (0.5, 2, 0)
+
     assert rate["other_branch"] is None
     assert rate["absolute_gap"] is None
     assert rate["verdict"] is None
