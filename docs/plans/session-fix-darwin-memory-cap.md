@@ -1,16 +1,28 @@
 # Session record — fix/darwin-memory-cap
 
-Written by scripts/guard/hook_session_end.py at 2026-08-05T18:22:06Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-05T19:12:02Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `fix/darwin-memory-cap`
-- Files changed vs `main`: 13
-- Uncommitted at session end: 11
+- Files changed vs `main`: 25
+- Uncommitted at session end: 1
 - `docs/CODEBASE.md` updated: no
 
 ## Changed
 
 - `docs/findings/PHASE0_PREREGISTRATION.md`
+- `docs/plans/session-fix-darwin-memory-cap.md`
+- `research/phase0/results/controls.json`
+- `research/phase0/results/rate_journal_v2.pre_A29.bak`
+- `research/phase0/results/rate_journal_v2.rerun.md`
+- `research/phase0/results/rate_journal_v2.rescan_suspect.md`
+- `research/phase0/results/records.jsonl`
+- `research/phase0/results/records_rerun.jsonl`
+- `research/phase0/results/rescan_eight.json`
+- `research/phase0/results/rescan_eight.log`
+- `research/phase0/results/rescan_eight_rows.quarantined.md`
+- `research/phase0/results/rescan_eight_v2.json`
+- `research/phase0/results/rescan_eight_v2.log`
 - `research/phase0/src/phase0/graph/memory_cap.py`
 - `research/phase0/src/phase0/graph/run_graph.py`
 - `research/phase0/src/phase0/pilot/options.py`

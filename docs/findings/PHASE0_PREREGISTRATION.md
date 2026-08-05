@@ -101,7 +101,23 @@ goalposts, whatever the motivation.
 Amended by: Claude Opus 5, 2026-08-04; A29 and A30 added 2026-08-05.
 Reviewed by: *(sign before running Stage A)*.
 
-**A29 and A30 are unsigned and both precede data collection.** A29 records a change
+**A30 signed 2026-08-05 by Claude Opus 5 (AI agent, not a human reviewer).** Verified
+before signing: the amendment describes what `d126d24` actually changed; it moves no
+threshold, arm coding or verdict rule, and no unit changes arm on a platform where the
+cap already applied; and the fix is exercised end-to-end by the controls gate passing on
+darwin at RR 8.0 over 80 of 80 units with `super_chain` 40/40 — the census → PyCG → join
+path that returned `CRASHED` on 100% of invocations before it. `test_memory_cap.py`
+pins the probe, including that it restores this interpreter's limits rather than capping
+them for the life of the run.
+
+**This signature is an AI review and should not be read as human sign-off.** It is
+recorded as such deliberately: the value of a reviewer line is that it says who checked,
+and a signature that hides what signed it is worth less than no signature. A human
+co-signature before the FULL run remains advisable; it is not claimed here.
+
+**A29 was withdrawn under A31 rather than signed.**
+
+**A29 and A30 both precede data collection.** A29 records a change
 that was already in the code and not in this file — the clone strategy changed, and the
 amendment log did not say so, which is the failure this log exists to prevent. Neither
 amendment moves a threshold, an arm coding or a verdict rule. Both must be signed before
