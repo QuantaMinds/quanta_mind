@@ -41,7 +41,7 @@ from pathlib import Path
 
 from phase0.extract_prs import PRRecord
 from phase0.graph.pycg_failure import GraphStatus
-from phase0.graph.run_graph import DEFAULT_TIMEOUT_S
+from phase0.graph.run_graph import DEFAULT_TIMEOUT_S, HarnessError
 from phase0.parent_commit import MergeShape
 from phase0.parent_commit import resolve as resolve_parent
 from phase0.pipeline import record, worktree
@@ -111,6 +111,11 @@ def one_pr(clone: Path, pr: PRRecord, slot: int, timeout_s: int) -> record.PRAud
                 parent_sha=parent.parent_sha,
                 parent_resolution_method=parent.shape.value,
             )
+    except HarnessError:
+        # Ahead of the catch-all on purpose. Our environment failing is not this PR
+        # failing, and recording it as attrition is how a broken machine produces a
+        # complete-looking corpus. Stop instead.
+        raise
     except Exception as exc:
         return failed(pr, "unexpected", f"{type(exc).__name__}: {exc}")
 
