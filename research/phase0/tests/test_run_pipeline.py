@@ -14,9 +14,9 @@ WHY:  Each property was chosen because getting it wrong costs a re-run of a
         loop, and the record must name WHICH stage failed.
       - RunSummary carries no arm counts, so a pilot cannot surface an effect size
         before the controls have cleared.
-      - run_pipeline must never import scan_outcome: if exposure could see
+      - run_pipeline must never import the outcome layer: if exposure could see
         outcomes, `PHASE0_RUNBOOK.md` “Exposure classifier tests” leakage becomes possible by
-        accident.
+        accident. The rule is paired with a test that proves it can still fail.
 IMPORTS: phase0.run_pipeline, phase0.pipeline.record, phase0.extract_prs, pytest.
 CONSUMED BY: `just test-phase0`. No network: the clone step is substituted.
 """
@@ -24,6 +24,7 @@ CONSUMED BY: `just test-phase0`. No network: the clone step is substituted.
 from __future__ import annotations
 
 import ast
+import importlib
 import inspect
 from dataclasses import fields
 from pathlib import Path
@@ -47,13 +48,46 @@ def _pr(pr_id: str, repo: str, files: tuple[str, ...] = ("acme/a.py",)) -> PRRec
     )
 
 
-def test_pipeline_cannot_see_outcomes() -> None:
-    """Exposure must be computable without knowing whether the PR broke anything."""
-    tree = ast.parse(inspect.getsource(run_pipeline))
-    imported = {
+def _imported_modules(module: object) -> set[str]:
+    """Every `from X import ...` target in a module's source."""
+    tree = ast.parse(inspect.getsource(module))  # type: ignore[arg-type]
+    return {
         node.module for node in ast.walk(tree) if isinstance(node, ast.ImportFrom) and node.module
     }
-    assert "phase0.scan_outcome" not in imported
+
+
+def test_pipeline_cannot_see_outcomes() -> None:
+    """Exposure must be computable without knowing whether the PR broke anything.
+
+    This named `phase0.scan_outcome` until that module became the `phase0.outcome`
+    package. The name it forbade then referred to nothing, so the assertion could not
+    fail and the isolation it protects was unguarded -- run_pipeline could have imported
+    `phase0.outcome.scan` and this test would still have been green.
+    """
+    leaked = {name for name in _imported_modules(run_pipeline) if name.startswith("phase0.outcome")}
+
+    assert leaked == set()
+
+
+def test_the_leak_rule_can_actually_fail() -> None:
+    """The rule above is quiet. This is what proves it is quiet for the right reason.
+
+    `handlabel/draw.py` genuinely imports the outcome layer, so the same rule applied to
+    it must fire. Without this, a prefix that matched nothing -- another rename, a typo --
+    would read exactly like isolation holding.
+    """
+    # importlib, not `from phase0.handlabel import draw`: that binds the FUNCTION named
+    # draw, whose source contains no imports at all -- the rule then reads as isolation
+    # holding on a module that is not even being looked at.
+    draw = importlib.import_module("phase0.handlabel.draw")
+
+    leaked = {name for name in _imported_modules(draw) if name.startswith("phase0.outcome")}
+
+    assert leaked == {
+        "phase0.outcome.conclusion",
+        "phase0.outcome.scan",
+        "phase0.outcome.window",
+    }
 
 
 def test_grouping_is_deterministic_and_sorted() -> None:
