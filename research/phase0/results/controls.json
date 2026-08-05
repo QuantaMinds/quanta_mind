@@ -17,8 +17,8 @@
   "negative_controls": [
     {
       "ci": [
-        0.641046532116256,
-        1.809171808138166
+        0.6410465321162561,
+        1.8091718081381658
       ],
       "detail": "method=cluster-robust",
       "name": "negative:symbol_initial_a_to_m",
@@ -27,26 +27,27 @@
     },
     {
       "ci": [
-        0.5715113358962426,
-        1.7497465705239308
+        0.5715113358962423,
+        1.7497465705239303
       ],
       "detail": "method=cluster-robust",
       "name": "negative:symbol_length_even",
       "passed": true,
-      "relative_risk": 1.0000000000000002
+      "relative_risk": 1.0
     },
     {
       "ci": [
-        0.5715113358962426,
-        1.7497465705239308
+        0.5715113358962423,
+        1.7497465705239303
       ],
       "detail": "method=cluster-robust",
       "name": "negative:repo_name_length_odd",
       "passed": true,
-      "relative_risk": 1.0000000000000002
+      "relative_risk": 1.0
     }
   ],
   "planted_break_detection_rate": 1.0,
+  "planted_breaks_unscannable": 0,
   "positive_control": {
     "ci": [
       3.1171684508250337,
@@ -58,13 +59,19 @@
   },
   "reconciliation": {
     "bounds_agree_on_gate": true,
+    "bounds_agree_on_gate_with_unscannable": true,
     "conserved": true,
     "corpus_units": 80,
     "detection_recall": 1.0,
     "excluded_from_control_arm": 0,
     "excluded_from_exposed_arm": 0,
     "excluded_total": 0,
+    "excluded_unscannable_outcome": 0,
     "planted_exposure_detected": "40/40",
+    "rr_bounds_over_all_exclusions": [
+      8.0,
+      8.0
+    ],
     "rr_bounds_over_exclusions": [
       8.0,
       8.0
@@ -75,6 +82,11 @@
       "c": 4,
       "d": 36,
       "in_table": 80
+    },
+    "unaccounted_units": 0,
+    "unscannable_by_arm": {
+      "exposed": 0,
+      "unexposed": 0
     }
   },
   "synthetic_repos": 80
