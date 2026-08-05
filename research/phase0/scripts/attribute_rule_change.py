@@ -13,7 +13,8 @@ WHY:  "Both changes can only remove verdicts" protects against inflation. It say
 
       Four variants in one clone visit rather than four runs: cloning is the entire cost
       here, and four passes would take two hours to answer a question one pass answers.
-IMPORTS: phase0.{fix_signals,handlabel.select,github_pulls}, phase0.pipeline.*.
+IMPORTS: phase0.outcome.{signals,scan,window}, phase0.{handlabel.select,github_pulls},
+         phase0.pipeline.*.
 CONSUMED BY: run by hand; result recorded in the pre-registration.
 """
 
@@ -25,12 +26,13 @@ from collections import Counter
 from datetime import timedelta
 from pathlib import Path
 
-from phase0 import fix_signals
 from phase0.github_pulls import merge_info, require_token
 from phase0.handlabel.select import eligible_prs
+from phase0.outcome import signals
+from phase0.outcome.scan import GIT_LOOKUP_ERRORS, WINDOW_DAYS, _merged_at
+from phase0.outcome.window import candidates
 from phase0.pipeline.assemble import Rejection, build_record
 from phase0.pipeline.worktree import CloneFailed, cloned
-from phase0.scan_outcome import GIT_LOOKUP_ERRORS, WINDOW_DAYS, _candidates, _merged_at
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE = ROOT / "data" / "AIDev_BC_Analyser.zip"
@@ -56,7 +58,7 @@ def _verdicts(repo_path: Path, record: object) -> dict[str, bool]:
         return broke
 
     try:
-        window = _candidates(
+        window = candidates(
             repo,
             start,
             start + timedelta(days=WINDOW_DAYS),
@@ -64,17 +66,17 @@ def _verdicts(repo_path: Path, record: object) -> dict[str, bool]:
         )
         for commit in window:
             message = str(commit.message)
-            if fix_signals.reverts(message, record.merged_sha):  # type: ignore[attr-defined]
+            if signals.reverts(message, record.merged_sha):  # type: ignore[attr-defined]
                 return dict.fromkeys(VARIANTS, True)
             try:
                 touched = frozenset(str(n) for n in commit.stats.files)
             except GIT_LOOKUP_ERRORS:
                 continue
             overlap_any = bool(touched & changed)
-            overlap_focused = fix_signals.is_focused(touched, changed)
-            body_hit = fix_signals.mentions_breakage(message)
-            subject_hit = fix_signals.mentions_breakage(fix_signals.subject(message))
-            revert_hit = fix_signals.looks_like_a_revert(message)
+            overlap_focused = signals.is_focused(touched, changed)
+            body_hit = signals.mentions_breakage(message)
+            subject_hit = signals.mentions_breakage(signals.subject(message))
+            revert_hit = signals.looks_like_a_revert(message)
 
             broke["neither"] |= overlap_any and (body_hit or revert_hit)
             broke["subject_only"] |= overlap_any and (subject_hit or revert_hit)
