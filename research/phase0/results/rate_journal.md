@@ -81,3 +81,9 @@ repository even when it produced no rows.
 | SirVer/ultisnips | 2262795916 | no | file_set | integrity | 3 | 9 | 0 | 0 | 7632 | - |
 | SirVer/ultisnips | 2380702095 | yes | - | - | 5 | 8 | 8 | 2 | 7632 | clean |
 <!-- repo-done: SirVer/ultisnips -->
+| Skyvern-AI/skyvern | 2274425518 | yes | - | - | 1 | 1 | 1 | 2 | 13976 | clean |
+| Skyvern-AI/skyvern | 2275685120 | yes | - | - | 1 | 3 | 3 | 2 | 13976 | clean |
+| Skyvern-AI/skyvern | 2334155600 | no | no_symbols | restricted | 2 | 11 | 0 | 0 | 13976 | - |
+| Skyvern-AI/skyvern | 2371172565 | yes | - | - | 1 | 1 | 1 | 1 | 13976 | clean |
+| Skyvern-AI/skyvern | 2371342937 | no | parent_commit | integrity | 3 | 1 | 0 | 0 | 13976 | - |
+<!-- repo-done: Skyvern-AI/skyvern -->

@@ -1247,6 +1247,15 @@ convergence on 11.3% would be mildly suspicious rather than reassuring.**
 defects; changing it again to land inside a band would be fitting to a figure from a
 different study on a different outcome variable.
 
+**Re-measured on the same 22 repositories: 27.3% → 17.6%** (9 breakages of 33 became 6
+of 34). That is inside the 8–20% band fixed above, and it is deliberately **not** on
+11.3% — it sits above the published figure, which is the direction the difference in
+what is measured predicts. A seven-day behavioural repair window should catch runtime,
+semantic and integration breakage that an AST-based detector cannot see.
+
+The rule is now closed to further tuning. It was changed once, on two named defects,
+before the labels were drawn.
+
 **Over-removal is the risk the "can only remove verdicts" argument does not cover.** It
 protects against inflation and not against losing real events, and `a >= 20` binds on the
 exposed arm. So the drop is attributed to each fix **separately** — a legitimate repair
