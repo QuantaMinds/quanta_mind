@@ -17,7 +17,8 @@ WHY:  The journal already lets a killed run RESUME. It does not let anyone work 
 
       So this writes three things and rewrites nothing:
       - `timeline.jsonl`, one timestamped line per event, flushed immediately
-      - `repos/NNN_owner__name.json`, a full snapshot as each repository closes
+      - `repos/NNN-NNN/NNN_owner__name.json`, a snapshot as each repository closes,
+        sharded in blocks of ten so a thirty-hour run does not bury a directory
       - `shape_latest.json`, the running report, so the shape is readable mid-run
 
       The per-repo file carries that repository's rows in full, so a snapshot is
@@ -57,6 +58,10 @@ class RunTrace:
         self.root = root
         self.repos = root / "repos"
         self.repos.mkdir(parents=True, exist_ok=True)
+        # Blocks of ten. A full run walks hundreds of repositories, and a directory with
+        # one entry per repository is unreadable long before it is large -- the same
+        # reason the source tree caps directory fan-out at fifteen.
+        self.block = 10
         self.started = _now()
         self.errors: list[str] = []
         self._write(
@@ -107,10 +112,13 @@ class RunTrace:
         are needed: the snapshot must be self-contained, and the shape must be cumulative.
         """
         stem = f"{position:03d}_{repo.replace('/', '__')}"
+        lo = ((position - 1) // self.block) * self.block + 1
+        shard = self.repos / f"{lo:03d}-{lo + self.block - 1:03d}"
+        shard.mkdir(parents=True, exist_ok=True)
         admitted = [a for a in rows if a.admitted]
         scanned = [a for a in rows if a.outcome in ("broke", "clean")]
         self._write(
-            self.repos / f"{stem}.json",
+            shard / f"{stem}.json",
             {
                 "repo": repo,
                 "position": position,

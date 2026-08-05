@@ -46,7 +46,8 @@ def test_one_finished_repository_leaves_a_readable_record(tmp_path: Path) -> Non
     rows = [_attempt("1", True, "broke"), _attempt("2", False)]
     trace.repo_done("a/b", 1, 30, rows, rows, clone_failures=0, started=trace.stamp())
 
-    snapshot = json.loads((tmp_path / "repos" / "001_a__b.json").read_text())
+    # Sharded in blocks of ten: repository 1 lands in `001-010`, not loose in `repos/`.
+    snapshot = json.loads((tmp_path / "repos" / "001-010" / "001_a__b.json").read_text())
     assert snapshot["repo"] == "a/b"
     assert (snapshot["attempts"], snapshot["admitted"], snapshot["broke"]) == (2, 1, 1)
     assert snapshot["arms"] == ["OpenAI_Codex"]
@@ -73,3 +74,17 @@ def test_the_timeline_is_flushed_per_event_not_at_the_end(tmp_path: Path) -> Non
     assert lines[2]["error"] == "timeout after 600s"
     # Every line carries the one clock, in order.
     assert [x["ts"] for x in lines] == sorted(x["ts"] for x in lines)
+
+
+def test_snapshots_shard_so_no_directory_exceeds_the_fan_out_cap(tmp_path: Path) -> None:
+    """A full run walks hundreds of repositories; one directory would bury them all."""
+    trace = RunTrace(tmp_path, {"arm": "agent"})
+    rows = [_attempt("1", True, "clean")]
+    for position in (1, 10, 11, 25):
+        trace.repo_done(f"a/r{position}", position, 30, rows, rows, 0, trace.stamp())
+
+    shards = sorted(p.name for p in (tmp_path / "repos").iterdir())
+    assert shards == ["001-010", "011-020", "021-030"]
+    assert (tmp_path / "repos" / "001-010" / "010_a__r10.json").is_file()
+    assert (tmp_path / "repos" / "011-020" / "011_a__r11.json").is_file()
+    assert max(len(list(p.iterdir())) for p in (tmp_path / "repos").iterdir()) <= 15

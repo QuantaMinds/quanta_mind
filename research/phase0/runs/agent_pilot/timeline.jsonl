@@ -1,0 +1,53 @@
+{"arm": "agent", "kind": "run_start", "population": 3566, "tally": {"Claude_Code": 47, "Copilot": 271, "Cursor": 132, "Devin": 301, "OpenAI_Codex": 2815}, "ts": "2026-08-05T22:34:44+00:00"}
+{"kind": "repo_start", "of": 30, "position": 5, "prs": 2, "repo": "567-labs/kura", "ts": "2026-08-05T22:34:44+00:00"}
+{"admitted": 2, "attempts": 2, "broke": 2, "kind": "repo_done", "of": 30, "position": 5, "repo": "567-labs/kura", "ts": "2026-08-05T22:35:20+00:00"}
+{"kind": "repo_start", "of": 30, "position": 6, "prs": 5, "repo": "AMICI-dev/AMICI", "ts": "2026-08-05T22:35:20+00:00"}
+{"admitted": 5, "attempts": 5, "broke": 0, "kind": "repo_done", "of": 30, "position": 6, "repo": "AMICI-dev/AMICI", "ts": "2026-08-05T22:36:12+00:00"}
+{"kind": "repo_start", "of": 30, "position": 7, "prs": 3, "repo": "APPFL/APPFL", "ts": "2026-08-05T22:36:12+00:00"}
+{"admitted": 3, "attempts": 3, "broke": 0, "kind": "repo_done", "of": 30, "position": 7, "repo": "APPFL/APPFL", "ts": "2026-08-05T22:36:29+00:00"}
+{"kind": "repo_start", "of": 30, "position": 8, "prs": 7, "repo": "AgentOps-AI/agentops", "ts": "2026-08-05T22:36:29+00:00"}
+{"admitted": 4, "attempts": 7, "broke": 1, "kind": "repo_done", "of": 30, "position": 8, "repo": "AgentOps-AI/agentops", "ts": "2026-08-05T22:39:06+00:00"}
+{"kind": "repo_start", "of": 30, "position": 9, "prs": 2, "repo": "AliAkhtari78/SpotifyScraper", "ts": "2026-08-05T22:39:06+00:00"}
+{"admitted": 2, "attempts": 2, "broke": 2, "kind": "repo_done", "of": 30, "position": 9, "repo": "AliAkhtari78/SpotifyScraper", "ts": "2026-08-05T22:39:33+00:00"}
+{"kind": "repo_start", "of": 30, "position": 10, "prs": 5, "repo": "Arize-ai/phoenix", "ts": "2026-08-05T22:39:33+00:00"}
+{"admitted": 4, "attempts": 5, "broke": 0, "kind": "repo_done", "of": 30, "position": 10, "repo": "Arize-ai/phoenix", "ts": "2026-08-05T22:40:13+00:00"}
+{"kind": "repo_start", "of": 30, "position": 11, "prs": 3, "repo": "Azure-Samples/openai-chat-vision-quickstart", "ts": "2026-08-05T22:40:13+00:00"}
+{"admitted": 1, "attempts": 3, "broke": 0, "kind": "repo_done", "of": 30, "position": 11, "repo": "Azure-Samples/openai-chat-vision-quickstart", "ts": "2026-08-05T22:40:41+00:00"}
+{"kind": "repo_start", "of": 30, "position": 12, "prs": 1, "repo": "Azure-Samples/rag-postgres-openai-python", "ts": "2026-08-05T22:40:41+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 30, "position": 12, "repo": "Azure-Samples/rag-postgres-openai-python", "ts": "2026-08-05T22:40:55+00:00"}
+{"kind": "repo_start", "of": 30, "position": 13, "prs": 1, "repo": "Azure/azure-functions-core-tools", "ts": "2026-08-05T22:40:55+00:00"}
+{"admitted": 0, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 30, "position": 13, "repo": "Azure/azure-functions-core-tools", "ts": "2026-08-05T22:41:13+00:00"}
+{"kind": "repo_start", "of": 30, "position": 14, "prs": 1, "repo": "Azure/azure-kusto-python", "ts": "2026-08-05T22:41:13+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 30, "position": 14, "repo": "Azure/azure-kusto-python", "ts": "2026-08-05T22:41:28+00:00"}
+{"kind": "repo_start", "of": 30, "position": 15, "prs": 3, "repo": "Azure/azure-sdk-for-java", "ts": "2026-08-05T22:41:28+00:00"}
+{"admitted": 0, "attempts": 3, "broke": 0, "kind": "repo_done", "of": 30, "position": 15, "repo": "Azure/azure-sdk-for-java", "ts": "2026-08-05T22:43:44+00:00"}
+{"kind": "repo_start", "of": 30, "position": 16, "prs": 2, "repo": "Azure/azure-sdk-for-net", "ts": "2026-08-05T22:43:44+00:00"}
+{"admitted": 0, "attempts": 2, "broke": 0, "kind": "repo_done", "of": 30, "position": 16, "repo": "Azure/azure-sdk-for-net", "ts": "2026-08-05T22:46:34+00:00"}
+{"kind": "repo_start", "of": 30, "position": 17, "prs": 7, "repo": "Azure/azure-sdk-for-python", "ts": "2026-08-05T22:46:34+00:00"}
+{"admitted": 4, "attempts": 7, "broke": 0, "kind": "repo_done", "of": 30, "position": 17, "repo": "Azure/azure-sdk-for-python", "ts": "2026-08-05T22:49:21+00:00"}
+{"kind": "repo_start", "of": 30, "position": 18, "prs": 2, "repo": "Azure/azure-sdk-tools", "ts": "2026-08-05T22:49:21+00:00"}
+{"admitted": 1, "attempts": 2, "broke": 0, "kind": "repo_done", "of": 30, "position": 18, "repo": "Azure/azure-sdk-tools", "ts": "2026-08-05T22:49:59+00:00"}
+{"kind": "repo_start", "of": 30, "position": 19, "prs": 2, "repo": "Azure/azure-storage-fuse", "ts": "2026-08-05T22:49:59+00:00"}
+{"admitted": 0, "attempts": 2, "broke": 0, "kind": "repo_done", "of": 30, "position": 19, "repo": "Azure/azure-storage-fuse", "ts": "2026-08-05T22:50:11+00:00"}
+{"kind": "repo_start", "of": 30, "position": 20, "prs": 2, "repo": "BOINC/boinc", "ts": "2026-08-05T22:50:11+00:00"}
+{"admitted": 0, "attempts": 2, "broke": 0, "kind": "repo_done", "of": 30, "position": 20, "repo": "BOINC/boinc", "ts": "2026-08-05T22:50:43+00:00"}
+{"kind": "repo_start", "of": 30, "position": 21, "prs": 2, "repo": "Bandit-HaxUnit/haxunit", "ts": "2026-08-05T22:50:43+00:00"}
+{"admitted": 1, "attempts": 2, "broke": 1, "kind": "repo_done", "of": 30, "position": 21, "repo": "Bandit-HaxUnit/haxunit", "ts": "2026-08-05T22:50:54+00:00"}
+{"kind": "repo_start", "of": 30, "position": 22, "prs": 2, "repo": "BeehiveInnovations/zen-mcp-server", "ts": "2026-08-05T22:50:54+00:00"}
+{"admitted": 2, "attempts": 2, "broke": 1, "kind": "repo_done", "of": 30, "position": 22, "repo": "BeehiveInnovations/zen-mcp-server", "ts": "2026-08-05T22:52:14+00:00"}
+{"kind": "repo_start", "of": 30, "position": 23, "prs": 4, "repo": "BerriAI/litellm", "ts": "2026-08-05T22:52:14+00:00"}
+{"admitted": 3, "attempts": 4, "broke": 0, "kind": "repo_done", "of": 30, "position": 23, "repo": "BerriAI/litellm", "ts": "2026-08-05T22:54:05+00:00"}
+{"kind": "repo_start", "of": 30, "position": 24, "prs": 1, "repo": "Blaizzy/mlx-audio", "ts": "2026-08-05T22:54:05+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 1, "kind": "repo_done", "of": 30, "position": 24, "repo": "Blaizzy/mlx-audio", "ts": "2026-08-05T22:54:50+00:00"}
+{"kind": "repo_start", "of": 30, "position": 25, "prs": 6, "repo": "Blaizzy/mlx-vlm", "ts": "2026-08-05T22:54:50+00:00"}
+{"admitted": 2, "attempts": 6, "broke": 1, "kind": "repo_done", "of": 30, "position": 25, "repo": "Blaizzy/mlx-vlm", "ts": "2026-08-05T22:55:31+00:00"}
+{"kind": "repo_start", "of": 30, "position": 26, "prs": 1, "repo": "BlueFalconHD/apple_generative_model_safety_decrypted", "ts": "2026-08-05T22:55:31+00:00"}
+{"admitted": 0, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 30, "position": 26, "repo": "BlueFalconHD/apple_generative_model_safety_decrypted", "ts": "2026-08-05T22:55:38+00:00"}
+{"kind": "repo_start", "of": 30, "position": 27, "prs": 1, "repo": "BoundaryML/baml", "ts": "2026-08-05T22:55:38+00:00"}
+{"admitted": 0, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 30, "position": 27, "repo": "BoundaryML/baml", "ts": "2026-08-05T22:56:05+00:00"}
+{"kind": "repo_start", "of": 30, "position": 28, "prs": 3, "repo": "ChaokunHong/MetaScreener", "ts": "2026-08-05T22:56:05+00:00"}
+{"admitted": 3, "attempts": 3, "broke": 0, "kind": "repo_done", "of": 30, "position": 28, "repo": "ChaokunHong/MetaScreener", "ts": "2026-08-05T22:56:38+00:00"}
+{"kind": "repo_start", "of": 30, "position": 29, "prs": 2, "repo": "ChristopheZhao/ChaGPT-API-Call", "ts": "2026-08-05T22:56:38+00:00"}
+{"admitted": 1, "attempts": 2, "broke": 0, "kind": "repo_done", "of": 30, "position": 29, "repo": "ChristopheZhao/ChaGPT-API-Call", "ts": "2026-08-05T22:56:47+00:00"}
+{"kind": "repo_start", "of": 30, "position": 30, "prs": 4, "repo": "ComposioHQ/composio", "ts": "2026-08-05T22:56:47+00:00"}
+{"admitted": 0, "attempts": 4, "broke": 0, "kind": "repo_done", "of": 30, "position": 30, "repo": "ComposioHQ/composio", "ts": "2026-08-05T22:57:23+00:00"}
