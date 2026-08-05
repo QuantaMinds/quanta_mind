@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import time
 import urllib.error
 import urllib.request
@@ -33,6 +34,9 @@ MAX_RETRIES = 5
 BACKOFF_BASE_S = 30
 # Honoured when present: GitHub states how long to wait, and guessing ignores it.
 RETRY_AFTER = "Retry-After"
+# Ceiling on an honoured Retry-After, so a mistaken or hostile header cannot stall a
+# 31-hour run. Exceeding it is PRINTED rather than applied quietly -- see `_retry_delay`.
+RETRY_AFTER_CAP_S = 900.0
 
 
 class MissingTokenError(RuntimeError):
@@ -80,9 +84,21 @@ def _retry_delay(error: urllib.error.HTTPError, attempt: int) -> float:
     stated = error.headers.get(RETRY_AFTER) if error.headers else None
     if stated:
         try:
-            return min(float(stated), 900.0)
+            asked = float(stated)
         except ValueError:
-            pass
+            return float(BACKOFF_BASE_S * (2**attempt))
+        if asked > RETRY_AFTER_CAP_S:
+            # Said out loud, because capping means DISREGARDING what GitHub told us.
+            # A stated 3600 capped to 900 retries into a still-active limit and burns
+            # an attempt, and over a 31-hour run the only trace would be a later
+            # failure with no explanation attached to it.
+            print(
+                f"rate limit: GitHub asked for {asked:.0f}s, waiting {RETRY_AFTER_CAP_S}s "
+                f"(capped); this retry may hit the same limit",
+                file=sys.stderr,
+                flush=True,
+            )
+        return min(asked, RETRY_AFTER_CAP_S)
     return float(BACKOFF_BASE_S * (2**attempt))
 
 

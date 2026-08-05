@@ -160,3 +160,37 @@ def test_retry_delay_backs_off_exponentially_without_a_header() -> None:
     bare = urllib.error.HTTPError("u", 403, "forbidden", {}, None)  # type: ignore[arg-type]
 
     assert [_retry_delay(bare, n) for n in range(4)] == [30.0, 60.0, 120.0, 240.0]
+
+
+def test_a_capped_retry_after_says_so(capsys) -> None:  # type: ignore[no-untyped-def]
+    """Capping means disregarding what GitHub asked for, and that must leave a trace.
+
+    A stated 3600 capped to 900 retries into a still-active limit and burns an attempt.
+    Over a 31-hour run the only evidence would otherwise be a later failure with nothing
+    attached explaining it.
+    """
+    asked_for_an_hour = urllib.error.HTTPError(
+        "u", 429, "too many", {"Retry-After": "3600"}, None  # type: ignore[arg-type]
+    )
+
+    assert _retry_delay(asked_for_an_hour, 0) == 900.0
+    warned = capsys.readouterr().err
+    assert "3600" in warned and "900" in warned
+
+
+def test_an_uncapped_retry_after_is_silent() -> None:
+    """No warning when nothing was disregarded -- an alarm that always fires is noise."""
+    ordinary = urllib.error.HTTPError(
+        "u", 429, "too many", {"Retry-After": "45"}, None  # type: ignore[arg-type]
+    )
+
+    assert _retry_delay(ordinary, 0) == 45.0
+
+
+def test_an_unparseable_retry_after_falls_back_to_backoff() -> None:
+    """A malformed header is not a reason to abandon the retry."""
+    junk = urllib.error.HTTPError(
+        "u", 429, "too many", {"Retry-After": "soon"}, None  # type: ignore[arg-type]
+    )
+
+    assert _retry_delay(junk, 1) == 60.0

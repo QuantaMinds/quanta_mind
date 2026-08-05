@@ -133,6 +133,12 @@ def run(
 
     seen = recorded = skipped = clone_failures = stage_failures = 0
 
+    # SERIAL over repositories, and that is load-bearing rather than incidental.
+    # GitHub's 100-concurrent and 900-points-per-minute ceilings are per ACCOUNT, not
+    # per process, so parallel repositories would share one budget and exhaust each
+    # other's -- surfacing as 403s that the retry policy would absorb as slowness until
+    # it could not. Parallelise the clone-and-analyse work if it is ever needed; the
+    # fetches must stay serialised, or revisit the rate-limit handling first.
     for repo_name, repo_prs in grouped.items():
         pending = [p for p in repo_prs if p.pr_id not in done]
         seen += len(repo_prs)
