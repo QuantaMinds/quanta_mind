@@ -1,180 +1,73 @@
 """Can a partial clone recover the repositories the timeout excludes?
 
-WHAT: Clones each timed-out repository three ways -- full, `blob:none`, `blob:limit=1m` --
-      and times the clone PLUS one real PR pipeline on each: parent resolution, the outcome
-      scan, and changed-symbol extraction.
-WHY:  Four clone timeouts have removed repositories with a median size of 959,522 KB
-      against 76,908 KB for those that cloned. That is a resource exclusion selecting on
-      repository size, which tracks project age, activity and release discipline -- the
-      same population the base-branch defect removed, arriving through a different door.
-      It is also the ONLY one of the four doors on to A16's confounder that is a property
-      of our clone command rather than of the data, so it is the only one that can be
-      closed rather than bounded.
+WHAT: Runs each timed-out repository through `blob:none` and `blob:limit=1m`, largest
+      first, and applies a decision rule fixed before any result was seen.
+WHY:  Nine clone failures removed repositories with a median size of 921,790 KB against
+      80,404 KB for those that cloned. That is a resource exclusion selecting on
+      repository size, which tracks project age, activity and release discipline -- and
+      it is the ONLY one of the four doors on to A16's confounder that is a property of
+      our clone command rather than of the data, so the only one that can be closed
+      rather than bounded.
 
-      Clone time alone would be the wrong measurement. Commit walks, `merge-base` and
-      `--name-only` compare tree OIDs and stay blob-free, but symbol extraction parses
-      real diff text and fetches -- in SINGLE-BLOB requests with no delta compression, so
-      a fast clone can be undone by hundreds of sequential round trips. Hence end-to-end,
-      and hence `blob:limit=1m` alongside `blob:none`: Python sources sit far below 1 MB
-      and arrive in the initial pack, skipping only the binaries that make these
-      repositories a gigabyte.
-      The filter is ASSERTED, not assumed. A server may deny a filter and silently serve a
-      full clone; `remote.origin.partialclonefilter` says whether it actually applied. An
-      unapplied filter reporting a fast clone would be one more absence read as success.
-IMPORTS: stdlib subprocess/time/json; phase0.{parent_commit,outcome.scan,pipeline.changed}.
+      `full` is deliberately absent. Every target is a repository the re-scan already
+      tried to clone in full and timed out on, so re-running it would cost eight more
+      timeouts to re-observe a result already in the journal. The baseline is measured.
+
+      `blob:limit=1m` is tested alongside `blob:none` because it is the better fit for
+      this workload: Python sources sit far below 1 MB and arrive in the initial pack,
+      so only the binaries that make these repositories a gigabyte are skipped, and
+      nothing is lazily fetched for the files the pipeline actually parses.
+
+      DECISION RULE, fixed before looking: a variant wins only if EVERY target completes
+      clone plus one full PR pipeline inside CLONE_TIMEOUT_S. Lazy-fetch counts break a
+      tie and never move that rule. If neither variant wins, the current strategy stands
+      and A17 keeps the bound -- a legitimate outcome, which is why the bound was
+      recorded before this probe was designed.
+IMPORTS: stdlib json/pathlib; audit.clone_variants.
 CONSUMED BY: run by hand before the full run; writes results/partial_clone.json.
 """
 
 from __future__ import annotations
 
 import json
-import shutil
-import subprocess
 import sys
-import time
 from pathlib import Path
 
 sys.path.insert(0, "E:/Code/quanta_mind/research/phase0/src")
+sys.path.insert(0, str(Path(__file__).parent))
 
-from phase0.extract_prs import PRRecord
-from phase0.outcome.scan import scan
-from phase0.parent_commit import resolve
-from phase0.pipeline.changed import changed_python_files
+from clone_variants import probe
+
 from phase0.pipeline.worktree import CLONE_TIMEOUT_S
 
 RESULTS = Path("E:/Code/quanta_mind/research/phase0/results")
-CACHE = Path("E:/Code/quanta_mind/research/phase0/data/gh_cache")
 WORK = Path("E:/Code/quanta_mind/research/phase0/data/partial_clone_probe")
 
-# `full` is deliberately absent. Every target here is a repository the re-scan already
-# tried to clone in full and timed out on at 900s, so running it again would cost eight
-# more timeouts -- two hours -- to re-observe a result already in the journal. The
-# baseline is measured; what is unmeasured is whether a filter beats it.
 VARIANTS = {
     "blob_none": ["--filter=blob:none"],
     "blob_limit_1m": ["--filter=blob:limit=1m"],
 }
 
 
-def _failed(repo: str, variant: str, why: str, seconds: float) -> dict[str, object]:
-    """A clone that never produced a tree. `within_timeout` is False, never absent."""
-    return {
-        "repo": repo,
-        "variant": variant,
-        "outcome": why,
-        "clone_s": round(seconds, 1),
-        "within_timeout": False,
-    }
-
-
-def _filter_applied(target: Path) -> str:
-    out = subprocess.run(
-        ["git", "config", "--get", "remote.origin.partialclonefilter"],
-        cwd=target,
-        capture_output=True,
-        text=True,
-        timeout=30,
-        check=False,
-    )
-    return out.stdout.strip() or "none"
-
-
-def _tree_size_kb(target: Path) -> int:
-    return sum(f.stat().st_size for f in target.rglob("*") if f.is_file()) // 1024
-
-
-def _promisor_objects(target: Path) -> int:
-    """Packs marked promisor, i.e. arriving from a lazy fetch rather than the clone.
-
-    The tie-breaker, not a threshold. A variant can win on total time while paying it in
-    hundreds of single-blob round trips, which have no delta compression and degrade
-    sharply with network variance; one that fetches the same content in a single pack is
-    more robust at the same wall time. Aggregate seconds cannot show the difference.
-    """
-    packs = target / ".git" / "objects" / "pack"
-    return len(list(packs.glob("*.promisor"))) if packs.is_dir() else 0
-
-
-def probe(repo: str, variant: str, pr: dict) -> dict:
-    target = WORK / f"{repo.replace('/', '__')}__{variant}"
-    if target.exists():
-        shutil.rmtree(target, ignore_errors=True)
-    target.parent.mkdir(parents=True, exist_ok=True)
-
-    started = time.monotonic()
-    try:
-        clone = [
-            "git",
-            "clone",
-            "--quiet",
-            *VARIANTS[variant],
-            f"https://github.com/{repo}.git",
-            str(target),
-        ]
-        code = subprocess.run(
-            clone, capture_output=True, text=True, timeout=CLONE_TIMEOUT_S, check=False
-        ).returncode
-    except subprocess.TimeoutExpired:
-        return _failed(repo, variant, "clone_timeout", float(CLONE_TIMEOUT_S))
-    clone_s = time.monotonic() - started
-    if code != 0:
-        return _failed(repo, variant, "clone_failed", clone_s)
-
-    applied = _filter_applied(target)
-    before_objects = _promisor_objects(target)
-    # The pipeline, on one real PR: parent resolution, symbol-bearing file diff, and the
-    # outcome walk. This is where a partial clone pays its lazy-fetch cost, if it pays.
-    pipeline_started = time.monotonic()
-    parent = resolve(target, pr["merge_sha"], frozenset(pr["files"]), pr["commits"], pr["subjects"])
-    derived = (
-        changed_python_files(target, parent.parent_sha, pr["merge_sha"])
-        if parent.is_resolved
-        else []
-    )
-    record = PRRecord(
-        pr_id=str(pr["pr_id"]),
-        repo=repo,
-        language="python",
-        parent_sha=parent.parent_sha,
-        merged_sha=pr["merge_sha"],
-        merged_at=pr["merged_at"],
-        changed_files=tuple(derived),
-        changed_symbols=(),
-        base_ref=pr["base_ref"],
-    )
-    verdict = scan(target, record)
-    pipeline_s = time.monotonic() - pipeline_started
-
-    total = clone_s + pipeline_s
-    result = {
-        "repo": repo,
-        "variant": variant,
-        "outcome": "ok",
-        "partialclonefilter": applied,
-        # Asserted, never assumed: github.com may deny a filter and quietly serve a full
-        # clone, which would show as a fast variant that is really the baseline.
-        "filter_actually_applied": applied != "none",
-        "clone_s": round(clone_s, 1),
-        "pipeline_s": round(pipeline_s, 1),
-        "total_s": round(total, 1),
-        "within_timeout": total < CLONE_TIMEOUT_S,
-        "size_kb": _tree_size_kb(target),
-        # Tie-breaker: lazy fetches the pipeline triggered, over and above the clone.
-        "lazy_fetches": _promisor_objects(target) - before_objects,
-        "parent_resolved": parent.is_resolved,
-        "derived_files": len(derived),
-        "scan_outcome": verdict.outcome.value,
-    }
-    shutil.rmtree(target, ignore_errors=True)
-    return result
-
-
 def main() -> int:
     targets = json.loads((RESULTS / "partial_clone_targets.json").read_text(encoding="utf-8"))
-    rows = []
+    sizes = json.loads((RESULTS / "probe_sizes.json").read_text(encoding="utf-8"))
+    # Largest first. One failure eliminates a variant, so the case most likely to
+    # eliminate should run first rather than after an hour of confirmations.
+    targets.sort(key=lambda entry: -sizes.get(entry["repo"], 0))
+
+    # Resume: a crash mid-probe must not discard the hours already spent. Each measured
+    # (repo, variant) is skipped rather than repeated.
+    existing = RESULTS / "partial_clone.json"
+    rows: list[dict] = (
+        json.loads(existing.read_text(encoding="utf-8")) if existing.is_file() else []
+    )
+    done = {(r["repo"], r["variant"]) for r in rows}
     for entry in targets:
-        for variant in VARIANTS:
-            row = probe(entry["repo"], variant, entry)
+        for variant, flags in VARIANTS.items():
+            if (entry["repo"], variant) in done:
+                continue
+            row = probe(entry["repo"], variant, flags, entry, WORK)
             rows.append(row)
             print(json.dumps(row), flush=True)
             (RESULTS / "partial_clone.json").write_text(
@@ -186,12 +79,15 @@ def main() -> int:
     for variant in VARIANTS:
         got = [r for r in rows if r["variant"] == variant]
         passed = [r for r in got if r.get("within_timeout")]
-        applied = all(r.get("filter_actually_applied", False) for r in got if r["outcome"] == "ok")
+        honoured = all(r.get("filter_actually_applied", False) for r in got if r["outcome"] == "ok")
         lazy = sum(int(r.get("lazy_fetches", 0)) for r in got)
         print(
-            f"  {variant:<14} {len(passed)}/{len(got)} in time | filter honoured: {applied}"
-            f" | lazy fetches: {lazy}"
+            f"  {variant:<14} {len(passed)}/{len(got)} in time | filter honoured: "
+            f"{honoured} | lazy fetches: {lazy}"
         )
+        for row in got:
+            if row["outcome"] != "ok":
+                print(f"      {row['repo']}: {row['outcome']} -- {row.get('stderr', '')[:120]}")
     print("Lazy fetches break a tie only. They do not move the rule above.")
     return 0
 
