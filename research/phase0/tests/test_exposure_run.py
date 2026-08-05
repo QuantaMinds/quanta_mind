@@ -80,3 +80,27 @@ def test_an_unknown_flag_is_rejected_rather_than_ignored(tmp_path: Path) -> None
     """`python -m` on a module without argparse swallowed every flag silently."""
     with pytest.raises(SystemExit):
         exposure_run.parse(["--not-a-real-flag"])
+
+
+def test_from_journal_is_offered_when_no_records_exist(tmp_path: Path) -> None:
+    """The corpus was measured before `--records` existed, so this path is not optional.
+
+    Re-running the pilot cannot recover them: it resumes from the journal, finds every
+    repository done, and writes nothing. The message must name the way out, because the
+    alternative a reader would reach for does not work.
+    """
+    args = exposure_run.parse(["--from-journal", "j.md"])
+
+    assert args.from_journal == Path("j.md")
+
+
+def test_the_refusal_names_both_ways_out(tmp_path: Path, capsys) -> None:  # type: ignore[no-untyped-def]
+    """A refusal that does not say what to do next gets worked around, not obeyed."""
+    exposure_run.main(
+        ["--records", str(tmp_path / "absent.jsonl"), "--out", str(tmp_path / "o.jsonl"),
+         "--workspace", str(tmp_path / "ws")]
+    )
+
+    message = capsys.readouterr().err
+    assert "--from-journal" in message
+    assert "pilot.run --records" in message
