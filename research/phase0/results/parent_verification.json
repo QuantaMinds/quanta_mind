@@ -1,0 +1,499 @@
+[
+  {
+    "band": "6-20",
+    "pr": "567-labs/instructor#1319",
+    "commits": 7,
+    "shape": "squash",
+    "reason": "0 consecutive subject match(es): one commit, so squashed",
+    "parent": "ccfa60a8f2",
+    "base_ref": "main",
+    "parent_on_base_branch": "yes",
+    "merge_reachable_from_base": true,
+    "parent_subject": "fix: Programmatically remove control characters from LLM response (#13",
+    "merge_subject": "feat: Add support for perplexity sonar (#1319)",
+    "diff_py": [
+      "instructor/__init__.py",
+      "instructor/client_perplexity.py",
+      "instructor/dsl/iterable.py",
+      "instructor/dsl/partial.py",
+      "instructor/function_calls.py",
+      "instructor/mode.py"
+    ],
+    "github_py": [
+      "instructor/__init__.py",
+      "instructor/client_perplexity.py",
+      "instructor/dsl/iterable.py",
+      "instructor/dsl/partial.py",
+      "instructor/function_calls.py",
+      "instructor/mode.py"
+    ],
+    "sets_equal": true
+  },
+  {
+    "band": "2-5",
+    "pr": "567-labs/instructor#1334",
+    "commits": 3,
+    "shape": "squash",
+    "reason": "0 consecutive subject match(es): one commit, so squashed",
+    "parent": "4ac0f5603e",
+    "base_ref": "main",
+    "parent_on_base_branch": "yes",
+    "merge_reachable_from_base": true,
+    "parent_subject": "fix: update litellm changes",
+    "merge_subject": "Add Deepseek Reasoning example (#1334)",
+    "diff_py": [
+      "tests/llm/test_openai/test_multimodal.py"
+    ],
+    "github_py": [
+      "tests/llm/test_openai/test_multimodal.py"
+    ],
+    "sets_equal": true
+  },
+  {
+    "band": "6-20",
+    "pr": "567-labs/instructor#1420",
+    "commits": 8,
+    "shape": "squash",
+    "reason": "0 consecutive subject match(es): one commit, so squashed",
+    "parent": "5a4d433dc6",
+    "base_ref": "main",
+    "parent_on_base_branch": "yes",
+    "merge_reachable_from_base": true,
+    "parent_subject": "docs(github): update cursor rules with proper website link and multili",
+    "merge_subject": "Adding Streaming for Mistral and VertexAI (#1420)",
+    "diff_py": [
+      "instructor/client_mistral.py",
+      "instructor/dsl/iterable.py",
+      "instructor/dsl/partial.py",
+      "tests/llm/test_mistral/test_stream.py",
+      "tests/llm/test_vertexai/test_stream.py",
+      "tests/llm/test_vertexai/util.py"
+    ],
+    "github_py": [
+      "instructor/client_mistral.py",
+      "instructor/dsl/iterable.py",
+      "instructor/dsl/partial.py",
+      "tests/llm/test_mistral/test_stream.py",
+      "tests/llm/test_vertexai/test_stream.py",
+      "tests/llm/test_vertexai/util.py"
+    ],
+    "sets_equal": true
+  },
+  {
+    "band": "2-5",
+    "pr": "567-labs/instructor#1544",
+    "commits": 3,
+    "shape": "squash",
+    "reason": "0 consecutive subject match(es): one commit, so squashed",
+    "parent": "7c749cd5bb",
+    "base_ref": "main",
+    "parent_on_base_branch": "yes",
+    "merge_reachable_from_base": true,
+    "parent_subject": "feat: Implementing support for responses (#1520)",
+    "merge_subject": "fix: remove failing test (#1544)",
+    "diff_py": [
+      "tests/llm/test_openai/test_responses_tools.py",
+      "tests/test_auto_client.py"
+    ],
+    "github_py": [
+      "tests/llm/test_openai/test_responses_tools.py",
+      "tests/test_auto_client.py"
+    ],
+    "sets_equal": true
+  },
+  {
+    "band": "21+",
+    "pr": "ACEsuit/mace#841",
+    "commits": 30,
+    "shape": "merge_commit",
+    "reason": "",
+    "parent": "3e578b02e6",
+    "base_ref": "main",
+    "parent_on_base_branch": "yes",
+    "merge_reachable_from_base": true,
+    "parent_subject": "Merge pull request #818 from ACEsuit/develop",
+    "merge_subject": "Merge pull request #841 from ACEsuit/develop",
+    "diff_py": [
+      "mace/cli/convert_cueq_e3nn.py",
+      "mace/cli/convert_e3nn_cueq.py",
+      "mace/cli/plot_train.py",
+      "mace/cli/run_train.py",
+      "mace/cli/visualise_train.py",
+      "mace/data/__init__.py"
+    ],
+    "github_py": [
+      "mace/cli/convert_cueq_e3nn.py",
+      "mace/cli/convert_e3nn_cueq.py",
+      "mace/cli/plot_train.py",
+      "mace/cli/run_train.py",
+      "mace/cli/visualise_train.py",
+      "mace/data/__init__.py"
+    ],
+    "sets_equal": true
+  },
+  {
+    "band": "1",
+    "pr": "AgentOps-AI/agentops#647",
+    "commits": 1,
+    "shape": "squash",
+    "reason": "0 consecutive subject match(es): one commit, so squashed",
+    "parent": "06d64d93f8",
+    "base_ref": "main",
+    "parent_on_base_branch": "yes",
+    "merge_reachable_from_base": true,
+    "parent_subject": "Remove old tox.ini (#649)",
+    "merge_subject": "Move `agentops.enums` to their respective module (#647)",
+    "diff_py": [
+      "agentops/enums.py",
+      "agentops/event.py",
+      "agentops/partners/autogen_logger.py",
+      "agentops/session.py"
+    ],
+    "github_py": [
+      "agentops/enums.py",
+      "agentops/event.py",
+      "agentops/partners/autogen_logger.py",
+      "agentops/session.py"
+    ],
+    "sets_equal": true
+  },
+  {
+    "band": "6-20",
+    "pr": "AgentOps-AI/agentops#714",
+    "commits": 7,
+    "shape": "squash",
+    "reason": "0 consecutive subject match(es): one commit, so squashed",
+    "parent": "6d293aea32",
+    "base_ref": "redesign",
+    "parent_on_base_branch": "yes",
+    "merge_reachable_from_base": true,
+    "parent_subject": "Squash merge redesign-session-client-remove-signals into redesign-old",
+    "merge_subject": "Client HTTP Module Refactoring and Test Fixes (#714)",
+    "diff_py": [
+      "agentops/client/__init__.py",
+      "agentops/client/api.py",
+      "agentops/client/api/__init__.py",
+      "agentops/client/api/base.py",
+      "agentops/client/api/versions/__init__.py",
+      "agentops/client/api/versions/v3.py"
+    ],
+    "github_py": [
+      "agentops/client/__init__.py",
+      "agentops/client/api.py",
+      "agentops/client/api/__init__.py",
+      "agentops/client/api/base.py",
+      "agentops/client/api/versions/__init__.py",
+      "agentops/client/api/versions/v3.py"
+    ],
+    "sets_equal": true
+  },
+  {
+    "band": "2-5",
+    "pr": "AgentOps-AI/agentops#811",
+    "commits": 5,
+    "shape": "squash",
+    "reason": "0 consecutive subject match(es): one commit, so squashed",
+    "parent": "7dbe990fb8",
+    "base_ref": "dev",
+    "parent_on_base_branch": "NO",
+    "merge_reachable_from_base": false,
+    "parent_subject": "Add Streaming support for AgentsInstrumentor and update SpanKind defin",
+    "merge_subject": "Added Examples for OpenAI (#811)",
+    "diff_py": [],
+    "github_py": [],
+    "sets_equal": true
+  },
+  {
+    "band": "2-5",
+    "pr": "AgentOps-AI/agentops#817",
+    "commits": 3,
+    "shape": "squash",
+    "reason": "0 consecutive subject match(es): one commit, so squashed",
+    "parent": "ff0141f57f",
+    "base_ref": "dev",
+    "parent_on_base_branch": "NO",
+    "merge_reachable_from_base": false,
+    "parent_subject": "Squash merge dev-internal-processor into dev",
+    "merge_subject": "Added Anthropic examples (#817)",
+    "diff_py": [],
+    "github_py": [],
+    "sets_equal": true
+  },
+  {
+    "band": "6-20",
+    "pr": "AgentOps-AI/agentops#818",
+    "commits": 12,
+    "shape": "squash",
+    "reason": "0 consecutive subject match(es): one commit, so squashed",
+    "parent": "9f10111b24",
+    "base_ref": "dev",
+    "parent_on_base_branch": "NO",
+    "merge_reachable_from_base": false,
+    "parent_subject": "Added Anthropic examples (#817)",
+    "merge_subject": "fix: checks for `dev` before release (#818)",
+    "diff_py": [
+      "agentops/__init__.py",
+      "agentops/client/api/__init__.py",
+      "agentops/client/api/base.py",
+      "agentops/client/api/types.py",
+      "agentops/client/api/versions/__init__.py",
+      "agentops/client/client.py"
+    ],
+    "github_py": [
+      "agentops/__init__.py",
+      "agentops/client/api/__init__.py",
+      "agentops/client/api/base.py",
+      "agentops/client/api/types.py",
+      "agentops/client/api/versions/__init__.py",
+      "agentops/client/client.py"
+    ],
+    "sets_equal": false
+  },
+  {
+    "band": "2-5",
+    "pr": "AgentOps-AI/agentops#819",
+    "commits": 3,
+    "shape": "ambiguous",
+    "reason": "commit unavailable: SHA b'78bcbd876a22699824b67ad98b6e25bd91642152' co",
+    "parent": "",
+    "base_ref": "dev-cleanup",
+    "parent_on_base_branch": "",
+    "merge_reachable_from_base": false,
+    "parent_subject": "",
+    "merge_subject": "",
+    "diff_py": [],
+    "github_py": [
+      "examples/agents-examples/agent_patterns/agents_as_tools.py",
+      "examples/agents-examples/agent_patterns/deterministic.py",
+      "examples/agents-examples/agent_patterns/input_guardrails.py",
+      "examples/agents-examples/agent_patterns/llm_as_a_judge.py",
+      "examples/agents-examples/agent_patterns/output_guardrails.py",
+      "examples/agents-examples/agent_patterns/parallelization.py"
+    ],
+    "sets_equal": false
+  },
+  {
+    "band": "1",
+    "pr": "BeehiveInnovations/zen-mcp-server#2",
+    "commits": 1,
+    "shape": "merge_commit",
+    "reason": "",
+    "parent": "53303f86be",
+    "base_ref": "main",
+    "parent_on_base_branch": "yes",
+    "merge_reachable_from_base": true,
+    "parent_subject": "feat: enhance review_changes with dynamic file requests",
+    "merge_subject": "Merge pull request #2 from vwieczorek/fix/security-focused-prompts",
+    "diff_py": [
+      "prompts/tool_prompts.py"
+    ],
+    "github_py": [
+      "prompts/tool_prompts.py"
+    ],
+    "sets_equal": true
+  },
+  {
+    "band": "1",
+    "pr": "BerriAI/litellm#8947",
+    "commits": 1,
+    "shape": "squash",
+    "reason": "0 consecutive subject match(es): one commit, so squashed",
+    "parent": "54b7f17ca6",
+    "base_ref": "main",
+    "parent_on_base_branch": "yes",
+    "merge_reachable_from_base": true,
+    "parent_subject": "fix(proxy_server.py): fix setting router redis cache, if cache enable\u2026",
+    "merge_subject": "quote DailyTagSpend in order to look for the right View (#8947)",
+    "diff_py": [
+      "litellm/proxy/spend_tracking/spend_management_endpoints.py"
+    ],
+    "github_py": [
+      "litellm/proxy/spend_tracking/spend_management_endpoints.py"
+    ],
+    "sets_equal": true
+  },
+  {
+    "band": "1",
+    "pr": "Blaizzy/mlx-vlm#236",
+    "commits": 1,
+    "shape": "squash",
+    "reason": "0 consecutive subject match(es): one commit, so squashed",
+    "parent": "777188a0b7",
+    "base_ref": "main",
+    "parent_on_base_branch": "yes",
+    "merge_reachable_from_base": true,
+    "parent_subject": "Add support for Gemma 3 (#235)",
+    "merge_subject": "bump (#236)",
+    "diff_py": [
+      "mlx_vlm/version.py"
+    ],
+    "github_py": [
+      "mlx_vlm/version.py"
+    ],
+    "sets_equal": true
+  },
+  {
+    "band": "1",
+    "pr": "Blaizzy/mlx-vlm#249",
+    "commits": 1,
+    "shape": "squash",
+    "reason": "0 consecutive subject match(es): one commit, so squashed",
+    "parent": "bee25a8633",
+    "base_ref": "main",
+    "parent_on_base_branch": "yes",
+    "merge_reachable_from_base": true,
+    "parent_subject": "Fix Gemma 3 Text-only and prompt template (#248)",
+    "merge_subject": "copy json files (#249)",
+    "diff_py": [
+      "mlx_vlm/utils.py"
+    ],
+    "github_py": [
+      "mlx_vlm/utils.py"
+    ],
+    "sets_equal": true
+  },
+  {
+    "band": "6-20",
+    "pr": "GodsScion/Auto_job_applier_linkedIn#45",
+    "commits": 15,
+    "shape": "merge_commit",
+    "reason": "",
+    "parent": "158672d051",
+    "base_ref": "main",
+    "parent_on_base_branch": "yes",
+    "merge_reachable_from_base": true,
+    "parent_subject": "Merge pull request #43 from tillydray/make_temp_optional",
+    "merge_subject": "Merge pull request #45 from GodsScion/community-version",
+    "diff_py": [
+      "config/questions.py",
+      "modules/ai/openaiConnections.py",
+      "modules/ai/prompts.py",
+      "modules/clickers_and_finders.py",
+      "runAiBot.py"
+    ],
+    "github_py": [
+      "config/questions.py",
+      "modules/ai/openaiConnections.py",
+      "modules/ai/prompts.py",
+      "modules/clickers_and_finders.py",
+      "runAiBot.py"
+    ],
+    "sets_equal": true
+  },
+  {
+    "band": "21+",
+    "pr": "OpenPipe/ART#163",
+    "commits": 100,
+    "shape": "squash",
+    "reason": "0 consecutive subject match(es): one commit, so squashed",
+    "parent": "5043669684",
+    "base_ref": "main",
+    "parent_on_base_branch": "yes",
+    "merge_reachable_from_base": true,
+    "parent_subject": "Merge pull request #166 from OpenPipe/no-ground-truth",
+    "merge_subject": "feat: Multi-device training",
+    "diff_py": [
+      "dev/swebench/instances.py",
+      "dev/swebench/logs.py",
+      "dev/swebench/rollout.py",
+      "src/art/cli.py",
+      "src/art/dev/__init__.py",
+      "src/art/dev/model.py"
+    ],
+    "github_py": [
+      "dev/swebench/instances.py",
+      "dev/swebench/logs.py",
+      "dev/swebench/rollout.py",
+      "src/art/cli.py",
+      "src/art/dev/__init__.py",
+      "src/art/dev/model.py"
+    ],
+    "sets_equal": true
+  },
+  {
+    "band": "21+",
+    "pr": "bruin-data/ingestr#199",
+    "commits": 21,
+    "shape": "squash",
+    "reason": "0 consecutive subject match(es): one commit, so squashed",
+    "parent": "07a70bb7a8",
+    "base_ref": "main",
+    "parent_on_base_branch": "yes",
+    "merge_reachable_from_base": true,
+    "parent_subject": "Merge pull request #198 from bruin-data/patch/mongodb/upgrade-source-c",
+    "merge_subject": "Add Attio as a Source",
+    "diff_py": [
+      "ingestr/src/attio/__init__.py",
+      "ingestr/src/attio/helpers.py",
+      "ingestr/src/factory.py",
+      "ingestr/src/http_client.py",
+      "ingestr/src/sources.py"
+    ],
+    "github_py": [
+      "ingestr/src/attio/__init__.py",
+      "ingestr/src/attio/helpers.py",
+      "ingestr/src/factory.py",
+      "ingestr/src/http_client.py",
+      "ingestr/src/sources.py"
+    ],
+    "sets_equal": true
+  },
+  {
+    "band": "21+",
+    "pr": "cartography-cncf/cartography#1571",
+    "commits": 23,
+    "shape": "squash",
+    "reason": "0 consecutive subject match(es): one commit, so squashed",
+    "parent": "d8693ca076",
+    "base_ref": "master",
+    "parent_on_base_branch": "yes",
+    "merge_reachable_from_base": true,
+    "parent_subject": "Add Anthropic intel (#1580)",
+    "merge_subject": "feat:  Add Secret manager secret version support  (#1571)",
+    "diff_py": [
+      "cartography/intel/aws/secretsmanager.py",
+      "cartography/models/aws/secretsmanager/__init__.py",
+      "cartography/models/aws/secretsmanager/secret_version.py",
+      "tests/data/aws/secretsmanager.py",
+      "tests/integration/cartography/intel/aws/test_secretsmanager.py"
+    ],
+    "github_py": [
+      "cartography/intel/aws/secretsmanager.py",
+      "cartography/models/aws/secretsmanager/__init__.py",
+      "cartography/models/aws/secretsmanager/secret_version.py",
+      "tests/data/aws/secretsmanager.py",
+      "tests/integration/cartography/intel/aws/test_secretsmanager.py"
+    ],
+    "sets_equal": true
+  },
+  {
+    "band": "21+",
+    "pr": "crewAIInc/crewAI#1843",
+    "commits": 22,
+    "shape": "squash",
+    "reason": "0 consecutive subject match(es): one commit, so squashed",
+    "parent": "a2f839fada",
+    "base_ref": "main",
+    "parent_on_base_branch": "yes",
+    "merge_reachable_from_base": true,
+    "parent_subject": "adding extra space",
+    "merge_subject": "Brandon/eng 266 conversation crew v1 (#1843)",
+    "diff_py": [
+      "src/crewai/agent.py",
+      "src/crewai/cli/cli.py",
+      "src/crewai/cli/constants.py",
+      "src/crewai/cli/crew_chat.py",
+      "src/crewai/cli/templates/crew/main.py",
+      "src/crewai/crew.py"
+    ],
+    "github_py": [
+      "src/crewai/agent.py",
+      "src/crewai/cli/cli.py",
+      "src/crewai/cli/constants.py",
+      "src/crewai/cli/crew_chat.py",
+      "src/crewai/cli/templates/crew/main.py",
+      "src/crewai/crew.py"
+    ],
+    "sets_equal": true
+  }
+]

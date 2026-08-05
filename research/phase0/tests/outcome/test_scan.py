@@ -25,7 +25,7 @@ import pytest
 from git import Actor, Repo
 
 from phase0.extract_prs import PRRecord
-from phase0.scan_outcome import WINDOW_DAYS, Criterion, Outcome, scan
+from phase0.outcome.scan import WINDOW_DAYS, Criterion, Outcome, scan
 
 MERGED_AT = datetime(2026, 3, 1, 12, 0, 0, tzinfo=timezone.utc)
 AUTHOR = Actor("Tester", "tester@example.com")

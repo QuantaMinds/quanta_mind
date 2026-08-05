@@ -32,7 +32,7 @@ from phase0.controls import (
     run_negative_controls,
     run_positive_control,
 )
-from phase0.scan_outcome import Outcome
+from phase0.outcome.scan import Outcome
 
 # The measured reach of the exposure variable as defined in `PHASE0_PREREGISTRATION.md` “Exposure
 # variable”. Established by

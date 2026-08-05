@@ -36,7 +36,7 @@ from phase0.analysis.risk import Counts, RiskResult, cluster_robust, design_effe
 from phase0.analysis.risk import katz as katz_ci
 from phase0.analysis.verdict import Verdict, read_verdict
 from phase0.classify_exposure import Exposure
-from phase0.scan_outcome import Outcome
+from phase0.outcome.scan import Outcome
 
 ArmOf = Callable[["Observation"], Exposure | None]
 
@@ -66,6 +66,11 @@ class Analysis:
     unanalyzed: RiskResult
     strata: dict[str, RiskResult]
     multi_site_excluded: int
+    # Units dropped because the outcome could not be scanned at all, by category. A
+    # complete-case table is only honest while the size of the case it is missing is
+    # reported next to it -- an exclusion nobody counts is indistinguishable from the
+    # silent CLEAN it replaced.
+    outcome_excluded: int
     verdict: Verdict
 
     @property
@@ -96,6 +101,12 @@ def tabulate(
     Only `exposed_arm` and UNEXPOSED are counted. Everything else -- an
     unmeasurable pair (None) or the other arm -- is excluded rather than folded in,
     because folding is how a third arm silently becomes part of a second.
+
+    The same applies down the other axis. An UNSCANNABLE outcome is a MISSING outcome,
+    and this used to code it 0, which put it in the clean cell. That is the base-branch
+    bug surviving one layer below the fix: the scan was corrected to say "I could not
+    look", and `tabulate` translated that back into "nothing broke" before the estimate
+    ever saw it. The 2x2 is complete-case by A16, and this is what makes it so.
     """
     a = b = c = d = 0
     exposed: list[int] = []
@@ -111,6 +122,8 @@ def tabulate(
         else:
             continue
 
+        if observation.outcome is Outcome.UNSCANNABLE:
+            continue
         outcome = 1 if observation.outcome is Outcome.BROKE else 0
         if flag and outcome:
             a += 1
@@ -161,5 +174,6 @@ def build(observations: Sequence[Observation], strata: Sequence[str] = ()) -> An
         unanalyzed=unanalyzed,
         strata=stratified,
         multi_site_excluded=sum(1 for o in observations if o.primary is None),
+        outcome_excluded=sum(1 for o in observations if o.outcome is Outcome.UNSCANNABLE),
         verdict=read_verdict(primary),
     )

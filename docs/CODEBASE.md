@@ -41,6 +41,42 @@ it survives someone re-merging the projects later.
 
 Read `research/phase0/ENVIRONMENT.lock` before touching the instrument.
 
+#### `research/phase0/src/phase0/outcome/` — the dependent variable
+
+The outcome scan answers "did a revert or a fix land within 7 days". It became a package
+when its verdict type grew a reason for *not* answering.
+
+| Module | Owns |
+|---|---|
+| `window.py` | which branch to walk, whether the merge is on it, and the `Exclusion` categories |
+| `signals.py` | the message and file-overlap rules — what counts as a fix |
+| `conclusion.py` | `Outcome`, `Criterion`, `OutcomeRecord` — what a verdict IS |
+| `scan.py` | the walk itself |
+
+`Outcome.UNSCANNABLE` is the reason the package is worth reading. The scan walked from the
+clone's HEAD, but 15.5% of the corpus merges into `dev`, `develop` or a feature branch —
+for those PRs the merge commit and its whole post-merge history sat outside the walk, and
+every one returned CLEAN. Nothing errored and no exclusion count moved, so the failure was
+invisible by construction, and it biased toward the null in precisely the repositories
+mature enough to have a release process.
+
+Two consequences bind anything that consumes a verdict:
+
+- **`UNSCANNABLE` is a missing outcome, never a clean one.** Every consumer drops it from
+  the denominator. `analysis/build_table.py` coded it `0` and therefore counted it in the
+  clean cell — the same bug living one layer below its own fix — and `controls/gate.py`
+  put it in the positive control's denominator, which reads an unwalkable branch as a
+  blind classifier.
+- **The exclusion carries a category, not a message.** `base_ref_missing` (branch deleted
+  after merge) and `merge_unreachable` (merge commit is not an ancestor of its base — a
+  force-push or a recreated branch) are separate values because they are different facts
+  with different fixes. `OutcomeRecord.is_consistent` returns whether the verdict and the
+  reason agree, rather than a comment claiming they do.
+
+`controls/reconcile.py` accounts for both ways out of the 2×2 and bounds them separately:
+an unmeasurable arm still has a known outcome and bounds tightly, while a missing outcome
+can only be bounded by assuming all of them broke and then that none did.
+
 ### `scripts/guard/` — the enforcement layer
 
 | File | Enforces |

@@ -18,7 +18,7 @@ WHY:  Three pre-registered decisions are enforced here rather than remembered.
       computed separately. If the effect lives there, this is a scalability product, not an
       unsoundness product, and that is a different company. Pooling the arms would hide the
       distinction the section exists on. IMPORTS: phase0.analysis.{build_table,risk,verdict},
-      phase0.classify_exposure, phase0.scan_outcome. CONSUMED BY: `just test-phase0`.
+      phase0.classify_exposure, phase0.outcome.conclusion. CONSUMED BY: `just test-phase0`.
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ from phase0.analysis.build_table import Observation, build, tabulate
 from phase0.analysis.risk import Counts, katz
 from phase0.analysis.verdict import STRONG_CI_LOW, STRONG_RR, WEAK_RR, read_verdict
 from phase0.classify_exposure import Exposure
-from phase0.scan_outcome import Outcome
+from phase0.outcome.conclusion import Outcome
 
 
 def _row(
@@ -135,3 +135,55 @@ def test_strata_are_reported_separately() -> None:
 def test_verdict_refuses_an_unavailable_interval() -> None:
     """A crashed fit is not a null. It reports as no result."""
     assert read_verdict(katz(Counts(0, 0, 5, 95))).label == "no result"
+
+
+def _unscannable(index: int, primary: Exposure | None, repo: str = "r0") -> Observation:
+    """A unit the outcome scan could not look at: the arm is known, the outcome is not."""
+    return Observation(
+        symbol=f"m.u{index}",
+        repo_id=repo,
+        outcome=Outcome.UNSCANNABLE,
+        primary=primary,
+        sensitivity_low=primary or Exposure.UNEXPOSED,
+        sensitivity_high=primary or Exposure.EXPOSED,
+    )
+
+
+def test_unscannable_outcomes_are_excluded_not_coded_clean() -> None:
+    """The base-branch bug, one layer down.
+
+    `tabulate` coded the outcome as `1 if BROKE else 0`, so a unit the scan reported
+    UNSCANNABLE for landed in the clean cell. The scan being fixed to say "I could not
+    look" achieves nothing while the analysis translates that back into "nothing broke"
+    before the estimate sees it. Asserted on the cell, not on the total, because a count
+    that merely stayed the same would pass either way.
+    """
+    rows = [
+        _row(0, Exposure.EXPOSED, True),
+        _row(1, Exposure.UNEXPOSED, False),
+        _unscannable(2, Exposure.EXPOSED),
+        _unscannable(3, Exposure.EXPOSED),
+    ]
+    counts, exposed, broke, _ = tabulate(rows)
+
+    assert counts.exposed_clean == 0, "an unscannable unit was folded into the clean cell"
+    assert counts.total == 2
+    assert (exposed, broke) == ([1, 0], [1, 0])
+
+
+def test_unscannable_units_are_counted_where_someone_reads_them() -> None:
+    """Dropping them silently is the same failure wearing a different hat.
+
+    A complete-case table is honest only while the size of the case it is missing is
+    reported beside it, so `build` carries the count rather than leaving the caller to
+    infer it from a total that does not add up.
+    """
+    rows = [
+        _row(0, Exposure.EXPOSED, True),
+        _row(1, Exposure.UNEXPOSED, False),
+        _unscannable(2, Exposure.EXPOSED),
+        _unscannable(3, None),
+    ]
+    analysis = build(rows)
+
+    assert analysis.outcome_excluded == 2

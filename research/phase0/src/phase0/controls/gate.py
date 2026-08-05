@@ -22,13 +22,15 @@ import json
 import tempfile
 from pathlib import Path
 
-from phase0.analysis.build_table import Observation, by_primary, tabulate
+from phase0.analysis.build_table import Observation
 from phase0.classify_exposure import Exposure
 from phase0.controls.analysis import run_negative_controls, run_positive_control
 from phase0.controls.corpus import DEFAULT_PER_MECHANISM, SyntheticPR, build_corpus
 from phase0.controls.mechanisms import probe_all_mechanisms
+from phase0.controls.reconcile import reconcile
+from phase0.outcome.conclusion import Outcome
+from phase0.outcome.scan import scan
 from phase0.run_pipeline import one_pr
-from phase0.scan_outcome import Outcome, scan
 
 
 def measure(
@@ -75,65 +77,22 @@ def detection_by_mechanism(
     return dict(sorted(tally.items()))
 
 
-def broke_rate(measured: list[tuple[SyntheticPR, Observation]]) -> float:
-    """Sanity check: the outcome scanner must actually detect the planted fixes."""
-    planted = [o for s, o in measured if s.planted_break]
-    if not planted:
-        return 0.0
-    return sum(1 for o in planted if o.outcome is Outcome.BROKE) / len(planted)
+def broke_rate(measured: list[tuple[SyntheticPR, Observation]]) -> tuple[float, int]:
+    """Detection rate over planted breaks the scanner could actually look at, and the
+    number it could not.
 
-
-def reconcile(measured: list[tuple[SyntheticPR, Observation]]) -> dict[str, object]:
-    """Account for every unit: a + b + c + d + excluded must equal the corpus.
-
-    `ARCHITECTURE.md` “Invariants” invariant 3 -- nothing is lost between stages -- applied to
-    the control itself. It exists because the pooled RR of 8.0 was computed from 50
-    of 80 units, with all 30 exclusions falling in the EXPOSED arm and none in the
-    control arm. That asymmetry is what produced the 8.0, and no output said so.
-
-    A6's sensitivity bounds do not cover this. They bound MULTI-site collapse; a
-    zero-site symbol returns None for primary AND for both bounds, so the largest
-    exclusion category was invisible to the mechanism built to bound exclusions.
+    The denominator was every planted break, including any the scan returned UNSCANNABLE
+    for. That reads a failure to look as a failure to detect, which pushes the positive
+    control DOWN and would have been debugged as a weak classifier rather than as an
+    unwalkable branch. Returning the excluded count alongside keeps the distinction
+    visible instead of leaving the caller to infer it from a lower number.
     """
-    observations = [o for _, o in measured]
-    counts, _, _, _ = tabulate(observations, by_primary)
-
-    excluded_exposed_arm = [
-        (s, o) for s, o in measured if o.primary is None and "-exp-" in s.record.pr_id
-    ]
-    excluded_control_arm = [
-        (s, o) for s, o in measured if o.primary is None and "-ctl-" in s.record.pr_id
-    ]
-
-    # Bound the exclusion both ways, as A6 does for multi-site pairs.
-    ex_broke = sum(1 for _, o in excluded_exposed_arm if o.outcome is Outcome.BROKE)
-    ex_clean = len(excluded_exposed_arm) - ex_broke
-    a, b = counts.exposed_broke, counts.exposed_clean
-    c, d = counts.unexposed_broke, counts.unexposed_clean
-
-    def _rr(aa: int, bb: int, cc: int, dd: int) -> float:
-        if (aa + bb) == 0 or (cc + dd) == 0 or cc == 0:
-            return float("nan")
-        return (aa / (aa + bb)) / (cc / (cc + dd))
-
-    lower = _rr(a, b, c + ex_broke, d + ex_clean)  # abstentions coded UNEXPOSED
-    upper = _rr(a + ex_broke, b + ex_clean, c, d)  # abstentions coded EXPOSED
-
-    planted_exposed = sum(1 for s, _ in measured if "-exp-" in s.record.pr_id)
-    return {
-        "table": {"a": a, "b": b, "c": c, "d": d, "in_table": counts.total},
-        "excluded_total": len(excluded_exposed_arm) + len(excluded_control_arm),
-        "excluded_from_exposed_arm": len(excluded_exposed_arm),
-        "excluded_from_control_arm": len(excluded_control_arm),
-        "conserved": counts.total + len(excluded_exposed_arm) + len(excluded_control_arm)
-        == len(measured),
-        "corpus_units": len(measured),
-        # Recall against planted exposure, which the pooled RR does not show.
-        "planted_exposure_detected": f"{a + b}/{planted_exposed}",
-        "detection_recall": (a + b) / planted_exposed if planted_exposed else 0.0,
-        "rr_bounds_over_exclusions": [lower, upper],
-        "bounds_agree_on_gate": (lower >= 5.0) == (upper >= 5.0),
-    }
+    planted = [o for s, o in measured if s.planted_break]
+    scannable = [o for o in planted if o.outcome is not Outcome.UNSCANNABLE]
+    if not scannable:
+        return 0.0, len(planted)
+    detected = sum(1 for o in scannable if o.outcome is Outcome.BROKE)
+    return detected / len(scannable), len(planted) - len(scannable)
 
 
 def report(per_mechanism: int = DEFAULT_PER_MECHANISM, timeout_s: int = 120) -> dict[str, object]:
@@ -146,6 +105,7 @@ def report(per_mechanism: int = DEFAULT_PER_MECHANISM, timeout_s: int = 120) -> 
     tally = detection_by_mechanism(measured)
     positive = run_positive_control(observations)
     negatives = run_negative_controls(observations)
+    detection_rate, unscannable_planted = broke_rate(measured)
 
     return {
         "synthetic_repos": len(built),
@@ -157,7 +117,11 @@ def report(per_mechanism: int = DEFAULT_PER_MECHANISM, timeout_s: int = 120) -> 
         # Reporting "firing" against the corpus would read 1/1 and hide A10.
         "capability_profile": {p.mechanism: p.detected for p in probe_all_mechanisms()},
         "mechanisms_firing_of_four": sum(1 for p in probe_all_mechanisms() if p.detected),
-        "planted_break_detection_rate": broke_rate(measured),
+        # Rate over planted breaks the scan could look at, and the count it could not.
+        # Pooling the second into the first reads an unwalkable branch as a blind
+        # classifier, which is a different bug with a different fix.
+        "planted_break_detection_rate": detection_rate,
+        "planted_breaks_unscannable": unscannable_planted,
         "positive_control": {
             "relative_risk": positive.relative_risk,
             "ci": [positive.ci_low, positive.ci_high],

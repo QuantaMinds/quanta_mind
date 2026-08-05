@@ -37,14 +37,17 @@ from pathlib import Path
 from phase0.extract_prs import PRRecord
 from phase0.github_pulls import merge_info, require_token
 from phase0.handlabel.select import Candidate, eligible_prs
+from phase0.outcome.scan import scan
 from phase0.pilot.report import Attempt, by_repo, default_branch, report, star_counts
 from phase0.pipeline import journal
 from phase0.pipeline.assemble import build_record
 from phase0.pipeline.rejection import Rejection
 from phase0.pipeline.worktree import CloneFailed, cloned, sweep
-from phase0.scan_outcome import scan
 
-ROOT = Path(__file__).resolve().parents[2]
+# pilot -> phase0 -> src -> project root. Was parents[2], which resolved to `src`, so every
+# default path below named a directory that does not exist. Dates from `pilot.py` becoming
+# the `pilot/` package. `controls/gate.py` counts from the same depth.
+ROOT = Path(__file__).resolve().parents[3]
 PACKAGE = ROOT / "data" / "AIDev_BC_Analyser.zip"
 WORKSPACE = ROOT / "data" / "pilot_clones"
 CACHE = ROOT / "data" / "gh_cache"

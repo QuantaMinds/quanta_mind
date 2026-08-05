@@ -22,6 +22,7 @@ CONSUMED BY: scan_outcome.py; tests/test_scan_outcome.py.
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from enum import Enum
 
 from git import Commit, Repo
 from git.exc import GitError, ODBError
@@ -30,8 +31,29 @@ GIT_LOOKUP_ERRORS = (GitError, ODBError, ValueError)
 MAX_COMMITS = 2000
 
 
+class Exclusion(Enum):
+    """Why the window could not be walked.
+
+    Each value is a category somebody counts, not a message somebody reads. The two
+    branch cases are deliberately separate: a base branch deleted after merge is
+    ordinary repository hygiene, whereas a merge commit that is not an ancestor of the
+    branch it merged into is a rewritten history. Folding them together would report one
+    rate for two populations and lose the distinction that says which.
+    """
+
+    NONE = "none"
+    UNPARSEABLE_MERGED_AT = "unparseable_merged_at"
+    UNREADABLE_CLONE = "unreadable_clone"
+    BASE_REF_MISSING = "base_ref_missing"
+    MERGE_UNREACHABLE = "merge_unreachable"
+
+
 def base_ref_of(repo: Repo, base_ref: str) -> str | None:
-    """The remote-tracking ref the PR merged into, or None when it is gone."""
+    """The remote-tracking ref the PR merged into, or None when it is gone.
+
+    None is never silently replaced by HEAD. A fallback would reintroduce the exact bug
+    this function exists to fix, only in a narrower band and harder to see.
+    """
     if not base_ref:
         return "HEAD"
     for candidate in (f"origin/{base_ref}", base_ref):
@@ -49,23 +71,6 @@ def reachable(repo: Repo, sha: str, ref: str) -> bool:
         return bool(repo.is_ancestor(repo.commit(sha), repo.commit(ref)))
     except GIT_LOOKUP_ERRORS:
         return False
-
-
-def _base_ref(repo: Repo, base_ref: str) -> str | None:
-    """The remote-tracking ref the PR merged into, or None when it is gone.
-
-    None is never silently replaced by HEAD. A fallback would reintroduce the exact bug
-    this function exists to fix, only in a narrower band and harder to see.
-    """
-    if not base_ref:
-        return "HEAD"
-    for candidate in (f"origin/{base_ref}", base_ref):
-        try:
-            repo.commit(candidate)
-        except GIT_LOOKUP_ERRORS:
-            continue
-        return candidate
-    return None
 
 
 def candidates(

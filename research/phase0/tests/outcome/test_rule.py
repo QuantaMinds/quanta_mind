@@ -13,15 +13,15 @@ WHY:  The dry run found the outcome rule too loose in eight of nine disagreement
 
       Both changes can only REMOVE breakage verdicts, never add them, so the direction
       is toward the null.
-IMPORTS: phase0.scan_outcome, phase0.fix_signals.
+IMPORTS: phase0.scan_outcome, phase0.signals.
 CONSUMED BY: `just test-phase0`.
 """
 
 from __future__ import annotations
 
-from phase0 import fix_signals
-from phase0.fix_signals import MIN_COMMIT_FOCUS
-from phase0.fix_signals import subject as _subject
+from phase0.outcome import signals
+from phase0.outcome.signals import MIN_COMMIT_FOCUS
+from phase0.outcome.signals import subject as _subject
 
 # PrunaAI/pruna 017dc9a144 — a FEATURE whose squashed body lists six `fix:` commits.
 SQUASH_BODY = (
@@ -35,8 +35,8 @@ SQUASH_BODY = (
 
 def test_a_squash_body_no_longer_fires_the_pattern() -> None:
     """The exact commit that made the rule fire on large feature PRs as a class."""
-    assert fix_signals.mentions_breakage(SQUASH_BODY), "the old rule matched the body"
-    assert not fix_signals.mentions_breakage(_subject(SQUASH_BODY))
+    assert signals.mentions_breakage(SQUASH_BODY), "the old rule matched the body"
+    assert not signals.mentions_breakage(_subject(SQUASH_BODY))
 
 
 def test_a_real_fix_subject_still_fires() -> None:
@@ -51,7 +51,7 @@ def test_a_real_fix_subject_still_fires() -> None:
         "Fix regression introduced by #4207",
         "docs: add a paragraph about the api",
     )
-    fired = {s: fix_signals.mentions_breakage(_subject(s)) for s in subjects}
+    fired = {s: signals.mentions_breakage(_subject(s)) for s in subjects}
     assert fired == {
         "fix: null dereference in the request handler": True,
         "hotfix: revert the broken migration": True,

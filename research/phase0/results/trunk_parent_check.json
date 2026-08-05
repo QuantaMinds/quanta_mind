@@ -1,0 +1,219 @@
+[
+  {
+    "band": "6-20",
+    "pr": "567-labs/instructor#1319",
+    "shape": "squash",
+    "base_ref": "main",
+    "merge_sha": "240e40510d",
+    "merge_parents": 1,
+    "trunk_first_parent": "ccfa60a8f2",
+    "resolved_parent": "ccfa60a8f2",
+    "verdict": "trunk"
+  },
+  {
+    "band": "2-5",
+    "pr": "567-labs/instructor#1334",
+    "shape": "squash",
+    "base_ref": "main",
+    "merge_sha": "4a39ad3199",
+    "merge_parents": 1,
+    "trunk_first_parent": "4ac0f5603e",
+    "resolved_parent": "4ac0f5603e",
+    "verdict": "trunk"
+  },
+  {
+    "band": "6-20",
+    "pr": "567-labs/instructor#1420",
+    "shape": "squash",
+    "base_ref": "main",
+    "merge_sha": "0f3af272f5",
+    "merge_parents": 1,
+    "trunk_first_parent": "5a4d433dc6",
+    "resolved_parent": "5a4d433dc6",
+    "verdict": "trunk"
+  },
+  {
+    "band": "2-5",
+    "pr": "567-labs/instructor#1544",
+    "shape": "squash",
+    "base_ref": "main",
+    "merge_sha": "1003e4e969",
+    "merge_parents": 1,
+    "trunk_first_parent": "7c749cd5bb",
+    "resolved_parent": "7c749cd5bb",
+    "verdict": "trunk"
+  },
+  {
+    "band": "21+",
+    "pr": "ACEsuit/mace#841",
+    "shape": "merge_commit",
+    "base_ref": "main",
+    "merge_sha": "73a855cad4",
+    "merge_parents": 2,
+    "trunk_first_parent": "3e578b02e6",
+    "resolved_parent": "3e578b02e6",
+    "verdict": "trunk"
+  },
+  {
+    "band": "1",
+    "pr": "AgentOps-AI/agentops#647",
+    "shape": "squash",
+    "base_ref": "main",
+    "merge_sha": "6d0459a186",
+    "merge_parents": 1,
+    "trunk_first_parent": "06d64d93f8",
+    "resolved_parent": "06d64d93f8",
+    "verdict": "trunk"
+  },
+  {
+    "band": "6-20",
+    "pr": "AgentOps-AI/agentops#714",
+    "shape": "squash",
+    "base_ref": "redesign",
+    "merge_sha": "3a847d9f38",
+    "merge_parents": 1,
+    "trunk_first_parent": "6d293aea32",
+    "resolved_parent": "6d293aea32",
+    "verdict": "trunk"
+  },
+  {
+    "band": "2-5",
+    "pr": "AgentOps-AI/agentops#811",
+    "shape": "squash",
+    "base_ref": "dev",
+    "merge_sha": "6d3f2e11fc",
+    "merge_parents": 1,
+    "trunk_first_parent": "7dbe990fb8",
+    "resolved_parent": "7dbe990fb8",
+    "verdict": "trunk"
+  },
+  {
+    "band": "2-5",
+    "pr": "AgentOps-AI/agentops#817",
+    "shape": "squash",
+    "base_ref": "dev",
+    "merge_sha": "9f10111b24",
+    "merge_parents": 1,
+    "trunk_first_parent": "ff0141f57f",
+    "resolved_parent": "ff0141f57f",
+    "verdict": "trunk"
+  },
+  {
+    "band": "6-20",
+    "pr": "AgentOps-AI/agentops#818",
+    "shape": "squash",
+    "base_ref": "dev",
+    "merge_sha": "d1f27e23ef",
+    "merge_parents": 1,
+    "trunk_first_parent": "9f10111b24",
+    "resolved_parent": "9f10111b24",
+    "verdict": "trunk"
+  },
+  {
+    "band": "2-5",
+    "pr": "AgentOps-AI/agentops#819",
+    "shape": "ambiguous",
+    "base_ref": "dev-cleanup",
+    "merge_sha": "78bcbd876a",
+    "verdict": "UNRESOLVED"
+  },
+  {
+    "band": "1",
+    "pr": "BeehiveInnovations/zen-mcp-server#2",
+    "shape": "merge_commit",
+    "base_ref": "main",
+    "merge_sha": "ed587f27d5",
+    "merge_parents": 2,
+    "trunk_first_parent": "53303f86be",
+    "resolved_parent": "53303f86be",
+    "verdict": "trunk"
+  },
+  {
+    "band": "1",
+    "pr": "BerriAI/litellm#8947",
+    "shape": "squash",
+    "base_ref": "main",
+    "merge_sha": "842d8dec09",
+    "merge_parents": 1,
+    "trunk_first_parent": "54b7f17ca6",
+    "resolved_parent": "54b7f17ca6",
+    "verdict": "trunk"
+  },
+  {
+    "band": "1",
+    "pr": "Blaizzy/mlx-vlm#236",
+    "shape": "squash",
+    "base_ref": "main",
+    "merge_sha": "37e3af81cc",
+    "merge_parents": 1,
+    "trunk_first_parent": "777188a0b7",
+    "resolved_parent": "777188a0b7",
+    "verdict": "trunk"
+  },
+  {
+    "band": "1",
+    "pr": "Blaizzy/mlx-vlm#249",
+    "shape": "squash",
+    "base_ref": "main",
+    "merge_sha": "182df250cc",
+    "merge_parents": 1,
+    "trunk_first_parent": "bee25a8633",
+    "resolved_parent": "bee25a8633",
+    "verdict": "trunk"
+  },
+  {
+    "band": "6-20",
+    "pr": "GodsScion/Auto_job_applier_linkedIn#45",
+    "shape": "merge_commit",
+    "base_ref": "main",
+    "merge_sha": "c7ada298e0",
+    "merge_parents": 2,
+    "trunk_first_parent": "158672d051",
+    "resolved_parent": "158672d051",
+    "verdict": "trunk"
+  },
+  {
+    "band": "21+",
+    "pr": "OpenPipe/ART#163",
+    "shape": "squash",
+    "base_ref": "main",
+    "merge_sha": "68bcdab8b0",
+    "merge_parents": 1,
+    "trunk_first_parent": "5043669684",
+    "resolved_parent": "5043669684",
+    "verdict": "trunk"
+  },
+  {
+    "band": "21+",
+    "pr": "bruin-data/ingestr#199",
+    "shape": "squash",
+    "base_ref": "main",
+    "merge_sha": "706a7c5562",
+    "merge_parents": 1,
+    "trunk_first_parent": "07a70bb7a8",
+    "resolved_parent": "07a70bb7a8",
+    "verdict": "trunk"
+  },
+  {
+    "band": "21+",
+    "pr": "cartography-cncf/cartography#1571",
+    "shape": "squash",
+    "base_ref": "master",
+    "merge_sha": "85b9f9eb26",
+    "merge_parents": 1,
+    "trunk_first_parent": "d8693ca076",
+    "resolved_parent": "d8693ca076",
+    "verdict": "trunk"
+  },
+  {
+    "band": "21+",
+    "pr": "crewAIInc/crewAI#1843",
+    "shape": "squash",
+    "base_ref": "main",
+    "merge_sha": "8f57753656",
+    "merge_parents": 1,
+    "trunk_first_parent": "a2f839fada",
+    "resolved_parent": "a2f839fada",
+    "verdict": "trunk"
+  }
+]

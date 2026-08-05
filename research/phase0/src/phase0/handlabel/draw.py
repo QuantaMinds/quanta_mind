@@ -28,8 +28,10 @@ from pathlib import Path
 
 from phase0.extract_prs import PRRecord
 from phase0.handlabel.select import Candidate
+from phase0.handlabel.sheet import Drawn, KeyRow
+from phase0.outcome.scan import Outcome, scan
+from phase0.outcome.window import Exclusion
 from phase0.pipeline.worktree import CloneFailed, cloned
-from phase0.scan_outcome import Outcome, scan
 
 # At most this many PRs from any one repository. Without it, a repository with 40
 # eligible PRs could supply the whole sample and the gate would measure one project.
@@ -44,37 +46,6 @@ class _Scored:
     verdict: str  # "BROKE" | "CLEAN"
     criterion: str
     evidence_sha: str
-
-
-@dataclass(frozen=True, slots=True)
-class KeyRow:
-    """The sealed answer for one drawn PR. Never reaches the blind sheet."""
-
-    label_id: int
-    pr_id: int
-    repo: str
-    number: int
-    verdict: str  # "BROKE" | "CLEAN"
-    criterion: str
-    evidence_sha: str
-
-
-@dataclass(frozen=True, slots=True)
-class Drawn:
-    """A completed draw: what the labeller sees, and what is sealed away."""
-
-    blind: tuple[tuple[int, str], ...]  # (label_id, pr_url) -- nothing else, by type
-    key: tuple[KeyRow, ...]
-    seed: int
-    considered: int
-    repos_visited: int
-
-    def bucket_sizes(self) -> dict[str, int]:
-        """Counts by verdict. Safe to print: says how many, never which."""
-        counts: dict[str, int] = defaultdict(int)
-        for row in self.key:
-            counts[row.verdict] += 1
-        return dict(counts)
 
 
 def _as_record(candidate: Candidate) -> PRRecord:
@@ -133,6 +104,12 @@ def draw(
     wanted = {Outcome.BROKE: n_broke, Outcome.CLEAN: n_clean}
     considered = 0
     repos_visited = 0
+    # PRs the scan could not look at. They are not eligible for either bucket -- a
+    # hand-labeller cannot check a verdict the instrument never reached -- and they are
+    # counted rather than skipped so the draw can report what it passed over. Before the
+    # base-branch fix these arrived as CLEAN and were labelled as though they had been
+    # measured, which would have scored the gate against answers nobody computed.
+    unscannable: dict[Exclusion, int] = defaultdict(int)
 
     for repo, candidates in _shuffled_by_repo(population, rng):
         if all(len(buckets[o]) >= wanted[o] for o in wanted):
@@ -145,6 +122,9 @@ def draw(
                         break
                     considered += 1
                     record = scan(path, _as_record(candidate))
+                    if record.outcome is Outcome.UNSCANNABLE:
+                        unscannable[record.exclusion] += 1
+                        continue
                     if len(buckets[record.outcome]) < wanted[record.outcome]:
                         buckets[record.outcome].append(
                             _Scored(
@@ -197,4 +177,5 @@ def draw(
         seed=seed,
         considered=considered,
         repos_visited=repos_visited,
+        unscannable=dict(unscannable),
     )

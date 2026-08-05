@@ -24,25 +24,26 @@ WHY:  The outcome is deliberately BEHAVIOURAL, not AST-based. AIDev ships
       >=16/20 agreement with hand-labelling, done BEFORE any classifier output is
       seen, because once you have seen the machine's answer your labels are
       anchored.
-IMPORTS: GitPython, phase0.fix_signals, phase0.extract_prs. Never
-      phase0.classify_exposure — the two passes must not see each other.
-CONSUMED BY: run_pipeline.py, build_table.py; tests/test_scan_outcome.py.
+IMPORTS: GitPython, phase0.extract_prs, and its siblings phase0.outcome.{signals,
+      conclusion,window}. Never phase0.classify_exposure — the two passes must not see
+      each other.
+CONSUMED BY: run_pipeline.py, analysis/build_table.py, controls/gate.py,
+      handlabel/draw.py; tests/test_scan_outcome.py.
 """
 
 from __future__ import annotations
 
 from contextlib import closing
-from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from enum import Enum
 from pathlib import Path
 
 from git import Commit, Repo
 from git.exc import GitError, ODBError
 
-from phase0 import fix_signals
 from phase0.extract_prs import PRRecord
-from phase0.outcome_window import base_ref_of, candidates, reachable
+from phase0.outcome import signals
+from phase0.outcome.conclusion import Criterion, Outcome, OutcomeRecord
+from phase0.outcome.window import Exclusion, base_ref_of, candidates, reachable
 
 # See parent_commit.py: BadName/BadObject derive from gitdb's ODBError, which is
 # neither a GitError nor a ValueError, so a narrower catch lets them escape.
@@ -53,48 +54,6 @@ WINDOW_DAYS = 7
 # Hard bound on how far to walk. A busy repository can land thousands of commits
 # in a week, and the scan is per-PR across thousands of PRs.
 MAX_COMMITS = 2000
-
-
-class Outcome(Enum):
-    BROKE = "broke"
-    CLEAN = "clean"
-    # We could not look. Distinct from CLEAN on purpose: the scan used to walk from the
-    # clone's HEAD, so a PR merged into `dev` or a feature branch had its whole
-    # post-merge history outside that walk and came back CLEAN. 15.5% of the corpus
-    # merges off the default branch, and those repositories are the ones with a release
-    # process -- so the instrument was systematically scoring the more process-mature
-    # projects as unbroken. A false negative leaves no trace anywhere; an UNSCANNABLE
-    # verdict is an exclusion somebody has to count.
-    UNSCANNABLE = "unscannable"
-
-
-class Criterion(Enum):
-    """Which `PHASE0_PREREGISTRATION.md` “Outcome variable” rule fired. Recorded so Results can
-    report
-    their relative weight.
-    """
-
-    REVERT = "revert"  # explicit `This reverts commit <sha>`
-    FIX_TOUCHING_SAME_FILE = "fix_touching_same_file"
-    ISSUE_LINK = "issue_link"  # A4, optional and API-dependent
-    NONE = "none"
-
-
-@dataclass(frozen=True, slots=True)
-class OutcomeRecord:
-    """A verdict and the commit that justifies it."""
-
-    outcome: Outcome
-    criterion: Criterion = Criterion.NONE
-    evidence_sha: str = ""
-    evidence_message: str = ""
-    commits_examined: int = 0
-    issue_link_checked: bool = False  # A4: stated in Results, never assumed
-
-    @property
-    def is_auditable(self) -> bool:
-        """A BROKE verdict without evidence is not a result, it is an assertion."""
-        return self.outcome is Outcome.CLEAN or bool(self.evidence_sha)
 
 
 def _merged_at(pr: PRRecord) -> datetime | None:
@@ -108,13 +67,13 @@ def _merged_at(pr: PRRecord) -> datetime | None:
 def _touches_pr_files(commit: Commit, changed: frozenset[str]) -> bool:
     """True if this commit is substantially about the files the PR modified.
 
-    The git extraction lives here; the rule lives in `fix_signals.is_focused`.
+    The git extraction lives here; the rule lives in `signals.is_focused`.
     """
     try:
         touched = frozenset(str(name) for name in commit.stats.files)
     except GIT_LOOKUP_ERRORS:
         return False
-    return fix_signals.is_focused(touched, changed)
+    return signals.is_focused(touched, changed)
 
 
 def scan(repo_path: Path, pr: PRRecord, window_days: int = WINDOW_DAYS) -> OutcomeRecord:
@@ -126,13 +85,21 @@ def scan(repo_path: Path, pr: PRRecord, window_days: int = WINDOW_DAYS) -> Outco
     """
     merged = _merged_at(pr)
     if merged is None:
-        return OutcomeRecord(Outcome.UNSCANNABLE, evidence_message="unparseable merged_at")
+        return OutcomeRecord(
+            Outcome.UNSCANNABLE,
+            evidence_message="unparseable merged_at",
+            exclusion=Exclusion.UNPARSEABLE_MERGED_AT,
+        )
 
     repo = None
     try:
         repo = Repo(repo_path)
     except GIT_LOOKUP_ERRORS as exc:
-        return OutcomeRecord(Outcome.UNSCANNABLE, evidence_message=f"unreadable clone: {exc}")
+        return OutcomeRecord(
+            Outcome.UNSCANNABLE,
+            evidence_message=f"unreadable clone: {exc}",
+            exclusion=Exclusion.UNREADABLE_CLONE,
+        )
 
     # `closing` rather than a finally: the scan has several early returns and each
     # one must release the handle. Windows keeps pack files mapped while a Repo is
@@ -140,18 +107,25 @@ def scan(repo_path: Path, pr: PRRecord, window_days: int = WINDOW_DAYS) -> Outco
     with closing(repo):
         ref = base_ref_of(repo, pr.base_ref)
         if ref is None:
+            # The branch was deleted after the merge, which is ordinary hygiene for a
+            # `feature/x` base. Counted, not defaulted to HEAD: a fallback would restore
+            # the original bug inside a narrower band, where it would be harder to find.
             return OutcomeRecord(
                 Outcome.UNSCANNABLE,
                 evidence_message=f"base branch {pr.base_ref!r} no longer exists",
+                exclusion=Exclusion.BASE_REF_MISSING,
             )
         if pr.merged_sha and not reachable(repo, pr.merged_sha, ref):
-            # agentops#811 and #817 merged into `dev` and their merge commits have no
-            # common ancestor with it -- force-push, branch recreation, or an indirect
-            # merge. Whatever the cause, the window cannot be walked from a branch the
-            # merge is not on, and guessing another would be inventing the answer.
+            # A separate category from a missing branch, because it is a different fact
+            # about the repository. agentops#811, #817, #818 and #819 merged into `dev`
+            # and their merge commits are not ancestors of it -- force-push, branch
+            # recreation, or an indirect merge. The branch exists and the merge is not on
+            # it, so the window cannot be walked and guessing another branch would be
+            # inventing the answer.
             return OutcomeRecord(
                 Outcome.UNSCANNABLE,
                 evidence_message=f"merge commit is not reachable from {ref}",
+                exclusion=Exclusion.MERGE_UNREACHABLE,
             )
         changed = frozenset(pr.changed_files)
         commits = candidates(repo, merged, merged + timedelta(days=window_days), pr.merged_sha, ref)
@@ -159,7 +133,7 @@ def scan(repo_path: Path, pr: PRRecord, window_days: int = WINDOW_DAYS) -> Outco
         for commit in commits:
             message = str(commit.message)
 
-            if fix_signals.reverts(message, pr.merged_sha):
+            if signals.reverts(message, pr.merged_sha):
                 return OutcomeRecord(
                     outcome=Outcome.BROKE,
                     criterion=Criterion.REVERT,
@@ -175,8 +149,8 @@ def scan(repo_path: Path, pr: PRRecord, window_days: int = WINDOW_DAYS) -> Outco
                 # that said "fix:" produced a body matching the pattern -- which made
                 # the rule fire on large feature PRs as a class. `looks_like_a_revert`
                 # keeps the whole message: `git revert` writes its marker in the body.
-                fix_signals.mentions_breakage(fix_signals.subject(message))
-                or fix_signals.looks_like_a_revert(message)
+                signals.mentions_breakage(signals.subject(message))
+                or signals.looks_like_a_revert(message)
             ):
                 return OutcomeRecord(
                     outcome=Outcome.BROKE,
