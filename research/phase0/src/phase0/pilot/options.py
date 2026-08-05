@@ -77,6 +77,14 @@ def parse(argv: list[str] | None = None) -> argparse.Namespace:
         "than rebuilding what this run already resolved",
     )
     parser.add_argument(
+        "--trace-dir",
+        type=Path,
+        default=ROOT / "runs" / "pilot",
+        help="timestamped run record: a timeline, a snapshot per repository, and the "
+        "running shape. Separate from --journal, which exists to RESUME a run; this "
+        "exists to explain one that died",
+    )
+    parser.add_argument(
         "--journal",
         type=Path,
         default=ROOT / "results" / "pilot_journal.md",

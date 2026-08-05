@@ -22,14 +22,18 @@ WHY:  The pilot exists to answer "is the instrument measuring what we think" bef
       Needs a GitHub token. `require_token` fails loudly rather than falling back to
       unauthenticated requests, which at 60/hour would look like a working run while
       silently dropping most of the corpus.
-IMPORTS: pandas, phase0.{github_pulls,handlabel.select,pilot_report},
-      phase0.pipeline.{assemble,worktree}.
+      Two records are written per repository and they answer different questions.
+      `pipeline/journal.py` is what a restart RESUMES from; `pilot/trace.py` is what
+      explains a run that died -- a timestamped timeline, a self-contained snapshot per
+      repository, and the running shape. Neither substitutes for the other.
+IMPORTS: phase0.{arm,extract_prs,github_pulls,outcome,population},
+      phase0.pilot.{attempt,covariates,options,repo_facts,report,targets,trace},
+      phase0.pipeline.{assemble,journal,records_file,rejection,resume,worktree}.
 CONSUMED BY: `just pilot`.
 """
 
 from __future__ import annotations
 
-import json
 import sys
 
 from phase0 import arm
@@ -44,6 +48,7 @@ from phase0.pilot.options import CACHE, PACKAGE, ROOT, parse
 from phase0.pilot.repo_facts import on_default_label, star_counts
 from phase0.pilot.report import by_repo, report
 from phase0.pilot.targets import choose
+from phase0.pilot.trace import RunTrace, announce, write_summary
 from phase0.pipeline import journal, records_file, resume
 from phase0.pipeline.assemble import build_record
 from phase0.pipeline.rejection import Rejection
@@ -65,6 +70,9 @@ def main(argv: list[str] | None = None) -> int:
     tally = arm.verify([c.pr_id for c in population], claimed, aidev)
     grouped = by_repo(population)
     targets = choose(grouped, args.journal, args.repos, args.only_repo, args.rescan_reason)
+    trace = RunTrace(
+        args.trace_dir, {"arm": args.arm, "population": len(population), "tally": tally}
+    )
     print(f"arm verified: {tally}")
     print(f"{len(population)} eligible across {len(grouped)} repos; {targets.announcement}")
 
@@ -107,6 +115,10 @@ def main(argv: list[str] | None = None) -> int:
             continue
         candidates = grouped[repo][: args.per_repo]
         before = len(attempts)
+        repo_started = trace.stamp()
+        trace.event(
+            "repo_start", repo=repo, position=position, of=len(targets.chosen), prs=len(candidates)
+        )
         print(f"[{position}/{len(targets.chosen)}] {repo} ({len(candidates)} PRs)", flush=True)
         try:
             with cloned(repo, args.workspace) as clone:
@@ -155,32 +167,26 @@ def main(argv: list[str] | None = None) -> int:
                         on_base,
                         merge.changed_lines,
                     )
-                    if isinstance(outcome, Rejection):
-                        print(
-                            f"     #{candidate.number}: rejected [{outcome.stage}"
-                            f"/{outcome.category}]",
-                            flush=True,
-                        )
-                    else:
-                        print(
-                            f"     #{candidate.number}: {len(outcome.changed_files)} files, "
-                            f"{len(outcome.changed_symbols)} symbols"
-                            + (f", {breakage}" if breakage else ""),
-                            flush=True,
-                        )
+                    announce(candidate.number, outcome, breakage)
         except CloneFailed as exc:
             clone_failures += 1
             print(f"     clone failed: {exc}", flush=True)
+            trace.event("clone_failed", repo=repo, position=position, error=str(exc))
             attempts += rows_for_clone_failure(candidates, attempts[before:], exc, stars)
         # Flushed here, not at the end. A repository that yielded nothing is still
         # marked done, or a restart would retry it forever.
         journal.append_repo(args.journal, repo, attempts[before:], targets.rescan)
+        trace.repo_done(
+            repo,
+            position,
+            len(targets.chosen),
+            attempts[before:],
+            attempts,
+            clone_failures,
+            repo_started,
+        )
 
-    summary = report(attempts, clone_failures, len(targets.chosen))
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
-    print("\n" + json.dumps(summary, indent=2))
-    print(f"\nwritten to {args.out}")
+    write_summary(args.out, report(attempts, clone_failures, len(targets.chosen)))
     return 0
 
 
