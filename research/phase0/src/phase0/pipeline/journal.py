@@ -47,6 +47,12 @@ COLUMNS = (
     # additions + deletions. A20's quartile banding reads this one.
     "changed_lines",
 )
+# The oldest schema this reader accepts, ending at `outcome`. Everything after it was
+# appended later and reads as "not measured" when a row is short. Keeps a pre-fix journal
+# comparable, which an aggregate cannot do -- and only a per-PR comparison can say whether
+# failures were fixed or merely moved to a different stage.
+MIN_COLUMNS = 11
+
 DONE = re.compile(r"^<!-- repo-done: (?P<repo>\S+) -->$")
 HEADER = (
     "# Pilot journal\n\n"
@@ -71,7 +77,18 @@ def completed_repos(path: Path) -> set[str]:
 
 
 def read_attempts(path: Path) -> list[Attempt]:
-    """Every attempt recorded so far, so the report covers the whole run."""
+    """Every attempt recorded so far, so the report covers the whole run.
+
+    Reads journals written before the newer columns existed. Columns are only ever
+    appended, so a shorter row is an older schema and the absent fields take the values
+    that mean NOT MEASURED -- `merge_on_base="unknown"`, `changed_lines=-1` -- rather than
+    a value that could be mistaken for a measurement. A LONGER row is refused: that is a
+    journal from a future schema and guessing at it would invent data.
+
+    This exists so a pre-fix journal remains comparable. Without it the only baseline is
+    an aggregate, and an aggregate cannot say whether failures were fixed or merely moved
+    to another stage -- which is the question a large drop in one stage always raises.
+    """
     if not path.is_file():
         return []
     attempts: list[Attempt] = []
@@ -79,8 +96,9 @@ def read_attempts(path: Path) -> list[Attempt]:
         if not line.startswith("| ") or line.startswith("| repo "):
             continue
         cells = [c.strip() for c in line.strip().strip("|").split("|")]
-        if len(cells) != len(COLUMNS) or cells[0] == "---":
+        if not MIN_COLUMNS <= len(cells) <= len(COLUMNS) or cells[0] == "---":
             continue
+        cells += [""] * (len(COLUMNS) - len(cells))
         try:
             attempts.append(
                 Attempt(
@@ -103,8 +121,11 @@ def read_attempts(path: Path) -> list[Attempt]:
                     # Three states -- "yes", "no", "unknown" -- kept as text rather than
                     # collapsed to a bool. "we could not check" and "it is not on the
                     # branch" are different facts, and a bool would have to pick one.
-                    merge_on_base=cells[12],
-                    changed_lines=int(cells[13]),
+                    # An absent column reads as its NOT-MEASURED value, never as a
+                    # measurement: an older journal did not record these, and "unknown"
+                    # and -1 are the values the rest of the analysis already excludes.
+                    merge_on_base=cells[12] or "unknown",
+                    changed_lines=int(cells[13]) if cells[13] else -1,
                 )
             )
         except ValueError:

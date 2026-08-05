@@ -14,7 +14,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from phase0.pilot.attempt import Attempt
-from phase0.pipeline.journal import append_repo, completed_repos, read_attempts
+from phase0.pipeline.journal import COLUMNS, append_repo, completed_repos, read_attempts
 
 
 def _attempt(repo: str, pr_id: str, admitted: bool = True, stage: str = "") -> Attempt:
@@ -82,3 +82,45 @@ def test_missing_journal_is_an_empty_resume_not_an_error(tmp_path: Path) -> None
     absent = tmp_path / "nope.md"
     assert completed_repos(absent) == set()
     assert read_attempts(absent) == []
+
+
+def test_a_journal_from_an_older_schema_still_reads(tmp_path: Path) -> None:
+    """Columns are only ever appended, so a short row is an older run, not a corrupt one.
+
+    Without this the only pre-fix baseline is an aggregate, and an aggregate cannot say
+    whether failures were FIXED or merely moved to a different stage — the question any
+    large drop in one rejection stage raises, and one this pipeline has already answered
+    wrongly once by watching a single gate.
+    """
+    older = tmp_path / "old.md"
+    older.write_text(
+        "| repo | pr_id | admitted | stage | category | commits | corpus_py | derived "
+        "| symbols | stars | outcome |\n"
+        "|---|---|---|---|---|---|---|---|---|---|---|\n"
+        "| o/r | 7 | no | parent_commit | integrity | 3 | 9 | 0 | 0 | 100 | - |\n",
+        encoding="utf-8",
+    )
+
+    attempts = read_attempts(older)
+
+    assert len(attempts) == 1
+    assert (attempts[0].stage, attempts[0].commit_count) == ("parent_commit", 3)
+    # The columns that did not exist read as NOT MEASURED, never as a measurement.
+    assert attempts[0].merge_on_base == "unknown"
+    assert attempts[0].changed_lines == -1
+
+
+def test_a_row_from_a_newer_schema_is_refused(tmp_path: Path) -> None:
+    """A longer row comes from a schema this code does not know; guessing invents data."""
+    newer = tmp_path / "new.md"
+    columns = "| " + " | ".join(COLUMNS) + " | extra |\n"
+    newer.write_text(
+        columns
+        + "|"
+        + "|".join("---" for _ in range(len(COLUMNS) + 1))
+        + "|\n"
+        + "| o/r | 8 | yes | - | - | 1 | 1 | 1 | 1 | 1 | clean | yes | yes | 10 | ??? |\n",
+        encoding="utf-8",
+    )
+
+    assert read_attempts(newer) == []

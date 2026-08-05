@@ -123,7 +123,7 @@ def test_a_perfectly_flat_gradient_is_not_rising() -> None:
 
 
 def test_a_dip_then_a_rise_is_not_monotone() -> None:
-    """"Rises monotonically" means every step, not merely a higher endpoint."""
+    """ "Rises monotonically" means every step, not merely a higher endpoint."""
     attempts = _rows(1, 10, 5) + _rows(3, 10, 1) + _rows(10, 10, 6)
 
     result = parent_gradient(attempts)
