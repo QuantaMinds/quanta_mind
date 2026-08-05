@@ -1,0 +1,10 @@
+[
+  "Azure/azure-sdk-for-python",
+  "airbytehq/airbyte",
+  "bruin-data/ingestr",
+  "dagster-io/dagster",
+  "getsentry/sentry",
+  "mlflow/mlflow",
+  "onyx-dot-app/onyx",
+  "wandb/weave"
+]

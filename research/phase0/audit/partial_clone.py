@@ -11,15 +11,13 @@ WHY:  Four clone timeouts have removed repositories with a median size of 959,52
       of our clone command rather than of the data, so it is the only one that can be
       closed rather than bounded.
 
-      Clone time alone would be the wrong measurement. A partial clone finishes fast and
-      then pays on first access: commit walks, `merge-base` and `--name-only` compare tree
-      OIDs and stay blob-free, but symbol extraction parses real diff text and will fetch.
-      Worse, missing blobs are fetched in SINGLE-BLOB requests with no delta compression,
-      so a fast clone can be undone by hundreds of sequential round trips. Hence
-      end-to-end, and hence `blob:limit=1m` alongside `blob:none`: Python sources sit far
-      below 1 MB, so they arrive in the initial pack and only the large binaries that make
-      these repositories a gigabyte are skipped.
-
+      Clone time alone would be the wrong measurement. Commit walks, `merge-base` and
+      `--name-only` compare tree OIDs and stay blob-free, but symbol extraction parses
+      real diff text and fetches -- in SINGLE-BLOB requests with no delta compression, so
+      a fast clone can be undone by hundreds of sequential round trips. Hence end-to-end,
+      and hence `blob:limit=1m` alongside `blob:none`: Python sources sit far below 1 MB
+      and arrive in the initial pack, skipping only the binaries that make these
+      repositories a gigabyte.
       The filter is ASSERTED, not assumed. A server may deny a filter and silently serve a
       full clone; `remote.origin.partialclonefilter` says whether it actually applied. An
       unapplied filter reporting a fast clone would be one more absence read as success.
@@ -48,11 +46,25 @@ RESULTS = Path("E:/Code/quanta_mind/research/phase0/results")
 CACHE = Path("E:/Code/quanta_mind/research/phase0/data/gh_cache")
 WORK = Path("E:/Code/quanta_mind/research/phase0/data/partial_clone_probe")
 
+# `full` is deliberately absent. Every target here is a repository the re-scan already
+# tried to clone in full and timed out on at 900s, so running it again would cost eight
+# more timeouts -- two hours -- to re-observe a result already in the journal. The
+# baseline is measured; what is unmeasured is whether a filter beats it.
 VARIANTS = {
-    "full": [],
     "blob_none": ["--filter=blob:none"],
     "blob_limit_1m": ["--filter=blob:limit=1m"],
 }
+
+
+def _failed(repo: str, variant: str, why: str, seconds: float) -> dict[str, object]:
+    """A clone that never produced a tree. `within_timeout` is False, never absent."""
+    return {
+        "repo": repo,
+        "variant": variant,
+        "outcome": why,
+        "clone_s": round(seconds, 1),
+        "within_timeout": False,
+    }
 
 
 def _filter_applied(target: Path) -> str:
@@ -103,22 +115,10 @@ def probe(repo: str, variant: str, pr: dict) -> dict:
             clone, capture_output=True, text=True, timeout=CLONE_TIMEOUT_S, check=False
         ).returncode
     except subprocess.TimeoutExpired:
-        return {
-            "repo": repo,
-            "variant": variant,
-            "outcome": "clone_timeout",
-            "clone_s": CLONE_TIMEOUT_S,
-            "within_timeout": False,
-        }
+        return _failed(repo, variant, "clone_timeout", float(CLONE_TIMEOUT_S))
     clone_s = time.monotonic() - started
     if code != 0:
-        return {
-            "repo": repo,
-            "variant": variant,
-            "outcome": "clone_failed",
-            "clone_s": round(clone_s, 1),
-            "within_timeout": False,
-        }
+        return _failed(repo, variant, "clone_failed", clone_s)
 
     applied = _filter_applied(target)
     before_objects = _promisor_objects(target)
@@ -151,8 +151,9 @@ def probe(repo: str, variant: str, pr: dict) -> dict:
         "variant": variant,
         "outcome": "ok",
         "partialclonefilter": applied,
-        # Asserted, never assumed: a server may deny the filter and serve a full clone.
-        "filter_actually_applied": (variant == "full") == (applied == "none"),
+        # Asserted, never assumed: github.com may deny a filter and quietly serve a full
+        # clone, which would show as a fast variant that is really the baseline.
+        "filter_actually_applied": applied != "none",
         "clone_s": round(clone_s, 1),
         "pipeline_s": round(pipeline_s, 1),
         "total_s": round(total, 1),

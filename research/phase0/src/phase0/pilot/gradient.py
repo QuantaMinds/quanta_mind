@@ -90,8 +90,17 @@ def parent_gradient(attempts: list[Attempt]) -> dict[str, object]:
         else None
     )
 
+    # Losses that carry no commit count cannot be attributed to a band. Journals written
+    # before that was fixed record 0 for every clone failure, so `share_lost` reads 0.0
+    # in every band while the losses are real. Reported at the top level: a zero share
+    # beside a non-zero count here means NOT MEASURED, not NOTHING LOST.
+    unbanded = sum(
+        1 for a in attempts if a.stage in CLONE_STAGES and _band_of(a.commit_count) == "unknown"
+    )
     return {
         "bands": bands,
+        "unbanded_clone_failures": unbanded,
+        "share_lost_is_trustworthy": unbanded == 0,
         "bands_in_trend": [name for name, _ in trend],
         # None is not "flat". Fewer than two usable bands means the question was not
         # answered, and a verdict of "flattened" from one band would be the same false

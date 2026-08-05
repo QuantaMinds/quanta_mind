@@ -103,5 +103,81 @@
     "files": [
       "python_modules/libraries/dagster-sling/dagster_sling/dagster_sling_translator.py"
     ]
+  },
+  {
+    "repo": "getsentry/sentry",
+    "pr_id": "2310085567",
+    "number": 84390,
+    "merge_sha": "added9b043e41d17afb326779df65530f93ad036",
+    "merged_at": "2025-02-03T17:25:39Z",
+    "base_ref": "master",
+    "commits": 2,
+    "subjects": [
+      "chore(issues): Update stronger typing list with more issues modules",
+      "Merge branch 'master' into mrduncan/strong-issues-typing"
+    ],
+    "files": [
+      "pyproject.toml",
+      "src/sentry/issues/streamline.py"
+    ]
+  },
+  {
+    "repo": "mlflow/mlflow",
+    "pr_id": "2283939870",
+    "number": 14265,
+    "merge_sha": "738dddf9a48bf9ef8d81ffb0266907bad5c018cf",
+    "merged_at": "2025-01-21T10:00:21Z",
+    "base_ref": "master",
+    "commits": 5,
+    "subjects": [
+      "spark_udf support for model with type hints",
+      "fix",
+      "fix",
+      "comment",
+      "comments"
+    ],
+    "files": [
+      "mlflow/pyfunc/__init__.py",
+      "mlflow/pyfunc/model.py",
+      "mlflow/types/type_hints.py",
+      "tests/pyfunc/test_pyfunc_model_with_type_hints.py",
+      "tests/types/test_type_hints.py"
+    ]
+  },
+  {
+    "repo": "onyx-dot-app/onyx",
+    "pr_id": "2267093351",
+    "number": 3634,
+    "merge_sha": "4c4ff46fe36dce4d1c94e0426ba0b3e0b749e0bb",
+    "merged_at": "2025-01-08T23:05:53Z",
+    "base_ref": "main",
+    "commits": 2,
+    "subjects": [
+      "Fixing google drive texts",
+      "Update conftest.py"
+    ],
+    "files": [
+      "backend/onyx/connectors/salesforce/shelve_stuff/old_test_salesforce_shelves.py",
+      "backend/tests/daily/connectors/google_drive/conftest.py",
+      "backend/tests/daily/connectors/google_drive/consts_and_utils.py"
+    ]
+  },
+  {
+    "repo": "wandb/weave",
+    "pr_id": "2269208152",
+    "number": 3358,
+    "merge_sha": "6841aa703b6a333de9674c98f32090b1a4902bbe",
+    "merged_at": "2025-01-09T21:16:16Z",
+    "base_ref": "master",
+    "commits": 1,
+    "subjects": [
+      "chore(weave): add deleted_at to weave object deleted error"
+    ],
+    "files": [
+      "tests/trace/test_obj_delete.py",
+      "weave/trace_server/clickhouse_trace_server_batched.py",
+      "weave/trace_server/errors.py",
+      "weave/trace_server/sqlite_trace_server.py"
+    ]
   }
 ]

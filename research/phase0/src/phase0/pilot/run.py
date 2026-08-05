@@ -182,7 +182,16 @@ def main(argv: list[str] | None = None) -> int:
             stage = "repo_gone" if "not found" in str(exc).lower() else "clone_timeout"
             for candidate in candidates:
                 if not any(a.pr_id == str(candidate.pr_id) for a in attempts[before:]):
-                    note(candidate, Rejection(str(candidate.pr_id), stage, str(exc)), 0)
+                    # The corpus's own commit list, because the API's count is only
+                    # fetched inside the clone that just failed. Passing 0 put every
+                    # clone failure outside every commit-count band, so the "lost to
+                    # clone failure" column read 0.0 for all of them -- "cannot tell"
+                    # rendered as "nothing lost", in the column added to prevent it.
+                    note(
+                        candidate,
+                        Rejection(str(candidate.pr_id), stage, str(exc)),
+                        len(candidate.commit_shas),
+                    )
         # Flushed here, not at the end. A repository that yielded nothing is still
         # marked done, or a restart would retry it forever.
         journal.append_repo(args.journal, repo, attempts[before:])
