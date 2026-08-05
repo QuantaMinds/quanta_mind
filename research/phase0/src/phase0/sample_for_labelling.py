@@ -78,6 +78,15 @@ def main(argv: list[str] | None = None) -> int:
         f"\nseed {drawn.seed}   examined {drawn.considered} PRs across "
         f"{drawn.repos_visited} repositories   buckets {drawn.bucket_sizes()}"
     )
+    # Printed, not merely collected. The draw skips PRs whose outcome it could not scan,
+    # and a count that is computed and then discarded is the same silence as never
+    # counting -- which is the defect that put UNSCANNABLE in the enum to begin with.
+    if drawn.unscannable:
+        breakdown = ", ".join(
+            f"{reason.value}={count}"
+            for reason, count in sorted(drawn.unscannable.items(), key=lambda kv: kv[0].value)
+        )
+        print(f"skipped      {drawn.skipped_total()} unscannable ({breakdown})")
     print(f"blind sheet  {args.out}")
     print(f"label here   {labels_path}")
     print(f"sealed key   {key_path}   <- DO NOT OPEN until the labels are committed")

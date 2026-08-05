@@ -25,6 +25,8 @@ from phase0.handlabel.draw import KeyRow
 from phase0.handlabel.files import BLIND_COLUMNS, read_key, write_blind, write_key
 from phase0.handlabel.labels import HumanLabel
 from phase0.handlabel.score import score
+from phase0.handlabel.sheet import Drawn
+from phase0.outcome.window import Exclusion
 
 
 def _key(n_broke: int, n_clean: int) -> list[KeyRow]:
@@ -123,3 +125,40 @@ def test_disagreement_direction_names_the_fix() -> None:
     assert {d.direction for d in result.disagreements} == {"rule too loose", "rule too tight"}
     assert result.machine_broke_human_clean == 1
     assert result.machine_clean_human_broke == 1
+
+
+def test_a_skipped_pr_is_counted_by_reason_and_reaches_the_caller() -> None:
+    """The draw must report what it passed over, not merely avoid crashing on it.
+
+    `draw` skips PRs whose outcome could not be scanned -- they cannot enter either
+    bucket, since a labeller cannot check a verdict the instrument never reached. The
+    count was collected into `Drawn` and then never read by `sample_for_labelling`, which
+    is the same silence as never counting it: the reason `UNSCANNABLE` exists at all is
+    that a skipped unit used to be indistinguishable from a clean one.
+
+    Kept at the accounting layer on purpose. `draw` itself clones from GitHub, and a mock
+    would only prove our stub returns what we told it to; that the scan produces the right
+    `Exclusion` for each case is asserted against real git in tests/outcome/test_branch.py.
+    """
+    drawn = Drawn(
+        blind=(),
+        key=(),
+        seed=0,
+        considered=12,
+        repos_visited=3,
+        unscannable={Exclusion.BASE_REF_MISSING: 2, Exclusion.MERGE_UNREACHABLE: 1},
+    )
+
+    assert drawn.skipped_total() == 3
+    # Reasons stay separate: a deleted branch and a rewritten history are different facts
+    # about the repository, and one number for both would report neither.
+    assert drawn.unscannable[Exclusion.BASE_REF_MISSING] == 2
+    assert drawn.unscannable[Exclusion.MERGE_UNREACHABLE] == 1
+
+
+def test_a_draw_that_skipped_nothing_reports_zero_not_absence() -> None:
+    """An empty skip set is a measurement, and must not read as "never checked"."""
+    drawn = Drawn(blind=(), key=(), seed=0, considered=5, repos_visited=1)
+
+    assert drawn.skipped_total() == 0
+    assert drawn.unscannable == {}
