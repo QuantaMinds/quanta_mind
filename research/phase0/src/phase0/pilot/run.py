@@ -41,7 +41,8 @@ from phase0.outcome.window import merge_on_base
 from phase0.pilot.attempt import Attempt
 from phase0.pilot.covariates import attempt_for
 from phase0.pilot.options import CACHE, PACKAGE, ROOT, parse
-from phase0.pilot.report import by_repo, default_branch, report, star_counts
+from phase0.pilot.repo_facts import default_branch, star_counts
+from phase0.pilot.report import by_repo, report
 from phase0.pilot.targets import choose
 from phase0.pipeline import journal, records_file, resume
 from phase0.pipeline.assemble import build_record

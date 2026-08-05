@@ -223,6 +223,19 @@ dropping most of the corpus.
 `just pilot` shells out to `gh auth token` at run time, so it works locally and will not
 work in CI. CI needs a real secret.
 
+**The `gh` binary itself is a required runtime dependency of the pilot, not only of the
+justfile.** `pilot/repo_facts.default_branch` invokes `gh api repos/<owner>/<name>` for
+every repository walked. It is not in `pyproject.toml` because it is not a Python
+package, and that is exactly how it went unnoticed: the first run on linux — the platform
+A35 selects for the corpus — died at its first repository because the container had
+`git` but not `gh`.
+
+A missing `gh` now raises `GhUnavailable` and stops the run rather than returning "".
+That choice is load-bearing: the answer is compared to `base_ref` and stored as a
+boolean, so degrading would have made every row read `base_is_default=False` and
+manufactured a 100% off-default corpus against a real figure of 15.5%. Verified against
+`gh` 2.63.2 on linux/aarch64.
+
 
 ## External inputs — pinned by hash
 

@@ -11,6 +11,7 @@ CONSUMED BY: `just pilot`; tests/pipeline/test_journal.py.
 from __future__ import annotations
 
 from phase0.pilot.attempt import Attempt
-from phase0.pilot.report import report, star_counts
+from phase0.pilot.repo_facts import star_counts
+from phase0.pilot.report import report
 
 __all__ = ["Attempt", "report", "star_counts"]
