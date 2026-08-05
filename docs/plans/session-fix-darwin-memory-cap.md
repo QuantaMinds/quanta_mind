@@ -1,11 +1,11 @@
 # Session record — fix/darwin-memory-cap
 
-Written by scripts/guard/hook_session_end.py at 2026-08-05T19:21:59Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-05T19:28:54Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `fix/darwin-memory-cap`
 - Files changed vs `main`: 25
-- Uncommitted at session end: 3
+- Uncommitted at session end: 4
 - `docs/CODEBASE.md` updated: no
 
 ## Changed
