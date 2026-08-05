@@ -114,13 +114,22 @@ def test_a_row_from_a_newer_schema_is_refused(tmp_path: Path) -> None:
     """A longer row comes from a schema this code does not know; guessing invents data."""
     newer = tmp_path / "new.md"
     columns = "| " + " | ".join(COLUMNS) + " | extra |\n"
+    # Sized against COLUMNS rather than written out. A literal row froze the width at
+    # fourteen, so appending a fifteenth column made this row exactly the CURRENT schema
+    # and the test started asserting that a valid row parses -- passing while testing
+    # nothing. The row must be one wider than whatever the schema is today.
+    cells = ["o/r", "8", "yes", "-", "-", "1", "1", "1", "1", "1", "clean", "yes", "yes", "10"]
+    cells += ["???"] * (len(COLUMNS) + 1 - len(cells))
     newer.write_text(
         columns
         + "|"
         + "|".join("---" for _ in range(len(COLUMNS) + 1))
         + "|\n"
-        + "| o/r | 8 | yes | - | - | 1 | 1 | 1 | 1 | 1 | clean | yes | yes | 10 | ??? |\n",
+        + "| "
+        + " | ".join(cells)
+        + " |\n",
         encoding="utf-8",
     )
 
+    assert len(cells) == len(COLUMNS) + 1
     assert read_attempts(newer) == []

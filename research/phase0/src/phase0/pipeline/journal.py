@@ -46,6 +46,11 @@ COLUMNS = (
     "merge_on_base",
     # additions + deletions. A20's quartile banding reads this one.
     "changed_lines",
+    # Empty on a first scan; on a re-scan it names WHY the repository was walked again,
+    # e.g. `rescan: blob_none_A29`. A repository can legitimately appear twice now, and
+    # a journal that recorded the second pass without its reason would leave the next
+    # reader unable to tell a re-scan from a duplicated bug.
+    "rescan",
 )
 # The oldest schema this reader accepts, ending at `outcome`. Everything after it was
 # appended later and reads as "not measured" when a row is short. Keeps a pre-fix journal
@@ -130,11 +135,33 @@ def read_attempts(path: Path) -> list[Attempt]:
             )
         except ValueError:
             continue  # a torn final line from a kill mid-write; the repo is not marked done
-    return attempts
+    return _last_wins(attempts)
 
 
-def append_repo(path: Path, repo: str, attempts: list[Attempt]) -> None:
-    """Flush one repository's rows and mark it finished. Called once per repository."""
+def _last_wins(attempts: list[Attempt]) -> list[Attempt]:
+    """One row per (repo, pr_id) — the LAST, because a re-scan supersedes.
+
+    A `--only-repo` pass appends a second block for a repository that is already in the
+    journal. Returning both would double-count it, and the eight repositories a re-scan
+    exists for are precisely the ones whose first block says `clone_failed` — so the
+    duplicate would reinstate the attrition the re-scan removed, in the arm that decides
+    A16's confounder. Insertion order is preserved so the report still reads as a walk.
+    """
+    latest: dict[tuple[str, str], Attempt] = {}
+    for attempt in attempts:
+        latest[(attempt.repo, attempt.pr_id)] = attempt
+    return list(latest.values())
+
+
+def append_repo(path: Path, repo: str, attempts: list[Attempt], rescan: str = "") -> None:
+    """Flush one repository's rows and mark it finished. Called once per repository.
+
+    `rescan` is stamped on every row of this flush. Nothing is rewritten and nothing is
+    removed: a repository walked a second time appends a second block, and `read_attempts`
+    resolves the collision by keeping the later row. Superseding rather than deleting
+    means the journal still shows that eight repositories once failed to clone, which is
+    the evidence A29 rests on.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     if not path.is_file():
         path.write_text(HEADER, encoding="utf-8")
@@ -157,6 +184,7 @@ def append_repo(path: Path, repo: str, attempts: list[Attempt]) -> None:
                 "yes" if a.base_is_default else "no",
                 a.merge_on_base,
                 str(a.changed_lines),
+                rescan or "-",
             )
         )
         + " |"

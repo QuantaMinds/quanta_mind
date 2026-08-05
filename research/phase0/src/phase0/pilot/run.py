@@ -40,6 +40,7 @@ from phase0.outcome.window import merge_on_base
 from phase0.pilot.attempt import Attempt
 from phase0.pilot.options import CACHE, PACKAGE, ROOT, parse
 from phase0.pilot.report import by_repo, default_branch, report, star_counts
+from phase0.pilot.targets import choose
 from phase0.pipeline import journal, records_file
 from phase0.pipeline.assemble import build_record
 from phase0.pipeline.rejection import Rejection
@@ -52,18 +53,17 @@ def main(argv: list[str] | None = None) -> int:
     token = require_token()
     population = eligible_prs(PACKAGE)
     grouped = by_repo(population)
-    chosen = sorted(grouped)[: args.repos]
-    print(f"{len(population)} eligible PRs across {len(grouped)} repos; taking {len(chosen)}")
+    targets = choose(grouped, args.journal, args.repos, args.only_repo, args.rescan_reason)
+    print(f"{len(population)} eligible across {len(grouped)} repos; {targets.announcement}")
 
     swept = sweep(args.workspace)
     if swept:
         print(f"swept {swept} clone(s) left by a previous run")
     stars = star_counts(ROOT / "data" / "aidev" / "repository.parquet")
-    already = journal.completed_repos(args.journal)
     attempts: list[Attempt] = journal.read_attempts(args.journal)
     clone_failures = 0
-    if already:
-        print(f"resuming: {len(already)} repos already journalled, {len(attempts)} attempts")
+    if targets.already:
+        print(f"resuming: {len(targets.already)} repos journalled, {len(attempts)} attempts")
 
     def note(
         candidate: Candidate,
@@ -100,12 +100,12 @@ def main(argv: list[str] | None = None) -> int:
             )
         )
 
-    for position, repo in enumerate(chosen, start=1):
-        if repo in already:
+    for position, repo in enumerate(targets.chosen, start=1):
+        if repo in targets.already:
             continue
         candidates = grouped[repo][: args.per_repo]
         before = len(attempts)
-        print(f"[{position}/{len(chosen)}] {repo} ({len(candidates)} PRs)", flush=True)
+        print(f"[{position}/{len(targets.chosen)}] {repo} ({len(candidates)} PRs)", flush=True)
         try:
             with cloned(repo, args.workspace) as clone:
                 for candidate in candidates:
@@ -186,9 +186,9 @@ def main(argv: list[str] | None = None) -> int:
                     note(candidate, fail, len(candidate.commit_shas))
         # Flushed here, not at the end. A repository that yielded nothing is still
         # marked done, or a restart would retry it forever.
-        journal.append_repo(args.journal, repo, attempts[before:])
+        journal.append_repo(args.journal, repo, attempts[before:], targets.rescan)
 
-    summary = report(attempts, clone_failures, len(chosen))
+    summary = report(attempts, clone_failures, len(targets.chosen))
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     print("\n" + json.dumps(summary, indent=2))

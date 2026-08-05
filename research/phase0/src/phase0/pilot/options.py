@@ -33,6 +33,21 @@ def parse(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Pilot: build records and report shape.")
     parser.add_argument("--repos", type=int, default=10)
     parser.add_argument(
+        "--only-repo",
+        action="append",
+        default=None,
+        metavar="OWNER/NAME",
+        help="walk only these repositories, even if the journal marks them done. "
+        "Repeatable. Requires --rescan-reason, because a repository appearing twice "
+        "without a stated cause is indistinguishable from a duplicated bug",
+    )
+    parser.add_argument(
+        "--rescan-reason",
+        default="",
+        metavar="TEXT",
+        help="stamped on every row this run appends, e.g. 'rescan: blob_none_A29'",
+    )
+    parser.add_argument(
         "--scan",
         action="store_true",
         help="also scan the outcome window, for the power projection",
@@ -58,4 +73,10 @@ def parse(argv: list[str] | None = None) -> argparse.Namespace:
         default=ROOT / "results" / "pilot_journal.md",
         help="append-only progress, flushed per repository; a restart resumes from it",
     )
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if args.only_repo and not args.rescan_reason.strip():
+        # Refused here rather than defaulted. A default reason would be written into the
+        # journal as though someone had stated it, and the journal is the only record of
+        # why a repository has two entries.
+        parser.error("--only-repo requires --rescan-reason stating why they are re-walked")
+    return args
