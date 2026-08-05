@@ -29,53 +29,25 @@ CONSUMED BY: `just pilot`.
 
 from __future__ import annotations
 
-import argparse
 import json
 import sys
-from pathlib import Path
 
 from phase0.extract_prs import PRRecord
 from phase0.github_pulls import merge_info, require_token
 from phase0.handlabel.select import Candidate, eligible_prs
 from phase0.outcome.scan import scan
-from phase0.pilot.report import Attempt, by_repo, default_branch, report, star_counts
+from phase0.outcome.window import merge_on_base
+from phase0.pilot.attempt import Attempt
+from phase0.pilot.options import CACHE, PACKAGE, ROOT, parse
+from phase0.pilot.report import by_repo, default_branch, report, star_counts
 from phase0.pipeline import journal
 from phase0.pipeline.assemble import build_record
 from phase0.pipeline.rejection import Rejection
 from phase0.pipeline.worktree import CloneFailed, cloned, sweep
 
-# pilot -> phase0 -> src -> project root. Was parents[2], which resolved to `src`, so every
-# default path below named a directory that does not exist. Dates from `pilot.py` becoming
-# the `pilot/` package. `controls/gate.py` counts from the same depth.
-ROOT = Path(__file__).resolve().parents[3]
-PACKAGE = ROOT / "data" / "AIDev_BC_Analyser.zip"
-WORKSPACE = ROOT / "data" / "pilot_clones"
-CACHE = ROOT / "data" / "gh_cache"
-
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Pilot: build records and report shape.")
-    parser.add_argument("--repos", type=int, default=10)
-    parser.add_argument(
-        "--scan",
-        action="store_true",
-        help="also scan the outcome window, for the power projection",
-    )
-    parser.add_argument("--per-repo", type=int, default=4)
-    parser.add_argument(
-        "--workspace",
-        type=Path,
-        default=WORKSPACE,
-        help="clone directory; a second concurrent run needs its own",
-    )
-    parser.add_argument("--out", type=Path, default=ROOT / "results" / "pilot.json")
-    parser.add_argument(
-        "--journal",
-        type=Path,
-        default=ROOT / "results" / "pilot_journal.md",
-        help="append-only progress, flushed per repository; a restart resumes from it",
-    )
-    args = parser.parse_args(argv if argv is not None else sys.argv[1:])
+    args = parse(argv if argv is not None else sys.argv[1:])
 
     token = require_token()
     population = eligible_prs(PACKAGE)
@@ -99,6 +71,7 @@ def main(argv: list[str] | None = None) -> int:
         commit_count: int,
         breakage: str = "",
         on_default: bool = True,
+        on_base: str = "unknown",
     ) -> None:
         """One attempt, with the covariates attrition may track. Never a verdict."""
         corpus_py = sum(1 for f in candidate.changed_files if f.endswith(".py"))
@@ -121,6 +94,7 @@ def main(argv: list[str] | None = None) -> int:
                 stars=stars.get(candidate.repo, -1),
                 outcome=breakage,
                 base_is_default=on_default,
+                merge_on_base=on_base,
             )
         )
 
@@ -141,6 +115,12 @@ def main(argv: list[str] | None = None) -> int:
                             0,
                         )
                         continue
+                    # Measured BEFORE the admission gate, on every attempt. The outcome
+                    # scan only ever sees survivors, and agentops #811/#817/#818/#819 --
+                    # the PRs that exposed the unreachable-merge case -- were all rejected
+                    # at `no_python` first. A prevalence taken after the gate would
+                    # describe the residue and be quoted as the population.
+                    on_base = merge_on_base(clone, merge.merge_commit_sha, merge.base_ref)
                     outcome = build_record(
                         clone,
                         merge,
@@ -161,6 +141,7 @@ def main(argv: list[str] | None = None) -> int:
                         merge.commit_count,
                         breakage,
                         merge.base_ref == default_branch(repo),
+                        on_base,
                     )
                     if isinstance(outcome, Rejection):
                         print(

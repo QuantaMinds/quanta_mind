@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from phase0.pilot.report import Attempt
+from phase0.pilot.attempt import Attempt
 from phase0.pipeline.journal import append_repo, completed_repos, read_attempts
 
 

@@ -28,7 +28,7 @@ from phase0.controls.analysis import run_negative_controls, run_positive_control
 from phase0.controls.corpus import DEFAULT_PER_MECHANISM, SyntheticPR, build_corpus
 from phase0.controls.mechanisms import probe_all_mechanisms
 from phase0.controls.reconcile import reconcile
-from phase0.outcome.conclusion import Outcome
+from phase0.outcome.conclusion import table_coding
 from phase0.outcome.scan import scan
 from phase0.run_pipeline import one_pr
 
@@ -88,11 +88,11 @@ def broke_rate(measured: list[tuple[SyntheticPR, Observation]]) -> tuple[float, 
     visible instead of leaving the caller to infer it from a lower number.
     """
     planted = [o for s, o in measured if s.planted_break]
-    scannable = [o for o in planted if o.outcome is not Outcome.UNSCANNABLE]
+    coded = [table_coding(o.outcome) for o in planted]
+    scannable = [c for c in coded if c is not None]
     if not scannable:
         return 0.0, len(planted)
-    detected = sum(1 for o in scannable if o.outcome is Outcome.BROKE)
-    return detected / len(scannable), len(planted) - len(scannable)
+    return sum(scannable) / len(scannable), len(planted) - len(scannable)
 
 
 def report(per_mechanism: int = DEFAULT_PER_MECHANISM, timeout_s: int = 120) -> dict[str, object]:

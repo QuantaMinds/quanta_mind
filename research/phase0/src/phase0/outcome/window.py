@@ -21,8 +21,10 @@ CONSUMED BY: scan_outcome.py; tests/test_scan_outcome.py.
 
 from __future__ import annotations
 
+from contextlib import closing
 from datetime import datetime, timezone
 from enum import Enum
+from pathlib import Path
 
 from git import Commit, Repo
 from git.exc import GitError, ODBError
@@ -71,6 +73,35 @@ def reachable(repo: Repo, sha: str, ref: str) -> bool:
         return bool(repo.is_ancestor(repo.commit(sha), repo.commit(ref)))
     except GIT_LOOKUP_ERRORS:
         return False
+
+
+def merge_on_base(clone: Path, merge_sha: str, base_ref: str) -> str:
+    """ "yes" | "no" | "unknown" -- is this merge commit on the branch it merged into?
+
+    Three answers, not two, and the third is the point. `reachable` collapses "not an
+    ancestor" and "could not resolve either end" into one False, which is the right shape
+    for the scan (both mean the window cannot be walked) and the wrong shape for a
+    prevalence count, where "no" is a fact about the repository and "unknown" is a fact
+    about us.
+
+    Takes a path and owns the handle, because it is called before the admission gate where
+    no Repo is open yet, and because Windows keeps pack files mapped until one is closed --
+    a leaked handle here would block the clone's own removal later.
+    """
+    if not merge_sha or not base_ref:
+        return "unknown"
+    try:
+        repo = Repo(clone)
+    except GIT_LOOKUP_ERRORS:
+        return "unknown"
+    with closing(repo):
+        ref = base_ref_of(repo, base_ref)
+        if ref is None:
+            return "unknown"  # branch gone; that is `base_ref_missing`, counted there
+        try:
+            return "yes" if repo.is_ancestor(repo.commit(merge_sha), repo.commit(ref)) else "no"
+        except GIT_LOOKUP_ERRORS:
+            return "unknown"
 
 
 def candidates(

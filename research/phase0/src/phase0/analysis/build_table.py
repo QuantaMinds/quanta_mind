@@ -36,7 +36,7 @@ from phase0.analysis.risk import Counts, RiskResult, cluster_robust, design_effe
 from phase0.analysis.risk import katz as katz_ci
 from phase0.analysis.verdict import Verdict, read_verdict
 from phase0.classify_exposure import Exposure
-from phase0.outcome.scan import Outcome
+from phase0.outcome.conclusion import Outcome, table_coding
 
 ArmOf = Callable[["Observation"], Exposure | None]
 
@@ -107,6 +107,11 @@ def tabulate(
     bug surviving one layer below the fix: the scan was corrected to say "I could not
     look", and `tabulate` translated that back into "nothing broke" before the estimate
     ever saw it. The 2x2 is complete-case by A16, and this is what makes it so.
+
+    The coding is `table_coding`'s to decide, not this function's. Reading the enum by
+    hand here is exactly what went wrong -- `1 if BROKE else 0` type-checks whatever
+    states exist -- so the decision lives in one exhaustive match that a fifth state
+    breaks at compile time.
     """
     a = b = c = d = 0
     exposed: list[int] = []
@@ -122,9 +127,9 @@ def tabulate(
         else:
             continue
 
-        if observation.outcome is Outcome.UNSCANNABLE:
+        outcome = table_coding(observation.outcome)
+        if outcome is None:  # no outcome to contribute; outside the denominator
             continue
-        outcome = 1 if observation.outcome is Outcome.BROKE else 0
         if flag and outcome:
             a += 1
         elif flag:

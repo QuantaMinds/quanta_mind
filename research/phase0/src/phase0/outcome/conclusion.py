@@ -25,6 +25,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
+from typing import NoReturn
 
 from phase0.outcome.window import Exclusion
 
@@ -33,11 +34,42 @@ class Outcome(Enum):
     BROKE = "broke"
     CLEAN = "clean"
     # We could not look. Distinct from CLEAN on purpose -- see the module docstring and
-    # `outcome_window.Exclusion`, which owns the reasons. Every consumer must exclude it
-    # rather than code it 0: the scan producing an honest UNSCANNABLE does not help if
-    # `tabulate` folds it back into the clean cell, which is where this bug lived one
-    # layer down after the scan itself was fixed.
+    # `window.Exclusion`, which owns the reasons. Read this through `table_coding` rather
+    # than testing it by hand: typing the value at the producer prevented nothing, because
+    # `1 if BROKE else 0` at the consumer compiles forever.
     UNSCANNABLE = "unscannable"
+
+
+def unhandled(value: NoReturn) -> NoReturn:
+    """Reject a state nobody handled, at type-check time where possible.
+
+    Passing a value mypy has not narrowed to Never is an error under --strict, so a fifth
+    `Outcome` becomes a COMPILE failure at every match that forgot it. That is the whole
+    defence: `UNSCANNABLE` was already a distinct value when four separate consumers
+    folded it into CLEAN, so richness at the producer bought nothing. Exhaustiveness at
+    the consumer is what forces the acknowledgement.
+
+    `typing.assert_never` is the same idea and arrived in 3.11; this project is pinned to
+    3.10 by PyCG, and `typing_extensions` is not a declared dependency.
+    """
+    raise AssertionError(f"unhandled outcome state: {value!r}")
+
+
+def table_coding(outcome: Outcome) -> int | None:
+    """1 broke, 0 clean, None excluded -- the ONE place the coding is decided.
+
+    None is not a failure. It means the unit has no outcome to contribute and belongs
+    outside the denominator, which is the distinction `analysis/build_table.py` erased by
+    coding it 0.
+    """
+    match outcome:
+        case Outcome.BROKE:
+            return 1
+        case Outcome.CLEAN:
+            return 0
+        case Outcome.UNSCANNABLE:
+            return None
+    unhandled(outcome)
 
 
 class Criterion(Enum):

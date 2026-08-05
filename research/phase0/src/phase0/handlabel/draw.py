@@ -14,8 +14,8 @@ WHY:  A random draw at the base rate hands the labeller roughly two broken PRs i
       Repositories are shuffled and capped rather than PRs -- shuffling PRs would mean a
       clone each, and stopping when the buckets fill would concentrate the sample in
       whichever repositories came first.
-IMPORTS: phase0.extract_prs, phase0.scan_outcome, phase0.pipeline.worktree,
-      phase0.handlabel.select.
+IMPORTS: phase0.extract_prs, phase0.outcome.{conclusion,scan,window},
+      phase0.pipeline.worktree, phase0.handlabel.{select,sheet}.
 CONSUMED BY: phase0/sample_for_labelling.py; tests/handlabel/.
 """
 
@@ -29,7 +29,8 @@ from pathlib import Path
 from phase0.extract_prs import PRRecord
 from phase0.handlabel.select import Candidate
 from phase0.handlabel.sheet import Drawn, KeyRow
-from phase0.outcome.scan import Outcome, scan
+from phase0.outcome.conclusion import Outcome, unhandled
+from phase0.outcome.scan import scan
 from phase0.outcome.window import Exclusion
 from phase0.pipeline.worktree import CloneFailed, cloned
 
@@ -122,10 +123,19 @@ def draw(
                         break
                     considered += 1
                     record = scan(path, _as_record(candidate))
-                    if record.outcome is Outcome.UNSCANNABLE:
-                        unscannable[record.exclusion] += 1
-                        continue
-                    if len(buckets[record.outcome]) < wanted[record.outcome]:
+                    # Exhaustive rather than a membership test. `buckets` holds two keys,
+                    # so the version that indexed it with the verdict directly raised
+                    # KeyError the moment a third state existed -- and a fourth would do
+                    # it again. mypy rejects an unhandled state here at check time.
+                    match record.outcome:
+                        case Outcome.UNSCANNABLE:
+                            unscannable[record.exclusion] += 1
+                            continue
+                        case Outcome.BROKE | Outcome.CLEAN:
+                            bucket = buckets[record.outcome]
+                        case _:
+                            unhandled(record.outcome)
+                    if len(bucket) < wanted[record.outcome]:
                         buckets[record.outcome].append(
                             _Scored(
                                 candidate=candidate,

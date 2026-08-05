@@ -18,12 +18,12 @@ from __future__ import annotations
 
 import subprocess
 from collections import Counter
-from dataclasses import dataclass
 from pathlib import Path
 
 import pandas as pd
 
 from phase0.handlabel.select import Candidate
+from phase0.pilot.attempt import Attempt
 
 # Commit-count bands. Chosen before the run and kept coarse: with a few hundred PRs,
 # quartiles cut from the data would move with it, and a moving boundary is a degree of
@@ -43,30 +43,6 @@ FILE_BANDS: tuple[tuple[str, int, int], ...] = (
     ("16-50", 16, 50),
     ("51+", 51, 10**9),
 )
-
-
-@dataclass(frozen=True, slots=True)
-class Attempt:
-    """One PR the pilot tried to admit, with the covariates attrition may track."""
-
-    pr_id: str
-    repo: str
-    admitted: bool
-    stage: str  # "" when admitted
-    category: str  # "" when admitted
-    commit_count: int
-    corpus_py_files: int
-    derived_files: int
-    changed_symbols: int
-    stars: int = -1
-    # "broke" | "clean" | "" when the outcome was not scanned. Three states, not two:
-    # an unscanned PR and a clean one must not be the same value, or the breakage rate
-    # silently divides by the wrong denominator.
-    outcome: str = ""
-    # Whether the PR merged into the repository's default branch. 15.5% do not, and
-    # those repositories have release processes -- so the split is a population
-    # question, not just a bug's footprint.
-    base_is_default: bool = True
 
 
 def star_counts(table: Path) -> dict[str, int]:
@@ -194,4 +170,10 @@ def report(attempts: list[Attempt], clone_failures: int, repos: int) -> dict[str
         "outcome_scanned": len(scanned),
         "outcome_broke": len(broke),
         "breakage_rate": round(len(broke) / len(scanned), 4) if scanned else None,
+        # Prevalence of unreachable merges over EVERY attempt, not over the scanned
+        # survivors. The four agentops PRs that exposed the case were rejected at
+        # `no_python` before any scan ran, so a scan-time count would report the residue.
+        # A17's accounting reads this one.
+        "merge_on_base_all_attempts": dict(Counter(a.merge_on_base for a in attempts)),
+        "merge_on_base_admitted": dict(Counter(a.merge_on_base for a in admitted)),
     }

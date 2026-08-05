@@ -28,7 +28,7 @@ from __future__ import annotations
 from phase0.analysis.build_table import Observation, by_primary, tabulate
 from phase0.classify_exposure import Exposure
 from phase0.controls.corpus import SyntheticPR
-from phase0.outcome.conclusion import Outcome
+from phase0.outcome.conclusion import table_coding
 
 Measured = list[tuple[SyntheticPR, Observation]]
 
@@ -40,7 +40,9 @@ def _rr(aa: int, bb: int, cc: int, dd: int) -> float:
 
 
 def _unscannable(observation: Observation) -> bool:
-    return observation.outcome is Outcome.UNSCANNABLE
+    """No outcome to contribute. Asked through `table_coding` so a new state cannot
+    quietly answer False here and land in whichever bucket follows."""
+    return table_coding(observation.outcome) is None
 
 
 def reconcile(measured: Measured) -> dict[str, object]:
@@ -59,7 +61,10 @@ def reconcile(measured: Measured) -> dict[str, object]:
     unknown_exposed = sum(1 for _, o in outcome_excluded if o.primary is Exposure.EXPOSED)
     unknown_unexposed = sum(1 for _, o in outcome_excluded if o.primary is Exposure.UNEXPOSED)
 
-    ex_broke = sum(1 for _, o in arm_exposed if o.outcome is Outcome.BROKE)
+    # These are known-outcome units by construction, so the coding is 1 or 0 and never
+    # None -- but it is still asked rather than assumed, because `- ex_broke` is exactly
+    # the subtraction that turned an unscannable unit into a clean one.
+    ex_broke = sum(table_coding(o.outcome) or 0 for _, o in arm_exposed)
     ex_clean = len(arm_exposed) - ex_broke
     a, b = counts.exposed_broke, counts.exposed_clean
     c, d = counts.unexposed_broke, counts.unexposed_clean

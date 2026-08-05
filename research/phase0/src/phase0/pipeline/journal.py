@@ -24,7 +24,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from phase0.pilot.report import Attempt
+from phase0.pilot.attempt import Attempt
 
 COLUMNS = (
     "repo",
@@ -39,6 +39,11 @@ COLUMNS = (
     "stars",
     "outcome",
     "on_default",
+    # Whether the merge commit is an ancestor of its own base branch. Recorded for EVERY
+    # attempt, admitted or not, because the scan only ever sees the survivors: the four
+    # agentops PRs that exposed this were rejected at `no_python` before any scan ran, so
+    # a count taken at scan time measures the post-filter residue rather than prevalence.
+    "merge_on_base",
 )
 DONE = re.compile(r"^<!-- repo-done: (?P<repo>\S+) -->$")
 HEADER = (
@@ -93,6 +98,10 @@ def read_attempts(path: Path) -> list[Attempt]:
                     stars=int(cells[9]),
                     outcome="" if cells[10] == "-" else cells[10],
                     base_is_default=cells[11] != "no",
+                    # Three states -- "yes", "no", "unknown" -- kept as text rather than
+                    # collapsed to a bool. "we could not check" and "it is not on the
+                    # branch" are different facts, and a bool would have to pick one.
+                    merge_on_base=cells[12],
                 )
             )
         except ValueError:
@@ -122,6 +131,7 @@ def append_repo(path: Path, repo: str, attempts: list[Attempt]) -> None:
                 str(a.stars),
                 a.outcome or "-",
                 "yes" if a.base_is_default else "no",
+                a.merge_on_base,
             )
         )
         + " |"

@@ -295,6 +295,45 @@ def callers_of(symbol) -> tuple[list[Edge], list[Unresolved]]: ...
 
 The second return value is the product.
 
+### 7.1a A typed absence is not enough on its own
+
+We learned this the expensive way, on our own instrument. The outcome scanner was given a
+third state, `UNSCANNABLE`, precisely so "we could not look" would stop impersonating
+"nothing broke". It produced that state correctly. Then **four separate consumers
+destroyed it** — three folded it into the clean cell, one would have crashed on it.
+
+The type existed. Nothing forced anyone to acknowledge it, because this compiles forever:
+
+```python
+outcome = 1 if result is Outcome.BROKE else 0   # UNSCANNABLE silently becomes "clean"
+```
+
+**Richness at the producer buys nothing without exhaustiveness at the consumer.** The
+defence is an exhaustive `match` whose default arm is unreachable-by-type, so adding a
+state is a *compile error* at every site that reads it. We verified ours bites by adding a
+fourth state and watching `mypy --strict` reject it. That is the difference between a
+distinction the type system *records* and one it *enforces*.
+
+### 7.1b The checker that passed itself
+
+The sharpest instance we have. We wrote a verifier to confirm each resolved parent commit
+really was the trunk commit a change landed on. It reported **20 of 20**.
+
+The true answer was 19 of 20. One parent had never resolved and was stored as an empty
+string:
+
+```python
+trunk.startswith(resolved)   # resolved == ""  ->  True for every string
+```
+
+A checker written to catch silent passes, containing a silent pass, and reporting a number
+*better* than the real one. It is not a data bug or a config bug — the logic was wrong and
+its output was entirely plausible. **Nobody double-checks a 20/20.**
+
+This is the whole thesis in six characters. The failure was not that the tool went wrong;
+it was that going wrong and going right looked identical from the outside. That is what we
+sell against, and we hit it inside the instrument built to measure it.
+
 ### 7.2 `Confidence` has no default
 
 A dataclass field with no default means the type-checker **forces** every code path to

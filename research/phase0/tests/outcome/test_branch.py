@@ -32,7 +32,7 @@ from git import Actor, Repo
 from phase0.extract_prs import PRRecord
 from phase0.outcome.conclusion import Outcome
 from phase0.outcome.scan import scan
-from phase0.outcome.window import Exclusion
+from phase0.outcome.window import Exclusion, merge_on_base
 
 MERGED_AT = datetime(2026, 3, 1, 12, 0, 0, tzinfo=timezone.utc)
 AUTHOR = Actor("Tester", "tester@example.com")
@@ -145,3 +145,26 @@ def test_merge_unreachable_from_base_is_its_own_category(tmp_path: Path) -> None
     assert result.exclusion is Exclusion.MERGE_UNREACHABLE
     assert result.exclusion is not Exclusion.BASE_REF_MISSING
     assert result.is_consistent
+
+
+def test_merge_on_base_separates_no_from_unknown(tmp_path: Path) -> None:
+    """Three answers, because "not on the branch" and "we could not check" differ.
+
+    `reachable` returns one False for both, which is right for the scan -- either way the
+    window cannot be walked -- and wrong for a prevalence count, where "no" describes the
+    repository and "unknown" describes us. Recorded at admission, so it covers PRs the
+    gate later rejects: every agentops case that exposed this was dropped at `no_python`
+    before any scan ran.
+    """
+    repo, merged = _repo_with_dev(tmp_path)
+    repo.heads.main.checkout()
+
+    assert merge_on_base(tmp_path, merged, "dev") == "yes"
+    assert merge_on_base(tmp_path, merged, "feature/gone") == "unknown"
+    assert merge_on_base(tmp_path, "", "dev") == "unknown"
+
+    repo.git.checkout("--orphan", "rewritten")
+    stranded = _commit(repo, TOUCHED, "feat: handler on a rewritten history", MERGED_AT)
+    repo.heads.main.checkout()
+
+    assert merge_on_base(tmp_path, stranded, "dev") == "no"

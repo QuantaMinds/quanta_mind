@@ -50,7 +50,7 @@ when its verdict type grew a reason for *not* answering.
 |---|---|
 | `window.py` | which branch to walk, whether the merge is on it, and the `Exclusion` categories |
 | `signals.py` | the message and file-overlap rules — what counts as a fix |
-| `conclusion.py` | `Outcome`, `Criterion`, `OutcomeRecord` — what a verdict IS |
+| `conclusion.py` | `Outcome`, `Criterion`, `OutcomeRecord`, and `table_coding` — what a verdict IS and how it is read |
 | `scan.py` | the walk itself |
 
 `Outcome.UNSCANNABLE` is the reason the package is worth reading. The scan walked from the
@@ -67,6 +67,13 @@ Two consequences bind anything that consumes a verdict:
   clean cell — the same bug living one layer below its own fix — and `controls/gate.py`
   put it in the positive control's denominator, which reads an unwalkable branch as a
   blind classifier.
+- **Read the enum through `table_coding`, never by hand.** It returns `1 | 0 | None` from
+  one exhaustive `match`; `None` means "outside the denominator". Typing the value at the
+  producer prevented none of the four failures above, because `1 if BROKE else 0`
+  type-checks against whatever states happen to exist. `conclusion.unhandled` takes a
+  `NoReturn` parameter, so a fifth state is a **compile error** at every site that reads
+  it — verified by adding one and watching `mypy --strict` reject it.
+  (`typing.assert_never` is the same idea and needs 3.11; PyCG pins us to 3.10.)
 - **The exclusion carries a category, not a message.** `base_ref_missing` (branch deleted
   after merge) and `merge_unreachable` (merge commit is not an ancestor of its base — a
   force-push or a recreated branch) are separate values because they are different facts
@@ -76,6 +83,15 @@ Two consequences bind anything that consumes a verdict:
 `controls/reconcile.py` accounts for both ways out of the 2×2 and bounds them separately:
 an unmeasurable arm still has a known outcome and bounds tightly, while a missing outcome
 can only be bounded by assuming all of them broke and then that none did.
+
+`window.merge_on_base` answers the same reachability question in three values — `yes`,
+`no`, `unknown` — and the pilot calls it at **admission**, on every attempt, before the
+gate. `reachable` collapses "not an ancestor" and "could not resolve" into one `False`,
+which is right for the scan (either way the window cannot be walked) and wrong for a
+prevalence count, where `no` describes the repository and `unknown` describes us. The
+count has to be taken before the gate because the scan only ever sees survivors: all four
+agentops PRs that exposed the unreachable-merge case were rejected at `no_python` first,
+so a scan-time count reports the residue and gets quoted as the population.
 
 ### `scripts/guard/` — the enforcement layer
 
