@@ -26,12 +26,12 @@ CONSUMED BY: extract_prs.py; tests/test_parent_commit.py.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from enum import Enum
 from pathlib import Path
 
 from git import Commit, Repo
 from git.exc import GitError, ODBError
+
+from phase0.pipeline.merge_shape import MergeShape, ParentResolution, by_subject
 
 # GitPython raises across two unrelated hierarchies. GitError covers command
 # failures; BadName and BadObject derive from gitdb's ODBError, which is NOT a
@@ -39,29 +39,6 @@ from git.exc import GitError, ODBError
 # escape -- and merge_commit_sha arrives from an API payload, so malformed is a
 # realistic input rather than a hypothetical one.
 GIT_LOOKUP_ERRORS = (GitError, ODBError, ValueError)
-
-
-class MergeShape(Enum):
-    """How the PR reached trunk. Decides which rule applies."""
-
-    MERGE_COMMIT = "merge_commit"
-    SQUASH = "squash"
-    REBASE = "rebase"
-    AMBIGUOUS = "ambiguous"  # excluded, and counted as corpus attrition
-
-
-@dataclass(frozen=True, slots=True)
-class ParentResolution:
-    """The parent commit, and how it was decided."""
-
-    shape: MergeShape
-    parent_sha: str
-    steps_walked: int = 0
-    reason: str = ""
-
-    @property
-    def is_resolved(self) -> bool:
-        return self.shape is not MergeShape.AMBIGUOUS and bool(self.parent_sha)
 
 
 def _files_of(commit: Commit) -> set[str]:
@@ -76,6 +53,7 @@ def resolve(
     merge_commit_sha: str,
     pr_files: frozenset[str],
     pr_commit_count: int,
+    pr_commit_subjects: tuple[str, ...] = (),
 ) -> ParentResolution:
     """Apply A2's decision table to one merged PR.
 
@@ -109,7 +87,13 @@ def resolve(
     if len(parents) >= 2:
         return ParentResolution(MergeShape.MERGE_COMMIT, parents[0].hexsha, steps_walked=1)
 
-    # 2 and 3 both have one parent; diff coverage tells them apart.
+    # 2. Subjects when we have them: authoritative, and independent of the corpus file
+    #    list that the file rules below depend on.
+    from_subjects = by_subject(merge, pr_commit_subjects, max(pr_commit_count, 1))
+    if from_subjects is not None:
+        return from_subjects
+
+    # 3 and 4 both have one parent; diff coverage tells them apart.
     covered = _files_of(merge)
     if not pr_files or covered >= pr_files:
         return ParentResolution(

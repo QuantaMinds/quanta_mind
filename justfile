@@ -178,4 +178,4 @@ allow-golden:
 # Stops at record construction on purpose: a pilot that produced a relative risk
 # would invite reading it.
 pilot REPOS="10":
-    cd research/phase0 && GITHUB_TOKEN="$(gh auth token)" uv run python -m phase0.run_pilot --repos {{REPOS}}
+    cd research/phase0 && GITHUB_TOKEN="$(gh auth token)" uv run python -m phase0.pilot.run --repos {{REPOS}}

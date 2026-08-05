@@ -1,6 +1,6 @@
 """The pilot: build records from the corpus and report the shape metrics, nothing else.
 
-WHAT: `python -m phase0.run_pilot --repos N`. Walks repositories, resolves each PR's
+WHAT: `python -m phase0.pilot.run --repos N`. Walks repositories, resolves each PR's
       parent, re-derives its file set, applies the admission gate, and prints where the
       corpus lost rows and why.
 WHY:  The pilot exists to answer "is the instrument measuring what we think" before any
@@ -37,7 +37,7 @@ from pathlib import Path
 from phase0.extract_prs import PRRecord
 from phase0.github_pulls import merge_info, require_token
 from phase0.handlabel.select import Candidate, eligible_prs
-from phase0.pilot_report import Attempt, report, star_counts
+from phase0.pilot.report import Attempt, report, star_counts
 from phase0.pipeline import journal
 from phase0.pipeline.assemble import Rejection, build_record
 from phase0.pipeline.worktree import CloneFailed, cloned, sweep
@@ -173,6 +173,12 @@ def main(argv: list[str] | None = None) -> int:
         except CloneFailed as exc:
             clone_failures += 1
             print(f"     clone failed: {exc}", flush=True)
+            # One row per PR, not a gap. A clone failure is attrition with a cause, and
+            # a denominator that moves with the weather makes every later comparison
+            # carry noise nobody declared.
+            for candidate in candidates:
+                if not any(a.pr_id == str(candidate.pr_id) for a in attempts[before:]):
+                    note(candidate, Rejection(str(candidate.pr_id), "clone_failed", str(exc)), 0)
         # Flushed here, not at the end. A repository that yielded nothing is still
         # marked done, or a restart would retry it forever.
         journal.append_repo(args.journal, repo, attempts[before:])

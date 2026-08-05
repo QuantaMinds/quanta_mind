@@ -5,7 +5,7 @@ WHAT: Pins the round trip, the done-marker, and the two failure modes that make 
 WHY:  The full run is over thirty hours. A journal that silently loses rows costs the
       run twice; one that marks a repository done before its rows are on disk loses them
       permanently and reports a complete result. Both are silent, so both are pinned.
-IMPORTS: phase0.pipeline.journal, phase0.pilot_report.
+IMPORTS: phase0.pipeline.journal, phase0.pilot.report.
 CONSUMED BY: `just test-phase0`.
 """
 
@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from phase0.pilot_report import Attempt
+from phase0.pilot.report import Attempt
 from phase0.pipeline.journal import append_repo, completed_repos, read_attempts
 
 

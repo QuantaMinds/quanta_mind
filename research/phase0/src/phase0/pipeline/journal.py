@@ -15,7 +15,7 @@ WHY:  The pilot takes about two hours and the full run takes over thirty. Holdin
       rows are written, so the restart would redo it forever. `repo-done` states that the
       repository was finished, which is the same distinction between silence and failure
       that the rest of this harness turns on.
-IMPORTS: stdlib re, pathlib; phase0.pilot_report.
+IMPORTS: stdlib re, pathlib; phase0.pilot.report.
 CONSUMED BY: run_pilot.py; tests/pipeline/test_journal.py.
 """
 
@@ -24,7 +24,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from phase0.pilot_report import Attempt
+from phase0.pilot.report import Attempt
 
 COLUMNS = (
     "repo",

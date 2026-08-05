@@ -59,6 +59,11 @@ MIN_FILE_AGREEMENT = 0.6
 #   restricted -- nothing to measure. Not missing data: the estimand does not cover
 #                 this unit, which narrows the claim rather than biasing it.
 CATEGORIES: dict[str, str] = {
+    # A repository we could not clone must produce a record per PR, not the absence of
+    # one. Absent rows shrink the denominator, so the same corpus scanned twice gave 33
+    # records once and 34 the next -- a 3% swing at that size, larger than several
+    # effects the study needs to tell apart, and nothing reported it.
+    "clone_failed": "resource",
     "merge_metadata": "resource",
     "parent_commit": "integrity",
     "file_set": "integrity",
@@ -104,7 +109,13 @@ def build_record(
     if not merge.is_usable:
         return Rejection(pr_id, "merge_metadata", "unmerged, or no merge commit recorded")
 
-    parent = resolve(clone, merge.merge_commit_sha, frozenset(corpus_files), merge.commit_count)
+    parent = resolve(
+        clone,
+        merge.merge_commit_sha,
+        frozenset(corpus_files),
+        merge.commit_count,
+        merge.commit_subjects,
+    )
     if not parent.is_resolved:
         return Rejection(pr_id, "parent_commit", parent.reason)
 
@@ -112,13 +123,19 @@ def build_record(
     if not derived:
         return Rejection(pr_id, "no_python", "no .py files between parent and merge")
 
-    corpus_py = frozenset(f for f in corpus_files if f.endswith(".py"))
+    # Verify against GitHub's own file list when we have it, and the corpus's only when
+    # we do not. Detection can be a heuristic; verification cannot. The corpus attributes
+    # 92 files to some three-file PRs, so a gate built on it was checking the wrong thing
+    # against the right diff.
+    authority = merge.api_files or corpus_files
+    source = "github" if merge.api_files else "corpus"
+    corpus_py = frozenset(f for f in authority if f.endswith(".py"))
     agreement = file_agreement(corpus_py, frozenset(derived))
     if agreement < MIN_FILE_AGREEMENT:
         return Rejection(
             pr_id,
             "file_set",
-            f"corpus lists {len(corpus_py)} .py files, the diff shows {len(derived)}; "
+            f"{source} lists {len(corpus_py)} .py files, the diff shows {len(derived)}; "
             f"agreement {agreement:.2f} < {MIN_FILE_AGREEMENT}. Analysing this PR would "
             f"scan a file set the change never touched.",
             agreement,
