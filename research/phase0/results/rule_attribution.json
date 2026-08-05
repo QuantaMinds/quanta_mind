@@ -1,0 +1,21 @@
+{
+  "scanned": 33,
+  "broke_by_variant": {
+    "neither": 9,
+    "subject_only": 7,
+    "focus_only": 7,
+    "both": 6
+  },
+  "rate_by_variant": {
+    "neither": 0.2727,
+    "subject_only": 0.2121,
+    "focus_only": 0.2121,
+    "both": 0.1818
+  },
+  "removed_by_subject_only": 2,
+  "removed_by_focus_only": 2,
+  "removed_by_both": 3,
+  "dropped_by_focus_after_subject": [
+    "AgentOps-AI/agentops#818"
+  ]
+}

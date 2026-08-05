@@ -1,0 +1,63 @@
+# The enforcement layer.
+#
+# WHY: these are the rules AGENTS.md states and .claude/settings.json maps. The hooks in
+#      that file give an agent immediate feedback, but PostToolUse fires after the write
+#      has already landed -- it cannot prevent anything. This workflow is what actually
+#      blocks. The $enforcement_map rows say "hook:PostToolUse (advisory) + ci:guards
+#      (blocking)" for exactly that reason.
+#
+#      Guards are stdlib-only and run without installing the package, which is why they
+#      import each other by bare name and why this workflow does not `uv sync`.
+
+name: guards
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  UV_VERSION: "0.12.1"
+
+jobs:
+  guards:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # check_docs_sync.py diffs origin/main...HEAD. Without full history that
+          # range resolves to nothing and the check silently passes -- which is worse
+          # than not running it, because the job still goes green.
+          fetch-depth: 0
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: ${{ env.UV_VERSION }}
+
+      - name: File length and directory fanout
+        run: python scripts/guard/check_structure.py .
+
+      - name: Layering, docstrings and naming
+        run: python scripts/guard/check_conventions.py .
+
+      - name: Test quality — product
+        run: python scripts/guard/check_assert_quality.py tests
+
+      - name: Test quality — the correlation test harness
+        run: python scripts/guard/check_assert_quality.py research/phase0/tests
+
+      - name: AGENTS.md budget and pointers
+        run: python scripts/guard/check_agents_md.py AGENTS.md
+
+      - name: Enforcement map resolves, no orphan guards
+        run: python scripts/guard/check_enforcement_map.py .
+
+      - name: Research dependencies stay out of the product
+        run: python scripts/guard/check_no_research_imports.py .
+
+      - name: Docs move with code
+        run: python scripts/guard/check_docs_sync.py .
+
+      - name: Branch name
+        if: github.event_name == 'pull_request'
+        run: python scripts/guard/check_branch_name.py . "${{ github.head_ref }}"

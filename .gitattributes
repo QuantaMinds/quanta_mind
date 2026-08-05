@@ -1,0 +1,16 @@
+# Line-ending normalisation.
+#
+# WHY: ARCHITECTURE.md invariant 5 requires that re-indexing an unchanged commit
+#      produces a byte-identical pack, and VALIDATION.md section 4 failure 10
+#      names non-deterministic output as the failure that kills the review
+#      culture. A repository that stores CRLF on Windows and LF elsewhere cannot
+#      make either claim -- golden-file diffs would be full of invisible noise
+#      and reviewers would learn to ignore them.
+#
+# Everything is LF in the repository, on every platform.
+
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.sqlite binary

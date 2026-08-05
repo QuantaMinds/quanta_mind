@@ -1,0 +1,10 @@
+  caught     signals.mentions_breakage -> always False
+  caught     signals.reverts -> always False
+  caught     window.base_ref_of -> always HEAD (the original defect)
+  caught     window.reachable -> always True
+  caught     conclusion.table_coding -> UNSCANNABLE counts as clean
+  caught     verify_files -> never rejects
+
+6/6 rules protected
+
+source restored clean

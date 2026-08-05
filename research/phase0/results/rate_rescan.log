@@ -1,0 +1,480 @@
+608 eligible PRs across 90 repos; taking 90
+swept 1 clone(s) left by a previous run
+[1/90] 567-labs/instructor (4 PRs)
+     #1319: rejected [no_symbols/restricted]
+     #1334: rejected [no_symbols/restricted]
+     #1420: 6 files, 3 symbols, clean
+     #1544: 2 files, 5 symbols, clean
+[2/90] ACEsuit/mace (1 PRs)
+     #841: 15 files, 8 symbols, broke
+[3/90] AgentOps-AI/agentops (4 PRs)
+     #647: 4 files, 1 symbols, clean
+     #714: 18 files, 20 symbols, clean
+     #811: rejected [no_python/restricted]
+     #817: rejected [no_python/restricted]
+[4/90] Azure/azure-sdk-for-python (4 PRs)
+     clone failed: Azure/azure-sdk-for-python: clone exceeded 900s
+[5/90] BeehiveInnovations/zen-mcp-server (1 PRs)
+     #2: rejected [no_symbols/restricted]
+[6/90] BerriAI/litellm (4 PRs)
+     #8227: rejected [file_set/integrity]
+     #8523: 4 files, 3 symbols, clean
+     #8947: 1 files, 1 symbols, clean
+     #10700: 10 files, 2 symbols, clean
+[7/90] Blaizzy/mlx-vlm (4 PRs)
+     #179: 3 files, 4 symbols, clean
+     #236: rejected [no_symbols/restricted]
+     #249: 1 files, 1 symbols, broke
+     #290: 1 files, 1 symbols, broke
+[8/90] GodsScion/Auto_job_applier_linkedIn (1 PRs)
+     #45: 5 files, 8 symbols, clean
+[9/90] Kanaries/pygwalker (3 PRs)
+     #673: 8 files, 3 symbols, clean
+     #692: 2 files, 3 symbols, clean
+     #694: 3 files, 6 symbols, clean
+[10/90] Kiln-AI/Kiln (4 PRs)
+     #110: 2 files, 3 symbols, clean
+     #145: 7 files, 9 symbols, unscannable
+     #150: 9 files, 35 symbols, clean
+     #155: 7 files, 8 symbols, clean
+[11/90] MervinPraison/PraisonAI (1 PRs)
+     #357: rejected [parent_commit/integrity]
+[12/90] Netflix/metaflow (1 PRs)
+     #2207: 6 files, 1 symbols, broke
+[13/90] NousResearch/atropos (1 PRs)
+     #135: rejected [no_symbols/restricted]
+[14/90] OpenPipe/ART (4 PRs)
+     #51: 10 files, 21 symbols, clean
+     #91: 18 files, 17 symbols, broke
+     #104: 9 files, 6 symbols, broke
+     #163: 29 files, 49 symbols, broke
+[15/90] Panchovix/stable-diffusion-webui-reForge (1 PRs)
+     #367: 1 files, 1 symbols, clean
+[16/90] PrefectHQ/marvin (1 PRs)
+     #1119: 3 files, 3 symbols, clean
+[17/90] PriorLabs/TabPFN (4 PRs)
+     #103: rejected [no_symbols/restricted]
+     #135: 3 files, 1 symbols, clean
+     #184: 7 files, 1 symbols, clean
+     #217: rejected [no_symbols/restricted]
+[18/90] PrunaAI/pruna (2 PRs)
+     #153: 2 files, 2 symbols, clean
+     #174: 1 files, 1 symbols, clean
+[19/90] RAGEN-AI/RAGEN (1 PRs)
+     #18: rejected [no_symbols/restricted]
+[20/90] Significant-Gravitas/AutoGPT (4 PRs)
+     #9272: 9 files, 2 symbols, clean
+     #9295: 2 files, 3 symbols, clean
+     #9308: 5 files, 1 symbols, clean
+     #9401: rejected [no_python/restricted]
+[21/90] SirVer/ultisnips (2 PRs)
+     #1562: rejected [no_symbols/restricted]
+     #1567: 8 files, 2 symbols, clean
+[22/90] Skyvern-AI/skyvern (4 PRs)
+     #1542: 1 files, 2 symbols, clean
+     #1543: 3 files, 2 symbols, clean
+     #1767: rejected [no_symbols/restricted]
+     #1882: 1 files, 1 symbols, clean
+[23/90] TheAlgorithms/Python (1 PRs)
+     #12676: rejected [no_symbols/restricted]
+[24/90] TobikoData/sqlmesh (4 PRs)
+     #3897: 1 files, 1 symbols, clean
+     #3927: rejected [no_symbols/restricted]
+     #4101: 23 files, 19 symbols, broke
+     #4427: 11 files, 24 symbols, broke
+[25/90] Uberi/speech_recognition (2 PRs)
+     #836: 1 files, 1 symbols, clean
+     #843: 2 files, 1 symbols, broke
+[26/90] a16z/halmos (4 PRs)
+     #456: 6 files, 7 symbols, clean
+     #481: 1 files, 1 symbols, clean
+     #486: 2 files, 1 symbols, clean
+     #505: 2 files, 15 symbols, clean
+[27/90] ag2ai/ag2 (2 PRs)
+     #703: 2 files, 3 symbols, clean
+     #936: 1 files, 1 symbols, broke
+[28/90] airbytehq/airbyte (4 PRs)
+     clone failed: airbytehq/airbyte: clone exceeded 900s
+[29/90] alexanderjeurissen/ranger_devicons (2 PRs)
+     #132: 1 files, 5 symbols, clean
+     #136: rejected [no_symbols/restricted]
+[30/90] allenai/reward-bench (2 PRs)
+     #242: rejected [no_symbols/restricted]
+     #245: rejected [no_symbols/restricted]
+[31/90] bentoml/BentoML (4 PRs)
+     #5190: 2 files, 1 symbols, clean
+     #5203: 2 files, 3 symbols, broke
+     #5214: 1 files, 1 symbols, broke
+     #5249: 2 files, 2 symbols, clean
+[32/90] bespokelabsai/curator (4 PRs)
+     #323: rejected [no_symbols/restricted]
+     #345: 13 files, 13 symbols, broke
+     #445: 11 files, 11 symbols, broke
+     #459: 13 files, 11 symbols, broke
+[33/90] blorm-network/ZerePy (3 PRs)
+     #62: 1 files, 1 symbols, clean
+     #81: rejected [no_symbols/restricted]
+     #103: 1 files, 1 symbols, clean
+[34/90] bruin-data/ingestr (4 PRs)
+     clone failed: bruin-data/ingestr: error: RPC failed; curl 56 Recv failure: Connection was reset
+error: 1104 bytes of body are still expected
+fetch-pack: unexpected disconnect while reading sideband packet
+fatal: early EOF
+fatal: fetch-pack: invalid index-pack output
+[35/90] cartography-cncf/cartography (4 PRs)
+     #1513: 2 files, 1 symbols, clean
+     #1520: 4 files, 1 symbols, clean
+     #1534: rejected [no_symbols/restricted]
+     #1563: 54 files, 2 symbols, clean
+[36/90] ckan/ckan (1 PRs)
+     #8726: 1 files, 1 symbols, clean
+[37/90] commaai/opendbc (4 PRs)
+     #1634: rejected [no_symbols/restricted]
+     #1825: rejected [no_symbols/restricted]
+     #1857: 2 files, 1 symbols, broke
+     #2010: rejected [no_symbols/restricted]
+[38/90] crewAIInc/crewAI (4 PRs)
+     #1836: rejected [no_python/restricted]
+     #1842: rejected [no_python/restricted]
+     #1843: 14 files, 20 symbols, clean
+     #1845: 13 files, 13 symbols, clean
+[39/90] crewAIInc/crewAI-tools (4 PRs)
+     #172: rejected [no_symbols/restricted]
+     #197: 2 files, 1 symbols, clean
+     #198: 2 files, 2 symbols, clean
+     #227: rejected [no_symbols/restricted]
+[40/90] dagster-io/dagster (4 PRs)
+     clone failed: dagster-io/dagster: clone exceeded 900s
+[41/90] devitocodes/devito (1 PRs)
+     #2555: 2 files, 3 symbols, clean
+[42/90] dropseed/plain (3 PRs)
+     #28: 25 files, 58 symbols, clean
+     #35: rejected [no_python/restricted]
+     #47: 64 files, 222 symbols, clean
+[43/90] electricitymaps/electricitymaps-contrib (1 PRs)
+     #8232: 3 files, 2 symbols, broke
+[44/90] featureform/enrichmcp (4 PRs)
+     #4: rejected [parent_commit/integrity]
+     #11: rejected [parent_commit/integrity]
+     #13: rejected [parent_commit/integrity]
+     #16: rejected [parent_commit/integrity]
+[45/90] getsentry/sentry (4 PRs)
+     clone failed: getsentry/sentry: clone exceeded 900s
+[46/90] getsentry/sentry-python (3 PRs)
+     #4034: 2 files, 4 symbols, clean
+     #4093: 25 files, 47 symbols, broke
+     #4264: rejected [no_symbols/restricted]
+[47/90] gptme/gptme (1 PRs)
+     #511: 2 files, 1 symbols, clean
+[48/90] huggingface/huggingface_hub (2 PRs)
+     #3005: 14 files, 31 symbols, broke
+     #3040: rejected [no_symbols/restricted]
+[49/90] huggingface/smolagents (1 PRs)
+     #146: 5 files, 28 symbols, broke
+[50/90] janbjorge/pgqueuer (4 PRs)
+     #267: 2 files, 4 symbols, clean
+     #283: 1 files, 1 symbols, clean
+     #286: 1 files, 9 symbols, clean
+     #290: rejected [no_python/restricted]
+[51/90] jlowin/fastmcp (2 PRs)
+     #315: 5 files, 10 symbols, clean
+     #748: 6 files, 8 symbols, clean
+[52/90] joshyattridge/smart-money-concepts (4 PRs)
+     #73: 2 files, 17 symbols, clean
+     #74: 2 files, 1 symbols, clean
+     #75: 1 files, 2 symbols, clean
+     #78: rejected [no_symbols/restricted]
+[53/90] julep-ai/julep (4 PRs)
+     #1007: 2 files, 1 symbols, unscannable
+     #1008: 7 files, 7 symbols, unscannable
+     #1009: 5 files, 1 symbols, unscannable
+     #1068: 15 files, 14 symbols, broke
+[54/90] keephq/keep (4 PRs)
+     #2958: 4 files, 1 symbols, clean
+     #2979: rejected [no_symbols/restricted]
+     #3245: 1 files, 1 symbols, clean
+     #3532: rejected [no_symbols/restricted]
+[55/90] kohya-ss/sd-scripts (1 PRs)
+     #2121: 6 files, 32 symbols, clean
+[56/90] langchain-ai/langgraph (3 PRs)
+     #3463: rejected [no_symbols/restricted]
+     #4497: 21 files, 97 symbols, clean
+     #4819: 10 files, 57 symbols, broke
+[57/90] langchain-ai/langsmith-sdk (3 PRs)
+     #1576: 1 files, 2 symbols, broke
+     #1641: 1 files, 1 symbols, clean
+     #1694: 4 files, 16 symbols, broke
+[58/90] mangiucugna/json_repair (3 PRs)
+[59/90] marimo-team/marimo (4 PRs)
+     #3368: rejected [no_symbols/restricted]
+     #3437: 12 files, 12 symbols, clean
+     #3527: 2 files, 6 symbols, clean
+     #3628: 11 files, 13 symbols, clean
+[60/90] microsoft/Olive (1 PRs)
+     #1837: 2 files, 1 symbols, clean
+[61/90] microsoft/autogen (2 PRs)
+     #4881: rejected [no_python/restricted]
+     #5285: 5 files, 2 symbols, clean
+[62/90] microsoft/debugpy (1 PRs)
+     #1870: 2 files, 1 symbols, clean
+[63/90] mistralai/mistral-common (3 PRs)
+     #79: 8 files, 29 symbols, clean
+     #83: rejected [no_symbols/restricted]
+     #93: 4 files, 4 symbols, broke
+[64/90] mlflow/mlflow (4 PRs)
+     clone failed: mlflow/mlflow: clone exceeded 900s
+[65/90] onyx-dot-app/onyx (4 PRs)
+     clone failed: onyx-dot-app/onyx: clone exceeded 900s
+[66/90] openai/openai-agents-python (3 PRs)
+     #161: rejected [no_symbols/restricted]
+     #386: rejected [no_symbols/restricted]
+     #561: rejected [no_symbols/restricted]
+[67/90] oraios/serena (1 PRs)
+     #122: 1 files, 1 symbols, clean
+[68/90] plexguide/Huntarr.io (4 PRs)
+     clone failed: plexguide/Huntarr.io: remote: Repository not found.
+fatal: repository 'https://github.com/plexguide/Huntarr.io.git/' not found
+[69/90] pydata/pandas-datareader (1 PRs)
+     #1001: 18 files, 16 symbols, broke
+[70/90] reflex-dev/reflex (3 PRs)
+     #4994: 9 files, 14 symbols, broke
+     #5069: 8 files, 23 symbols, broke
+     #5135: 1 files, 1 symbols, clean
+[71/90] roboflow/inference (4 PRs)
+     #942: 8 files, 27 symbols, clean
+     #983: 1 files, 2 symbols, clean
+     #986: rejected [no_symbols/restricted]
+     #1003: rejected [no_symbols/restricted]
+[72/90] saturday06/VRM-Addon-for-Blender (1 PRs)
+     #846: 2 files, 1 symbols, clean
+[73/90] simonw/llm (1 PRs)
+     #1077: 1 files, 1 symbols, broke
+[74/90] sooperset/mcp-atlassian (1 PRs)
+     #467: rejected [no_symbols/restricted]
+[75/90] spcl/dace (4 PRs)
+     #1861: 1 files, 4 symbols, clean
+     #1870: 2 files, 4 symbols, clean
+     #1885: 3 files, 5 symbols, clean
+     #1896: 8 files, 6 symbols, broke
+[76/90] stair-lab/kg-gen (1 PRs)
+     #28: rejected [no_symbols/restricted]
+[77/90] stanford-crfm/levanter (2 PRs)
+     #902: rejected [no_symbols/restricted]
+     #904: 2 files, 1 symbols, clean
+[78/90] stanfordnlp/dspy (4 PRs)
+     #7877: rejected [no_symbols/restricted]
+     #7972: 1 files, 6 symbols, clean
+     #8003: 11 files, 18 symbols, clean
+     #8337: 6 files, 4 symbols, clean
+[79/90] strawberry-graphql/strawberry (1 PRs)
+     #3907: rejected [no_symbols/restricted]
+[80/90] test-zeus-ai/testzeus-hercules (1 PRs)
+     #42: 23 files, 58 symbols, broke
+[81/90] tinygrad/tinygrad (4 PRs)
+     #8731: 1 files, 95 symbols, clean
+     #8994: 5 files, 9 symbols, clean
+     #9088: 2 files, 2 symbols, clean
+     #9154: 4 files, 4 symbols, clean
+[82/90] vllm-project/vllm (1 PRs)
+     #16256: 1 files, 1 symbols, clean
+[83/90] vlm-run/vlmrun-hub (4 PRs)
+     #46: 6 files, 6 symbols, clean
+     #47: 5 files, 6 symbols, clean
+     #49: rejected [no_symbols/restricted]
+     #50: rejected [no_symbols/restricted]
+[84/90] volcengine/verl (1 PRs)
+     #1911: 3 files, 4 symbols, broke
+[85/90] wandb/wandb (1 PRs)
+     #9287: 3 files, 34 symbols, clean
+[86/90] wandb/weave (3 PRs)
+     clone failed: wandb/weave: clone exceeded 900s
+[87/90] whitphx/streamlit-webrtc (1 PRs)
+     #1901: 2 files, 1 symbols, broke
+[88/90] wizarrrr/wizarr (1 PRs)
+     #605: 2 files, 4 symbols, unscannable
+[89/90] writer/writer-framework (4 PRs)
+     #805: 1 files, 1 symbols, clean
+     #817: 1 files, 1 symbols, clean
+     #857: 1 files, 1 symbols, broke
+     #898: 2 files, 1 symbols, clean
+[90/90] zenml-io/zenml (4 PRs)
+     #3314: 64 files, 89 symbols, broke
+     #3363: 1 files, 1 symbols, clean
+     #3389: rejected [no_symbols/restricted]
+     #3525: rejected [no_symbols/restricted]
+
+{
+  "repositories_visited": 90,
+  "clone_failures": 9,
+  "prs_attempted": 236,
+  "records_built": 139,
+  "admission_rate": 0.589,
+  "rejected_by_stage": {
+    "no_symbols": 45,
+    "no_python": 8,
+    "clone_failed": 35,
+    "file_set": 1,
+    "parent_commit": 5,
+    "merge_metadata": 3
+  },
+  "rejected_by_category": {
+    "restricted": 53,
+    "resource": 38,
+    "integrity": 6
+  },
+  "attrition_by_commit_count": {
+    "1": {
+      "n": 79,
+      "admitted": 48,
+      "admission_rate": 0.6076,
+      "by_stage": {
+        "no_symbols": 28,
+        "parent_commit": 3
+      }
+    },
+    "2-5": {
+      "n": 84,
+      "admitted": 59,
+      "admission_rate": 0.7024,
+      "by_stage": {
+        "no_symbols": 15,
+        "no_python": 8,
+        "file_set": 1,
+        "parent_commit": 1
+      }
+    },
+    "6-20": {
+      "n": 30,
+      "admitted": 28,
+      "admission_rate": 0.9333,
+      "by_stage": {
+        "no_symbols": 2
+      }
+    },
+    "21+": {
+      "n": 5,
+      "admitted": 4,
+      "admission_rate": 0.8,
+      "by_stage": {
+        "parent_commit": 1
+      }
+    }
+  },
+  "attrition_by_corpus_file_count": {
+    "1-4": {
+      "n": 142,
+      "admitted": 78,
+      "admission_rate": 0.5493,
+      "by_stage": {
+        "no_symbols": 41,
+        "no_python": 4,
+        "clone_failed": 14,
+        "file_set": 1,
+        "parent_commit": 1,
+        "merge_metadata": 3
+      }
+    },
+    "5-15": {
+      "n": 58,
+      "admitted": 35,
+      "admission_rate": 0.6034,
+      "by_stage": {
+        "no_symbols": 4,
+        "clone_failed": 13,
+        "no_python": 3,
+        "parent_commit": 3
+      }
+    },
+    "16-50": {
+      "n": 23,
+      "admitted": 18,
+      "admission_rate": 0.7826,
+      "by_stage": {
+        "no_python": 1,
+        "clone_failed": 3,
+        "parent_commit": 1
+      }
+    },
+    "51+": {
+      "n": 13,
+      "admitted": 8,
+      "admission_rate": 0.6154,
+      "by_stage": {
+        "clone_failed": 5
+      }
+    }
+  },
+  "file_set_disagreement_by_changed_lines": {
+    "quartiles": {
+      "Q1": {
+        "n": 51,
+        "file_set_rejections": 0,
+        "disagreement_rate": 0.0,
+        "changed_lines_range": [
+          0,
+          13
+        ]
+      },
+      "Q2": {
+        "n": 50,
+        "file_set_rejections": 0,
+        "disagreement_rate": 0.0,
+        "changed_lines_range": [
+          14,
+          64
+        ]
+      },
+      "Q3": {
+        "n": 49,
+        "file_set_rejections": 0,
+        "disagreement_rate": 0.0,
+        "changed_lines_range": [
+          65,
+          296
+        ]
+      },
+      "Q4": {
+        "n": 48,
+        "file_set_rejections": 1,
+        "disagreement_rate": 0.0208,
+        "changed_lines_range": [
+          297,
+          11193
+        ]
+      }
+    },
+    "cut_points": {
+      "q1": 13,
+      "q2": 64,
+      "q3": 296
+    },
+    "unmeasured": 38
+  },
+  "median_changed_files": 3,
+  "median_changed_symbols": 3,
+  "distinct_repos_in_records": 69,
+  "top_repo_share": 0.0288,
+  "star_band": {
+    ">=500": 139
+  },
+  "outcome_unscannable": 5,
+  "breakage_rate_default_branch": 0.2672,
+  "breakage_rate_other_branch": 0.2778,
+  "scanned_on_default": 116,
+  "scanned_off_default": 18,
+  "outcome_scanned": 134,
+  "outcome_broke": 36,
+  "breakage_rate": 0.2687,
+  "merge_on_base_all_attempts": {
+    "yes": 186,
+    "no": 3,
+    "unknown": 47
+  },
+  "merge_on_base_admitted": {
+    "yes": 134,
+    "unknown": 4,
+    "no": 1
+  }
+}
+
+written to results\rate_rescan.json

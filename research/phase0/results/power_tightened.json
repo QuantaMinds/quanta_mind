@@ -1,0 +1,103 @@
+{
+  "repositories_visited": 22,
+  "clone_failures": 1,
+  "prs_attempted": 59,
+  "records_built": 34,
+  "admission_rate": 0.5763,
+  "rejected_by_stage": {
+    "parent_commit": 12,
+    "no_symbols": 9,
+    "file_set": 4
+  },
+  "rejected_by_category": {
+    "integrity": 16,
+    "restricted": 9
+  },
+  "attrition_by_commit_count": {
+    "1": {
+      "n": 18,
+      "admitted": 13,
+      "admission_rate": 0.7222,
+      "by_stage": {
+        "no_symbols": 4,
+        "parent_commit": 1
+      }
+    },
+    "2-5": {
+      "n": 28,
+      "admitted": 14,
+      "admission_rate": 0.5,
+      "by_stage": {
+        "no_symbols": 4,
+        "parent_commit": 8,
+        "file_set": 2
+      }
+    },
+    "6-20": {
+      "n": 10,
+      "admitted": 6,
+      "admission_rate": 0.6,
+      "by_stage": {
+        "parent_commit": 2,
+        "file_set": 1,
+        "no_symbols": 1
+      }
+    },
+    "21+": {
+      "n": 3,
+      "admitted": 1,
+      "admission_rate": 0.3333,
+      "by_stage": {
+        "file_set": 1,
+        "parent_commit": 1
+      }
+    }
+  },
+  "attrition_by_corpus_file_count": {
+    "1-4": {
+      "n": 32,
+      "admitted": 17,
+      "admission_rate": 0.5312,
+      "by_stage": {
+        "no_symbols": 8,
+        "parent_commit": 7
+      }
+    },
+    "5-15": {
+      "n": 18,
+      "admitted": 12,
+      "admission_rate": 0.6667,
+      "by_stage": {
+        "parent_commit": 2,
+        "file_set": 3,
+        "no_symbols": 1
+      }
+    },
+    "16-50": {
+      "n": 6,
+      "admitted": 3,
+      "admission_rate": 0.5,
+      "by_stage": {
+        "parent_commit": 3
+      }
+    },
+    "51+": {
+      "n": 3,
+      "admitted": 2,
+      "admission_rate": 0.6667,
+      "by_stage": {
+        "file_set": 1
+      }
+    }
+  },
+  "median_changed_files": 5,
+  "median_changed_symbols": 3,
+  "distinct_repos_in_records": 15,
+  "top_repo_share": 0.1471,
+  "star_band": {
+    ">=500": 34
+  },
+  "outcome_scanned": 34,
+  "outcome_broke": 6,
+  "breakage_rate": 0.1765
+}

@@ -1,0 +1,92 @@
+# the correlation test research harness — a STANDALONE project, deliberately not a workspace member.
+#
+# WHAT: The measurement instrument for docs/findings/PHASE0_RUNBOOK.md. Its own
+#       lockfile, its own virtual environment, and its own interpreter.
+# WHY:  Two independent reasons, either sufficient on its own.
+#
+#       1. Dependency containment. uv's documentation states it "can't ensure that
+#          packages don't import dependencies declared by another workspace
+#          member", and that workspaces are "not suited for cases in which members
+#          ... desire a separate virtual environment for each member". pandas,
+#          scipy and PyCG must never become reachable from src/qmctx/.
+#
+#       2. Interpreter conflict. PyCG does not run on the interpreter the product
+#          targets. The product needs >=3.12 for sys.monitoring; PyCG's ceiling is
+#          3.10. A shared environment cannot satisfy both. See ENVIRONMENT.lock.
+#
+# CONSUMED BY: `just test-phase0`, .github/workflows/ci.yml, and the run itself.
+
+[build-system]
+requires = ["hatchling==1.31.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "phase0"
+version = "0.0.0"
+description = "Does an unresolved call site predict breakage in AI-authored changes?"
+requires-python = ">=3.10,<3.11"
+
+# Exact pins, resolved on CPython 3.10.20 and read back from uv.lock -- not
+# guessed. pandas and scipy sit below the versions the product would resolve
+# (3.0.5 / 1.18.0) because those require a newer interpreter than PyCG tolerates.
+dependencies = [
+    # Analysis
+    "pandas==2.3.3",
+    # AIDev ships parquet; pandas needs an engine to read it, and does not bundle
+    # one. Without this the corpus cannot be loaded at all.
+    "pyarrow==21.0.0",
+    "scipy==1.15.3",
+    "statsmodels==0.14.6",
+    # Corpus and outcome scan
+    "GitPython==3.1.57",
+    "PyYAML==6.0.3",
+    # Census: the coverage denominator, which no upstream graph tool emits
+    "tree-sitter==0.26.0",
+    "tree-sitter-python==0.25.0",
+    "tree-sitter-typescript==0.23.2",
+    # The instrument. 0.0.7, NOT 0.0.8 -- see ENVIRONMENT.lock.
+    "pycg==0.0.7",
+    # PyCG imports pkg_resources, which setuptools removed in 81.
+    "setuptools==80.10.2",
+]
+
+[dependency-groups]
+dev = [
+    "pytest==9.1.1",
+    "pytest-timeout==2.4.0",
+    "hypothesis==6.165.0",
+    # Own copy so lint runs against this project's py310 target, not the
+    # product's py312 -- UP rules would otherwise suggest syntax PyCG's
+    # interpreter cannot parse.
+    "ruff==0.16.1",
+    "mypy==2.3.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/phase0"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "UP", "B", "SIM", "C4", "RUF"]
+
+[tool.mypy]
+python_version = "3.10"
+# Deliberately NOT strict, unlike the product. This is research code with a
+# finite life, and pandas / scipy / statsmodels / pycg ship no type information --
+# strict mode here would produce a wall of missing-import errors that teaches
+# people to add blanket ignores. The product stays mypy --strict; this does not.
+warn_unused_ignores = true
+warn_redundant_casts = true
+disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = ["pandas.*", "scipy.*", "statsmodels.*", "pycg.*", "git.*", "tree_sitter.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-markers --strict-config"
+xfail_strict = true

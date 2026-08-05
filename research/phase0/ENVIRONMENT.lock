@@ -1,0 +1,277 @@
+# the correlation test environment record
+#
+# PHASE0_RUNBOOK.md section 0: "Pin everything. Record versions in
+# phase0/ENVIRONMENT.lock. A study you cannot re-run is a study you cannot
+# defend." Section 5 requires a full re-run from raw data, on a different
+# machine, from this file.
+#
+# uv.lock is the machine-readable lock. This file records the decisions behind
+# it -- specifically the three that are not obvious and would otherwise be
+# rediscovered painfully.
+
+interpreter:  CPython 3.10.20        # NOT the product's >=3.12 -- see finding 3
+uv:           0.12.0                 # local; CI pins 0.12.1 via astral-sh/setup-uv
+platform_verified: win32 x86_64
+date_verified: 2026-08-03
+
+
+## Step 0 findings — PyCG, verified by direct execution, not assumed
+
+The pre-registration names vanilla PyCG as the instrument "because it is the
+crudest and therefore the conservative one". Three things had to be established
+before that sentence was executable. All three were found by running it.
+
+### Finding 1 — pycg 0.0.8 is broken on every interpreter. Use 0.0.7.
+
+The 0.0.8 wheel installs the package directory as `PyCG/`, while its own
+`PyCG/__main__.py` line 4 reads `from pycg import formats`. The import fails
+immediately:
+
+    ModuleNotFoundError: No module named 'pycg'
+
+Reproduced identically on 3.12 and 3.11, so it is a packaging defect, not an
+interpreter incompatibility. 0.0.8 was the last release before the project was
+archived on 2023-11-26 (final commit message: "Archival message"), and the
+commit before it was "Fix deprecation issues with pyproject file (#74)" -- the
+packaging change that appears to have introduced this. Nobody caught it because
+nothing was released afterwards.
+
+    PINNED: pycg==0.0.7
+
+### Finding 2 — 0.0.7 needs setuptools<81.
+
+`pycg/formats/fasten.py:23` does `from pkg_resources import Requirement`.
+setuptools removed pkg_resources in 81; with setuptools 83 installed the import
+still fails. Pinned below the removal.
+
+    PINNED: setuptools==80.10.2
+
+### Finding 3 — PyCG's ceiling is Python 3.10. This is why the harness is standalone.
+
+On 3.11 and 3.12, `install_hooks()` -> `_clear_caches()` ->
+`importlib.invalidate_caches()` now triggers a lazy import of
+`importlib.metadata`, which re-enters the import hook PyCG has just installed:
+
+    pycg.machinery.imports.ImportManagerError: Can't add edge to a non existing node
+
+Verified working: 3.10.20, 3.9.25, 3.8.20.
+Verified failing:  3.11.15, 3.12.x.
+
+The product targets >=3.12 for sys.monitoring (ARCHITECTURE.md section 4). One
+environment cannot satisfy both, which is the second independent reason
+research/phase0/ is a standalone uv project rather than a workspace member.
+
+    PINNED: .python-version = 3.10
+
+### Finding 4 — GitPython's clone timeout does not exist on Windows
+
+`Repo.clone_from(..., kill_after_timeout=N)` raises on every call:
+
+    Cmd('git') failed due to: '"kill_after_timeout" feature is not supported on Windows.'
+
+Not a slow clone, not a network fault -- the feature is refused outright. Every clone
+in the study therefore failed on this platform, and because `cloned()` raises
+`CloneFailed` which callers treated as corpus attrition, the pipeline would have run to
+completion and reported 100% attrition as a result rather than as a broken environment.
+
+The hand-labelling sheet is where it surfaced, and it surfaced badly: 13 of 13 clones
+failed, the sheet rendered 20 PRs as having no commits in their window, and a labeller
+reading it would have marked 20 clean. The outcome classifier returns CLEAN on
+unreadable history for its own (defensible) reasons, so the `PHASE0_PREREGISTRATION.md` “Timeline” gate would have reported
+20/20 PASS on no data whatsoever.
+
+Fixed by calling git through `subprocess.run(..., timeout=CLONE_TIMEOUT_S)`, which is
+portable and keeps the timeout AGENTS.md requires on every subprocess. Dropping the flag
+would have "fixed" it by removing the timeout.
+
+The second half of the fix is typed: `handlabel/window.py` returns a `Window` carrying
+`available`, so an unreadable repository and a quiet week are no longer the same empty
+list. The sheet refuses to offer an unreadable PR for labelling and the generator exits
+non-zero. See amendment A21.
+
+### Finding 5 — two more Windows faults, both of which read as corpus attrition
+
+Found by running the hand-labelling sheet against real repositories. Both produced a
+plausible-looking study result rather than an error, which is what makes them worth
+recording rather than just fixing.
+
+**5a. Paths over 260 characters.** Two Significant-Gravitas/AutoGPT PRs failed checkout
+partway through the clone on a deeply nested frontend route. Git reported "unable to
+access <path>" and carried on, so the clone half-existed. The consequence is not random
+loss: it is attrition concentrated in repositories with deep directory trees, which is a
+selection effect on exactly the kind of repository a large agent-authored PR touches.
+
+    FIX: git -c core.longpaths=true clone ...
+
+**5b. `shutil.rmtree(..., ignore_errors=True)` deletes nothing.** Git writes its object
+files read-only. On Windows unlink then raises EACCES and `ignore_errors` swallows it, so
+the directory survives. The next clone fails with "destination path already exists" and
+19 of 20 PRs came back as unreadable history -- an error naming an entirely different
+cause. `ignore_errors=True` is the same silent-absence pattern AGENTS.md rule 3 forbids,
+sitting in the cleanup path where nobody looks.
+
+    FIX: pipeline/worktree.py::_remove_tree, which clears the read-only bit and RAISES
+         if the directory survives. Strict before cloning (reusing a stale clone would
+         analyse the wrong tree); lenient after (the strict pass catches leftovers).
+    PINNED BY: tests/test_worktree.py
+
+### Sanity check on the instrument — it reproduces the founding example
+
+Fixture: a base class, a subclass calling `super().validate(req)`, a decorator.
+PyCG 0.0.7 output, verbatim:
+
+    "handlers.StripeHandler.validate": [
+        "handlers.StripeHandler._check_currency",
+        "<builtin>.super"
+    ]
+
+`super().validate(req)` resolved to `<builtin>.super`, NOT to
+`handlers.BasePaymentHandler.validate`. The base method appears in the graph
+with no incoming edge from its subclass. This is DyPyBench's finding that
+super() calls are absent from PyCG's graph entirely, confirmed on our own
+instrument, and it is the exact example in README.md.
+
+It also means the instrument behaves as the pre-registration assumes: crude, and
+crude in the direction that makes a null result conservative.
+
+
+## Resolved versions
+
+Read back from uv.lock after resolution on CPython 3.10.20. pandas and scipy
+resolve BELOW what the product environment would pick (3.0.5 / 1.18.0) because
+those releases require a newer interpreter than PyCG tolerates.
+
+pandas                 2.3.3
+scipy                  1.15.3
+statsmodels            0.14.6
+GitPython              3.1.57
+PyYAML                 6.0.3
+tree-sitter            0.26.0
+tree-sitter-python     0.25.0
+tree-sitter-typescript 0.23.2
+pycg                   0.0.7
+setuptools             80.10.2
+pytest                 9.1.1
+pytest-timeout         2.4.0
+hypothesis             6.165.0
+
+
+## Invocation
+
+PyCG ships no console script -- `uvx pycg` fails with "Package `pycg` does not
+provide any executables". It is invoked as a module:
+
+    uv run python -m pycg --package <pkg_dir> <files...>
+
+PHASE0_RUNBOOK.md section 3 shows a bare `pycg` CLI call; that form does not
+exist and the runbook has been corrected.
+
+
+## Open
+
+- TS/JS arm (RUNBOOK section 7) needs a JS graph tool -- Jelly, js-callgraph or
+  TAJS. Not selected, not pinned. The Python arm runs first by design.
+
+
+## Corpus facts computed from the live dataset, not cited
+
+Published sources disagree about AIDev-pop's star threshold, so it was computed.
+HuggingFace datasets-server `/statistics`, config `repository`, 2,807 rows:
+
+    stars   min 101   median 564   max 203,424
+
+AIDev-pop is >100 stars. arXiv 2606.28125 describes it as ">500"; the dataset card,
+the MSR 2026 challenge page and arXiv 2606.13468 say ">100". The median of 564 is
+the likely source of that error. See amendment A15.
+
+Agent composition, config `pull_request`, 33,596 rows:
+
+    OpenAI_Codex  21,799   64.9%
+    Copilot        4,970   14.8%
+    Devin          4,827   14.4%
+    Cursor         1,541    4.6%
+    Claude_Code      459    1.4%
+
+Any the correlation test result is predominantly a result about Codex. See amendment A14.
+
+
+## GitHub credential — recorded because the measurement depends on it
+
+The parent-commit resolution needs an authenticated token. `require_token` refuses to
+fall back to unauthenticated requests: 60/hour looks like a working run while silently
+dropping most of the corpus.
+
+    identity   Dhanush295
+    supplied   gh auth token       <- NOT a fine-grained PAT
+    kind       gho_ OAuth (user session)
+    scopes     gist, read:org, repo, workflow
+    rate       5000 req/hr core
+
+**This is not the credential the design assumes, and two things do not transfer.**
+
+1. Timing and rate limits measured under this token do not predict CI or a deployment
+   running a fine-grained read-only PAT. Any throughput figure taken here is provisional.
+2. `repo` grants WRITE to the user's own repositories. The architecture claims read-only
+   access to customer code; that claim cannot be made while the study runs on a
+   write-capable session token.
+
+    REQUIRED BEFORE THE NUMBERS ARE USED FOR TIMING OR ACCESS CLAIMS:
+      re-run under a fine-grained PAT scoped to public repositories, contents:read.
+      Structural metrics -- attrition, exposure, symbol counts -- are unaffected by
+      scope and do transfer.
+
+`just pilot` shells out to `gh auth token` at run time, so it works locally and will not
+work in CI. CI needs a real secret.
+
+
+## External inputs — pinned by hash
+
+### AIDev_BC_Analyser replication package
+
+Supplies the human arm's commit-level data, which AIDev itself does not ship. Without it
+A2's parent resolution cannot run on that arm. Downloaded 2026-08-03.
+
+    source     https://ndownloader.figshare.com/files/60719872
+    licence    CC BY 4.0, public, not embargoed
+    bytes      78,419,081
+    md5        7fc01c70cb4ed0210fab098d820de743   published == computed
+    path       research/phase0/data/  (gitignored; re-fetch from the URL above)
+
+Contents — 10 entries:
+
+    human_pr_python.parquet          1,402 rows
+    human_commit.parquet             7,376 rows    sha, pr_id, repo_url, pr_number, message
+    human_commit_detail.parquet    110,047 rows    sha, pr_id, filename, patch
+    code_analyzer.py                   318 lines   AST breaking-change detector
+    bc_analysis_ai.ipynb, bc_analysis_human.ipynb, human_data_processing.ipynb
+    README.pdf, requirements.txt
+
+Measured coverage (not assumed — see amendment A19):
+
+    merged human Python PRs                      1,042 of 1,402
+    ... with >=1 mined commit SHA                1,009   96.8%   <- gates the primary
+    ... with >=1 non-empty .py patch               607           <- gates the tertiary
+    repositories in that patch-bearing set          90
+    .py patches with no patch text              20,091   31.1%   <- patch-weighted, see below
+    PRs whose .py patch text is complete           710   85.6%   <- the PR-level truth
+
+The 31.1% is real but is NOT a property of the corpus. It is a property of one pull
+request that touches 35,884 .py files and holds 79.3% of all missing patch text on its
+own; the top five hold 93.1%. Excluding those five, the rate is 5.7%. The unit of
+analysis is the PR, so 85.6% is the figure to quote and 31.1% is the figure that will
+be quoted back at you if you state it without its denominator. See amendment A20.
+
+Filenames, unlike patch text, are complete: 0 null of 110,047 rows. This is what makes
+A2's shape detection immune to the problem — it consumes filenames, not patches.
+
+The package is PRE-filter and therefore a superset of the paper's 5,788 commits / 93,044
+patches. Not a corrupted download.
+
+### Join hazard — costs a silent empty result
+
+`pr_id` is a STRING in human_commit and human_commit_detail, and int64 in
+human_pr_python. Joining without a cast returns zero rows: no error, no warning, and it
+looks exactly like "the human arm has no commit data". Cast to int64 first, then assert
+the join is non-empty rather than trusting it.
+
+    com["pr_id"] = com.pr_id.astype("int64")

@@ -1,0 +1,10 @@
+{
+  "Azure/azure-sdk-for-python": 1021309,
+  "airbytehq/airbyte": 897821,
+  "bruin-data/ingestr": 188185,
+  "dagster-io/dagster": 1458859,
+  "getsentry/sentry": 922066,
+  "mlflow/mlflow": 1492800,
+  "onyx-dot-app/onyx": 2188063,
+  "wandb/weave": 1631043
+}

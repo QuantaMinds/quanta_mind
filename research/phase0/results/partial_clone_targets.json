@@ -1,0 +1,183 @@
+[
+  {
+    "repo": "Azure/azure-sdk-for-python",
+    "pr_id": "2371954177",
+    "number": 39942,
+    "merge_sha": "e5035ec225049b59fc4811c52d87a0094fbf4167",
+    "merged_at": "2025-03-05T00:24:43Z",
+    "base_ref": "main",
+    "commits": 3,
+    "subjects": [
+      "Update CHANGELOG.md",
+      "Update _base.py",
+      "Update _base.py"
+    ],
+    "files": [
+      "sdk/monitor/azure-monitor-opentelemetry-exporter/CHANGELOG.md"
+    ]
+  },
+  {
+    "repo": "airbytehq/airbyte",
+    "pr_id": "2264866046",
+    "number": 50971,
+    "merge_sha": "81f0796e52823a7b69d24eb10205dc853a7d8a84",
+    "merged_at": "2025-01-10T16:41:50Z",
+    "base_ref": "master",
+    "commits": 12,
+    "subjects": [
+      "derp",
+      "do better",
+      "cleanup",
+      "Merge branch 'master' into edgao/derp",
+      "more cleanup",
+      "rename",
+      "kill the region system property too?",
+      "more cleanup",
+      "changelog",
+      "version bump",
+      "make constant visible",
+      "Merge branch 'master' into edgao/derp"
+    ],
+    "files": [
+      "airbyte-cdk/bulk/toolkits/load-s3/src/main/kotlin/io/airbyte/cdk/load/file/s3/S3Client.kt",
+      "airbyte-integrations/connectors/destination-s3-data-lake/metadata.yaml",
+      "airbyte-integrations/connectors/destination-s3-data-lake/src/main/kotlin/io/airbyte/integrations/destination/s3_data_lake/GlueCredentialsProvider.kt",
+      "airbyte-integrations/connectors/destination-s3-data-lake/src/main/kotlin/io/airbyte/integrations/destination/s3_data_lake/io/S3DataLakeUtil.kt",
+      "docs/integrations/destinations/s3-data-lake.md"
+    ]
+  },
+  {
+    "repo": "bruin-data/ingestr",
+    "pr_id": "2532214135",
+    "number": 199,
+    "merge_sha": "706a7c55622a6ba7756e877f5a7e5705a6f0867c",
+    "merged_at": "2025-05-22T14:29:59Z",
+    "base_ref": "main",
+    "commits": 21,
+    "subjects": [
+      "add attio as a source",
+      "add objects as a resource",
+      "add records resource",
+      "refactor + fix lint",
+      "add lists resource",
+      "add list_entries resource",
+      "add all_list_entries resource",
+      "fix lint",
+      "refactor",
+      "updated write disposition",
+      "handle error",
+      "remove unnecessary function + move fetch list entries logic to resources",
+      "add doc",
+      "remove empty check",
+      "flatten item[id]",
+      "rename function name",
+      "add safety check for id",
+      "rename package name + remove unused variable + add log",
+      "remove table validation",
+      "handle resource not found error + remove unused variable",
+      "pass path instead of the full url"
+    ],
+    "files": [
+      "docs/.vitepress/config.mjs",
+      "docs/supported-sources/attio.md",
+      "ingestr/src/attio/__init__.py",
+      "ingestr/src/attio/helpers.py",
+      "ingestr/src/factory.py",
+      "ingestr/src/http_client.py",
+      "ingestr/src/sources.py"
+    ]
+  },
+  {
+    "repo": "dagster-io/dagster",
+    "pr_id": "2280794084",
+    "number": 27142,
+    "merge_sha": "30f903906e408ca0fdeda40bfa625733332ac036",
+    "merged_at": "2025-01-20T22:18:37Z",
+    "base_ref": "master",
+    "commits": 3,
+    "subjects": [
+      "[4/n][dagster-sling] Deprecate DagsterSlingTranslator.get_* methods",
+      "Use superseded",
+      "Update supersession warning"
+    ],
+    "files": [
+      "python_modules/libraries/dagster-sling/dagster_sling/dagster_sling_translator.py"
+    ]
+  },
+  {
+    "repo": "getsentry/sentry",
+    "pr_id": "2310085567",
+    "number": 84390,
+    "merge_sha": "added9b043e41d17afb326779df65530f93ad036",
+    "merged_at": "2025-02-03T17:25:39Z",
+    "base_ref": "master",
+    "commits": 2,
+    "subjects": [
+      "chore(issues): Update stronger typing list with more issues modules",
+      "Merge branch 'master' into mrduncan/strong-issues-typing"
+    ],
+    "files": [
+      "pyproject.toml",
+      "src/sentry/issues/streamline.py"
+    ]
+  },
+  {
+    "repo": "mlflow/mlflow",
+    "pr_id": "2283939870",
+    "number": 14265,
+    "merge_sha": "738dddf9a48bf9ef8d81ffb0266907bad5c018cf",
+    "merged_at": "2025-01-21T10:00:21Z",
+    "base_ref": "master",
+    "commits": 5,
+    "subjects": [
+      "spark_udf support for model with type hints",
+      "fix",
+      "fix",
+      "comment",
+      "comments"
+    ],
+    "files": [
+      "mlflow/pyfunc/__init__.py",
+      "mlflow/pyfunc/model.py",
+      "mlflow/types/type_hints.py",
+      "tests/pyfunc/test_pyfunc_model_with_type_hints.py",
+      "tests/types/test_type_hints.py"
+    ]
+  },
+  {
+    "repo": "onyx-dot-app/onyx",
+    "pr_id": "2267093351",
+    "number": 3634,
+    "merge_sha": "4c4ff46fe36dce4d1c94e0426ba0b3e0b749e0bb",
+    "merged_at": "2025-01-08T23:05:53Z",
+    "base_ref": "main",
+    "commits": 2,
+    "subjects": [
+      "Fixing google drive texts",
+      "Update conftest.py"
+    ],
+    "files": [
+      "backend/onyx/connectors/salesforce/shelve_stuff/old_test_salesforce_shelves.py",
+      "backend/tests/daily/connectors/google_drive/conftest.py",
+      "backend/tests/daily/connectors/google_drive/consts_and_utils.py"
+    ]
+  },
+  {
+    "repo": "wandb/weave",
+    "pr_id": "2269208152",
+    "number": 3358,
+    "merge_sha": "6841aa703b6a333de9674c98f32090b1a4902bbe",
+    "merged_at": "2025-01-09T21:16:16Z",
+    "base_ref": "master",
+    "commits": 1,
+    "subjects": [
+      "chore(weave): add deleted_at to weave object deleted error"
+    ],
+    "files": [
+      "tests/trace/test_obj_delete.py",
+      "weave/trace_server/clickhouse_trace_server_batched.py",
+      "weave/trace_server/errors.py",
+      "weave/trace_server/sqlite_trace_server.py"
+    ]
+  }
+]

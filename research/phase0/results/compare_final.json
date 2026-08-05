@@ -1,0 +1,224 @@
+{
+  "breakage_rate": {
+    "absolute_gap": 0.0106,
+    "default_branch": 0.2672,
+    "n_default": 116,
+    "n_other": 18,
+    "other_branch": 0.2778,
+    "pooled": 0.2687,
+    "unscannable_excluded": 5,
+    "verdict": "corrective"
+  },
+  "churn": {
+    "available": true,
+    "compared": 52,
+    "net": 4,
+    "newly_admitted": 6,
+    "newly_rejected": 2,
+    "newly_rejected_detail": [
+      "Azure/azure-sdk-for-python#2433002376->clone_failed",
+      "Azure/azure-sdk-for-python#2449032917->clone_failed"
+    ]
+  },
+  "composition": {
+    "admission_rate_new": 0.6915,
+    "admission_rate_old": 0.56,
+    "by_commit_count": {
+      "1": {
+        "delta": -0.027,
+        "n_new": 79,
+        "n_old": 104,
+        "rate_new": 0.6076,
+        "rate_old": 0.6346
+      },
+      "2-5": {
+        "delta": 0.1198,
+        "n_new": 84,
+        "n_old": 115,
+        "rate_new": 0.7024,
+        "rate_old": 0.5826
+      },
+      "21+": {
+        "delta": 0.5,
+        "n_new": 5,
+        "n_old": 10,
+        "rate_new": 0.8,
+        "rate_old": 0.3
+      },
+      "6-20": {
+        "delta": 0.5147,
+        "n_new": 30,
+        "n_old": 43,
+        "rate_new": 0.9333,
+        "rate_old": 0.4186
+      }
+    },
+    "by_corpus_file_count": {
+      "1-4": {
+        "delta": -0.0001,
+        "n_new": 128,
+        "n_old": 169,
+        "rate_new": 0.6094,
+        "rate_old": 0.6095
+      },
+      "16-50": {
+        "delta": 0.6667,
+        "n_new": 20,
+        "n_old": 30,
+        "rate_new": 0.9,
+        "rate_old": 0.2333
+      },
+      "5-15": {
+        "delta": 0.1488,
+        "n_new": 45,
+        "n_old": 62,
+        "rate_new": 0.7778,
+        "rate_old": 0.629
+      },
+      "51+": {
+        "delta": 0.6429,
+        "n_new": 8,
+        "n_old": 14,
+        "rate_new": 1.0,
+        "rate_old": 0.3571
+      }
+    },
+    "clone_failed_repos": [
+      "Azure/azure-sdk-for-python",
+      "airbytehq/airbyte",
+      "bruin-data/ingestr",
+      "dagster-io/dagster",
+      "getsentry/sentry",
+      "mlflow/mlflow",
+      "onyx-dot-app/onyx",
+      "plexguide/Huntarr.io",
+      "wandb/weave"
+    ],
+    "clone_failed_rows_removed": 35,
+    "stages_new": {
+      "file_set": 1,
+      "merge_metadata": 3,
+      "no_python": 8,
+      "no_symbols": 45,
+      "parent_commit": 5
+    },
+    "stages_old": {
+      "file_set": 24,
+      "merge_metadata": 3,
+      "no_python": 1,
+      "no_symbols": 50,
+      "parent_commit": 43
+    }
+  },
+  "file_set_disagreement_by_changed_lines": {
+    "cut_points": {
+      "q1": 13,
+      "q2": 64,
+      "q3": 296
+    },
+    "quartiles": {
+      "Q1": {
+        "changed_lines_range": [
+          0,
+          13
+        ],
+        "disagreement_rate": 0.0,
+        "file_set_rejections": 0,
+        "n": 51
+      },
+      "Q2": {
+        "changed_lines_range": [
+          14,
+          64
+        ],
+        "disagreement_rate": 0.0,
+        "file_set_rejections": 0,
+        "n": 50
+      },
+      "Q3": {
+        "changed_lines_range": [
+          65,
+          296
+        ],
+        "disagreement_rate": 0.0,
+        "file_set_rejections": 0,
+        "n": 49
+      },
+      "Q4": {
+        "changed_lines_range": [
+          297,
+          11193
+        ],
+        "disagreement_rate": 0.0208,
+        "file_set_rejections": 1,
+        "n": 48
+      }
+    },
+    "unmeasured": 38
+  },
+  "merge_on_base": {
+    "admitted_only": {
+      "no": 1,
+      "unknown": 4,
+      "yes": 134
+    },
+    "all_attempts": {
+      "no": 3,
+      "unknown": 47,
+      "yes": 186
+    }
+  },
+  "parent_commit_gradient": {
+    "bands": {
+      "1": {
+        "counted_in_trend": true,
+        "distinct_repos_present": 51,
+        "failure_rate": 0.038,
+        "lost_to_clone_timeout": 0,
+        "n": 79,
+        "parent_commit_failures": 3,
+        "repos_lost": [],
+        "share_lost": 0.0
+      },
+      "2-5": {
+        "counted_in_trend": true,
+        "distinct_repos_present": 50,
+        "failure_rate": 0.0119,
+        "lost_to_clone_timeout": 0,
+        "n": 84,
+        "parent_commit_failures": 1,
+        "repos_lost": [],
+        "share_lost": 0.0
+      },
+      "21+": {
+        "counted_in_trend": true,
+        "distinct_repos_present": 5,
+        "failure_rate": 0.2,
+        "lost_to_clone_timeout": 0,
+        "n": 5,
+        "parent_commit_failures": 1,
+        "repos_lost": [],
+        "share_lost": 0.0
+      },
+      "6-20": {
+        "counted_in_trend": true,
+        "distinct_repos_present": 25,
+        "failure_rate": 0.0,
+        "lost_to_clone_timeout": 0,
+        "n": 30,
+        "parent_commit_failures": 0,
+        "repos_lost": [],
+        "share_lost": 0.0
+      }
+    },
+    "bands_in_trend": [
+      "1",
+      "2-5",
+      "6-20",
+      "21+"
+    ],
+    "pooled_failure_rate": 0.0212,
+    "still_rises_with_size": false,
+    "verdict": "gradient flattened"
+  }
+}

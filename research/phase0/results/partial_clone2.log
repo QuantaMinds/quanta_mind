@@ -1,0 +1,2 @@
+{"repo": "dagster-io/dagster", "variant": "blob_none", "outcome": "clone_failed", "within_timeout": false, "clone_s": 0.0, "stderr": "fatal: destination path 'E:\\Code\\quanta_mind\\research\\phase0\\data\\partial_clone_probe\\dagster-io__dagster__blob_none' already exists and is not an empty directory."}
+{"repo": "dagster-io/dagster", "variant": "blob_limit_1m", "outcome": "clone_failed", "within_timeout": false, "clone_s": 25.8, "stderr": "fatal: fetch-pack: invalid index-pack output"}

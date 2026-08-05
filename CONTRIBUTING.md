@@ -6,14 +6,35 @@
 
 ---
 
+## Prerequisites
+
+| Tool | Version | Note |
+|---|---|---|
+| Python | 3.12 | product floor; `.python-version` pins it |
+| uv | 0.12.1 | one tool for venv, lock and run |
+| just | 1.58.0 | |
+| **bash** | any | `justfile:15` is `set shell := ["bash", "-uc"]` |
+
+**On Windows, bash means Git Bash**, which ships with Git for Windows — the recipes are
+not cmd.exe- or PowerShell-compatible and are not trying to be. This is stated rather
+than assumed because it is the kind of requirement that silently costs someone an hour.
+
+The the correlation test harness pins a *different* interpreter (Python 3.10) in its own environment;
+uv fetches it. See `research/phase0/ENVIRONMENT.lock` for why.
+
 ## First hour
 
 ```bash
 git clone <repo> && cd qmctx
-just install          # uv sync, pre-commit, symlink CLAUDE.md -> AGENTS.md
-just fixtures         # pinned real repos for live tests (large, one time)
+just install          # uv sync (product + harness), pre-commit
 just check            # must be green before you change anything
 ```
+
+`CLAUDE.md` is committed and contains `@AGENTS.md`, so there is no symlink step — the old
+`ln -sf` needed Developer Mode on Windows and failed silently without it.
+
+`just fixtures` pulls the pinned repositories for live tests. It is not needed yet:
+`tests/live/` has no tests before the call-site census layer.
 
 Then read, in this order: `ARCHITECTURE.md` → `docs/PROJECT_CONTEXT.md` →
 `docs/VALIDATION.md`. Skip `docs/BUILD_PLAN.md` unless you are picking up a phase.
@@ -21,7 +42,24 @@ Then read, in this order: `ARCHITECTURE.md` → `docs/PROJECT_CONTEXT.md` →
 If `just check` is red on a fresh clone, that is a bug and it is the highest-priority
 issue in the repository. Report it before doing anything else.
 
+**`just verify` does not run yet, and that is deliberate** — it operates on a pack format
+that the correlation test has not authorised anyone to build. `scripts/verify/README.md` says so.
+A green `just check` means the code is well-formed. It says nothing about whether output
+data is correct, because there is no output data.
+
 ---
+
+## Moving files
+
+Use `git mv`, never `mv`. A plain `mv` followed by `git add -A` records a delete and an
+add; if the new copy lands somewhere git has not yet noticed, both survive and nothing
+tells you. That happened here: a stale `assemble.py` sat alongside its replacement
+through a full commit, missing the two pieces the attrition analysis depends on, and
+every guard passed because nothing imported either name.
+
+`scripts/guard/check_module_identity.py` now catches it. Use `git mv` anyway — on a
+project whose thesis is provenance, letting git lose track of a rename is not a small
+irony.
 
 ## One change, one branch, one PR
 
@@ -56,7 +94,8 @@ just check                     # after every meaningful step
 # 3. Before you push:
 just verify                    # live data verification
 just verify-determinism        # if you touched store/ or label/
-just docs-sync                 # regenerate docs/CODEBASE.md, review the diff
+                               # docs/CODEBASE.md is hand-written; update it by hand.
+                               # check_docs_sync.py fails the build if you did not.
 
 git push -u origin fix/412-super-chain-dropped
 gh pr create --fill

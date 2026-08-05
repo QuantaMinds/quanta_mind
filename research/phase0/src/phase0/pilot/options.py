@@ -1,0 +1,61 @@
+"""The pilot's command line, and the paths it defaults to.
+
+WHAT: `parse` — the argument surface of `python -m phase0.pilot.run`, plus the project
+      paths every default is anchored to.
+WHY:  Split from `run.py`, which orchestrates the walk. How the run is INVOKED and what
+      the run DOES are separate concerns, and the split keeps the defaults in one place
+      where they can be read against each other.
+
+      `ROOT` is why this matters more than tidiness. It was `parents[2]`, which resolved
+      to `src/` rather than the project root, so every default below named a directory
+      that does not exist and the pilot could not find its own corpus. It broke silently
+      when `pilot.py` became the `pilot/` package, and nothing re-ran it until now.
+      Counted once, here, rather than recomputed beside each path.
+IMPORTS: stdlib argparse, pathlib.
+CONSUMED BY: pilot/run.py.
+"""
+
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+
+# options -> pilot -> phase0 -> src -> project root. `controls/gate.py` counts from the
+# same depth; if either moves, both move.
+ROOT = Path(__file__).resolve().parents[3]
+PACKAGE = ROOT / "data" / "AIDev_BC_Analyser.zip"
+WORKSPACE = ROOT / "data" / "pilot_clones"
+CACHE = ROOT / "data" / "gh_cache"
+
+
+def parse(argv: list[str] | None = None) -> argparse.Namespace:
+    """The pilot's arguments. Defaults are anchored to ROOT, never to the cwd."""
+    parser = argparse.ArgumentParser(description="Pilot: build records and report shape.")
+    parser.add_argument("--repos", type=int, default=10)
+    parser.add_argument(
+        "--scan",
+        action="store_true",
+        help="also scan the outcome window, for the power projection",
+    )
+    parser.add_argument("--per-repo", type=int, default=4)
+    parser.add_argument(
+        "--workspace",
+        type=Path,
+        default=WORKSPACE,
+        help="clone directory; a second concurrent run needs its own",
+    )
+    parser.add_argument("--out", type=Path, default=ROOT / "results" / "pilot.json")
+    parser.add_argument(
+        "--records",
+        type=Path,
+        default=ROOT / "results" / "records.jsonl",
+        help="persist admitted PRRecords here; the exposure pass reads them rather "
+        "than rebuilding what this run already resolved",
+    )
+    parser.add_argument(
+        "--journal",
+        type=Path,
+        default=ROOT / "results" / "pilot_journal.md",
+        help="append-only progress, flushed per repository; a restart resumes from it",
+    )
+    return parser.parse_args(argv)
