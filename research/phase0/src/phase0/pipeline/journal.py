@@ -103,7 +103,7 @@ def append_repo(path: Path, repo: str, attempts: list[Attempt], rescan: str = ""
                 str(a.changed_symbols),
                 str(a.stars),
                 a.outcome or "-",
-                "yes" if a.base_is_default else "no",
+                a.base_on_default,
                 a.merge_on_base,
                 str(a.changed_lines),
                 rescan or "-",

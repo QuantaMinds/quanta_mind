@@ -87,8 +87,12 @@ def report(attempts: list[Attempt], clone_failures: int, repos: int) -> dict[str
     scanned = [a for a in admitted if a.outcome in ("broke", "clean")]
     unscannable = [a for a in admitted if a.outcome == "unscannable"]
     broke = [a for a in scanned if a.outcome == "broke"]
-    on_default = [a for a in scanned if a.base_is_default]
-    off_default = [a for a in scanned if not a.base_is_default]
+    # Excluded from BOTH, never folded into off-default. `not base_is_default` used to
+    # sweep an unchecked repository into the off-default arm, where it would have read as
+    # a measurement -- the same error UNSCANNABLE gets kept out of the clean cell for.
+    on_default = [a for a in scanned if a.base_on_default == "yes"]
+    off_default = [a for a in scanned if a.base_on_default == "no"]
+    base_unknown = [a for a in scanned if a.base_on_default not in ("yes", "no")]
     star_bands = Counter(
         "unknown" if a.stars < 0 else ("<500" if a.stars < 500 else ">=500") for a in admitted
     )
@@ -135,6 +139,11 @@ def report(attempts: list[Attempt], clone_failures: int, repos: int) -> dict[str
         else None,
         "scanned_on_default": len(on_default),
         "scanned_off_default": len(off_default),
+        # Reported, not silently dropped. A non-zero count here means some repository's
+        # default branch could not be looked up, so the off-default share -- which the
+        # analysis stratifies on -- is computed over a smaller denominator than
+        # `outcome_scanned`. Silence would make the two look like the same population.
+        "base_branch_unknown": len(base_unknown),
         "outcome_scanned": len(scanned),
         "outcome_broke": len(broke),
         "breakage_rate": round(len(broke) / len(scanned), 4) if scanned else None,

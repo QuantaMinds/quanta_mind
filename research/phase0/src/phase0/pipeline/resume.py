@@ -78,7 +78,10 @@ def read_attempts(path: Path) -> list[Attempt]:
                     changed_symbols=int(cells[8]),
                     stars=int(cells[9]),
                     outcome="" if cells[10] == "-" else cells[10],
-                    base_is_default=cells[11] != "no",
+                    # Three states, not a bool. An older journal wrote only yes/no and both
+                    # are measurements; an EMPTY cell is a journal that did not record it,
+                    # and "unknown" is what the report excludes rather than counts.
+                    base_on_default=cells[11] or "unknown",
                     # Three states -- "yes", "no", "unknown" -- kept as text rather than
                     # collapsed to a bool. "we could not check" and "it is not on the
                     # branch" are different facts, and a bool would have to pick one.

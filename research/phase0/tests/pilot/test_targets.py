@@ -40,7 +40,7 @@ def _attempt(repo: str, pr_id: str, admitted: bool, stage: str) -> Attempt:
         changed_symbols=1 if admitted else 0,
         stars=500,
         outcome="clean" if admitted else "",
-        base_is_default=True,
+        base_on_default="yes",
         merge_on_base="yes",
         changed_lines=10,
     )

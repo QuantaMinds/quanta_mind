@@ -77,3 +77,18 @@ def default_branch(repo: str) -> str:
             return ""
         _DEFAULTS[repo] = out.stdout.strip()
     return _DEFAULTS[repo]
+
+
+def on_default_label(base_ref: str, repo: str) -> str:
+    """ "yes" | "no" | "unknown" -- an unchecked base is not an off-default base.
+
+    `default_branch` returns "" when this repository's lookup timed out. Comparing that
+    to `base_ref` yields False, and as a BOOLEAN that was indistinguishable from a real
+    merge into a non-default branch -- in the variable the analysis stratifies on. The
+    third state exists so the report can exclude the row from both arms instead of
+    silently manufacturing an off-default one.
+    """
+    default = default_branch(repo)
+    if not default:
+        return "unknown"
+    return "yes" if base_ref == default else "no"

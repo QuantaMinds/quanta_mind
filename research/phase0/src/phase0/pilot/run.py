@@ -39,9 +39,9 @@ from phase0.handlabel.select import Candidate
 from phase0.outcome.scan import scan
 from phase0.outcome.window import merge_on_base
 from phase0.pilot.attempt import Attempt
-from phase0.pilot.covariates import attempt_for
+from phase0.pilot.covariates import attempt_for, rows_for_clone_failure
 from phase0.pilot.options import CACHE, PACKAGE, ROOT, parse
-from phase0.pilot.repo_facts import default_branch, star_counts
+from phase0.pilot.repo_facts import on_default_label, star_counts
 from phase0.pilot.report import by_repo, report
 from phase0.pilot.targets import choose
 from phase0.pipeline import journal, records_file, resume
@@ -82,7 +82,9 @@ def main(argv: list[str] | None = None) -> int:
         outcome: PRRecord | Rejection,
         commit_count: int,
         breakage: str = "",
-        on_default: bool = True,
+        # "unknown", not "yes": a rejected attempt never reached the branch lookup, and
+        # defaulting to a measurement is how the two got confused in the first place.
+        on_default: str = "unknown",
         on_base: str = "unknown",
         lines_changed: int = -1,
     ) -> None:
@@ -147,7 +149,9 @@ def main(argv: list[str] | None = None) -> int:
                         outcome,
                         merge.commit_count,
                         breakage,
-                        merge.base_ref == default_branch(repo),
+                        # "unknown" when the lookup failed for this repo, never False:
+                        # an unchecked base is not a base on a non-default branch.
+                        on_default_label(merge.base_ref, repo),
                         on_base,
                         merge.changed_lines,
                     )
@@ -167,23 +171,7 @@ def main(argv: list[str] | None = None) -> int:
         except CloneFailed as exc:
             clone_failures += 1
             print(f"     clone failed: {exc}", flush=True)
-            # One row per PR, not a gap. A clone failure is attrition with a cause, and
-            # a denominator that moves with the weather makes every later comparison
-            # carry noise nobody declared.
-            #
-            # Two causes, kept apart. A timeout removes the LARGEST repositories, so it
-            # selects on the study's own confounder; a repository that no longer exists
-            # selects on nothing and has no size to measure. Pooling them puts a repo
-            # with no measurable size into the median that quantifies the size bias.
-            stage = "repo_gone" if "not found" in str(exc).lower() else "clone_timeout"
-            for candidate in candidates:
-                if not any(a.pr_id == str(candidate.pr_id) for a in attempts[before:]):
-                    # The corpus's commit list: the API's count is fetched inside the
-                    # clone that just failed, and passing 0 put every clone failure
-                    # outside every band, so `share_lost` read 0.0 -- "cannot tell"
-                    # rendered as "nothing lost".
-                    fail = Rejection(str(candidate.pr_id), stage, str(exc))
-                    note(candidate, fail, len(candidate.commit_shas))
+            attempts += rows_for_clone_failure(candidates, attempts[before:], exc, stars)
         # Flushed here, not at the end. A repository that yielded nothing is still
         # marked done, or a restart would retry it forever.
         journal.append_repo(args.journal, repo, attempts[before:], targets.rescan)

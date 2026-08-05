@@ -38,7 +38,7 @@ def _row(
     index: int,
     *,
     outcome: str = "",
-    on_default: bool = True,
+    on_default: str = "yes",
     stage: str = "",
     repo: str = "o/r",
 ) -> Attempt:
@@ -53,7 +53,7 @@ def _row(
         derived_files=1,
         changed_symbols=1,
         outcome=outcome,
-        base_is_default=on_default,
+        base_on_default=on_default,
         changed_lines=10,
     )
 
@@ -61,8 +61,8 @@ def _row(
 def test_a_material_gap_becomes_a_stratum() -> None:
     """Two rates far apart mean two populations, not one measured twice."""
     attempts = [
-        _row(0, outcome="broke", on_default=False),
-        _row(1, outcome="broke", on_default=False),
+        _row(0, outcome="broke", on_default="no"),
+        _row(1, outcome="broke", on_default="no"),
         _row(2, outcome="clean"),
         _row(3, outcome="clean"),
     ]
@@ -78,8 +78,8 @@ def test_a_material_gap_becomes_a_stratum() -> None:
 def test_matching_rates_read_as_corrective() -> None:
     """When the split agrees, the fix moved no population and that can be said."""
     attempts = [
-        _row(0, outcome="broke", on_default=False),
-        _row(1, outcome="clean", on_default=False),
+        _row(0, outcome="broke", on_default="no"),
+        _row(1, outcome="clean", on_default="no"),
         _row(2, outcome="broke"),
         _row(3, outcome="clean"),
     ]

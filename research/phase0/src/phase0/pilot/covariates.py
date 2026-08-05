@@ -14,16 +14,19 @@ WHY:  Split from `pilot/run.py`, which owns the walk: choosing repositories, clo
       built for EVERY attempt, admitted or rejected, because the outcome scan only ever
       sees survivors and a covariate counted after the gate describes the residue.
 IMPORTS: phase0.extract_prs, phase0.handlabel.select, phase0.pilot.attempt,
-      phase0.pipeline.rejection.
+      phase0.pipeline.rejection, phase0.pipeline.worktree.
 CONSUMED BY: pilot/run.py; tests/pilot/test_covariates.py.
 """
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 from phase0.extract_prs import PRRecord
 from phase0.handlabel.select import Candidate
 from phase0.pilot.attempt import Attempt
 from phase0.pipeline.rejection import Rejection
+from phase0.pipeline.worktree import CloneFailed
 
 
 def attempt_for(
@@ -32,7 +35,7 @@ def attempt_for(
     commit_count: int,
     stars: int,
     breakage: str = "",
-    on_default: bool = True,
+    on_default: str = "unknown",
     on_base: str = "unknown",
     lines_changed: int = -1,
 ) -> Attempt:
@@ -60,8 +63,42 @@ def attempt_for(
         changed_symbols=symbols,
         stars=stars,
         outcome=breakage,
-        base_is_default=on_default,
+        base_on_default=on_default,
         merge_on_base=on_base,
         changed_lines=lines_changed,
         arm=candidate.arm,
     )
+
+
+def clone_failure_stage(exc: CloneFailed) -> str:
+    """Which kind of clone failure this is. The two must never be pooled.
+
+    A timeout removes the LARGEST repositories, so it selects on the study's own
+    confounder. A repository that no longer exists selects on nothing and has no size to
+    measure. Pooling them puts a repo with no measurable size into the median that
+    quantifies the size bias.
+    """
+    return "repo_gone" if "not found" in str(exc).lower() else "clone_timeout"
+
+
+def rows_for_clone_failure(
+    candidates: Sequence[Candidate],
+    already_noted: Sequence[Attempt],
+    exc: CloneFailed,
+    stars: dict[str, int],
+) -> list[Attempt]:
+    """One row per PR the failed clone never reached. Attrition with a cause, not a gap.
+
+    A denominator that moves with the weather makes every later comparison carry noise
+    nobody declared. The commit count comes from the CORPUS list, because the API's count
+    is fetched inside the clone that just failed -- passing 0 put every clone failure
+    outside every band, so `share_lost` read 0.0 and "cannot tell" rendered as
+    "nothing lost".
+    """
+    seen = {a.pr_id for a in already_noted}
+    stage = clone_failure_stage(exc)
+    return [
+        attempt_for(c, Rejection(str(c.pr_id), stage, str(exc)), len(c.commit_shas), stars=-1)
+        for c in candidates
+        if str(c.pr_id) not in seen
+    ]
