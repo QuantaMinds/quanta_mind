@@ -54,3 +54,9 @@ class Attempt:
     # correlates of size, not the variable named. -1 when the API did not supply it, so
     # "not measured" cannot masquerade as "a very small PR".
     changed_lines: int = -1
+    # Which arm this PR is from, carried on EVERY row rather than assumed by the reader.
+    # "" means a journal written before this column existed -- NOT MEASURED, never
+    # "human". The 90-repo pilot was entirely human-arm and no artefact it produced said
+    # so, which is why its breakage rate was compared against the agent reference for
+    # weeks. `phase0.arm.verify` checks the claim against AIDev before the run starts.
+    arm: str = ""

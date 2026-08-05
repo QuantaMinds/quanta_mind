@@ -14,7 +14,8 @@ from __future__ import annotations
 from pathlib import Path
 
 from phase0.pilot.attempt import Attempt
-from phase0.pipeline.journal import COLUMNS, append_repo, completed_repos, read_attempts
+from phase0.pipeline.journal import COLUMNS, append_repo
+from phase0.pipeline.resume import completed_repos, read_attempts
 
 
 def _attempt(repo: str, pr_id: str, admitted: bool = True, stage: str = "") -> Attempt:

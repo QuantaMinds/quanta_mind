@@ -41,7 +41,7 @@ from pathlib import Path
 from phase0.pilot.attempt import Attempt
 from phase0.pilot.gradient import parent_gradient
 from phase0.pilot.report import report
-from phase0.pipeline import journal
+from phase0.pipeline import resume
 
 # A gap this wide or wider means the two arms are different populations, not one
 # population measured twice. Fixed here rather than chosen after seeing the split.
@@ -157,8 +157,8 @@ def main(argv: list[str] | None = None) -> int:
         print(main.__doc__)
         return 2
     baseline = json.loads(Path(args[0]).read_text(encoding="utf-8"))
-    attempts = journal.read_attempts(Path(args[1]))
-    prior = journal.read_attempts(Path(args[2])) if len(args) == 3 else []
+    attempts = resume.read_attempts(Path(args[1]))
+    prior = resume.read_attempts(Path(args[2])) if len(args) == 3 else []
     print(json.dumps(compare(baseline, attempts, prior), indent=2, sort_keys=True))
     return 0
 

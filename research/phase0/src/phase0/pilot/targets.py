@@ -21,7 +21,7 @@ from collections.abc import Collection
 from dataclasses import dataclass
 from pathlib import Path
 
-from phase0.pipeline import journal
+from phase0.pipeline import resume
 
 
 @dataclass(frozen=True, slots=True)
@@ -54,6 +54,6 @@ def choose(
             raise SystemExit(f"not in the eligible population: {', '.join(sorted(missing))}")
         chosen = sorted(only_repo)
         # The done-markers are dropped for these and kept for everything else.
-        return Targets(chosen, journal.completed_repos(journal_path) - set(chosen), rescan_reason)
+        return Targets(chosen, resume.completed_repos(journal_path) - set(chosen), rescan_reason)
 
-    return Targets(sorted(grouped)[:repos], journal.completed_repos(journal_path), "")
+    return Targets(sorted(grouped)[:repos], resume.completed_repos(journal_path), "")

@@ -22,7 +22,7 @@ import pytest
 
 from phase0.pilot.attempt import Attempt
 from phase0.pilot.targets import choose
-from phase0.pipeline import journal
+from phase0.pipeline import journal, resume
 
 POPULATION = ["a/one", "b/two", "c/three"]
 
@@ -75,7 +75,7 @@ def test_a_rescan_supersedes_the_failed_block_rather_than_adding_to_it(tmp_path:
         path, "a/one", [_attempt("a/one", "1", True, "")], rescan="rescan: blob_none_A29"
     )
 
-    read = journal.read_attempts(path)
+    read = resume.read_attempts(path)
     assert len(read) == 1
     assert read[0].admitted is True and read[0].stage == ""
     # Superseded, not deleted -- the failure is still on disk as A29's evidence.

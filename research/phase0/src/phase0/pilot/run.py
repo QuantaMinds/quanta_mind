@@ -32,16 +32,18 @@ from __future__ import annotations
 import json
 import sys
 
+from phase0 import arm
 from phase0.extract_prs import PRRecord
 from phase0.github_pulls import merge_info, require_token
 from phase0.handlabel.select import Candidate, eligible_prs
 from phase0.outcome.scan import scan
 from phase0.outcome.window import merge_on_base
 from phase0.pilot.attempt import Attempt
+from phase0.pilot.covariates import attempt_for
 from phase0.pilot.options import CACHE, PACKAGE, ROOT, parse
 from phase0.pilot.report import by_repo, default_branch, report, star_counts
 from phase0.pilot.targets import choose
-from phase0.pipeline import journal, records_file
+from phase0.pipeline import journal, records_file, resume
 from phase0.pipeline.assemble import build_record
 from phase0.pipeline.rejection import Rejection
 from phase0.pipeline.worktree import CloneFailed, cloned, sweep
@@ -52,15 +54,22 @@ def main(argv: list[str] | None = None) -> int:
 
     token = require_token()
     population = eligible_prs(PACKAGE)
+    # Before the first clone, not after thirty hours. This run's entire 90-repo
+    # predecessor was human-arm and every metric it produced was read as the agent arm;
+    # nothing objected because no artefact named an arm. `verify` raises unless every
+    # id is in the arm the population claims, checked against AIDev's own `agent`
+    # column rather than against the filename the population was built from.
+    tally = arm.verify([c.pr_id for c in population], arm.HUMAN, ROOT / "data" / "aidev")
     grouped = by_repo(population)
     targets = choose(grouped, args.journal, args.repos, args.only_repo, args.rescan_reason)
+    print(f"arm verified: {tally}")
     print(f"{len(population)} eligible across {len(grouped)} repos; {targets.announcement}")
 
     swept = sweep(args.workspace)
     if swept:
         print(f"swept {swept} clone(s) left by a previous run")
     stars = star_counts(ROOT / "data" / "aidev" / "repository.parquet")
-    attempts: list[Attempt] = journal.read_attempts(args.journal)
+    attempts: list[Attempt] = resume.read_attempts(args.journal)
     clone_failures = 0
     if targets.already:
         print(f"resuming: {len(targets.already)} repos journalled, {len(attempts)} attempts")
@@ -74,29 +83,17 @@ def main(argv: list[str] | None = None) -> int:
         on_base: str = "unknown",
         lines_changed: int = -1,
     ) -> None:
-        """One attempt, with the covariates attrition may track. Never a verdict."""
-        corpus_py = sum(1 for f in candidate.changed_files if f.endswith(".py"))
-        stage, category, files, symbols = "", "", 0, 0
-        if isinstance(outcome, Rejection):
-            stage, category = outcome.stage, outcome.category
-        else:
-            files, symbols = len(outcome.changed_files), len(outcome.changed_symbols)
+        """One attempt appended. The row itself is built by `covariates.attempt_for`."""
         attempts.append(
-            Attempt(
-                pr_id=str(candidate.pr_id),
-                repo=candidate.repo,
-                admitted=not isinstance(outcome, Rejection),
-                stage=stage,
-                category=category,
-                commit_count=commit_count,
-                corpus_py_files=corpus_py,
-                derived_files=files,
-                changed_symbols=symbols,
-                stars=stars.get(candidate.repo, -1),
-                outcome=breakage,
-                base_is_default=on_default,
-                merge_on_base=on_base,
-                changed_lines=lines_changed,
+            attempt_for(
+                candidate,
+                outcome,
+                commit_count,
+                stars.get(candidate.repo, -1),
+                breakage,
+                on_default,
+                on_base,
+                lines_changed,
             )
         )
 
