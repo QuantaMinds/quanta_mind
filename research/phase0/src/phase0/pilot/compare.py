@@ -47,7 +47,9 @@ from phase0.pipeline import journal
 # population measured twice. Fixed here rather than chosen after seeing the split.
 MATERIAL_GAP = 0.05
 
-CLONE_FAILED = "clone_failed"
+# Journals written before the timeout/gone split say `clone_failed`; both new
+# names mean the same thing here -- the unit never reached the rule.
+CLONE_STAGES = frozenset({"clone_failed", "clone_timeout", "repo_gone"})
 
 
 def _bands(old: dict, new: dict, key: str) -> dict[str, object]:
@@ -102,8 +104,8 @@ def compare(
     repos = len({a.repo for a in attempts})
     as_recorded = report(attempts, 0, repos)
 
-    dropped = [a for a in attempts if a.stage == CLONE_FAILED]
-    comparable = report([a for a in attempts if a.stage != CLONE_FAILED], 0, repos)
+    dropped = [a for a in attempts if a.stage in CLONE_STAGES]
+    comparable = report([a for a in attempts if a.stage not in CLONE_STAGES], 0, repos)
 
     on = as_recorded.get("breakage_rate_default_branch")
     off = as_recorded.get("breakage_rate_other_branch")

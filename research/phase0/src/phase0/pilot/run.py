@@ -172,9 +172,17 @@ def main(argv: list[str] | None = None) -> int:
             # One row per PR, not a gap. A clone failure is attrition with a cause, and
             # a denominator that moves with the weather makes every later comparison
             # carry noise nobody declared.
+            #
+            # Two causes, kept apart. A timeout removes the LARGEST repositories --
+            # measured at an 11.5x median size difference -- so it selects on the study's
+            # own confounder. A repository that no longer exists selects on nothing and
+            # has no size to measure. Pooling them puts a repo with no measurable size
+            # into the median that quantifies the size bias, and the classification would
+            # otherwise survive only in a log line nobody joins back.
+            stage = "repo_gone" if "not found" in str(exc).lower() else "clone_timeout"
             for candidate in candidates:
                 if not any(a.pr_id == str(candidate.pr_id) for a in attempts[before:]):
-                    note(candidate, Rejection(str(candidate.pr_id), "clone_failed", str(exc)), 0)
+                    note(candidate, Rejection(str(candidate.pr_id), stage, str(exc)), 0)
         # Flushed here, not at the end. A repository that yielded nothing is still
         # marked done, or a restart would retry it forever.
         journal.append_repo(args.journal, repo, attempts[before:])

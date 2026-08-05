@@ -26,7 +26,13 @@ CATEGORIES: dict[str, str] = {
     # A repository we could not clone must produce a record per PR, not the absence of
     # one. Absent rows shrink the denominator, so the same corpus scanned twice gave 33
     # records once and 34 the next -- a 3% swing at that size, and nothing reported it.
+    # Kept apart because they select differently. A timeout removes the LARGEST
+    # repositories -- 11.5x median size difference -- so it selects on the study's own
+    # confounder; a repository that no longer exists selects on nothing and has no size
+    # to measure. `clone_failed` remains for journals written before the split.
     "clone_failed": "resource",
+    "clone_timeout": "resource",
+    "repo_gone": "resource",
     "merge_metadata": "resource",
     "no_merge_sha": "resource",
     "parent_commit": "integrity",
@@ -47,5 +53,10 @@ class Rejection:
 
     @property
     def category(self) -> str:
-        """`resource`, `integrity` or `restricted` -- see CATEGORIES."""
+        """`resource`, `integrity` or `restricted` -- see CATEGORIES.
+
+        The default is deliberate but not safe: an unmapped stage becomes `resource`,
+        which understates the bound if the real cause was `integrity`. Add new stages to
+        the map rather than relying on it.
+        """
         return CATEGORIES.get(self.stage, "resource")
