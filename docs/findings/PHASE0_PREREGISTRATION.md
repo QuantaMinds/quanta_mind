@@ -1517,14 +1517,16 @@ timeout as an exclusion in A17's bounds. Its *direction* was not recorded, and i
 neutral. Measured over the re-run's first 41 repositories, against GitHub's reported
 repository size:
 
-| | n | median size | largest |
+| | n | median size | range |
 |---|---|---|---|
-| clone timed out | 4 | **959,522 KB** | 1,458,859 KB |
-| cloned | 36 | **76,908 KB** | 1,311,233 KB |
+| clone timed out | 5 | **921,790 KB** | 189,729 – 1,458,859 KB |
+| cloned | 40 | **80,404 KB** | up to 1,311,233 KB |
 
-A 12.5× difference in median. It is not a clean threshold — `BerriAI/litellm` at 1.31 GB
-cloned successfully, so network variance matters — but the central tendency is not in
-doubt: a resource exclusion is removing the largest repositories, and repository size
+An 11.5× difference in median, over the re-run's first 46 repositories. It is emphatically
+not a threshold: `bruin-data/ingestr` timed out at 190 MB while `BerriAI/litellm` cloned at
+1.31 GB, so network variance is large and the two distributions overlap. The ratio itself
+moved from 12.5× to 11.5× as the fifth failure arrived, so it should be read as a
+direction rather than a coefficient. What is not in doubt is that direction: a resource exclusion is removing the largest repositories, and repository size
 tracks project age, activity and release discipline. That is the same selection the
 base-branch defect made, arriving through a different door, and it is the fourth door on
 to A16's confounder after patch text, shape detection and the outcome scan.
