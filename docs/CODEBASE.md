@@ -26,7 +26,7 @@ Pack format: `v0` · Phase: **pre-Phase-0, no product code written**
 | `research/` | Measurement | separate uv projects, separate interpreters. Never on the product's dependency graph |
 | `scripts/guard/` | Rule enforcement | stdlib only — must run before the package installs |
 | `scripts/verify/` | Data verification | golden diff, source-leak proof, determinism. **Empty until the call-site census layer** — see its README |
-| `vendor/` | Pinned third-party source | **never edited**, blocked by `hook_pre_edit.py` |
+| `vendor/` | Pinned third-party source | **never edited**, blocked by `hooks/hook_pre_edit.py` |
 | `docs/` | Reasoning | exempt from the line cap |
 | `BRIEFING.md` | The founder-facing account: pitch, risks, the five questions | root, beside README — it is the outward story, not internal reasoning |
 
@@ -159,9 +159,9 @@ so a scan-time count reports the residue and gets quoted as the population.
 | `check_no_research_imports.py` | research deps never reach `src/` or `scripts/` |
 | `check_no_vague_refs.py` | references name files and headings, never section or phase numbers |
 | `check_module_identity.py` | no two modules with one name; no module nothing imports |
-| `hook_pre_edit.py` | denies `vendor/` and writes on `main`; asks on golden files |
-| `hook_post_edit.py` | formats the edited file, reports violations — **advisory** |
-| `hook_session_end.py` | session record to `docs/plans/` |
+| `hooks/hook_pre_edit.py` | denies `vendor/` and writes on `main`; asks on golden files |
+| `hooks/hook_post_edit.py` | formats the edited file, reports violations — **advisory** |
+| `hooks/hook_session_end.py` | session record to `docs/plans/` |
 
 **A guard's enforcement value is capped by whether people leave it enabled.** The walker
 in `discovery.py` used to enumerate every path under an excluded directory before

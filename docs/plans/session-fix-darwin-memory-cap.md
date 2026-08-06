@@ -1,11 +1,11 @@
 # Session record — fix/darwin-memory-cap
 
-Written by scripts/guard/hook_session_end.py at 2026-08-05T21:38:22Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-06T00:21:31Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `fix/darwin-memory-cap`
-- Files changed vs `main`: 50
-- Uncommitted at session end: 0
+- Files changed vs `main`: 89
+- Uncommitted at session end: 8
 - `docs/CODEBASE.md` updated: yes
 
 ## Changed
@@ -14,7 +14,12 @@ Informational. Nothing here was blocked or enforced.
 - `docs/findings/PHASE0_PREREGISTRATION.md`
 - `docs/plans/session-fix-darwin-memory-cap-handoff.md`
 - `docs/plans/session-fix-darwin-memory-cap.md`
+- `justfile`
 - `research/phase0/ENVIRONMENT.lock`
+- `research/phase0/results/agent_pilot.json`
+- `research/phase0/results/agent_pilot.log`
+- `research/phase0/results/agent_pilot_journal.md`
+- `research/phase0/results/agent_records.jsonl`
 - `research/phase0/results/controls.json`
 - `research/phase0/results/controls_linux.json`
 - `research/phase0/results/exposure.VOID.README.md`
@@ -30,6 +35,35 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/results/rescan_eight_rows.quarantined.md`
 - `research/phase0/results/rescan_eight_v2.json`
 - `research/phase0/results/rescan_eight_v2.log`
+- `research/phase0/runs/agent_pilot/repos/001-010/005_567-labs__kura.json`
+- `research/phase0/runs/agent_pilot/repos/001-010/006_AMICI-dev__AMICI.json`
+- `research/phase0/runs/agent_pilot/repos/001-010/007_APPFL__APPFL.json`
+- `research/phase0/runs/agent_pilot/repos/001-010/008_AgentOps-AI__agentops.json`
+- `research/phase0/runs/agent_pilot/repos/001-010/009_AliAkhtari78__SpotifyScraper.json`
+- `research/phase0/runs/agent_pilot/repos/001-010/010_Arize-ai__phoenix.json`
+- `research/phase0/runs/agent_pilot/repos/011-020/011_Azure-Samples__openai-chat-vision-quickstart.json`
+- `research/phase0/runs/agent_pilot/repos/011-020/012_Azure-Samples__rag-postgres-openai-python.json`
+- `research/phase0/runs/agent_pilot/repos/011-020/013_Azure__azure-functions-core-tools.json`
+- `research/phase0/runs/agent_pilot/repos/011-020/014_Azure__azure-kusto-python.json`
+- `research/phase0/runs/agent_pilot/repos/011-020/015_Azure__azure-sdk-for-java.json`
+- `research/phase0/runs/agent_pilot/repos/011-020/016_Azure__azure-sdk-for-net.json`
+- `research/phase0/runs/agent_pilot/repos/011-020/017_Azure__azure-sdk-for-python.json`
+- `research/phase0/runs/agent_pilot/repos/011-020/018_Azure__azure-sdk-tools.json`
+- `research/phase0/runs/agent_pilot/repos/011-020/019_Azure__azure-storage-fuse.json`
+- `research/phase0/runs/agent_pilot/repos/011-020/020_BOINC__boinc.json`
+- `research/phase0/runs/agent_pilot/repos/021-030/021_Bandit-HaxUnit__haxunit.json`
+- `research/phase0/runs/agent_pilot/repos/021-030/022_BeehiveInnovations__zen-mcp-server.json`
+- `research/phase0/runs/agent_pilot/repos/021-030/023_BerriAI__litellm.json`
+- `research/phase0/runs/agent_pilot/repos/021-030/024_Blaizzy__mlx-audio.json`
+- `research/phase0/runs/agent_pilot/repos/021-030/025_Blaizzy__mlx-vlm.json`
+- `research/phase0/runs/agent_pilot/repos/021-030/026_BlueFalconHD__apple_generative_model_safety_decrypted.json`
+- `research/phase0/runs/agent_pilot/repos/021-030/027_BoundaryML__baml.json`
+- `research/phase0/runs/agent_pilot/repos/021-030/028_ChaokunHong__MetaScreener.json`
+- `research/phase0/runs/agent_pilot/repos/021-030/029_ChristopheZhao__ChaGPT-API-Call.json`
+- `research/phase0/runs/agent_pilot/repos/021-030/030_ComposioHQ__composio.json`
+- `research/phase0/runs/agent_pilot/run_meta.json`
+- `research/phase0/runs/agent_pilot/shape_latest.json`
+- `research/phase0/runs/agent_pilot/timeline.jsonl`
 - `research/phase0/src/phase0/arm.py`
 - `research/phase0/src/phase0/graph/memory_cap.py`
 - `research/phase0/src/phase0/graph/run_graph.py`
@@ -43,6 +77,7 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/src/phase0/pilot/report.py`
 - `research/phase0/src/phase0/pilot/run.py`
 - `research/phase0/src/phase0/pilot/targets.py`
+- `research/phase0/src/phase0/pilot/trace.py`
 - `research/phase0/src/phase0/pipeline/assemble.py`
 - `research/phase0/src/phase0/pipeline/journal.py`
 - `research/phase0/src/phase0/pipeline/measure.py`
@@ -52,10 +87,14 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/src/phase0/population/__init__.py`
 - `research/phase0/src/phase0/population/agent.py`
 - `research/phase0/src/phase0/run_pipeline.py`
+- `research/phase0/src/phase0/sample_for_labelling.py`
 - `research/phase0/tests/pilot/test_agent_population.py`
 - `research/phase0/tests/pilot/test_arm.py`
+- `research/phase0/tests/pilot/test_compare.py`
+- `research/phase0/tests/pilot/test_default_branch_label.py`
 - `research/phase0/tests/pilot/test_repo_facts.py`
 - `research/phase0/tests/pilot/test_targets.py`
+- `research/phase0/tests/pilot/test_trace.py`
 - `research/phase0/tests/pipeline/test_contents_assertion.py`
 - `research/phase0/tests/pipeline/test_journal.py`
 - `research/phase0/tests/test_memory_cap.py`

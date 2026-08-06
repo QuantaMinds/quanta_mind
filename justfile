@@ -53,6 +53,8 @@ guards:
     uv run python scripts/guard/check_module_identity.py .
     uv run python scripts/guard/check_docs_sync.py .
     uv run python scripts/guard/check_documented_commands.py .
+    uv run python scripts/guard/check_no_partial_clone.py .
+    uv run python scripts/guard/check_withdrawn_amendments.py .
 
 test-unit:
     uv run pytest tests/unit -x --timeout=60

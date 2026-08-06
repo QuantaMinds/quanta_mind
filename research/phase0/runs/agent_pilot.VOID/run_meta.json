@@ -1,7 +1,7 @@
 {
   "arm": "agent",
   "population": 3566,
-  "started_utc": "2026-08-05T22:34:44+00:00",
+  "started_utc": "2026-08-06T00:01:15+00:00",
   "tally": {
     "Claude_Code": 47,
     "Copilot": 271,

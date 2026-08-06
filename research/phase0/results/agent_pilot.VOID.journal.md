@@ -130,3 +130,35 @@ repository even when it produced no rows.
 | ComposioHQ/composio | 2902796110 | no | no_symbols | restricted | 3 | 1 | 0 | 0 | 25592 | - | no | unknown | 88 | - | Devin |
 | ComposioHQ/composio | 2902941522 | no | no_python | restricted | 9 | 1 | 0 | 0 | 25592 | - | no | unknown | 8 | - | Devin |
 <!-- repo-done: ComposioHQ/composio -->
+| DannyMac180/meta-agent | 2970993516 | yes | - | - | 1 | 2 | 2 | 4 | 364 | clean | yes | yes | 155 | - | Devin |
+| DannyMac180/meta-agent | 3071657073 | yes | - | - | 1 | 5 | 5 | 5 | 364 | unscannable | no | unknown | 85 | - | OpenAI_Codex |
+| DannyMac180/meta-agent | 3071923910 | no | no_symbols | restricted | 1 | 1 | 0 | 0 | 364 | - | no | unknown | 24 | - | OpenAI_Codex |
+| DannyMac180/meta-agent | 3074842735 | yes | - | - | 1 | 4 | 4 | 24 | 364 | unscannable | no | unknown | 823 | - | OpenAI_Codex |
+| DannyMac180/meta-agent | 3075386253 | yes | - | - | 1 | 3 | 3 | 4 | 364 | unscannable | no | unknown | 169 | - | OpenAI_Codex |
+| DannyMac180/meta-agent | 3080182898 | yes | - | - | 1 | 4 | 4 | 3 | 364 | unscannable | no | unknown | 258 | - | OpenAI_Codex |
+| DannyMac180/meta-agent | 3080712414 | yes | - | - | 2 | 12 | 4 | 5 | 364 | unscannable | no | unknown | 176 | - | OpenAI_Codex |
+<!-- repo-done: DannyMac180/meta-agent -->
+| Deep-Learning-Profiling-Tools/triton-viz | 3220223180 | yes | - | - | 8 | 9 | 9 | 36 | 227 | unscannable | no | unknown | 3599 | - | Claude_Code |
+<!-- repo-done: Deep-Learning-Profiling-Tools/triton-viz -->
+| DeepLabCut/DeepLabCut | 3205453833 | no | no_symbols | restricted | 3 | 2 | 0 | 0 | 5169 | - | no | yes | 6 | - | Copilot |
+| DeepLabCut/DeepLabCut | 3205514535 | yes | - | - | 2 | 2 | 2 | 1 | 5169 | broke | no | yes | 186 | - | Copilot |
+<!-- repo-done: DeepLabCut/DeepLabCut -->
+| DogukanUrker/FlaskBlog | 3216099985 | no | no_symbols | restricted | 1 | 1 | 0 | 0 | 172 | - | yes | yes | 4 | - | OpenAI_Codex |
+| DogukanUrker/FlaskBlog | 3220302351 | yes | - | - | 8 | 14 | 5 | 3 | 172 | unscannable | no | unknown | 669 | - | OpenAI_Codex |
+| DogukanUrker/FlaskBlog | 3220752877 | yes | - | - | 18 | 5 | 5 | 2 | 172 | unscannable | no | unknown | 169 | - | OpenAI_Codex |
+| DogukanUrker/FlaskBlog | 3220982571 | yes | - | - | 5 | 1 | 1 | 1 | 172 | unscannable | no | unknown | 282 | - | OpenAI_Codex |
+| DogukanUrker/FlaskBlog | 3221861500 | yes | - | - | 2 | 8 | 8 | 6 | 172 | clean | yes | yes | 230 | - | OpenAI_Codex |
+<!-- repo-done: DogukanUrker/FlaskBlog -->
+| DonDebonair/slack-machine | 3161229907 | yes | - | - | 1 | 2 | 2 | 4 | 766 | unscannable | no | unknown | 78 | - | Copilot |
+<!-- repo-done: DonDebonair/slack-machine -->
+| Drakonis96/dockerstats | 3117545312 | yes | - | - | 1 | 1 | 1 | 1 | 103 | clean | yes | yes | 26 | - | OpenAI_Codex |
+| Drakonis96/dockerstats | 3117549299 | no | no_symbols | restricted | 1 | 1 | 0 | 0 | 103 | - | yes | yes | 13 | - | OpenAI_Codex |
+| Drakonis96/dockerstats | 3117577331 | yes | - | - | 1 | 1 | 1 | 1 | 103 | broke | yes | yes | 94 | - | OpenAI_Codex |
+| Drakonis96/dockerstats | 3120427742 | yes | - | - | 1 | 1 | 1 | 1 | 103 | clean | yes | yes | 117 | - | OpenAI_Codex |
+| Drakonis96/dockerstats | 3120687133 | yes | - | - | 1 | 3 | 3 | 2 | 103 | clean | yes | yes | 93 | - | OpenAI_Codex |
+<!-- repo-done: Drakonis96/dockerstats -->
+| Efeckc17/YoutubeGO | 3204463734 | yes | - | - | 3 | 1 | 1 | 1 | 384 | unscannable | yes | no | 12 | - | Cursor |
+<!-- repo-done: Efeckc17/YoutubeGO -->
+| EricLBuehler/mistral.rs | 3117321071 | no | no_symbols | restricted | 3 | 2 | 0 | 0 | 5959 | - | yes | yes | 400 | - | OpenAI_Codex |
+| EricLBuehler/mistral.rs | 3117621789 | no | no_symbols | restricted | 7 | 3 | 0 | 0 | 5959 | - | yes | yes | 594 | - | OpenAI_Codex |
+<!-- repo-done: EricLBuehler/mistral.rs -->

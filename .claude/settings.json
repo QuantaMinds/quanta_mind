@@ -48,7 +48,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python \"$CLAUDE_PROJECT_DIR/scripts/guard/hook_pre_edit.py\"",
+            "command": "python \"$CLAUDE_PROJECT_DIR/scripts/guard/hooks/hook_pre_edit.py\"",
             "$comment": "Denies edits to vendor/ and any write while on main. Golden fixtures escalate to 'ask' rather than deny -- blocking them outright pushes people to disable the hook, and a human in the loop is the actual requirement. Authorised by a one-shot sentinel file the hook deletes after use, not an env var that can be left set in a shell profile."
           }
         ]
@@ -61,7 +61,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python \"$CLAUDE_PROJECT_DIR/scripts/guard/hook_post_edit.py\"",
+            "command": "python \"$CLAUDE_PROJECT_DIR/scripts/guard/hooks/hook_post_edit.py\"",
             "$comment": "One script, not three. Formats only the file named in tool_input.file_path, then runs the structural and convention guards and reports failures on the turn that caused them. ADVISORY: the write has already happened by the time this runs. ci:guards is what blocks. Three separate hooks would also have run in parallel rather than in order."
           }
         ]
@@ -73,7 +73,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python \"$CLAUDE_PROJECT_DIR/scripts/guard/hook_session_end.py\"",
+            "command": "python \"$CLAUDE_PROJECT_DIR/scripts/guard/hooks/hook_session_end.py\"",
             "$comment": "Writes a session record to docs/plans/ naming what changed and whether docs/CODEBASE.md moved with it. Never blocks -- a Stop hook that fails ends the session in an error nobody asked for, and the record is worth less than the interruption costs."
           }
         ]
@@ -108,6 +108,8 @@
     "research deps stay out of the product": "guard:check_no_research_imports",
     "references name things, not numbers": "guard:check_no_vague_refs",
     "no duplicate or orphan modules": "guard:check_module_identity",
+    "no --filter on a git clone (A31)": "guard:check_no_partial_clone",
+    "a withdrawn amendment names its enforcer": "guard:check_withdrawn_amendments",
 
     "no source text in pack": "ci:verify-no-source-leak (invariant 6)",
     "deterministic re-index": "ci:verify-determinism (invariant 5)",

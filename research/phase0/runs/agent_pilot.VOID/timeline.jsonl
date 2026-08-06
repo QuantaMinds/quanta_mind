@@ -51,3 +51,21 @@
 {"admitted": 1, "attempts": 2, "broke": 0, "kind": "repo_done", "of": 30, "position": 29, "repo": "ChristopheZhao/ChaGPT-API-Call", "ts": "2026-08-05T22:56:47+00:00"}
 {"kind": "repo_start", "of": 30, "position": 30, "prs": 4, "repo": "ComposioHQ/composio", "ts": "2026-08-05T22:56:47+00:00"}
 {"admitted": 0, "attempts": 4, "broke": 0, "kind": "repo_done", "of": 30, "position": 30, "repo": "ComposioHQ/composio", "ts": "2026-08-05T22:57:23+00:00"}
+{"arm": "agent", "kind": "run_start", "population": 3566, "tally": {"Claude_Code": 47, "Copilot": 271, "Cursor": 132, "Devin": 301, "OpenAI_Codex": 2815}, "ts": "2026-08-06T00:01:15+00:00"}
+{"kind": "repo_start", "of": 72, "position": 31, "prs": 7, "repo": "DannyMac180/meta-agent", "ts": "2026-08-06T00:01:15+00:00"}
+{"admitted": 6, "attempts": 7, "broke": 0, "kind": "repo_done", "of": 72, "position": 31, "repo": "DannyMac180/meta-agent", "ts": "2026-08-06T00:01:51+00:00"}
+{"kind": "repo_start", "of": 72, "position": 32, "prs": 1, "repo": "Deep-Learning-Profiling-Tools/triton-viz", "ts": "2026-08-06T00:01:51+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 72, "position": 32, "repo": "Deep-Learning-Profiling-Tools/triton-viz", "ts": "2026-08-06T00:02:13+00:00"}
+{"kind": "repo_start", "of": 72, "position": 33, "prs": 2, "repo": "DeepLabCut/DeepLabCut", "ts": "2026-08-06T00:02:13+00:00"}
+{"admitted": 1, "attempts": 2, "broke": 1, "kind": "repo_done", "of": 72, "position": 33, "repo": "DeepLabCut/DeepLabCut", "ts": "2026-08-06T00:02:55+00:00"}
+{"kind": "repo_start", "of": 72, "position": 34, "prs": 5, "repo": "DogukanUrker/FlaskBlog", "ts": "2026-08-06T00:02:55+00:00"}
+{"admitted": 4, "attempts": 5, "broke": 0, "kind": "repo_done", "of": 72, "position": 34, "repo": "DogukanUrker/FlaskBlog", "ts": "2026-08-06T00:03:31+00:00"}
+{"kind": "repo_start", "of": 72, "position": 35, "prs": 1, "repo": "DonDebonair/slack-machine", "ts": "2026-08-06T00:03:31+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 72, "position": 35, "repo": "DonDebonair/slack-machine", "ts": "2026-08-06T00:03:38+00:00"}
+{"kind": "repo_start", "of": 72, "position": 36, "prs": 5, "repo": "Drakonis96/dockerstats", "ts": "2026-08-06T00:03:38+00:00"}
+{"admitted": 4, "attempts": 5, "broke": 1, "kind": "repo_done", "of": 72, "position": 36, "repo": "Drakonis96/dockerstats", "ts": "2026-08-06T00:04:26+00:00"}
+{"kind": "repo_start", "of": 72, "position": 37, "prs": 1, "repo": "Efeckc17/YoutubeGO", "ts": "2026-08-06T00:04:26+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 72, "position": 37, "repo": "Efeckc17/YoutubeGO", "ts": "2026-08-06T00:04:32+00:00"}
+{"kind": "repo_start", "of": 72, "position": 38, "prs": 2, "repo": "EricLBuehler/mistral.rs", "ts": "2026-08-06T00:04:32+00:00"}
+{"admitted": 0, "attempts": 2, "broke": 0, "kind": "repo_done", "of": 72, "position": 38, "repo": "EricLBuehler/mistral.rs", "ts": "2026-08-06T00:04:56+00:00"}
+{"kind": "repo_start", "of": 72, "position": 39, "prs": 1, "repo": "EvolvingLMMs-Lab/lmms-eval", "ts": "2026-08-06T00:04:56+00:00"}

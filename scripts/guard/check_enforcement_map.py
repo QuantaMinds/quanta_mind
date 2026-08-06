@@ -4,7 +4,8 @@ WHAT: Two checks, one in each direction.
       1. Resolution — every `guard:`, `ci:` and `hook:` token in the map must name
                       something that exists: a guard file, a justfile recipe or
                       workflow job, or a hook event actually registered.
-      2. Orphans    — every file in scripts/guard/ must be invoked by the justfile,
+      2. Orphans    — every file in scripts/guard/ and its subdirectories must be
+                      invoked by the justfile,
                       a workflow, or settings.json.
 WHY:  The map is the repository's claim about which rules are mechanically
       enforced. Fixing it by hand once does not stop it drifting again, and drift
@@ -111,7 +112,10 @@ def check_no_orphan_guards(settings: Path, root: Path) -> list[Violation]:
     )
 
     violations: list[Violation] = []
-    for path in sorted(guard_dir.glob("*.py")):
+    # rglob: hooks live in scripts/guard/hooks/ since the directory hit its fan-out
+    # cap. A non-recursive glob would silently stop checking them for orphan
+    # status -- the guard-that-guards-guards quietly covering less than it says.
+    for path in sorted(guard_dir.rglob("*.py")):
         # discovery.py is the shared walker, imported rather than invoked.
         if path.name == "discovery.py":
             continue

@@ -296,3 +296,52 @@ resuming: 4 repos journalled, 20 attempts
 
 written to /out/agent_pilot.json
 === AGENT PILOT DONE ===
+=== AGENT PILOT EXTEND TO 72 REPOS START ===
+arm verified: {'Devin': 301, 'Claude_Code': 47, 'OpenAI_Codex': 2815, 'Copilot': 271, 'Cursor': 132}
+3566 eligible across 389 repos; taking 72 repos
+resuming: 30 repos journalled, 94 attempts
+[31/72] DannyMac180/meta-agent (7 PRs)
+     #15: 2 files, 4 symbols, clean
+     #19: 5 files, 5 symbols, unscannable
+     #21: rejected [no_symbols/restricted]
+     #23: 4 files, 24 symbols, unscannable
+     #28: 3 files, 4 symbols, unscannable
+     #31: 4 files, 3 symbols, unscannable
+     #34: 4 files, 5 symbols, unscannable
+[32/72] Deep-Learning-Profiling-Tools/triton-viz (1 PRs)
+     #86: 9 files, 36 symbols, unscannable
+[33/72] DeepLabCut/DeepLabCut (2 PRs)
+     #3045: rejected [no_symbols/restricted]
+     #3047: 2 files, 1 symbols, broke
+[34/72] DogukanUrker/FlaskBlog (5 PRs)
+     #188: rejected [no_symbols/restricted]
+     #189: 5 files, 3 symbols, unscannable
+     #191: 5 files, 2 symbols, unscannable
+     #194: 1 files, 1 symbols, unscannable
+     #196: 8 files, 6 symbols, clean
+[35/72] DonDebonair/slack-machine (1 PRs)
+     #1254: 2 files, 4 symbols, unscannable
+[36/72] Drakonis96/dockerstats (5 PRs)
+     #12: 1 files, 1 symbols, clean
+     #14: rejected [no_symbols/restricted]
+     #15: 1 files, 1 symbols, broke
+     #18: 1 files, 1 symbols, clean
+     #19: 3 files, 2 symbols, clean
+[37/72] Efeckc17/YoutubeGO (1 PRs)
+     #16: 1 files, 1 symbols, unscannable
+[38/72] EricLBuehler/mistral.rs (2 PRs)
+     #1426: rejected [no_symbols/restricted]
+     #1427: rejected [no_symbols/restricted]
+[39/72] EvolvingLMMs-Lab/lmms-eval (1 PRs)
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/local/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/w/src/phase0/pilot/run.py", line 194, in <module>
+    sys.exit(main())
+  File "/w/src/phase0/pilot/run.py", line 139, in main
+    outcome = build_record(
+  File "/w/src/phase0/pipeline/assemble.py", line 110, in build_record
+    raise HarnessError(
+phase0.graph.run_graph.HarnessError: 3193101857: derived 2 of 3 .py files GitHub lists for this PR. File contents did not reach the working tree -- with --filter=blob:none that means a lazy fetch returned nothing. This is our environment, not the repository, so it is not an exclusion.
