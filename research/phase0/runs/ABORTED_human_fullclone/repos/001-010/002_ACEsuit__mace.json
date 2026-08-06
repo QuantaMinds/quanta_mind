@@ -1,0 +1,35 @@
+{
+  "admitted": 1,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 1,
+  "broke": 1,
+  "finished_utc": "2026-08-06T00:36:53+00:00",
+  "of": 90,
+  "position": 2,
+  "rejected_by_stage": {},
+  "repo": "ACEsuit/mace",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "no",
+      "category": "",
+      "changed_lines": 2345,
+      "changed_symbols": 8,
+      "commit_count": 30,
+      "corpus_py_files": 23,
+      "derived_files": 15,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "2373978615",
+      "repo": "ACEsuit/mace",
+      "stage": "",
+      "stars": 811
+    }
+  ],
+  "scanned": 1,
+  "stars": 811,
+  "started_utc": "2026-08-06T00:35:53+00:00"
+}

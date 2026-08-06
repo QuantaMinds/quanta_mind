@@ -1,0 +1,71 @@
+{
+  "admitted": 2,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 3,
+  "broke": 0,
+  "finished_utc": "2026-08-06T01:38:21+00:00",
+  "of": 90,
+  "position": 33,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "blorm-network/ZerePy",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 19,
+      "changed_symbols": 1,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "2265140449",
+      "repo": "blorm-network/ZerePy",
+      "stage": "",
+      "stars": 587
+    },
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 508,
+      "changed_symbols": 0,
+      "commit_count": 4,
+      "corpus_py_files": 4,
+      "derived_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "2274941460",
+      "repo": "blorm-network/ZerePy",
+      "stage": "no_symbols",
+      "stars": 587
+    },
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 2,
+      "changed_symbols": 1,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "2307241075",
+      "repo": "blorm-network/ZerePy",
+      "stage": "",
+      "stars": 587
+    }
+  ],
+  "scanned": 2,
+  "stars": 587,
+  "started_utc": "2026-08-06T01:38:11+00:00"
+}

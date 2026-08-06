@@ -1,0 +1,42 @@
+2
+=== HUMAN RE-WALK (full clones) START ===
+arm verified: {'Human': 608}
+608 eligible across 90 repos; taking 90 repos
+[1/90] 567-labs/instructor (4 PRs)
+     #1319: rejected [no_symbols/restricted]
+     #1334: rejected [no_symbols/restricted]
+     #1420: 6 files, 3 symbols, clean
+     #1544: 2 files, 5 symbols, clean
+[2/90] ACEsuit/mace (1 PRs)
+     #841: 15 files, 8 symbols, broke
+[3/90] AgentOps-AI/agentops (7 PRs)
+     #647: 4 files, 1 symbols, clean
+     #714: 18 files, 20 symbols, clean
+     #811: rejected [no_python/restricted]
+     #817: rejected [no_python/restricted]
+     #818: 124 files, 246 symbols, unscannable
+     #819: rejected [parent_commit/integrity]
+     #823: rejected [no_symbols/restricted]
+[4/90] Azure/azure-sdk-for-python (7 PRs)
+     #39942: rejected [no_python/restricted]
+     #40333: 101 files, 203 symbols, clean
+     #40382: 7 files, 16 symbols, clean
+     #40443: 12 files, 3 symbols, unscannable
+     #40459: rejected [no_symbols/restricted]
+     #40546: rejected [no_symbols/restricted]
+     #40820: 32 files, 35 symbols, unscannable
+[5/90] BeehiveInnovations/zen-mcp-server (1 PRs)
+     #2: rejected [no_symbols/restricted]
+[6/90] BerriAI/litellm (5 PRs)
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/local/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/w/src/phase0/pilot/run.py", line 194, in <module>
+    sys.exit(main())
+  File "/w/src/phase0/pilot/run.py", line 139, in main
+    outcome = build_record(
+  File "/w/src/phase0/pipeline/assemble.py", line 110, in build_record
+    raise HarnessError(
+phase0.graph.run_graph.HarnessError: 2313919432: derived 2 of 4 .py files GitHub lists for this PR. File contents did not reach the working tree -- with --filter=blob:none that means a lazy fetch returned nothing. This is our environment, not the repository, so it is not an exclusion.

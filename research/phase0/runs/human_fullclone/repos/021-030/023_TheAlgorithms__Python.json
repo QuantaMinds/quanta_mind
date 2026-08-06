@@ -1,0 +1,37 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-06T01:26:52+00:00",
+  "of": 90,
+  "position": 23,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "TheAlgorithms/Python",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 22,
+      "changed_symbols": 0,
+      "commit_count": 4,
+      "corpus_py_files": 1,
+      "derived_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "2467788242",
+      "repo": "TheAlgorithms/Python",
+      "stage": "no_symbols",
+      "stars": 203424
+    }
+  ],
+  "scanned": 0,
+  "stars": 203424,
+  "started_utc": "2026-08-06T01:26:47+00:00"
+}
