@@ -1,25 +1,28 @@
 # Session record — fix/darwin-memory-cap
 
-Written by scripts/guard/hook_session_end.py at 2026-08-06T00:21:31Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-06T00:36:02Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `fix/darwin-memory-cap`
-- Files changed vs `main`: 89
-- Uncommitted at session end: 8
+- Files changed vs `main`: 108
+- Uncommitted at session end: 4
 - `docs/CODEBASE.md` updated: yes
 
 ## Changed
 
+- `.claude/settings.json`
+- `AGENTS.md`
 - `docs/CODEBASE.md`
 - `docs/findings/PHASE0_PREREGISTRATION.md`
 - `docs/plans/session-fix-darwin-memory-cap-handoff.md`
 - `docs/plans/session-fix-darwin-memory-cap.md`
 - `justfile`
 - `research/phase0/ENVIRONMENT.lock`
-- `research/phase0/results/agent_pilot.json`
-- `research/phase0/results/agent_pilot.log`
-- `research/phase0/results/agent_pilot_journal.md`
-- `research/phase0/results/agent_records.jsonl`
+- `research/phase0/results/agent_pilot.VOID.README.md`
+- `research/phase0/results/agent_pilot.VOID.journal.md`
+- `research/phase0/results/agent_pilot.VOID.json`
+- `research/phase0/results/agent_pilot.VOID.log`
+- `research/phase0/results/agent_records.VOID.jsonl`
 - `research/phase0/results/controls.json`
 - `research/phase0/results/controls_linux.json`
 - `research/phase0/results/exposure.VOID.README.md`
@@ -35,35 +38,44 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/results/rescan_eight_rows.quarantined.md`
 - `research/phase0/results/rescan_eight_v2.json`
 - `research/phase0/results/rescan_eight_v2.log`
-- `research/phase0/runs/agent_pilot/repos/001-010/005_567-labs__kura.json`
-- `research/phase0/runs/agent_pilot/repos/001-010/006_AMICI-dev__AMICI.json`
-- `research/phase0/runs/agent_pilot/repos/001-010/007_APPFL__APPFL.json`
-- `research/phase0/runs/agent_pilot/repos/001-010/008_AgentOps-AI__agentops.json`
-- `research/phase0/runs/agent_pilot/repos/001-010/009_AliAkhtari78__SpotifyScraper.json`
-- `research/phase0/runs/agent_pilot/repos/001-010/010_Arize-ai__phoenix.json`
-- `research/phase0/runs/agent_pilot/repos/011-020/011_Azure-Samples__openai-chat-vision-quickstart.json`
-- `research/phase0/runs/agent_pilot/repos/011-020/012_Azure-Samples__rag-postgres-openai-python.json`
-- `research/phase0/runs/agent_pilot/repos/011-020/013_Azure__azure-functions-core-tools.json`
-- `research/phase0/runs/agent_pilot/repos/011-020/014_Azure__azure-kusto-python.json`
-- `research/phase0/runs/agent_pilot/repos/011-020/015_Azure__azure-sdk-for-java.json`
-- `research/phase0/runs/agent_pilot/repos/011-020/016_Azure__azure-sdk-for-net.json`
-- `research/phase0/runs/agent_pilot/repos/011-020/017_Azure__azure-sdk-for-python.json`
-- `research/phase0/runs/agent_pilot/repos/011-020/018_Azure__azure-sdk-tools.json`
-- `research/phase0/runs/agent_pilot/repos/011-020/019_Azure__azure-storage-fuse.json`
-- `research/phase0/runs/agent_pilot/repos/011-020/020_BOINC__boinc.json`
-- `research/phase0/runs/agent_pilot/repos/021-030/021_Bandit-HaxUnit__haxunit.json`
-- `research/phase0/runs/agent_pilot/repos/021-030/022_BeehiveInnovations__zen-mcp-server.json`
-- `research/phase0/runs/agent_pilot/repos/021-030/023_BerriAI__litellm.json`
-- `research/phase0/runs/agent_pilot/repos/021-030/024_Blaizzy__mlx-audio.json`
-- `research/phase0/runs/agent_pilot/repos/021-030/025_Blaizzy__mlx-vlm.json`
-- `research/phase0/runs/agent_pilot/repos/021-030/026_BlueFalconHD__apple_generative_model_safety_decrypted.json`
-- `research/phase0/runs/agent_pilot/repos/021-030/027_BoundaryML__baml.json`
-- `research/phase0/runs/agent_pilot/repos/021-030/028_ChaokunHong__MetaScreener.json`
-- `research/phase0/runs/agent_pilot/repos/021-030/029_ChristopheZhao__ChaGPT-API-Call.json`
-- `research/phase0/runs/agent_pilot/repos/021-030/030_ComposioHQ__composio.json`
-- `research/phase0/runs/agent_pilot/run_meta.json`
-- `research/phase0/runs/agent_pilot/shape_latest.json`
-- `research/phase0/runs/agent_pilot/timeline.jsonl`
+- `research/phase0/runs/agent_pilot.VOID/VOID.README.md`
+- `research/phase0/runs/agent_pilot.VOID/repos/001-010/005_567-labs__kura.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/001-010/006_AMICI-dev__AMICI.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/001-010/007_APPFL__APPFL.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/001-010/008_AgentOps-AI__agentops.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/001-010/009_AliAkhtari78__SpotifyScraper.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/001-010/010_Arize-ai__phoenix.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/011-020/011_Azure-Samples__openai-chat-vision-quickstart.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/011-020/012_Azure-Samples__rag-postgres-openai-python.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/011-020/013_Azure__azure-functions-core-tools.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/011-020/014_Azure__azure-kusto-python.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/011-020/015_Azure__azure-sdk-for-java.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/011-020/016_Azure__azure-sdk-for-net.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/011-020/017_Azure__azure-sdk-for-python.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/011-020/018_Azure__azure-sdk-tools.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/011-020/019_Azure__azure-storage-fuse.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/011-020/020_BOINC__boinc.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/021-030/021_Bandit-HaxUnit__haxunit.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/021-030/022_BeehiveInnovations__zen-mcp-server.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/021-030/023_BerriAI__litellm.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/021-030/024_Blaizzy__mlx-audio.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/021-030/025_Blaizzy__mlx-vlm.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/021-030/026_BlueFalconHD__apple_generative_model_safety_decrypted.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/021-030/027_BoundaryML__baml.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/021-030/028_ChaokunHong__MetaScreener.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/021-030/029_ChristopheZhao__ChaGPT-API-Call.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/021-030/030_ComposioHQ__composio.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/031-040/031_DannyMac180__meta-agent.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/031-040/032_Deep-Learning-Profiling-Tools__triton-viz.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/031-040/033_DeepLabCut__DeepLabCut.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/031-040/034_DogukanUrker__FlaskBlog.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/031-040/035_DonDebonair__slack-machine.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/031-040/036_Drakonis96__dockerstats.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/031-040/037_Efeckc17__YoutubeGO.json`
+- `research/phase0/runs/agent_pilot.VOID/repos/031-040/038_EricLBuehler__mistral.rs.json`
+- `research/phase0/runs/agent_pilot.VOID/run_meta.json`
+- `research/phase0/runs/agent_pilot.VOID/shape_latest.json`
+- `research/phase0/runs/agent_pilot.VOID/timeline.jsonl`
 - `research/phase0/src/phase0/arm.py`
 - `research/phase0/src/phase0/graph/memory_cap.py`
 - `research/phase0/src/phase0/graph/run_graph.py`
@@ -84,6 +96,7 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/src/phase0/pipeline/rebuild.py`
 - `research/phase0/src/phase0/pipeline/record.py`
 - `research/phase0/src/phase0/pipeline/resume.py`
+- `research/phase0/src/phase0/pipeline/worktree.py`
 - `research/phase0/src/phase0/population/__init__.py`
 - `research/phase0/src/phase0/population/agent.py`
 - `research/phase0/src/phase0/run_pipeline.py`
@@ -99,3 +112,9 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/tests/pipeline/test_journal.py`
 - `research/phase0/tests/test_memory_cap.py`
 - `research/phase0/tests/test_run_pipeline.py`
+- `scripts/guard/check_enforcement_map.py`
+- `scripts/guard/check_no_partial_clone.py`
+- `scripts/guard/check_withdrawn_amendments.py`
+- `scripts/guard/hooks/hook_post_edit.py`
+- `scripts/guard/hooks/hook_pre_edit.py`
+- `scripts/guard/hooks/hook_session_end.py`

@@ -1,0 +1,88 @@
+{
+  "admitted": 2,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 4,
+  "broke": 0,
+  "finished_utc": "2026-08-06T00:35:53+00:00",
+  "of": 90,
+  "position": 1,
+  "rejected_by_stage": {
+    "no_symbols": 2
+  },
+  "repo": "567-labs/instructor",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 255,
+      "changed_symbols": 0,
+      "commit_count": 7,
+      "corpus_py_files": 14,
+      "derived_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "2298301775",
+      "repo": "567-labs/instructor",
+      "stage": "no_symbols",
+      "stars": 11095
+    },
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 47,
+      "changed_symbols": 0,
+      "commit_count": 3,
+      "corpus_py_files": 1,
+      "derived_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "2313986091",
+      "repo": "567-labs/instructor",
+      "stage": "no_symbols",
+      "stars": 11095
+    },
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 554,
+      "changed_symbols": 3,
+      "commit_count": 8,
+      "corpus_py_files": 6,
+      "derived_files": 6,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "2400261241",
+      "repo": "567-labs/instructor",
+      "stage": "",
+      "stars": 11095
+    },
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 60,
+      "changed_symbols": 5,
+      "commit_count": 3,
+      "corpus_py_files": 2,
+      "derived_files": 2,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "2537575913",
+      "repo": "567-labs/instructor",
+      "stage": "",
+      "stars": 11095
+    }
+  ],
+  "scanned": 2,
+  "stars": 11095,
+  "started_utc": "2026-08-06T00:35:23+00:00"
+}
