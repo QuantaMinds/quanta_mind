@@ -1,11 +1,11 @@
 # Session record — fix/darwin-memory-cap
 
-Written by scripts/guard/hook_session_end.py at 2026-08-06T00:36:02Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-06T02:48:29Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `fix/darwin-memory-cap`
-- Files changed vs `main`: 108
-- Uncommitted at session end: 4
+- Files changed vs `main`: 216
+- Uncommitted at session end: 5
 - `docs/CODEBASE.md` updated: yes
 
 ## Changed
@@ -18,6 +18,9 @@ Informational. Nothing here was blocked or enforced.
 - `docs/plans/session-fix-darwin-memory-cap.md`
 - `justfile`
 - `research/phase0/ENVIRONMENT.lock`
+- `research/phase0/results/ABORTED_human_fullclone.log`
+- `research/phase0/results/ABORTED_human_fullclone_journal.md`
+- `research/phase0/results/ABORTED_human_fullclone_records.jsonl`
 - `research/phase0/results/agent_pilot.VOID.README.md`
 - `research/phase0/results/agent_pilot.VOID.journal.md`
 - `research/phase0/results/agent_pilot.VOID.json`
@@ -28,6 +31,10 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/results/exposure.VOID.README.md`
 - `research/phase0/results/exposure.VOID.jsonl`
 - `research/phase0/results/exposure.log`
+- `research/phase0/results/human_fullclone.json`
+- `research/phase0/results/human_fullclone.log`
+- `research/phase0/results/human_fullclone_journal.md`
+- `research/phase0/results/human_fullclone_records.jsonl`
 - `research/phase0/results/rate_journal_v2.pre_A29.bak`
 - `research/phase0/results/rate_journal_v2.rerun.md`
 - `research/phase0/results/rate_journal_v2.rescan_suspect.md`
@@ -38,6 +45,14 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/results/rescan_eight_rows.quarantined.md`
 - `research/phase0/results/rescan_eight_v2.json`
 - `research/phase0/results/rescan_eight_v2.log`
+- `research/phase0/runs/ABORTED_human_fullclone/repos/001-010/001_567-labs__instructor.json`
+- `research/phase0/runs/ABORTED_human_fullclone/repos/001-010/002_ACEsuit__mace.json`
+- `research/phase0/runs/ABORTED_human_fullclone/repos/001-010/003_AgentOps-AI__agentops.json`
+- `research/phase0/runs/ABORTED_human_fullclone/repos/001-010/004_Azure__azure-sdk-for-python.json`
+- `research/phase0/runs/ABORTED_human_fullclone/repos/001-010/005_BeehiveInnovations__zen-mcp-server.json`
+- `research/phase0/runs/ABORTED_human_fullclone/run_meta.json`
+- `research/phase0/runs/ABORTED_human_fullclone/shape_latest.json`
+- `research/phase0/runs/ABORTED_human_fullclone/timeline.jsonl`
 - `research/phase0/runs/agent_pilot.VOID/VOID.README.md`
 - `research/phase0/runs/agent_pilot.VOID/repos/001-010/005_567-labs__kura.json`
 - `research/phase0/runs/agent_pilot.VOID/repos/001-010/006_AMICI-dev__AMICI.json`
@@ -76,6 +91,99 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/runs/agent_pilot.VOID/run_meta.json`
 - `research/phase0/runs/agent_pilot.VOID/shape_latest.json`
 - `research/phase0/runs/agent_pilot.VOID/timeline.jsonl`
+- `research/phase0/runs/human_fullclone/repos/001-010/001_567-labs__instructor.json`
+- `research/phase0/runs/human_fullclone/repos/001-010/002_ACEsuit__mace.json`
+- `research/phase0/runs/human_fullclone/repos/001-010/003_AgentOps-AI__agentops.json`
+- `research/phase0/runs/human_fullclone/repos/001-010/004_Azure__azure-sdk-for-python.json`
+- `research/phase0/runs/human_fullclone/repos/001-010/005_BeehiveInnovations__zen-mcp-server.json`
+- `research/phase0/runs/human_fullclone/repos/001-010/006_BerriAI__litellm.json`
+- `research/phase0/runs/human_fullclone/repos/001-010/007_Blaizzy__mlx-vlm.json`
+- `research/phase0/runs/human_fullclone/repos/001-010/008_GodsScion__Auto_job_applier_linkedIn.json`
+- `research/phase0/runs/human_fullclone/repos/001-010/009_Kanaries__pygwalker.json`
+- `research/phase0/runs/human_fullclone/repos/001-010/010_Kiln-AI__Kiln.json`
+- `research/phase0/runs/human_fullclone/repos/011-020/011_MervinPraison__PraisonAI.json`
+- `research/phase0/runs/human_fullclone/repos/011-020/012_Netflix__metaflow.json`
+- `research/phase0/runs/human_fullclone/repos/011-020/013_NousResearch__atropos.json`
+- `research/phase0/runs/human_fullclone/repos/011-020/014_OpenPipe__ART.json`
+- `research/phase0/runs/human_fullclone/repos/011-020/015_Panchovix__stable-diffusion-webui-reForge.json`
+- `research/phase0/runs/human_fullclone/repos/011-020/016_PrefectHQ__marvin.json`
+- `research/phase0/runs/human_fullclone/repos/011-020/017_PriorLabs__TabPFN.json`
+- `research/phase0/runs/human_fullclone/repos/011-020/018_PrunaAI__pruna.json`
+- `research/phase0/runs/human_fullclone/repos/011-020/019_RAGEN-AI__RAGEN.json`
+- `research/phase0/runs/human_fullclone/repos/011-020/020_Significant-Gravitas__AutoGPT.json`
+- `research/phase0/runs/human_fullclone/repos/021-030/021_SirVer__ultisnips.json`
+- `research/phase0/runs/human_fullclone/repos/021-030/022_Skyvern-AI__skyvern.json`
+- `research/phase0/runs/human_fullclone/repos/021-030/023_TheAlgorithms__Python.json`
+- `research/phase0/runs/human_fullclone/repos/021-030/024_TobikoData__sqlmesh.json`
+- `research/phase0/runs/human_fullclone/repos/021-030/025_Uberi__speech_recognition.json`
+- `research/phase0/runs/human_fullclone/repos/021-030/026_a16z__halmos.json`
+- `research/phase0/runs/human_fullclone/repos/021-030/027_ag2ai__ag2.json`
+- `research/phase0/runs/human_fullclone/repos/021-030/028_airbytehq__airbyte.json`
+- `research/phase0/runs/human_fullclone/repos/021-030/029_alexanderjeurissen__ranger_devicons.json`
+- `research/phase0/runs/human_fullclone/repos/021-030/030_allenai__reward-bench.json`
+- `research/phase0/runs/human_fullclone/repos/031-040/031_bentoml__BentoML.json`
+- `research/phase0/runs/human_fullclone/repos/031-040/032_bespokelabsai__curator.json`
+- `research/phase0/runs/human_fullclone/repos/031-040/033_blorm-network__ZerePy.json`
+- `research/phase0/runs/human_fullclone/repos/031-040/034_bruin-data__ingestr.json`
+- `research/phase0/runs/human_fullclone/repos/031-040/035_cartography-cncf__cartography.json`
+- `research/phase0/runs/human_fullclone/repos/031-040/036_ckan__ckan.json`
+- `research/phase0/runs/human_fullclone/repos/031-040/037_commaai__opendbc.json`
+- `research/phase0/runs/human_fullclone/repos/031-040/038_crewAIInc__crewAI.json`
+- `research/phase0/runs/human_fullclone/repos/031-040/039_crewAIInc__crewAI-tools.json`
+- `research/phase0/runs/human_fullclone/repos/031-040/040_dagster-io__dagster.json`
+- `research/phase0/runs/human_fullclone/repos/041-050/041_devitocodes__devito.json`
+- `research/phase0/runs/human_fullclone/repos/041-050/042_dropseed__plain.json`
+- `research/phase0/runs/human_fullclone/repos/041-050/043_electricitymaps__electricitymaps-contrib.json`
+- `research/phase0/runs/human_fullclone/repos/041-050/044_featureform__enrichmcp.json`
+- `research/phase0/runs/human_fullclone/repos/041-050/045_getsentry__sentry.json`
+- `research/phase0/runs/human_fullclone/repos/041-050/046_getsentry__sentry-python.json`
+- `research/phase0/runs/human_fullclone/repos/041-050/047_gptme__gptme.json`
+- `research/phase0/runs/human_fullclone/repos/041-050/048_huggingface__huggingface_hub.json`
+- `research/phase0/runs/human_fullclone/repos/041-050/049_huggingface__smolagents.json`
+- `research/phase0/runs/human_fullclone/repos/041-050/050_janbjorge__pgqueuer.json`
+- `research/phase0/runs/human_fullclone/repos/051-060/051_jlowin__fastmcp.json`
+- `research/phase0/runs/human_fullclone/repos/051-060/052_joshyattridge__smart-money-concepts.json`
+- `research/phase0/runs/human_fullclone/repos/051-060/053_julep-ai__julep.json`
+- `research/phase0/runs/human_fullclone/repos/051-060/054_keephq__keep.json`
+- `research/phase0/runs/human_fullclone/repos/051-060/055_kohya-ss__sd-scripts.json`
+- `research/phase0/runs/human_fullclone/repos/051-060/056_langchain-ai__langgraph.json`
+- `research/phase0/runs/human_fullclone/repos/051-060/057_langchain-ai__langsmith-sdk.json`
+- `research/phase0/runs/human_fullclone/repos/051-060/058_mangiucugna__json_repair.json`
+- `research/phase0/runs/human_fullclone/repos/051-060/059_marimo-team__marimo.json`
+- `research/phase0/runs/human_fullclone/repos/051-060/060_microsoft__Olive.json`
+- `research/phase0/runs/human_fullclone/repos/061-070/061_microsoft__autogen.json`
+- `research/phase0/runs/human_fullclone/repos/061-070/062_microsoft__debugpy.json`
+- `research/phase0/runs/human_fullclone/repos/061-070/063_mistralai__mistral-common.json`
+- `research/phase0/runs/human_fullclone/repos/061-070/064_mlflow__mlflow.json`
+- `research/phase0/runs/human_fullclone/repos/061-070/065_onyx-dot-app__onyx.json`
+- `research/phase0/runs/human_fullclone/repos/061-070/066_openai__openai-agents-python.json`
+- `research/phase0/runs/human_fullclone/repos/061-070/067_oraios__serena.json`
+- `research/phase0/runs/human_fullclone/repos/061-070/068_plexguide__Huntarr.io.json`
+- `research/phase0/runs/human_fullclone/repos/061-070/069_pydata__pandas-datareader.json`
+- `research/phase0/runs/human_fullclone/repos/061-070/070_reflex-dev__reflex.json`
+- `research/phase0/runs/human_fullclone/repos/071-080/071_roboflow__inference.json`
+- `research/phase0/runs/human_fullclone/repos/071-080/072_saturday06__VRM-Addon-for-Blender.json`
+- `research/phase0/runs/human_fullclone/repos/071-080/073_simonw__llm.json`
+- `research/phase0/runs/human_fullclone/repos/071-080/074_sooperset__mcp-atlassian.json`
+- `research/phase0/runs/human_fullclone/repos/071-080/075_spcl__dace.json`
+- `research/phase0/runs/human_fullclone/repos/071-080/076_stair-lab__kg-gen.json`
+- `research/phase0/runs/human_fullclone/repos/071-080/077_stanford-crfm__levanter.json`
+- `research/phase0/runs/human_fullclone/repos/071-080/078_stanfordnlp__dspy.json`
+- `research/phase0/runs/human_fullclone/repos/071-080/079_strawberry-graphql__strawberry.json`
+- `research/phase0/runs/human_fullclone/repos/071-080/080_test-zeus-ai__testzeus-hercules.json`
+- `research/phase0/runs/human_fullclone/repos/081-090/081_tinygrad__tinygrad.json`
+- `research/phase0/runs/human_fullclone/repos/081-090/082_vllm-project__vllm.json`
+- `research/phase0/runs/human_fullclone/repos/081-090/083_vlm-run__vlmrun-hub.json`
+- `research/phase0/runs/human_fullclone/repos/081-090/084_volcengine__verl.json`
+- `research/phase0/runs/human_fullclone/repos/081-090/085_wandb__wandb.json`
+- `research/phase0/runs/human_fullclone/repos/081-090/086_wandb__weave.json`
+- `research/phase0/runs/human_fullclone/repos/081-090/087_whitphx__streamlit-webrtc.json`
+- `research/phase0/runs/human_fullclone/repos/081-090/088_wizarrrr__wizarr.json`
+- `research/phase0/runs/human_fullclone/repos/081-090/089_writer__writer-framework.json`
+- `research/phase0/runs/human_fullclone/repos/081-090/090_zenml-io__zenml.json`
+- `research/phase0/runs/human_fullclone/run_meta.json`
+- `research/phase0/runs/human_fullclone/shape_latest.json`
+- `research/phase0/runs/human_fullclone/timeline.jsonl`
 - `research/phase0/src/phase0/arm.py`
 - `research/phase0/src/phase0/graph/memory_cap.py`
 - `research/phase0/src/phase0/graph/run_graph.py`
@@ -108,7 +216,7 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/tests/pilot/test_repo_facts.py`
 - `research/phase0/tests/pilot/test_targets.py`
 - `research/phase0/tests/pilot/test_trace.py`
-- `research/phase0/tests/pipeline/test_contents_assertion.py`
+- `research/phase0/tests/pipeline/test_file_set_shortfall.py`
 - `research/phase0/tests/pipeline/test_journal.py`
 - `research/phase0/tests/test_memory_cap.py`
 - `research/phase0/tests/test_run_pipeline.py`
