@@ -1,0 +1,37 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Copilot"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-06T03:14:50+00:00",
+  "of": 72,
+  "position": 61,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "MikePopoloski/slang",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 498,
+      "changed_symbols": 0,
+      "commit_count": 4,
+      "corpus_py_files": 3,
+      "derived_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3117273620",
+      "repo": "MikePopoloski/slang",
+      "stage": "no_symbols",
+      "stars": 799
+    }
+  ],
+  "scanned": 0,
+  "stars": 799,
+  "started_utc": "2026-08-06T03:14:41+00:00"
+}

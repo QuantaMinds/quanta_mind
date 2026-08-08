@@ -1,0 +1,55 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Copilot"
+  ],
+  "attempts": 2,
+  "broke": 0,
+  "finished_utc": "2026-08-06T02:56:34+00:00",
+  "of": 72,
+  "position": 16,
+  "rejected_by_stage": {
+    "no_python": 1,
+    "no_symbols": 1
+  },
+  "repo": "Azure/azure-sdk-for-net",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 898,
+      "changed_symbols": 0,
+      "commit_count": 17,
+      "corpus_py_files": 2,
+      "derived_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3080751824",
+      "repo": "Azure/azure-sdk-for-net",
+      "stage": "no_symbols",
+      "stars": 5827
+    },
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 483,
+      "changed_symbols": 0,
+      "commit_count": 20,
+      "corpus_py_files": 1,
+      "derived_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3170054434",
+      "repo": "Azure/azure-sdk-for-net",
+      "stage": "no_python",
+      "stars": 5827
+    }
+  ],
+  "scanned": 0,
+  "stars": 5827,
+  "started_utc": "2026-08-06T02:47:25+00:00"
+}

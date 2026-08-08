@@ -1,0 +1,52 @@
+{
+  "admitted": 2,
+  "arms": [
+    "Claude_Code"
+  ],
+  "attempts": 2,
+  "broke": 0,
+  "finished_utc": "2026-08-06T03:11:02+00:00",
+  "of": 72,
+  "position": 47,
+  "rejected_by_stage": {},
+  "repo": "INCATools/ontology-access-kit",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Claude_Code",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 300,
+      "changed_symbols": 4,
+      "commit_count": 7,
+      "corpus_py_files": 3,
+      "derived_files": 3,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "2908771855",
+      "repo": "INCATools/ontology-access-kit",
+      "stage": "",
+      "stars": 146
+    },
+    {
+      "admitted": true,
+      "arm": "Claude_Code",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 28,
+      "changed_symbols": 9,
+      "commit_count": 2,
+      "corpus_py_files": 13,
+      "derived_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "2975165913",
+      "repo": "INCATools/ontology-access-kit",
+      "stage": "",
+      "stars": 146
+    }
+  ],
+  "scanned": 2,
+  "stars": 146,
+  "started_utc": "2026-08-06T03:10:50+00:00"
+}

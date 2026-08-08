@@ -1,0 +1,54 @@
+{
+  "admitted": 0,
+  "arms": [
+    "OpenAI_Codex"
+  ],
+  "attempts": 2,
+  "broke": 0,
+  "finished_utc": "2026-08-06T03:01:20+00:00",
+  "of": 72,
+  "position": 20,
+  "rejected_by_stage": {
+    "no_symbols": 2
+  },
+  "repo": "BOINC/boinc",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 3,
+      "changed_symbols": 0,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3071986443",
+      "repo": "BOINC/boinc",
+      "stage": "no_symbols",
+      "stars": 2180
+    },
+    {
+      "admitted": false,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 2,
+      "changed_symbols": 0,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3122008661",
+      "repo": "BOINC/boinc",
+      "stage": "no_symbols",
+      "stars": 2180
+    }
+  ],
+  "scanned": 0,
+  "stars": 2180,
+  "started_utc": "2026-08-06T03:00:23+00:00"
+}

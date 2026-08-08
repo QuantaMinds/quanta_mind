@@ -1,0 +1,72 @@
+=== AGENT RE-WALK (full clones) START ===
+arm verified: {'Devin': 301, 'Claude_Code': 47, 'OpenAI_Codex': 2815, 'Copilot': 271, 'Cursor': 132}
+3566 eligible across 389 repos; taking 72 repos
+[1/72] 14790897/handwriting-web (1 PRs)
+     #45: rejected [no_symbols/restricted]
+[2/72] 3rdIteration/btcrecover (7 PRs)
+     #599: 1 files, 1 symbols, clean
+     #602: rejected [no_symbols/restricted]
+     #609: rejected [no_symbols/restricted]
+     #611: 3 files, 4 symbols, broke
+     #612: 4 files, 32 symbols, broke
+     #613: 1 files, 2 symbols, clean
+     #614: 2 files, 1 symbols, clean
+[3/72] 514-labs/moose (5 PRs)
+     #2499: rejected [no_python/restricted]
+     #2529: 2 files, 5 symbols, clean
+     #2531: rejected [no_python/restricted]
+     #2532: rejected [no_symbols/restricted]
+     #2560: 1 files, 1 symbols, clean
+[4/72] 567-labs/instructor (7 PRs)
+     #1555: 3 files, 2 symbols, clean
+     #1566: 2 files, 2 symbols, clean
+     #1567: rejected [no_symbols/restricted]
+     #1654: rejected [parent_commit/integrity]
+     #1665: 12 files, 3 symbols, clean
+     #1667: 2 files, 3 symbols, broke
+     #1677: 1 files, 1 symbols, clean
+[5/72] 567-labs/kura (2 PRs)
+     #53: 12 files, 17 symbols, broke
+     #60: 2 files, 3 symbols, broke
+[6/72] AMICI-dev/AMICI (5 PRs)
+     #2746: 2 files, 4 symbols, unscannable
+     #2794: 4 files, 2 symbols, unscannable
+     #2795: 9 files, 9 symbols, unscannable
+     #2807: 8 files, 10 symbols, unscannable
+     #2841: 8 files, 20 symbols, clean
+[7/72] APPFL/APPFL (3 PRs)
+     #315: 6 files, 6 symbols, clean
+     #316: 1 files, 1 symbols, clean
+     #317: 1 files, 1 symbols, clean
+[8/72] AgentOps-AI/agentops (7 PRs)
+     #605: 6 files, 8 symbols, broke
+     #650: rejected [no_symbols/restricted]
+     #729: 15 files, 12 symbols, clean
+     #1064: rejected [no_symbols/restricted]
+     #1080: rejected [no_python/restricted]
+     #1134: 1 files, 1 symbols, clean
+     #1156: 4 files, 5 symbols, clean
+[9/72] AliAkhtari78/SpotifyScraper (2 PRs)
+     #21: 9 files, 4 symbols, broke
+     #48: 6 files, 1 symbols, broke
+[10/72] Arize-ai/phoenix (5 PRs)
+     #8571: 1 files, 2 symbols, clean
+     #8645: 3 files, 1 symbols, clean
+     #8660: rejected [no_symbols/restricted]
+     #8661: 2 files, 3 symbols, clean
+     #8792: 1 files, 2 symbols, clean
+[11/72] Azure-Samples/openai-chat-vision-quickstart (3 PRs)
+     #54: rejected [no_python/restricted]
+     #56: rejected [no_python/restricted]
+     #60: 1 files, 1 symbols, clean
+[12/72] Azure-Samples/rag-postgres-openai-python (1 PRs)
+     #236: 3 files, 3 symbols, clean
+[13/72] Azure/azure-functions-core-tools (1 PRs)
+     #4445: rejected [no_python/restricted]
+[14/72] Azure/azure-kusto-python (1 PRs)
+     #583: 2 files, 2 symbols, clean
+[15/72] Azure/azure-sdk-for-java (3 PRs)
+     #45595: rejected [no_python/restricted]
+     #45797: rejected [no_python/restricted]
+     #45803: rejected [no_python/restricted]
+[16/72] Azure/azure-sdk-for-net (2 PRs)
