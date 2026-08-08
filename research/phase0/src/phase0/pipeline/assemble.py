@@ -87,6 +87,24 @@ def build_record(
         return Rejection(pr_id, "parent_commit", parent.reason)
 
     derived = changed_python_files(clone, parent.parent_sha, merge.merge_commit_sha)
+
+    # A shortfall against GitHub's list is the REPOSITORY's business, not ours.
+    #
+    # There was an assertion here that raised HarnessError when `derived` fell short of
+    # GitHub's `.py` count, on the reasoning that contents must have failed to arrive.
+    # That reasoning held only under `--filter=blob:none`, where a diff over blobs that
+    # never fetched is empty rather than wrong. A31 abandoned that clone strategy and
+    # `guard:check_no_partial_clone` now rejects it, so the premise is gone.
+    #
+    # Left in place it did active harm: on the first full-clone run it fired on
+    # BerriAI/litellm#2313919432 -- derived 2 of 4 -- and halted the walk. The canonical
+    # pre-blobless journal rejects that same PR as `file_set/integrity`, which is a
+    # legitimate exclusion `verify_files` is built to produce. The assertion converted a
+    # corpus fact into a harness error, the exact inversion of the bug it was written for.
+    #
+    # So the shortfall falls through to `verify_files` below, which compares the two
+    # lists and labels the disagreement. Nothing here claims to know the cause.
+
     if not derived:
         return Rejection(pr_id, "no_python", "no .py files between parent and merge")
 

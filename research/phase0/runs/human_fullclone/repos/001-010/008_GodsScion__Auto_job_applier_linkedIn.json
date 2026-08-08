@@ -1,0 +1,35 @@
+{
+  "admitted": 1,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-06T01:10:39+00:00",
+  "of": 90,
+  "position": 8,
+  "rejected_by_stage": {},
+  "repo": "GodsScion/Auto_job_applier_linkedIn",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 133,
+      "changed_symbols": 8,
+      "commit_count": 15,
+      "corpus_py_files": 5,
+      "derived_files": 5,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "2441758104",
+      "repo": "GodsScion/Auto_job_applier_linkedIn",
+      "stage": "",
+      "stars": 872
+    }
+  ],
+  "scanned": 1,
+  "stars": 872,
+  "started_utc": "2026-08-06T01:10:35+00:00"
+}

@@ -1,0 +1,99 @@
+{
+  "_platform_observation": {
+    "machine": "aarch64",
+    "note": "A30 platform-equivalence condition, run under docker on linux/aarch64. Python is 3.10.19 here, NOT the 3.10.20 ENVIRONMENT.lock pins on darwin.",
+    "platform": "linux",
+    "python": "3.10.19"
+  },
+  "capability_profile": {
+    "computed_getattr": false,
+    "registering_decorator": false,
+    "string_registry": false,
+    "super_chain": true
+  },
+  "clusters": 80,
+  "detection_in_corpus": {
+    "super_chain": [
+      40,
+      40
+    ]
+  },
+  "gate_passed": true,
+  "mechanisms_firing_of_four": 1,
+  "negative_controls": [
+    {
+      "ci": [
+        0.6410465321162557,
+        1.8091718081381658
+      ],
+      "detail": "method=cluster-robust",
+      "name": "negative:symbol_initial_a_to_m",
+      "passed": true,
+      "relative_risk": 1.0769230769230766
+    },
+    {
+      "ci": [
+        0.5715113358962423,
+        1.7497465705239303
+      ],
+      "detail": "method=cluster-robust",
+      "name": "negative:symbol_length_even",
+      "passed": true,
+      "relative_risk": 1.0
+    },
+    {
+      "ci": [
+        0.5715113358962423,
+        1.7497465705239303
+      ],
+      "detail": "method=cluster-robust",
+      "name": "negative:repo_name_length_odd",
+      "passed": true,
+      "relative_risk": 1.0
+    }
+  ],
+  "planted_break_detection_rate": 1.0,
+  "planted_breaks_unscannable": 0,
+  "positive_control": {
+    "ci": [
+      3.1171684508250297,
+      20.531453788793755
+    ],
+    "detail": "n=80 synthetic, method=cluster-robust",
+    "passed": true,
+    "relative_risk": 7.999999999999995
+  },
+  "reconciliation": {
+    "bounds_agree_on_gate": true,
+    "bounds_agree_on_gate_with_unscannable": true,
+    "conserved": true,
+    "corpus_units": 80,
+    "detection_recall": 1.0,
+    "excluded_from_control_arm": 0,
+    "excluded_from_exposed_arm": 0,
+    "excluded_total": 0,
+    "excluded_unscannable_outcome": 0,
+    "planted_exposure_detected": "40/40",
+    "rr_bounds_over_all_exclusions": [
+      8.0,
+      8.0
+    ],
+    "rr_bounds_over_exclusions": [
+      8.0,
+      8.0
+    ],
+    "table": {
+      "a": 32,
+      "b": 8,
+      "c": 4,
+      "d": 36,
+      "in_table": 80
+    },
+    "unaccounted_units": 0,
+    "unscannable_by_arm": {
+      "exposed": 0,
+      "unexposed": 0
+    }
+  },
+  "synthetic_repos": 80
+}

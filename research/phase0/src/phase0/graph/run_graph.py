@@ -28,14 +28,27 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
-from collections.abc import Callable
 from dataclasses import dataclass
 
+from phase0.graph.memory_cap import preexec_for, resolve
 from phase0.graph.pycg_failure import GraphStatus, classify, syntax_location
 from phase0.scope import Scope
 
 DEFAULT_TIMEOUT_S = 600
 DEFAULT_MEM_LIMIT_GB = 16
+
+
+class HarnessError(RuntimeError):
+    """Our own environment failed, so this unit produced no measurement of anything.
+
+    Deliberately NOT a GraphStatus. Every member of that enum is a claim about the
+    repository under analysis, and "PyCG never started" is a claim about us. The two
+    were the same value once -- CRASHED -- and on a platform that could not apply the
+    memory cap it meant a full corpus run reporting total attrition as a finding.
+
+    run_pipeline re-raises this ahead of its per-PR handler, so it stops the run
+    rather than accumulating as exclusions nobody would think to question.
+    """
 
 
 @dataclass(frozen=True, slots=True)
@@ -60,6 +73,10 @@ class GraphResult:
     detail: str = ""  # syntax error text, or the tail of stderr
     detail_path: str = ""  # file the parse failed in, when known
     detail_line: int = 0
+    # The memory bound this run actually had, from memory_cap.MemoryCap.provenance.
+    # Empty means unrecorded, which is not the same claim as "bounded" -- an OOM
+    # arm assembled from runs that were never capped measures the machine.
+    mem_cap: str = ""
 
     @property
     def is_analysable(self) -> bool:
@@ -69,26 +86,6 @@ class GraphResult:
     def is_attrition(self) -> bool:
         """A7: excluded from the study rather than assigned to an arm."""
         return self.status.is_attrition
-
-
-def _limit_memory(mem_limit_gb: int) -> Callable[[], None] | None:
-    """A preexec_fn capping address space, or None where that is unavailable.
-
-    POSIX only. On Windows the cap is not applied and the timeout is the only
-    bound -- the full run happens on Linux, and ENVIRONMENT.lock records which
-    platform produced a result.
-    """
-    if sys.platform == "win32":
-        return None
-
-    import resource
-
-    limit = mem_limit_gb * 1024**3
-
-    def apply() -> None:
-        resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
-
-    return apply
 
 
 def normalise_fqn(name: str) -> str:
@@ -144,6 +141,8 @@ def run(
         *(str(f) for f in scope.files),
     ]
 
+    cap = resolve(mem_limit_gb)
+
     try:
         completed = subprocess.run(
             command,
@@ -151,16 +150,26 @@ def run(
             text=True,
             timeout=timeout_s,
             check=False,
-            preexec_fn=_limit_memory(mem_limit_gb),
+            preexec_fn=preexec_for(cap),
         )
     except subprocess.TimeoutExpired:
         return GraphResult(
             status=GraphStatus.TIMEOUT,
             duration_ms=timeout_s * 1000,
             detail=f"exceeded {timeout_s}s on {scope.file_count} files",
+            mem_cap=cap.provenance,
         )
+    except subprocess.SubprocessError as exc:
+        # The child never ran, so nothing here is a fact about the repository. Raising
+        # is the point: this used to reach the caller as CRASHED, and a harness that
+        # cannot launch reported as a corpus whose code defeats the analyser.
+        raise HarnessError(
+            f"PyCG could not be launched ({type(exc).__name__}: {exc}); {cap.provenance}"
+        ) from exc
     except OSError as exc:
-        return GraphResult(status=GraphStatus.CRASHED, duration_ms=0, detail=str(exc))
+        return GraphResult(
+            status=GraphStatus.CRASHED, duration_ms=0, detail=str(exc), mem_cap=cap.provenance
+        )
 
     if completed.returncode != 0:
         status, detail = classify(completed.returncode, completed.stderr)
@@ -171,10 +180,12 @@ def run(
             detail=detail,
             detail_path=path,
             detail_line=line,
+            mem_cap=cap.provenance,
         )
 
     return GraphResult(
         status=GraphStatus.OK,
         duration_ms=0,
         edges=_parse_edges(completed.stdout),
+        mem_cap=cap.provenance,
     )

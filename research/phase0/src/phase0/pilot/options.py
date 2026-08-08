@@ -31,7 +31,31 @@ CACHE = ROOT / "data" / "gh_cache"
 def parse(argv: list[str] | None = None) -> argparse.Namespace:
     """The pilot's arguments. Defaults are anchored to ROOT, never to the cwd."""
     parser = argparse.ArgumentParser(description="Pilot: build records and report shape.")
+    parser.add_argument(
+        "--arm",
+        choices=("agent", "human"),
+        required=True,
+        help="which population to walk. REQUIRED and deliberately without a default: "
+        "the 90-repo pilot ran entirely on the human arm because a caller took the "
+        "population function it found, and no default here can be the wrong one if "
+        "there is no default. `agent` is the study's primary arm",
+    )
     parser.add_argument("--repos", type=int, default=10)
+    parser.add_argument(
+        "--only-repo",
+        action="append",
+        default=None,
+        metavar="OWNER/NAME",
+        help="walk only these repositories, even if the journal marks them done. "
+        "Repeatable. Requires --rescan-reason, because a repository appearing twice "
+        "without a stated cause is indistinguishable from a duplicated bug",
+    )
+    parser.add_argument(
+        "--rescan-reason",
+        default="",
+        metavar="TEXT",
+        help="stamped on every row this run appends, e.g. 'rescan: blob_none_A29'",
+    )
     parser.add_argument(
         "--scan",
         action="store_true",
@@ -53,9 +77,23 @@ def parse(argv: list[str] | None = None) -> argparse.Namespace:
         "than rebuilding what this run already resolved",
     )
     parser.add_argument(
+        "--trace-dir",
+        type=Path,
+        default=ROOT / "runs" / "pilot",
+        help="timestamped run record: a timeline, a snapshot per repository, and the "
+        "running shape. Separate from --journal, which exists to RESUME a run; this "
+        "exists to explain one that died",
+    )
+    parser.add_argument(
         "--journal",
         type=Path,
         default=ROOT / "results" / "pilot_journal.md",
         help="append-only progress, flushed per repository; a restart resumes from it",
     )
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if args.only_repo and not args.rescan_reason.strip():
+        # Refused here rather than defaulted. A default reason would be written into the
+        # journal as though someone had stated it, and the journal is the only record of
+        # why a repository has two entries.
+        parser.error("--only-repo requires --rescan-reason stating why they are re-walked")
+    return args

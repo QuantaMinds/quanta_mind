@@ -1,0 +1,54 @@
+{
+  "admitted": 1,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 2,
+  "broke": 0,
+  "finished_utc": "2026-08-06T02:03:40+00:00",
+  "of": 90,
+  "position": 61,
+  "rejected_by_stage": {
+    "no_python": 1
+  },
+  "repo": "microsoft/autogen",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 4,
+      "changed_symbols": 0,
+      "commit_count": 2,
+      "corpus_py_files": 1,
+      "derived_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "2258241795",
+      "repo": "microsoft/autogen",
+      "stage": "no_python",
+      "stars": 48110
+    },
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 519,
+      "changed_symbols": 2,
+      "commit_count": 11,
+      "corpus_py_files": 12,
+      "derived_files": 5,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "2309714629",
+      "repo": "microsoft/autogen",
+      "stage": "",
+      "stars": 48110
+    }
+  ],
+  "scanned": 1,
+  "stars": 48110,
+  "started_utc": "2026-08-06T02:03:17+00:00"
+}

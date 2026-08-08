@@ -39,19 +39,6 @@ __all__ = ["CLONE_TIMEOUT_S", "CloneFailed", "at_commit", "cloned", "sweep"]
 CLONE_TIMEOUT_S = 900
 
 
-def _filter_applied(target: Path) -> bool:
-    """Whether git recorded the partial-clone filter it was asked for."""
-    out = subprocess.run(
-        ["git", "config", "--get", "remote.origin.partialclonefilter"],
-        cwd=target,
-        capture_output=True,
-        text=True,
-        timeout=30,
-        check=False,
-    )
-    return bool(out.stdout.strip())
-
-
 @contextmanager
 def cloned(repo_full_name: str, workspace: Path, keep: bool = False) -> Iterator[Path]:
     """Clone a repository for the duration of the block, then delete it.
@@ -60,18 +47,23 @@ def cloned(repo_full_name: str, workspace: Path, keep: bool = False) -> Iterator
     merge and A2's rebase rule walks BACKWARD over replayed commits. A shallow
     clone has neither.
 
-    BLOBLESS, though. `--filter=blob:none` keeps every commit and tree and omits file
-    CONTENTS until something asks for them, so the history both of those walks need is
-    intact while the bulk is not transferred. Nine repositories previously exceeded the
-    timeout, and they were the largest -- an 11.5x median size difference against those
-    that cloned, which made a resource exclusion select on repository size and so on the
-    study's own confounder. A probe over all eight timed-out repositories resolved
-    8/8 within the budget against 4/8 for `blob:limit=1m`, worst case 343.9s of 900s.
+    FULL CONTENTS too, and that is a decision rather than a default. A29 added
+    `--filter=blob:none` to recover eight repositories that exceeded the clone timeout
+    and were the largest -- an 11.5x median size difference, so the exclusion selected
+    on the study's own confounder. A31 pre-registered a stop rule before the re-run, the
+    known-answer PR came back wrong, and the strategy was ABANDONED rather than patched.
 
-    Blobs still arrive when the outcome scan diffs a candidate commit, because
-    `commit.stats` needs contents rather than tree OIDs. That cost is real and bounded:
-    20 lazy packs on the one probe target whose scan returned BROKE, and the run still
-    finished in 38s.
+    A blobless clone supplies file CONTENTS only by lazy fetch, and a diff over blobs
+    that never arrived is EMPTY rather than wrong. Measured: twelve rejections at
+    `derived=0`, three of them labelled `no_python` where GitHub lists 104, 65 and 40
+    `.py` files, 17 of 17 scored PRs CLEAN at p=0.0049, and the one PR the probe had
+    scored BROKE deriving zero symbols. The harness's own failure wearing a corpus label.
+
+    **The cost of not using it is stated, not hidden:** the eight largest repositories
+    stay excluded at `clone_timeout`, A17 keeps that bound, and the 21-plus commit band
+    stays unresolved. A worse corpus and a defensible one. `scripts/guard/
+    check_no_partial_clone.py` enforces this, because A31 was honoured in prose for a
+    day while the flag stayed in this function and two arms were walked under it.
     """
     target = workspace / repo_full_name.replace("/", "__")
     _remove_tree(target, strict=True)
@@ -93,8 +85,9 @@ def cloned(repo_full_name: str, workspace: Path, keep: bool = False) -> Iterator
                 "core.longpaths=true",
                 "clone",
                 "--quiet",
-                # See the docstring: history intact, contents deferred.
-                "--filter=blob:none",
+                # No --filter. See the docstring and A31: a partial clone defers file
+                # contents, and a diff over blobs that never arrived reads as "this PR
+                # touched no Python" rather than as a fetch that failed.
                 f"https://github.com/{repo_full_name}.git",
                 str(target),
             ],
@@ -110,17 +103,6 @@ def cloned(repo_full_name: str, workspace: Path, keep: bool = False) -> Iterator
         _remove_tree(target, strict=False)
         detail = getattr(exc, "stderr", "") or str(exc)
         raise CloneFailed(f"{repo_full_name}: {str(detail).strip()[:300]}") from exc
-
-    # A server may DENY a filter and quietly serve a full clone. That would not fail --
-    # it would just be slow, and the eight repositories this filter exists to recover
-    # would time out again while the logs said nothing. git records what it actually
-    # negotiated, so the property is checked rather than assumed.
-    if not _filter_applied(target):
-        _remove_tree(target, strict=False)
-        raise CloneFailed(
-            f"{repo_full_name}: --filter=blob:none was not honoured by the server; "
-            f"a full clone was served instead"
-        )
 
     try:
         yield target

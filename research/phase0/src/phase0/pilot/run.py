@@ -22,90 +22,104 @@ WHY:  The pilot exists to answer "is the instrument measuring what we think" bef
       Needs a GitHub token. `require_token` fails loudly rather than falling back to
       unauthenticated requests, which at 60/hour would look like a working run while
       silently dropping most of the corpus.
-IMPORTS: pandas, phase0.{github_pulls,handlabel.select,pilot_report},
-      phase0.pipeline.{assemble,worktree}.
+      Two records are written per repository and they answer different questions.
+      `pipeline/journal.py` is what a restart RESUMES from; `pilot/trace.py` is what
+      explains a run that died -- a timestamped timeline, a self-contained snapshot per
+      repository, and the running shape. Neither substitutes for the other.
+IMPORTS: phase0.{arm,extract_prs,github_pulls,outcome,population},
+      phase0.pilot.{attempt,covariates,options,repo_facts,report,targets,trace},
+      phase0.pipeline.{assemble,journal,records_file,rejection,resume,worktree}.
 CONSUMED BY: `just pilot`.
 """
 
 from __future__ import annotations
 
-import json
 import sys
 
+from phase0 import arm
 from phase0.extract_prs import PRRecord
 from phase0.github_pulls import merge_info, require_token
-from phase0.handlabel.select import Candidate, eligible_prs
+from phase0.handlabel.select import Candidate
 from phase0.outcome.scan import scan
 from phase0.outcome.window import merge_on_base
 from phase0.pilot.attempt import Attempt
+from phase0.pilot.covariates import attempt_for, rows_for_clone_failure
 from phase0.pilot.options import CACHE, PACKAGE, ROOT, parse
-from phase0.pilot.report import by_repo, default_branch, report, star_counts
-from phase0.pipeline import journal, records_file
+from phase0.pilot.repo_facts import on_default_label, star_counts
+from phase0.pilot.report import by_repo, report
+from phase0.pilot.targets import choose
+from phase0.pilot.trace import RunTrace, announce, write_summary
+from phase0.pipeline import journal, records_file, resume
 from phase0.pipeline.assemble import build_record
 from phase0.pipeline.rejection import Rejection
 from phase0.pipeline.worktree import CloneFailed, cloned, sweep
+from phase0.population import for_arm
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parse(argv if argv is not None else sys.argv[1:])
 
     token = require_token()
-    population = eligible_prs(PACKAGE)
+    aidev = ROOT / "data" / "aidev"
+    population, claimed = for_arm(args.arm, aidev, PACKAGE)
+    # Before the first clone, not after thirty hours. This run's entire 90-repo
+    # predecessor was human-arm and every metric it produced was read as the agent arm;
+    # nothing objected because no artefact named an arm. `verify` raises unless every
+    # id is in the arm the population claims, checked against AIDev's own `agent`
+    # column rather than against the filename the population was built from.
+    tally = arm.verify([c.pr_id for c in population], claimed, aidev)
     grouped = by_repo(population)
-    chosen = sorted(grouped)[: args.repos]
-    print(f"{len(population)} eligible PRs across {len(grouped)} repos; taking {len(chosen)}")
+    targets = choose(grouped, args.journal, args.repos, args.only_repo, args.rescan_reason)
+    trace = RunTrace(
+        args.trace_dir, {"arm": args.arm, "population": len(population), "tally": tally}
+    )
+    print(f"arm verified: {tally}")
+    print(f"{len(population)} eligible across {len(grouped)} repos; {targets.announcement}")
 
     swept = sweep(args.workspace)
     if swept:
         print(f"swept {swept} clone(s) left by a previous run")
     stars = star_counts(ROOT / "data" / "aidev" / "repository.parquet")
-    already = journal.completed_repos(args.journal)
-    attempts: list[Attempt] = journal.read_attempts(args.journal)
+    attempts: list[Attempt] = resume.read_attempts(args.journal)
     clone_failures = 0
-    if already:
-        print(f"resuming: {len(already)} repos already journalled, {len(attempts)} attempts")
+    if targets.already:
+        print(f"resuming: {len(targets.already)} repos journalled, {len(attempts)} attempts")
 
     def note(
         candidate: Candidate,
         outcome: PRRecord | Rejection,
         commit_count: int,
         breakage: str = "",
-        on_default: bool = True,
+        # "unknown", not "yes": a rejected attempt never reached the branch lookup, and
+        # defaulting to a measurement is how the two got confused in the first place.
+        on_default: str = "unknown",
         on_base: str = "unknown",
         lines_changed: int = -1,
     ) -> None:
-        """One attempt, with the covariates attrition may track. Never a verdict."""
-        corpus_py = sum(1 for f in candidate.changed_files if f.endswith(".py"))
-        stage, category, files, symbols = "", "", 0, 0
-        if isinstance(outcome, Rejection):
-            stage, category = outcome.stage, outcome.category
-        else:
-            files, symbols = len(outcome.changed_files), len(outcome.changed_symbols)
+        """One attempt appended. The row itself is built by `covariates.attempt_for`."""
         attempts.append(
-            Attempt(
-                pr_id=str(candidate.pr_id),
-                repo=candidate.repo,
-                admitted=not isinstance(outcome, Rejection),
-                stage=stage,
-                category=category,
-                commit_count=commit_count,
-                corpus_py_files=corpus_py,
-                derived_files=files,
-                changed_symbols=symbols,
-                stars=stars.get(candidate.repo, -1),
-                outcome=breakage,
-                base_is_default=on_default,
-                merge_on_base=on_base,
-                changed_lines=lines_changed,
+            attempt_for(
+                candidate,
+                outcome,
+                commit_count,
+                stars.get(candidate.repo, -1),
+                breakage,
+                on_default,
+                on_base,
+                lines_changed,
             )
         )
 
-    for position, repo in enumerate(chosen, start=1):
-        if repo in already:
+    for position, repo in enumerate(targets.chosen, start=1):
+        if repo in targets.already:
             continue
         candidates = grouped[repo][: args.per_repo]
         before = len(attempts)
-        print(f"[{position}/{len(chosen)}] {repo} ({len(candidates)} PRs)", flush=True)
+        repo_started = trace.stamp()
+        trace.event(
+            "repo_start", repo=repo, position=position, of=len(targets.chosen), prs=len(candidates)
+        )
+        print(f"[{position}/{len(targets.chosen)}] {repo} ({len(candidates)} PRs)", flush=True)
         try:
             with cloned(repo, args.workspace) as clone:
                 for candidate in candidates:
@@ -147,52 +161,32 @@ def main(argv: list[str] | None = None) -> int:
                         outcome,
                         merge.commit_count,
                         breakage,
-                        merge.base_ref == default_branch(repo),
+                        # "unknown" when the lookup failed for this repo, never False:
+                        # an unchecked base is not a base on a non-default branch.
+                        on_default_label(merge.base_ref, repo),
                         on_base,
                         merge.changed_lines,
                     )
-                    if isinstance(outcome, Rejection):
-                        print(
-                            f"     #{candidate.number}: rejected [{outcome.stage}"
-                            f"/{outcome.category}]",
-                            flush=True,
-                        )
-                    else:
-                        print(
-                            f"     #{candidate.number}: {len(outcome.changed_files)} files, "
-                            f"{len(outcome.changed_symbols)} symbols"
-                            + (f", {breakage}" if breakage else ""),
-                            flush=True,
-                        )
+                    announce(candidate.number, outcome, breakage)
         except CloneFailed as exc:
             clone_failures += 1
             print(f"     clone failed: {exc}", flush=True)
-            # One row per PR, not a gap. A clone failure is attrition with a cause, and
-            # a denominator that moves with the weather makes every later comparison
-            # carry noise nobody declared.
-            #
-            # Two causes, kept apart. A timeout removes the LARGEST repositories, so it
-            # selects on the study's own confounder; a repository that no longer exists
-            # selects on nothing and has no size to measure. Pooling them puts a repo
-            # with no measurable size into the median that quantifies the size bias.
-            stage = "repo_gone" if "not found" in str(exc).lower() else "clone_timeout"
-            for candidate in candidates:
-                if not any(a.pr_id == str(candidate.pr_id) for a in attempts[before:]):
-                    # The corpus's commit list: the API's count is fetched inside the
-                    # clone that just failed, and passing 0 put every clone failure
-                    # outside every band, so `share_lost` read 0.0 -- "cannot tell"
-                    # rendered as "nothing lost".
-                    fail = Rejection(str(candidate.pr_id), stage, str(exc))
-                    note(candidate, fail, len(candidate.commit_shas))
+            trace.event("clone_failed", repo=repo, position=position, error=str(exc))
+            attempts += rows_for_clone_failure(candidates, attempts[before:], exc, stars)
         # Flushed here, not at the end. A repository that yielded nothing is still
         # marked done, or a restart would retry it forever.
-        journal.append_repo(args.journal, repo, attempts[before:])
+        journal.append_repo(args.journal, repo, attempts[before:], targets.rescan)
+        trace.repo_done(
+            repo,
+            position,
+            len(targets.chosen),
+            attempts[before:],
+            attempts,
+            clone_failures,
+            repo_started,
+        )
 
-    summary = report(attempts, clone_failures, len(chosen))
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
-    print("\n" + json.dumps(summary, indent=2))
-    print(f"\nwritten to {args.out}")
+    write_summary(args.out, report(attempts, clone_failures, len(targets.chosen)))
     return 0
 
 

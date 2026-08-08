@@ -31,14 +31,14 @@ from pathlib import Path
 from phase0.extract_prs import PRRecord
 from phase0.github_pulls import merge_info
 from phase0.handlabel.select import Candidate, eligible_prs
-from phase0.pipeline import journal
+from phase0.pipeline import resume
 from phase0.pipeline.assemble import build_record
 from phase0.pipeline.rejection import Rejection
 
 
 def admitted_ids(journal_path: Path) -> set[str]:
     """PR ids the journal recorded as admitted. Rejections stay rejected."""
-    return {a.pr_id for a in journal.read_attempts(journal_path) if a.admitted}
+    return {a.pr_id for a in resume.read_attempts(journal_path) if a.admitted}
 
 
 def _by_id(package: Path, wanted: set[str]) -> dict[str, Candidate]:

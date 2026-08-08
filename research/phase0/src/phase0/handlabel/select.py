@@ -10,8 +10,15 @@ WHY:  Eligibility is decided here, once, on facts that cannot correlate with the
       supplies commit SHAs and changed filenames directly -- so this gate runs while the
       token still blocks everything downstream. The classifier reads git history and is
       arm-agnostic, but the choice is recorded rather than assumed.
-IMPORTS: pandas, phase0.joins.
-CONSUMED BY: handlabel/draw.py; tests/handlabel/.
+
+      That choice is correct for the labelling gate and was WRONG for the pilot, which
+      imported this function as its population and inherited the human arm without ever
+      naming it. Every Candidate now carries `arm`, and `pilot/run.py` verifies the
+      whole population against AIDev's own `agent` column before it clones anything.
+      This module is a legitimate human-arm source; the defect was a consumer treating
+      "the population function" as arm-neutral because nothing made it say otherwise.
+IMPORTS: pandas, phase0.arm, phase0.joins.
+CONSUMED BY: handlabel/draw.py, pilot/run.py; tests/handlabel/, tests/test_arm.py.
 """
 
 from __future__ import annotations
@@ -23,6 +30,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from phase0 import arm as arm_module
 from phase0.joins import checked_merge
 
 PACKAGE_MEMBER = "AIDev_BC_Analyser/{name}.parquet"
@@ -39,6 +47,11 @@ class Candidate:
     title: str
     commit_shas: tuple[str, ...]
     changed_files: tuple[str, ...]
+    # Stamped, never inferred. This package ships `human_*` members and no agent table,
+    # so every Candidate it can produce is human -- which stayed true and unstated while
+    # a 90-repo pilot read its own output as the agent arm. `arm.verify` checks this
+    # against AIDev's `agent` column rather than trusting the constant.
+    arm: str = arm_module.HUMAN
 
     @property
     def url(self) -> str:
@@ -51,7 +64,7 @@ def _read(package: Path, name: str) -> pd.DataFrame:
         return pd.read_parquet(BytesIO(archive.read(PACKAGE_MEMBER.format(name=name))))
 
 
-def _repo_full_name(url: str) -> str:
+def repo_full_name(url: str) -> str:
     """`https://api.github.com/repos/owner/name` -> `owner/name`."""
     return "/".join(str(url).rstrip("/").split("/")[-2:])
 
@@ -91,7 +104,7 @@ def eligible_prs(package: Path) -> list[Candidate]:
     return [
         Candidate(
             pr_id=int(row["id"]),
-            repo=_repo_full_name(row["repo_url"]),
+            repo=repo_full_name(row["repo_url"]),
             number=int(row["number"]),
             merged_at=str(row["merged_at"]),
             title=str(row["title"]),

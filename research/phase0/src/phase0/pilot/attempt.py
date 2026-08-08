@@ -42,7 +42,14 @@ class Attempt:
     # Whether the PR merged into the repository's default branch. 15.5% do not, and
     # those repositories have release processes -- so the split is a population
     # question, not just a bug's footprint.
-    base_is_default: bool = True
+    # "yes" | "no" | "unknown". Three states, like `merge_on_base` and for the same
+    # reason: `default_branch` returns "" when a repository's `gh` lookup times out, and
+    # as a bool that read `False` -- a MEASUREMENT of "merged into a non-default branch".
+    # The off-default share is a population finding the analysis stratifies on, so a
+    # failed lookup silently manufacturing off-default rows is the same shape as the
+    # missing-`gh` crash, at one-repo granularity instead of all-repos. Fixed BEFORE it
+    # produced a wrong number, which is the first time that has happened here.
+    base_on_default: str = "unknown"
     # "yes" | "no" | "unknown": is the merge commit an ancestor of its own base branch?
     # Recorded at ADMISSION, on every attempt, because the outcome scan only sees PRs that
     # survived the gate -- agentops #811/#817/#818/#819 are all unreachable-merge cases
@@ -54,3 +61,9 @@ class Attempt:
     # correlates of size, not the variable named. -1 when the API did not supply it, so
     # "not measured" cannot masquerade as "a very small PR".
     changed_lines: int = -1
+    # Which arm this PR is from, carried on EVERY row rather than assumed by the reader.
+    # "" means a journal written before this column existed -- NOT MEASURED, never
+    # "human". The 90-repo pilot was entirely human-arm and no artefact it produced said
+    # so, which is why its breakage rate was compared against the agent reference for
+    # weeks. `phase0.arm.verify` checks the claim against AIDev before the run starts.
+    arm: str = ""

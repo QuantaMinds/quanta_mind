@@ -1,0 +1,53 @@
+{
+  "admitted": 2,
+  "arms": [
+    "Claude_Code",
+    "Devin"
+  ],
+  "attempts": 2,
+  "broke": 2,
+  "finished_utc": "2026-08-05T22:35:20+00:00",
+  "of": 30,
+  "position": 5,
+  "rejected_by_stage": {},
+  "repo": "567-labs/kura",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Claude_Code",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 2055,
+      "changed_symbols": 17,
+      "commit_count": 16,
+      "corpus_py_files": 40,
+      "derived_files": 12,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "3086930190",
+      "repo": "567-labs/kura",
+      "stage": "",
+      "stars": 259
+    },
+    {
+      "admitted": true,
+      "arm": "Devin",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 8,
+      "changed_symbols": 3,
+      "commit_count": 1,
+      "corpus_py_files": 2,
+      "derived_files": 2,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "3094372246",
+      "repo": "567-labs/kura",
+      "stage": "",
+      "stars": 259
+    }
+  ],
+  "scanned": 2,
+  "stars": 259,
+  "started_utc": "2026-08-05T22:34:44+00:00"
+}

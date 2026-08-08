@@ -1,0 +1,54 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 2,
+  "broke": 0,
+  "finished_utc": "2026-08-06T01:37:16+00:00",
+  "of": 90,
+  "position": 30,
+  "rejected_by_stage": {
+    "no_symbols": 2
+  },
+  "repo": "allenai/reward-bench",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 251,
+      "changed_symbols": 0,
+      "commit_count": 3,
+      "corpus_py_files": 3,
+      "derived_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "2571668210",
+      "repo": "allenai/reward-bench",
+      "stage": "no_symbols",
+      "stars": 620
+    },
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 27,
+      "changed_symbols": 0,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "2579713983",
+      "repo": "allenai/reward-bench",
+      "stage": "no_symbols",
+      "stars": 620
+    }
+  ],
+  "scanned": 0,
+  "stars": 620,
+  "started_utc": "2026-08-06T01:37:07+00:00"
+}

@@ -1,0 +1,88 @@
+{
+  "admitted": 3,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 4,
+  "broke": 0,
+  "finished_utc": "2026-08-06T02:17:36+00:00",
+  "of": 90,
+  "position": 78,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "stanfordnlp/dspy",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 2,
+      "changed_symbols": 0,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "2363562560",
+      "repo": "stanfordnlp/dspy",
+      "stage": "no_symbols",
+      "stars": 26818
+    },
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 296,
+      "changed_symbols": 6,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "2396520749",
+      "repo": "stanfordnlp/dspy",
+      "stage": "",
+      "stars": 26818
+    },
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 236,
+      "changed_symbols": 18,
+      "commit_count": 17,
+      "corpus_py_files": 234,
+      "derived_files": 11,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "2413225736",
+      "repo": "stanfordnlp/dspy",
+      "stage": "",
+      "stars": 26818
+    },
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 59,
+      "changed_symbols": 4,
+      "commit_count": 1,
+      "corpus_py_files": 6,
+      "derived_files": 6,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "2574401083",
+      "repo": "stanfordnlp/dspy",
+      "stage": "",
+      "stars": 26818
+    }
+  ],
+  "scanned": 3,
+  "stars": 26818,
+  "started_utc": "2026-08-06T02:16:57+00:00"
+}

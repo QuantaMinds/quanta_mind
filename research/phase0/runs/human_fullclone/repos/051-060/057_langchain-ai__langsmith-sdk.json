@@ -1,0 +1,69 @@
+{
+  "admitted": 3,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 3,
+  "broke": 2,
+  "finished_utc": "2026-08-06T02:01:08+00:00",
+  "of": 90,
+  "position": 57,
+  "rejected_by_stage": {},
+  "repo": "langchain-ai/langsmith-sdk",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 14,
+      "changed_symbols": 2,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "2394823134",
+      "repo": "langchain-ai/langsmith-sdk",
+      "stage": "",
+      "stars": 606
+    },
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 5,
+      "changed_symbols": 1,
+      "commit_count": 2,
+      "corpus_py_files": 1,
+      "derived_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "2443706665",
+      "repo": "langchain-ai/langsmith-sdk",
+      "stage": "",
+      "stars": 606
+    },
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 252,
+      "changed_symbols": 16,
+      "commit_count": 4,
+      "corpus_py_files": 4,
+      "derived_files": 4,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "2482170552",
+      "repo": "langchain-ai/langsmith-sdk",
+      "stage": "",
+      "stars": 606
+    }
+  ],
+  "scanned": 3,
+  "stars": 606,
+  "started_utc": "2026-08-06T02:00:55+00:00"
+}

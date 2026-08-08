@@ -1,0 +1,69 @@
+{
+  "admitted": 3,
+  "arms": [
+    "OpenAI_Codex"
+  ],
+  "attempts": 3,
+  "broke": 0,
+  "finished_utc": "2026-08-05T22:56:38+00:00",
+  "of": 30,
+  "position": 28,
+  "rejected_by_stage": {},
+  "repo": "ChaokunHong/MetaScreener",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 13,
+      "changed_symbols": 3,
+      "commit_count": 1,
+      "corpus_py_files": 2,
+      "derived_files": 2,
+      "merge_on_base": "no",
+      "outcome": "unscannable",
+      "pr_id": "3070801634",
+      "repo": "ChaokunHong/MetaScreener",
+      "stage": "",
+      "stars": 966
+    },
+    {
+      "admitted": true,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 195,
+      "changed_symbols": 14,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": 1,
+      "merge_on_base": "no",
+      "outcome": "unscannable",
+      "pr_id": "3074286852",
+      "repo": "ChaokunHong/MetaScreener",
+      "stage": "",
+      "stars": 966
+    },
+    {
+      "admitted": true,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 211,
+      "changed_symbols": 2,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": 1,
+      "merge_on_base": "no",
+      "outcome": "unscannable",
+      "pr_id": "3076361098",
+      "repo": "ChaokunHong/MetaScreener",
+      "stage": "",
+      "stars": 966
+    }
+  ],
+  "scanned": 0,
+  "stars": 966,
+  "started_utc": "2026-08-05T22:56:05+00:00"
+}

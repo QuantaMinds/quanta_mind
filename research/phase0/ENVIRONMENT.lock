@@ -223,6 +223,49 @@ dropping most of the corpus.
 `just pilot` shells out to `gh auth token` at run time, so it works locally and will not
 work in CI. CI needs a real secret.
 
+**The `gh` binary itself is a required runtime dependency of the pilot, not only of the
+justfile.** `pilot/repo_facts.default_branch` invokes `gh api repos/<owner>/<name>` for
+every repository walked. It is not in `pyproject.toml` because it is not a Python
+package, and that is exactly how it went unnoticed: the first run on linux — the platform
+A35 selects for the corpus — died at its first repository because the container had
+`git` but not `gh`.
+
+A missing `gh` now raises `GhUnavailable` and stops the run rather than returning "".
+That choice is load-bearing: the answer is compared to `base_ref` and stored as a
+boolean, so degrading would have made every row read `base_is_default=False` and
+manufactured a 100% off-default corpus against a real figure of 15.5%. Verified against
+`gh` 2.63.2 on linux/aarch64.
+
+
+## CPython 3.10 reaches end of life on 2026-10-31
+
+**Roughly three months from this entry.** After that date there are no further security
+releases, and binary installers are already not provided for the branch.
+
+**Why 3.10 at all — say this in the writeup, because a reviewer in 2027 will ask.** It is
+PyCG's constraint, not a preference: the instrument is archived upstream and 3.10 is the
+highest interpreter it runs on. The corpus predates 3.11 syntax, so the constraint does
+not bind on this data — it costs us A7's `SYNTAX_UNSUPPORTED` arm and nothing else.
+
+**Therefore the reproducibility artefact is the IMAGE, not the interpreter version.** A
+future reader cannot re-resolve `python==3.10.20` from an EOL branch, so pin the digest:
+
+| Image | Digest | Used for |
+|---|---|---|
+| `ghcr.io/astral-sh/uv:python3.10-bookworm` | `sha256:d50f4195bad149b4ede086c32abdbe001324939775310454a72046d65173af81` | controls gate, agent pilot (A35) |
+| `python:3.10-slim` | `sha256:34a2c9467a0231d8c29a5ecadc219733a9393b026882b44d91616b9dae6088b6` | `RLIMIT_AS` enforcement verification (A33) |
+
+The first resolves CPython **3.10.19**, not the 3.10.20 pinned above. **That difference
+is closed, not outstanding:** both are security-only releases and neither touches `ast`,
+the tokenizer or the grammar, so A7's arm is defined against the MINOR version. Pin the
+digest for reproducibility, not because the patch level is suspected.
+
+**CVE-2026-15308** (`html.parser.HTMLParser` CPU denial-of-service, all CPython before
+3.15.0) will almost certainly never be fixed on 3.10. Checked: **nothing in `src/`,
+`scripts/`, `research/phase0/` imports `html.parser`, `HTMLParser`, BeautifulSoup, lxml
+or `xml.etree`.** The pipeline parses Python, git output and parquet, never HTML, and
+never HTML from an untrusted source. Not applicable — recorded so the question is not
+re-asked.
 
 ## External inputs — pinned by hash
 

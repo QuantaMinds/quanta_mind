@@ -1,0 +1,12 @@
+{
+  "arm": "agent",
+  "population": 3566,
+  "started_utc": "2026-08-06T00:01:15+00:00",
+  "tally": {
+    "Claude_Code": 47,
+    "Copilot": 271,
+    "Cursor": 132,
+    "Devin": 301,
+    "OpenAI_Codex": 2815
+  }
+}

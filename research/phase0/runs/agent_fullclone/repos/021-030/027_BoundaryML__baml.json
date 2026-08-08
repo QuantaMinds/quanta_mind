@@ -1,0 +1,37 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Cursor"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-06T03:05:39+00:00",
+  "of": 72,
+  "position": 27,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "BoundaryML/baml",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Cursor",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 617,
+      "changed_symbols": 0,
+      "commit_count": 4,
+      "corpus_py_files": 2,
+      "derived_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3138021777",
+      "repo": "BoundaryML/baml",
+      "stage": "no_symbols",
+      "stars": 4975
+    }
+  ],
+  "scanned": 0,
+  "stars": 4975,
+  "started_utc": "2026-08-06T03:04:23+00:00"
+}

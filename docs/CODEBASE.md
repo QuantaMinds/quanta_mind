@@ -26,7 +26,7 @@ Pack format: `v0` · Phase: **pre-Phase-0, no product code written**
 | `research/` | Measurement | separate uv projects, separate interpreters. Never on the product's dependency graph |
 | `scripts/guard/` | Rule enforcement | stdlib only — must run before the package installs |
 | `scripts/verify/` | Data verification | golden diff, source-leak proof, determinism. **Empty until the call-site census layer** — see its README |
-| `vendor/` | Pinned third-party source | **never edited**, blocked by `hook_pre_edit.py` |
+| `vendor/` | Pinned third-party source | **never edited**, blocked by `hooks/hook_pre_edit.py` |
 | `docs/` | Reasoning | exempt from the line cap |
 | `BRIEFING.md` | The founder-facing account: pitch, risks, the five questions | root, beside README — it is the outward story, not internal reasoning |
 
@@ -40,6 +40,48 @@ workspace member". `check_no_research_imports.py` enforces the boundary a second
 it survives someone re-merging the projects later.
 
 Read `research/phase0/ENVIRONMENT.lock` before touching the instrument.
+
+#### `research/phase0/src/phase0/arm.py` — which population a row is from
+
+A 90-repository pilot ran to completion on the human arm while every metric it produced
+was read as the agent arm. `handlabel/select.py` draws from the figshare replication
+package, which ships `human_pr_python`, `human_commit` and `human_commit_detail` and no
+agent table at all; `pilot/run.py` imported it as "the population" and inherited the arm
+silently. Nothing lied — `select.py`'s docstring says which arm it draws — and nothing
+objected either, because no record, journal row or report named an arm to disagree with.
+
+`arm.py` reads `pr_id -> arm` out of the `agent` column that both AIDev tables carry,
+never from a filename, so the data can contradict the claim instead of restating it.
+`verify` raises `ArmMismatch`, and `pilot/run.py` calls it on the whole population before
+the first clone rather than after thirty hours.
+
+- **An id in neither table is a mismatch, not an abstention.** A population half-built
+  from the wrong source would otherwise tally clean for every id it recognised.
+- **`arm` is appended last in the journal schema, so older journals read `""`.** That is
+  NOT MEASURED. The canonical journal is human throughout and records nothing about it;
+  back-filling `"Human"` would assert what was never written down.
+- **The star band is the trap worth remembering.** The pilot's repositories floor at 528
+  stars, and A15 had already recorded 503-with-none-below-500 as the *human* arm's
+  defining filter. The measurement matched the falsifying hypothesis and was read as
+  supporting the favourable one.
+
+#### `research/phase0/src/phase0/graph/memory_cap.py` — a bound, or an honest absence
+
+`RLIMIT_AS` cannot be lowered on darwin under an unlimited hard limit, so the guard asks
+the kernel rather than reading `sys.platform`. The probe and the `preexec_fn` hook call
+one function, `_lower_soft`, because they diverged once — the probe tested `(limit, hard)`
+while the hook applied `(limit, limit)`, so the capability answer authorised a call nobody
+had run. Lowering the hard limit is irreversible even as uid 0, which is why the shared
+call is soft-only rather than the probe being widened to match.
+
+- **`PRAudit.mem_cap` and `Provenance.platform` persist.** The bound used to travel on the
+  in-memory `GraphResult` and stop there, so no record on disk stated whether its run was
+  bounded. Empty `mem_cap` means UNRECORDED, never "bounded".
+- **Where the cap is unenforceable, PyCG runs unbounded and `GraphStatus.OOM` cannot fire
+  via `RLIMIT_AS` at all.** On darwin that leaves `UNANALYZED_RESOURCE` structurally
+  empty. Decide the run platform deliberately; on darwin that arm needs a stated caveat.
+- **The enforcement tests skip rather than pass where the cap cannot apply**, so darwin
+  reports enforcement as untested instead of green.
 
 #### `research/phase0/src/phase0/outcome/` — the dependent variable
 
@@ -117,9 +159,9 @@ so a scan-time count reports the residue and gets quoted as the population.
 | `check_no_research_imports.py` | research deps never reach `src/` or `scripts/` |
 | `check_no_vague_refs.py` | references name files and headings, never section or phase numbers |
 | `check_module_identity.py` | no two modules with one name; no module nothing imports |
-| `hook_pre_edit.py` | denies `vendor/` and writes on `main`; asks on golden files |
-| `hook_post_edit.py` | formats the edited file, reports violations — **advisory** |
-| `hook_session_end.py` | session record to `docs/plans/` |
+| `hooks/hook_pre_edit.py` | denies `vendor/` and writes on `main`; asks on golden files |
+| `hooks/hook_post_edit.py` | formats the edited file, reports violations — **advisory** |
+| `hooks/hook_session_end.py` | session record to `docs/plans/` |
 
 **A guard's enforcement value is capped by whether people leave it enabled.** The walker
 in `discovery.py` used to enumerate every path under an excluded directory before

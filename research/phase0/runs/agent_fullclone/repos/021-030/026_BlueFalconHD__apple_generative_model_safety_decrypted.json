@@ -1,0 +1,37 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Cursor"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-06T03:04:23+00:00",
+  "of": 72,
+  "position": 26,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "BlueFalconHD/apple_generative_model_safety_decrypted",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Cursor",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 81616,
+      "changed_symbols": 0,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3207423060",
+      "repo": "BlueFalconHD/apple_generative_model_safety_decrypted",
+      "stage": "no_symbols",
+      "stars": 287
+    }
+  ],
+  "scanned": 0,
+  "stars": 287,
+  "started_utc": "2026-08-06T03:04:17+00:00"
+}

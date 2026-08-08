@@ -11,17 +11,14 @@ WHY:  A single attrition percentage is the wrong summary. The first smoke run lo
       That is differential exclusion on the study's own confounder, not noise. So the
       report cross-tabulates rather than totals, and the three categories are kept apart:
       `restricted` narrows the estimand, `resource` and `integrity` bias it.
-IMPORTS: pandas, stdlib collections.
-CONSUMED BY: run_pilot.py; tests/pilot/test_compare.py.
+IMPORTS: stdlib collections; phase0.handlabel.select, phase0.pilot.{attempt,quartile}.
+      External lookups (stars, default branch) live in pilot/repo_facts.py.
+CONSUMED BY: pilot/run.py; tests/pilot/test_compare.py.
 """
 
 from __future__ import annotations
 
-import subprocess
 from collections import Counter
-from pathlib import Path
-
-import pandas as pd
 
 from phase0.handlabel.select import Candidate
 from phase0.pilot.attempt import Attempt
@@ -45,42 +42,6 @@ FILE_BANDS: tuple[tuple[str, int, int], ...] = (
     ("16-50", 16, 50),
     ("51+", 51, 10**9),
 )
-
-
-def star_counts(table: Path) -> dict[str, int]:
-    """Star count per repository, keyed by `owner/name`.
-
-    Lives beside the banding rather than in the runner: the band is a report dimension,
-    and a loader separated from the thing that interprets it is how the two drift.
-
-    Returns empty when the table is absent rather than failing. The band then reports
-    `unknown`, which is visibly different from reporting a band that was never measured.
-    """
-    if not table.is_file():
-        return {}
-    frame = pd.read_parquet(table)
-    return {str(r.full_name): int(r.stars) for r in frame.itertuples() if r.full_name}
-
-
-_DEFAULTS: dict[str, str] = {}
-
-
-def default_branch(repo: str) -> str:
-    """The repository's default branch, cached. Empty when the lookup fails.
-
-    Used only to label a PR's base as default or not; an empty answer makes the label
-    wrong rather than the scan wrong, since the scan uses `base_ref` directly.
-    """
-    if repo not in _DEFAULTS:
-        out = subprocess.run(
-            ["gh", "api", f"repos/{repo}", "--jq", ".default_branch"],
-            capture_output=True,
-            text=True,
-            timeout=60,
-            check=False,
-        )
-        _DEFAULTS[repo] = out.stdout.strip()
-    return _DEFAULTS[repo]
 
 
 def by_repo(population: list[Candidate]) -> dict[str, list[Candidate]]:
@@ -126,8 +87,12 @@ def report(attempts: list[Attempt], clone_failures: int, repos: int) -> dict[str
     scanned = [a for a in admitted if a.outcome in ("broke", "clean")]
     unscannable = [a for a in admitted if a.outcome == "unscannable"]
     broke = [a for a in scanned if a.outcome == "broke"]
-    on_default = [a for a in scanned if a.base_is_default]
-    off_default = [a for a in scanned if not a.base_is_default]
+    # Excluded from BOTH, never folded into off-default. `not base_is_default` used to
+    # sweep an unchecked repository into the off-default arm, where it would have read as
+    # a measurement -- the same error UNSCANNABLE gets kept out of the clean cell for.
+    on_default = [a for a in scanned if a.base_on_default == "yes"]
+    off_default = [a for a in scanned if a.base_on_default == "no"]
+    base_unknown = [a for a in scanned if a.base_on_default not in ("yes", "no")]
     star_bands = Counter(
         "unknown" if a.stars < 0 else ("<500" if a.stars < 500 else ">=500") for a in admitted
     )
@@ -174,6 +139,11 @@ def report(attempts: list[Attempt], clone_failures: int, repos: int) -> dict[str
         else None,
         "scanned_on_default": len(on_default),
         "scanned_off_default": len(off_default),
+        # Reported, not silently dropped. A non-zero count here means some repository's
+        # default branch could not be looked up, so the off-default share -- which the
+        # analysis stratifies on -- is computed over a smaller denominator than
+        # `outcome_scanned`. Silence would make the two look like the same population.
+        "base_branch_unknown": len(base_unknown),
         "outcome_scanned": len(scanned),
         "outcome_broke": len(broke),
         "breakage_rate": round(len(broke) / len(scanned), 4) if scanned else None,

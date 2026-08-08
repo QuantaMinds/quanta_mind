@@ -50,7 +50,7 @@ reclassification this log exists to prevent.
 
 | # | Section | Change | Why |
 |---|---|---|---|
-| **A1** | 3 | Population restated: 7,191 → 4,798 structural → ~3,300 merged. Human arm runs in the same pass. | 7,191 was the pre-filter count. The analysed population is 2.2× smaller and saying so is cheaper than discovering it at Day 6. |
+| **A1** | 3 | Population restated: 7,191 → 4,798 structural → ~3,300 merged. Human arm runs in the same pass. | 7,191 was the pre-filter count. The analysed population is 2.2× smaller and saying so is cheaper than discovering it at Day 6. **A32: "in the same pass" is what actually happened, and only the human half ran.** These counts are the AGENT arm's. The pilot that has been executed — 90 repositories, 236 attempts, 139 admitted — drew from the figshare human package and is the human arm end to end. The agent population above has not been built yet. |
 | **A2** | 3.1 | Parent commit is `merge_commit_sha^1`, obtained from the GitHub API, with a diff-coverage rule for rebase merges. | AIDev carries no base, head or merge SHA. `base.sha` would be the commit the PR was *opened against*, potentially weeks stale. |
 | **A3** | 3.1 | Census scope ≡ PyCG scope, as a rule with the failure mode named. | A wider census makes every out-of-scope site look unresolved and inflates exposure toward 100%. |
 | **A4** | 3.2 | Issue-link outcome criterion marked optional and API-dependent; whether it ran is stated in Results. | It needs quota the other two criteria do not. Silent non-execution would give two runs different outcome variables under one name. |
@@ -82,17 +82,77 @@ reclassification this log exists to prevent.
 
 | **A25** | 4.14 | A PR with **no changed function body** is excluded as a **restricted estimand**, counted apart from resource attrition and carried into the bounds. Attrition is reported **cross-tabulated by commit count and corpus file count**, never pooled; if it tracks either, A17's bounds must cover `parent_commit` failures and not only the file-set gate. The estimand is stated as **function-body changes only**. | A smoke run lost 32% of PRs with `parent_commit` dominating — shape detection failing when the corpus file list does not match the change, which tracks patch size. That is differential exclusion on the study's own confounder, and a single attrition percentage cannot show it. Coding zero-symbol PRs as UNEXPOSED would put real breakage (import and constant edits do break callers) into the unexposed arm — the error that manufactured RR 8.0, arriving from the other side. |
 
-| **A26** | 4.15 | **Tightens the outcome rule on its two named defects, before the labels are drawn.** The breakage pattern matches the commit **subject** only, not the squash body; and a later commit counts as a repair only if the PR's files are at least a quarter of what that commit touched. Adds **clone timeout** as a named exclusion in A17's bounds. | The pilot's rate came back at **27.3%** against the published PR-level figure of 11.3% — 2.4x the reference, on a corpus skewed toward small single-commit changes that should sit *below* it. Both causes were already diagnosed, so fixing them after labelling would burn an iteration of the gate on a rule known to be broken. Both changes can only remove verdicts, never add them. |
+| **A26** | 4.15 | **Tightens the outcome rule on its two named defects, before the labels are drawn.** The breakage pattern matches the commit **subject** only, not the squash body; and a later commit counts as a repair only if the PR's files are at least a quarter of what that commit touched. Adds **clone timeout** as a named exclusion in A17's bounds. | The pilot's rate came back at **27.3%** against the published PR-level figure of 11.3% — 2.4x the reference, on a corpus skewed toward small single-commit changes that should sit *below* it. Both causes were already diagnosed, so fixing them after labelling would burn an iteration of the gate on a rule known to be broken. Both changes can only remove verdicts, never add them. **CORRECTED by A32: the reference was the wrong arm.** The pilot is human-arm, whose published PR-level rate is 21.18% (`136/642`), not 11.3%. The excess was 1.29x, not 2.4x. **The two mechanical fixes stand** — subject-vs-body matching was diagnosed on pruna `017dc9a144` and the focus threshold on its own logic; neither argument mentions a rate. What does not stand is the calibration story that motivated the timing, which rested on a comparison against the arm this pilot was not measuring. |
 
 | **A27** | 4.16 | **The outcome scan must walk the PR's own base branch, not the clone's default.** 15.5% of PRs merge into `dev`, `develop` or a feature branch; `scan_outcome` walks from HEAD, so their post-merge history is invisible and every one of them reads CLEAN. Also: `merged_at` asserted before `merge_commit_sha` is read, a merged PR with a null merge sha becomes `no_merge_sha`, and file-set verification requires **exact equality** rather than a ratio. | A superset passes a ratio gate. When a PR's commits land via another pull request the merge sha belongs to that other PR, shape detection resolves a parent confidently, and if the other PR carried nothing else the file sets differ only by what they share — a wrong parent that passes verification, which is the one failure surviving every downstream check. And a false CLEAN on 15.5% of the corpus biases the outcome toward the null in a way no bound would show. |
 
 | **A28** | 4.17 | **Supersedes A2's detection rule.** Shape is decided by the SEQUENCE of the PR's commit subjects — at least two consecutive matches walking back from the merge — with the diff-coverage rules kept only as a fallback when the API returns no subjects. Records the hand-verification: 19 of 20 resolved parents agree with `merge_commit_sha`'s first parent, all five of the 21+ band among them — which over a sample of 16 squashes and 3 merge commits confirms that **none was misrouted to rebase**, and, since the resolver returns `merge^1` for both those shapes by construction, is not independent evidence of anything more. The sample contained **no rebases**, so that branch was measured and verified separately: it fires on **4 of 88 multi-commit PRs (4.5%)** across three repositories, its shape is confirmed by a committer-timestamp test that reads no message text, and **all 4 of its parents are correct** against that structural truth — each differing from `merge^1`, which is what makes the check meaningful there and near-tautological everywhere else. Also makes `UNSCANNABLE` a **counted exclusion at every consumer**, not only at the scan, and adds the unreachable-merge prevalence **measured at admission**. | A2 detected shape by diff coverage against a file list the corpus supplies, and the corpus attributes 92 files to some three-file PRs — so detection failed on exactly the PRs whose file lists were wrong, at 17–70% across commit-count bands, differentially on patch size. Subjects come from the API and are independent of the corpus, which removes the file list from detection entirely. A single-subject match would not do: GitHub's default squash message reuses the title on a one-commit PR, so only a sequence of two distinguishes the shapes. **This changes which units are admitted, never a decision boundary** — no threshold, arm coding or verdict rule moves. |
 
+| **A29** | 4.18 | **Clones are blobless.** `worktree.cloned` passes `--filter=blob:none` and asserts the server honoured it by reading back `remote.origin.partialclonefilter`; a denied filter is a failure, not a full clone served quietly. Supersedes A26's addition of **clone timeout** as a named exclusion in A17's bounds: the exclusion is not removed from the bounds but its measured incidence goes to zero on the eight repositories that defined it. The probe is reported per repository, and **"zero lazy fetches" is recorded as an artefact, not a property** — seven targets showed 0 and the one whose scan returned BROKE showed 20, because a BROKE verdict is what makes the scan call `commit.stats.files`, which needs contents. 20 is the figure to carry, not 0. | Nine repositories exceeded the clone timeout and they were the largest — an 11.5x median size difference against those that cloned — so a resource exclusion selected on repository size, which is A16's confounder arriving through the one door that was a property of our command rather than of the data. Measured: `blob:none` resolved 8/8 within budget, worst case 343.9s of 900s, every parent resolved and every pipeline completed; `blob:limit=1m` managed 4/8 and was eliminated under the rule fixed before the probe ran. **This changes which units are admitted, never a decision boundary.** Recovering eight repositories is not eight usable PRs — two carry no `.py` files at all. **UNSIGNED, and conditional.** This strategy FAILED its first live use: blobless clones supply file contents only by lazy fetch, and a diff over blobs that never arrived is empty rather than wrong, so twelve rejections came back at `derived=0` and seventeen of seventeen scored PRs read CLEAN. It is safe only with the contents assertion in `pipeline/assemble.py`, which raises `HarnessError` when the derived `.py` count falls short of GitHub's list — that assertion is the reason this amendment is signable at all, and removing it silently restores the defect. A31 fixes the stop rule that governs whether this amendment survives. **WITHDRAWN 2026-08-05 — A31 triggered.** The re-run with the contents assertion reproduced the first result exactly: `ingestr#2532214135` still derives zero symbols where the probe scored it BROKE, the three `no_python` rejections still derive zero against GitHub lists of 104, 65 and 40, and the recovered scored set is again 0 broke of 17 (p = 0.0049). The assertion never fired, because `api_files` truncates at `API_FILE_PAGE` and the guard therefore skips exactly the largest PRs — the same size selection this amendment existed to remove, relocated into its own safeguard. Blobless cloning is NOT adopted. The eight repositories stay excluded, A17 keeps the clone-timeout bound, and the 21+ band stays unresolved. **Enforced by `guard:check_no_partial_clone`.** The withdrawal below was recorded in this log while the flag stayed in `pipeline/worktree.py`; the guard is what makes the reversal real. |
+
+| **A30** | 4.19 | **A harness failure is not a graph status.** PyCG's memory cap is probed against the kernel rather than inferred from `sys.platform`, the bound that actually applied travels on the result (`GraphResult.mem_cap`), and a subprocess that never launched raises `HarnessError` — re-raised ahead of `run_pipeline.one_pr`'s per-PR handler — instead of being recorded as `CRASHED`. | Found by running the harness on a third platform. `RLIMIT_AS` cannot be lowered on darwin under an unlimited hard limit, the `ValueError` fired inside `preexec_fn`, and **100% of invocations returned `CRASHED`** — a status that asserts the analysed repository defeated the analyser. The run would have completed and reported total attrition as a finding, which is ENVIRONMENT.lock Finding 4's shape one platform over. Every `GraphStatus` member is a claim about the corpus; "our environment failed" is a claim about us, and the two must not share a value. **No threshold, verdict rule or arm coding changes. Admission DOES change on darwin** — units that were becoming `CRASHED` now receive real classifications, because a harness failure stopped occupying a corpus label. Saying "no decision boundary moved" was strictly true of the thresholds and misleading about the consequence. **Platform equivalence is a CONDITION, not a claim:** the controls gate must be run on any platform before the corpus runs there, and `RR 8.0 / 80-of-80 / super_chain 40-of-40` is the known-answer result it must reproduce. That converts an inference about `RLIMIT_AS` behaviour into a procedure that would have caught this defect in minutes. |
+
+| **A31** | 4.20 | **A pre-fixed stop rule for A29's clone strategy, written before the re-run and before any result is seen.** The first live use of `--filter=blob:none` produced 17 of 17 scored PRs CLEAN (p = 0.0049 against the corpus base rate), twelve rejections with `derived=0` including three labelled `no_python` at `corpus_py` 104, 65 and 40, and — decisively — `bruin-data/ingestr#2532214135` derived zero symbols where the probe had scored it BROKE with 20 lazy fetches. Derivation and the outcome scan both need blob CONTENTS, which a blobless clone supplies only by lazy fetch; when that yields nothing the harness recorded it as a property of the repository. **The known-answer test is `ingestr#2532214135`, whose correct answer the probe already fixed at BROKE.** After the contents assertion lands, the re-run must satisfy all three: (a) that PR reads BROKE; (b) the three `no_python` rejections derive a non-zero file count; (c) the broke rate across the recovered scored set is non-zero and not extreme against 26.87%. **If (a) fails, `blob:none` is ABANDONED, not patched** — the eight stay excluded, A17 keeps the clone-timeout bound, and the 21+ band stays unresolved. | A29 adopted blobless cloning to close a size-selection door and opened a worse one onto the same eight largest repositories — the study's own confounder, entered from the other side, and biased toward the null in a way no bound would show. A recovered corpus resting on a clone strategy whose failure mode is not fully understood is worse than the smaller corpus it replaced: the original exclusion is visible and bounded, this one is invisible and reads as data. Fixing the mechanism blind and re-running until it passes would be tuning the instrument against the answer, so the abandon condition is fixed here while the result is still unknown. **Enforced by `guard:check_no_partial_clone`.** ABANDONED was honoured in prose for a day and not in code: the commit recording it touched thirteen files, none of them source, and both pilot arms were then walked under the withdrawn strategy. The guard rejects any `--filter` on a git clone, in any form. |
+| **A32** | 4.5, 4.15, 6 | **The 90-repository pilot is the HUMAN arm, and every row now carries the arm it came from.** `handlabel/select.py` draws from the figshare replication package, which ships `human_pr_python`, `human_commit` and `human_commit_detail` and **no agent table at all**; `pilot/run.py` imported it as its population and inherited the arm silently. Confirmed four ways: the package's members; `eligible_prs` returning 608 ids, **608 in `human_pull_request` and 0 in `pull_request`**; all **236** canonical journal ids and all **139** admitted rows human, 0 agent; and the journal's repositories flooring at **528 stars**. `phase0/arm.py` now reads `pr_id -> arm` from AIDev's own `agent` column and `pilot/run.py` verifies the whole population **before the first clone**; `Candidate`, `Attempt` and the journal carry `arm`, appended last so older journals read `""` — NOT MEASURED, never back-filled. **Consequence: the pilot is a complete pilot of the COMPARISON arm, not the primary one.** Every shape metric it produced — 26.87% breakage, exposure rate, multi-site fraction, no-static-callee share, the commit-count gradient, the attrition split — is a human-arm number and none transfers. The agent arm needs its own population (AIDev `pr_commits`, 4,798 structural PRs, star floor 101 with 47.3% below 500, a different repository set) **and its own pilot** before its full run. | **A15 already contained the falsifying evidence and it was read the favourable way.** A15 records the human arm's floor as *503 stars with 0% below 500* against the agent arm's *101 and 47.3% below*. The pilot's own ≥500 floor was measured, matched that filter exactly, and was read as the agent arm self-selecting into the human band through attrition. The alternative was not merely untested — it was pre-registered, quantified, and in this file. Nothing lied at any point: `select.py`'s docstring says *"Every merged **human** Python PR"* and *"The human arm is used because it needs no GitHub token"*. The defect was a consumer treating "the population function" as arm-neutral, and **no record, row or report naming an arm to disagree with**. This is the thirteenth instance this session of one shape — a stage produced a complete, plausible, wrong result rather than an error — and the first where the field existed and was hardcoded, which is what made it read as a bug in the exposure pass rather than as the truth about the whole corpus. |
+| **A33** | 4.19 | **Closes the two gaps A30's signature left open, and corrects one claim A30 made.** (1) **`mem_cap` never reached disk.** A30 states the applied bound "travels on the result"; it travelled as far as the in-memory `GraphResult` and was dropped at `measure.py` — zero reads outside the two defining files, no field on `PRAudit`, nothing in `Provenance`. **No record on disk stated whether its run was bounded.** `PRAudit.mem_cap` and `Provenance.platform` now persist; empty `mem_cap` means UNRECORDED, never "bounded". (2) **The probe authorised a call it never made.** `_probe` tested `(limit, hard)`; the hook applied `(limit, limit)`. Both now go through one function, `_lower_soft`, soft-only. (3) **Enforcement is now proven, on linux.** Two tests spawn a real child: one reads its actual limits back, one allocates past the bound and follows it through `classify()` to `OOM`. They SKIP where the cap is unenforceable, so **darwin reports enforcement as untested rather than green**. | **Observed, not inferred — A30's uncovered path (1) is now closed.** Run under docker on linux: `RLIMIT_AS` as found is `(-1, -1)`, the soft-only probe is accepted and restorable, the child dies with `MemoryError` and classifies as `OOM`, and the full `test_memory_cap.py` runs **7 passed** where darwin skips 2. Also observed: lowering the HARD limit is irreversible **even as uid 0** (`ValueError: not allowed to raise maximum limit`), which is why the divergence is resolved by sharing the soft-only call rather than widening the probe to match the hook — a probe of `(limit, limit)` cannot undo itself. The old hook's call is accepted on linux, so the divergence was **latent, not live**, there. The enforcement assertion was sabotaged twice to confirm it discriminates: a 1KB allocation and a cap-absent run both leave the child at returncode 0 and fail it. **Why this mattered beyond documentation:** on darwin `enforceable=False` means `preexec_for` returns `None`, so PyCG runs **unbounded** and `GraphStatus.OOM` cannot fire via `RLIMIT_AS` at all — leaving `UNANALYZED_RESOURCE`, the arm section 4.4 reads to decide *scalability product vs unsoundness product*, structurally empty with nothing on disk saying so. **The run platform must be decided before the full run**; if it is darwin, that arm needs a stated caveat. |
+| **A34** | 4.4, 4.7, 6 | **Agent-stratified RR is reportable for CODEX ONLY, and the retrieval-strategy moderation is WITHDRAWN on power grounds — both fixed before any agent-arm number exists.** The agent population is now built (A32) and counted: **3,566 PRs across 389 repositories** — Codex 2,815, Devin 301, Copilot 271, Cursor 132, **Claude Code 47**. A17 called 459 Claude Code PRs "below the power floor"; **47 is not underpowered, it is absent** — before merge-status filtering, before admission, before exposure. Every non-Codex cell is DESCRIPTIVE and is labelled as such in Results; no relative risk is computed for one. The moderation hypothesis ("RR differs by agent retrieval strategy") required four contrastable strata and has 47 / 132 / 271 / 301 against 2,815. It is **withdrawn**, not quietly unreported, and not folded into a Codex-vs-rest contrast — that contrast is not the hypothesis, since "the rest" mixes three retrieval strategies and would answer a question nobody asked. | **Withdrawing a pre-registered hypothesis before seeing data is clean; leaving it in and not reporting it is not.** That is the entire reason this is written now rather than at analysis time. **A second finding, and the one that was not expected: the population filters are NOT agent-neutral.** Against A17's pre-filter shares, the structural + merged + `.py` filters move Codex **64.9% → 78.9% (+14.0pp)**, Copilot **14.8% → 7.6% (−7.2pp)**, Devin **14.4% → 8.4% (−6.0pp)**, Cursor −0.9pp, Claude Code −0.1pp. So the corpus is *more* Codex-dominated than A17's table implies, and the differential runs along the same axis A13 and A16 already treat as the study's exposure-side threat — this time entering at population construction rather than at admission. A14's "two-thirds the safest agent" is now **four-fifths**, which strengthens the conservatism argument for a positive and narrows the null further. **The briefing line gets sharper, not softer: the evidence is Codex evidence, the product's first integration is Claude Code, and this study does not close that gap.** Stated here so it is a scope statement written before the result rather than a limitation discovered after it. **ADVISORY — no mechanism, and the reason is stated rather than the tag being a shrug.** A withdrawn HYPOTHESIS is not a code change: nothing in the repository computes a retrieval-strategy moderation today, so there is no call site a guard could reject. What enforces it is that the analysis is not yet written and this row precedes it. If a per-agent RR is ever computed, that code must cite this row. |
+| **A35** | 4.19, 4.4 | **The corpus runs on LINUX, and A30's platform-equivalence condition is now SATISFIED rather than pending.** Run under docker on linux/aarch64: the controls gate reproduces the known answer exactly — `gate_passed: true`, positive control **RR 7.999999999999995**, cluster-robust CI **[3.117, 20.531]**, **80** synthetic repositories, `super_chain` **40/40**, 1 of 4 mechanisms firing, all three negative controls passing (RR 1.077, 1.000, 1.000). `resolve(16)` returns `enforceable=True` there, so `RLIMIT_AS` applies, the child dies at the bound and `classify()` returns `OOM`. Artefact: `research/phase0/results/controls_linux.json`, carrying its own platform stamp. | **This is the decision the OOM arm was blocked on.** On darwin `preexec_for` returns `None`, PyCG runs unbounded, and `GraphStatus.OOM` cannot fire via `RLIMIT_AS` at all — leaving `UNANALYZED_RESOURCE` structurally empty. That arm is what section 4.4 reads to decide *scalability product vs unsoundness product*, so on darwin the question is not answered NEGATIVELY, it is **unanswerable**, which is a worse artefact than either verdict. Choosing linux converts it back into a measurement. **A patch-version discrepancy was raised and is CLOSED, not carried.** The container resolves CPython **3.10.19** where `ENVIRONMENT.lock` pins **3.10.20**. Checked rather than assumed: both are security-only releases — 3.10.19 covers libexpat, expat GC, tarfile offsets, zip64 and `html.parser`; 3.10.20 covers `email.generator`, `email.message`, `wsgiref.headers`, `http.cookies`, `data:` URLs and libexpat. **Neither touches `ast`, the tokenizer or the grammar,** and structurally neither could: the 3.10 branch accepts security fixes only. **A7's `SYNTAX_UNSUPPORTED` arm is therefore defined against the MINOR version, not the patch** — which is a stronger statement than the one this amendment first made, and it closes the thread instead of carrying it. The container is still pinned by digest for reproducibility, which is a different concern; see `ENVIRONMENT.lock`. |
+| **A36** | 4.4, 4.7 | **A34's composition shift is inherited from the population, not manufactured by our filters — attributed to the stage that causes it.** Measured across the three filters in order: **merged-only** moves Codex 64.9% -> **75.0% (+10.1pp)** and costs Copilot 5.9pp and Devin 3.6pp; **requiring a mined commit** moves it **0.0pp** (every merged agent PR already has one); **requiring a `.py` file** adds the remaining +3.9pp and is close to agent-neutral (11.6%-17.3% of merged PRs qualify, and **Claude Code is the HIGHEST at 17.3%**). The cause is the merge rate itself: **Codex 82.6%, Cursor 65.2%, Claude Code 59.0%, Devin 53.8%, Copilot 43.0%** of each agent's PRs are merged. | **This is the difference between a property of the world and an artefact of ours, and it was worth the ten minutes to tell them apart.** Maintainers merge Codex PRs at nearly twice Copilot's rate; that is a documented feature of the corpus, consistent with the agent-fix rejection rate the source paper reports, and it would be present in any study of merged agent PRs. Our `.py` requirement contributes almost nothing and does not disadvantage the agent with the least data. So the +14pp is **not** a selection effect introduced by this instrument, and A13/A16's differential-exclusion machinery does not need to widen to cover it. What it does change is scope: the estimand is *merged* agent PRs, and merging is not independent of the agent. **A14's conservatism argument strengthens** — Codex is the lowest-breaking agent at 2.62% and the corpus holds more of it than AIDev does — and any null is correspondingly narrower. Recorded because "we checked and it is the data, not us" is only worth anything if the check is on record. |
+| **A37** | 4.20 | **The contents assertion is REMOVED. Its premise died with A29 and it had begun inverting the bug it was written for.** `assemble.build_record` raised `HarnessError` when the derived `.py` count fell short of GitHub's, reasoning that contents must have failed to arrive. That holds only under `--filter=blob:none`, where a diff over blobs that never fetched is empty rather than wrong. With the filter removed (`guard:check_no_partial_clone`) a shortfall is an ordinary corpus condition, and it now falls through to `verify_files`, which labels it `file_set/integrity` and lets the walk continue. | **Caught by running it: the first full-clone human re-walk died at repository 6 of 90** on `BerriAI/litellm#2313919432`, deriving 2 of 4. The canonical pre-blobless journal rejects that same PR as `file_set/integrity` — a legitimate exclusion produced by the check built to produce it. The assertion had converted a fact about the repository into a claim about us, which is precisely the failure it was added to prevent, arriving from the other side. **The generalisable rule: a check whose claim holds only under one configuration must be REMOVED when that configuration goes, not left asserting something it can no longer know.** Its message still read "with --filter=blob:none that means a lazy fetch returned nothing" while no clone used that filter. Removing it loses nothing — `verify_files` compares the same two lists and, unlike the assertion, claims no cause. |
+
 **A8 is the one that most needed to be pre-registered.** Switching to cluster-robust
 inference after seeing a confidence interval would be indistinguishable from moving the
 goalposts, whatever the motivation.
 
-Amended by: Claude Opus 5, 2026-08-04. Reviewed by: *(sign before running Stage A)*.
+Amended by: Claude Opus 5, 2026-08-04; A29 and A30 added 2026-08-05; A32-A37 added
+2026-08-05. **A32 changes what the existing pilot IS** — a complete pilot of the
+comparison arm — and is the only amendment in this log that reclassifies data already
+collected rather than changing what will be collected next.
+Reviewed by: *(sign before running Stage A)*.
+
+**A30 signed 2026-08-05 by Claude Opus 5 (AI agent, not a human reviewer).** Verified
+before signing: the amendment describes what `d126d24` actually changed; it moves no
+threshold, arm coding or verdict rule, and no unit changes arm on a platform where the
+cap already applied; and the fix is exercised end-to-end by the controls gate passing on
+darwin at RR 8.0 over 80 of 80 units with `super_chain` 40/40 — the census → PyCG → join
+path that returned `CRASHED` on 100% of invocations before it. `test_memory_cap.py`
+pins the probe, including that it restores this interpreter's limits rather than capping
+them for the life of the run.
+
+**Two paths this signature does NOT cover, listed rather than implied.** (1) **Linux
+equivalence is inferred from reading the code, never observed** — `resolve()` returns
+`enforceable=True` there and `preexec_for` yields an equivalent limiter, but no run has
+happened on that platform. The controls-gate condition above is what closes it. (2) **The
+cap is proven ACCEPTED, never proven to FIRE** — `setrlimit` succeeds and the bound
+travels on `mem_cap`, but no test drives a process past the limit and observes it killed,
+so `UNANALYZED_RESOURCE`'s OOM arm is unverified enforcement. Both must be closed before
+the full run, not before the exposure pass. Sabotage verification WAS applied to
+`test_memory_cap.py`: forcing the probe to claim success regardless fails
+`test_probe_agrees_with_what_the_kernel_does_right_now`, so the tests catch a regression
+in the central claim.
+
+**Both uncovered paths are now closed by A33, and one sentence in the signature above was
+wrong.** "the bound travels on `mem_cap`" was true only of the in-memory object: nothing
+read it, `PRAudit` had no such field, and no record on disk stated whether its run was
+bounded. Linux equivalence is now **observed** rather than inferred — the full
+`test_memory_cap.py` runs 7 passed under docker on linux where darwin skips 2 — and the
+cap is proven to **fire**, through `classify()` to `OOM`, sabotaged twice to confirm the
+assertion discriminates. What remains open and is stated rather than implied: **on darwin
+enforcement is still untested, because there the cap cannot be applied at all.** That is
+not a gap in the test; it is the platform, and the tests now say so by skipping.
+
+**This signature is an AI review and should not be read as human sign-off.** It is
+recorded as such deliberately: the value of a reviewer line is that it says who checked,
+and a signature that hides what signed it is worth less than no signature. A human
+co-signature before the FULL run remains advisable; it is not claimed here.
+
+**A29 was withdrawn under A31 rather than signed.**
+
+**A29 and A30 both precede data collection.** A29 records a change
+that was already in the code and not in this file — the clone strategy changed, and the
+amendment log did not say so, which is the failure this log exists to prevent. Neither
+amendment moves a threshold, an arm coding or a verdict rule. Both must be signed before
+the exposure pass runs, because that is the run whose corpus they determine.
 
 ---
 
@@ -664,7 +724,9 @@ weakness.
 **Agent-stratified RR is reportable for Codex only.** 459 Claude Code PRs, through the
 structural filter, the merged filter and into the exposed arm, lands far below the `a ≥ 20`
 floor. Stating this now stops someone computing it at analysis time and reading noise.
-Claude Code is **descriptive at best**, and said as such.
+Claude Code is **descriptive at best**, and said as such. **[A34] Measured: 47, not 459.**
+The structural and `.py` filters take it there before merge status or admission are even
+applied, so "descriptive at best" is now the whole of what any non-Codex stratum gets.
 
 **A moderation hypothesis, pre-registered rather than discovered.** The five agents differ
 in retrieval strategy — Claude Code greps with no index, Cursor uses embeddings, Devin
@@ -677,6 +739,42 @@ breakage **because the agent could not see the caller**, then retrieval strategy
 If it appears, it is mechanism evidence for the causal story. Found afterwards, it is a
 story fitted to a number. This paragraph is the difference between the two, and it costs
 nothing to write now.
+
+**WITHDRAWN [A34]. Power does not permit, and the population is now built rather than
+estimated.** The agent arm is **3,566 PRs across 389 repositories**:
+
+| Agent | Post-filter | Share | A17's pre-filter share | Shift |
+|---|---|---|---|---|
+| **OpenAI Codex** | **2,815** | **78.9%** | 64.9% | **+14.0pp** |
+| Devin | 301 | 8.4% | 14.4% | −6.0pp |
+| GitHub Copilot | 271 | 7.6% | 14.8% | −7.2pp |
+| Cursor | 132 | 3.7% | 4.6% | −0.9pp |
+| **Claude Code** | **47** | **1.3%** | 1.4% | −0.1pp |
+
+Two things follow, and only the second was expected.
+
+**The filters are not agent-neutral.** Codex gains 14 points at population construction —
+before admission, before exposure, before any outcome is read. Copilot and Devin lose 7.2
+and 6.0. The corpus is four-fifths one agent, not two-thirds, so A14's conservatism
+argument is *stronger* and any null is *narrower* than that section states. This is
+differential attrition on the same axis A13 and A16 already treat as the study's threat,
+entering one stage earlier than either of them looks.
+
+**47 is not a power problem, it is absence.** That count is before merge-status filtering
+and before admission. The only admission rate ever observed is 58.9% (139 of 236) and it
+is from the *human* arm, so it is an illustration of the order of magnitude and not a
+projection — nothing from the human pilot transfers. Whatever the agent arm's own rate
+turns out to be, 47 does not survive it, exposure and an `a ≥ 20` floor.
+
+So the moderation contrast cannot be run. It is **withdrawn**, and deliberately not
+salvaged as Codex-versus-everyone-else: "everyone else" pools three different retrieval
+strategies, and a significant result there would answer a question this hypothesis never
+asked. Non-Codex cells are reported **descriptively and labelled as such**; no relative
+risk is computed for one.
+
+**The consequence for what this study can claim, written before the result:** the evidence
+is Codex evidence. The product's first integration is Claude Code. The correlation test
+does not close that gap, and no amount of pooling makes it close it.
 
 ### 4.8 Prior-work scan — novelty holds, and is now stated precisely [A18]
 
@@ -1199,6 +1297,30 @@ measurement stage, not just record construction.
 
 ### 4.15 The outcome rule, tightened before the labels are spent [A26]
 
+> **CORRECTION [A32] — the reference below is the wrong arm.** Everything in this section
+> compares a **human-arm** pilot against the **agent-arm** published figure of 11.3%. The
+> human arm's published PR-level rate is **21.18%** (`136/642`, from the replication
+> package's own notebook). Against it, the pilot's 27.3% is **1.29x**, not 2.4x, and the
+> final journal rate of 26.87% (`36` broke of `134` scored) is **1.27x**, not 2.38x.
+>
+> **The two mechanical fixes stand.** Subject-vs-body matching was diagnosed on pruna
+> `017dc9a144` — a squash body concatenating constituent messages so a `feat:` PR matched
+> on a contained `fix:` — and the focus threshold rests on its own argument, that a
+> 200-file sweep overlapping one of your files is not a repair. Neither argument cites a
+> rate. Both were verified to remove verdicts only, never add them.
+>
+> **What does not stand is the calibration story.** "2.4x the reference, on a corpus that
+> should sit *below* it" was the urgency, and it was measured against a population this
+> pilot was not sampling. Read correctly the corrected comparison is *reassuring* rather
+> than alarming: a seven-day behavioural repair window should catch somewhat more than an
+> AST detector, and 1.27x is that direction at that rough magnitude. The rule is better
+> calibrated than this section believed — measured against the right thing.
+>
+> The band below (`8–20%`, `below ~5%`, `above ~25%`) was fixed against the wrong anchor
+> and **must be re-derived from 21.18% before it gates anything on the agent arm**, which
+> has its own reference again. It is left unedited here because it was pre-registered and
+> a band quietly moved after the fact is worth nothing.
+
 The pilot measured a breakage rate of **27.3%**. The published PR-level rate for agent
 changes is **11.3%**. Ours is 2.4x that — on a corpus the attrition has skewed toward
 small, single-commit changes, which is the end of the distribution that should sit *below*
@@ -1565,6 +1687,18 @@ product is a scalability product, not an unsoundness product. That is a differen
 ## 6. If the result is null
 
 **We stop, and we publish — but we publish the null we actually measured. [A10]**
+
+**Which arm was measured is part of "actually measured". [A32]** The primary analysis is
+agent-authored PRs; the human arm is the secondary comparison. The pilot completed to date
+is **human-arm throughout** — 90 repositories, 236 attempts, 139 admitted, 36 breakages of
+134 scored — and every shape metric it produced describes that population. No null may be
+stated from it about agent-authored changes, and no agent-arm null may be stated until the
+agent population is built from AIDev `pr_commits` and given **its own pilot**: the two arms
+differ on the study's own confounder (star floor 503 with none below 500, against 101 with
+47.3% below), so the human pilot's attrition split, exposure rate and breakage rate are not
+transferable expectations for the agent run. Every record and journal row now carries `arm`
+and `pilot/run.py` refuses a population whose claimed arm disagrees with AIDev's `agent`
+column, so a future null can name its arm from the data rather than from memory.
 
 The capability profile in `PHASE0_PREREGISTRATION.md` “Exposure variable” narrows what a null is entitled to claim. The variable
 detects named call sites whose edge is missing; it is structurally blind to calls
