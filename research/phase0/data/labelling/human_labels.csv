@@ -1,13 +1,13 @@
 label_id,verdict,confidence,evidence,reasoning,minutes
 1,CLEAN,high,no footer/singlehtml commit in window,"28 window commits are an ongoing docs modernisation sweep (mermaid, restructure, json targets) touching conf.py/Makefile. Nothing addresses the footer removal.",9
-2,BROKE,medium,"82d1b7e175 'small fixes', a3eca5500e 'fixing small bugs', 046c3258e1 'fix tools issue'","PR CREATED dev/tau-bench/run_rl.py. Three explicit fix/bug commits land on that same new file within 3 days, so they repair code this PR introduced.",12
+2,BROKE,low,"82d1b7e175 'small fixes', a3eca5500e 'fixing small bugs', 046c3258e1 'fix tools issue'","PR CREATED dev/tau-bench/run_rl.py. Three explicit fix/bug commits land on that same new file within 3 days, so they repair code this PR introduced.",12
 3,CLEAN,high,zero commits in the 7-day window,"Nothing landed on the base branch after the merge, so nothing could have undone it.",4
 4,CLEAN,high,no window commit touches backup_lidarr_2csv.py,"11 window commits, all on lidarr_add_from_list.py, requirements.txt, arr_gui.py or shows. The file this PR changed is untouched.",8
 5,BROKE,high,"35697b23a4 and 67d96b73a0, both on backend/database.py","PR fixed the Docker SQLite database path. Two later commits repair the same concern in the same file: automatic db path detection, then ensuring the db directory exists.",11
-6,BROKE,medium,1871c690d7 'Fix threading/asyncio warnings in model fetch' on remote_config.py,"PR made remote config loading async. Only 3 of 158 window commits overlap, and one fixes asyncio/threading warnings in the file it made async.",10
+6,BROKE,low,1871c690d7 'Fix threading/asyncio warnings in model fetch' on remote_config.py,"PR made remote config loading async. Only 3 of 158 window commits overlap, and one fixes asyncio/threading warnings in the file it made async.",10
 7,CLEAN,high,zero commits in the 7-day window,Nothing landed after the merge.,4
 8,CLEAN,high,window contains only this PR's own merge commit,Nothing followed it inside the window.,5
-9,BROKE,medium,51ea20aefe 'Fix up routeserver' touching cli.py,PR rewrote the CLI with click. A later commit fixes routeserver and touches cli.py. Other overlaps are an unrelated mypy/typing/autoformat sweep.,12
+9,BROKE,low,51ea20aefe 'Fix up routeserver' touching cli.py,PR rewrote the CLI with click. A later commit fixes routeserver and touches cli.py. Other overlaps are an unrelated mypy/typing/autoformat sweep.,12
 10,BROKE,high,66572cbe6d 'Fix e2e tests with Grafana' on capture-screenshots.js and generate-traffic.sh,PR ADDED those Grafana e2e scripts. The fix lands the same day on files this PR created.,9
 11,UNSURE,low,ec0ae570a5 'Fix Dashboard not being opened in browser',"Repo is very active (47 commits/week) and agent.py is a hub file, so most of 29 overlaps are routine churn. The one candidate fixes _open_dashboard(port -> url), browser-launch logic that pre-dates this PR, not the tool analytics it added. Cannot attribute either way.",14
 12,BROKE,high,"b89cb22cb0 on livecodebench.py+code.py, df4586427e 'Fix bug in Formatter' on operators.py",Two separate next-day fixes land on three of the five files this PR changed.,10
@@ -17,5 +17,5 @@ label_id,verdict,confidence,evidence,reasoning,minutes
 16,CLEAN,high,PR #114 wrote '- [Python](./python/README.md)' WITH the closing paren,df70c0434c repairs a missing ')' that this PR did not introduce; the diff shows this PR's own line was correct. Someone else broke it afterwards.,13
 17,CLEAN,high,zero commits in the 7-day window,Nothing landed after the merge.,4
 18,CLEAN,high,no window commit touches radarr_add_from_list.py,"15 window commits, none on the file this PR changed.",7
-19,BROKE,medium,e42b1dfd61 'Fixed Things' modifying lidarr_add_from_list.py,PR refactored that exact single file; hours later a Fix commit modifies only that file. Subject is uninformative but the file and timing are specific.,11
+19,BROKE,low,e42b1dfd61 'Fixed Things' modifying lidarr_add_from_list.py,PR refactored that exact single file; hours later a Fix commit modifies only that file. Subject is uninformative but the file and timing are specific.,11
 20,CLEAN,high,zero commits in the 7-day window,Nothing landed after the merge.,4
