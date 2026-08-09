@@ -132,6 +132,38 @@ call is soft-only rather than the probe being widened to match.
 - **The enforcement tests skip rather than pass where the cap cannot apply**, so darwin
   reports enforcement as untested instead of green.
 
+#### `research/phase0/src/phase0/handlabel/` — the gate, and what it must consume
+
+The 20-PR gate certifies the outcome classifier against human judgement. It can only do
+that if it runs **the** classifier, on **the** input the study uses.
+
+`draw._as_record` rebuilt that input from a `Candidate` instead of reading the `PRRecord`
+the pipeline had already written, and got three fields wrong — each one a defect the
+pipeline had already fixed and documented above:
+
+| field | rebuilt as | consequence |
+|---|---|---|
+| `base_ref` | never set → `""` | `base_ref_of("")` returns `"HEAD"`, so the scan walked the clone's **default** branch, not the branch the PR merged into |
+| `arm` | hardcoded `"human"` | on a draw invoked `--arm agent` |
+| `merged_sha` | `commit_shas[-1]` | the PR's last branch commit, not the merge commit the scan needs for reachability and self-exclusion |
+
+**The gate therefore certified a classifier the study does not run**, and 15.5% of the
+corpus merges into `dev`, `develop` or a feature branch — so it was wrong on roughly one
+PR in six, not on a handful. Demonstrated on `camUrban/PteraSoftware#32`: its real base
+`release-3.1.0` is deleted, so the pipeline returns `UNSCANNABLE`, while the rebuilt input
+walked `main`, found a commit eighty minutes after the merge, and returned `BROKE`.
+
+`draw.py`'s own comment claimed the base-branch fix applied here while `_as_record` never
+passed `base_ref` — a comment asserting a property the code did not have.
+
+- **`record_for` returns the stored object, never a copy.** `sample_for_labelling` now
+  requires `--records`, and a candidate absent from that map was never admitted, so the
+  gate does not certify the classifier on a PR the study never analyses.
+- **Nothing exercised `draw` at all.** No test called it, which is how three wrong fields
+  survived. `draw` clones over the network and cannot run offline, so the invariant is
+  factored into `record_for` and asserted on **identity** — an object that merely compares
+  equal is exactly what a future rebuild would produce.
+
 #### `research/phase0/src/phase0/outcome/` — the dependent variable
 
 The outcome scan answers "did a revert or a fix land within 7 days". It became a package
