@@ -1,0 +1,80 @@
+{
+  "admitted": 2,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 3,
+  "broke": 1,
+  "finished_utc": "2026-08-09T08:48:21+00:00",
+  "of": 90,
+  "position": 56,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "langchain-ai/langgraph",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 14,
+      "changed_symbols": null,
+      "commit_count": 2,
+      "corpus_py_files": 1,
+      "derived_files": null,
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "2338275002",
+      "repo": "langchain-ai/langgraph",
+      "stage": "no_symbols",
+      "stars": 16579
+    },
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 541,
+      "changed_symbols": 97,
+      "commit_count": 11,
+      "corpus_py_files": 21,
+      "derived_files": 21,
+      "github_changed_files": 23,
+      "github_files_truncated": false,
+      "github_py_files": 21,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "2494218951",
+      "repo": "langchain-ai/langgraph",
+      "stage": "",
+      "stars": 16579
+    },
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 1110,
+      "changed_symbols": 57,
+      "commit_count": 1,
+      "corpus_py_files": 10,
+      "derived_files": 10,
+      "github_changed_files": 14,
+      "github_files_truncated": false,
+      "github_py_files": 10,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "2542040727",
+      "repo": "langchain-ai/langgraph",
+      "stage": "",
+      "stars": 16579
+    }
+  ],
+  "scanned": 2,
+  "stars": 16579,
+  "started_utc": "2026-08-09T08:46:54+00:00"
+}

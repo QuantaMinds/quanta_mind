@@ -1,0 +1,80 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Copilot"
+  ],
+  "attempts": 3,
+  "broke": 0,
+  "finished_utc": "2026-08-09T07:21:16+00:00",
+  "of": 72,
+  "position": 15,
+  "rejected_by_stage": {
+    "clone_timeout": 3
+  },
+  "repo": "Azure/azure-sdk-for-java",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "unknown",
+      "category": "resource",
+      "changed_lines": -1,
+      "changed_symbols": null,
+      "commit_count": 17,
+      "corpus_py_files": 10,
+      "derived_files": null,
+      "github_changed_files": null,
+      "github_files_truncated": false,
+      "github_py_files": null,
+      "merge_on_base": "unknown",
+      "outcome": "",
+      "pr_id": "3119512382",
+      "repo": "Azure/azure-sdk-for-java",
+      "stage": "clone_timeout",
+      "stars": -1
+    },
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "unknown",
+      "category": "resource",
+      "changed_lines": -1,
+      "changed_symbols": null,
+      "commit_count": 11,
+      "corpus_py_files": 13,
+      "derived_files": null,
+      "github_changed_files": null,
+      "github_files_truncated": false,
+      "github_py_files": null,
+      "merge_on_base": "unknown",
+      "outcome": "",
+      "pr_id": "3169497988",
+      "repo": "Azure/azure-sdk-for-java",
+      "stage": "clone_timeout",
+      "stars": -1
+    },
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "unknown",
+      "category": "resource",
+      "changed_lines": -1,
+      "changed_symbols": null,
+      "commit_count": 5,
+      "corpus_py_files": 2,
+      "derived_files": null,
+      "github_changed_files": null,
+      "github_files_truncated": false,
+      "github_py_files": null,
+      "merge_on_base": "unknown",
+      "outcome": "",
+      "pr_id": "3169577770",
+      "repo": "Azure/azure-sdk-for-java",
+      "stage": "clone_timeout",
+      "stars": -1
+    }
+  ],
+  "scanned": 0,
+  "stars": -1,
+  "started_utc": "2026-08-09T07:06:16+00:00"
+}

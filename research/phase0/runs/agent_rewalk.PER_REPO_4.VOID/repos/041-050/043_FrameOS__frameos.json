@@ -1,0 +1,38 @@
+{
+  "admitted": 1,
+  "arms": [
+    "OpenAI_Codex"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-09T06:14:59+00:00",
+  "of": 72,
+  "position": 43,
+  "rejected_by_stage": {},
+  "repo": "FrameOS/frameos",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 939,
+      "changed_symbols": 34,
+      "commit_count": 5,
+      "corpus_py_files": 3,
+      "derived_files": 3,
+      "github_changed_files": 8,
+      "github_files_truncated": false,
+      "github_py_files": 3,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "3106116444",
+      "repo": "FrameOS/frameos",
+      "stage": "",
+      "stars": 380
+    }
+  ],
+  "scanned": 1,
+  "stars": 380,
+  "started_utc": "2026-08-09T06:14:25+00:00"
+}

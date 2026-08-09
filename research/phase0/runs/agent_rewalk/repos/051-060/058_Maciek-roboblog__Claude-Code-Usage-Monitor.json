@@ -1,0 +1,38 @@
+{
+  "admitted": 1,
+  "arms": [
+    "OpenAI_Codex"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-09T07:56:24+00:00",
+  "of": 72,
+  "position": 58,
+  "rejected_by_stage": {},
+  "repo": "Maciek-roboblog/Claude-Code-Usage-Monitor",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "no",
+      "category": "",
+      "changed_lines": 62,
+      "changed_symbols": 1,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": 1,
+      "github_changed_files": 2,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "3159106430",
+      "repo": "Maciek-roboblog/Claude-Code-Usage-Monitor",
+      "stage": "",
+      "stars": 3636
+    }
+  ],
+  "scanned": 1,
+  "stars": 3636,
+  "started_utc": "2026-08-09T07:56:22+00:00"
+}

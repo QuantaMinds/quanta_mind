@@ -1,0 +1,38 @@
+{
+  "admitted": 1,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 1,
+  "broke": 1,
+  "finished_utc": "2026-08-09T08:39:57+00:00",
+  "of": 90,
+  "position": 43,
+  "rejected_by_stage": {},
+  "repo": "electricitymaps/electricitymaps-contrib",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 15,
+      "changed_symbols": 2,
+      "commit_count": 1,
+      "corpus_py_files": 3,
+      "derived_files": 3,
+      "github_changed_files": 5,
+      "github_files_truncated": false,
+      "github_py_files": 3,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "2604844532",
+      "repo": "electricitymaps/electricitymaps-contrib",
+      "stage": "",
+      "stars": 3870
+    }
+  ],
+  "scanned": 1,
+  "stars": 3870,
+  "started_utc": "2026-08-09T08:39:38+00:00"
+}
