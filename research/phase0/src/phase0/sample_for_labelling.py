@@ -31,6 +31,7 @@ from phase0 import arm
 from phase0.handlabel.draw import draw
 from phase0.handlabel.files import write_blind, write_key, write_label_template
 from phase0.handlabel.select import Candidate
+from phase0.pipeline import records_file
 from phase0.population import for_arm
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -55,6 +56,14 @@ def _parse(argv: list[str]) -> argparse.Namespace:
         "--seed", type=int, required=True, help="fixed, so the draw is reproducible"
     )
     parser.add_argument("--out", type=Path, default=ROOT / "data" / "labelling" / "sample.csv")
+    parser.add_argument(
+        "--records",
+        type=Path,
+        required=True,
+        help="the pilot's own PRRecords for this arm. REQUIRED and without a default: the "
+        "gate certifies the classifier on the records the study analyses, and rebuilding "
+        "that input here is what made it certify a different classifier",
+    )
     return parser.parse_args(argv)
 
 
@@ -82,9 +91,21 @@ def main(argv: list[str] | None = None) -> int:
             flush=True,
         )
 
+    # The pipeline's own records, not a reconstruction of them. `_as_record` used to
+    # rebuild the scan's input here and got `base_ref`, `arm` and `merged_sha` wrong, so
+    # the gate certified a classifier the study does not run. A candidate absent from this
+    # map was never admitted, and the gate must not certify the classifier on a PR the
+    # study never analyses.
+    records = {r.pr_id: r for r in records_file.read(args.records)}
+    if not records:
+        print(f"{args.records} holds no records -- run the pilot for this arm first.")
+        return 1
+    print(f"{len(records)} admitted records to draw from", flush=True)
+
     drawn = draw(
         population,
         WORKSPACE,
+        records,
         n_broke=args.n_broke,
         n_clean=args.n_clean,
         seed=args.seed,
