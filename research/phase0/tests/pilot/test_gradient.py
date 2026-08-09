@@ -24,15 +24,25 @@ from phase0.pilot.attempt import Attempt
 from phase0.pilot.gradient import MIN_BAND_N, parent_gradient
 
 
-def _rows(commits: int, total: int, failures: int) -> list[Attempt]:
-    """`total` attempts in one commit-count band, `failures` of them parent_commit."""
+def _rows(commits: int, total: int, failures: int, *, one_repo: bool = False) -> list[Attempt]:
+    """`total` attempts in one commit-count band, `failures` of them parent_commit.
+
+    Failures are spread across DISTINCT repositories by default, because that is what a
+    gradient across the corpus means. The fixture used to hardcode one repository for
+    every row, which was invisible while the check ignored repositories — and it is
+    exactly the shape that made the human arm's 21-plus band read as a size effect when
+    all three of its failures were one project that had rewritten its history.
+
+    `one_repo=True` forces the degenerate case on purpose, for the test that pins the
+    refusal.
+    """
     made = []
     for index in range(total):
         stage = "parent_commit" if index < failures else ""
         made.append(
             Attempt(
                 pr_id=f"{commits}-{index}",
-                repo="o/r",
+                repo="o/r" if one_repo else f"o/r{index}",
                 admitted=not stage,
                 stage=stage,
                 category="integrity" if stage else "",
@@ -129,3 +139,46 @@ def test_a_dip_then_a_rise_is_not_monotone() -> None:
     result = parent_gradient(attempts)
 
     assert result["still_rises_with_size"] is False
+
+
+def test_a_spike_confined_to_the_top_band_is_not_flattened() -> None:
+    """Monotonicity answers the wrong question, and this is the shape that exposed it.
+
+    The concern is whether failure CONCENTRATES on the largest PRs. `still_rises_with_size`
+    asks whether it climbs at every step. A band that declines, declines, then spikes
+    answers no to the second and yes to the first, and the human arm's real data was
+    reported as "gradient flattened" at 25.0% against 1.96% below it, P = 0.0060.
+    """
+    # Declines, then spikes -- 15%, 10%, 60%. Monotone says no; concentration says yes.
+    attempts = _rows(1, 20, 3) + _rows(3, 20, 2) + _rows(30, 20, 12)
+
+    result = parent_gradient(attempts)
+
+    assert result["still_rises_with_size"] is False
+    assert result["top_band_elevated"] is True
+    assert result["verdict"] == "top band elevated"
+
+
+def test_an_elevated_top_band_from_one_repository_refuses_a_verdict() -> None:
+    """One project's history is not a size effect, and neither verdict is honest.
+
+    All three failures in the human arm's 21-plus band were `featureform/enrichmcp`,
+    which had rewritten its history so its merge commits exist in no clone -- see
+    `results/handverify_21plus.md`. Elevation alone would have called that a size effect
+    and sent someone chasing a phantom.
+    """
+    attempts = _rows(1, 20, 3) + _rows(3, 20, 2) + _rows(30, 20, 12, one_repo=True)
+
+    result = parent_gradient(attempts)
+
+    assert result["top_band_elevated"] is True
+    assert result["top_band_failure_repos"] == 1
+    assert result["verdict"] == "single_repo_band, verdict unavailable"
+
+
+def test_failure_repos_are_reported_per_band() -> None:
+    """The column that made the one-repo concentration visible at all."""
+    result = parent_gradient(_rows(1, 10, 3))
+    bands = result["bands"]
+    assert isinstance(bands, dict)
+    assert bands["1"]["failure_repos"] == ["o/r0", "o/r1", "o/r2"]
