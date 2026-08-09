@@ -52,7 +52,8 @@ callers_of("BasePaymentHandler.validate")
   coverage(payments/) = 91%
 ```
 
-The agent now says: *"I updated 9, not 3. One I could not verify — check `legacy.py:88`."*
+The agent now says: *"I updated 9, not 3. One I could not verify — check `legacy.py:88`."*  <!-- citation:allow — an illustration of the product's own output, not a reference to this repo -->
+
 
 **The last line is the product.** Every competitor would have returned 3 and sounded
 certain.

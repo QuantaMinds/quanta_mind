@@ -413,8 +413,8 @@ whole arm is suspect.
 | `results/controls.json` | positive and negative control results |
 | `data/exposure.jsonl`, `data/outcome.jsonl` | raw per-PR records, published |
 | `ENVIRONMENT.lock` | every pinned version |
-| `PHASE0_PREREGISTRATION.md `PHASE0_RUNBOOK.md` “Deliverables”` | filled and signed |
-| `docs/findings/phase0-writeup.md` | the narrative, **including the failure path taken if any** |
+| `PHASE0_PREREGISTRATION.md` “Results” | filled and signed |
+| `docs/findings/phase0-writeup.md` — NOT YET WRITTEN | the narrative, **including the failure path taken if any** |  citation:allow
 
 The writeup is written **whatever the answer is.** A null with clean controls is a real
 scientific result, an O-1A original-contribution artifact, and an honest close to a
