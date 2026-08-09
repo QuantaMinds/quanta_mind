@@ -49,19 +49,16 @@ class _Scored:
     evidence_sha: str
 
 
-def _as_record(candidate: Candidate) -> PRRecord:
-    """The classifier's input. `parent_sha` is unused by the outcome scan."""
-    return PRRecord(
-        pr_id=str(candidate.pr_id),
-        repo=candidate.repo,
-        language="python",
-        parent_sha="",
-        merged_sha=candidate.commit_shas[-1] if candidate.commit_shas else "",
-        merged_at=candidate.merged_at,
-        changed_files=candidate.changed_files,
-        changed_symbols=(),
-        arm="human",
-    )
+def record_for(candidate: Candidate, records: dict[str, PRRecord]) -> PRRecord | None:
+    """The pipeline's OWN record, or None when this candidate was never admitted.
+
+    Returns the stored object rather than building one. `_as_record` used to rebuild the
+    scan's input here and got `base_ref`, `arm` and `merged_sha` wrong -- three defects the
+    pipeline had already fixed -- so the gate certified a classifier the study does not
+    run. Named rather than inlined because `draw` clones over the network and cannot be
+    tested offline, and nothing exercised `draw` at all while that drift survived.
+    """
+    return records.get(str(candidate.pr_id))
 
 
 def _shuffled_by_repo(
@@ -84,6 +81,7 @@ def _shuffled_by_repo(
 def draw(
     population: list[Candidate],
     workspace: Path,
+    records: dict[str, PRRecord],
     *,
     n_broke: int,
     n_clean: int,
@@ -121,8 +119,12 @@ def draw(
                 for candidate in candidates:
                     if all(len(buckets[o]) >= wanted[o] for o in wanted):
                         break
+                    # The pipeline's OWN record, never a reconstruction.
+                    source = record_for(candidate, records)
+                    if source is None:
+                        continue
                     considered += 1
-                    record = scan(path, _as_record(candidate))
+                    record = scan(path, source)
                     # Exhaustive rather than a membership test. `buckets` holds two keys,
                     # so the version that indexed it with the verdict directly raised
                     # KeyError the moment a third state existed -- and a fourth would do
