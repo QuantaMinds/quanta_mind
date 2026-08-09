@@ -35,6 +35,12 @@ CATEGORIES: dict[str, str] = {
     "repo_gone": "resource",
     "merge_metadata": "resource",
     "no_merge_sha": "resource",
+    # GitHub supplied no file list, so there is nothing to verify the parent against.
+    # `resource`, not `integrity`: the missing thing is OUR authority, not the corpus's
+    # account of the unit. `verify_files` used to substitute the corpus list here, which
+    # rejected at `file_set` -- an `integrity` label blaming the repository for our gap,
+    # and biased toward the PRs the corpus mis-attributes most, i.e. by size.
+    "no_file_authority": "resource",
     "parent_commit": "integrity",
     "file_set": "integrity",
     "no_python": "restricted",

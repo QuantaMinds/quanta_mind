@@ -13,9 +13,21 @@ WHY:  Split from `assemble.py` because resolving a parent and proving it right a
       wrong parent that passes verification, which is the single failure mode surviving
       every downstream check, on the primary variable. Set equality refuses it.
 
-      The ratio survives only where equality cannot be trusted: when the authority is
-      the corpus rather than GitHub, or when GitHub's list came back at the page limit
-      and may be truncated -- a truncated list would reject a perfectly correct parent.
+      The ratio survives in ONE place: when GitHub's list came back at the page limit and
+      may be truncated. There the authority is still GitHub, merely possibly incomplete,
+      and strict equality would reject a perfectly correct parent.
+
+      There is no corpus fallback. `authority = merge.api_files or corpus_files` used to
+      substitute the corpus's list when GitHub supplied none, and no amendment ever
+      authorised that -- it was inherited, never argued. The corpus OVER-attributes, so
+      the substitution had a direction: measured against GitHub, it claimed 104, 65 and 40
+      `.py` files for PRs whose real lists were 2, 9 and 2 with none of them Python. A
+      correct diff against an inflated expectation scores low agreement and is rejected at
+      `file_set` -- an `integrity` verdict, blaming the repository's account of itself for
+      a gap that was ours, landing hardest on the PRs the corpus mis-attributes most, which
+      correlates with size. That is A16's confounder entering through our own gate.
+
+      An absent authority is now `no_file_authority`, categorised `resource` and counted.
 IMPORTS: phase0.github_pulls, phase0.pipeline.{changed,rejection}.
 CONSUMED BY: pipeline/assemble.py; tests/pipeline/test_assemble.py.
 """
@@ -32,13 +44,21 @@ MIN_FILE_AGREEMENT = 0.6
 API_FILE_PAGE = 100
 
 
-def verify_files(
-    pr_id: str, merge: MergeInfo, corpus_files: tuple[str, ...], found: frozenset[str]
-) -> Rejection | None:
-    """None when the parent is corroborated, a `Rejection` when it is not."""
-    authority = merge.api_files or corpus_files
-    trusted = bool(merge.api_files) and len(merge.api_files) < API_FILE_PAGE
-    expected = frozenset(f for f in authority if f.endswith(".py"))
+def verify_files(pr_id: str, merge: MergeInfo, found: frozenset[str]) -> Rejection | None:
+    """None when the parent is corroborated, a `Rejection` when it is not.
+
+    Takes no corpus list. There is nothing to fall back TO: verification either has
+    GitHub's account of the PR or it does not, and the second is a typed absence.
+    """
+    if not merge.api_files:
+        return Rejection(
+            pr_id,
+            "no_file_authority",
+            "GitHub supplied no file list; there is nothing to verify the parent against.",
+        )
+
+    trusted = len(merge.api_files) < API_FILE_PAGE
+    expected = frozenset(f for f in merge.api_files if f.endswith(".py"))
     agreement = file_agreement(expected, found)
 
     if trusted:
@@ -56,13 +76,15 @@ def verify_files(
             )
         return None
 
+    # Only reachable when GitHub's list is exactly one page long and so may be cut. The
+    # authority IS GitHub here, merely possibly incomplete, and strict equality would
+    # reject a correct parent for files the second page would have listed.
     if agreement < MIN_FILE_AGREEMENT:
-        source = "github (truncated)" if merge.api_files else "corpus"
         return Rejection(
             pr_id,
             "file_set",
-            f"{source} lists {len(expected)} .py files, the diff shows {len(found)}; "
-            f"agreement {agreement:.2f} < {MIN_FILE_AGREEMENT}.",
+            f"github (truncated at {API_FILE_PAGE}) lists {len(expected)} .py files, the "
+            f"diff shows {len(found)}; agreement {agreement:.2f} < {MIN_FILE_AGREEMENT}.",
             agreement,
         )
     return None
