@@ -26,6 +26,7 @@ from phase0.extract_prs import PRRecord
 from phase0.handlabel.select import Candidate
 from phase0.pilot.attempt import Attempt
 from phase0.pipeline.rejection import Rejection
+from phase0.pipeline.verify_files import API_FILE_PAGE
 from phase0.pipeline.worktree import CloneFailed
 
 
@@ -38,6 +39,7 @@ def attempt_for(
     on_default: str = "unknown",
     on_base: str = "unknown",
     lines_changed: int = -1,
+    api_files: Sequence[str] | None = None,
 ) -> Attempt:
     """One attempt, with the covariates attrition may track. Never a verdict.
 
@@ -46,11 +48,27 @@ def attempt_for(
     restating an assumption instead of recording a fact.
     """
     corpus_py = sum(1 for f in candidate.changed_files if f.endswith(".py"))
-    stage, category, files, symbols = "", "", 0, 0
+    # None, not 0. These were 0 on every rejected row, which made "derivation never ran"
+    # read as "derivation found nothing" -- and a count of rows reading 0 was then
+    # arithmetically identical to a count of rejected rows. A `no_symbols` rejection
+    # cannot have derived zero files, because `assemble.py` only reaches that branch when
+    # `derived` is non-empty, yet it recorded 0 like everything else.
+    stage, category = "", ""
+    files: int | None = None
+    symbols: int | None = None
     if isinstance(outcome, Rejection):
         stage, category = outcome.stage, outcome.category
+        if outcome.stage == "no_python":
+            # The one stage where zero is a MEASUREMENT: `if not derived` is the rejection.
+            files = 0
     else:
         files, symbols = len(outcome.changed_files), len(outcome.changed_symbols)
+    # GitHub's own list, recorded rather than consumed and dropped. None when the API gave
+    # us nothing -- an empty list and a missing one are different facts. `truncated` is set
+    # when the list is exactly one page long, because `github_pulls` fetches one page deep
+    # and a list of exactly that length cannot be told from a longer one that was cut.
+    gh_files = None if api_files is None else len(api_files)
+    gh_py = None if api_files is None else sum(1 for f in api_files if f.endswith(".py"))
     return Attempt(
         pr_id=str(candidate.pr_id),
         repo=candidate.repo,
@@ -61,6 +79,9 @@ def attempt_for(
         corpus_py_files=corpus_py,
         derived_files=files,
         changed_symbols=symbols,
+        github_changed_files=gh_files,
+        github_py_files=gh_py,
+        github_files_truncated=gh_files is not None and gh_files >= API_FILE_PAGE,
         stars=stars,
         outcome=breakage,
         base_on_default=on_default,
