@@ -63,7 +63,14 @@ def _cross(attempts: list[Attempt], bands: tuple[tuple[str, int, int], ...], fie
     """Admission rate within each band, so a trend is visible rather than pooled away."""
     out: dict[str, dict[str, object]] = {}
     for name, _, _ in bands:
-        rows = [a for a in attempts if _band(getattr(a, field), bands) == name]
+        # A row whose banding field was never measured is dropped, not banded. `_band`
+        # would send None to "unknown", which then reads as a band alongside the real
+        # ones; a PR we did not measure belongs in no band at all.
+        rows = [
+            a
+            for a in attempts
+            if getattr(a, field) is not None and _band(getattr(a, field), bands) == name
+        ]
         if not rows:
             continue
         admitted = sum(1 for a in rows if a.admitted)
@@ -80,8 +87,12 @@ def report(attempts: list[Attempt], clone_failures: int, repos: int) -> dict[str
     """Everything the pilot is for, and no point estimate of an effect."""
     admitted = [a for a in attempts if a.admitted]
     rejected = [a for a in attempts if not a.admitted]
-    symbols = sorted(a.changed_symbols for a in admitted)
-    files = sorted(a.derived_files for a in admitted)
+    # `is not None`, not `or 0`. Both are measured on every admitted row today, so an
+    # absent one means a journal that did not record it -- and substituting 0 would put a
+    # PR that changed an unknown number of files into the "changed nothing" bucket, which
+    # is the shape of error this field was just fixed for.
+    symbols = sorted(a.changed_symbols for a in admitted if a.changed_symbols is not None)
+    files = sorted(a.derived_files for a in admitted if a.derived_files is not None)
     # UNSCANNABLE is excluded from the denominator, not counted clean. Folding it in
     # would restore the exact bias the base-branch fix removed, one layer up.
     scanned = [a for a in admitted if a.outcome in ("broke", "clean")]
@@ -107,7 +118,15 @@ def report(attempts: list[Attempt], clone_failures: int, repos: int) -> dict[str
         "rejected_by_stage": dict(Counter(a.stage for a in rejected)),
         "rejected_by_category": dict(Counter(a.category for a in rejected)),
         "attrition_by_commit_count": _cross(attempts, COMMIT_BANDS, "commit_count"),
+        # Kept under its original name so pre-fix runs stay comparable, but it bands on the
+        # CORPUS's claim, which is not a measurement: verified against GitHub, the corpus
+        # said 104, 65 and 40 `.py` files for PRs whose real file lists were 2, 9 and 2
+        # with zero `.py` among them. A25 reads this table to decide whether attrition
+        # tracks patch size; on these bands it cannot.
         "attrition_by_corpus_file_count": _cross(attempts, FILE_BANDS, "corpus_py_files"),
+        # The same banding over GitHub's own count. Rows predating the column are dropped
+        # rather than banded, so this table is empty on an old journal instead of wrong.
+        "attrition_by_github_file_count": _cross(attempts, FILE_BANDS, "github_py_files"),
         # A20, pre-registered and previously unimplemented. Commit count and file count
         # are correlates of patch size; changed lines is the variable A20 names, and
         # `file_set` is the gate it names. A rising rate across quartiles makes A16's

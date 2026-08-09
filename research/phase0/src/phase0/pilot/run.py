@@ -95,6 +95,8 @@ def main(argv: list[str] | None = None) -> int:
         on_default: str = "unknown",
         on_base: str = "unknown",
         lines_changed: int = -1,
+        # None when the API supplied no list; `()` would claim GitHub reported zero files.
+        api_files: tuple[str, ...] | None = None,
     ) -> None:
         """One attempt appended. The row itself is built by `covariates.attempt_for`."""
         attempts.append(
@@ -107,6 +109,7 @@ def main(argv: list[str] | None = None) -> int:
                 on_default,
                 on_base,
                 lines_changed,
+                api_files,
             )
         )
 
@@ -166,6 +169,9 @@ def main(argv: list[str] | None = None) -> int:
                         on_default_label(merge.base_ref, repo),
                         on_base,
                         merge.changed_lines,
+                        # Recorded, not just consumed by `verify_files` and dropped: it is
+                        # what makes derivation checkable from the run's own output.
+                        merge.api_files or None,
                     )
                     announce(candidate.number, outcome, breakage)
         except CloneFailed as exc:

@@ -65,6 +65,38 @@ the first clone rather than after thirty hours.
   defining filter. The measurement matched the falsifying hypothesis and was read as
   supporting the favourable one.
 
+#### `research/phase0/src/phase0/pilot/covariates.py` — what was measured, and what was not
+
+Every field on `Attempt` obeys one rule: a value meaning NOT MEASURED must never be one
+that could pass as a measurement. `stars=-1`, `outcome=""`, `base_on_default="unknown"`,
+`changed_lines=-1` all follow it. **`derived_files` and `changed_symbols` did not.** They
+were initialised to `0` and overwritten only on the admitted branch, so every rejected row
+recorded zero derived files regardless of what derivation did.
+
+The consequence is the sharpest instance of this project's recurring bug. The set of rows
+reading `derived_files == 0` was *the same objects* as the set of rejected rows — so
+"38.6% of attempts derived nothing" and "38.6% of attempts were rejected" were the same
+sentence, and the field could not answer the question it appears to answer. A `no_symbols`
+row cannot have derived zero, because `assemble.py` reaches that branch only when `derived`
+is non-empty, yet it recorded `0` like the rest. Both are now `int | None`, `None` when
+unmeasured, and `no_python` is the sole stage recording a real `0` — there, `if not
+derived` **is** the rejection.
+
+**`corpus_py_files` is the corpus's claim, never a measurement.** Verified live against
+GitHub: the corpus asserted 104, 65 and 40 `.py` files for PRs whose real file lists were
+2, 9 and 2, with **zero** `.py` among them. `mlflow/mlflow#14364` is "Fix API reference
+link in preview" and touches a CircleCI config and a docs sidebar. `report.py` banded
+attrition on this number, and A25 reads that table to decide whether attrition tracks
+patch size. `attrition_by_github_file_count` now bands on GitHub's own count alongside it;
+the corpus-banded table keeps its name so pre-fix runs stay comparable, and says in place
+what it is.
+
+`github_changed_files`, `github_py_files` and `github_files_truncated` are recorded on the
+row. GitHub's list was fetched, used by `verify_files`, and discarded — so "did derivation
+find what actually changed" cost API calls after the fact instead of falling out of the
+run. `github_pulls.py` fetches one page deep, so a list of exactly `API_FILE_PAGE` entries
+is flagged truncated rather than trusted.
+
 #### `research/phase0/src/phase0/graph/memory_cap.py` — a bound, or an honest absence
 
 `RLIMIT_AS` cannot be lowered on darwin under an unlimited hard limit, so the guard asks

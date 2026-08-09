@@ -31,9 +31,29 @@ class Attempt:
     stage: str  # "" when admitted
     category: str  # "" when admitted
     commit_count: int
+    # The CORPUS's claim about how many `.py` files this PR touched, never a measurement.
+    # Verified against GitHub on seven rejections: the corpus said 104, 65, 40, 23, 17, 15
+    # and 1; GitHub's own `changed_files` for the same PRs was 2, 9, 2, 9, ?, 5 and 1, with
+    # ZERO `.py` among them. `mlflow#14364` is "Fix API reference link in preview" and
+    # touches a CI config and a docs sidebar. Read it as the corpus's assertion and nothing
+    # more -- `github_py_files` below is the measurement.
     corpus_py_files: int
-    derived_files: int
-    changed_symbols: int
+    # None when derivation did not run or its result was never read. It was `0` for every
+    # rejected row, which made "we never measured" indistinguishable from "we measured
+    # zero" -- and the count of rows reading 0 was arithmetically identical to the count of
+    # rejected rows, the same objects rather than merely the same total. Only a `no_python`
+    # rejection genuinely derived zero, because `assemble.py`'s `if not derived` IS that
+    # rejection; a `no_symbols` row cannot have, since that path runs only when `derived`
+    # is non-empty, yet it recorded 0 all the same.
+    derived_files: int | None
+    changed_symbols: int | None
+    # GitHub's own file list for this PR, recorded rather than discarded after use. With it
+    # on the row, "did derivation find what GitHub says changed" is answerable from the run
+    # instead of costing ~200 API calls per arm afterwards. None when the API did not
+    # supply a list; `github_files_truncated` says whether the one it did supply was whole.
+    github_changed_files: int | None = None
+    github_py_files: int | None = None
+    github_files_truncated: bool = False
     stars: int = -1
     # "broke" | "clean" | "" when the outcome was not scanned. Three states, not two:
     # an unscanned PR and a clean one must not be the same value, or the breakage rate

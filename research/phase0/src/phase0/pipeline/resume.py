@@ -74,8 +74,12 @@ def read_attempts(path: Path) -> list[Attempt]:
                     category="" if cells[4] == "-" else cells[4],
                     commit_count=int(cells[5]),
                     corpus_py_files=int(cells[6]),
-                    derived_files=int(cells[7]),
-                    changed_symbols=int(cells[8]),
+                    # `-` is NOT MEASURED and must not read back as 0. Older journals wrote
+                    # a literal 0 on every rejected row, so those still read 0 -- that is
+                    # what they recorded, and inventing None for them would assert a
+                    # distinction the file never made.
+                    derived_files=_count(cells[7]),
+                    changed_symbols=_count(cells[8]),
                     stars=int(cells[9]),
                     outcome="" if cells[10] == "-" else cells[10],
                     # Three states, not a bool. An older journal wrote only yes/no and both
@@ -95,11 +99,24 @@ def read_attempts(path: Path) -> list[Attempt]:
                     # human-arm throughout and records nothing about it; back-filling
                     # "Human" here would assert what was never written down.
                     arm="" if cells[15] == "-" else cells[15],
+                    github_changed_files=_count(cells[16]),
+                    github_py_files=_count(cells[17]),
+                    github_files_truncated=cells[18] == "yes",
                 )
             )
         except ValueError:
             continue  # a torn final line from a kill mid-write; the repo is not marked done
     return _last_wins(attempts)
+
+
+def _count(cell: str) -> int | None:
+    """A recorded count, or None when the journal did not record one.
+
+    `-` and an absent column are both NOT MEASURED. Returning 0 for either is the bug this
+    exists to prevent: it makes "derivation found nothing" and "derivation never ran" the
+    same value, and the second is what every rejected row actually was.
+    """
+    return int(cell) if cell and cell != "-" else None
 
 
 def _last_wins(attempts: list[Attempt]) -> list[Attempt]:

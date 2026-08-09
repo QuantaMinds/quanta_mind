@@ -57,7 +57,21 @@ COLUMNS = (
     # nothing about it, and "" is the honest rendering of that: the rows do not record
     # their arm, and back-filling one would be asserting what was never written down.
     "arm",
+    # GitHub's own file list, appended after `arm` for the same reason it was: every
+    # journal written before these existed reads "-" = NOT MEASURED, never zero. `derived`
+    # above is now "-" on rejected rows for the same reason -- it used to write 0 there,
+    # which read as a measurement of nothing found.
+    "gh_files",
+    "gh_py",
+    "gh_truncated",
 )
+
+
+def _num(value: int | None) -> str:
+    """A count, or `-` when it was never measured. Never `0` for the second case."""
+    return "-" if value is None else str(value)
+
+
 # The oldest schema this reader accepts, ending at `outcome`. Everything after it was
 # appended later and reads as "not measured" when a row is short. Keeps a pre-fix journal
 # comparable, which an aggregate cannot do -- and only a per-PR comparison can say whether
@@ -99,8 +113,8 @@ def append_repo(path: Path, repo: str, attempts: list[Attempt], rescan: str = ""
                 a.category or "-",
                 str(a.commit_count),
                 str(a.corpus_py_files),
-                str(a.derived_files),
-                str(a.changed_symbols),
+                _num(a.derived_files),
+                _num(a.changed_symbols),
                 str(a.stars),
                 a.outcome or "-",
                 a.base_on_default,
@@ -108,6 +122,9 @@ def append_repo(path: Path, repo: str, attempts: list[Attempt], rescan: str = ""
                 str(a.changed_lines),
                 rescan or "-",
                 a.arm or "-",
+                _num(a.github_changed_files),
+                _num(a.github_py_files),
+                "yes" if a.github_files_truncated else "no",
             )
         )
         + " |"
