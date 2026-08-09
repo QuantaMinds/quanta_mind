@@ -28,7 +28,7 @@ PACKAGE = Path(__file__).resolve().parents[2] / "data" / "AIDev_BC_Analyser.zip"
 ZENML_3757 = 2607442037
 
 
-def _merge(sha: str, count: int = 1) -> MergeInfo:
+def _merge(sha: str, count: int = 1, api_files: tuple[str, ...] = ()) -> MergeInfo:
     return MergeInfo(
         pr_id="1",
         number=1,
@@ -37,29 +37,33 @@ def _merge(sha: str, count: int = 1) -> MergeInfo:
         merged_at="2025-06-24T22:46:29Z",
         base_ref="main",
         commit_count=count,
+        api_files=api_files,
     )
 
 
 def test_a_pr_whose_file_sets_disagree_is_refused(repo: tuple[Path, str, str]) -> None:
-    """The zenml shape: the corpus names files the diff denies, so the PR is excluded.
+    """GitHub names files the diff denies, so the PR is excluded.
 
-    Sized to clear shape detection and fail on agreement, because the two exclusions are
-    different findings and a test that cannot tell them apart pins neither.
+    Sized to clear shape detection and fail on the file set, because the two exclusions
+    are different findings and a test that cannot tell them apart pins neither.
+
+    The disagreement is now GITHUB's, not the corpus's. This test used to supply the
+    inflated list as `corpus_files` and rely on `verify_files` falling back to it -- so it
+    was pinning the fallback rather than the gate, and the fallback is gone.
     """
     root, _, child = repo
-    corpus = ("pkg/mod.py", "pkg/added.py", "src/other/a.py", "src/other/b.py")
+    listed = ("pkg/mod.py", "pkg/added.py", "src/other/a.py", "src/other/b.py")
     outcome = build_record(
         root,
-        _merge(child),
+        _merge(child, api_files=listed),
         pr_id="1",
         repo="acme/widget",
         merged_at="2025-06-24T22:46:29Z",
-        corpus_files=corpus,
+        corpus_files=listed,
     )
     assert isinstance(outcome, Rejection)
     assert outcome.stage == "file_set"
     assert 0.0 <= outcome.agreement < MIN_FILE_AGREEMENT
-    assert "agreement" in outcome.reason
 
 
 def test_a_wildly_inflated_list_is_refused_at_shape_detection(
@@ -86,9 +90,10 @@ def test_a_wildly_inflated_list_is_refused_at_shape_detection(
 
 def test_an_honest_pr_becomes_a_record(repo: tuple[Path, str, str]) -> None:
     root, _, child = repo
+    # api_files explicit: this passed with none only via the removed corpus fallback.
     outcome = build_record(
         root,
-        _merge(child),
+        _merge(child, api_files=("pkg/mod.py", "pkg/added.py")),
         pr_id="2",
         repo="acme/widget",
         merged_at="2025-06-24T22:46:29Z",

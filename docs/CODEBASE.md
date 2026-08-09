@@ -97,6 +97,23 @@ find what actually changed" cost API calls after the fact instead of falling out
 run. `github_pulls.py` fetches one page deep, so a list of exactly `API_FILE_PAGE` entries
 is flagged truncated rather than trusted.
 
+**`verify_files` has no corpus fallback, and that is the point.** It read
+`authority = merge.api_files or corpus_files`, so an absent GitHub list silently promoted
+the corpus's list to authority and gated admission on it at a 0.6 agreement threshold. No
+amendment authorised that — it was inherited, never argued. Because the corpus
+over-attributes, the substitution had a direction: a correct diff scored against an
+inflated expectation falls below the threshold and is rejected at `file_set`, an
+`integrity` verdict blaming the repository's account of itself for a gap that was ours,
+landing hardest on the PRs the corpus mis-attributes most — which tracks size, so A16's
+confounder arrives through our own gate. An absent authority is now `no_file_authority`,
+categorised `resource`, and counted. `corpus_files` has left the signature: a parameter
+nothing reads is how a fallback gets reinstated. The ratio survives in exactly one place —
+a GitHub list at the page limit, where the authority is still GitHub and merely
+incomplete, and strict equality would reject a correct parent.
+
+Once that fallback is gone the single-page fetch becomes load-bearing, so paginating
+`/pulls/{n}/files` moves up the queue rather than staying a flagged limitation.
+
 #### `research/phase0/src/phase0/graph/memory_cap.py` — a bound, or an honest absence
 
 `RLIMIT_AS` cannot be lowered on darwin under an unlimited hard limit, so the guard asks

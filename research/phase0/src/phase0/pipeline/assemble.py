@@ -108,11 +108,11 @@ def build_record(
     if not derived:
         return Rejection(pr_id, "no_python", "no .py files between parent and merge")
 
-    # Verify against GitHub's own file list when we have it, and the corpus's only when
-    # we do not. Detection can be a heuristic; verification cannot. The corpus attributes
-    # 92 files to some three-file PRs, so a gate built on it was checking the wrong thing
-    # against the right diff.
-    mismatch = verify_files(pr_id, merge, corpus_files, frozenset(derived))
+    # Verify against GitHub's own file list, or not at all. Detection can be a heuristic;
+    # verification cannot, and it may not fall back to the corpus -- which attributes 92
+    # files to some three-file PRs, so a gate built on it checks the wrong thing against
+    # the right diff. No authority is `no_file_authority`, counted as `resource`.
+    mismatch = verify_files(pr_id, merge, frozenset(derived))
     if mismatch is not None:
         return mismatch
 
