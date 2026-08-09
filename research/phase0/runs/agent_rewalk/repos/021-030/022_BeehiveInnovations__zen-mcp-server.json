@@ -1,0 +1,58 @@
+{
+  "admitted": 2,
+  "arms": [
+    "Claude_Code"
+  ],
+  "attempts": 2,
+  "broke": 1,
+  "finished_utc": "2026-08-09T07:39:37+00:00",
+  "of": 72,
+  "position": 22,
+  "rejected_by_stage": {},
+  "repo": "BeehiveInnovations/zen-mcp-server",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Claude_Code",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 8,
+      "changed_symbols": 2,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": 1,
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "3150229181",
+      "repo": "BeehiveInnovations/zen-mcp-server",
+      "stage": "",
+      "stars": 5465
+    },
+    {
+      "admitted": true,
+      "arm": "Claude_Code",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 24666,
+      "changed_symbols": 268,
+      "commit_count": 27,
+      "corpus_py_files": 88,
+      "derived_files": 67,
+      "github_changed_files": 76,
+      "github_files_truncated": false,
+      "github_py_files": 67,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "3164250713",
+      "repo": "BeehiveInnovations/zen-mcp-server",
+      "stage": "",
+      "stars": 5465
+    }
+  ],
+  "scanned": 2,
+  "stars": 5465,
+  "started_utc": "2026-08-09T07:39:32+00:00"
+}

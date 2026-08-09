@@ -1,0 +1,80 @@
+{
+  "admitted": 2,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 3,
+  "broke": 1,
+  "finished_utc": "2026-08-09T08:39:38+00:00",
+  "of": 90,
+  "position": 42,
+  "rejected_by_stage": {
+    "no_python": 1
+  },
+  "repo": "dropseed/plain",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 297,
+      "changed_symbols": 58,
+      "commit_count": 6,
+      "corpus_py_files": 25,
+      "derived_files": 25,
+      "github_changed_files": 27,
+      "github_files_truncated": false,
+      "github_py_files": 25,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "2467087648",
+      "repo": "dropseed/plain",
+      "stage": "",
+      "stars": 619
+    },
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 13,
+      "changed_symbols": null,
+      "commit_count": 3,
+      "corpus_py_files": 1,
+      "derived_files": 0,
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "2540205307",
+      "repo": "dropseed/plain",
+      "stage": "no_python",
+      "stars": 619
+    },
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 2413,
+      "changed_symbols": 222,
+      "commit_count": 3,
+      "corpus_py_files": 64,
+      "derived_files": 64,
+      "github_changed_files": 66,
+      "github_files_truncated": false,
+      "github_py_files": 64,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "2612105218",
+      "repo": "dropseed/plain",
+      "stage": "",
+      "stars": 619
+    }
+  ],
+  "scanned": 2,
+  "stars": 619,
+  "started_utc": "2026-08-09T08:38:44+00:00"
+}

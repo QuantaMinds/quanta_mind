@@ -1,0 +1,26 @@
+{"arm": "human", "kind": "run_start", "population": 608, "tally": {"Human": 608}, "ts": "2026-08-09T06:32:59+00:00"}
+{"kind": "repo_start", "of": 90, "position": 1, "prs": 4, "repo": "567-labs/instructor", "ts": "2026-08-09T06:32:59+00:00"}
+{"admitted": 2, "attempts": 4, "broke": 0, "kind": "repo_done", "of": 90, "position": 1, "repo": "567-labs/instructor", "ts": "2026-08-09T06:33:51+00:00"}
+{"kind": "repo_start", "of": 90, "position": 2, "prs": 1, "repo": "ACEsuit/mace", "ts": "2026-08-09T06:33:51+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 1, "kind": "repo_done", "of": 90, "position": 2, "repo": "ACEsuit/mace", "ts": "2026-08-09T06:34:23+00:00"}
+{"kind": "repo_start", "of": 90, "position": 3, "prs": 4, "repo": "AgentOps-AI/agentops", "ts": "2026-08-09T06:34:23+00:00"}
+{"admitted": 2, "attempts": 4, "broke": 0, "kind": "repo_done", "of": 90, "position": 3, "repo": "AgentOps-AI/agentops", "ts": "2026-08-09T06:35:31+00:00"}
+{"kind": "repo_start", "of": 90, "position": 4, "prs": 4, "repo": "Azure/azure-sdk-for-python", "ts": "2026-08-09T06:35:31+00:00"}
+{"admitted": 3, "attempts": 4, "broke": 1, "kind": "repo_done", "of": 90, "position": 4, "repo": "Azure/azure-sdk-for-python", "ts": "2026-08-09T06:42:07+00:00"}
+{"kind": "repo_start", "of": 90, "position": 5, "prs": 1, "repo": "BeehiveInnovations/zen-mcp-server", "ts": "2026-08-09T06:42:07+00:00"}
+{"admitted": 0, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 5, "repo": "BeehiveInnovations/zen-mcp-server", "ts": "2026-08-09T06:42:12+00:00"}
+{"kind": "repo_start", "of": 90, "position": 6, "prs": 4, "repo": "BerriAI/litellm", "ts": "2026-08-09T06:42:12+00:00"}
+{"admitted": 3, "attempts": 4, "broke": 1, "kind": "repo_done", "of": 90, "position": 6, "repo": "BerriAI/litellm", "ts": "2026-08-09T06:52:45+00:00"}
+{"kind": "repo_start", "of": 90, "position": 7, "prs": 4, "repo": "Blaizzy/mlx-vlm", "ts": "2026-08-09T06:52:45+00:00"}
+{"admitted": 3, "attempts": 4, "broke": 2, "kind": "repo_done", "of": 90, "position": 7, "repo": "Blaizzy/mlx-vlm", "ts": "2026-08-09T06:53:08+00:00"}
+{"kind": "repo_start", "of": 90, "position": 8, "prs": 1, "repo": "GodsScion/Auto_job_applier_linkedIn", "ts": "2026-08-09T06:53:08+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 8, "repo": "GodsScion/Auto_job_applier_linkedIn", "ts": "2026-08-09T06:53:13+00:00"}
+{"kind": "repo_start", "of": 90, "position": 9, "prs": 3, "repo": "Kanaries/pygwalker", "ts": "2026-08-09T06:53:13+00:00"}
+{"admitted": 3, "attempts": 3, "broke": 0, "kind": "repo_done", "of": 90, "position": 9, "repo": "Kanaries/pygwalker", "ts": "2026-08-09T06:53:30+00:00"}
+{"kind": "repo_start", "of": 90, "position": 10, "prs": 4, "repo": "Kiln-AI/Kiln", "ts": "2026-08-09T06:53:30+00:00"}
+{"admitted": 4, "attempts": 4, "broke": 0, "kind": "repo_done", "of": 90, "position": 10, "repo": "Kiln-AI/Kiln", "ts": "2026-08-09T06:53:48+00:00"}
+{"kind": "repo_start", "of": 90, "position": 11, "prs": 1, "repo": "MervinPraison/PraisonAI", "ts": "2026-08-09T06:53:48+00:00"}
+{"admitted": 0, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 11, "repo": "MervinPraison/PraisonAI", "ts": "2026-08-09T06:55:03+00:00"}
+{"kind": "repo_start", "of": 90, "position": 12, "prs": 1, "repo": "Netflix/metaflow", "ts": "2026-08-09T06:55:03+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 1, "kind": "repo_done", "of": 90, "position": 12, "repo": "Netflix/metaflow", "ts": "2026-08-09T06:55:10+00:00"}
+{"kind": "repo_start", "of": 90, "position": 13, "prs": 1, "repo": "NousResearch/atropos", "ts": "2026-08-09T06:55:10+00:00"}

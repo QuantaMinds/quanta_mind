@@ -1,0 +1,60 @@
+{
+  "admitted": 1,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 2,
+  "broke": 0,
+  "finished_utc": "2026-08-09T08:18:41+00:00",
+  "of": 90,
+  "position": 21,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "SirVer/ultisnips",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 5,
+      "changed_symbols": null,
+      "commit_count": 3,
+      "corpus_py_files": 9,
+      "derived_files": null,
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "2262795916",
+      "repo": "SirVer/ultisnips",
+      "stage": "no_symbols",
+      "stars": 7632
+    },
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 64,
+      "changed_symbols": 2,
+      "commit_count": 5,
+      "corpus_py_files": 8,
+      "derived_files": 8,
+      "github_changed_files": 11,
+      "github_files_truncated": false,
+      "github_py_files": 8,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "2380702095",
+      "repo": "SirVer/ultisnips",
+      "stage": "",
+      "stars": 7632
+    }
+  ],
+  "scanned": 1,
+  "stars": 7632,
+  "started_utc": "2026-08-09T08:18:34+00:00"
+}

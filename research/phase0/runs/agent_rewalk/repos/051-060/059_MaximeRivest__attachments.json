@@ -1,0 +1,80 @@
+{
+  "admitted": 2,
+  "arms": [
+    "OpenAI_Codex"
+  ],
+  "attempts": 3,
+  "broke": 0,
+  "finished_utc": "2026-08-09T07:56:27+00:00",
+  "of": 72,
+  "position": 59,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "MaximeRivest/attachments",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 4,
+      "changed_symbols": 1,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": 1,
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "no",
+      "outcome": "unscannable",
+      "pr_id": "3204936390",
+      "repo": "MaximeRivest/attachments",
+      "stage": "",
+      "stars": 230
+    },
+    {
+      "admitted": true,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 21,
+      "changed_symbols": 1,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": 1,
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "no",
+      "outcome": "unscannable",
+      "pr_id": "3205047107",
+      "repo": "MaximeRivest/attachments",
+      "stage": "",
+      "stars": 230
+    },
+    {
+      "admitted": false,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 87,
+      "changed_symbols": null,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": null,
+      "github_changed_files": 2,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "no",
+      "outcome": "",
+      "pr_id": "3226774803",
+      "repo": "MaximeRivest/attachments",
+      "stage": "no_symbols",
+      "stars": 230
+    }
+  ],
+  "scanned": 0,
+  "stars": 230,
+  "started_utc": "2026-08-09T07:56:24+00:00"
+}

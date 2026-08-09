@@ -1,0 +1,40 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-09T08:17:23+00:00",
+  "of": 90,
+  "position": 19,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "RAGEN-AI/RAGEN",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 6,
+      "changed_symbols": null,
+      "commit_count": 1,
+      "corpus_py_files": 3,
+      "derived_files": null,
+      "github_changed_files": 3,
+      "github_files_truncated": false,
+      "github_py_files": 3,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "2327705108",
+      "repo": "RAGEN-AI/RAGEN",
+      "stage": "no_symbols",
+      "stars": 2175
+    }
+  ],
+  "scanned": 0,
+  "stars": 2175,
+  "started_utc": "2026-08-09T08:17:10+00:00"
+}

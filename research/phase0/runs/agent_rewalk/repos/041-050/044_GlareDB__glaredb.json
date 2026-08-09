@@ -1,0 +1,40 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Devin"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-09T07:49:40+00:00",
+  "of": 72,
+  "position": 44,
+  "rejected_by_stage": {
+    "no_python": 1
+  },
+  "repo": "GlareDB/glaredb",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Devin",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 54,
+      "changed_symbols": null,
+      "commit_count": 3,
+      "corpus_py_files": 1,
+      "derived_files": 0,
+      "github_changed_files": 13,
+      "github_files_truncated": false,
+      "github_py_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "2980213795",
+      "repo": "GlareDB/glaredb",
+      "stage": "no_python",
+      "stars": 951
+    }
+  ],
+  "scanned": 0,
+  "stars": 951,
+  "started_utc": "2026-08-09T07:49:30+00:00"
+}

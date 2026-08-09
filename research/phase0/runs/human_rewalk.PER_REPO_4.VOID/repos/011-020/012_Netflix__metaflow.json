@@ -1,0 +1,38 @@
+{
+  "admitted": 1,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 1,
+  "broke": 1,
+  "finished_utc": "2026-08-09T06:55:10+00:00",
+  "of": 90,
+  "position": 12,
+  "rejected_by_stage": {},
+  "repo": "Netflix/metaflow",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 194,
+      "changed_symbols": 1,
+      "commit_count": 8,
+      "corpus_py_files": 8,
+      "derived_files": 6,
+      "github_changed_files": 6,
+      "github_files_truncated": false,
+      "github_py_files": 6,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "2272586142",
+      "repo": "Netflix/metaflow",
+      "stage": "",
+      "stars": 9330
+    }
+  ],
+  "scanned": 1,
+  "stars": 9330,
+  "started_utc": "2026-08-09T06:55:03+00:00"
+}

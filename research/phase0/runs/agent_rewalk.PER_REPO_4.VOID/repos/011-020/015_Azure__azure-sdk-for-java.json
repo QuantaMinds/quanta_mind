@@ -1,0 +1,80 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Copilot"
+  ],
+  "attempts": 3,
+  "broke": 0,
+  "finished_utc": "2026-08-09T05:20:48+00:00",
+  "of": 72,
+  "position": 15,
+  "rejected_by_stage": {
+    "no_python": 3
+  },
+  "repo": "Azure/azure-sdk-for-java",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 10,
+      "changed_symbols": null,
+      "commit_count": 17,
+      "corpus_py_files": 10,
+      "derived_files": 0,
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3119512382",
+      "repo": "Azure/azure-sdk-for-java",
+      "stage": "no_python",
+      "stars": 2506
+    },
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 66,
+      "changed_symbols": null,
+      "commit_count": 11,
+      "corpus_py_files": 13,
+      "derived_files": 0,
+      "github_changed_files": 18,
+      "github_files_truncated": false,
+      "github_py_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3169497988",
+      "repo": "Azure/azure-sdk-for-java",
+      "stage": "no_python",
+      "stars": 2506
+    },
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 4,
+      "changed_symbols": null,
+      "commit_count": 5,
+      "corpus_py_files": 2,
+      "derived_files": 0,
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3169577770",
+      "repo": "Azure/azure-sdk-for-java",
+      "stage": "no_python",
+      "stars": 2506
+    }
+  ],
+  "scanned": 0,
+  "stars": 2506,
+  "started_utc": "2026-08-09T05:07:38+00:00"
+}

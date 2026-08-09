@@ -1,0 +1,60 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Copilot"
+  ],
+  "attempts": 2,
+  "broke": 0,
+  "finished_utc": "2026-08-09T05:45:00+00:00",
+  "of": 72,
+  "position": 19,
+  "rejected_by_stage": {
+    "no_python": 2
+  },
+  "repo": "Azure/azure-storage-fuse",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 196,
+      "changed_symbols": null,
+      "commit_count": 29,
+      "corpus_py_files": 5,
+      "derived_files": 0,
+      "github_changed_files": 9,
+      "github_files_truncated": false,
+      "github_py_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3082070083",
+      "repo": "Azure/azure-storage-fuse",
+      "stage": "no_python",
+      "stars": 763
+    },
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 222,
+      "changed_symbols": null,
+      "commit_count": 12,
+      "corpus_py_files": 1,
+      "derived_files": 0,
+      "github_changed_files": 4,
+      "github_files_truncated": false,
+      "github_py_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3109359968",
+      "repo": "Azure/azure-storage-fuse",
+      "stage": "no_python",
+      "stars": 763
+    }
+  ],
+  "scanned": 0,
+  "stars": 763,
+  "started_utc": "2026-08-09T05:44:47+00:00"
+}

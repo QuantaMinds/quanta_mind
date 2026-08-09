@@ -1,0 +1,80 @@
+{
+  "admitted": 2,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 3,
+  "broke": 0,
+  "finished_utc": "2026-08-09T09:35:22+00:00",
+  "of": 90,
+  "position": 86,
+  "rejected_by_stage": {
+    "no_python": 1
+  },
+  "repo": "wandb/weave",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 22,
+      "changed_symbols": 5,
+      "commit_count": 1,
+      "corpus_py_files": 4,
+      "derived_files": 4,
+      "github_changed_files": 4,
+      "github_files_truncated": false,
+      "github_py_files": 4,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "2269208152",
+      "repo": "wandb/weave",
+      "stage": "",
+      "stars": 950
+    },
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 31,
+      "changed_symbols": 2,
+      "commit_count": 10,
+      "corpus_py_files": 55,
+      "derived_files": 2,
+      "github_changed_files": 2,
+      "github_files_truncated": false,
+      "github_py_files": 2,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "2405425459",
+      "repo": "wandb/weave",
+      "stage": "",
+      "stars": 950
+    },
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 131,
+      "changed_symbols": null,
+      "commit_count": 11,
+      "corpus_py_files": 23,
+      "derived_files": 0,
+      "github_changed_files": 9,
+      "github_files_truncated": false,
+      "github_py_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "2548010588",
+      "repo": "wandb/weave",
+      "stage": "no_python",
+      "stars": 950
+    }
+  ],
+  "scanned": 2,
+  "stars": 950,
+  "started_utc": "2026-08-09T09:28:02+00:00"
+}

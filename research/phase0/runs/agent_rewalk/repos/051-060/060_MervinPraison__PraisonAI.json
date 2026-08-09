@@ -1,0 +1,61 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Claude_Code",
+    "OpenAI_Codex"
+  ],
+  "attempts": 2,
+  "broke": 0,
+  "finished_utc": "2026-08-09T07:56:41+00:00",
+  "of": 72,
+  "position": 60,
+  "rejected_by_stage": {
+    "parent_commit": 2
+  },
+  "repo": "MervinPraison/PraisonAI",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "integrity",
+      "changed_lines": 36,
+      "changed_symbols": null,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": null,
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "unknown",
+      "outcome": "",
+      "pr_id": "3116524279",
+      "repo": "MervinPraison/PraisonAI",
+      "stage": "parent_commit",
+      "stars": 5243
+    },
+    {
+      "admitted": false,
+      "arm": "Claude_Code",
+      "base_on_default": "yes",
+      "category": "integrity",
+      "changed_lines": 2138,
+      "changed_symbols": null,
+      "commit_count": 3,
+      "corpus_py_files": 7,
+      "derived_files": null,
+      "github_changed_files": 6,
+      "github_files_truncated": false,
+      "github_py_files": 6,
+      "merge_on_base": "unknown",
+      "outcome": "",
+      "pr_id": "3245011006",
+      "repo": "MervinPraison/PraisonAI",
+      "stage": "parent_commit",
+      "stars": 5243
+    }
+  ],
+  "scanned": 0,
+  "stars": 5243,
+  "started_utc": "2026-08-09T07:56:27+00:00"
+}

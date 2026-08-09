@@ -1,0 +1,58 @@
+{
+  "admitted": 2,
+  "arms": [
+    "OpenAI_Codex"
+  ],
+  "attempts": 2,
+  "broke": 1,
+  "finished_utc": "2026-08-09T07:48:18+00:00",
+  "of": 72,
+  "position": 42,
+  "rejected_by_stage": {},
+  "repo": "FoundationAgents/AFlow",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 23,
+      "changed_symbols": 2,
+      "commit_count": 1,
+      "corpus_py_files": 4,
+      "derived_files": 4,
+      "github_changed_files": 5,
+      "github_files_truncated": false,
+      "github_py_files": 4,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "3230472071",
+      "repo": "FoundationAgents/AFlow",
+      "stage": "",
+      "stars": 197
+    },
+    {
+      "admitted": true,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 102,
+      "changed_symbols": 6,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": 1,
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "3234978750",
+      "repo": "FoundationAgents/AFlow",
+      "stage": "",
+      "stars": 197
+    }
+  ],
+  "scanned": 2,
+  "stars": 197,
+  "started_utc": "2026-08-09T07:48:16+00:00"
+}

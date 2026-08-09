@@ -1,0 +1,38 @@
+{
+  "admitted": 1,
+  "arms": [
+    "OpenAI_Codex"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-09T06:32:13+00:00",
+  "of": 72,
+  "position": 70,
+  "rejected_by_stage": {},
+  "repo": "ObservedObserver/streamlit-shadcn-ui",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 44,
+      "changed_symbols": 1,
+      "commit_count": 1,
+      "corpus_py_files": 4,
+      "derived_files": 4,
+      "github_changed_files": 9,
+      "github_files_truncated": false,
+      "github_py_files": 4,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "3070124371",
+      "repo": "ObservedObserver/streamlit-shadcn-ui",
+      "stage": "",
+      "stars": 978
+    }
+  ],
+  "scanned": 1,
+  "stars": 978,
+  "started_utc": "2026-08-09T06:32:02+00:00"
+}

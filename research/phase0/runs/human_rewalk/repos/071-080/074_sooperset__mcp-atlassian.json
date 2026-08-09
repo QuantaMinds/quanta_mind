@@ -1,0 +1,40 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-09T09:22:55+00:00",
+  "of": 90,
+  "position": 74,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "sooperset/mcp-atlassian",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 76,
+      "changed_symbols": null,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": null,
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "2554942977",
+      "repo": "sooperset/mcp-atlassian",
+      "stage": "no_symbols",
+      "stars": 2645
+    }
+  ],
+  "scanned": 0,
+  "stars": 2645,
+  "started_utc": "2026-08-09T09:22:51+00:00"
+}

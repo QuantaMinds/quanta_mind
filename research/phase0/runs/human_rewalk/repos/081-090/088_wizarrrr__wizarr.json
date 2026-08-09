@@ -1,0 +1,38 @@
+{
+  "admitted": 1,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-09T09:36:06+00:00",
+  "of": 90,
+  "position": 88,
+  "rejected_by_stage": {},
+  "repo": "wizarrrr/wizarr",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 62,
+      "changed_symbols": 4,
+      "commit_count": 2,
+      "corpus_py_files": 2,
+      "derived_files": 2,
+      "github_changed_files": 2,
+      "github_files_truncated": false,
+      "github_py_files": 2,
+      "merge_on_base": "no",
+      "outcome": "unscannable",
+      "pr_id": "2579953738",
+      "repo": "wizarrrr/wizarr",
+      "stage": "",
+      "stars": 2081
+    }
+  ],
+  "scanned": 0,
+  "stars": 2081,
+  "started_utc": "2026-08-09T09:35:28+00:00"
+}

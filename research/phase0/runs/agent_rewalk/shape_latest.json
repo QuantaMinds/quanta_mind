@@ -1,0 +1,232 @@
+{
+  "as_of_utc": "2026-08-09T07:59:25+00:00",
+  "of": 72,
+  "repos_finished": 72,
+  "shape": {
+    "admission_rate": 0.5756,
+    "attrition_by_commit_count": {
+      "1": {
+        "admission_rate": 0.6625,
+        "admitted": 53,
+        "by_stage": {
+          "file_set": 1,
+          "no_symbols": 18,
+          "parent_commit": 7,
+          "repo_gone": 1
+        },
+        "n": 80
+      },
+      "2-5": {
+        "admission_rate": 0.5867,
+        "admitted": 44,
+        "by_stage": {
+          "clone_timeout": 1,
+          "file_set": 1,
+          "no_python": 6,
+          "no_symbols": 16,
+          "parent_commit": 5,
+          "repo_gone": 2
+        },
+        "n": 75
+      },
+      "21+": {
+        "admission_rate": 0.4,
+        "admitted": 4,
+        "by_stage": {
+          "no_python": 2,
+          "no_symbols": 2,
+          "repo_gone": 2
+        },
+        "n": 10
+      },
+      "6-20": {
+        "admission_rate": 0.425,
+        "admitted": 17,
+        "by_stage": {
+          "clone_timeout": 4,
+          "file_set": 1,
+          "no_python": 7,
+          "no_symbols": 6,
+          "parent_commit": 2,
+          "repo_gone": 3
+        },
+        "n": 40
+      }
+    },
+    "attrition_by_corpus_file_count": {
+      "1-4": {
+        "admission_rate": 0.5816,
+        "admitted": 82,
+        "by_stage": {
+          "clone_timeout": 3,
+          "file_set": 2,
+          "no_python": 7,
+          "no_symbols": 34,
+          "parent_commit": 10,
+          "repo_gone": 3
+        },
+        "n": 141
+      },
+      "16-50": {
+        "admission_rate": 0.5714,
+        "admitted": 8,
+        "by_stage": {
+          "file_set": 1,
+          "no_python": 1,
+          "no_symbols": 1,
+          "parent_commit": 1,
+          "repo_gone": 2
+        },
+        "n": 14
+      },
+      "5-15": {
+        "admission_rate": 0.6047,
+        "admitted": 26,
+        "by_stage": {
+          "clone_timeout": 2,
+          "no_python": 3,
+          "no_symbols": 6,
+          "parent_commit": 3,
+          "repo_gone": 3
+        },
+        "n": 43
+      },
+      "51+": {
+        "admission_rate": 0.2857,
+        "admitted": 2,
+        "by_stage": {
+          "no_python": 4,
+          "no_symbols": 1
+        },
+        "n": 7
+      }
+    },
+    "attrition_by_github_file_count": {
+      "1-4": {
+        "admission_rate": 0.6667,
+        "admitted": 94,
+        "by_stage": {
+          "file_set": 2,
+          "no_symbols": 35,
+          "parent_commit": 10
+        },
+        "n": 141
+      },
+      "16-50": {
+        "admission_rate": 0.6667,
+        "admitted": 4,
+        "by_stage": {
+          "file_set": 1,
+          "no_symbols": 1
+        },
+        "n": 6
+      },
+      "5-15": {
+        "admission_rate": 0.6552,
+        "admitted": 19,
+        "by_stage": {
+          "no_symbols": 6,
+          "parent_commit": 4
+        },
+        "n": 29
+      },
+      "51+": {
+        "admission_rate": 1.0,
+        "admitted": 1,
+        "by_stage": {},
+        "n": 1
+      }
+    },
+    "base_branch_unknown": 0,
+    "breakage_rate": 0.3204,
+    "breakage_rate_default_branch": 0.3125,
+    "breakage_rate_other_branch": 0.4286,
+    "clone_failures": 6,
+    "distinct_repos_in_records": 45,
+    "file_set_disagreement_by_changed_lines": {
+      "cut_points": {
+        "q1": 20,
+        "q2": 109,
+        "q3": 359
+      },
+      "quartiles": {
+        "Q1": {
+          "changed_lines_range": [
+            1,
+            20
+          ],
+          "disagreement_rate": 0.0,
+          "file_set_rejections": 0,
+          "n": 48
+        },
+        "Q2": {
+          "changed_lines_range": [
+            21,
+            109
+          ],
+          "disagreement_rate": 0.0,
+          "file_set_rejections": 0,
+          "n": 48
+        },
+        "Q3": {
+          "changed_lines_range": [
+            114,
+            359
+          ],
+          "disagreement_rate": 0.0417,
+          "file_set_rejections": 2,
+          "n": 48
+        },
+        "Q4": {
+          "changed_lines_range": [
+            385,
+            81616
+          ],
+          "disagreement_rate": 0.0208,
+          "file_set_rejections": 1,
+          "n": 48
+        }
+      },
+      "unmeasured": 13
+    },
+    "median_changed_files": 2,
+    "median_changed_symbols": 2,
+    "merge_on_base_admitted": {
+      "no": 2,
+      "unknown": 13,
+      "yes": 103
+    },
+    "merge_on_base_all_attempts": {
+      "no": 3,
+      "unknown": 46,
+      "yes": 156
+    },
+    "outcome_broke": 33,
+    "outcome_scanned": 103,
+    "outcome_unscannable": 15,
+    "prs_attempted": 205,
+    "records_built": 118,
+    "rejected_by_category": {
+      "integrity": 17,
+      "resource": 13,
+      "restricted": 57
+    },
+    "rejected_by_stage": {
+      "clone_timeout": 5,
+      "file_set": 3,
+      "no_python": 15,
+      "no_symbols": 42,
+      "parent_commit": 14,
+      "repo_gone": 8
+    },
+    "repositories_visited": 72,
+    "scanned_off_default": 7,
+    "scanned_on_default": 96,
+    "star_band": {
+      "<500": 66,
+      ">=500": 52
+    },
+    "top_repo_share": 0.0508
+  },
+  "trace_write_errors": []
+}

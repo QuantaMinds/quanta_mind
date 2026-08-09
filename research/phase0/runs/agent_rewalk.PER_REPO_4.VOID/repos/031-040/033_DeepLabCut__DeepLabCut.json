@@ -1,0 +1,60 @@
+{
+  "admitted": 1,
+  "arms": [
+    "Copilot"
+  ],
+  "attempts": 2,
+  "broke": 1,
+  "finished_utc": "2026-08-09T06:08:49+00:00",
+  "of": 72,
+  "position": 33,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "DeepLabCut/DeepLabCut",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "no",
+      "category": "restricted",
+      "changed_lines": 6,
+      "changed_symbols": null,
+      "commit_count": 3,
+      "corpus_py_files": 2,
+      "derived_files": null,
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3205453833",
+      "repo": "DeepLabCut/DeepLabCut",
+      "stage": "no_symbols",
+      "stars": 5169
+    },
+    {
+      "admitted": true,
+      "arm": "Copilot",
+      "base_on_default": "no",
+      "category": "",
+      "changed_lines": 186,
+      "changed_symbols": 1,
+      "commit_count": 2,
+      "corpus_py_files": 2,
+      "derived_files": 2,
+      "github_changed_files": 2,
+      "github_files_truncated": false,
+      "github_py_files": 2,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "3205514535",
+      "repo": "DeepLabCut/DeepLabCut",
+      "stage": "",
+      "stars": 5169
+    }
+  ],
+  "scanned": 1,
+  "stars": 5169,
+  "started_utc": "2026-08-09T06:07:32+00:00"
+}

@@ -1,0 +1,38 @@
+{
+  "admitted": 1,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 1,
+  "broke": 1,
+  "finished_utc": "2026-08-09T09:19:12+00:00",
+  "of": 90,
+  "position": 69,
+  "rejected_by_stage": {},
+  "repo": "pydata/pandas-datareader",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 202,
+      "changed_symbols": 16,
+      "commit_count": 12,
+      "corpus_py_files": 18,
+      "derived_files": 18,
+      "github_changed_files": 22,
+      "github_files_truncated": false,
+      "github_py_files": 18,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "2434638102",
+      "repo": "pydata/pandas-datareader",
+      "stage": "",
+      "stars": 3080
+    }
+  ],
+  "scanned": 1,
+  "stars": 3080,
+  "started_utc": "2026-08-09T09:19:07+00:00"
+}
