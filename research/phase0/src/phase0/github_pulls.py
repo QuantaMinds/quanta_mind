@@ -8,10 +8,9 @@ WHY:  Amendment A2. AIDev's `pull_request` table has no base, head or merge SHA,
       basis of the exposure variable, so a GitHub token is a prerequisite of this
       study rather than an implementation detail.
 
-      Responses are cached keyed by PR id. RUNBOOK section 5 requires the whole
-      study be reproducible from raw data on another machine, and an uncached
-      client would make a re-run cost another full pass of quota and return
-      different data as repositories change under it.
+      Responses are cached keyed by PR id. `PHASE0_RUNBOOK.md` requires the study be
+      reproducible from raw data on another machine, and an uncached client would cost
+      another full pass of quota and return different data as repositories change.
 
       The token is read from the environment and never written anywhere. A missing
       token fails loudly, naming the scope, rather than proceeding with
@@ -29,7 +28,14 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
-from phase0.github_http import TOKEN_VAR, MissingTokenError, cache_payload, fetch, require_token
+from phase0.github_http import (
+    TOKEN_VAR,
+    MissingTokenError,
+    cache_payload,
+    fetch,
+    fetch_all,
+    require_token,
+)
 
 API_ROOT = "https://api.github.com"
 
@@ -122,10 +128,10 @@ def merge_info(
 def _api_files(
     repo_full_name: str, number: int, pr_id: str, cache_dir: Path, token: str | None
 ) -> tuple[str, ...]:
-    """The PR's changed files, straight from GitHub. Capped at the first 300.
+    """The PR's changed files, straight from GitHub. Every page, never capped.
 
-    Empty when unavailable, which makes the caller fall back to the corpus list rather
-    than treat "we could not ask" as "the PR changed nothing".
+    Empty when unavailable. A39 removed the corpus fallback, so the caller now rejects at
+    `no_file_authority` rather than substituting a list it has measured as unreliable.
     """
     path = _cache_path(cache_dir, f"{pr_id}-files")
     if path.is_file():
@@ -136,8 +142,9 @@ def _api_files(
         # into a hard failure.
         return ()
     else:
-        payload = fetch(
-            f"{API_ROOT}/repos/{repo_full_name}/pulls/{number}/files?per_page=100",
+        # Every page: one deep gave a short list indistinguishable from a complete one.
+        payload = fetch_all(
+            f"{API_ROOT}/repos/{repo_full_name}/pulls/{number}/files",
             token or require_token(),
         )
         cache_payload(path, payload)
@@ -165,8 +172,10 @@ def _commit_subjects(
         # into a hard failure.
         return ()
     else:
-        payload = fetch(
-            f"{API_ROOT}/repos/{repo_full_name}/pulls/{number}/commits?per_page=100",
+        # Every page: a truncated subject list makes shape detection compare the wrong
+        # sequence, on exactly the large PRs whose shape matters most.
+        payload = fetch_all(
+            f"{API_ROOT}/repos/{repo_full_name}/pulls/{number}/commits",
             token or require_token(),
         )
         cache_payload(path, payload)

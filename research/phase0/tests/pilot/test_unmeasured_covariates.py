@@ -82,16 +82,22 @@ def test_an_admitted_row_records_what_was_measured() -> None:
     assert row.changed_symbols == 1
 
 
-def test_github_file_list_is_recorded_and_truncation_flagged() -> None:
-    """The list was used by `verify_files` and dropped; the row now keeps it."""
+def test_github_file_list_is_recorded_and_never_flagged_truncated() -> None:
+    """The list was used by `verify_files` and dropped; the row now keeps it.
+
+    This test previously asserted a 100-entry list was `truncated=True`, which was right
+    while `github_pulls` fetched one page deep. `fetch_all` now walks every page and
+    RAISES rather than returning a short list, so a full-page list is complete and the
+    flag is False. The old assertion was pinning the truncation, not the recording.
+    """
     row = attempt_for(_candidate(), _record(), 3, stars=1, api_files=("x.py", "y.md", "z.py"))
     assert (row.github_changed_files, row.github_py_files) == (3, 2)
     assert row.github_files_truncated is False
 
-    capped = attempt_for(
+    full_page = attempt_for(
         _candidate(), _record(), 3, stars=1, api_files=tuple(f"f{i}.py" for i in range(100))
     )
-    assert capped.github_files_truncated is True, "a full page cannot be told from a cut one"
+    assert (full_page.github_changed_files, full_page.github_files_truncated) == (100, False)
 
 
 def test_absent_github_list_is_none_not_zero() -> None:

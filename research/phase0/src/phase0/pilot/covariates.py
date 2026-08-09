@@ -26,7 +26,6 @@ from phase0.extract_prs import PRRecord
 from phase0.handlabel.select import Candidate
 from phase0.pilot.attempt import Attempt
 from phase0.pipeline.rejection import Rejection
-from phase0.pipeline.verify_files import API_FILE_PAGE
 from phase0.pipeline.worktree import CloneFailed
 
 
@@ -81,7 +80,12 @@ def attempt_for(
         changed_symbols=symbols,
         github_changed_files=gh_files,
         github_py_files=gh_py,
-        github_files_truncated=gh_files is not None and gh_files >= API_FILE_PAGE,
+        # Always False now, and kept rather than dropped so a journal written before
+        # pagination still parses. `fetch_all` walks every page and RAISES rather than
+        # returning a short list, so a full-page list is complete. Inferring truncation
+        # from length after that would flag the largest PRs as suspect for a reason that
+        # no longer exists -- the same size selection this field was added to expose.
+        github_files_truncated=False,
         stars=stars,
         outcome=breakage,
         base_on_default=on_default,
