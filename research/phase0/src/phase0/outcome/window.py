@@ -15,8 +15,23 @@ WHY:  Split from `scan_outcome.py` because deciding WHERE to look and deciding W
 
       `base_ref_of` returns None rather than falling back to HEAD. A fallback would
       reintroduce the same bug in a narrower band and be harder to find the second time.
+
+      The walk is bounded by DATE, never by a commit count. It was capped at 2000
+      commits from the tip, and commits landing AFTER the window end consumed that
+      budget, so in a repository that had since landed more than 2000 commits the walk
+      was exhausted before reaching the window: `candidates` returned an empty list and
+      the PR scored CLEAN having examined nothing. Measured on the human arm, 60 of 191
+      scanned PRs were truncated this way and broke at 0.00% against 33.59% for the
+      rest. Re-scanned under a date bound, 23 of those 60 were BROKE and the two
+      partitions became statistically indistinguishable (Fisher p = 0.52), so the cap
+      accounted for the whole gap. A count cap is a selector on repository VELOCITY,
+      which tracks size -- the study's own confounder, entering through our command.
+
+      An unreadable walk RAISES rather than returning an empty list, because "no commits
+      landed in the window" and "the walk could not run" are different facts and CLEAN
+      is only honest about the first.
 IMPORTS: GitPython. Nothing from phase0.
-CONSUMED BY: scan_outcome.py; tests/outcome/test_scan.py.
+CONSUMED BY: outcome/scan.py; tests/outcome/test_scan.py.
 """
 
 from __future__ import annotations
@@ -30,7 +45,18 @@ from git import Commit, Repo
 from git.exc import GitError, ODBError
 
 GIT_LOOKUP_ERRORS = (GitError, ODBError, ValueError)
-MAX_COMMITS = 2000
+
+# Git's own date format for --since/--until. Committer date is what the walk filters on
+# and what `candidates` re-checks, so the two cannot disagree about which day it is.
+_GIT_DATE = "%Y-%m-%dT%H:%M:%S%z"
+
+
+class WindowUnreadable(Exception):
+    """The commit walk could not run. NOT the same as a window containing no commits.
+
+    Returning `[]` for both is what made the count cap invisible: the caller could not
+    tell "nothing landed here" from "we never looked", and scored CLEAN either way.
+    """
 
 
 class Exclusion(Enum):
@@ -48,6 +74,7 @@ class Exclusion(Enum):
     UNREADABLE_CLONE = "unreadable_clone"
     BASE_REF_MISSING = "base_ref_missing"
     MERGE_UNREACHABLE = "merge_unreachable"
+    WINDOW_UNREADABLE = "window_unreadable"
 
 
 def base_ref_of(repo: Repo, base_ref: str) -> str | None:
@@ -107,22 +134,38 @@ def merge_on_base(clone: Path, merge_sha: str, base_ref: str) -> str:
 def candidates(
     repo: Repo, start: datetime, end: datetime, exclude: str, ref: str = "HEAD"
 ) -> list[Commit]:
-    """Commits landing strictly after the merge and within the window, ON `ref`."""
+    """Commits landing strictly after the merge and within the window, ON `ref`.
+
+    Raises WindowUnreadable when the walk cannot run. An empty list therefore means one
+    thing only: the window is genuinely empty.
+    """
     found: list[Commit] = []
     try:
-        walk = repo.iter_commits(ref, max_count=MAX_COMMITS)
-    except GIT_LOOKUP_ERRORS:
-        return found
+        # Git bounds the walk by committer date. No max_count: a count cap consumes its
+        # budget on commits after the window and can be exhausted before reaching it,
+        # which reads as an empty window rather than as a truncated walk.
+        walk = repo.iter_commits(
+            ref, since=start.strftime(_GIT_DATE), until=end.strftime(_GIT_DATE)
+        )
+    except GIT_LOOKUP_ERRORS as exc:
+        raise WindowUnreadable(f"cannot walk {ref}: {exc}") from exc
 
-    for commit in walk:
-        when = commit.committed_datetime
-        if when.tzinfo is None:
-            when = when.replace(tzinfo=timezone.utc)
-        if when > end:
-            continue
-        if when <= start:
-            break  # history is newest-first; everything below is out of window
-        if exclude and commit.hexsha.startswith(exclude[:7]):
-            continue
-        found.append(commit)
+    try:
+        for commit in walk:
+            when = commit.committed_datetime
+            if when.tzinfo is None:
+                when = when.replace(tzinfo=timezone.utc)
+            # Re-checked rather than trusted: --since/--until is inclusive at the start
+            # and the window is open there, so the merge's own second must not qualify.
+            # `continue`, never `break` -- a break would reintroduce an ordering
+            # assumption that the date bound has already made unnecessary.
+            if when > end or when <= start:
+                continue
+            if exclude and commit.hexsha.startswith(exclude[:7]):
+                continue
+            found.append(commit)
+    except GIT_LOOKUP_ERRORS as exc:
+        # Mid-walk failure. Half a window is not a window, and the commits already
+        # collected would score CLEAN on the strength of the ones never read.
+        raise WindowUnreadable(f"walk of {ref} failed after {len(found)} commits: {exc}") from exc
     return found

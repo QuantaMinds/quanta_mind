@@ -121,6 +121,24 @@ Two consequences bind anything that consumes a verdict:
   force-push or a recreated branch) are separate values because they are different facts
   with different fixes. `OutcomeRecord.is_consistent` returns whether the verdict and the
   reason agree, rather than a comment claiming they do.
+- **The walk is bounded by date, never by a count.** `window.candidates` passed
+  `max_count=2000` to `iter_commits`, walking newest-first from the tip. Commits landing
+  *after* the window end hit `continue` but still spent that budget, so a repository that
+  had since landed more than 2,000 commits exhausted the walk before reaching the window:
+  the function returned `[]`, the PR scored CLEAN, and `commits_examined` was `0`. On the
+  human arm this took **60 of 191 scanned PRs**, which broke at **0.00%** against **33.59%**
+  for the rest; re-scanned under a date bound, **23 of the 60 were BROKE** and the two
+  partitions became indistinguishable (Fisher *p* = 0.52). The corrected human-arm rate is
+  **35.08%, not 23.04%** — 1.66× the published 21.18% reference rather than 1.09×. A count
+  cap selects on repository *velocity*, which tracks size, which is the study's own
+  confounder entering through our command rather than the data. `scan.py` declared a second
+  `MAX_COMMITS` that nothing read, so the constant that looked authoritative could be
+  edited with no effect and no failing test; it is gone.
+- **An unreadable walk raises.** `candidates` raises `WindowUnreadable` rather than
+  returning `[]`, and `scan` maps it to `Exclusion.WINDOW_UNREADABLE`. Returning the empty
+  list for both "nothing landed in the window" and "the walk could not run" is what made
+  the cap invisible for as long as it was: the caller could not tell the two apart, and
+  scored CLEAN either way.
 
 `controls/reconcile.py` accounts for both ways out of the 2×2 and bounds them separately:
 an unmeasurable arm still has a known outcome and bounds tightly, while a missing outcome
