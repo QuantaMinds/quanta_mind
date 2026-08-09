@@ -43,7 +43,13 @@ from git.exc import GitError, ODBError
 from phase0.extract_prs import PRRecord
 from phase0.outcome import signals
 from phase0.outcome.conclusion import Criterion, Outcome, OutcomeRecord
-from phase0.outcome.window import Exclusion, base_ref_of, candidates, reachable
+from phase0.outcome.window import (
+    Exclusion,
+    WindowUnreadable,
+    base_ref_of,
+    candidates,
+    reachable,
+)
 
 # See parent_commit.py: BadName/BadObject derive from gitdb's ODBError, which is
 # neither a GitError nor a ValueError, so a narrower catch lets them escape.
@@ -51,9 +57,11 @@ GIT_LOOKUP_ERRORS = (GitError, ODBError, ValueError)
 
 WINDOW_DAYS = 7
 
-# Hard bound on how far to walk. A busy repository can land thousands of commits
-# in a week, and the scan is per-PR across thousands of PRs.
-MAX_COMMITS = 2000
+# There is deliberately no commit-count bound here. This module used to declare a
+# second `MAX_COMMITS = 2000` that nothing read -- `window.py` held the live one -- so
+# the constant that looked authoritative, in the file where the walk appears to happen,
+# could be edited with no effect and no failing test. The bound is a DATE and it lives
+# with the walk. See `window.py` for what the count cap cost.
 
 
 def _merged_at(pr: PRRecord) -> datetime | None:
@@ -128,7 +136,18 @@ def scan(repo_path: Path, pr: PRRecord, window_days: int = WINDOW_DAYS) -> Outco
                 exclusion=Exclusion.MERGE_UNREACHABLE,
             )
         changed = frozenset(pr.changed_files)
-        commits = candidates(repo, merged, merged + timedelta(days=window_days), pr.merged_sha, ref)
+        try:
+            commits = candidates(
+                repo, merged, merged + timedelta(days=window_days), pr.merged_sha, ref
+            )
+        except WindowUnreadable as exc:
+            # UNSCANNABLE, never CLEAN. A walk that could not run says nothing about
+            # whether this PR broke anything, and CLEAN would claim it did not.
+            return OutcomeRecord(
+                Outcome.UNSCANNABLE,
+                evidence_message=str(exc)[:200],
+                exclusion=Exclusion.WINDOW_UNREADABLE,
+            )
 
         for commit in commits:
             message = str(commit.message)
