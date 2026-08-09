@@ -42,6 +42,7 @@ from git.exc import GitError, ODBError
 
 from phase0.extract_prs import PRRecord
 from phase0.outcome import signals
+from phase0.outcome.arrival import resolve_deleted_base
 from phase0.outcome.conclusion import Criterion, Outcome, OutcomeRecord
 from phase0.outcome.window import (
     Exclusion,
@@ -115,14 +116,20 @@ def scan(repo_path: Path, pr: PRRecord, window_days: int = WINDOW_DAYS) -> Outco
     with closing(repo):
         ref = base_ref_of(repo, pr.base_ref)
         if ref is None:
-            # The branch was deleted after the merge, which is ordinary hygiene for a
-            # `feature/x` base. Counted, not defaulted to HEAD: a fallback would restore
-            # the original bug inside a narrower band, where it would be harder to find.
-            return OutcomeRecord(
-                Outcome.UNSCANNABLE,
-                evidence_message=f"base branch {pr.base_ref!r} no longer exists",
-                exclusion=Exclusion.BASE_REF_MISSING,
+            # The branch was deleted, which is ordinary hygiene for a `feature/x` base.
+            # Never defaulted to HEAD -- that fallback is the original bug. The default
+            # branch is substituted ONLY when the merge demonstrably arrived there inside
+            # this PR's own window; otherwise the reason is counted and the PR excluded.
+            substitute, why = resolve_deleted_base(
+                repo_path, pr.merged_sha, merged, merged + timedelta(days=window_days)
             )
+            if substitute is None:
+                return OutcomeRecord(
+                    Outcome.UNSCANNABLE,
+                    evidence_message=f"base branch {pr.base_ref!r} no longer exists",
+                    exclusion=Exclusion(why),
+                )
+            ref = substitute
         if pr.merged_sha and not reachable(repo, pr.merged_sha, ref):
             # A separate category from a missing branch, because it is a different fact
             # about the repository. agentops#811, #817, #818 and #819 merged into `dev`

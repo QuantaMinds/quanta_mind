@@ -18,6 +18,26 @@
 | 2 | A31 recorded `--filter=blob:none` as ABANDONED. | The flag stayed in `pipeline/worktree.py` for a day, and **both arms were walked under the strategy the amendment said was abandoned.** | By reading the code after the walks had already run. | **YES** — `guard:check_no_partial_clone` rejects any `--filter`, and `guard:check_withdrawn_amendments` requires a withdrawal to name its enforcer. |
 | 3 | The 20-PR gate validated the outcome classifier. | `draw._as_record` **rebuilt** the classifier's input instead of consuming the `PRRecord` the pipeline had written, and got `base_ref`, `arm` and `merged_sha` wrong. The gate certified a classifier the study does not run, on roughly one PR in six. | By reading, after it had already invalidated a gate — chased down from a single disagreement where machine and human gave three different answers for the same PR. | **NO.** No guard catches "this tool rebuilds its input instead of consuming it". `record_for` now returns the stored object and is asserted on **identity**, but that is a test of one call site, not of the class. |
 
+| 4 | "All four base branches merged into main later than the PR merged into them, so walking default measures a different week." Stated as a measurement, and a taxonomy was designed on it — the fourth arm was said to be one that *will* fire. | **All four arrived inside the window.** Measured: 1 minute, 3 minutes, 10 minutes, and 3 days 12 hours, against a 7-day window. Walking default would have been valid for every one. | By finally running the query — `git rev-list --ancestry-path <merge_sha>..<default>`, last entry, its committer date. Minutes of work, never done until after the claim had been built on. | **NO.** Nothing catches an unmeasured claim in prose. See the mitigation below. |
+
+---
+
+## The mitigation for entry 4
+
+No guard reads prose for whether a claim was measured. What would have worked here is a
+habit, not a mechanism:
+
+> **A claim about the data is either accompanied by the query that produced it, or marked
+> as a hypothesis.**
+
+Entry 4 also has a shape worth naming, because it is the reason it went unexamined by
+either party. **The unverified claim was conservative** — it predicted more exclusions,
+more caution, a wider limitation. That made it comfortable to accept and extend.
+
+An unverified claim that argues for caution attracts less scrutiny than one that argues
+for a result, and that asymmetry is how a study accumulates unearned conservatism. The
+measured answer was the opposite of the comfortable one in every case.
+
 ---
 
 ## What the last column says

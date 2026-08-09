@@ -109,7 +109,17 @@ def test_fix_on_main_does_not_count_for_a_dev_pr(tmp_path: Path) -> None:
 
 
 def test_deleted_base_branch_is_counted_not_defaulted(tmp_path: Path) -> None:
-    """A base branch deleted after merge is an exclusion with a name, never a CLEAN."""
+    """A base branch deleted after merge is an exclusion with a name, never a CLEAN.
+
+    The name changed when `BASE_REF_MISSING` was subdivided into the three arms that
+    decide whether the default branch is a defensible substitute. This fixture is a local
+    repository with no `origin`, so the arrival of the merge in a default branch cannot be
+    determined at all -- which is `BASE_REF_UNRESOLVABLE` by definition, and the honest
+    answer here rather than a fallback.
+
+    The property this test was written for is unchanged and is asserted first: a deleted
+    base branch produces a TYPED exclusion and never a CLEAN verdict.
+    """
     repo, merged = _repo_with_dev(tmp_path)
     _commit(repo, TOUCHED, "fix: crash on empty payload", MERGED_AT + timedelta(days=2))
     repo.heads.main.checkout()
@@ -117,7 +127,8 @@ def test_deleted_base_branch_is_counted_not_defaulted(tmp_path: Path) -> None:
     result = scan(tmp_path, _pr(merged, "feature/gone"))
 
     assert result.outcome is Outcome.UNSCANNABLE
-    assert result.exclusion is Exclusion.BASE_REF_MISSING
+    assert result.outcome is not Outcome.CLEAN
+    assert result.exclusion is Exclusion.BASE_REF_UNRESOLVABLE
     assert result.is_consistent
 
 

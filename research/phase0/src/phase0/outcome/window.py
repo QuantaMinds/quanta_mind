@@ -75,6 +75,18 @@ class Exclusion(Enum):
     BASE_REF_MISSING = "base_ref_missing"
     MERGE_UNREACHABLE = "merge_unreachable"
     WINDOW_UNREADABLE = "window_unreadable"
+    # The base branch is gone, the merge IS in the default branch's history, and it
+    # arrived there outside the window. A fact about the DATA: walking the default branch
+    # instead would measure a different week from the one this PR lived in.
+    BASE_REF_WINDOW_SHIFTED = "base_ref_window_shifted"
+    # The base branch is gone and the merge is not in the default branch's history at all.
+    # A fact about US, which is why it is not called `unreachable`: a squash-merged feature
+    # branch and an abandoned one are INDISTINGUISHABLE here. A squash writes a new commit,
+    # so the PR's own merge sha is absent either way, and separating the two would need
+    # content matching -- inferring an arrival date from a diff that may have been modified
+    # in the squash, introduced independently, or arrived by another path. That is
+    # manufactured precision, so the two facts are merged and the name says so.
+    BASE_REF_UNRESOLVABLE = "base_ref_unresolvable"
 
 
 def base_ref_of(repo: Repo, base_ref: str) -> str | None:
