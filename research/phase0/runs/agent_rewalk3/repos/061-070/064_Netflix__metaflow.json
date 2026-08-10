@@ -1,0 +1,39 @@
+{
+  "admitted": 1,
+  "arms": [
+    "OpenAI_Codex"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-10T15:25:57+00:00",
+  "of": 72,
+  "position": 64,
+  "rejected_by_stage": {},
+  "repo": "Netflix/metaflow",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 253,
+      "changed_symbols": 2,
+      "commit_count": 2,
+      "corpus_py_files": 4,
+      "derived_files": 4,
+      "exclusion": "none",
+      "github_changed_files": 5,
+      "github_files_truncated": false,
+      "github_py_files": 4,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "3161557128",
+      "repo": "Netflix/metaflow",
+      "stage": "",
+      "stars": 9330
+    }
+  ],
+  "scanned": 1,
+  "stars": 9330,
+  "started_utc": "2026-08-10T15:25:48+00:00"
+}

@@ -38,6 +38,11 @@ CLONE_STAGES = frozenset({"clone_failed", "clone_timeout", "repo_gone"})
 # than chosen once the bands are in front of us.
 MIN_BAND_N = 5
 
+# How far above the pooled rate the largest band must sit to count as concentrated. Two
+# is deliberately blunt: the failure this exists to catch was 12.8x, and a threshold tuned
+# finely enough to argue about would be a threshold chosen after seeing the data.
+TOP_BAND_MULTIPLE = 2.0
+
 
 def _band_of(value: int) -> str:
     for name, low, high in COMMIT_BANDS:
@@ -70,6 +75,11 @@ def parent_gradient(attempts: list[Attempt]) -> dict[str, object]:
             "lost_to_clone_timeout": len(lost),
             "repos_lost": sorted({a.repo for a in lost}),
             "distinct_repos_present": len({a.repo for a in reachable}),
+            # Which repositories the FAILURES came from, not just the band. A band rate is
+            # a size effect only if several projects produce it: all three failures in the
+            # human arm's 21-plus band were `featureform/enrichmcp`, a repository that
+            # rewrote its history, so the band said 25% and the corpus said nothing.
+            "failure_repos": sorted({a.repo for a in rows if a.stage == PARENT_STAGE}),
             # The share of the band that never reached the rule at all. A high value here
             # makes the band's failure rate a statement about survivors, not about size.
             "share_lost": round(len(lost) / len(rows), 4),
@@ -97,6 +107,45 @@ def parent_gradient(attempts: list[Attempt]) -> dict[str, object]:
     unbanded = sum(
         1 for a in attempts if a.stage in CLONE_STAGES and _band_of(a.commit_count) == "unknown"
     )
+    pooled = (
+        round(sum(1 for a in attempts if a.stage == PARENT_STAGE) / len(attempts), 4)
+        if attempts
+        else None
+    )
+    # Monotonicity was the only test, and it answers the wrong question. The CONCERN is
+    # whether failure concentrates on the largest PRs; `rising` asks whether it climbs at
+    # every step. A spike confined to the top band answers yes to the first and no to the
+    # second, and that is exactly what the human arm produced: 25.0% at 21-plus against
+    # 1.96% below it, P = 0.0060, reported as "gradient flattened".
+    top = trend[-1] if trend else None
+    elevated = bool(top and pooled and top[1] >= TOP_BAND_MULTIPLE * pooled)
+
+    # ...and elevation alone would then have chased a phantom. All three failures in that
+    # band were ONE repository, which rewrote its history -- see
+    # `results/handverify_21plus.md`. A rate produced by a single project is not a size
+    # effect, and the honest output is neither verdict. Refused rather than guessed, the
+    # same way a trend is refused below MIN_BAND_N.
+    top_band = bands.get(top[0]) if top else None
+    top_repos = len(top_band["failure_repos"]) if top_band else 0  # type: ignore[arg-type]
+    # Conditional on ELEVATION. A band with one failure is single-repo by arithmetic, and
+    # refusing a verdict there would withhold an answer wherever the top band is quiet --
+    # which is most of the time, and is the outcome A28 predicts. The refusal is for a
+    # spike that cannot be attributed, not for the absence of one.
+    single_repo_top = bool(
+        elevated and top_band and top_band["parent_commit_failures"] and top_repos < 2
+    )
+
+    if rising is None:
+        verdict = None
+    elif single_repo_top:
+        verdict = "single_repo_band, verdict unavailable"
+    elif rising:
+        verdict = "mechanism may remain"
+    elif elevated:
+        verdict = "top band elevated"
+    else:
+        verdict = "gradient flattened"
+
     return {
         "bands": bands,
         "unbanded_clone_failures": unbanded,
@@ -106,12 +155,9 @@ def parent_gradient(attempts: list[Attempt]) -> dict[str, object]:
         # answered, and a verdict of "flattened" from one band would be the same false
         # reassurance the rest of this instrument keeps producing.
         "still_rises_with_size": rising,
-        "verdict": None
-        if rising is None
-        else ("mechanism may remain" if rising else "gradient flattened"),
-        "pooled_failure_rate": round(
-            sum(1 for a in attempts if a.stage == PARENT_STAGE) / len(attempts), 4
-        )
-        if attempts
-        else None,
+        "top_band_elevated": elevated,
+        "top_band_failure_repos": top_repos,
+        "top_band_is_single_repo": single_repo_top,
+        "verdict": verdict,
+        "pooled_failure_rate": pooled,
     }

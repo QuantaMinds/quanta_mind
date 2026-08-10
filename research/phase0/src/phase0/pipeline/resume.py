@@ -102,6 +102,7 @@ def read_attempts(path: Path) -> list[Attempt]:
                     github_changed_files=_count(cells[16]),
                     github_py_files=_count(cells[17]),
                     github_files_truncated=cells[18] == "yes",
+                    exclusion="" if cells[19] == "-" else cells[19],
                 )
             )
         except ValueError:

@@ -54,6 +54,14 @@ class Attempt:
     github_changed_files: int | None = None
     github_py_files: int | None = None
     github_files_truncated: bool = False
+    # WHY the outcome could not be scanned, from `Exclusion`. "" when the PR was scanned
+    # or never reached the scan. The verdict was recorded as a bare "unscannable" and the
+    # reason was computed, typed, and dropped -- so `base_ref_window_shifted`,
+    # `base_ref_unresolvable` and `history_rewritten` all arrived on disk as one word, and
+    # A40 requires them reported separately because a dominant one says which mechanism is
+    # doing the work. Same shape as `mem_cap` travelling on the in-memory result and never
+    # reaching a row.
+    exclusion: str = ""
     stars: int = -1
     # "broke" | "clean" | "" when the outcome was not scanned. Three states, not two:
     # an unscanned PR and a clean one must not be the same value, or the breakage rate

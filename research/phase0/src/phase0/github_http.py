@@ -137,3 +137,33 @@ def fetch(url: str, token: str) -> Any:
                 continue
             raise
     return {}
+
+
+def fetch_all(url: str, token: str, *, per_page: int = 100, max_pages: int = 30) -> list[Any]:
+    """Every page of a list endpoint, concatenated. Raises rather than truncating.
+
+    `/pulls/{n}/files` was fetched one page deep, so a PR touching more than `per_page`
+    files yielded a SHORT LIST INDISTINGUISHABLE FROM A COMPLETE ONE. `verify_files`
+    then compared the diff against a truncated authority, and its own guard skipped
+    exactly the largest PRs to avoid the false rejection -- size selection relocated into
+    the safeguard built to remove it.
+
+    `max_pages` is a runaway bound, not a truncation: hitting it RAISES. A cap that
+    returned what it had would restore the defect one layer out, which is the shape this
+    project keeps re-learning.
+    """
+    out: list[Any] = []
+    joiner = "&" if "?" in url else "?"
+    for page in range(1, max_pages + 1):
+        payload = fetch(f"{url}{joiner}per_page={per_page}&page={page}", token)
+        if not isinstance(payload, list):
+            # A dict here is `{}` from a 404, or an error object. Either way it is not a
+            # page of results, and appending nothing would read as "the list ended".
+            return out
+        out.extend(payload)
+        if len(payload) < per_page:
+            return out
+    raise RuntimeError(
+        f"{url} still had results after {max_pages} pages of {per_page}. Returning the "
+        f"first {len(out)} would be a truncated list that reads as a complete one."
+    )

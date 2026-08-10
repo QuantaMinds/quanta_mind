@@ -37,13 +37,11 @@ from __future__ import annotations
 import sys
 
 from phase0 import arm
-from phase0.extract_prs import PRRecord
 from phase0.github_pulls import merge_info, require_token
-from phase0.handlabel.select import Candidate
 from phase0.outcome.scan import scan
 from phase0.outcome.window import merge_on_base
 from phase0.pilot.attempt import Attempt
-from phase0.pilot.covariates import attempt_for, rows_for_clone_failure
+from phase0.pilot.covariates import recorder, rows_for_clone_failure
 from phase0.pilot.options import CACHE, PACKAGE, ROOT, parse
 from phase0.pilot.repo_facts import on_default_label, star_counts
 from phase0.pilot.report import by_repo, report
@@ -85,33 +83,7 @@ def main(argv: list[str] | None = None) -> int:
     if targets.already:
         print(f"resuming: {len(targets.already)} repos journalled, {len(attempts)} attempts")
 
-    def note(
-        candidate: Candidate,
-        outcome: PRRecord | Rejection,
-        commit_count: int,
-        breakage: str = "",
-        # "unknown", not "yes": a rejected attempt never reached the branch lookup, and
-        # defaulting to a measurement is how the two got confused in the first place.
-        on_default: str = "unknown",
-        on_base: str = "unknown",
-        lines_changed: int = -1,
-        # None when the API supplied no list; `()` would claim GitHub reported zero files.
-        api_files: tuple[str, ...] | None = None,
-    ) -> None:
-        """One attempt appended. The row itself is built by `covariates.attempt_for`."""
-        attempts.append(
-            attempt_for(
-                candidate,
-                outcome,
-                commit_count,
-                stars.get(candidate.repo, -1),
-                breakage,
-                on_default,
-                on_base,
-                lines_changed,
-                api_files,
-            )
-        )
+    note = recorder(attempts, stars)
 
     for position, repo in enumerate(targets.chosen, start=1):
         if repo in targets.already:
@@ -153,12 +125,14 @@ def main(argv: list[str] | None = None) -> int:
                         # and the file set -- discarding them is what made the outcome
                         # scan need a second pass over the corpus.
                         records_file.append(args.records, outcome)
-                    breakage = ""
+                    breakage, why = "", ""
                     if args.scan and not isinstance(outcome, Rejection):
-                        # The clone is already open and at the right repository, so the
-                        # scan costs a history walk and no network. Doing it in a second
-                        # pass would mean cloning every repository twice.
-                        breakage = scan(clone, outcome).outcome.value
+                        # Clone already open at the right repo, so this costs no network.
+                        # The exclusion travels WITH the verdict: it was computed, typed
+                        # and discarded here, so three reasons reached disk as one word.
+                        scanned = scan(clone, outcome)
+                        breakage = scanned.outcome.value
+                        why = scanned.exclusion.value if scanned.exclusion else ""
                     note(
                         candidate,
                         outcome,
@@ -172,6 +146,7 @@ def main(argv: list[str] | None = None) -> int:
                         # Recorded, not just consumed by `verify_files` and dropped: it is
                         # what makes derivation checkable from the run's own output.
                         merge.api_files or None,
+                        why,
                     )
                     announce(candidate.number, outcome, breakage)
         except CloneFailed as exc:

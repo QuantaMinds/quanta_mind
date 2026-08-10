@@ -1,0 +1,60 @@
+{
+  "admitted": 2,
+  "arms": [
+    "Copilot"
+  ],
+  "attempts": 2,
+  "broke": 2,
+  "finished_utc": "2026-08-10T14:41:16+00:00",
+  "of": 72,
+  "position": 9,
+  "rejected_by_stage": {},
+  "repo": "AliAkhtari78/SpotifyScraper",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 985,
+      "changed_symbols": 4,
+      "commit_count": 4,
+      "corpus_py_files": 9,
+      "derived_files": 9,
+      "exclusion": "none",
+      "github_changed_files": 9,
+      "github_files_truncated": false,
+      "github_py_files": 9,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "3081620313",
+      "repo": "AliAkhtari78/SpotifyScraper",
+      "stage": "",
+      "stars": 167
+    },
+    {
+      "admitted": true,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 1325,
+      "changed_symbols": 1,
+      "commit_count": 4,
+      "corpus_py_files": 6,
+      "derived_files": 6,
+      "exclusion": "none",
+      "github_changed_files": 14,
+      "github_files_truncated": false,
+      "github_py_files": 6,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "3091643325",
+      "repo": "AliAkhtari78/SpotifyScraper",
+      "stage": "",
+      "stars": 167
+    }
+  ],
+  "scanned": 2,
+  "stars": 167,
+  "started_utc": "2026-08-10T14:41:13+00:00"
+}

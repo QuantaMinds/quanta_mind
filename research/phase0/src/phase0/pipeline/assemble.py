@@ -32,6 +32,7 @@ from pathlib import Path
 
 from phase0.extract_prs import PRRecord
 from phase0.github_pulls import MergeInfo
+from phase0.outcome.arrival import sha_absent_from_clone
 from phase0.parent_commit import resolve
 from phase0.pipeline.changed import (
     changed_python_files,
@@ -75,6 +76,20 @@ def build_record(
         # unrelated bucket, and "we never had a merge commit" is not the same claim as
         # "we could not resolve its parent".
         return Rejection(pr_id, "no_merge_sha", "merged, but GitHub reports no merge commit")
+
+    # BEFORE parent resolution, because a merge commit that is in no clone makes the
+    # resolver fail for a reason that is not about the resolver. Checked here rather than
+    # in `outcome/scan.py`, where it was first placed: scan runs only on ADMITTED records,
+    # and these PRs are rejected at this stage, so the check could never reach them and
+    # fired zero times across 515 attempts. Caught by the known-answer test on
+    # `featureform/enrichmcp` -- see `results/handverify_21plus.md`.
+    if sha_absent_from_clone(clone, merge.merge_commit_sha):
+        return Rejection(
+            pr_id,
+            "history_rewritten",
+            f"merge commit {merge.merge_commit_sha[:10]} is in no clone; the repository "
+            f"rewrote its history after this PR merged",
+        )
 
     parent = resolve(
         clone,

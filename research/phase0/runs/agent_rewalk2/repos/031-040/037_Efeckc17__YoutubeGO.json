@@ -1,0 +1,40 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Cursor"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-10T07:23:31+00:00",
+  "of": 72,
+  "position": 37,
+  "rejected_by_stage": {
+    "parent_commit": 1
+  },
+  "repo": "Efeckc17/YoutubeGO",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Cursor",
+      "base_on_default": "yes",
+      "category": "integrity",
+      "changed_lines": 12,
+      "changed_symbols": null,
+      "commit_count": 3,
+      "corpus_py_files": 1,
+      "derived_files": null,
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "unknown",
+      "outcome": "",
+      "pr_id": "3204463734",
+      "repo": "Efeckc17/YoutubeGO",
+      "stage": "parent_commit",
+      "stars": 384
+    }
+  ],
+  "scanned": 0,
+  "stars": 384,
+  "started_utc": "2026-08-10T07:23:29+00:00"
+}

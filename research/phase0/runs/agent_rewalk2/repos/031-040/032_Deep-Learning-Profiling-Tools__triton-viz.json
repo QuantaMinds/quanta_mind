@@ -1,0 +1,40 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Claude_Code"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-10T07:22:20+00:00",
+  "of": 72,
+  "position": 32,
+  "rejected_by_stage": {
+    "parent_commit": 1
+  },
+  "repo": "Deep-Learning-Profiling-Tools/triton-viz",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Claude_Code",
+      "base_on_default": "no",
+      "category": "integrity",
+      "changed_lines": 3599,
+      "changed_symbols": null,
+      "commit_count": 8,
+      "corpus_py_files": 9,
+      "derived_files": null,
+      "github_changed_files": 23,
+      "github_files_truncated": false,
+      "github_py_files": 9,
+      "merge_on_base": "unknown",
+      "outcome": "",
+      "pr_id": "3220223180",
+      "repo": "Deep-Learning-Profiling-Tools/triton-viz",
+      "stage": "parent_commit",
+      "stars": 227
+    }
+  ],
+  "scanned": 0,
+  "stars": 227,
+  "started_utc": "2026-08-10T07:22:05+00:00"
+}

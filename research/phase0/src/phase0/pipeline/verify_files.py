@@ -40,7 +40,9 @@ from phase0.pipeline.rejection import Rejection
 
 MIN_FILE_AGREEMENT = 0.6
 
-# `/pulls/{n}/files` is fetched one page deep. A list exactly this long may be truncated.
+# The page SIZE `github_pulls` requests. It is no longer a truncation point: `fetch_all`
+# walks every page and raises rather than returning a short list, so a list exactly this
+# long is complete and gets the same strict equality as any other.
 API_FILE_PAGE = 100
 
 
@@ -57,34 +59,25 @@ def verify_files(pr_id: str, merge: MergeInfo, found: frozenset[str]) -> Rejecti
             "GitHub supplied no file list; there is nothing to verify the parent against.",
         )
 
-    trusted = len(merge.api_files) < API_FILE_PAGE
+    # No `trusted` branch any more. `github_pulls` paginates, and `fetch_all` RAISES
+    # rather than truncating, so the list is complete or the run stops. It used to read
+    # `len(api_files) < API_FILE_PAGE`, which sent a full page down the ratio path -- and
+    # a full page is the LARGEST PRs, so the strict gate was disabled on exactly the
+    # units that most need it. Keeping that test after pagination would be a compensation
+    # for a defect that no longer exists, still selecting on size.
     expected = frozenset(f for f in merge.api_files if f.endswith(".py"))
     agreement = file_agreement(expected, found)
 
-    if trusted:
-        if expected != found:
-            extra = sorted(found - expected)[:3]
-            missing = sorted(expected - found)[:3]
-            return Rejection(
-                pr_id,
-                "file_set",
-                f"diff and GitHub's file list are not equal: {len(found)} vs "
-                f"{len(expected)} .py files. Extra in diff: {extra or 'none'}; absent "
-                f"from diff: {missing or 'none'}. A superset means the walk went too far "
-                f"back or the PR was merged indirectly.",
-                agreement,
-            )
-        return None
-
-    # Only reachable when GitHub's list is exactly one page long and so may be cut. The
-    # authority IS GitHub here, merely possibly incomplete, and strict equality would
-    # reject a correct parent for files the second page would have listed.
-    if agreement < MIN_FILE_AGREEMENT:
+    if expected != found:
+        extra = sorted(found - expected)[:3]
+        missing = sorted(expected - found)[:3]
         return Rejection(
             pr_id,
             "file_set",
-            f"github (truncated at {API_FILE_PAGE}) lists {len(expected)} .py files, the "
-            f"diff shows {len(found)}; agreement {agreement:.2f} < {MIN_FILE_AGREEMENT}.",
+            f"diff and GitHub's file list are not equal: {len(found)} vs "
+            f"{len(expected)} .py files. Extra in diff: {extra or 'none'}; absent from "
+            f"diff: {missing or 'none'}. A superset means the walk went too far back or "
+            f"the PR was merged indirectly.",
             agreement,
         )
     return None

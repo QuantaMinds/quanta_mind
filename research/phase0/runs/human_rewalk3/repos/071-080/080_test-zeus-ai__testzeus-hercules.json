@@ -1,0 +1,39 @@
+{
+  "admitted": 1,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 1,
+  "broke": 1,
+  "finished_utc": "2026-08-10T16:10:33+00:00",
+  "of": 90,
+  "position": 80,
+  "rejected_by_stage": {},
+  "repo": "test-zeus-ai/testzeus-hercules",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 7379,
+      "changed_symbols": 58,
+      "commit_count": 6,
+      "corpus_py_files": 23,
+      "derived_files": 23,
+      "exclusion": "none",
+      "github_changed_files": 36,
+      "github_files_truncated": false,
+      "github_py_files": 23,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "2347982033",
+      "repo": "test-zeus-ai/testzeus-hercules",
+      "stage": "",
+      "stars": 620
+    }
+  ],
+  "scanned": 1,
+  "stars": 620,
+  "started_utc": "2026-08-10T16:10:29+00:00"
+}

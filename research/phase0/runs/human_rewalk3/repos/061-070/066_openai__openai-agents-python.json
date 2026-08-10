@@ -1,0 +1,83 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 3,
+  "broke": 0,
+  "finished_utc": "2026-08-10T16:08:18+00:00",
+  "of": 90,
+  "position": 66,
+  "rejected_by_stage": {
+    "no_symbols": 3
+  },
+  "repo": "openai/openai-agents-python",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 2,
+      "changed_symbols": null,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "2393403477",
+      "repo": "openai/openai-agents-python",
+      "stage": "no_symbols",
+      "stars": 13119
+    },
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 2,
+      "changed_symbols": null,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "2426401975",
+      "repo": "openai/openai-agents-python",
+      "stage": "no_symbols",
+      "stars": 13119
+    },
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 90,
+      "changed_symbols": null,
+      "commit_count": 1,
+      "corpus_py_files": 3,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": 5,
+      "github_files_truncated": false,
+      "github_py_files": 3,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "2471938138",
+      "repo": "openai/openai-agents-python",
+      "stage": "no_symbols",
+      "stars": 13119
+    }
+  ],
+  "scanned": 0,
+  "stars": 13119,
+  "started_utc": "2026-08-10T16:08:11+00:00"
+}

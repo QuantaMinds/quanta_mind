@@ -1,0 +1,38 @@
+{
+  "admitted": 1,
+  "arms": [
+    "OpenAI_Codex"
+  ],
+  "attempts": 1,
+  "broke": 1,
+  "finished_utc": "2026-08-10T07:19:34+00:00",
+  "of": 72,
+  "position": 24,
+  "rejected_by_stage": {},
+  "repo": "Blaizzy/mlx-audio",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 6,
+      "changed_symbols": 1,
+      "commit_count": 2,
+      "corpus_py_files": 10,
+      "derived_files": 1,
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "3071093339",
+      "repo": "Blaizzy/mlx-audio",
+      "stage": "",
+      "stars": 2524
+    }
+  ],
+  "scanned": 1,
+  "stars": 2524,
+  "started_utc": "2026-08-10T07:19:28+00:00"
+}

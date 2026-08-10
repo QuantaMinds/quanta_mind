@@ -1,0 +1,83 @@
+{
+  "admitted": 2,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 3,
+  "broke": 1,
+  "finished_utc": "2026-08-10T15:51:01+00:00",
+  "of": 90,
+  "position": 46,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "getsentry/sentry-python",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 70,
+      "changed_symbols": 4,
+      "commit_count": 3,
+      "corpus_py_files": 2,
+      "derived_files": 2,
+      "exclusion": "none",
+      "github_changed_files": 2,
+      "github_files_truncated": false,
+      "github_py_files": 2,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "2327061220",
+      "repo": "getsentry/sentry-python",
+      "stage": "",
+      "stars": 2043
+    },
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "no",
+      "category": "",
+      "changed_lines": 221,
+      "changed_symbols": 47,
+      "commit_count": 6,
+      "corpus_py_files": 27,
+      "derived_files": 25,
+      "exclusion": "none",
+      "github_changed_files": 28,
+      "github_files_truncated": false,
+      "github_py_files": 25,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "2353932762",
+      "repo": "getsentry/sentry-python",
+      "stage": "",
+      "stars": 2043
+    },
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "no",
+      "category": "restricted",
+      "changed_lines": 1,
+      "changed_symbols": null,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "2448918557",
+      "repo": "getsentry/sentry-python",
+      "stage": "no_symbols",
+      "stars": 2043
+    }
+  ],
+  "scanned": 2,
+  "stars": 2043,
+  "started_utc": "2026-08-10T15:50:34+00:00"
+}

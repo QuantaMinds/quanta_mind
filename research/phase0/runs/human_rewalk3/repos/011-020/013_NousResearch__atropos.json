@@ -1,0 +1,41 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-10T15:34:58+00:00",
+  "of": 90,
+  "position": 13,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "NousResearch/atropos",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 343,
+      "changed_symbols": null,
+      "commit_count": 2,
+      "corpus_py_files": 3,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": 3,
+      "github_files_truncated": false,
+      "github_py_files": 2,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "2545179720",
+      "repo": "NousResearch/atropos",
+      "stage": "no_symbols",
+      "stars": 570
+    }
+  ],
+  "scanned": 0,
+  "stars": 570,
+  "started_utc": "2026-08-10T15:34:48+00:00"
+}

@@ -41,6 +41,12 @@ CATEGORIES: dict[str, str] = {
     # rejected at `file_set` -- an `integrity` label blaming the repository for our gap,
     # and biased toward the PRs the corpus mis-attributes most, i.e. by size.
     "no_file_authority": "resource",
+    # The merge commit is in no clone: the repository rewrote its history after merging.
+    # `resource`, not `integrity` -- the data is missing, and nothing about our resolver's
+    # account is in question. It read as `parent_commit/integrity` before, which blamed
+    # the resolver for a force-push and made ONE project 70% of the human arm's
+    # integrity attrition. See `results/handverify_21plus.md`.
+    "history_rewritten": "resource",
     "parent_commit": "integrity",
     "file_set": "integrity",
     "no_python": "restricted",

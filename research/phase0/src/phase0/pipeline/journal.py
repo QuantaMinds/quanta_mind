@@ -64,6 +64,10 @@ COLUMNS = (
     "gh_files",
     "gh_py",
     "gh_truncated",
+    # WHY the outcome was unscannable, from `Exclusion`. Appended last, so older
+    # journals read "-" = NOT MEASURED. The reason was computed and typed and then
+    # dropped, so three different exclusions arrived on disk as one word.
+    "exclusion",
 )
 
 
@@ -125,6 +129,7 @@ def append_repo(path: Path, repo: str, attempts: list[Attempt], rescan: str = ""
                 _num(a.github_changed_files),
                 _num(a.github_py_files),
                 "yes" if a.github_files_truncated else "no",
+                a.exclusion or "-",
             )
         )
         + " |"

@@ -1,0 +1,38 @@
+{
+  "admitted": 1,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 1,
+  "broke": 1,
+  "finished_utc": "2026-08-10T08:05:57+00:00",
+  "of": 90,
+  "position": 84,
+  "rejected_by_stage": {},
+  "repo": "volcengine/verl",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 40,
+      "changed_symbols": 4,
+      "commit_count": 12,
+      "corpus_py_files": 213,
+      "derived_files": 3,
+      "github_changed_files": 4,
+      "github_files_truncated": false,
+      "github_py_files": 3,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "2576376243",
+      "repo": "volcengine/verl",
+      "stage": "",
+      "stars": 11675
+    }
+  ],
+  "scanned": 1,
+  "stars": 11675,
+  "started_utc": "2026-08-10T08:05:53+00:00"
+}

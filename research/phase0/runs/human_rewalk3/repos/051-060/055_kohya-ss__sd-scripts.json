@@ -1,0 +1,39 @@
+{
+  "admitted": 1,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-10T15:53:02+00:00",
+  "of": 90,
+  "position": 55,
+  "rejected_by_stage": {},
+  "repo": "kohya-ss/sd-scripts",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "no",
+      "category": "",
+      "changed_lines": 651,
+      "changed_symbols": 32,
+      "commit_count": 1,
+      "corpus_py_files": 6,
+      "derived_files": 6,
+      "exclusion": "none",
+      "github_changed_files": 6,
+      "github_files_truncated": false,
+      "github_py_files": 6,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "2590345700",
+      "repo": "kohya-ss/sd-scripts",
+      "stage": "",
+      "stars": 6459
+    }
+  ],
+  "scanned": 1,
+  "stars": 6459,
+  "started_utc": "2026-08-10T15:52:49+00:00"
+}

@@ -75,6 +75,26 @@ class Exclusion(Enum):
     BASE_REF_MISSING = "base_ref_missing"
     MERGE_UNREACHABLE = "merge_unreachable"
     WINDOW_UNREADABLE = "window_unreadable"
+    # The base branch is gone, the merge IS in the default branch's history, and it
+    # arrived there outside the window. A fact about the DATA: walking the default branch
+    # instead would measure a different week from the one this PR lived in.
+    BASE_REF_WINDOW_SHIFTED = "base_ref_window_shifted"
+    # The base branch is gone and the merge is not in the default branch's history at all.
+    # A fact about US, which is why it is not called `unreachable`: a squash-merged feature
+    # branch and an abandoned one are INDISTINGUISHABLE here. A squash writes a new commit,
+    # so the PR's own merge sha is absent either way, and separating the two would need
+    # content matching -- inferring an arrival date from a diff that may have been modified
+    # in the squash, introduced independently, or arrived by another path. That is
+    # manufactured precision, so the two facts are merged and the name says so.
+    BASE_REF_UNRESOLVABLE = "base_ref_unresolvable"
+    # The merge commit is not in the REPOSITORY at all -- not merely off the default
+    # branch. GitHub's PR payload names the sha, and a full clone holds no such object, so
+    # the history was rewritten after the merge: force-push, branch recreation, or a
+    # squash-and-reset. Distinct from BASE_REF_UNRESOLVABLE, which is a ROUTING question
+    # (the merge exists, it is not on default's path); this is MISSING DATA, and nothing
+    # about the PR is recoverable from any clone. Bird et al.'s "git history is
+    # revisionist" arriving in the corpus. See `results/handverify_21plus.md`.
+    HISTORY_REWRITTEN = "history_rewritten"
 
 
 def base_ref_of(repo: Repo, base_ref: str) -> str | None:

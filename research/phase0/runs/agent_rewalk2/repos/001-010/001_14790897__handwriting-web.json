@@ -1,0 +1,40 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Copilot"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-10T06:43:56+00:00",
+  "of": 72,
+  "position": 1,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "14790897/handwriting-web",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 76,
+      "changed_symbols": null,
+      "commit_count": 7,
+      "corpus_py_files": 1,
+      "derived_files": null,
+      "github_changed_files": 3,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3224777239",
+      "repo": "14790897/handwriting-web",
+      "stage": "no_symbols",
+      "stars": 399
+    }
+  ],
+  "scanned": 0,
+  "stars": 399,
+  "started_utc": "2026-08-10T06:43:47+00:00"
+}

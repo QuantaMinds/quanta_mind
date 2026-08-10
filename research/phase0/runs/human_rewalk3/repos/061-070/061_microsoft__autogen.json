@@ -1,0 +1,62 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 2,
+  "broke": 0,
+  "finished_utc": "2026-08-10T15:56:11+00:00",
+  "of": 90,
+  "position": 61,
+  "rejected_by_stage": {
+    "repo_gone": 2
+  },
+  "repo": "microsoft/autogen",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "unknown",
+      "category": "resource",
+      "changed_lines": -1,
+      "changed_symbols": null,
+      "commit_count": 2,
+      "corpus_py_files": 1,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": null,
+      "github_files_truncated": false,
+      "github_py_files": null,
+      "merge_on_base": "unknown",
+      "outcome": "",
+      "pr_id": "2258241795",
+      "repo": "microsoft/autogen",
+      "stage": "repo_gone",
+      "stars": -1
+    },
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "unknown",
+      "category": "resource",
+      "changed_lines": -1,
+      "changed_symbols": null,
+      "commit_count": 11,
+      "corpus_py_files": 12,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": null,
+      "github_files_truncated": false,
+      "github_py_files": null,
+      "merge_on_base": "unknown",
+      "outcome": "",
+      "pr_id": "2309714629",
+      "repo": "microsoft/autogen",
+      "stage": "repo_gone",
+      "stars": -1
+    }
+  ],
+  "scanned": 0,
+  "stars": -1,
+  "started_utc": "2026-08-10T15:56:00+00:00"
+}
