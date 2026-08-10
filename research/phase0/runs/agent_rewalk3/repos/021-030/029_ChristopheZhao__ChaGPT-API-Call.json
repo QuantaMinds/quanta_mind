@@ -1,0 +1,63 @@
+{
+  "admitted": 1,
+  "arms": [
+    "Devin",
+    "OpenAI_Codex"
+  ],
+  "attempts": 2,
+  "broke": 0,
+  "finished_utc": "2026-08-10T15:06:36+00:00",
+  "of": 72,
+  "position": 29,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "ChristopheZhao/ChaGPT-API-Call",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 150,
+      "changed_symbols": null,
+      "commit_count": 1,
+      "corpus_py_files": 3,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": 5,
+      "github_files_truncated": false,
+      "github_py_files": 3,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3185869590",
+      "repo": "ChristopheZhao/ChaGPT-API-Call",
+      "stage": "no_symbols",
+      "stars": 116
+    },
+    {
+      "admitted": true,
+      "arm": "Devin",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 146,
+      "changed_symbols": 1,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": 1,
+      "exclusion": "none",
+      "github_changed_files": 2,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "3204333284",
+      "repo": "ChristopheZhao/ChaGPT-API-Call",
+      "stage": "",
+      "stars": 116
+    }
+  ],
+  "scanned": 1,
+  "stars": 116,
+  "started_utc": "2026-08-10T15:06:34+00:00"
+}

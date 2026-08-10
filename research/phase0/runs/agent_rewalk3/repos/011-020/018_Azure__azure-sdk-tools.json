@@ -1,0 +1,62 @@
+{
+  "admitted": 1,
+  "arms": [
+    "Copilot"
+  ],
+  "attempts": 2,
+  "broke": 0,
+  "finished_utc": "2026-08-10T14:55:10+00:00",
+  "of": 72,
+  "position": 18,
+  "rejected_by_stage": {
+    "no_python": 1
+  },
+  "repo": "Azure/azure-sdk-tools",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 767,
+      "changed_symbols": null,
+      "commit_count": 18,
+      "corpus_py_files": 1,
+      "derived_files": 0,
+      "exclusion": "",
+      "github_changed_files": 10,
+      "github_files_truncated": false,
+      "github_py_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3134438774",
+      "repo": "Azure/azure-sdk-tools",
+      "stage": "no_python",
+      "stars": 122
+    },
+    {
+      "admitted": true,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 252,
+      "changed_symbols": 3,
+      "commit_count": 4,
+      "corpus_py_files": 4,
+      "derived_files": 3,
+      "exclusion": "none",
+      "github_changed_files": 3,
+      "github_files_truncated": false,
+      "github_py_files": 3,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "3158220791",
+      "repo": "Azure/azure-sdk-tools",
+      "stage": "",
+      "stars": 122
+    }
+  ],
+  "scanned": 1,
+  "stars": 122,
+  "started_utc": "2026-08-10T14:54:43+00:00"
+}

@@ -1,0 +1,60 @@
+{
+  "admitted": 2,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 2,
+  "broke": 2,
+  "finished_utc": "2026-08-10T15:51:49+00:00",
+  "of": 90,
+  "position": 51,
+  "rejected_by_stage": {},
+  "repo": "jlowin/fastmcp",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 13,
+      "changed_symbols": 10,
+      "commit_count": 2,
+      "corpus_py_files": 5,
+      "derived_files": 5,
+      "exclusion": "none",
+      "github_changed_files": 5,
+      "github_files_truncated": false,
+      "github_py_files": 5,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "2497387255",
+      "repo": "jlowin/fastmcp",
+      "stage": "",
+      "stars": 15491
+    },
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 548,
+      "changed_symbols": 8,
+      "commit_count": 7,
+      "corpus_py_files": 44,
+      "derived_files": 6,
+      "exclusion": "none",
+      "github_changed_files": 6,
+      "github_files_truncated": false,
+      "github_py_files": 6,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "2576026392",
+      "repo": "jlowin/fastmcp",
+      "stage": "",
+      "stars": 15491
+    }
+  ],
+  "scanned": 2,
+  "stars": 15491,
+  "started_utc": "2026-08-10T15:51:31+00:00"
+}

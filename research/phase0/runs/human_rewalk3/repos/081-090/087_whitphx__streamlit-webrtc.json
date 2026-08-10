@@ -1,0 +1,39 @@
+{
+  "admitted": 1,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 1,
+  "broke": 1,
+  "finished_utc": "2026-08-10T16:17:06+00:00",
+  "of": 90,
+  "position": 87,
+  "rejected_by_stage": {},
+  "repo": "whitphx/streamlit-webrtc",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 26,
+      "changed_symbols": 1,
+      "commit_count": 3,
+      "corpus_py_files": 2,
+      "derived_files": 2,
+      "exclusion": "none",
+      "github_changed_files": 3,
+      "github_files_truncated": false,
+      "github_py_files": 2,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "2385847879",
+      "repo": "whitphx/streamlit-webrtc",
+      "stage": "",
+      "stars": 1613
+    }
+  ],
+  "scanned": 1,
+  "stars": 1613,
+  "started_utc": "2026-08-10T16:16:58+00:00"
+}

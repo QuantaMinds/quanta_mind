@@ -1,0 +1,39 @@
+{
+  "admitted": 1,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-10T15:46:20+00:00",
+  "of": 90,
+  "position": 41,
+  "rejected_by_stage": {},
+  "repo": "devitocodes/devito",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Human",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 42,
+      "changed_symbols": 3,
+      "commit_count": 2,
+      "corpus_py_files": 2,
+      "derived_files": 2,
+      "exclusion": "none",
+      "github_changed_files": 2,
+      "github_files_truncated": false,
+      "github_py_files": 2,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "2397352966",
+      "repo": "devitocodes/devito",
+      "stage": "",
+      "stars": 612
+    }
+  ],
+  "scanned": 1,
+  "stars": 612,
+  "started_utc": "2026-08-10T15:45:55+00:00"
+}

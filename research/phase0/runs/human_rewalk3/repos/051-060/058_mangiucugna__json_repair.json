@@ -1,0 +1,83 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Human"
+  ],
+  "attempts": 3,
+  "broke": 0,
+  "finished_utc": "2026-08-10T15:54:58+00:00",
+  "of": 90,
+  "position": 58,
+  "rejected_by_stage": {
+    "merge_metadata": 3
+  },
+  "repo": "mangiucugna/json_repair",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "unknown",
+      "category": "resource",
+      "changed_lines": -1,
+      "changed_symbols": null,
+      "commit_count": 0,
+      "corpus_py_files": 2,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": null,
+      "github_files_truncated": false,
+      "github_py_files": null,
+      "merge_on_base": "unknown",
+      "outcome": "",
+      "pr_id": "2329041793",
+      "repo": "mangiucugna/json_repair",
+      "stage": "merge_metadata",
+      "stars": 2533
+    },
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "unknown",
+      "category": "resource",
+      "changed_lines": -1,
+      "changed_symbols": null,
+      "commit_count": 0,
+      "corpus_py_files": 3,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": null,
+      "github_files_truncated": false,
+      "github_py_files": null,
+      "merge_on_base": "unknown",
+      "outcome": "",
+      "pr_id": "2488024698",
+      "repo": "mangiucugna/json_repair",
+      "stage": "merge_metadata",
+      "stars": 2533
+    },
+    {
+      "admitted": false,
+      "arm": "Human",
+      "base_on_default": "unknown",
+      "category": "resource",
+      "changed_lines": -1,
+      "changed_symbols": null,
+      "commit_count": 0,
+      "corpus_py_files": 1,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": null,
+      "github_files_truncated": false,
+      "github_py_files": null,
+      "merge_on_base": "unknown",
+      "outcome": "",
+      "pr_id": "2524180167",
+      "repo": "mangiucugna/json_repair",
+      "stage": "merge_metadata",
+      "stars": 2533
+    }
+  ],
+  "scanned": 0,
+  "stars": 2533,
+  "started_utc": "2026-08-10T15:54:55+00:00"
+}
