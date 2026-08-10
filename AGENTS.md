@@ -97,14 +97,12 @@ you remember to obey — the machine will stop you either way.
     such references were already dangling when this rule was written.
 
     ```
-    §7's gate       →  `PHASE0_RUNBOOK.md` “The 20-PR hand-labelling gate”  no-vague-refs:allow
-    RUNBOOK §2.1    →  `PHASE0_RUNBOOK.md` “Positive control”               no-vague-refs:allow
-    Phase 0         →  the correlation test                                 no-vague-refs:allow
-    Phase 3         →  the probe layer                                      no-vague-refs:allow
+    §7's gate  →  `PHASE0_RUNBOOK.md` “The 20-PR hand-labelling gate”  no-vague-refs:allow
+    Phase 0    →  the correlation test                                 no-vague-refs:allow
     ```
-    The trailing marker suppresses the guard on that line so the rule can show what it
-    bans. It is counted and printed on every run; it is not a general escape hatch.
-    → `scripts/guard/check_no_vague_refs.py`
+    One example of each banned form. The trailing marker suppresses the guard on that line
+    so the rule can show what it bans; it is counted and printed on every run, and is not a
+    general escape hatch. → `scripts/guard/check_no_vague_refs.py`
 
 13. **Move files with `git mv`, and never leave two modules with one name.** A stale
     duplicate passed every guard: git tracked both copies, nothing imported the old
@@ -112,18 +110,20 @@ you remember to obey — the machine will stop you either way.
     project whose thesis is provenance, letting git lose a rename is not a small irony.
     → `scripts/guard/check_module_identity.py`
 
-14. **A comment may explain *why*, never assert *whether*.** If a comment claims a safety
-    property — "this is caught later", "callers always hold the lock", "the next pass
-    checks it" — that claim belongs in an assertion, a test, or a returned value. The
-    comment then explains the reasoning behind the check rather than standing in for it.
+14. **A comment may explain *why*, never assert *whether*.** A claim of a safety property
+    — "this is caught later", "callers always hold the lock" — belongs in an assertion, a
+    test, or a returned value. A cleanup path said "a leftover is caught by the strict pass
+    on the next attempt"; the next attempt was a different repo, nothing checked, 1.6 GB
+    accumulated. `sweep()` returns the count instead — observable, not claimed.
 
-    A cleanup path said "a leftover is caught by the strict pass on the next attempt". The
-    next attempt was a different repo, so nothing checked and 1.6 GB accumulated. `sweep()`
-    returns the count instead — observable, not claimed.
     **Ask what a check outputs when the thing it checks is broken. If the answer is "the
-    same thing", it is not a check.** `all(b >= a)` said True on a flat gradient;
-    `startswith("")` said True for an unresolved parent; a survey reusing the rule it
-    validates agrees by construction. → **ADVISORY** — notice the verb.
+    same thing", it is not a check.** Three surfaces, one question. *Wrong logic*:
+    `all(b >= a)` said True on a flat gradient. *Unreachable*: `history_rewritten` sat in
+    `scan()`, which runs only on admitted records, so it never met its cases and returned
+    zero across 515 attempts — identical to a genuine null. *A pinned defect*: two tests
+    certified the corpus-for-GitHub substitution as correct, so removing it broke them;
+    before editing an assertion to pass, establish which of the two it protects. **Only a
+    known-answer test tells any of these from a real negative.** → **ADVISORY** — notice the verb.
 
 15. **A documented command must run, or carry `documented-command:unbuilt`.** `python -m`
     with no `__main__` ignores flags, writes nothing, exits 0 — the runbook's "Days 3–5" reported success and did nothing. → `scripts/guard/check_documented_commands.py`
