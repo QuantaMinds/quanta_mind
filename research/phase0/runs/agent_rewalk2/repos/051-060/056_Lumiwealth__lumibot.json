@@ -1,0 +1,40 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Cursor"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-10T07:27:09+00:00",
+  "of": 72,
+  "position": 56,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "Lumiwealth/lumibot",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Cursor",
+      "base_on_default": "no",
+      "category": "restricted",
+      "changed_lines": 1,
+      "changed_symbols": null,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": null,
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3225620441",
+      "repo": "Lumiwealth/lumibot",
+      "stage": "no_symbols",
+      "stars": 1087
+    }
+  ],
+  "scanned": 0,
+  "stars": 1087,
+  "started_utc": "2026-08-10T07:26:57+00:00"
+}

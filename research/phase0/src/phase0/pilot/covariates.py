@@ -20,7 +20,7 @@ CONSUMED BY: pilot/run.py; tests/pilot/test_covariates.py.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 
 from phase0.extract_prs import PRRecord
 from phase0.handlabel.select import Candidate
@@ -39,6 +39,7 @@ def attempt_for(
     on_base: str = "unknown",
     lines_changed: int = -1,
     api_files: Sequence[str] | None = None,
+    exclusion: str = "",
 ) -> Attempt:
     """One attempt, with the covariates attrition may track. Never a verdict.
 
@@ -92,6 +93,7 @@ def attempt_for(
         merge_on_base=on_base,
         changed_lines=lines_changed,
         arm=candidate.arm,
+        exclusion=exclusion,
     )
 
 
@@ -127,3 +129,43 @@ def rows_for_clone_failure(
         for c in candidates
         if str(c.pr_id) not in seen
     ]
+
+
+def recorder(attempts: list[Attempt], stars: dict[str, int]) -> Callable[..., None]:
+    """A closure that appends one row per attempt to `attempts`.
+
+    Lives here rather than inside `pilot/run.py` because building a row is this module's
+    concern and walking repositories is that one's -- and because run.py had grown past
+    its file budget with this closure inside it for the second time.
+    """
+
+    def note(
+        candidate: Candidate,
+        outcome: PRRecord | Rejection,
+        commit_count: int,
+        breakage: str = "",
+        # "unknown", not "yes": a rejected attempt never reached the branch lookup, and
+        # defaulting to a measurement is how the two got confused in the first place.
+        on_default: str = "unknown",
+        on_base: str = "unknown",
+        lines_changed: int = -1,
+        # None when the API supplied no list; `()` would claim GitHub reported zero files.
+        api_files: Sequence[str] | None = None,
+        exclusion: str = "",
+    ) -> None:
+        attempts.append(
+            attempt_for(
+                candidate,
+                outcome,
+                commit_count,
+                stars.get(candidate.repo, -1),
+                breakage,
+                on_default,
+                on_base,
+                lines_changed,
+                api_files,
+                exclusion,
+            )
+        )
+
+    return note

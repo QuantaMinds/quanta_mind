@@ -1,0 +1,80 @@
+{
+  "admitted": 1,
+  "arms": [
+    "Copilot"
+  ],
+  "attempts": 3,
+  "broke": 0,
+  "finished_utc": "2026-08-10T06:51:25+00:00",
+  "of": 72,
+  "position": 11,
+  "rejected_by_stage": {
+    "no_python": 2
+  },
+  "repo": "Azure-Samples/openai-chat-vision-quickstart",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 6,
+      "changed_symbols": null,
+      "commit_count": 5,
+      "corpus_py_files": 279,
+      "derived_files": 0,
+      "github_changed_files": 2,
+      "github_files_truncated": false,
+      "github_py_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3244675240",
+      "repo": "Azure-Samples/openai-chat-vision-quickstart",
+      "stage": "no_python",
+      "stars": 152
+    },
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 8,
+      "changed_symbols": null,
+      "commit_count": 8,
+      "corpus_py_files": 502,
+      "derived_files": 0,
+      "github_changed_files": 2,
+      "github_files_truncated": false,
+      "github_py_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3244675358",
+      "repo": "Azure-Samples/openai-chat-vision-quickstart",
+      "stage": "no_python",
+      "stars": 152
+    },
+    {
+      "admitted": true,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 21,
+      "changed_symbols": 1,
+      "commit_count": 2,
+      "corpus_py_files": 1,
+      "derived_files": 1,
+      "github_changed_files": 3,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "3258691697",
+      "repo": "Azure-Samples/openai-chat-vision-quickstart",
+      "stage": "",
+      "stars": 152
+    }
+  ],
+  "scanned": 1,
+  "stars": 152,
+  "started_utc": "2026-08-10T06:51:19+00:00"
+}

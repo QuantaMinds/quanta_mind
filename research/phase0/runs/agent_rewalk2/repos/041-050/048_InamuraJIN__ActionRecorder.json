@@ -1,0 +1,40 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Copilot"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-10T07:25:48+00:00",
+  "of": 72,
+  "position": 48,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "InamuraJIN/ActionRecorder",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 39,
+      "changed_symbols": null,
+      "commit_count": 2,
+      "corpus_py_files": 3,
+      "derived_files": null,
+      "github_changed_files": 3,
+      "github_files_truncated": false,
+      "github_py_files": 3,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3204337980",
+      "repo": "InamuraJIN/ActionRecorder",
+      "stage": "no_symbols",
+      "stars": 205
+    }
+  ],
+  "scanned": 0,
+  "stars": 205,
+  "started_utc": "2026-08-10T07:25:45+00:00"
+}

@@ -1,0 +1,60 @@
+{
+  "admitted": 1,
+  "arms": [
+    "Cursor"
+  ],
+  "attempts": 2,
+  "broke": 1,
+  "finished_utc": "2026-08-10T07:16:12+00:00",
+  "of": 72,
+  "position": 21,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "Bandit-HaxUnit/haxunit",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Cursor",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 48,
+      "changed_symbols": null,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": null,
+      "github_changed_files": 4,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3239582067",
+      "repo": "Bandit-HaxUnit/haxunit",
+      "stage": "no_symbols",
+      "stars": 325
+    },
+    {
+      "admitted": true,
+      "arm": "Cursor",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 15,
+      "changed_symbols": 3,
+      "commit_count": 2,
+      "corpus_py_files": 1,
+      "derived_files": 1,
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "3239615601",
+      "repo": "Bandit-HaxUnit/haxunit",
+      "stage": "",
+      "stars": 325
+    }
+  ],
+  "scanned": 1,
+  "stars": 325,
+  "started_utc": "2026-08-10T07:16:10+00:00"
+}

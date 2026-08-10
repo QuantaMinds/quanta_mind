@@ -1,0 +1,40 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Devin"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-10T07:25:53+00:00",
+  "of": 72,
+  "position": 49,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "Jij-Inc/OpenJij",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Devin",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 12,
+      "changed_symbols": null,
+      "commit_count": 4,
+      "corpus_py_files": 1,
+      "derived_files": null,
+      "github_changed_files": 3,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "2960029883",
+      "repo": "Jij-Inc/OpenJij",
+      "stage": "no_symbols",
+      "stars": 112
+    }
+  ],
+  "scanned": 0,
+  "stars": 112,
+  "started_utc": "2026-08-10T07:25:48+00:00"
+}

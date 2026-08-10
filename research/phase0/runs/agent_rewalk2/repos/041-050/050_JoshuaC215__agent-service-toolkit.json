@@ -1,0 +1,38 @@
+{
+  "admitted": 1,
+  "arms": [
+    "Claude_Code"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-10T07:25:55+00:00",
+  "of": 72,
+  "position": 50,
+  "rejected_by_stage": {},
+  "repo": "JoshuaC215/agent-service-toolkit",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Claude_Code",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 36,
+      "changed_symbols": 1,
+      "commit_count": 2,
+      "corpus_py_files": 3,
+      "derived_files": 1,
+      "github_changed_files": 3,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "2986072834",
+      "repo": "JoshuaC215/agent-service-toolkit",
+      "stage": "",
+      "stars": 3385
+    }
+  ],
+  "scanned": 1,
+  "stars": 3385,
+  "started_utc": "2026-08-10T07:25:53+00:00"
+}

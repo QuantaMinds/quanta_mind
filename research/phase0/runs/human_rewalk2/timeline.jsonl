@@ -1,0 +1,184 @@
+{"arm": "human", "kind": "run_start", "population": 608, "tally": {"Human": 608}, "ts": "2026-08-10T07:30:25+00:00"}
+{"kind": "repo_start", "of": 90, "position": 1, "prs": 4, "repo": "567-labs/instructor", "ts": "2026-08-10T07:30:25+00:00"}
+{"admitted": 2, "attempts": 4, "broke": 0, "kind": "repo_done", "of": 90, "position": 1, "repo": "567-labs/instructor", "ts": "2026-08-10T07:30:31+00:00"}
+{"kind": "repo_start", "of": 90, "position": 2, "prs": 1, "repo": "ACEsuit/mace", "ts": "2026-08-10T07:30:31+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 1, "kind": "repo_done", "of": 90, "position": 2, "repo": "ACEsuit/mace", "ts": "2026-08-10T07:30:45+00:00"}
+{"kind": "repo_start", "of": 90, "position": 3, "prs": 7, "repo": "AgentOps-AI/agentops", "ts": "2026-08-10T07:30:45+00:00"}
+{"admitted": 2, "attempts": 7, "broke": 0, "kind": "repo_done", "of": 90, "position": 3, "repo": "AgentOps-AI/agentops", "ts": "2026-08-10T07:30:57+00:00"}
+{"kind": "repo_start", "of": 90, "position": 4, "prs": 7, "repo": "Azure/azure-sdk-for-python", "ts": "2026-08-10T07:30:57+00:00"}
+{"admitted": 3, "attempts": 7, "broke": 1, "kind": "repo_done", "of": 90, "position": 4, "repo": "Azure/azure-sdk-for-python", "ts": "2026-08-10T07:32:38+00:00"}
+{"kind": "repo_start", "of": 90, "position": 5, "prs": 1, "repo": "BeehiveInnovations/zen-mcp-server", "ts": "2026-08-10T07:32:38+00:00"}
+{"admitted": 0, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 5, "repo": "BeehiveInnovations/zen-mcp-server", "ts": "2026-08-10T07:32:40+00:00"}
+{"kind": "repo_start", "of": 90, "position": 6, "prs": 5, "repo": "BerriAI/litellm", "ts": "2026-08-10T07:32:40+00:00"}
+{"admitted": 3, "attempts": 5, "broke": 1, "kind": "repo_done", "of": 90, "position": 6, "repo": "BerriAI/litellm", "ts": "2026-08-10T07:35:32+00:00"}
+{"kind": "repo_start", "of": 90, "position": 7, "prs": 5, "repo": "Blaizzy/mlx-vlm", "ts": "2026-08-10T07:35:32+00:00"}
+{"admitted": 4, "attempts": 5, "broke": 3, "kind": "repo_done", "of": 90, "position": 7, "repo": "Blaizzy/mlx-vlm", "ts": "2026-08-10T07:35:39+00:00"}
+{"kind": "repo_start", "of": 90, "position": 8, "prs": 1, "repo": "GodsScion/Auto_job_applier_linkedIn", "ts": "2026-08-10T07:35:39+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 8, "repo": "GodsScion/Auto_job_applier_linkedIn", "ts": "2026-08-10T07:35:41+00:00"}
+{"kind": "repo_start", "of": 90, "position": 9, "prs": 3, "repo": "Kanaries/pygwalker", "ts": "2026-08-10T07:35:41+00:00"}
+{"admitted": 3, "attempts": 3, "broke": 0, "kind": "repo_done", "of": 90, "position": 9, "repo": "Kanaries/pygwalker", "ts": "2026-08-10T07:35:47+00:00"}
+{"kind": "repo_start", "of": 90, "position": 10, "prs": 7, "repo": "Kiln-AI/Kiln", "ts": "2026-08-10T07:35:47+00:00"}
+{"admitted": 6, "attempts": 7, "broke": 2, "kind": "repo_done", "of": 90, "position": 10, "repo": "Kiln-AI/Kiln", "ts": "2026-08-10T07:35:59+00:00"}
+{"kind": "repo_start", "of": 90, "position": 11, "prs": 1, "repo": "MervinPraison/PraisonAI", "ts": "2026-08-10T07:35:59+00:00"}
+{"admitted": 0, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 11, "repo": "MervinPraison/PraisonAI", "ts": "2026-08-10T07:36:07+00:00"}
+{"kind": "repo_start", "of": 90, "position": 12, "prs": 1, "repo": "Netflix/metaflow", "ts": "2026-08-10T07:36:07+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 1, "kind": "repo_done", "of": 90, "position": 12, "repo": "Netflix/metaflow", "ts": "2026-08-10T07:36:37+00:00"}
+{"kind": "repo_start", "of": 90, "position": 13, "prs": 1, "repo": "NousResearch/atropos", "ts": "2026-08-10T07:36:37+00:00"}
+{"admitted": 0, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 13, "repo": "NousResearch/atropos", "ts": "2026-08-10T07:36:44+00:00"}
+{"kind": "repo_start", "of": 90, "position": 14, "prs": 4, "repo": "OpenPipe/ART", "ts": "2026-08-10T07:36:44+00:00"}
+{"admitted": 4, "attempts": 4, "broke": 3, "kind": "repo_done", "of": 90, "position": 14, "repo": "OpenPipe/ART", "ts": "2026-08-10T07:36:56+00:00"}
+{"kind": "repo_start", "of": 90, "position": 15, "prs": 1, "repo": "Panchovix/stable-diffusion-webui-reForge", "ts": "2026-08-10T07:36:56+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 15, "repo": "Panchovix/stable-diffusion-webui-reForge", "ts": "2026-08-10T07:37:04+00:00"}
+{"kind": "repo_start", "of": 90, "position": 16, "prs": 1, "repo": "PrefectHQ/marvin", "ts": "2026-08-10T07:37:04+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 16, "repo": "PrefectHQ/marvin", "ts": "2026-08-10T07:37:10+00:00"}
+{"kind": "repo_start", "of": 90, "position": 17, "prs": 5, "repo": "PriorLabs/TabPFN", "ts": "2026-08-10T07:37:10+00:00"}
+{"admitted": 3, "attempts": 5, "broke": 0, "kind": "repo_done", "of": 90, "position": 17, "repo": "PriorLabs/TabPFN", "ts": "2026-08-10T07:37:37+00:00"}
+{"kind": "repo_start", "of": 90, "position": 18, "prs": 2, "repo": "PrunaAI/pruna", "ts": "2026-08-10T07:37:37+00:00"}
+{"admitted": 2, "attempts": 2, "broke": 0, "kind": "repo_done", "of": 90, "position": 18, "repo": "PrunaAI/pruna", "ts": "2026-08-10T07:37:42+00:00"}
+{"kind": "repo_start", "of": 90, "position": 19, "prs": 1, "repo": "RAGEN-AI/RAGEN", "ts": "2026-08-10T07:37:42+00:00"}
+{"admitted": 0, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 19, "repo": "RAGEN-AI/RAGEN", "ts": "2026-08-10T07:37:46+00:00"}
+{"kind": "repo_start", "of": 90, "position": 20, "prs": 7, "repo": "Significant-Gravitas/AutoGPT", "ts": "2026-08-10T07:37:46+00:00"}
+{"admitted": 4, "attempts": 7, "broke": 2, "kind": "repo_done", "of": 90, "position": 20, "repo": "Significant-Gravitas/AutoGPT", "ts": "2026-08-10T07:39:45+00:00"}
+{"kind": "repo_start", "of": 90, "position": 21, "prs": 2, "repo": "SirVer/ultisnips", "ts": "2026-08-10T07:39:45+00:00"}
+{"admitted": 1, "attempts": 2, "broke": 0, "kind": "repo_done", "of": 90, "position": 21, "repo": "SirVer/ultisnips", "ts": "2026-08-10T07:39:48+00:00"}
+{"kind": "repo_start", "of": 90, "position": 22, "prs": 7, "repo": "Skyvern-AI/skyvern", "ts": "2026-08-10T07:39:48+00:00"}
+{"admitted": 4, "attempts": 7, "broke": 2, "kind": "repo_done", "of": 90, "position": 22, "repo": "Skyvern-AI/skyvern", "ts": "2026-08-10T07:41:08+00:00"}
+{"kind": "repo_start", "of": 90, "position": 23, "prs": 1, "repo": "TheAlgorithms/Python", "ts": "2026-08-10T07:41:08+00:00"}
+{"admitted": 0, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 23, "repo": "TheAlgorithms/Python", "ts": "2026-08-10T07:41:10+00:00"}
+{"kind": "repo_start", "of": 90, "position": 24, "prs": 5, "repo": "TobikoData/sqlmesh", "ts": "2026-08-10T07:41:10+00:00"}
+{"admitted": 3, "attempts": 5, "broke": 2, "kind": "repo_done", "of": 90, "position": 24, "repo": "TobikoData/sqlmesh", "ts": "2026-08-10T07:41:21+00:00"}
+{"kind": "repo_start", "of": 90, "position": 25, "prs": 2, "repo": "Uberi/speech_recognition", "ts": "2026-08-10T07:41:21+00:00"}
+{"admitted": 2, "attempts": 2, "broke": 1, "kind": "repo_done", "of": 90, "position": 25, "repo": "Uberi/speech_recognition", "ts": "2026-08-10T07:41:27+00:00"}
+{"kind": "repo_start", "of": 90, "position": 26, "prs": 5, "repo": "a16z/halmos", "ts": "2026-08-10T07:41:27+00:00"}
+{"admitted": 5, "attempts": 5, "broke": 0, "kind": "repo_done", "of": 90, "position": 26, "repo": "a16z/halmos", "ts": "2026-08-10T07:41:31+00:00"}
+{"kind": "repo_start", "of": 90, "position": 27, "prs": 2, "repo": "ag2ai/ag2", "ts": "2026-08-10T07:41:31+00:00"}
+{"error": "ag2ai/ag2: git-lfs filter-process: git-lfs: command not found\nfatal: the remote end hung up unexpectedly\nwarning: Clone succeeded, but checkout failed.\nYou can inspect what was checked out with 'git status'\nand retry with 'git restore --source=HEAD :/'", "kind": "clone_failed", "position": 27, "repo": "ag2ai/ag2", "ts": "2026-08-10T07:42:35+00:00"}
+{"admitted": 0, "attempts": 2, "broke": 0, "kind": "repo_done", "of": 90, "position": 27, "repo": "ag2ai/ag2", "ts": "2026-08-10T07:42:35+00:00"}
+{"kind": "repo_start", "of": 90, "position": 28, "prs": 7, "repo": "airbytehq/airbyte", "ts": "2026-08-10T07:42:35+00:00"}
+{"admitted": 3, "attempts": 7, "broke": 0, "kind": "repo_done", "of": 90, "position": 28, "repo": "airbytehq/airbyte", "ts": "2026-08-10T07:47:56+00:00"}
+{"kind": "repo_start", "of": 90, "position": 29, "prs": 2, "repo": "alexanderjeurissen/ranger_devicons", "ts": "2026-08-10T07:47:56+00:00"}
+{"admitted": 1, "attempts": 2, "broke": 0, "kind": "repo_done", "of": 90, "position": 29, "repo": "alexanderjeurissen/ranger_devicons", "ts": "2026-08-10T07:47:58+00:00"}
+{"kind": "repo_start", "of": 90, "position": 30, "prs": 2, "repo": "allenai/reward-bench", "ts": "2026-08-10T07:47:58+00:00"}
+{"admitted": 0, "attempts": 2, "broke": 0, "kind": "repo_done", "of": 90, "position": 30, "repo": "allenai/reward-bench", "ts": "2026-08-10T07:48:01+00:00"}
+{"kind": "repo_start", "of": 90, "position": 31, "prs": 7, "repo": "bentoml/BentoML", "ts": "2026-08-10T07:48:01+00:00"}
+{"admitted": 7, "attempts": 7, "broke": 3, "kind": "repo_done", "of": 90, "position": 31, "repo": "bentoml/BentoML", "ts": "2026-08-10T07:48:09+00:00"}
+{"kind": "repo_start", "of": 90, "position": 32, "prs": 7, "repo": "bespokelabsai/curator", "ts": "2026-08-10T07:48:09+00:00"}
+{"admitted": 6, "attempts": 7, "broke": 3, "kind": "repo_done", "of": 90, "position": 32, "repo": "bespokelabsai/curator", "ts": "2026-08-10T07:48:23+00:00"}
+{"kind": "repo_start", "of": 90, "position": 33, "prs": 3, "repo": "blorm-network/ZerePy", "ts": "2026-08-10T07:48:23+00:00"}
+{"admitted": 2, "attempts": 3, "broke": 0, "kind": "repo_done", "of": 90, "position": 33, "repo": "blorm-network/ZerePy", "ts": "2026-08-10T07:48:26+00:00"}
+{"kind": "repo_start", "of": 90, "position": 34, "prs": 4, "repo": "bruin-data/ingestr", "ts": "2026-08-10T07:48:26+00:00"}
+{"admitted": 2, "attempts": 4, "broke": 0, "kind": "repo_done", "of": 90, "position": 34, "repo": "bruin-data/ingestr", "ts": "2026-08-10T07:48:36+00:00"}
+{"kind": "repo_start", "of": 90, "position": 35, "prs": 5, "repo": "cartography-cncf/cartography", "ts": "2026-08-10T07:48:36+00:00"}
+{"admitted": 4, "attempts": 5, "broke": 1, "kind": "repo_done", "of": 90, "position": 35, "repo": "cartography-cncf/cartography", "ts": "2026-08-10T07:48:43+00:00"}
+{"kind": "repo_start", "of": 90, "position": 36, "prs": 1, "repo": "ckan/ckan", "ts": "2026-08-10T07:48:43+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 36, "repo": "ckan/ckan", "ts": "2026-08-10T07:49:07+00:00"}
+{"kind": "repo_start", "of": 90, "position": 37, "prs": 4, "repo": "commaai/opendbc", "ts": "2026-08-10T07:49:07+00:00"}
+{"admitted": 1, "attempts": 4, "broke": 1, "kind": "repo_done", "of": 90, "position": 37, "repo": "commaai/opendbc", "ts": "2026-08-10T07:49:10+00:00"}
+{"kind": "repo_start", "of": 90, "position": 38, "prs": 7, "repo": "crewAIInc/crewAI", "ts": "2026-08-10T07:49:10+00:00"}
+{"admitted": 3, "attempts": 7, "broke": 0, "kind": "repo_done", "of": 90, "position": 38, "repo": "crewAIInc/crewAI", "ts": "2026-08-10T07:49:32+00:00"}
+{"kind": "repo_start", "of": 90, "position": 39, "prs": 7, "repo": "crewAIInc/crewAI-tools", "ts": "2026-08-10T07:49:32+00:00"}
+{"admitted": 5, "attempts": 7, "broke": 0, "kind": "repo_done", "of": 90, "position": 39, "repo": "crewAIInc/crewAI-tools", "ts": "2026-08-10T07:49:37+00:00"}
+{"kind": "repo_start", "of": 90, "position": 40, "prs": 4, "repo": "dagster-io/dagster", "ts": "2026-08-10T07:49:37+00:00"}
+{"admitted": 2, "attempts": 4, "broke": 0, "kind": "repo_done", "of": 90, "position": 40, "repo": "dagster-io/dagster", "ts": "2026-08-10T07:52:59+00:00"}
+{"kind": "repo_start", "of": 90, "position": 41, "prs": 1, "repo": "devitocodes/devito", "ts": "2026-08-10T07:52:59+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 41, "repo": "devitocodes/devito", "ts": "2026-08-10T07:53:23+00:00"}
+{"kind": "repo_start", "of": 90, "position": 42, "prs": 3, "repo": "dropseed/plain", "ts": "2026-08-10T07:53:23+00:00"}
+{"admitted": 2, "attempts": 3, "broke": 1, "kind": "repo_done", "of": 90, "position": 42, "repo": "dropseed/plain", "ts": "2026-08-10T07:53:51+00:00"}
+{"kind": "repo_start", "of": 90, "position": 43, "prs": 1, "repo": "electricitymaps/electricitymaps-contrib", "ts": "2026-08-10T07:53:51+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 1, "kind": "repo_done", "of": 90, "position": 43, "repo": "electricitymaps/electricitymaps-contrib", "ts": "2026-08-10T07:54:04+00:00"}
+{"kind": "repo_start", "of": 90, "position": 44, "prs": 7, "repo": "featureform/enrichmcp", "ts": "2026-08-10T07:54:04+00:00"}
+{"admitted": 0, "attempts": 7, "broke": 0, "kind": "repo_done", "of": 90, "position": 44, "repo": "featureform/enrichmcp", "ts": "2026-08-10T07:54:06+00:00"}
+{"kind": "repo_start", "of": 90, "position": 45, "prs": 5, "repo": "getsentry/sentry", "ts": "2026-08-10T07:54:06+00:00"}
+{"admitted": 4, "attempts": 5, "broke": 1, "kind": "repo_done", "of": 90, "position": 45, "repo": "getsentry/sentry", "ts": "2026-08-10T07:55:40+00:00"}
+{"kind": "repo_start", "of": 90, "position": 46, "prs": 3, "repo": "getsentry/sentry-python", "ts": "2026-08-10T07:55:40+00:00"}
+{"admitted": 2, "attempts": 3, "broke": 1, "kind": "repo_done", "of": 90, "position": 46, "repo": "getsentry/sentry-python", "ts": "2026-08-10T07:55:55+00:00"}
+{"kind": "repo_start", "of": 90, "position": 47, "prs": 1, "repo": "gptme/gptme", "ts": "2026-08-10T07:55:55+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 47, "repo": "gptme/gptme", "ts": "2026-08-10T07:56:02+00:00"}
+{"kind": "repo_start", "of": 90, "position": 48, "prs": 2, "repo": "huggingface/huggingface_hub", "ts": "2026-08-10T07:56:02+00:00"}
+{"admitted": 1, "attempts": 2, "broke": 1, "kind": "repo_done", "of": 90, "position": 48, "repo": "huggingface/huggingface_hub", "ts": "2026-08-10T07:56:07+00:00"}
+{"kind": "repo_start", "of": 90, "position": 49, "prs": 1, "repo": "huggingface/smolagents", "ts": "2026-08-10T07:56:07+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 1, "kind": "repo_done", "of": 90, "position": 49, "repo": "huggingface/smolagents", "ts": "2026-08-10T07:56:10+00:00"}
+{"kind": "repo_start", "of": 90, "position": 50, "prs": 7, "repo": "janbjorge/pgqueuer", "ts": "2026-08-10T07:56:10+00:00"}
+{"admitted": 6, "attempts": 7, "broke": 0, "kind": "repo_done", "of": 90, "position": 50, "repo": "janbjorge/pgqueuer", "ts": "2026-08-10T07:56:14+00:00"}
+{"kind": "repo_start", "of": 90, "position": 51, "prs": 2, "repo": "jlowin/fastmcp", "ts": "2026-08-10T07:56:14+00:00"}
+{"admitted": 2, "attempts": 2, "broke": 2, "kind": "repo_done", "of": 90, "position": 51, "repo": "jlowin/fastmcp", "ts": "2026-08-10T07:56:21+00:00"}
+{"kind": "repo_start", "of": 90, "position": 52, "prs": 4, "repo": "joshyattridge/smart-money-concepts", "ts": "2026-08-10T07:56:21+00:00"}
+{"admitted": 3, "attempts": 4, "broke": 0, "kind": "repo_done", "of": 90, "position": 52, "repo": "joshyattridge/smart-money-concepts", "ts": "2026-08-10T07:56:24+00:00"}
+{"kind": "repo_start", "of": 90, "position": 53, "prs": 7, "repo": "julep-ai/julep", "ts": "2026-08-10T07:56:24+00:00"}
+{"admitted": 6, "attempts": 7, "broke": 2, "kind": "repo_done", "of": 90, "position": 53, "repo": "julep-ai/julep", "ts": "2026-08-10T07:56:35+00:00"}
+{"kind": "repo_start", "of": 90, "position": 54, "prs": 7, "repo": "keephq/keep", "ts": "2026-08-10T07:56:35+00:00"}
+{"admitted": 4, "attempts": 7, "broke": 1, "kind": "repo_done", "of": 90, "position": 54, "repo": "keephq/keep", "ts": "2026-08-10T07:56:46+00:00"}
+{"kind": "repo_start", "of": 90, "position": 55, "prs": 1, "repo": "kohya-ss/sd-scripts", "ts": "2026-08-10T07:56:46+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 55, "repo": "kohya-ss/sd-scripts", "ts": "2026-08-10T07:56:49+00:00"}
+{"kind": "repo_start", "of": 90, "position": 56, "prs": 3, "repo": "langchain-ai/langgraph", "ts": "2026-08-10T07:56:49+00:00"}
+{"admitted": 2, "attempts": 3, "broke": 1, "kind": "repo_done", "of": 90, "position": 56, "repo": "langchain-ai/langgraph", "ts": "2026-08-10T07:57:15+00:00"}
+{"kind": "repo_start", "of": 90, "position": 57, "prs": 3, "repo": "langchain-ai/langsmith-sdk", "ts": "2026-08-10T07:57:15+00:00"}
+{"admitted": 3, "attempts": 3, "broke": 2, "kind": "repo_done", "of": 90, "position": 57, "repo": "langchain-ai/langsmith-sdk", "ts": "2026-08-10T07:57:20+00:00"}
+{"kind": "repo_start", "of": 90, "position": 58, "prs": 3, "repo": "mangiucugna/json_repair", "ts": "2026-08-10T07:57:20+00:00"}
+{"admitted": 0, "attempts": 3, "broke": 0, "kind": "repo_done", "of": 90, "position": 58, "repo": "mangiucugna/json_repair", "ts": "2026-08-10T07:57:23+00:00"}
+{"kind": "repo_start", "of": 90, "position": 59, "prs": 7, "repo": "marimo-team/marimo", "ts": "2026-08-10T07:57:23+00:00"}
+{"admitted": 5, "attempts": 7, "broke": 3, "kind": "repo_done", "of": 90, "position": 59, "repo": "marimo-team/marimo", "ts": "2026-08-10T07:57:40+00:00"}
+{"kind": "repo_start", "of": 90, "position": 60, "prs": 1, "repo": "microsoft/Olive", "ts": "2026-08-10T07:57:40+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 60, "repo": "microsoft/Olive", "ts": "2026-08-10T07:57:47+00:00"}
+{"kind": "repo_start", "of": 90, "position": 61, "prs": 2, "repo": "microsoft/autogen", "ts": "2026-08-10T07:57:47+00:00"}
+{"error": "microsoft/autogen: git-lfs filter-process: git-lfs: command not found\nfatal: the remote end hung up unexpectedly\nwarning: Clone succeeded, but checkout failed.\nYou can inspect what was checked out with 'git status'\nand retry with 'git restore --source=HEAD :/'", "kind": "clone_failed", "position": 61, "repo": "microsoft/autogen", "ts": "2026-08-10T07:58:07+00:00"}
+{"admitted": 0, "attempts": 2, "broke": 0, "kind": "repo_done", "of": 90, "position": 61, "repo": "microsoft/autogen", "ts": "2026-08-10T07:58:07+00:00"}
+{"kind": "repo_start", "of": 90, "position": 62, "prs": 1, "repo": "microsoft/debugpy", "ts": "2026-08-10T07:58:07+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 62, "repo": "microsoft/debugpy", "ts": "2026-08-10T07:58:13+00:00"}
+{"kind": "repo_start", "of": 90, "position": 63, "prs": 3, "repo": "mistralai/mistral-common", "ts": "2026-08-10T07:58:13+00:00"}
+{"admitted": 2, "attempts": 3, "broke": 1, "kind": "repo_done", "of": 90, "position": 63, "repo": "mistralai/mistral-common", "ts": "2026-08-10T07:58:16+00:00"}
+{"kind": "repo_start", "of": 90, "position": 64, "prs": 7, "repo": "mlflow/mlflow", "ts": "2026-08-10T07:58:16+00:00"}
+{"admitted": 5, "attempts": 7, "broke": 1, "kind": "repo_done", "of": 90, "position": 64, "repo": "mlflow/mlflow", "ts": "2026-08-10T07:59:39+00:00"}
+{"kind": "repo_start", "of": 90, "position": 65, "prs": 7, "repo": "onyx-dot-app/onyx", "ts": "2026-08-10T07:59:39+00:00"}
+{"admitted": 5, "attempts": 7, "broke": 2, "kind": "repo_done", "of": 90, "position": 65, "repo": "onyx-dot-app/onyx", "ts": "2026-08-10T08:02:23+00:00"}
+{"kind": "repo_start", "of": 90, "position": 66, "prs": 3, "repo": "openai/openai-agents-python", "ts": "2026-08-10T08:02:23+00:00"}
+{"admitted": 0, "attempts": 3, "broke": 0, "kind": "repo_done", "of": 90, "position": 66, "repo": "openai/openai-agents-python", "ts": "2026-08-10T08:02:29+00:00"}
+{"kind": "repo_start", "of": 90, "position": 67, "prs": 1, "repo": "oraios/serena", "ts": "2026-08-10T08:02:29+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 67, "repo": "oraios/serena", "ts": "2026-08-10T08:02:33+00:00"}
+{"kind": "repo_start", "of": 90, "position": 68, "prs": 5, "repo": "plexguide/Huntarr.io", "ts": "2026-08-10T08:02:33+00:00"}
+{"error": "plexguide/Huntarr.io: remote: Repository not found.\nfatal: repository 'https://github.com/plexguide/Huntarr.io.git/' not found", "kind": "clone_failed", "position": 68, "repo": "plexguide/Huntarr.io", "ts": "2026-08-10T08:02:33+00:00"}
+{"admitted": 0, "attempts": 5, "broke": 0, "kind": "repo_done", "of": 90, "position": 68, "repo": "plexguide/Huntarr.io", "ts": "2026-08-10T08:02:33+00:00"}
+{"kind": "repo_start", "of": 90, "position": 69, "prs": 1, "repo": "pydata/pandas-datareader", "ts": "2026-08-10T08:02:33+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 1, "kind": "repo_done", "of": 90, "position": 69, "repo": "pydata/pandas-datareader", "ts": "2026-08-10T08:02:37+00:00"}
+{"kind": "repo_start", "of": 90, "position": 70, "prs": 3, "repo": "reflex-dev/reflex", "ts": "2026-08-10T08:02:37+00:00"}
+{"admitted": 3, "attempts": 3, "broke": 2, "kind": "repo_done", "of": 90, "position": 70, "repo": "reflex-dev/reflex", "ts": "2026-08-10T08:02:45+00:00"}
+{"kind": "repo_start", "of": 90, "position": 71, "prs": 7, "repo": "roboflow/inference", "ts": "2026-08-10T08:02:45+00:00"}
+{"admitted": 4, "attempts": 7, "broke": 3, "kind": "repo_done", "of": 90, "position": 71, "repo": "roboflow/inference", "ts": "2026-08-10T08:03:20+00:00"}
+{"kind": "repo_start", "of": 90, "position": 72, "prs": 1, "repo": "saturday06/VRM-Addon-for-Blender", "ts": "2026-08-10T08:03:20+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 72, "repo": "saturday06/VRM-Addon-for-Blender", "ts": "2026-08-10T08:03:30+00:00"}
+{"kind": "repo_start", "of": 90, "position": 73, "prs": 1, "repo": "simonw/llm", "ts": "2026-08-10T08:03:30+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 1, "kind": "repo_done", "of": 90, "position": 73, "repo": "simonw/llm", "ts": "2026-08-10T08:03:33+00:00"}
+{"kind": "repo_start", "of": 90, "position": 74, "prs": 1, "repo": "sooperset/mcp-atlassian", "ts": "2026-08-10T08:03:33+00:00"}
+{"admitted": 0, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 74, "repo": "sooperset/mcp-atlassian", "ts": "2026-08-10T08:03:36+00:00"}
+{"kind": "repo_start", "of": 90, "position": 75, "prs": 7, "repo": "spcl/dace", "ts": "2026-08-10T08:03:36+00:00"}
+{"admitted": 7, "attempts": 7, "broke": 4, "kind": "repo_done", "of": 90, "position": 75, "repo": "spcl/dace", "ts": "2026-08-10T08:03:47+00:00"}
+{"kind": "repo_start", "of": 90, "position": 76, "prs": 1, "repo": "stair-lab/kg-gen", "ts": "2026-08-10T08:03:47+00:00"}
+{"admitted": 0, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 76, "repo": "stair-lab/kg-gen", "ts": "2026-08-10T08:03:55+00:00"}
+{"kind": "repo_start", "of": 90, "position": 77, "prs": 2, "repo": "stanford-crfm/levanter", "ts": "2026-08-10T08:03:55+00:00"}
+{"admitted": 1, "attempts": 2, "broke": 0, "kind": "repo_done", "of": 90, "position": 77, "repo": "stanford-crfm/levanter", "ts": "2026-08-10T08:03:59+00:00"}
+{"kind": "repo_start", "of": 90, "position": 78, "prs": 4, "repo": "stanfordnlp/dspy", "ts": "2026-08-10T08:03:59+00:00"}
+{"admitted": 3, "attempts": 4, "broke": 0, "kind": "repo_done", "of": 90, "position": 78, "repo": "stanfordnlp/dspy", "ts": "2026-08-10T08:04:41+00:00"}
+{"kind": "repo_start", "of": 90, "position": 79, "prs": 1, "repo": "strawberry-graphql/strawberry", "ts": "2026-08-10T08:04:41+00:00"}
+{"admitted": 0, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 79, "repo": "strawberry-graphql/strawberry", "ts": "2026-08-10T08:04:45+00:00"}
+{"kind": "repo_start", "of": 90, "position": 80, "prs": 1, "repo": "test-zeus-ai/testzeus-hercules", "ts": "2026-08-10T08:04:45+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 1, "kind": "repo_done", "of": 90, "position": 80, "repo": "test-zeus-ai/testzeus-hercules", "ts": "2026-08-10T08:04:48+00:00"}
+{"kind": "repo_start", "of": 90, "position": 81, "prs": 7, "repo": "tinygrad/tinygrad", "ts": "2026-08-10T08:04:48+00:00"}
+{"admitted": 7, "attempts": 7, "broke": 3, "kind": "repo_done", "of": 90, "position": 81, "repo": "tinygrad/tinygrad", "ts": "2026-08-10T08:05:06+00:00"}
+{"kind": "repo_start", "of": 90, "position": 82, "prs": 1, "repo": "vllm-project/vllm", "ts": "2026-08-10T08:05:06+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 82, "repo": "vllm-project/vllm", "ts": "2026-08-10T08:05:49+00:00"}
+{"kind": "repo_start", "of": 90, "position": 83, "prs": 7, "repo": "vlm-run/vlmrun-hub", "ts": "2026-08-10T08:05:49+00:00"}
+{"admitted": 3, "attempts": 7, "broke": 0, "kind": "repo_done", "of": 90, "position": 83, "repo": "vlm-run/vlmrun-hub", "ts": "2026-08-10T08:05:53+00:00"}
+{"kind": "repo_start", "of": 90, "position": 84, "prs": 1, "repo": "volcengine/verl", "ts": "2026-08-10T08:05:53+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 1, "kind": "repo_done", "of": 90, "position": 84, "repo": "volcengine/verl", "ts": "2026-08-10T08:05:57+00:00"}
+{"kind": "repo_start", "of": 90, "position": 85, "prs": 1, "repo": "wandb/wandb", "ts": "2026-08-10T08:05:57+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 1, "kind": "repo_done", "of": 90, "position": 85, "repo": "wandb/wandb", "ts": "2026-08-10T08:06:11+00:00"}
+{"kind": "repo_start", "of": 90, "position": 86, "prs": 3, "repo": "wandb/weave", "ts": "2026-08-10T08:06:11+00:00"}
+{"admitted": 2, "attempts": 3, "broke": 0, "kind": "repo_done", "of": 90, "position": 86, "repo": "wandb/weave", "ts": "2026-08-10T08:08:44+00:00"}
+{"kind": "repo_start", "of": 90, "position": 87, "prs": 1, "repo": "whitphx/streamlit-webrtc", "ts": "2026-08-10T08:08:44+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 1, "kind": "repo_done", "of": 90, "position": 87, "repo": "whitphx/streamlit-webrtc", "ts": "2026-08-10T08:08:48+00:00"}
+{"kind": "repo_start", "of": 90, "position": 88, "prs": 1, "repo": "wizarrrr/wizarr", "ts": "2026-08-10T08:08:48+00:00"}
+{"admitted": 1, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 90, "position": 88, "repo": "wizarrrr/wizarr", "ts": "2026-08-10T08:08:59+00:00"}
+{"kind": "repo_start", "of": 90, "position": 89, "prs": 4, "repo": "writer/writer-framework", "ts": "2026-08-10T08:08:59+00:00"}
+{"admitted": 4, "attempts": 4, "broke": 1, "kind": "repo_done", "of": 90, "position": 89, "repo": "writer/writer-framework", "ts": "2026-08-10T08:09:08+00:00"}
+{"kind": "repo_start", "of": 90, "position": 90, "prs": 7, "repo": "zenml-io/zenml", "ts": "2026-08-10T08:09:08+00:00"}
+{"admitted": 5, "attempts": 7, "broke": 1, "kind": "repo_done", "of": 90, "position": 90, "repo": "zenml-io/zenml", "ts": "2026-08-10T08:10:16+00:00"}
