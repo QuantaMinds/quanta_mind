@@ -49,6 +49,25 @@ def _git(clone: Path, *args: str) -> str | None:
     return done.stdout if done.returncode == 0 else None
 
 
+def sha_absent_from_clone(clone: Path, sha: str) -> bool:
+    """True when a full clone holds no such object at all.
+
+    Two of the three legs of the rewritten-history signature are local and are checked
+    here: the sha came from GitHub's own PR payload, so GitHub has it, and a FULL clone
+    (A31 forbids `--filter`, so this is never shallow) does not. A shallow clone would
+    fail this too, which is why the no-partial-clone guard is what makes the inference
+    sound rather than a coincidence.
+
+    The third leg -- asking GitHub to resolve the commit -- is deliberately NOT made.
+    `scan` runs entirely from a local clone and consumes no quota, which is a property the
+    runbook relies on; adding a per-PR API call here would cost a request for every PR in
+    the corpus to confirm something the merge payload already implied. The cost is that a
+    garbage sha and a rewritten history are not separated locally, and `merge_commit_sha`
+    is only ever populated from GitHub, so the first is not a state this pipeline produces.
+    """
+    return bool(sha) and _git(clone, "cat-file", "-e", f"{sha}^{{commit}}") is None
+
+
 def default_ref(clone: Path) -> str | None:
     """The clone's default branch, from origin's own HEAD rather than a guessed name."""
     out = _git(clone, "symbolic-ref", "refs/remotes/origin/HEAD")

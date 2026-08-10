@@ -1692,6 +1692,19 @@ product is a scalability product, not an unsoundness product. That is a differen
 
 **We stop, and we publish — but we publish the null we actually measured. [A10]**
 
+**The instrument detects ONE of four unresolvable-caller mechanisms, and the scope
+sentence says so before any result exists. [A11]** Measured on the current machine, the
+positive control returns RR 8.0 with planted-break detection 40/40 and
+`mechanisms_firing_of_four: 1` — the capability profile reports `computed_getattr` and
+`registering_decorator` as `false`. So the gate is passed by `super()` chains alone.
+
+> **A null narrows to statically-named unresolvable call sites. It is explicitly not a
+> claim about dynamic dispatch, string registries, or registering decorators.**
+
+A11's reading table already established this. It is repeated here so it travels attached
+to the result rather than needing to be looked up, which is the difference between a scope
+statement and a limitation discovered afterwards.
+
 **Which arm was measured is part of "actually measured". [A32]** The primary analysis is
 agent-authored PRs; the human arm is the secondary comparison. The pilot completed to date
 is **human-arm throughout** — 90 repositories, 236 attempts, 139 admitted, 36 breakages of

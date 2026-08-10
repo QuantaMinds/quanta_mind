@@ -179,3 +179,22 @@ def test_merge_on_base_separates_no_from_unknown(tmp_path: Path) -> None:
     repo.heads.main.checkout()
 
     assert merge_on_base(tmp_path, stranded, "dev") == "no"
+
+
+def test_a_merge_commit_in_no_clone_is_history_rewritten(tmp_path: Path) -> None:
+    """Missing data, not routing, and not our resolver's fault.
+
+    `enrichmcp` rewrote its history after merging: GitHub still resolves the merge SHAs, a
+    full clone holds no such object, so charging it to `parent_commit` blames the resolver
+    for a force-push -- `handverify_21plus.md`. BASE_REF_UNRESOLVABLE says WHERE to walk is
+    unknown; this says there is nothing to walk to.
+    """
+    repo, _ = _repo_with_dev(tmp_path)
+    repo.heads.main.checkout()
+
+    result = scan(tmp_path, _pr("0" * 40, "main"))  # well-formed, in no repository
+
+    assert result.outcome is Outcome.UNSCANNABLE
+    assert result.exclusion is Exclusion.HISTORY_REWRITTEN
+    assert result.exclusion is not Exclusion.BASE_REF_UNRESOLVABLE
+    assert result.is_consistent

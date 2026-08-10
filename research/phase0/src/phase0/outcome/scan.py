@@ -42,7 +42,7 @@ from git.exc import GitError, ODBError
 
 from phase0.extract_prs import PRRecord
 from phase0.outcome import signals
-from phase0.outcome.arrival import resolve_deleted_base
+from phase0.outcome.arrival import resolve_deleted_base, sha_absent_from_clone
 from phase0.outcome.conclusion import Criterion, Outcome, OutcomeRecord
 from phase0.outcome.window import (
     Exclusion,
@@ -114,6 +114,15 @@ def scan(repo_path: Path, pr: PRRecord, window_days: int = WINDOW_DAYS) -> Outco
     # one must release the handle. Windows keeps pack files mapped while a Repo is
     # open, so a missed close means the clone cannot be deleted afterwards.
     with closing(repo):
+        # Checked BEFORE routing: if the merge commit is not in the repository, no branch
+        # is the right one to walk and `parent_commit` would blame our resolver for the
+        # repository having rewritten its history.
+        if sha_absent_from_clone(repo_path, pr.merged_sha):
+            return OutcomeRecord(
+                Outcome.UNSCANNABLE,
+                evidence_message=f"merge commit {pr.merged_sha[:10]} is in no clone",
+                exclusion=Exclusion.HISTORY_REWRITTEN,
+            )
         ref = base_ref_of(repo, pr.base_ref)
         if ref is None:
             # The branch was deleted, which is ordinary hygiene for a `feature/x` base.
