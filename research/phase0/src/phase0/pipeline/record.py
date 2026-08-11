@@ -111,6 +111,12 @@ class PRAudit:
     parent_sha: str = ""
     merged_sha: str = ""
     parent_resolution_method: str = ""
+    # WHICH rule produced the method above. `subject_sequence` and `merge_parents` rest
+    # on git and the API; `file_coverage` and `no_file_list` rest on the CORPUS file
+    # list, measured unreliable in both directions at a rate that is only a lower bound
+    # (A46). Without this column the method looks equally trustworthy either way, and
+    # the share resting on the corpus cannot be counted at all. Empty is UNRECORDED.
+    parent_resolution_rule: str = ""
     graph_status: str = ""
     # The memory bound this PR's graph run actually had, from GraphResult.mem_cap.
     # Empty means UNRECORDED -- a stage that failed before the graph ran. It does not

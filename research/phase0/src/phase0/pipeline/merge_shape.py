@@ -18,7 +18,7 @@ CONSUMED BY: parent_commit.resolve; tests/pipeline/test_merge_shape.py.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 from git import Commit
@@ -33,14 +33,39 @@ class MergeShape(Enum):
     AMBIGUOUS = "ambiguous"  # excluded, and counted as corpus attrition
 
 
+class ResolutionRule(Enum):
+    """WHICH rule produced the shape. Recorded separately because the shape alone
+    does not say what it rests on, and the rules do not rest on the same thing.
+
+    `SUBJECT_SEQUENCE` and `MERGE_PARENTS` read only git and the API. `FILE_COVERAGE`
+    reads the CORPUS's file list, which A46 measures as unreliable in both directions
+    at a rate that is only a lower bound. `NO_FILE_LIST` is split out from it rather
+    than folded in: `covered >= pr_files` passing on a list we have and returning
+    SQUASH because there is no list at all are different claims, and only the second
+    is a guess. Merging them is the collapse non-negotiable 3 forbids.
+    """
+
+    MERGE_PARENTS = "merge_parents"  # two parents; git alone decides
+    SUBJECT_SEQUENCE = "subject_sequence"  # A28's rule; corpus-free
+    FILE_COVERAGE = "file_coverage"  # the corpus file list decided
+    NO_FILE_LIST = "no_file_list"  # SQUASH returned with nothing to test against
+    UNRESOLVED = "unresolved"  # no rule reached; not about the rules at all
+
+
 @dataclass(frozen=True, slots=True)
 class ParentResolution:
-    """The parent commit, and how it was decided."""
+    """The parent commit, how it was decided, and by WHICH rule."""
 
     shape: MergeShape
     parent_sha: str
     steps_walked: int = 0
     reason: str = ""
+    # Keyword-only and WITHOUT a default, so every return site must name its rule and
+    # mypy rejects one that does not. A default would let a new branch acquire a
+    # plausible rule silently, which is the `_as_record` shape one field at a time.
+    # Keyword-only because the existing call sites pass shape/sha/steps/reason
+    # positionally, and appending a positional field is how a wrong value slides in.
+    rule: ResolutionRule = field(kw_only=True)
 
     @property
     def is_resolved(self) -> bool:
@@ -93,16 +118,24 @@ def by_subject(merge: Commit, subjects: tuple[str, ...], limit: int) -> ParentRe
     if matched >= 2:
         earliest = walked[matched - 1]
         if not earliest.parents:
-            return ParentResolution(MergeShape.AMBIGUOUS, "", matched, "ran out of history")
+            return ParentResolution(
+                MergeShape.AMBIGUOUS,
+                "",
+                matched,
+                "ran out of history",
+                rule=ResolutionRule.SUBJECT_SEQUENCE,
+            )
         return ParentResolution(
             MergeShape.REBASE,
             earliest.parents[0].hexsha,
             matched,
             f"{matched} of {len(subjects)} subjects matched in order: replayed",
+            rule=ResolutionRule.SUBJECT_SEQUENCE,
         )
     return ParentResolution(
         MergeShape.SQUASH,
         merge.parents[0].hexsha,
         steps_walked=1,
         reason=f"{matched} consecutive subject match(es): one commit, so squashed",
+        rule=ResolutionRule.SUBJECT_SEQUENCE,
     )

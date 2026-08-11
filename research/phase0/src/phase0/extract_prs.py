@@ -17,7 +17,8 @@ WHY:  Every later stage keys off `parent_sha`, which must be the commit the chan
       repository retains its original copyright", and `PHASE0_RUNBOOK.md`
       “Authenticity checklist” requires publishing the raw inputs alongside the
       result — so the publishable subset is filtered before results/, not after.
-IMPORTS: pandas, phase0.joins, phase0.github_pulls, phase0.parent_commit.
+IMPORTS: pandas, phase0.attrition, phase0.joins, phase0.github_pulls,
+      phase0.parent_commit.
 CONSUMED BY: run_pipeline.py; tests/test_extract_prs.py.
 """
 
@@ -29,6 +30,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from phase0.attrition import Attrition
 from phase0.joins import JoinReport, checked_merge
 
 Language = str  # "python" | "typescript" — the two arms in scope, `PHASE0_RUNBOOK.md` “TS/JS arm”
@@ -67,6 +69,18 @@ class PRRecord:
     # 15.5% of the corpus merges into dev, develop or a feature branch, and walking HEAD
     # scored every one of them CLEAN.
     base_ref: str = ""
+    # HOW the parent above was decided, and by WHICH rule -- `MergeShape.value` and
+    # `ResolutionRule.value`. Carried on the record so `run_pipeline` can CONSUME the
+    # resolution instead of recomputing it; the version that recomputed passed a file
+    # count where a commit count belongs and omitted the subjects entirely, so it ran
+    # A28's corpus-free rule never and the corpus file rules always. A46, and the same
+    # rebuild-instead-of-consume shape as `_as_record`.
+    #
+    # Appended last with empty defaults, so a records file written before this field
+    # reads as UNRECORDED. Empty is never "ambiguous" and never "we checked" -- it is
+    # "nothing on disk says", which is the only honest reading of an older file.
+    parent_resolution_method: str = ""
+    parent_resolution_rule: str = ""
 
     @property
     def is_publishable(self) -> bool:
@@ -74,27 +88,6 @@ class PRRecord:
         checklist”.
         """
         return self.licence.lower() in PUBLISHABLE_LICENCES
-
-
-@dataclass(frozen=True, slots=True)
-class Attrition:
-    """Why rows left the corpus. Reported, never silently dropped."""
-
-    not_python: int = 0
-    not_structural: int = 0
-    not_merged: int = 0
-    no_merge_metadata: int = 0
-    unresolvable_parent: int = 0
-
-    @property
-    def total(self) -> int:
-        return (
-            self.not_python
-            + self.not_structural
-            + self.not_merged
-            + self.no_merge_metadata
-            + self.unresolvable_parent
-        )
 
 
 def load_table(dataset: Path, name: str) -> pd.DataFrame:

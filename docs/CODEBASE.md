@@ -243,6 +243,45 @@ count has to be taken before the gate because the scan only ever sees survivors:
 agentops PRs that exposed the unreachable-merge case were rejected at `no_python` first,
 so a scan-time count reports the residue and gets quoted as the population.
 
+#### `research/phase0/src/phase0/parent_commit.py` — the parent, and what decided it
+
+`resolve` applies four rules in order and now records **which one fired**, as
+`ResolutionRule` on the returned `ParentResolution`. The shape alone does not say what it
+rests on: `MERGE_PARENTS` and `SUBJECT_SEQUENCE` read git and the API, while
+`FILE_COVERAGE` and `NO_FILE_LIST` read the **corpus's** file list, which is unreliable in
+both directions at a rate that is only a lower bound (`PHASE0_PREREGISTRATION.md` A46).
+
+`NO_FILE_LIST` is split out of `FILE_COVERAGE` rather than folded into it. Both return
+SQUASH with the same parent and a near-identical reason, so before the split the share of
+parents resting on **nothing** could not be counted — `covered >= pr_files` passing on a
+list we have, and returning SQUASH because there is no list at all, are different claims
+and only the second is a guess. Same collapse non-negotiable 3 forbids.
+
+The rule travels onto `PRRecord.parent_resolution_rule` and `PRAudit.parent_resolution_rule`.
+Empty means **UNRECORDED** — a records file written before the field — never "ambiguous"
+and never "we checked".
+
+**`run_pipeline.one_pr` CONSUMES this resolution; it does not compute one.** The version
+that recomputed passed the PR's **file count** where a commit count belongs — the
+substitution `assemble.build_record`'s own docstring says A24 forbade — and omitted the
+commit subjects entirely, so `by_subject` returned `None` every time and the corpus file
+rules decided every PR. It then overwrote a `parent_sha` the record already carried,
+resolved by `assemble` from the API's subjects and true commit count. A caller rebuilding
+what it was handed: the `handlabel/draw._as_record` defect in the pipeline's own entry
+point, and the third occurrence of that shape.
+
+A record with no `parent_sha` is now a typed `parent_commit` failure. Re-deriving one
+turns a corrupt input into a plausible measurement.
+`tests/pipeline/test_parent_is_consumed.py` builds `A -> B -> C` so the record's parent
+and the resolver's answer are **different commits**, and asserts that premise separately —
+without it every assertion there would pass under either behaviour.
+
+#### `research/phase0/src/phase0/attrition.py` — why rows left, counted
+
+Split out of `extract_prs.py`, which exported a record type, an attrition type and a
+table-loading family from one module and had reached the 200-line cap — which is how a
+module stops being able to carry the field it needs next. `PRRecord` needed two.
+
 ### `scripts/guard/` — the enforcement layer
 
 | File | Enforces |

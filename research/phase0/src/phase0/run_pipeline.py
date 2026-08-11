@@ -28,7 +28,7 @@ stages
       tests” calls the
       likeliest way to fake a positive by accident. tests/test_run_pipeline.py
       asserts that import is absent.
-IMPORTS: phase0.parent_commit, extract_prs, pycg_failure, run_graph, and
+IMPORTS: phase0.extract_prs, pycg_failure, run_graph, and
       pipeline.{measure,record,worktree}. Never phase0.scan_outcome.
 CONSUMED BY: the run itself; tests/test_run_pipeline.py.
 """
@@ -42,8 +42,6 @@ from pathlib import Path
 from phase0.extract_prs import PRRecord
 from phase0.graph.pycg_failure import GraphStatus
 from phase0.graph.run_graph import DEFAULT_TIMEOUT_S, HarnessError
-from phase0.parent_commit import MergeShape
-from phase0.parent_commit import resolve as resolve_parent
 from phase0.pipeline import record, worktree
 from phase0.pipeline.measure import measure
 
@@ -73,10 +71,14 @@ def group_by_repo(prs: Sequence[PRRecord]) -> dict[str, list[PRRecord]]:
     return dict(sorted(grouped.items()))
 
 
-def failed(
-    pr: PRRecord, stage: str, reason: str, shape: MergeShape | None = None
-) -> record.PRAudit:
-    """A record naming WHICH stage failed. 'PR 4821 failed' is useless at hour 30."""
+def failed(pr: PRRecord, stage: str, reason: str) -> record.PRAudit:
+    """A record naming WHICH stage failed. 'PR 4821 failed' is useless at hour 30.
+
+    The parent resolution is copied from the RECORD rather than taken as an argument.
+    It was a `MergeShape | None` parameter filled from a resolution this function's
+    callers performed themselves; now that nothing here resolves, a parameter would be
+    a vestige that only ever received None -- present, plausible and always empty.
+    """
     return record.PRAudit(
         pr_id=pr.pr_id,
         repo=pr.repo,
@@ -84,7 +86,8 @@ def failed(
         arm=pr.arm,
         task_type=pr.task_type,
         merged_sha=pr.merged_sha,
-        parent_resolution_method=shape.value if shape else "",
+        parent_resolution_method=pr.parent_resolution_method,
+        parent_resolution_rule=pr.parent_resolution_rule,
         graph_status=GraphStatus.CRASHED.value if stage == "unexpected" else "",
         stage_failed=stage,
         error=reason[:300],
@@ -92,24 +95,38 @@ def failed(
 
 
 def one_pr(clone: Path, pr: PRRecord, slot: int, timeout_s: int) -> record.PRAudit:
-    """One PR, fully isolated. Every failure becomes a record, never an exception."""
-    try:
-        parent = resolve_parent(
-            clone, pr.merged_sha, frozenset(pr.changed_files), max(len(pr.changed_files), 1)
-        )
-        if not parent.is_resolved:
-            return failed(pr, "parent_commit", parent.reason, parent.shape)
+    """One PR, fully isolated. Every failure becomes a record, never an exception.
 
-        with worktree.at_commit(clone, parent.parent_sha, str(slot)) as tree:
+    CONSUMES the record's parent. It does not re-resolve one.
+
+    The version that re-resolved called `parent_commit.resolve` with the PR's FILE
+    COUNT in the commit-count slot -- the substitution `assemble.build_record`'s own
+    docstring says A24 forbade -- and omitted `pr_commit_subjects` entirely, so
+    `by_subject` returned None every time and the corpus-derived file rules decided
+    every PR. It then overwrote a `parent_sha` the record already carried, resolved by
+    `assemble` from the API's subjects and true commit count. A caller rebuilding what
+    it was handed, which is the `_as_record` defect in the pipeline's own entry point.
+    """
+    try:
+        if not pr.parent_sha:
+            # Typed, not recomputed. A record with no parent is malformed -- `assemble`
+            # cannot emit one -- and re-deriving it here would turn a corrupt input into
+            # a plausible measurement, which is the failure this whole file guards.
+            return failed(pr, "parent_commit", "record carries no parent_sha")
+
+        with worktree.at_commit(clone, pr.parent_sha, str(slot)) as tree:
             if tree is None:
-                return failed(pr, "worktree", "parent commit unavailable", parent.shape)
+                return failed(pr, "worktree", "parent commit unavailable")
             audit = measure(tree, pr, timeout_s)
             if audit is None:
-                return failed(pr, "scope", "no analysable Python at the parent", parent.shape)
+                return failed(pr, "scope", "no analysable Python at the parent")
             return replace(
                 audit,
-                parent_sha=parent.parent_sha,
-                parent_resolution_method=parent.shape.value,
+                parent_sha=pr.parent_sha,
+                # Empty on a records file written before these fields existed. That is
+                # UNRECORDED and must never be read as "ambiguous" or as "checked".
+                parent_resolution_method=pr.parent_resolution_method,
+                parent_resolution_rule=pr.parent_resolution_rule,
             )
     except HarnessError:
         # Ahead of the catch-all on purpose. Our environment failing is not this PR

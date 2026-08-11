@@ -26,6 +26,7 @@ from pathlib import Path
 from git import Actor, Repo
 
 from phase0.parent_commit import GIT_LOOKUP_ERRORS, MergeShape, resolve
+from phase0.pipeline.merge_shape import ResolutionRule
 
 AUTHOR = Actor("Tester", "tester@example.com")
 PR_FILES = frozenset({"acme/one.py", "acme/two.py"})
@@ -132,3 +133,61 @@ def test_merge_touching_unrelated_files_is_ambiguous(tmp_path: Path) -> None:
     odd = _commit(repo, "other/thing.py", "# x\n", "chore: unrelated single commit")
     result = resolve(tmp_path, odd, PR_FILES, 2)
     assert result.shape is MergeShape.AMBIGUOUS
+
+
+def test_no_file_list_and_covered_file_list_are_different_rules(tmp_path: Path) -> None:
+    """A46. Both return SQUASH, and only one of them tested anything.
+
+    `covered >= pr_files` passing on a list we have, and returning SQUASH because there
+    is no list at all, are different claims. They shared one verdict, so the share of
+    parents resting on nothing could not be counted -- "no edge here" and "we failed
+    here" as the same value on the wire, which non-negotiable 3 forbids.
+    """
+    repo, _trunk_sha = _trunk(tmp_path)
+    merged = _commit(repo, "acme/one.py", "# changed\n", "feat: change one")
+
+    with_list = resolve(tmp_path, merged, frozenset({"acme/one.py"}), 1)
+    without_list = resolve(tmp_path, merged, frozenset(), 1)
+
+    assert with_list.shape is MergeShape.SQUASH
+    assert without_list.shape is MergeShape.SQUASH
+    assert with_list.parent_sha == without_list.parent_sha
+    # Same shape, same parent, same reason-to-a-skim. The rule is the only field that
+    # tells them apart, which is why it exists.
+    assert with_list.rule is ResolutionRule.FILE_COVERAGE
+    assert without_list.rule is ResolutionRule.NO_FILE_LIST
+
+
+def test_a_merge_commit_records_that_git_alone_decided_it(tmp_path: Path) -> None:
+    """Two parents needs no file list, and the rule must say so."""
+    repo, _trunk_sha = _trunk(tmp_path)
+    repo.git.checkout("-b", "feature")
+    _commit(repo, "acme/one.py", "# changed\n", "feat: one")
+    repo.git.checkout("main")
+    repo.git.merge("--no-ff", "feature", "-m", "Merge pull request #9")
+    merged = repo.head.commit.hexsha
+
+    resolved = resolve(tmp_path, merged, frozenset({"acme/one.py"}), 1)
+
+    assert resolved.shape is MergeShape.MERGE_COMMIT
+    assert resolved.rule is ResolutionRule.MERGE_PARENTS
+
+
+def test_subjects_decide_without_the_corpus_file_list(tmp_path: Path) -> None:
+    """A28's rule runs first, and a resolution it produced must not read as corpus-based.
+
+    The file list passed here is DELIBERATELY wrong -- a file the PR never touched. If
+    the subject rule did not decide, the file rules would, and the recorded rule would
+    say `file_coverage` instead.
+    """
+    repo, _trunk_sha = _trunk(tmp_path)
+    first = _commit(repo, "acme/one.py", "# a\n", "feat: first of two")
+    _commit(repo, "acme/one.py", "# b\n", "feat: second of two")
+    merged = repo.head.commit.hexsha
+    subjects = ("feat: first of two", "feat: second of two")
+
+    resolved = resolve(tmp_path, merged, frozenset({"nowhere/absent.py"}), 2, subjects)
+
+    assert resolved.rule is ResolutionRule.SUBJECT_SEQUENCE
+    assert resolved.shape is MergeShape.REBASE
+    assert resolved.parent_sha == repo.commit(first).parents[0].hexsha

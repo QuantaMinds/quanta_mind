@@ -114,7 +114,12 @@ def build_one(
 
     source = MECHANISMS[mechanism] if exposed else RESOLVABLE
     _commit(repo, "acme/__init__.py", "", "chore: seed package", MERGED_AT - timedelta(days=2))
-    _commit(
+    # Captured, because it IS the parent of the PR commit below. The record used to
+    # carry `parent_sha=""` and `run_pipeline.one_pr` re-derived it by running
+    # `parent_commit.resolve` over this repository. Now that `one_pr` consumes the
+    # record's parent instead of rebuilding one, a fixture that omits it is a malformed
+    # record, and this one was only ever valid because the consumer covered for it.
+    seeded = _commit(
         repo,
         f"acme/{_module_for(mechanism, index)}.py",
         source,
@@ -122,7 +127,11 @@ def build_one(
         MERGED_AT - timedelta(days=1),
     )
 
-    # The PR: a change to `target`, squash-shaped so A2 resolves it as SQUASH.
+    # The PR: a change to `target`, squash-shaped. `parent_resolution_method` and
+    # `_rule` are left EMPTY on the record below -- meaning UNRECORDED, not "ambiguous"
+    # -- because no rule decided this parent: the fixture knows it by construction.
+    # Claiming `squash`/`file_coverage` here would put a resolver verdict on disk that
+    # no resolver produced, which is the fabrication these fields exist to prevent.
     merged = _commit(
         repo,
         f"acme/{_module_for(mechanism, index)}.py",
@@ -144,7 +153,7 @@ def build_one(
         pr_id=f"{mechanism}-{'exp' if exposed else 'ctl'}-{index}",
         repo=f"synthetic/{mechanism}-{index}",
         language="python",
-        parent_sha="",
+        parent_sha=seeded,
         merged_sha=merged,
         merged_at=MERGED_AT.isoformat().replace("+00:00", "Z"),
         changed_files=(f"acme/{_module_for(mechanism, index)}.py",),

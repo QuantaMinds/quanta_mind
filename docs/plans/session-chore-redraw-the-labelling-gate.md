@@ -1,6 +1,6 @@
 # Session record — chore/redraw-the-labelling-gate
 
-Written by scripts/guard/hook_session_end.py at 2026-08-11T02:35:51Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-11T02:45:48Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `chore/redraw-the-labelling-gate`

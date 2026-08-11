@@ -43,7 +43,12 @@ from pathlib import Path
 from git import Commit, Repo
 from git.exc import GitError, ODBError
 
-from phase0.pipeline.merge_shape import MergeShape, ParentResolution, by_subject
+from phase0.pipeline.merge_shape import (
+    MergeShape,
+    ParentResolution,
+    ResolutionRule,
+    by_subject,
+)
 
 # GitPython raises across two unrelated hierarchies. GitError covers command
 # failures; BadName and BadObject derive from gitdb's ODBError, which is NOT a
@@ -83,7 +88,12 @@ def resolve(
         # 2025-08 snapshot is corpus attrition, and attrition must not crash a run.
         parents = merge.parents
     except GIT_LOOKUP_ERRORS as exc:
-        return ParentResolution(MergeShape.AMBIGUOUS, "", reason=f"commit unavailable: {exc}")
+        return ParentResolution(
+            MergeShape.AMBIGUOUS,
+            "",
+            reason=f"commit unavailable: {exc}",
+            rule=ResolutionRule.UNRESOLVED,
+        )
     finally:
         # Windows keeps the pack files mapped while a Repo is open, so the clone cannot
         # be deleted afterwards and 1.6 GB accumulated over 41 repositories. Closing is
@@ -93,11 +103,21 @@ def resolve(
             repo.close()
 
     if not parents:
-        return ParentResolution(MergeShape.AMBIGUOUS, "", reason="root commit has no parent")
+        return ParentResolution(
+            MergeShape.AMBIGUOUS,
+            "",
+            reason="root commit has no parent",
+            rule=ResolutionRule.UNRESOLVED,
+        )
 
     # 1. A true merge commit. Unambiguous: the first parent is trunk.
     if len(parents) >= 2:
-        return ParentResolution(MergeShape.MERGE_COMMIT, parents[0].hexsha, steps_walked=1)
+        return ParentResolution(
+            MergeShape.MERGE_COMMIT,
+            parents[0].hexsha,
+            steps_walked=1,
+            rule=ResolutionRule.MERGE_PARENTS,
+        )
 
     # 2. Subjects when we have them: authoritative, and independent of the corpus file
     #    list that the file rules below depend on.
@@ -106,13 +126,27 @@ def resolve(
         return from_subjects
 
     # 3 and 4 both have one parent; diff coverage tells them apart.
+    # A46: these are TWO claims, not one, and only the second is a measurement.
+    # `covered >= pr_files` tested a list we have; `not pr_files` returns SQUASH with
+    # nothing to test against at all. They are recorded under different rules so the
+    # next reader can count them apart -- the collapse non-negotiable 3 forbids is
+    # exactly what one shared verdict here would be.
     covered = _files_of(merge)
-    if not pr_files or covered >= pr_files:
+    if not pr_files:
+        return ParentResolution(
+            MergeShape.SQUASH,
+            parents[0].hexsha,
+            steps_walked=1,
+            reason="no file list to test against; assumed squash",
+            rule=ResolutionRule.NO_FILE_LIST,
+        )
+    if covered >= pr_files:
         return ParentResolution(
             MergeShape.SQUASH,
             parents[0].hexsha,
             steps_walked=1,
             reason="single commit covers the PR's whole file set",
+            rule=ResolutionRule.FILE_COVERAGE,
         )
 
     # 3. Rebase: walk back over the replayed commits.
@@ -121,7 +155,13 @@ def resolve(
     limit = max(pr_commit_count, 1)
     while steps < limit:
         if not current.parents:
-            return ParentResolution(MergeShape.AMBIGUOUS, "", steps, "ran out of history")
+            return ParentResolution(
+                MergeShape.AMBIGUOUS,
+                "",
+                steps,
+                "ran out of history",
+                rule=ResolutionRule.FILE_COVERAGE,
+            )
         touched = _files_of(current)
         if not touched or not touched <= pr_files:
             break
@@ -134,12 +174,21 @@ def resolve(
             "",
             0,
             "merge commit touches files outside the PR: neither squash nor rebase",
+            rule=ResolutionRule.FILE_COVERAGE,
         )
     if steps >= limit and current.parents and _files_of(current) <= pr_files:
         return ParentResolution(
-            MergeShape.AMBIGUOUS, "", steps, f"walk exceeded the PR's {limit} commits"
+            MergeShape.AMBIGUOUS,
+            "",
+            steps,
+            f"walk exceeded the PR's {limit} commits",
+            rule=ResolutionRule.FILE_COVERAGE,
         )
 
     return ParentResolution(
-        MergeShape.REBASE, current.hexsha, steps, "walked back replayed commits"
+        MergeShape.REBASE,
+        current.hexsha,
+        steps,
+        "walked back replayed commits",
+        rule=ResolutionRule.FILE_COVERAGE,
     )

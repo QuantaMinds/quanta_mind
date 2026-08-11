@@ -25,9 +25,9 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
+from phase0.attrition import Attrition
 from phase0.extract_prs import (
     STRUCTURAL_TASK_TYPES,
-    Attrition,
     PRRecord,
     load_table,
     population_counts,

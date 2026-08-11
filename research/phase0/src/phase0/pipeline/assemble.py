@@ -164,4 +164,9 @@ def build_record(
         licence=licence,
         repo_id=repo,
         base_ref=merge.base_ref,
+        # Carried so the exposure pass consumes this resolution rather than redoing it
+        # with worse inputs. `rule` is recorded beside the shape because the shape alone
+        # does not say whether the CORPUS file list decided it -- see A46.
+        parent_resolution_method=parent.shape.value,
+        parent_resolution_rule=parent.rule.value,
     )
