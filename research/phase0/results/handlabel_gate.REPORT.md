@@ -98,15 +98,26 @@ rescues nothing: three labels agreeing while resting on no evidence is two instr
 sharing a blind spot, not agreement. And the key was open, so any re-label by that labeller
 is anchored.
 
-### 2.5 What survived as signal
+### 2.5 What survived as signal — ONE finding, not two
 
-The two genuine disagreements point in **opposite** directions, which is information about
-the rule and worth keeping:
+An earlier version of this section claimed two genuine disagreements pointing in opposite
+directions, and called them worth more than the score would have been. **That was wrong,
+and it was overstated twice before it was checked.**
 
-- **`langgraph#4947` — rule too LOOSE.** A docstring-only change marked BROKE because a
-  later commit touched the same file.
-- **`prometheus-metrics-bundle#118` — rule too TIGHT.** Missed a same-day fix to scripts
-  the PR itself created.
+- **`langgraph#4947` — rule too LOOSE. STANDS.** A docstring-only change marked BROKE
+  because a later commit touched the same file. A comment cannot cause a
+  callback-manager tag bug, and the rule has no notion of what a PR changed — only which
+  files it touched.
+- **`prometheus-metrics-bundle#118` — rule too TIGHT. WITHDRAWN.** Not a rule failure at
+  all. The gate fed the scan the CORPUS's file list, which claims **1 file** for a PR that
+  changed **43**, and the claimed file is not among them. The scan was asked whether
+  anyone repaired a file the PR never touched, found an empty overlap, and returned CLEAN
+  before any ratio was computed. With GitHub's real list the current rule scores it
+  10/15 = 0.667 → **BROKE**, agreeing with the human label. See A46.
+
+So attempt 1 produced **no valid gate and one finding**, and that finding was already
+reached independently by a mechanism argument — a PR that changed no executable line
+cannot cause a runtime bug. The salvage is thinner than this report first claimed.
 
 ### 2.6 Who labelled it
 
@@ -291,3 +302,28 @@ through 4,300 PRs unnoticed:
 
 **The instrument is in better shape than when the gate was first attempted.** What remains
 is a corpus large enough to draw from, and two hours of human reading.
+
+### 10.1 The deeper pattern: the validation layer was not held to the pipeline's standard
+
+"Nobody knew draws were a limited resource" understates what went wrong. **Three of the
+four attempts were invalidated by defects in the validation machinery itself, not in the
+pipeline it validates.**
+
+| attempt | failed in |
+| --- | --- |
+| 1 | the gate rebuilt the classifier's input and got **four** fields wrong |
+| 2 | the key's confidentiality broke in the tooling around the gate |
+| 4 | two caps in the draw and the walk disagreed |
+| 3 | *the only plain sampling problem* |
+
+The pipeline has 300+ tests, eight guards, and twenty documented defects found and fixed.
+**`handlabel/draw.py` had no test calling it at all** — which is exactly why four wrong
+fields survived in one function.
+
+The lesson is not "count your draws". It is that **the instrument which checks the
+instrument needs the same discipline as the instrument, and it did not get it.**
+
+`_as_record` is the concentrated form: `base_ref` unset, `arm` hardcoded, `merged_sha`
+wrong, `changed_files` taken from the corpus. Every field it touched. That is why the fix
+is `record_for` returning the stored object asserted on IDENTITY, rather than correcting
+four values — it makes the count irrelevant.
