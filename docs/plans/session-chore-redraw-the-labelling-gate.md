@@ -1,20 +1,27 @@
 # Session record — chore/redraw-the-labelling-gate
 
-Written by scripts/guard/hook_session_end.py at 2026-08-11T02:45:48Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-11T05:13:54Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `chore/redraw-the-labelling-gate`
-- Files changed vs `main`: 17
-- Uncommitted at session end: 11
-- `docs/CODEBASE.md` updated: no
+- Files changed vs `main`: 41
+- Uncommitted at session end: 25
+- `docs/CODEBASE.md` updated: yes
 
 ## Changed
 
+- `AGENTS.md`
+- `docs/CODEBASE.md`
 - `docs/findings/PHASE0_PREREGISTRATION.md`
 - `docs/plans/session-chore-redraw-the-labelling-gate.md`
 - `research/phase0/data/labelling/human_labels.csv`
+- `research/phase0/results/a47_evaluations.md`
 - `research/phase0/results/agent_walk2_journal.md`
 - `research/phase0/results/agent_walk2_records.jsonl`
+- `research/phase0/results/citation_verification_2026-08.md`
+- `research/phase0/results/clone_failure_classes.md`
+- `research/phase0/results/clone_failure_corrections.json`
+- `research/phase0/results/drawn_pr_ids.json`
 - `research/phase0/results/handlabel_gate.INVALID.README.md`
 - `research/phase0/results/handlabel_gate.INVALID.score.json`
 - `research/phase0/results/handlabel_gate.REPORT.md`
@@ -26,4 +33,21 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/runs/agent_walk2/run_meta.json`
 - `research/phase0/runs/agent_walk2/shape_latest.json`
 - `research/phase0/runs/agent_walk2/timeline.jsonl`
+- `research/phase0/scripts/build_drawn_ids.py`
+- `research/phase0/scripts/reclassify_clone_failures.py`
+- `research/phase0/src/phase0/attrition.py`
+- `research/phase0/src/phase0/controls/corpus.py`
+- `research/phase0/src/phase0/extract_prs.py`
 - `research/phase0/src/phase0/handlabel/draw.py`
+- `research/phase0/src/phase0/parent_commit.py`
+- `research/phase0/src/phase0/pipeline/assemble.py`
+- `research/phase0/src/phase0/pipeline/checkout.py`
+- `research/phase0/src/phase0/pipeline/merge_shape.py`
+- `research/phase0/src/phase0/pipeline/record.py`
+- `research/phase0/src/phase0/pipeline/resume.py`
+- `research/phase0/src/phase0/run_pipeline.py`
+- `research/phase0/tests/controls/test_capability_is_the_census.py`
+- `research/phase0/tests/pipeline/test_checkout_complete.py`
+- `research/phase0/tests/pipeline/test_parent_is_consumed.py`
+- `research/phase0/tests/test_extract_prs.py`
+- `research/phase0/tests/test_parent_commit.py`

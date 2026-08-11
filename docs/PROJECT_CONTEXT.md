@@ -123,7 +123,10 @@ arXiv serves the abstract; ACM is paywalled; ResearchGate rate-limits.
 **The most consequential paper for this thesis, and it cuts both ways.** 350 PRs with
 human-annotated ground truth, 8 frontier models, three frozen context configurations.
 arXiv preprint, single author (Deepak Kumar, independent), not peer-reviewed. Dataset and
-harness public: `huggingface.co/datasets/foundry-ai/swe-prbench`.
+harness **NOT** public as of 2026-08-10 — the dataset page says *"Evaluation harness and
+submission instructions coming shortly."* The data is there:
+`huggingface.co/datasets/foundry-ai/swe-prbench`. A51 depends on the harness and waits for
+it rather than substituting one.
 
 **⚠️ The finding that pressures our mechanism:**
 

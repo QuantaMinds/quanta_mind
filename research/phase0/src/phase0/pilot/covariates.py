@@ -125,7 +125,24 @@ def rows_for_clone_failure(
     seen = {a.pr_id for a in already_noted}
     stage = clone_failure_stage(exc)
     return [
-        attempt_for(c, Rejection(str(c.pr_id), stage, str(exc)), len(c.commit_shas), stars=-1)
+        attempt_for(
+            c,
+            Rejection(str(c.pr_id), stage, str(exc)),
+            len(c.commit_shas),
+            # `stars` was a parameter this function ACCEPTED AND NEVER READ, hardcoding
+            # -1 -- NOT MEASURED -- on every clone-failure row. The star count is the
+            # journal's only size proxy, and these are precisely the rows whose size
+            # decides whether `clone_failure_stage`'s split does anything: a timeout
+            # removes the LARGEST repositories, a deleted one "has no size to measure".
+            # Measured off the parquet at 139 repositories, the medians are 16,245 /
+            # 1,618 / 590 / 166 stars for timeout / git-lfs / transport / gone against a
+            # 449 baseline -- so the split is real AND the journal could not show it,
+            # because every row it applies to said -1. The data was in the call site the
+            # whole time: `run.py` loads it before the first clone and passes it here.
+            # -1 SURVIVES as the default for a repository absent from the table, which is
+            # a real state and still means NOT MEASURED. A48.
+            stars.get(c.repo, -1),
+        )
         for c in candidates
         if str(c.pr_id) not in seen
     ]
