@@ -160,11 +160,18 @@ def draw(
 
     for outcome, want in wanted.items():
         if len(buckets[outcome]) < want:
+            got, kind = len(buckets[outcome]), outcome.value.upper()
             raise ValueError(
-                f"only {len(buckets[outcome])} {outcome.value.upper()} PRs found in "
-                f"{considered} examined across {repos_visited} repositories, need {want}. "
-                f"Do not shrink the bucket to fit: a base rate this far from expectation "
-                f"is a finding about the outcome rule, not a sampling inconvenience."
+                f"only {got} {kind} in {considered} examined across {repos_visited} repos, "
+                f"need {want} ({got / considered:.1%}). Do not shrink the bucket. TWO "
+                f"CAUSES, OPPOSITE MEANINGS: (a) on a FIRST draw from an undepleted pool "
+                f"this is a finding about the OUTCOME RULE; (b) on a LATER draw it is "
+                f"DEPLETION -- a stratified draw takes {kind} faster than the pool holds "
+                f"it, and three draws took this corpus 37.07% -> 33.33% BROKE, which says "
+                f"nothing about the rule. Compare the residual pool's rate to the corpus "
+                f"rate. If depleted, WALK MORE REPOSITORIES: re-seeding reshuffles the same "
+                f"pool, and raising MAX_PER_REPO ({MAX_PER_REPO}) defeats the cap that "
+                f"stops one repository supplying the sample."
             )
 
     drawn = [row for outcome in (Outcome.BROKE, Outcome.CLEAN) for row in buckets[outcome]]

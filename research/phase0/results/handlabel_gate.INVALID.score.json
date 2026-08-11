@@ -1,0 +1,62 @@
+{
+  "agreement": 16,
+  "total": 20,
+  "rate": 0.8,
+  "passed": true,
+  "kappa": 0.6815642458100558,
+  "unsure": 1,
+  "minutes_median": 9.0,
+  "confusion": {
+    "both_broke": 7,
+    "both_clean": 9,
+    "machine_broke_human_clean": 2,
+    "machine_clean_human_broke": 1
+  },
+  "disagreements": [
+    {
+      "label_id": 10,
+      "repo": "artprima/prometheus-metrics-bundle",
+      "number": 118,
+      "human": "BROKE",
+      "machine": "CLEAN",
+      "human_reasoning": "PR ADDED those Grafana e2e scripts. The fix lands the same day on files this PR created.",
+      "machine_criterion": "none",
+      "machine_evidence": "",
+      "direction": "rule too tight"
+    },
+    {
+      "label_id": 11,
+      "repo": "oraios/serena",
+      "number": 264,
+      "human": "UNSURE",
+      "machine": "BROKE",
+      "human_reasoning": "Repo is very active (47 commits/week) and agent.py is a hub file, so most of 29 overlaps are routine churn. The one candidate fixes _open_dashboard(port -> url), browser-launch logic that pre-dates this PR, not the tool analytics it added. Cannot attribute either way.",
+      "machine_criterion": "fix_touching_same_file",
+      "machine_evidence": "ec0ae570a58a8d646bc30c9fcdd9750089b858b8",
+      "direction": "undetermined"
+    },
+    {
+      "label_id": 15,
+      "repo": "langchain-ai/langgraph",
+      "number": 4947,
+      "human": "CLEAN",
+      "machine": "BROKE",
+      "human_reasoning": "PR changed a DOCSTRING only. A docstring cannot break callback tag handling. Textbook same-file-not-same-work.",
+      "machine_criterion": "fix_touching_same_file",
+      "machine_evidence": "0b609646d5199608c4b5c2ee0878b5d327f4f580",
+      "direction": "rule too loose"
+    },
+    {
+      "label_id": 20,
+      "repo": "camUrban/PteraSoftware",
+      "number": 32,
+      "human": "CLEAN",
+      "machine": "BROKE",
+      "human_reasoning": "Nothing landed after the merge.",
+      "machine_criterion": "fix_touching_same_file",
+      "machine_evidence": "4098184ef7f1c58defb0398e53fff4e3e0f52bb9",
+      "direction": "rule too loose"
+    }
+  ],
+  "human_labels_commit": "74022f71f59b612ff9df1e6079287e55b100c72f"
+}

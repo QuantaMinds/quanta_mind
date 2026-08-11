@@ -1,66 +1,56 @@
-# The 20-PR gate scored 16/20 and the result is INVALID
+# Two invalidated gate attempts, and which artifact belongs to which
 
-The score is real. The labels behind four of it are not.
+Three files in this directory carry the `handlabel_gate.INVALID` prefix. They are kept
+rather than deleted because their numbers exist in this project's history and must stay
+traceable to the reasons they are wrong. **None of them is a result.**
 
-## What happened
+| file | draw | what it is |
+| --- | --- | --- |
+| `handlabel_gate.INVALID.human_labels.csv` | seed **20260809** | twenty labels, committed before the key was opened |
+| `handlabel_gate.INVALID.score.json` | seed **20260809** | the 16/20 those labels scored |
+| this README | — | why neither counts |
 
-`_key.csv` was opened only after `human_labels.csv` was committed, and scoring reported:
+## Attempt 1 — seed 20260809. Scored 16/20 and is invalid
 
-    agreement 16/20 (80%)   gate >=16 -> PASS
-    kappa 0.682   unsure 1   median 9 min
+Two independent defects, and they masked each other.
 
-Four of those twenty labels — **3, 7, 17 and 20** — were recorded as CLEAN on the stated
-reason "zero commits in the 7-day window". There were no commits in the window because
-**the window could not be read**. Every one of those four PRs merged into a branch that
-has since been deleted:
+**In the labelling.** Four labels — 3, 7, 17, 20 — were recorded CLEAN on the stated
+reason "zero commits in the 7-day window". There were no commits because **the window
+could not be read**: all four merged into branches since deleted, the query 404s, and the
+evidence gatherer ended it with `or []`. A failure became an empty list, and an empty list
+read as a finding.
 
-| label | PR | base ref | resolves |
-| --- | --- | --- | --- |
-| 3 | policyengine-us#6069 | `BenOgorek/qbid-suite` | **404** |
-| 7 | policyengine-us#6052 | `BenOgorek/qbid-suite` | **404** |
-| 17 | policyengine-us#6071 | `just-qbid-logic` | **404** |
-| 20 | PteraSoftware#32 | `release-3.1.0` | **404** |
+**In the gate itself.** `draw._as_record` rebuilt the classifier's input instead of
+consuming the `PRRecord` the pipeline had written, getting `base_ref`, `arm` and
+`merged_sha` wrong — so it walked the clone's default branch rather than the PR's own
+base. Fixed in the commit closing issue 13.
 
-The evidence gatherer written for this labelling session ended its window query with
-`or []`. A 404 became an empty list, an empty list read as "nothing landed after this PR",
-and "nothing landed" was recorded as a judgement that nothing broke.
+On `camUrban/PteraSoftware#32` the two produced three different answers: pipeline
+`UNSCANNABLE`, gate `BROKE`, human `CLEAN`. Machine and human disagreed because they were
+reading different branches, neither of them the right one.
 
-**That is the defect this entire session existed to remove**, reproduced by the tooling
-built to validate the fix for it. `window.candidates` returned `[]` for both "no commits"
-and "could not look", and A38 replaced it with a raise. The gatherer here reintroduced the
-same collapse one layer up, in a throwaway script, and it went unnoticed because an empty
-window produces a confident-looking CLEAN rather than an error.
+**`handlabel_gate.INVALID.score.json` is the score of THIS draw.** Its disagreements name
+`prometheus-metrics-bundle`, `serena`, `langgraph` and `PteraSoftware` — none of which
+appear in any later sample. It must never be read as a result for a subsequent draw.
 
-## It produced at least one wrong label
+## Attempt 2 — seed 20260810. Never scored, withdrawn before labelling
 
-Label 20 is provably wrong on its stated reason. `camUrban/PteraSoftware#32` merged at
-`2025-07-07T00:49:29Z`; commit `4098184ef7f1` — "I reformatted my files using black and
-fixed even more typos" — lands at `02:10:53Z`, eighty minutes later and squarely inside
-the window. The classifier saw it. The label says nothing landed.
+The draw was made with the fixed pipeline and its dossiers were gathered complete, 20 of
+20. **No labels were ever recorded** — `human_labels.csv` stayed blank throughout.
 
-Whether that commit REPAIRS the PR is a separate question and arguably it does not:
-"fixed even more typos" reads as continuing incomplete work rather than undoing wrong
-work. But the label did not reach CLEAN by that argument. It reached CLEAN by not looking.
+It is withdrawn because the sealed key's confidentiality could no longer be
+*demonstrated*. That is the whole point of sealing it: the commit timestamp on the labels
+exists so that blindness is provable rather than asserted, and an assurance that nobody
+looked is exactly the kind of claim this project has learned not to accept. The draw is
+discarded on the possibility, not on a confirmed exposure.
 
-## Why the score cannot simply be recomputed
+Its sample, key, dossiers and the agent reference set are out of the repository, not in
+this directory, so nothing from it can be picked up by a later run.
 
-Labels 3, 7 and 17 agreed with the classifier, so the arithmetic survives dropping label
-20 alone. That does not rescue the gate:
+## What a valid attempt requires
 
-- Three labels agreeing with the machine while resting on no evidence is not agreement.
-  It is two instruments being silent about the same hole.
-- The key is now open. Any re-label of these four by the same labeller is anchored, which
-  is the exact contamination the sealed key exists to prevent.
-
-## What the gate needs
-
-A fresh draw and a fresh labeller, with the gatherer fixed first:
-
-1. Resolve a deleted base ref rather than swallowing it — the merge commit is still
-   reachable from the default branch, and the window can be walked from there.
-2. An unreadable window must RAISE, never return empty. Same rule as `window.candidates`.
-3. A label whose stated evidence is "zero commits in the window" must record whether the
-   window was READ and found empty, or could not be read at all.
-
-Until then this repository has no passed hand-labelling gate, and the outcome variable's
-32.04% agent-arm breakage rate is unvalidated by human judgement.
+1. A fresh seed, resealed.
+2. Dossiers regathered — the gatherer works; it produced 20 of 20 complete last time.
+3. A **human** labeller, per `PHASE0_RUNBOOK.md` “The 20-PR hand-labelling gate” and
+   `HAND_LABELLING_PROTOCOL.md`. A machine dry run of this gate scored 11/20, kappa 0.10.
+4. Labels committed **before** the key is opened. The timestamp is the proof.

@@ -1,0 +1,12 @@
+{"arm": "agent", "kind": "run_start", "population": 3566, "tally": {"Claude_Code": 47, "Copilot": 271, "Cursor": 132, "Devin": 301, "OpenAI_Codex": 2815}, "ts": "2026-08-11T01:54:11+00:00"}
+{"kind": "repo_start", "of": 200, "position": 1, "prs": 1, "repo": "14790897/handwriting-web", "ts": "2026-08-11T01:54:11+00:00"}
+{"admitted": 0, "attempts": 1, "broke": 0, "kind": "repo_done", "of": 200, "position": 1, "repo": "14790897/handwriting-web", "ts": "2026-08-11T01:54:25+00:00"}
+{"kind": "repo_start", "of": 200, "position": 2, "prs": 7, "repo": "3rdIteration/btcrecover", "ts": "2026-08-11T01:54:25+00:00"}
+{"admitted": 5, "attempts": 7, "broke": 2, "kind": "repo_done", "of": 200, "position": 2, "repo": "3rdIteration/btcrecover", "ts": "2026-08-11T01:54:49+00:00"}
+{"kind": "repo_start", "of": 200, "position": 3, "prs": 5, "repo": "514-labs/moose", "ts": "2026-08-11T01:54:49+00:00"}
+{"admitted": 2, "attempts": 5, "broke": 0, "kind": "repo_done", "of": 200, "position": 3, "repo": "514-labs/moose", "ts": "2026-08-11T01:55:48+00:00"}
+{"kind": "repo_start", "of": 200, "position": 4, "prs": 7, "repo": "567-labs/instructor", "ts": "2026-08-11T01:55:48+00:00"}
+{"admitted": 5, "attempts": 7, "broke": 1, "kind": "repo_done", "of": 200, "position": 4, "repo": "567-labs/instructor", "ts": "2026-08-11T01:55:58+00:00"}
+{"kind": "repo_start", "of": 200, "position": 5, "prs": 2, "repo": "567-labs/kura", "ts": "2026-08-11T01:55:58+00:00"}
+{"admitted": 2, "attempts": 2, "broke": 2, "kind": "repo_done", "of": 200, "position": 5, "repo": "567-labs/kura", "ts": "2026-08-11T01:56:07+00:00"}
+{"kind": "repo_start", "of": 200, "position": 6, "prs": 5, "repo": "AMICI-dev/AMICI", "ts": "2026-08-11T01:56:07+00:00"}
