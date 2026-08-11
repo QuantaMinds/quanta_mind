@@ -1,0 +1,41 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Cursor"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-11T04:53:43+00:00",
+  "of": 200,
+  "position": 122,
+  "rejected_by_stage": {
+    "history_rewritten": 1
+  },
+  "repo": "allthingslinux/tux",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Cursor",
+      "base_on_default": "no",
+      "category": "resource",
+      "changed_lines": 1306,
+      "changed_symbols": null,
+      "commit_count": 2,
+      "corpus_py_files": 140,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": 146,
+      "github_files_truncated": false,
+      "github_py_files": 140,
+      "merge_on_base": "unknown",
+      "outcome": "",
+      "pr_id": "3223709587",
+      "repo": "allthingslinux/tux",
+      "stage": "history_rewritten",
+      "stars": 124
+    }
+  ],
+  "scanned": 0,
+  "stars": 124,
+  "started_utc": "2026-08-11T04:53:35+00:00"
+}

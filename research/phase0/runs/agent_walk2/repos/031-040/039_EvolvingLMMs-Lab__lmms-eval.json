@@ -1,0 +1,41 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Cursor"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-11T03:10:39+00:00",
+  "of": 200,
+  "position": 39,
+  "rejected_by_stage": {
+    "file_set": 1
+  },
+  "repo": "EvolvingLMMs-Lab/lmms-eval",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Cursor",
+      "base_on_default": "yes",
+      "category": "integrity",
+      "changed_lines": 144,
+      "changed_symbols": null,
+      "commit_count": 2,
+      "corpus_py_files": 3,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": 4,
+      "github_files_truncated": false,
+      "github_py_files": 3,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3193101857",
+      "repo": "EvolvingLMMs-Lab/lmms-eval",
+      "stage": "file_set",
+      "stars": 2845
+    }
+  ],
+  "scanned": 0,
+  "stars": 2845,
+  "started_utc": "2026-08-11T03:10:36+00:00"
+}

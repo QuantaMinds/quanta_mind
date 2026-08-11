@@ -1,0 +1,41 @@
+{
+  "admitted": 0,
+  "arms": [
+    "OpenAI_Codex"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-11T04:59:06+00:00",
+  "of": 200,
+  "position": 134,
+  "rejected_by_stage": {
+    "no_python": 1
+  },
+  "repo": "azure-ai-foundry/foundry-samples",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 3300,
+      "changed_symbols": null,
+      "commit_count": 5,
+      "corpus_py_files": 3,
+      "derived_files": 0,
+      "exclusion": "",
+      "github_changed_files": 17,
+      "github_files_truncated": false,
+      "github_py_files": 0,
+      "merge_on_base": "no",
+      "outcome": "",
+      "pr_id": "3141451728",
+      "repo": "azure-ai-foundry/foundry-samples",
+      "stage": "no_python",
+      "stars": 119
+    }
+  ],
+  "scanned": 0,
+  "stars": 119,
+  "started_utc": "2026-08-11T04:58:46+00:00"
+}

@@ -1,0 +1,39 @@
+{
+  "admitted": 1,
+  "arms": [
+    "Devin"
+  ],
+  "attempts": 1,
+  "broke": 1,
+  "finished_utc": "2026-08-11T05:09:54+00:00",
+  "of": 200,
+  "position": 151,
+  "rejected_by_stage": {},
+  "repo": "codegen-sh/codegen",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Devin",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 182,
+      "changed_symbols": 2,
+      "commit_count": 2,
+      "corpus_py_files": 3,
+      "derived_files": 3,
+      "exclusion": "none",
+      "github_changed_files": 3,
+      "github_files_truncated": false,
+      "github_py_files": 3,
+      "merge_on_base": "yes",
+      "outcome": "broke",
+      "pr_id": "2887628012",
+      "repo": "codegen-sh/codegen",
+      "stage": "",
+      "stars": 481
+    }
+  ],
+  "scanned": 1,
+  "stars": 481,
+  "started_utc": "2026-08-11T05:09:47+00:00"
+}

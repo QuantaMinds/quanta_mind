@@ -1,0 +1,41 @@
+{
+  "admitted": 0,
+  "arms": [
+    "OpenAI_Codex"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-11T06:45:03+00:00",
+  "of": 200,
+  "position": 199,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "green-coding-solutions/green-metrics-tool",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 280,
+      "changed_symbols": null,
+      "commit_count": 3,
+      "corpus_py_files": 3,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": 10,
+      "github_files_truncated": false,
+      "github_py_files": 3,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3236878089",
+      "repo": "green-coding-solutions/green-metrics-tool",
+      "stage": "no_symbols",
+      "stars": 218
+    }
+  ],
+  "scanned": 0,
+  "stars": 218,
+  "started_utc": "2026-08-11T06:44:54+00:00"
+}

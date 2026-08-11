@@ -1,0 +1,39 @@
+{
+  "admitted": 1,
+  "arms": [
+    "Copilot"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-11T06:21:43+00:00",
+  "of": 200,
+  "position": 191,
+  "rejected_by_stage": {},
+  "repo": "frenck/spook",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 89,
+      "changed_symbols": 1,
+      "commit_count": 5,
+      "corpus_py_files": 1,
+      "derived_files": 1,
+      "exclusion": "none",
+      "github_changed_files": 2,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "3092813223",
+      "repo": "frenck/spook",
+      "stage": "",
+      "stars": 784
+    }
+  ],
+  "scanned": 1,
+  "stars": 784,
+  "started_utc": "2026-08-11T06:21:38+00:00"
+}

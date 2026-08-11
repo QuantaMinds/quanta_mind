@@ -1,0 +1,41 @@
+{
+  "admitted": 0,
+  "arms": [
+    "OpenAI_Codex"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-11T03:55:49+00:00",
+  "of": 200,
+  "position": 46,
+  "rejected_by_stage": {
+    "clone_timeout": 1
+  },
+  "repo": "HumanSignal/label-studio-ml-backend",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "unknown",
+      "category": "resource",
+      "changed_lines": -1,
+      "changed_symbols": null,
+      "commit_count": 29,
+      "corpus_py_files": 5,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": null,
+      "github_files_truncated": false,
+      "github_py_files": null,
+      "merge_on_base": "unknown",
+      "outcome": "",
+      "pr_id": "3123335159",
+      "repo": "HumanSignal/label-studio-ml-backend",
+      "stage": "clone_timeout",
+      "stars": -1
+    }
+  ],
+  "scanned": 0,
+  "stars": -1,
+  "started_utc": "2026-08-11T03:30:48+00:00"
+}

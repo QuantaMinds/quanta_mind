@@ -1,11 +1,11 @@
 {
   "by_cause": {
     "clone_timeout": 4,
-    "git_lfs_absent": 4,
-    "repo_gone": 2,
+    "git_lfs_absent": 6,
+    "repo_gone": 3,
     "transport_failure": 2
   },
-  "clone_failures": 12,
+  "clone_failures": 15,
   "corrections": [
     {
       "cause": "git_lfs_absent",
@@ -78,6 +78,24 @@
       "git_said": "git-lfs filter-process: git-lfs: command not found fatal: the remote end hung up unexpectedly warning: Clone succeeded, but checkout failed. You can inspect what was checked out with 'git status' and retry with 'git restore --source=HEAD :/'",
       "recorded_as": "repo_gone",
       "repo": "allenai/open-instruct"
+    },
+    {
+      "cause": "git_lfs_absent",
+      "git_said": "git-lfs filter-process: git-lfs: command not found fatal: the remote end hung up unexpectedly warning: Clone succeeded, but checkout failed. You can inspect what was checked out with 'git status' and retry with 'git restore --source=HEAD :/'",
+      "recorded_as": "repo_gone",
+      "repo": "commaai/openpilot"
+    },
+    {
+      "cause": "repo_gone",
+      "git_said": "remote: Repository not found. fatal: repository 'https://github.com/dai-motoki/haconiwa.git/' not found",
+      "recorded_as": "repo_gone",
+      "repo": "dai-motoki/haconiwa"
+    },
+    {
+      "cause": "git_lfs_absent",
+      "git_said": "git-lfs filter-process: git-lfs: command not found fatal: the remote end hung up unexpectedly warning: Clone succeeded, but checkout failed. You can inspect what was checked out with 'git status' and retry with 'git restore --source=HEAD :/'",
+      "recorded_as": "repo_gone",
+      "repo": "effekseer/Effekseer"
     }
   ],
   "journal_rows_affected": {
@@ -92,7 +110,10 @@
     "OWASP-BLT/BLT": 1,
     "PostHog/posthog": 1,
     "ag2ai/build-with-ag2": 1,
-    "allenai/open-instruct": 1
+    "allenai/open-instruct": 1,
+    "commaai/openpilot": 4,
+    "dai-motoki/haconiwa": 1,
+    "effekseer/Effekseer": 3
   },
-  "misclassified": 6
+  "misclassified": 8
 }

@@ -1,0 +1,83 @@
+{
+  "admitted": 0,
+  "arms": [
+    "OpenAI_Codex"
+  ],
+  "attempts": 3,
+  "broke": 0,
+  "finished_utc": "2026-08-11T03:06:39+00:00",
+  "of": 200,
+  "position": 28,
+  "rejected_by_stage": {
+    "history_rewritten": 3
+  },
+  "repo": "ChaokunHong/MetaScreener",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "resource",
+      "changed_lines": 13,
+      "changed_symbols": null,
+      "commit_count": 1,
+      "corpus_py_files": 2,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": 2,
+      "github_files_truncated": false,
+      "github_py_files": 2,
+      "merge_on_base": "unknown",
+      "outcome": "",
+      "pr_id": "3070801634",
+      "repo": "ChaokunHong/MetaScreener",
+      "stage": "history_rewritten",
+      "stars": 966
+    },
+    {
+      "admitted": false,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "resource",
+      "changed_lines": 195,
+      "changed_symbols": null,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": 6,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "unknown",
+      "outcome": "",
+      "pr_id": "3074286852",
+      "repo": "ChaokunHong/MetaScreener",
+      "stage": "history_rewritten",
+      "stars": 966
+    },
+    {
+      "admitted": false,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "resource",
+      "changed_lines": 211,
+      "changed_symbols": null,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "unknown",
+      "outcome": "",
+      "pr_id": "3076361098",
+      "repo": "ChaokunHong/MetaScreener",
+      "stage": "history_rewritten",
+      "stars": 966
+    }
+  ],
+  "scanned": 0,
+  "stars": 966,
+  "started_utc": "2026-08-11T03:06:31+00:00"
+}

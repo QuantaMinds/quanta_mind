@@ -1,0 +1,41 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Devin"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-11T04:58:38+00:00",
+  "of": 200,
+  "position": 132,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "axinc-ai/ailia-models",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Devin",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 876,
+      "changed_symbols": null,
+      "commit_count": 3,
+      "corpus_py_files": 4,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": 10,
+      "github_files_truncated": false,
+      "github_py_files": 4,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3234052393",
+      "repo": "axinc-ai/ailia-models",
+      "stage": "no_symbols",
+      "stars": 2229
+    }
+  ],
+  "scanned": 0,
+  "stars": 2229,
+  "started_utc": "2026-08-11T04:54:55+00:00"
+}

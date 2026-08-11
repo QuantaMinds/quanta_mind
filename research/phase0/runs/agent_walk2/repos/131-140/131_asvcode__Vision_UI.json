@@ -1,0 +1,62 @@
+{
+  "admitted": 1,
+  "arms": [
+    "OpenAI_Codex"
+  ],
+  "attempts": 2,
+  "broke": 0,
+  "finished_utc": "2026-08-11T04:54:55+00:00",
+  "of": 200,
+  "position": 131,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "asvcode/Vision_UI",
+  "rows": [
+    {
+      "admitted": true,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 96,
+      "changed_symbols": 1,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": 1,
+      "exclusion": "none",
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "clean",
+      "pr_id": "3238146178",
+      "repo": "asvcode/Vision_UI",
+      "stage": "",
+      "stars": 250
+    },
+    {
+      "admitted": false,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 7,
+      "changed_symbols": null,
+      "commit_count": 1,
+      "corpus_py_files": 1,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3241739426",
+      "repo": "asvcode/Vision_UI",
+      "stage": "no_symbols",
+      "stars": 250
+    }
+  ],
+  "scanned": 1,
+  "stars": 250,
+  "started_utc": "2026-08-11T04:54:48+00:00"
+}

@@ -1,0 +1,41 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Copilot"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-11T04:04:28+00:00",
+  "of": 200,
+  "position": 74,
+  "rejected_by_stage": {
+    "merge_metadata": 1
+  },
+  "repo": "PDFMathTranslate/PDFMathTranslate-next",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "unknown",
+      "category": "resource",
+      "changed_lines": -1,
+      "changed_symbols": null,
+      "commit_count": 0,
+      "corpus_py_files": 2,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": null,
+      "github_files_truncated": false,
+      "github_py_files": null,
+      "merge_on_base": "unknown",
+      "outcome": "",
+      "pr_id": "3221791587",
+      "repo": "PDFMathTranslate/PDFMathTranslate-next",
+      "stage": "merge_metadata",
+      "stars": 632
+    }
+  ],
+  "scanned": 0,
+  "stars": 632,
+  "started_utc": "2026-08-11T04:04:22+00:00"
+}

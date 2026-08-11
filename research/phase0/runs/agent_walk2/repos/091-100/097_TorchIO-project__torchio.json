@@ -1,0 +1,62 @@
+{
+  "admitted": 1,
+  "arms": [
+    "Copilot"
+  ],
+  "attempts": 2,
+  "broke": 0,
+  "finished_utc": "2026-08-11T04:37:13+00:00",
+  "of": 200,
+  "position": 97,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "TorchIO-project/torchio",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 2,
+      "changed_symbols": null,
+      "commit_count": 2,
+      "corpus_py_files": 1,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "no",
+      "outcome": "",
+      "pr_id": "3177184154",
+      "repo": "TorchIO-project/torchio",
+      "stage": "no_symbols",
+      "stars": 2244
+    },
+    {
+      "admitted": true,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "",
+      "changed_lines": 70,
+      "changed_symbols": 1,
+      "commit_count": 6,
+      "corpus_py_files": 2,
+      "derived_files": 2,
+      "exclusion": "merge_unreachable",
+      "github_changed_files": 2,
+      "github_files_truncated": false,
+      "github_py_files": 2,
+      "merge_on_base": "no",
+      "outcome": "unscannable",
+      "pr_id": "3185333353",
+      "repo": "TorchIO-project/torchio",
+      "stage": "",
+      "stars": 2244
+    }
+  ],
+  "scanned": 0,
+  "stars": 2244,
+  "started_utc": "2026-08-11T04:36:58+00:00"
+}

@@ -1,0 +1,41 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Copilot"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-11T04:54:24+00:00",
+  "of": 200,
+  "position": 127,
+  "rejected_by_stage": {
+    "no_python": 1
+  },
+  "repo": "artprima/prometheus-metrics-bundle",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 4899,
+      "changed_symbols": null,
+      "commit_count": 31,
+      "corpus_py_files": 1,
+      "derived_files": 0,
+      "exclusion": "",
+      "github_changed_files": 43,
+      "github_files_truncated": false,
+      "github_py_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3114898378",
+      "repo": "artprima/prometheus-metrics-bundle",
+      "stage": "no_python",
+      "stars": 154
+    }
+  ],
+  "scanned": 0,
+  "stars": 154,
+  "started_utc": "2026-08-11T04:54:19+00:00"
+}

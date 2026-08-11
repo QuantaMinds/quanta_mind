@@ -1,0 +1,63 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Copilot"
+  ],
+  "attempts": 2,
+  "broke": 0,
+  "finished_utc": "2026-08-11T04:58:46+00:00",
+  "of": 200,
+  "position": 133,
+  "rejected_by_stage": {
+    "no_python": 1,
+    "no_symbols": 1
+  },
+  "repo": "aztfmod/terraform-provider-azurecaf",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 10705,
+      "changed_symbols": null,
+      "commit_count": 30,
+      "corpus_py_files": 1,
+      "derived_files": 0,
+      "exclusion": "",
+      "github_changed_files": 50,
+      "github_files_truncated": false,
+      "github_py_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3171113463",
+      "repo": "aztfmod/terraform-provider-azurecaf",
+      "stage": "no_python",
+      "stars": 179
+    },
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 12132,
+      "changed_symbols": null,
+      "commit_count": 12,
+      "corpus_py_files": 1,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": 16,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3175054599",
+      "repo": "aztfmod/terraform-provider-azurecaf",
+      "stage": "no_symbols",
+      "stars": 179
+    }
+  ],
+  "scanned": 0,
+  "stars": 179,
+  "started_utc": "2026-08-11T04:58:38+00:00"
+}

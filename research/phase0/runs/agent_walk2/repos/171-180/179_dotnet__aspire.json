@@ -1,0 +1,41 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Copilot"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-11T06:02:25+00:00",
+  "of": 200,
+  "position": 179,
+  "rejected_by_stage": {
+    "no_python": 1
+  },
+  "repo": "dotnet/aspire",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 97,
+      "changed_symbols": null,
+      "commit_count": 9,
+      "corpus_py_files": 1,
+      "derived_files": 0,
+      "exclusion": "",
+      "github_changed_files": 15,
+      "github_files_truncated": false,
+      "github_py_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3195801570",
+      "repo": "dotnet/aspire",
+      "stage": "no_python",
+      "stars": 4723
+    }
+  ],
+  "scanned": 0,
+  "stars": 4723,
+  "started_utc": "2026-08-11T06:00:17+00:00"
+}

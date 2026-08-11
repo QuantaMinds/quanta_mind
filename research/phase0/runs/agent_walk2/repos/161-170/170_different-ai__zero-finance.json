@@ -1,0 +1,41 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Devin"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-11T05:53:15+00:00",
+  "of": 200,
+  "position": 170,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "different-ai/zero-finance",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Devin",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 396,
+      "changed_symbols": null,
+      "commit_count": 5,
+      "corpus_py_files": 4,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": 7,
+      "github_files_truncated": false,
+      "github_py_files": 4,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3064113810",
+      "repo": "different-ai/zero-finance",
+      "stage": "no_symbols",
+      "stars": 116
+    }
+  ],
+  "scanned": 0,
+  "stars": 116,
+  "started_utc": "2026-08-11T05:51:10+00:00"
+}

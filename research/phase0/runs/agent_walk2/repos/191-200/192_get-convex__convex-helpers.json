@@ -1,0 +1,41 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Devin"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-11T06:21:49+00:00",
+  "of": 200,
+  "position": 192,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "get-convex/convex-helpers",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Devin",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 40,
+      "changed_symbols": null,
+      "commit_count": 2,
+      "corpus_py_files": 1,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": 2,
+      "github_files_truncated": false,
+      "github_py_files": 1,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "2939503388",
+      "repo": "get-convex/convex-helpers",
+      "stage": "no_symbols",
+      "stars": 242
+    }
+  ],
+  "scanned": 0,
+  "stars": 242,
+  "started_utc": "2026-08-11T06:21:43+00:00"
+}

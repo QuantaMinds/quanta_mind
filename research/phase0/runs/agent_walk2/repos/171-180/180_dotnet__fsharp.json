@@ -1,0 +1,41 @@
+{
+  "admitted": 0,
+  "arms": [
+    "Copilot"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-11T06:10:55+00:00",
+  "of": 200,
+  "position": 180,
+  "rejected_by_stage": {
+    "no_python": 1
+  },
+  "repo": "dotnet/fsharp",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "Copilot",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 178,
+      "changed_symbols": null,
+      "commit_count": 17,
+      "corpus_py_files": 1,
+      "derived_files": 0,
+      "exclusion": "",
+      "github_changed_files": 6,
+      "github_files_truncated": false,
+      "github_py_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3083186670",
+      "repo": "dotnet/fsharp",
+      "stage": "no_python",
+      "stars": 4110
+    }
+  ],
+  "scanned": 0,
+  "stars": 4110,
+  "started_utc": "2026-08-11T06:02:25+00:00"
+}

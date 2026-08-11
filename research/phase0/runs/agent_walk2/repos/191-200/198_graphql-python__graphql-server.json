@@ -1,0 +1,41 @@
+{
+  "admitted": 0,
+  "arms": [
+    "OpenAI_Codex"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-11T06:44:54+00:00",
+  "of": 200,
+  "position": 198,
+  "rejected_by_stage": {
+    "no_symbols": 1
+  },
+  "repo": "graphql-python/graphql-server",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 277,
+      "changed_symbols": null,
+      "commit_count": 2,
+      "corpus_py_files": 5,
+      "derived_files": null,
+      "exclusion": "",
+      "github_changed_files": 7,
+      "github_files_truncated": false,
+      "github_py_files": 5,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3203838795",
+      "repo": "graphql-python/graphql-server",
+      "stage": "no_symbols",
+      "stars": 131
+    }
+  ],
+  "scanned": 0,
+  "stars": 131,
+  "started_utc": "2026-08-11T06:44:50+00:00"
+}

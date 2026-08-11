@@ -1,0 +1,41 @@
+{
+  "admitted": 0,
+  "arms": [
+    "OpenAI_Codex"
+  ],
+  "attempts": 1,
+  "broke": 0,
+  "finished_utc": "2026-08-11T04:04:34+00:00",
+  "of": 200,
+  "position": 75,
+  "rejected_by_stage": {
+    "no_python": 1
+  },
+  "repo": "PRQL/prql",
+  "rows": [
+    {
+      "admitted": false,
+      "arm": "OpenAI_Codex",
+      "base_on_default": "yes",
+      "category": "restricted",
+      "changed_lines": 2,
+      "changed_symbols": null,
+      "commit_count": 2,
+      "corpus_py_files": 1,
+      "derived_files": 0,
+      "exclusion": "",
+      "github_changed_files": 1,
+      "github_files_truncated": false,
+      "github_py_files": 0,
+      "merge_on_base": "yes",
+      "outcome": "",
+      "pr_id": "3070115595",
+      "repo": "PRQL/prql",
+      "stage": "no_python",
+      "stars": 10371
+    }
+  ],
+  "scanned": 0,
+  "stars": 10371,
+  "started_utc": "2026-08-11T04:04:28+00:00"
+}
