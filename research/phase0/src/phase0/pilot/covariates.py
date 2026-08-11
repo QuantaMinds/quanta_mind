@@ -26,7 +26,6 @@ from phase0.extract_prs import PRRecord
 from phase0.handlabel.select import Candidate
 from phase0.pilot.attempt import Attempt
 from phase0.pipeline.rejection import Rejection
-from phase0.pipeline.worktree import CloneFailed
 
 
 def attempt_for(
@@ -95,57 +94,6 @@ def attempt_for(
         arm=candidate.arm,
         exclusion=exclusion,
     )
-
-
-def clone_failure_stage(exc: CloneFailed) -> str:
-    """Which kind of clone failure this is. The two must never be pooled.
-
-    A timeout removes the LARGEST repositories, so it selects on the study's own
-    confounder. A repository that no longer exists selects on nothing and has no size to
-    measure. Pooling them puts a repo with no measurable size into the median that
-    quantifies the size bias.
-    """
-    return "repo_gone" if "not found" in str(exc).lower() else "clone_timeout"
-
-
-def rows_for_clone_failure(
-    candidates: Sequence[Candidate],
-    already_noted: Sequence[Attempt],
-    exc: CloneFailed,
-    stars: dict[str, int],
-) -> list[Attempt]:
-    """One row per PR the failed clone never reached. Attrition with a cause, not a gap.
-
-    A denominator that moves with the weather makes every later comparison carry noise
-    nobody declared. The commit count comes from the CORPUS list, because the API's count
-    is fetched inside the clone that just failed -- passing 0 put every clone failure
-    outside every band, so `share_lost` read 0.0 and "cannot tell" rendered as
-    "nothing lost".
-    """
-    seen = {a.pr_id for a in already_noted}
-    stage = clone_failure_stage(exc)
-    return [
-        attempt_for(
-            c,
-            Rejection(str(c.pr_id), stage, str(exc)),
-            len(c.commit_shas),
-            # `stars` was a parameter this function ACCEPTED AND NEVER READ, hardcoding
-            # -1 -- NOT MEASURED -- on every clone-failure row. The star count is the
-            # journal's only size proxy, and these are precisely the rows whose size
-            # decides whether `clone_failure_stage`'s split does anything: a timeout
-            # removes the LARGEST repositories, a deleted one "has no size to measure".
-            # Measured off the parquet at 139 repositories, the medians are 16,245 /
-            # 1,618 / 590 / 166 stars for timeout / git-lfs / transport / gone against a
-            # 449 baseline -- so the split is real AND the journal could not show it,
-            # because every row it applies to said -1. The data was in the call site the
-            # whole time: `run.py` loads it before the first clone and passes it here.
-            # -1 SURVIVES as the default for a repository absent from the table, which is
-            # a real state and still means NOT MEASURED. A48.
-            stars.get(c.repo, -1),
-        )
-        for c in candidates
-        if str(c.pr_id) not in seen
-    ]
 
 
 def recorder(attempts: list[Attempt], stars: dict[str, int]) -> Callable[..., None]:

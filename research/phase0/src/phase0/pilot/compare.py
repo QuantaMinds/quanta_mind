@@ -42,14 +42,11 @@ from phase0.pilot.attempt import Attempt
 from phase0.pilot.gradient import parent_gradient
 from phase0.pilot.report import report
 from phase0.pipeline import resume
+from phase0.pipeline.rejection import CLONE_STAGES
 
 # A gap this wide or wider means the two arms are different populations, not one
 # population measured twice. Fixed here rather than chosen after seeing the split.
 MATERIAL_GAP = 0.05
-
-# Journals written before the timeout/gone split say `clone_failed`; both new
-# names mean the same thing here -- the unit never reached the rule.
-CLONE_STAGES = frozenset({"clone_failed", "clone_timeout", "repo_gone"})
 
 
 def _bands(old: dict, new: dict, key: str) -> dict[str, object]:

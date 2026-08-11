@@ -30,11 +30,10 @@ from pathlib import Path
 
 from phase0.extract_prs import PRRecord
 from phase0.handlabel.select import Candidate
-from phase0.pilot.covariates import attempt_for, rows_for_clone_failure
+from phase0.pilot.covariates import attempt_for
 from phase0.pilot.report import FILE_BANDS, _cross
 from phase0.pipeline import journal, resume
 from phase0.pipeline.rejection import Rejection
-from phase0.pipeline.worktree import CloneFailed
 
 CORPUS_FILES = ("a/b.py", "a/c.py", "README.md")
 
@@ -150,37 +149,3 @@ def test_a_zero_would_be_indistinguishable_from_rejection() -> None:
     reading_zero = {r.pr_id for r in rows if r.derived_files == 0}
     assert reading_zero != rejected
     assert reading_zero == set()
-
-
-def test_a_clone_failure_row_records_the_repository_size_it_was_handed() -> None:
-    """`stars` was ACCEPTED AND NEVER READ here, hardcoding -1 on every failure row.
-
-    Nothing covered it, which is why it survived: the suite returned the same result
-    whether the parameter was used or discarded. This is the known-answer test that
-    tells those apart.
-
-    It matters because these rows are exactly the ones whose size decides whether
-    `clone_failure_stage`'s four-way split does anything. Measured off the parquet at 139
-    repositories the class medians are 16,245 / 1,618 / 590 / 166 stars against a 449
-    baseline — so the split is real, and the journal could not show it because every row
-    it applies to said NOT MEASURED.
-    """
-    rows = rows_for_clone_failure(
-        [_candidate(1), _candidate(2)],
-        [],
-        CloneFailed("o/r: clone exceeded 900s"),
-        {"o/r": 4321},
-    )
-
-    assert [r.stars for r in rows] == [4321, 4321]
-    assert [r.stage for r in rows] == ["clone_timeout", "clone_timeout"]
-
-
-def test_a_repository_absent_from_the_star_table_stays_unmeasured() -> None:
-    """-1 survives as a real state. Absent is NOT MEASURED, never "zero stars"."""
-    rows = rows_for_clone_failure(
-        [_candidate(1)], [], CloneFailed("o/r: remote: Repository not found."), {}
-    )
-
-    assert [r.stars for r in rows] == [-1]
-    assert rows[0].stage == "repo_gone"

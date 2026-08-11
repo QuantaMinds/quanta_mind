@@ -33,11 +33,11 @@ repository even when it produced no rows.
 | 567-labs/kura | 3086930190 | yes | - | - | 16 | 40 | 12 | 17 | 259 | broke | yes | yes | 2055 | - | Claude_Code | 21 | 12 | no | none |
 | 567-labs/kura | 3094372246 | yes | - | - | 1 | 2 | 2 | 3 | 259 | broke | yes | yes | 8 | - | Devin | 2 | 2 | no | none |
 <!-- repo-done: 567-labs/kura -->
-| AMICI-dev/AMICI | 3077312135 | no | repo_gone | resource | 3 | 20 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
-| AMICI-dev/AMICI | 3154014605 | no | repo_gone | resource | 10 | 14 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
-| AMICI-dev/AMICI | 3154166023 | no | repo_gone | resource | 30 | 30 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
-| AMICI-dev/AMICI | 3162509065 | no | repo_gone | resource | 7 | 12 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
-| AMICI-dev/AMICI | 3179711395 | no | repo_gone | resource | 24 | 8 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
+| AMICI-dev/AMICI | 3077312135 | no | git_lfs_absent | resource | 3 | 20 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
+| AMICI-dev/AMICI | 3154014605 | no | git_lfs_absent | resource | 10 | 14 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
+| AMICI-dev/AMICI | 3154166023 | no | git_lfs_absent | resource | 30 | 30 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
+| AMICI-dev/AMICI | 3162509065 | no | git_lfs_absent | resource | 7 | 12 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
+| AMICI-dev/AMICI | 3179711395 | no | git_lfs_absent | resource | 24 | 8 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
 <!-- repo-done: AMICI-dev/AMICI -->
 | APPFL/APPFL | 3217407679 | yes | - | - | 1 | 6 | 6 | 6 | 142 | clean | yes | yes | 14 | - | OpenAI_Codex | 6 | 6 | no | none |
 | APPFL/APPFL | 3217698832 | yes | - | - | 1 | 1 | 1 | 1 | 142 | clean | yes | yes | 2 | - | OpenAI_Codex | 1 | 1 | no | none |
@@ -116,7 +116,7 @@ repository even when it produced no rows.
 <!-- repo-done: Blaizzy/mlx-vlm -->
 | BlueFalconHD/apple_generative_model_safety_decrypted | 3207423060 | no | no_symbols | restricted | 1 | 1 | - | - | 287 | - | yes | yes | 81616 | - | Cursor | 48 | 1 | no | - |
 <!-- repo-done: BlueFalconHD/apple_generative_model_safety_decrypted -->
-| BoundaryML/baml | 3138021777 | no | repo_gone | resource | 4 | 2 | - | - | -1 | - | unknown | unknown | -1 | - | Cursor | - | - | no | - |
+| BoundaryML/baml | 3138021777 | no | git_lfs_absent | resource | 4 | 2 | - | - | -1 | - | unknown | unknown | -1 | - | Cursor | - | - | no | - |
 <!-- repo-done: BoundaryML/baml -->
 | ChaokunHong/MetaScreener | 3070801634 | no | history_rewritten | resource | 1 | 2 | - | - | 966 | - | yes | unknown | 13 | - | OpenAI_Codex | 2 | 2 | no | - |
 | ChaokunHong/MetaScreener | 3074286852 | no | history_rewritten | resource | 1 | 1 | - | - | 966 | - | yes | unknown | 195 | - | OpenAI_Codex | 6 | 1 | no | - |
@@ -172,13 +172,13 @@ repository even when it produced no rows.
 | FoundationAgents/AFlow | 3230472071 | yes | - | - | 1 | 4 | 4 | 2 | 197 | broke | yes | yes | 23 | - | OpenAI_Codex | 5 | 4 | no | none |
 | FoundationAgents/AFlow | 3234978750 | yes | - | - | 1 | 1 | 1 | 6 | 197 | clean | yes | yes | 102 | - | OpenAI_Codex | 1 | 1 | no | none |
 <!-- repo-done: FoundationAgents/AFlow -->
-| FrameOS/frameos | 3106116444 | no | clone_timeout | resource | 5 | 3 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
+| FrameOS/frameos | 3106116444 | no | transport_failure | resource | 5 | 3 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
 <!-- repo-done: FrameOS/frameos -->
 | GlareDB/glaredb | 2980213795 | no | no_python | restricted | 3 | 1 | 0 | - | 951 | - | yes | yes | 54 | - | Devin | 13 | 0 | no | - |
 <!-- repo-done: GlareDB/glaredb -->
 | Hi-Dolphin/datamax | 3118487985 | no | repo_gone | resource | 1 | 4 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
 <!-- repo-done: Hi-Dolphin/datamax -->
-| HumanSignal/label-studio-ml-backend | 3123335159 | no | clone_timeout | resource | 29 | 5 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
+| HumanSignal/label-studio-ml-backend | 3123335159 | no | transport_failure | resource | 29 | 5 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
 <!-- repo-done: HumanSignal/label-studio-ml-backend -->
 | INCATools/ontology-access-kit | 2908771855 | yes | - | - | 7 | 3 | 3 | 4 | 146 | clean | yes | yes | 300 | - | Claude_Code | 6 | 3 | no | none |
 | INCATools/ontology-access-kit | 2975165913 | yes | - | - | 2 | 13 | 1 | 9 | 146 | clean | yes | yes | 28 | - | Claude_Code | 6 | 1 | no | none |
@@ -437,7 +437,7 @@ repository even when it produced no rows.
 | aeron7/nsepython | 3211401020 | no | no_symbols | restricted | 1 | 1 | - | - | 301 | - | yes | yes | 2 | - | OpenAI_Codex | 1 | 1 | no | - |
 | aeron7/nsepython | 3211408111 | yes | - | - | 1 | 1 | 1 | 1 | 301 | clean | yes | yes | 37 | - | OpenAI_Codex | 1 | 1 | no | none |
 <!-- repo-done: aeron7/nsepython -->
-| ag2ai/build-with-ag2 | 2819900203 | no | repo_gone | resource | 25 | 11 | - | - | -1 | - | unknown | unknown | -1 | - | Devin | - | - | no | - |
+| ag2ai/build-with-ag2 | 2819900203 | no | git_lfs_absent | resource | 25 | 11 | - | - | -1 | - | unknown | unknown | -1 | - | Devin | - | - | no | - |
 <!-- repo-done: ag2ai/build-with-ag2 -->
 | ai-shifu/ai-shifu | 3100453288 | no | no_python | restricted | 2 | 12 | 0 | - | 169 | - | yes | yes | 4 | - | Devin | 3 | 0 | no | - |
 <!-- repo-done: ai-shifu/ai-shifu -->
@@ -473,7 +473,7 @@ repository even when it produced no rows.
 | alirezamika/autoscraper | 3128297260 | no | no_symbols | restricted | 2 | 10 | - | - | 6867 | - | yes | yes | 415 | - | OpenAI_Codex | 12 | 10 | no | - |
 | alirezamika/autoscraper | 3128367303 | yes | - | - | 1 | 2 | 2 | 2 | 6867 | clean | yes | yes | 10 | - | OpenAI_Codex | 2 | 2 | no | none |
 <!-- repo-done: alirezamika/autoscraper -->
-| allenai/open-instruct | 2903936265 | no | repo_gone | resource | 3 | 4 | - | - | -1 | - | unknown | unknown | -1 | - | Claude_Code | - | - | no | - |
+| allenai/open-instruct | 2903936265 | no | git_lfs_absent | resource | 3 | 4 | - | - | -1 | - | unknown | unknown | -1 | - | Claude_Code | - | - | no | - |
 <!-- repo-done: allenai/open-instruct -->
 | allthingsida/qscripts | 3077280318 | yes | - | - | 1 | 1 | 1 | 1 | 358 | clean | yes | yes | 16 | - | OpenAI_Codex | 1 | 1 | no | none |
 <!-- repo-done: allthingsida/qscripts -->
@@ -595,10 +595,10 @@ repository even when it produced no rows.
 | commaai/opendbc | 3257783295 | yes | - | - | 6 | 6 | 5 | 8 | 2457 | broke | yes | yes | 1720 | - | OpenAI_Codex | 18 | 5 | no | none |
 | commaai/opendbc | 3258015988 | yes | - | - | 3 | 10 | 10 | 12 | 2457 | clean | yes | yes | 495 | - | OpenAI_Codex | 10 | 10 | no | none |
 <!-- repo-done: commaai/opendbc -->
-| commaai/openpilot | 3070996322 | no | repo_gone | resource | 1 | 1 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
-| commaai/openpilot | 3072108466 | no | repo_gone | resource | 3 | 1 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
-| commaai/openpilot | 3131500263 | no | repo_gone | resource | 7 | 2 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
-| commaai/openpilot | 3131530969 | no | repo_gone | resource | 13 | 17 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
+| commaai/openpilot | 3070996322 | no | git_lfs_absent | resource | 1 | 1 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
+| commaai/openpilot | 3072108466 | no | git_lfs_absent | resource | 3 | 1 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
+| commaai/openpilot | 3131500263 | no | git_lfs_absent | resource | 7 | 2 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
+| commaai/openpilot | 3131530969 | no | git_lfs_absent | resource | 13 | 17 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
 <!-- repo-done: commaai/openpilot -->
 | commaai/panda | 3075406722 | yes | - | - | 5 | 30 | 1 | 2 | 1608 | clean | yes | yes | 160 | - | OpenAI_Codex | 8 | 1 | no | none |
 | commaai/panda | 3245442075 | yes | - | - | 2 | 4 | 4 | 9 | 1608 | clean | yes | yes | 793 | - | OpenAI_Codex | 10 | 4 | no | none |
@@ -704,9 +704,9 @@ repository even when it produced no rows.
 | econ-ark/HARK | 3075009767 | yes | - | - | 1 | 1 | 1 | 1 | 352 | clean | no | unknown | 30 | - | OpenAI_Codex | 1 | 1 | no | none |
 | econ-ark/HARK | 3077187183 | yes | - | - | 1 | 3 | 3 | 8 | 352 | clean | no | unknown | 65 | - | OpenAI_Codex | 3 | 3 | no | none |
 <!-- repo-done: econ-ark/HARK -->
-| effekseer/Effekseer | 3087903462 | no | repo_gone | resource | 1 | 1 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
-| effekseer/Effekseer | 3096998531 | no | repo_gone | resource | 1 | 1 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
-| effekseer/Effekseer | 3097347399 | no | repo_gone | resource | 1 | 1 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
+| effekseer/Effekseer | 3087903462 | no | git_lfs_absent | resource | 1 | 1 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
+| effekseer/Effekseer | 3096998531 | no | git_lfs_absent | resource | 1 | 1 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
+| effekseer/Effekseer | 3097347399 | no | git_lfs_absent | resource | 1 | 1 | - | - | -1 | - | unknown | unknown | -1 | - | OpenAI_Codex | - | - | no | - |
 <!-- repo-done: effekseer/Effekseer -->
 | ethyca/fides | 3209964949 | yes | - | - | 11 | 4 | 1 | 1 | 413 | clean | yes | yes | 262 | - | Cursor | 14 | 1 | no | none |
 <!-- repo-done: ethyca/fides -->

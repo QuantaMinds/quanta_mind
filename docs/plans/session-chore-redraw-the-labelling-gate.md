@@ -1,17 +1,18 @@
 # Session record — chore/redraw-the-labelling-gate
 
-Written by scripts/guard/hook_session_end.py at 2026-08-11T05:13:54Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-11T06:47:29Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `chore/redraw-the-labelling-gate`
-- Files changed vs `main`: 41
-- Uncommitted at session end: 25
+- Files changed vs `main`: 44
+- Uncommitted at session end: 31
 - `docs/CODEBASE.md` updated: yes
 
 ## Changed
 
 - `AGENTS.md`
 - `docs/CODEBASE.md`
+- `docs/PROJECT_CONTEXT.md`
 - `docs/findings/PHASE0_PREREGISTRATION.md`
 - `docs/plans/session-chore-redraw-the-labelling-gate.md`
 - `research/phase0/data/labelling/human_labels.csv`
@@ -40,6 +41,7 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/src/phase0/extract_prs.py`
 - `research/phase0/src/phase0/handlabel/draw.py`
 - `research/phase0/src/phase0/parent_commit.py`
+- `research/phase0/src/phase0/pilot/covariates.py`
 - `research/phase0/src/phase0/pipeline/assemble.py`
 - `research/phase0/src/phase0/pipeline/checkout.py`
 - `research/phase0/src/phase0/pipeline/merge_shape.py`
@@ -47,6 +49,7 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/src/phase0/pipeline/resume.py`
 - `research/phase0/src/phase0/run_pipeline.py`
 - `research/phase0/tests/controls/test_capability_is_the_census.py`
+- `research/phase0/tests/pilot/test_unmeasured_covariates.py`
 - `research/phase0/tests/pipeline/test_checkout_complete.py`
 - `research/phase0/tests/pipeline/test_parent_is_consumed.py`
 - `research/phase0/tests/test_extract_prs.py`

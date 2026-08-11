@@ -55,7 +55,7 @@ def _lost(commits: int, total: int, repo: str = "big/repo") -> list[Attempt]:
     ]
 
 
-def test_a_band_reports_what_it_lost_to_clone_timeouts() -> None:
+def test_a_band_reports_what_it_lost_to_clone_failures() -> None:
     """A populated band can still be unrepresentative, and the two look identical without this.
 
     Clone timeouts remove the largest repositories, and the largest repositories hold the
@@ -67,7 +67,7 @@ def test_a_band_reports_what_it_lost_to_clone_timeouts() -> None:
     band = parent_gradient(attempts)["bands"]["21+"]
 
     assert band["failure_rate"] == 0.0
-    assert band["lost_to_clone_timeout"] == 7
+    assert band["lost_to_clone_failure"] == 7
     assert band["repos_lost"] == ["getsentry/sentry"]
     assert band["share_lost"] == 0.5833
     assert band["distinct_repos_present"] == 1
@@ -77,7 +77,7 @@ def test_a_band_that_lost_nothing_says_so_with_a_zero() -> None:
     """Zero lost is a measurement. An absent key would read as "not checked"."""
     band = parent_gradient(_rows(1, 6, 1))["bands"]["1"]
 
-    assert band["lost_to_clone_timeout"] == 0
+    assert band["lost_to_clone_failure"] == 0
     assert band["share_lost"] == 0.0
     assert band["repos_lost"] == []
 
@@ -109,5 +109,5 @@ def test_both_clone_failure_stages_count_as_lost() -> None:
 
     band = parent_gradient(rows)["bands"]["21+"]
 
-    assert band["lost_to_clone_timeout"] == 3
+    assert band["lost_to_clone_failure"] == 3
     assert band["repos_lost"] == ["a/timeout", "b/deleted", "legacy/clone-failed"]

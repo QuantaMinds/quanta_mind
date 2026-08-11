@@ -28,11 +28,9 @@ from itertools import pairwise
 
 from phase0.pilot.attempt import Attempt
 from phase0.pilot.report import COMMIT_BANDS
+from phase0.pipeline.rejection import CLONE_STAGES
 
 PARENT_STAGE = "parent_commit"
-# Journals written before the timeout/gone split say `clone_failed`; both new
-# names mean the same thing here -- the unit never reached the rule.
-CLONE_STAGES = frozenset({"clone_failed", "clone_timeout", "repo_gone"})
 
 # Below this a band's rate is one or two PRs and cannot carry a trend. Fixed here rather
 # than chosen once the bands are in front of us.
@@ -72,7 +70,10 @@ def parent_gradient(attempts: list[Attempt]) -> dict[str, object]:
             # Stated per band, so a verdict computed over three of four bands cannot be
             # read as if it covered all of them.
             "counted_in_trend": len(rows) >= MIN_BAND_N,
-            "lost_to_clone_timeout": len(lost),
+            # NOT `lost_to_clone_timeout`, which is what this was called while holding
+            # `repo_gone` and `clone_failed` rows too -- a field name asserting a cause
+            # its value does not carry. Rule 14 applied to a key rather than a comment.
+            "lost_to_clone_failure": len(lost),
             "repos_lost": sorted({a.repo for a in lost}),
             "distinct_repos_present": len({a.repo for a in reachable}),
             # Which repositories the FAILURES came from, not just the band. A band rate is

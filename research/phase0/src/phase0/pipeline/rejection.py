@@ -22,6 +22,17 @@ from dataclasses import dataclass
 #                 cover it rather than treat it as noise.
 #   restricted -- nothing to measure. Not missing data: the estimand does not cover this
 #                 unit, which narrows the claim rather than biasing it.
+# Every stage that means "the repository never opened", in ONE place. Journals written
+# before the split say `clone_failed`, and it means the same thing here: the unit never
+# reached the rule. It was defined
+# twice -- `pilot/gradient.py` and `pilot/compare.py` -- and adding a stage to one and
+# not the other silently moves rows from "lost" into "reachable", inflating the
+# denominator with units nothing measured. Two copies of a set is the same defect class
+# as two caps on one resource (A43).
+CLONE_STAGES: frozenset[str] = frozenset(
+    {"clone_failed", "clone_timeout", "repo_gone", "git_lfs_absent", "transport_failure"}
+)
+
 CATEGORIES: dict[str, str] = {
     # A repository we could not clone must produce a record per PR, not the absence of
     # one. Absent rows shrink the denominator, so the same corpus scanned twice gave 33
@@ -33,6 +44,14 @@ CATEGORIES: dict[str, str] = {
     "clone_failed": "resource",
     "clone_timeout": "resource",
     "repo_gone": "resource",
+    # Split out of the two above, because four causes were sharing two labels and the
+    # size medians say they are not the same thing: against a 423-star baseline across
+    # 200 walked repositories, timeout sits at 38.4x, git-lfs at 5.5x, transport at 1.4x
+    # and a deleted repository at 0.5x. `git_lfs_absent` was landing in `repo_gone` --
+    # 11x the median of the bucket it was filed in -- because `git-lfs: command not
+    # found` contains "not found". That is OUR machine, not the world's repository.
+    "git_lfs_absent": "resource",
+    "transport_failure": "resource",
     "merge_metadata": "resource",
     "no_merge_sha": "resource",
     # GitHub supplied no file list, so there is nothing to verify the parent against.

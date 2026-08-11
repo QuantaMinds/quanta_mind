@@ -41,7 +41,8 @@ from phase0.github_pulls import merge_info, require_token
 from phase0.outcome.scan import scan
 from phase0.outcome.window import merge_on_base
 from phase0.pilot.attempt import Attempt
-from phase0.pilot.covariates import recorder, rows_for_clone_failure
+from phase0.pilot.clone_cause import rows_for_clone_failure
+from phase0.pilot.covariates import recorder
 from phase0.pilot.options import CACHE, PACKAGE, ROOT, parse
 from phase0.pilot.repo_facts import on_default_label, star_counts
 from phase0.pilot.report import by_repo, report
