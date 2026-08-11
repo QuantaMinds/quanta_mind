@@ -46,8 +46,7 @@ you remember to obey — the machine will stop you either way.
 1. **A green test is not a verified test.** Every behavioural test must assert on data
    produced by a real run, not a mock. `tests/live/` runs the real pipeline against real
    repositories and diffs the output against a checked-in golden file. A test that only
-   proves "no exception was raised" is a silent failure waiting to ship.
-   → enforced by `scripts/guard/check_assert_quality.py`
+   proves "no exception was raised" is a silent failure waiting to ship.  → `scripts/guard/check_assert_quality.py`
 
 2. **Never emit an unlabeled edge.** Every edge carries a `Confidence` and a `Provenance`.
    There is no default. `Confidence.RESOLVED` requires two independent resolvers agreeing.
@@ -90,25 +89,22 @@ you remember to obey — the machine will stop you either way.
     → `scripts/guard/check_no_research_imports.py`
 
 12. **Every reference names something, never a number.** No section symbols, no phase
-    numbers. A reference points at a file path, a class, a function, or a heading's text
-    — something that cannot change without someone renaming it on purpose. Section and
-    phase numbers break silently: insert one heading and every citation in the repo now
-    points somewhere else, no test fails, and the sentence still reads correctly. Eight
-    such references were already dangling when this rule was written.
+    numbers — point at a file path, a class, a function, or a heading's text, something
+    that cannot change without someone renaming it on purpose. Numbers break silently:
+    insert one heading and every citation points elsewhere, no test fails, and the sentence
+    still reads correctly. Eight were dangling when this rule was written. Below: one of
+    each banned form, the marker suppressing the guard so the rule can show what it bans —
+    counted and printed every run, not an escape hatch. → `scripts/guard/check_no_vague_refs.py`
 
     ```
     §7's gate  →  `PHASE0_RUNBOOK.md` “The 20-PR hand-labelling gate”  no-vague-refs:allow
     Phase 0    →  the correlation test                                 no-vague-refs:allow
     ```
-    One example of each banned form. The trailing marker suppresses the guard on that line
-    so the rule can show what it bans; it is counted and printed on every run, and is not a
-    general escape hatch. → `scripts/guard/check_no_vague_refs.py`
 
 13. **Move files with `git mv`, and never leave two modules with one name.** A stale
     duplicate passed every guard: git tracked both copies, nothing imported the old
     name, and the copy left behind was missing the logic the analysis rested on. On a
-    project whose thesis is provenance, letting git lose a rename is not a small irony.
-    → `scripts/guard/check_module_identity.py`
+    project whose thesis is provenance, letting git lose a rename is not a small irony. → `scripts/guard/check_module_identity.py`
 
 14. **A comment may explain *why*, never assert *whether*.** A claim of a safety property
     — "this is caught later", "callers always hold the lock" — belongs in an assertion, a
@@ -117,13 +113,17 @@ you remember to obey — the machine will stop you either way.
     accumulated. `sweep()` returns the count instead — observable, not claimed.
 
     **Ask what a check outputs when the thing it checks is broken. If the answer is "the
-    same thing", it is not a check.** Three surfaces, one question. *Wrong logic*:
-    `all(b >= a)` said True on a flat gradient. *Unreachable*: `history_rewritten` sat in
-    `scan()`, which runs only on admitted records, so it never met its cases and returned
-    zero across 515 attempts — identical to a genuine null. *A pinned defect*: two tests
-    certified the corpus-for-GitHub substitution as correct, so removing it broke them;
-    before editing an assertion to pass, establish which of the two it protects. **Only a
-    known-answer test tells any of these from a real negative.** → **ADVISORY** — notice the verb.
+    same thing", it is not a check.** *Wrong logic*: `all(b >= a)` said True on a flat
+    gradient. *Unreachable*: `history_rewritten` sat in `scan()`, which runs only on
+    admitted records, so it never met its cases — zero across 515 attempts, identical to a
+    genuine null. **When a fix breaks a test, ask whether it *asserted* the old behaviour
+    or merely *relied* on it.** Two tests certified the corpus-for-GitHub substitution —
+    invert them. A control fixture carried `parent_sha=""` and scored 2/2 only because its
+    consumer re-resolved — rebuild it. The second is harder to see: the assertion is right,
+    and the data was constructible only while the bug lived. **Only a known-answer test
+    tells these from a real negative, and only sabotaging the WHOLE mechanism tests the
+    known-answer test** — sabotaging the entry point alone left one of ours green and
+    reading as coverage: this rule, found inside a sabotage. → **ADVISORY** — notice the verb.
 
 15. **A documented command must run, or carry `documented-command:unbuilt`.** `python -m`
     with no `__main__` ignores flags, writes nothing, exits 0 — the runbook's "Days 3–5" reported success and did nothing. → `scripts/guard/check_documented_commands.py`

@@ -72,6 +72,19 @@ def read_attempts(path: Path) -> list[Attempt]:
                     # the final report grows a rejection category that never happened.
                     stage="" if cells[3] == "-" else cells[3],
                     category="" if cells[4] == "-" else cells[4],
+                    # POSITIONAL, AND THAT MAKES THIS FILE A SCHEMA LOCK ON A LIVE WALK.
+                    # Every field below is read by INDEX, and the journal is the resume
+                    # checkpoint: a walk killed at hour four re-enters here and continues
+                    # appending. So inserting or reordering a column mid-walk writes two
+                    # different shapes into one file, and the rows written under the old
+                    # shape then parse into the wrong fields rather than failing -- the
+                    # `except ValueError: continue` at the bottom only catches a torn
+                    # line, not a well-formed line of the wrong width read one column off.
+                    #
+                    # Append at the END, never in the middle, and never while a walk is
+                    # running. This is the same reason `run_pipeline.run` documents its
+                    # serial-over-repositories loop: a property nothing enforces, that
+                    # costs a re-run when broken. There is no guard for it.
                     commit_count=int(cells[5]),
                     corpus_py_files=int(cells[6]),
                     # `-` is NOT MEASURED and must not read back as 0. Older journals wrote
