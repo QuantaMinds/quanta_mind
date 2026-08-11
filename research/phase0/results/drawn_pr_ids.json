@@ -1,0 +1,425 @@
+{
+  "drawn_pairs": 51,
+  "resolved": {
+    "3071093339": {
+      "number": 162,
+      "repo": "Blaizzy/mlx-audio",
+      "seeds": [
+        "contaminated_seed20260810"
+      ]
+    },
+    "3076095158": {
+      "number": 53,
+      "repo": "OEvortex/Webscout",
+      "seeds": [
+        "overlapping_seed20260811"
+      ]
+    },
+    "3076401687": {
+      "number": 583,
+      "repo": "Azure/azure-kusto-python",
+      "seeds": [
+        "contaminated_seed20260810"
+      ]
+    },
+    "3077799254": {
+      "number": 701,
+      "repo": "Kanaries/pygwalker",
+      "seeds": [
+        "contaminated_seed20260810",
+        "overlapping_seed20260811"
+      ]
+    },
+    "3086930190": {
+      "number": 53,
+      "repo": "567-labs/kura",
+      "seeds": [
+        "overlapping_seed20260811"
+      ]
+    },
+    "3093833900": {
+      "number": 6052,
+      "repo": "PolicyEngine/policyengine-us",
+      "seeds": [
+        "scratchpad"
+      ]
+    },
+    "3094372246": {
+      "number": 60,
+      "repo": "567-labs/kura",
+      "seeds": [
+        "overlapping_seed20260811"
+      ]
+    },
+    "3094439662": {
+      "number": 1566,
+      "repo": "567-labs/instructor",
+      "seeds": [
+        "overlapping_seed20260811"
+      ]
+    },
+    "3101183442": {
+      "number": 6069,
+      "repo": "PolicyEngine/policyengine-us",
+      "seeds": [
+        "scratchpad"
+      ]
+    },
+    "3101960801": {
+      "number": 6071,
+      "repo": "PolicyEngine/policyengine-us",
+      "seeds": [
+        "scratchpad"
+      ]
+    },
+    "3114898378": {
+      "number": 118,
+      "repo": "artprima/prometheus-metrics-bundle",
+      "seeds": [
+        "scratchpad"
+      ]
+    },
+    "3115093915": {
+      "number": 44,
+      "repo": "Felix3322/PotPlayer_ChatGPT_Translate",
+      "seeds": [
+        "overlapping_seed20260811"
+      ]
+    },
+    "3115664771": {
+      "number": 4947,
+      "repo": "langchain-ai/langgraph",
+      "seeds": [
+        "scratchpad"
+      ]
+    },
+    "3119211958": {
+      "number": 857,
+      "repo": "MFlowCode/MFC",
+      "seeds": [
+        "overlapping_seed20260811"
+      ]
+    },
+    "3120466029": {
+      "number": 15,
+      "repo": "thomascamminady/LeTourDataSet",
+      "seeds": [
+        "scratchpad"
+      ]
+    },
+    "3127341913": {
+      "number": 1,
+      "repo": "ObservedObserver/async-code",
+      "seeds": [
+        "contaminated_seed20260810"
+      ]
+    },
+    "3127380361": {
+      "number": 2,
+      "repo": "ObservedObserver/async-code",
+      "seeds": [
+        "contaminated_seed20260810"
+      ]
+    },
+    "3130282110": {
+      "number": 350,
+      "repo": "Kiln-AI/Kiln",
+      "seeds": [
+        "contaminated_seed20260810",
+        "overlapping_seed20260811"
+      ]
+    },
+    "3139945869": {
+      "number": 114,
+      "repo": "microsoft/mcp-for-beginners",
+      "seeds": [
+        "scratchpad"
+      ]
+    },
+    "3142999940": {
+      "number": 167,
+      "repo": "oraios/serena",
+      "seeds": [
+        "scratchpad"
+      ]
+    },
+    "3150229181": {
+      "number": 62,
+      "repo": "BeehiveInnovations/zen-mcp-server",
+      "seeds": [
+        "contaminated_seed20260810",
+        "overlapping_seed20260811"
+      ]
+    },
+    "3157140778": {
+      "number": 372,
+      "repo": "Kiln-AI/Kiln",
+      "seeds": [
+        "scratchpad"
+      ]
+    },
+    "3159106430": {
+      "number": 4,
+      "repo": "Maciek-roboblog/Claude-Code-Usage-Monitor",
+      "seeds": [
+        "contaminated_seed20260810"
+      ]
+    },
+    "3161557128": {
+      "number": 2467,
+      "repo": "Netflix/metaflow",
+      "seeds": [
+        "contaminated_seed20260810"
+      ]
+    },
+    "3164250713": {
+      "number": 95,
+      "repo": "BeehiveInnovations/zen-mcp-server",
+      "seeds": [
+        "contaminated_seed20260810",
+        "overlapping_seed20260811"
+      ]
+    },
+    "3166124377": {
+      "number": 3,
+      "repo": "Nativu5/Gemini-FastAPI",
+      "seeds": [
+        "overlapping_seed20260811"
+      ]
+    },
+    "3168020176": {
+      "number": 4,
+      "repo": "Nativu5/Gemini-FastAPI",
+      "seeds": [
+        "contaminated_seed20260810",
+        "overlapping_seed20260811"
+      ]
+    },
+    "3170016626": {
+      "number": 7,
+      "repo": "Nativu5/Gemini-FastAPI",
+      "seeds": [
+        "contaminated_seed20260810",
+        "overlapping_seed20260811"
+      ]
+    },
+    "3170718599": {
+      "number": 161,
+      "repo": "OpenPipe/ART",
+      "seeds": [
+        "scratchpad"
+      ]
+    },
+    "3180617603": {
+      "number": 30,
+      "repo": "sirk123au/ArrTools",
+      "seeds": [
+        "scratchpad"
+      ]
+    },
+    "3190237651": {
+      "number": 31,
+      "repo": "sirk123au/ArrTools",
+      "seeds": [
+        "scratchpad"
+      ]
+    },
+    "3190360797": {
+      "number": 32,
+      "repo": "sirk123au/ArrTools",
+      "seeds": [
+        "scratchpad"
+      ]
+    },
+    "3192545670": {
+      "number": 495,
+      "repo": "NewFuture/DDNS",
+      "seeds": [
+        "contaminated_seed20260810",
+        "overlapping_seed20260811"
+      ]
+    },
+    "3193905559": {
+      "number": 264,
+      "repo": "oraios/serena",
+      "seeds": [
+        "scratchpad"
+      ]
+    },
+    "3204333284": {
+      "number": 20,
+      "repo": "ChristopheZhao/ChaGPT-API-Call",
+      "seeds": [
+        "contaminated_seed20260810"
+      ]
+    },
+    "3205514535": {
+      "number": 3047,
+      "repo": "DeepLabCut/DeepLabCut",
+      "seeds": [
+        "contaminated_seed20260810"
+      ]
+    },
+    "3207223142": {
+      "number": 32,
+      "repo": "camUrban/PteraSoftware",
+      "seeds": [
+        "scratchpad"
+      ]
+    },
+    "3216289477": {
+      "number": 1346,
+      "repo": "LorenFrankLab/spyglass",
+      "seeds": [
+        "contaminated_seed20260810"
+      ]
+    },
+    "3220982571": {
+      "number": 194,
+      "repo": "DogukanUrker/FlaskBlog",
+      "seeds": [
+        "overlapping_seed20260811"
+      ]
+    },
+    "3221861500": {
+      "number": 196,
+      "repo": "DogukanUrker/FlaskBlog",
+      "seeds": [
+        "overlapping_seed20260811"
+      ]
+    },
+    "3226874756": {
+      "number": 40,
+      "repo": "bmander/graphserver",
+      "seeds": [
+        "scratchpad"
+      ]
+    },
+    "3229430451": {
+      "number": 8571,
+      "repo": "Arize-ai/phoenix",
+      "seeds": [
+        "overlapping_seed20260811"
+      ]
+    },
+    "3230472071": {
+      "number": 25,
+      "repo": "FoundationAgents/AFlow",
+      "seeds": [
+        "overlapping_seed20260811",
+        "scratchpad"
+      ]
+    },
+    "3233722470": {
+      "number": 853,
+      "repo": "PromtEngineer/localGPT",
+      "seeds": [
+        "scratchpad"
+      ]
+    },
+    "3239615601": {
+      "number": 36,
+      "repo": "Bandit-HaxUnit/haxunit",
+      "seeds": [
+        "contaminated_seed20260810",
+        "overlapping_seed20260811"
+      ]
+    },
+    "3244989711": {
+      "number": 8661,
+      "repo": "Arize-ai/phoenix",
+      "seeds": [
+        "overlapping_seed20260811"
+      ]
+    },
+    "3245542447": {
+      "number": 5838,
+      "repo": "rsyslog/rsyslog",
+      "seeds": [
+        "scratchpad"
+      ]
+    },
+    "3251629632": {
+      "number": 173,
+      "repo": "KenYu910645/MapleStoryAutoLevelUp",
+      "seeds": [
+        "contaminated_seed20260810"
+      ]
+    },
+    "3251691496": {
+      "number": 175,
+      "repo": "KenYu910645/MapleStoryAutoLevelUp",
+      "seeds": [
+        "contaminated_seed20260810"
+      ]
+    },
+    "3251736222": {
+      "number": 177,
+      "repo": "KenYu910645/MapleStoryAutoLevelUp",
+      "seeds": [
+        "contaminated_seed20260810"
+      ]
+    },
+    "3255020828": {
+      "number": 30,
+      "repo": "pamelafox/python-openai-demos",
+      "seeds": [
+        "scratchpad"
+      ]
+    }
+  },
+  "resolved_pr_ids": [
+    "3071093339",
+    "3076095158",
+    "3076401687",
+    "3077799254",
+    "3086930190",
+    "3093833900",
+    "3094372246",
+    "3094439662",
+    "3101183442",
+    "3101960801",
+    "3114898378",
+    "3115093915",
+    "3115664771",
+    "3119211958",
+    "3120466029",
+    "3127341913",
+    "3127380361",
+    "3130282110",
+    "3139945869",
+    "3142999940",
+    "3150229181",
+    "3157140778",
+    "3159106430",
+    "3161557128",
+    "3164250713",
+    "3166124377",
+    "3168020176",
+    "3170016626",
+    "3170718599",
+    "3180617603",
+    "3190237651",
+    "3190360797",
+    "3192545670",
+    "3193905559",
+    "3204333284",
+    "3205514535",
+    "3207223142",
+    "3216289477",
+    "3220982571",
+    "3221861500",
+    "3226874756",
+    "3229430451",
+    "3230472071",
+    "3233722470",
+    "3239615601",
+    "3244989711",
+    "3245542447",
+    "3251629632",
+    "3251691496",
+    "3251736222",
+    "3255020828"
+  ],
+  "unresolved": []
+}
