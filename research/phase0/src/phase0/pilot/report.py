@@ -104,9 +104,31 @@ def report(attempts: list[Attempt], clone_failures: int, repos: int) -> dict[str
     on_default = [a for a in scanned if a.base_on_default == "yes"]
     off_default = [a for a in scanned if a.base_on_default == "no"]
     base_unknown = [a for a in scanned if a.base_on_default not in ("yes", "no")]
-    star_bands = Counter(
-        "unknown" if a.stars < 0 else ("<500" if a.stars < 500 else ">=500") for a in admitted
-    )
+    # The ARM travels INSIDE the band counts, and mixed arms raise. A star band read
+    # without its arm is how A15 came to be retired: the 90-repository pilot's bands were
+    # all >=500, that was read as "the agent arm self-selected into the human band through
+    # attrition", and the pilot was the HUMAN arm -- which A15 itself states is >=500 BY
+    # CONSTRUCTION. The evidence was the premise restated, and it is unfalsifiable: for
+    # the human arm there is no observation that could have come out below 500.
+    #
+    # A sibling key would drift; nesting it means a consumer cannot read a band without
+    # reading whose band it is. Second occurrence of the arm-confusion class, so it gets
+    # a mechanism rather than vigilance -- the same reasoning as `arm.verify` asserting
+    # before the first clone.
+    arms = {a.arm for a in admitted if a.arm}
+    if len(arms) > 1:
+        raise ValueError(
+            f"star bands computed over MIXED arms {sorted(arms)}: a pooled band is not a "
+            f"property of either arm, and reading one as if it were is the A15 defect."
+        )
+    star_bands: dict[str, object] = {
+        # "" means UNRECORDED -- a journal written before the arm column -- never a claim
+        # that the arm is unknown to the study.
+        "arm": next(iter(arms), ""),
+        **Counter(
+            "unknown" if a.stars < 0 else ("<500" if a.stars < 500 else ">=500") for a in admitted
+        ),
+    }
     repo_counts = Counter(a.repo for a in admitted)
 
     return {
@@ -136,7 +158,7 @@ def report(attempts: list[Attempt], clone_failures: int, repos: int) -> dict[str
         "median_changed_symbols": symbols[len(symbols) // 2] if symbols else 0,
         "distinct_repos_in_records": len(repo_counts),
         "top_repo_share": round(max(repo_counts.values()) / len(admitted), 4) if admitted else 0.0,
-        "star_band": dict(star_bands),
+        "star_band": star_bands,
         # The power projection. `a >= 20` in the exposed arm is the binding constraint,
         # and the corpus is skewed toward small single-commit changes by the attrition
         # above -- the end of the distribution least likely to break anything. A rate

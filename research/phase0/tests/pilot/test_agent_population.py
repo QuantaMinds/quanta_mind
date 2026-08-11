@@ -23,7 +23,9 @@ import pandas as pd
 import pytest
 
 from phase0.arm import AGENTS, HUMAN, ArmMismatch, arms_present, verify
+from phase0.pilot.attempt import Attempt
 from phase0.pilot.options import ROOT
+from phase0.pilot.report import report
 from phase0.population.agent import agent_prs
 
 AIDEV = ROOT / "data" / "aidev"
@@ -102,3 +104,47 @@ def test_every_candidate_has_the_evidence_the_gate_requires(population: list) ->
     assert [c.pr_id for c in population if not c.changed_files] == []
     non_python = [f for c in population for f in c.changed_files if not f.endswith(".py")]
     assert non_python == []
+
+
+def _attempt(arm: str, stars: int) -> Attempt:
+    """One admitted attempt, arm and star count only — nothing else is read here."""
+    return Attempt(
+        repo="o/r",
+        pr_id="1",
+        admitted=True,
+        stage="",
+        category="",
+        commit_count=1,
+        corpus_py_files=1,
+        derived_files=1,
+        changed_symbols=1,
+        stars=stars,
+        arm=arm,
+    )
+
+
+def test_a_star_band_carries_the_arm_it_belongs_to() -> None:
+    """A15 was retired on a star band read without its arm. The arm now travels inside.
+
+    A sibling key would drift apart from the counts; nesting means a consumer cannot
+    read a band without reading whose band it is.
+    """
+    out = report([_attempt("agent", 100), _attempt("agent", 900)], 0, 1)
+
+    assert out["star_band"] == {"arm": "agent", "<500": 1, ">=500": 1}
+
+
+def test_bands_over_mixed_arms_raise_rather_than_pooling() -> None:
+    """A pooled band is a property of neither arm. It must not be computable."""
+    with pytest.raises(ValueError) as raised:
+        report([_attempt("agent", 100), _attempt("human", 900)], 0, 1)
+
+    assert "MIXED arms" in str(raised.value)
+    assert "agent" in str(raised.value) and "human" in str(raised.value)
+
+
+def test_an_older_journal_reads_as_unrecorded_not_as_an_arm() -> None:
+    """Rows predating the arm column give "", never a guess at which arm they were."""
+    out = report([_attempt("", 900)], 0, 1)
+
+    assert out["star_band"]["arm"] == ""
