@@ -37,9 +37,25 @@ shape.**
   `label_id, pr_url` only. A random draw at the base rate hands the labeller about two
   broken PRs in twenty, so marking everything CLEAN would score ~18/20 and pass a gate that
   proved nothing. At 10/10, always-CLEAN scores 10/20 and fails.
+- **Since 2026-08-11 the draw is stratified on TWO dimensions, not one: verdict × star
+  band, five per cell.** The totals are unchanged — 10 BROKE, 10 CLEAN — so always-CLEAN
+  still scores 10/20. What changed is that each verdict is split evenly between
+  repositories under 500 stars and at or above it. `handlabel/strata.py` owns the cells;
+  the floor is 500 because that is the *human* arm's construction floor (A15), not a round
+  number.
 - **Balance costs representativeness on purpose.** Agreement here estimates the average of
   sensitivity and specificity, **not** accuracy over the corpus. It must never be reported
-  as “right 80% of the time”.
+  as “right 80% of the time”. **With four cells it is now the average over four, equally
+  weighted** — and the star bands do not occur equally in the corpus, so the gate is
+  further from a corpus-level accuracy than it already was. That is the price of being able
+  to detect a rule that behaves differently in the two bands.
+- **The labeller is NOT told which band a PR is in, and that is deliberate.** The band is a
+  property of the sample's construction, not evidence about the PR. “Who labels” below
+  records that knowing the classifier's *failure modes* contaminates every PR read
+  afterwards; a hypothesis about how the rule might behave per band is exactly such a
+  failure mode, and telling the labeller would prime the labels toward it. The reason the
+  fourth cell exists belongs in the analysis, after the key is opened — see
+  `PHASE0_PREREGISTRATION.md` A52.
 - **The draw scans the pipeline's own `PRRecord`s**, never a reconstruction of them —
   `sample_for_labelling --records` is required. See `docs/CORRECTIONS.md` entry 3 for what
   happened when it rebuilt them instead.
@@ -70,3 +86,16 @@ they predate the key, which is why it is a separate commit from scoring. Then op
 ≥16 of 20. Below that, the outcome variable is unreliable and so is everything downstream.
 Record how many iterations of the classifier it took: three is tuning, ten is fitting the
 classifier to your hopes.
+
+**After the key is opened, disagreements are tabulated BY ARM and BY STAR BAND**, per
+`PHASE0_PREREGISTRATION.md` A49 and A52 — a gate can clear 16/20 overall while being
+differentially wrong in one cell, and a count that pools the cells cannot show it. Under
+five disagreements the split is descriptive and is labelled so; no threshold is placed on
+a handful of observations.
+
+**What the gate is now for has changed, and it is worth knowing before reading twenty
+PRs.** It began as a reliability check on the way to the run. Against the source paper's
+per-PR figures this study sits at 3.28× and 1.65× its references — inflation factors 2×
+apart — so the gate is now the test of whether the outcome rule is *too loose, and more so
+on one arm*. That is a question about the rule, not about any individual PR, and it is
+answered by how the disagreements fall rather than by the score alone.

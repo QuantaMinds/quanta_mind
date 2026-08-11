@@ -288,6 +288,34 @@ key, sample, dossiers and agent reference set; seed 20260811's key, sample and t
 
 ---
 
+## 9.9 A prediction recorded BEFORE the labels exist
+
+**Written 2026-08-11, after the draw and the dossiers, before any label.** The timestamp
+is the point: a pattern named after seeing the disagreements is a story; the same pattern
+named before them is evidence.
+
+The seed-20260813 sample has wildly uneven windows — **1, 3, 3, 4, 7, 7, 8, 11, 12, 17,
+17, 17, 25, 30, 37, 76, 85, 154, 168, 263** commits. Five PRs carry 76–263.
+
+**Prediction: disagreements will concentrate on those five.** The mechanism is specific
+rather than a hunch about difficulty. The outcome rule decides BROKE partly on file
+overlap between a later fix-worded commit and the PR's own files. In a repository
+committing 263 times in seven days a hot file is touched constantly by unrelated work, so
+**file overlap carries almost no information there** — Trap 4, same file different work,
+which is exactly the failure `langgraph#4947` showed.
+
+If the disagreements land there, the rule's weakness is a function of **repository commit
+velocity**, not of PR content. That is a different and more tractable finding than "the
+rule is loose": velocity is measurable per repository, and a rule conditioning overlap on
+it would be a targeted fix rather than a threshold moved by hand.
+
+If they land evenly instead, this prediction is wrong and the looseness is elsewhere.
+
+**Recorded here and NOT in `HAND_LABELLING_PROTOCOL.md`, deliberately.** Telling a
+labeller in advance where the rule is expected to fail is priming, and that document's own
+"Who labels" section forbids exactly that. It is written after the sample was drawn and the
+dossiers gathered, so it cannot have shaped either.
+
 ## 10. What this cost, and what it bought
 
 Four attempts, no gate. But the attempts surfaced defects that would otherwise have run
