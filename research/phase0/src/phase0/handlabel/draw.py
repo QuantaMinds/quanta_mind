@@ -6,12 +6,12 @@ WHY:  A random draw at the base rate hands the labeller roughly two broken PRs i
       so always-CLEAN would score about 18/20 and prove nothing. The cells fill equally
       instead; `handlabel/strata.py` owns which cells there are and why.
 
-      Balance costs representativeness on purpose: agreement here estimates the average
-      of sensitivity and specificity, NOT agreement over the corpus. It is a validation
-      quantity, not a prevalence one, and must never be read as "right 80% of the time".
+      Balance costs representativeness on purpose: agreement estimates the average of
+      sensitivity and specificity, NOT agreement over the corpus -- a validation
+      quantity, never "right 80% of the time".
 
-      Repositories are shuffled and capped rather than PRs: shuffling PRs would mean a
-      clone each, and stopping when the cells fill would concentrate the sample.
+      Repositories are shuffled and capped rather than PRs: one clone each otherwise,
+      and stopping when the cells fill would concentrate the sample.
 IMPORTS: phase0.extract_prs, phase0.outcome.{conclusion,scan,window},
       phase0.pipeline.worktree, phase0.handlabel.{select,sheet,strata}.
 CONSUMED BY: phase0/sample_for_labelling.py; tests/handlabel/.
@@ -27,15 +27,17 @@ from pathlib import Path
 from phase0.extract_prs import PRRecord
 from phase0.handlabel.select import Candidate
 from phase0.handlabel.sheet import Drawn, KeyRow
-from phase0.handlabel.strata import Cell, band_of, cells_for, unfillable
+from phase0.handlabel.strata import (
+    Cell,
+    band_of,
+    cells_for,
+    shuffled_by_repo,
+    unfillable,
+)
 from phase0.outcome.conclusion import Outcome, unhandled
 from phase0.outcome.scan import scan
 from phase0.outcome.window import Exclusion
 from phase0.pipeline.worktree import CloneFailed, cloned
-
-# At most this many PRs from any one repository. Without it, a repository with 40
-# eligible PRs could supply the whole sample and the gate would measure one project.
-MAX_PER_REPO = 3
 
 
 @dataclass(frozen=True, slots=True)
@@ -59,23 +61,6 @@ def record_for(candidate: Candidate, records: dict[str, PRRecord]) -> PRRecord |
     tested offline, and nothing exercised `draw` at all while that drift survived.
     """
     return records.get(str(candidate.pr_id))
-
-
-def _shuffled_by_repo(
-    population: list[Candidate], rng: random.Random
-) -> list[tuple[str, list[Candidate]]]:
-    """Repositories in random order, each contributing at most MAX_PER_REPO PRs."""
-    grouped: dict[str, list[Candidate]] = defaultdict(list)
-    for candidate in population:
-        grouped[candidate.repo].append(candidate)
-    repos = sorted(grouped)
-    rng.shuffle(repos)
-    picked: list[tuple[str, list[Candidate]]] = []
-    for repo in repos:
-        prs = sorted(grouped[repo], key=lambda c: c.pr_id)
-        rng.shuffle(prs)
-        picked.append((repo, prs[:MAX_PER_REPO]))
-    return picked
 
 
 def draw(
@@ -115,7 +100,7 @@ def draw(
     # measured, which would have scored the gate against answers nobody computed.
     unscannable: dict[Exclusion, int] = defaultdict(int)
 
-    for repo, candidates in _shuffled_by_repo(population, rng):
+    for repo, candidates in shuffled_by_repo(population, rng):
         if all(len(buckets[c]) >= wanted[c] for c in wanted):
             break
         band = band_of(stars.get(repo, -1))
@@ -170,9 +155,7 @@ def draw(
 
     for cell, want in wanted.items():
         if len(buckets[cell]) < want:
-            raise ValueError(
-                unfillable(cell, len(buckets[cell]), want, considered, repos_visited, MAX_PER_REPO)
-            )
+            raise ValueError(unfillable(cell, len(buckets[cell]), want, considered, repos_visited))
 
     drawn = [row for cell in wanted for row in buckets[cell]]
     rng.shuffle(drawn)
@@ -197,4 +180,5 @@ def draw(
         considered=considered,
         repos_visited=repos_visited,
         unscannable=dict(unscannable),
+        unbanded=unbanded,
     )

@@ -50,6 +50,12 @@ class Drawn:
     # PRs examined whose outcome could not be scanned, by category. Never eligible for a
     # bucket: a labeller cannot check a verdict the instrument never reached.
     unscannable: dict[Exclusion, int] = field(default_factory=dict)
+    # PRs in repositories with NO recorded star count, so no band and no cell. Returned
+    # rather than counted internally: the first version computed this and dropped it,
+    # which is the `stars` defect -- a value produced and discarded at the moment of
+    # writing -- reintroduced in the same session that fixed it. A zero here must be
+    # distinguishable from a branch that never runs.
+    unbanded: int = 0
 
     def bucket_sizes(self) -> dict[str, int]:
         """Counts by verdict. Safe to print: says how many, never which."""

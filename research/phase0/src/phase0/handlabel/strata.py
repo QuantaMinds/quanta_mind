@@ -1,7 +1,7 @@
-"""The cells a blind draw fills: one per (verdict, star band).
+"""The sampling design of the blind draw: cells, bands, the per-repository cap, order.
 
-WHAT: `Cell`, `band_of`, and `cells_for` — the key a stratified draw buckets on, and the
-      per-cell quota it fills.
+WHAT: `Cell`, `band_of`, `cells_for`, `shuffled_by_repo`, `unfillable` — everything that
+      decides WHICH units a draw may take, separated from the loop that takes them.
 WHY:  A draw balanced on verdict alone can come back with every BROKE PR from one star
       band. That matters here because the bands break at different rates — measured on
       200 agent repositories, `<500` at 34.25% against `>=500` at 24.22%, Fisher
@@ -13,20 +13,29 @@ WHY:  A draw balanced on verdict alone can come back with every BROKE PR from on
       A repository with no star count gets NO band. It is skipped and counted, never
       folded into `<500`: "we do not know its size" and "it is small" are different
       facts, and pooling them is what A52 records going wrong one layer up.
-IMPORTS: phase0.outcome.conclusion for `Outcome`. Nothing else -- kept free of the draw
-      so the cell definition can be tested without a network.
+IMPORTS: stdlib random/collections; phase0.handlabel.select for `Candidate`;
+      phase0.outcome.conclusion for `Outcome`. Nothing that touches the network -- which
+      is the point: `draw` clones, so everything decidable WITHOUT a clone lives here and
+      is tested. Four wrong fields once survived inside `draw` because nothing called it.
 CONSUMED BY: handlabel/draw.py; tests/handlabel/test_strata.py.
 """
 
 from __future__ import annotations
 
+import random
+from collections import defaultdict
 from typing import NamedTuple
 
+from phase0.handlabel.select import Candidate
 from phase0.outcome.conclusion import Outcome
 
 # A15's floor. The human arm's own floor is 503 stars with 0% below it, so this is the
 # boundary that decides whether an agent-arm PR has any human counterpart at all.
 STAR_FLOOR = 500
+
+# At most this many PRs from any one repository. Without it, a repository with 40
+# eligible PRs could supply the whole sample and the gate would measure one project.
+MAX_PER_REPO = 3
 
 BAND_LOW = "<500"
 BAND_HIGH = ">=500"
@@ -70,7 +79,24 @@ def cells_for(n_broke: int, n_clean: int) -> dict[Cell, int]:
     }
 
 
-def unfillable(cell: Cell, got: int, want: int, considered: int, repos: int, per_repo: int) -> str:
+def shuffled_by_repo(
+    population: list[Candidate], rng: random.Random
+) -> list[tuple[str, list[Candidate]]]:
+    """Repositories in random order, each contributing at most MAX_PER_REPO PRs."""
+    grouped: dict[str, list[Candidate]] = defaultdict(list)
+    for candidate in population:
+        grouped[candidate.repo].append(candidate)
+    repos = sorted(grouped)
+    rng.shuffle(repos)
+    picked: list[tuple[str, list[Candidate]]] = []
+    for repo in repos:
+        prs = sorted(grouped[repo], key=lambda c: c.pr_id)
+        rng.shuffle(prs)
+        picked.append((repo, prs[:MAX_PER_REPO]))
+    return picked
+
+
+def unfillable(cell: Cell, got: int, want: int, considered: int, repos: int) -> str:
     """Why a cell would not fill — and the two causes that look identical from inside.
 
     The message this replaced said only that a base rate far from expectation is "a
@@ -88,6 +114,6 @@ def unfillable(cell: Cell, got: int, want: int, considered: int, repos: int, per
         f"than the pool holds it, and three draws took this corpus 37.07% -> 33.33% "
         f"BROKE, which says nothing about the rule. Compare the residual pool's rate to "
         f"the corpus rate. If depleted, WALK MORE REPOSITORIES: re-seeding reshuffles "
-        f"the same pool, and raising MAX_PER_REPO ({per_repo}) defeats the cap that "
+        f"the same pool, and raising MAX_PER_REPO ({MAX_PER_REPO}) defeats the cap that "
         f"stops one repository supplying the sample."
     )

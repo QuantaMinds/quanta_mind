@@ -16,10 +16,11 @@ from pathlib import Path
 
 import pytest
 
-from phase0.handlabel.draw import MAX_PER_REPO, KeyRow, _shuffled_by_repo
+from phase0.handlabel.draw import KeyRow
 from phase0.handlabel.labels import read_labels
 from phase0.handlabel.score import GATE_MINIMUM, Agreement, score
 from phase0.handlabel.select import Candidate
+from phase0.handlabel.strata import MAX_PER_REPO, shuffled_by_repo
 
 HEADER = "label_id,verdict,confidence,evidence,reasoning,minutes\n"
 
@@ -154,6 +155,6 @@ def test_no_repository_can_supply_the_whole_sample() -> None:
         )
         for i in range(50)
     ]
-    grouped = dict(_shuffled_by_repo(population, random.Random(20260804)))
+    grouped = dict(shuffled_by_repo(population, random.Random(20260804)))
     assert len(grouped["acme/big"]) == MAX_PER_REPO
     assert max(len(v) for v in grouped.values()) <= MAX_PER_REPO

@@ -80,9 +80,7 @@ def test_an_odd_total_raises_rather_than_rounding(n_broke: int, n_clean: int) ->
 
 def test_the_unfillable_message_names_the_cell_and_both_causes() -> None:
     """One message, two opposite meanings, was the defect. Both must appear."""
-    text = unfillable(
-        Cell(Outcome.BROKE, BAND_LOW), got=3, want=5, considered=40, repos=12, per_repo=3
-    )
+    text = unfillable(Cell(Outcome.BROKE, BAND_LOW), got=3, want=5, considered=40, repos=12)
 
     assert "BROKE <500" in text
     assert "OUTCOME RULE" in text and "DEPLETION" in text
@@ -92,9 +90,7 @@ def test_the_unfillable_message_names_the_cell_and_both_causes() -> None:
 
 def test_the_message_survives_zero_examined_without_dividing_by_it() -> None:
     """A cell can fail with nothing examined — every repository failed to clone."""
-    text = unfillable(
-        Cell(Outcome.CLEAN, BAND_HIGH), got=0, want=5, considered=0, repos=0, per_repo=3
-    )
+    text = unfillable(Cell(Outcome.CLEAN, BAND_HIGH), got=0, want=5, considered=0, repos=0)
 
     assert "no candidates examined" in text
     assert "CLEAN >=500" in text

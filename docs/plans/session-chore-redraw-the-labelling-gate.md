@@ -1,10 +1,10 @@
 # Session record — chore/redraw-the-labelling-gate
 
-Written by scripts/guard/hook_session_end.py at 2026-08-11T14:37:47Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-11T14:45:43Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `chore/redraw-the-labelling-gate`
-- Files changed vs `main`: 248
+- Files changed vs `main`: 251
 - Uncommitted at session end: 0
 - `docs/CODEBASE.md` updated: yes
 
@@ -236,6 +236,7 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/src/phase0/controls/corpus.py`
 - `research/phase0/src/phase0/extract_prs.py`
 - `research/phase0/src/phase0/handlabel/draw.py`
+- `research/phase0/src/phase0/handlabel/strata.py`
 - `research/phase0/src/phase0/parent_commit.py`
 - `research/phase0/src/phase0/pilot/clone_cause.py`
 - `research/phase0/src/phase0/pilot/compare.py`
@@ -250,7 +251,9 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/src/phase0/pipeline/rejection.py`
 - `research/phase0/src/phase0/pipeline/resume.py`
 - `research/phase0/src/phase0/run_pipeline.py`
+- `research/phase0/src/phase0/sample_for_labelling.py`
 - `research/phase0/tests/controls/test_capability_is_the_census.py`
+- `research/phase0/tests/handlabel/test_strata.py`
 - `research/phase0/tests/pilot/test_agent_population.py`
 - `research/phase0/tests/pilot/test_band_composition.py`
 - `research/phase0/tests/pilot/test_clone_cause.py`
