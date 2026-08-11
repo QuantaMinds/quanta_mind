@@ -129,6 +129,11 @@ class PRAudit:
     graph_detail_path: str = ""
     graph_detail_line: int = 0
     scope_files: int = 0
+    # Files in scope the census could not READ, so their call sites are absent from
+    # `call_sites`, `non_builtin_sites`, `no_static_callee_sites` and the symbol rows --
+    # while PyCG still ran over them. Zero means the census covered the whole scope; it
+    # never means "not checked", because `measure` always sets it.
+    unreadable_files: int = 0
     call_sites: int = 0
     non_builtin_sites: int = 0
     no_static_callee_sites: int = 0  # A10's prevalence denominator

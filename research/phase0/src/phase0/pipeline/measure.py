@@ -76,11 +76,24 @@ def measure(tree: Path, pr: PRRecord, timeout_s: int) -> record.PRAudit | None:
 
     started = time.monotonic()
     sites: list[CallSite] = []
+    unreadable = 0
     for path in resolved.files:
         try:
             source = path.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError):
-            continue  # unreadable file: counted by omission, never fatal
+            # COUNTED, not merely skipped. This read `counted by omission, never fatal`
+            # while nothing counted it -- a comment asserting a property instead of an
+            # assertion establishing one, which is rule 14's own worked example.
+            #
+            # It is not a small omission. `sites` feeds `call_sites`,
+            # `non_builtin_sites`, `no_static_callee_sites` -- A10's prevalence
+            # denominator -- and `symbol_rows`, which IS the exposure variable. And
+            # `run_graph` runs PyCG over `resolved`, the FULL file set, so a skipped file
+            # leaves the census and the graph covering different code while `classify`
+            # joins them. `scope_files` then counts a denominator its numerator does not
+            # match, and nothing on disk revealed the gap.
+            unreadable += 1
+            continue
         sites += count_call_sites(source, path=str(path), module=resolved.module_of(path))
     timings["census_ms"] = int((time.monotonic() - started) * 1000)
 
@@ -103,6 +116,10 @@ def measure(tree: Path, pr: PRRecord, timeout_s: int) -> record.PRAudit | None:
         graph_detail_path=graph.detail_path,
         graph_detail_line=graph.detail_line,
         scope_files=resolved.file_count,
+        # `scope_files - unreadable_files` is what the census actually read. Reported so a
+        # low `call_sites` can be told from a partly-unread scope; unreadable files are
+        # not random, they cluster in older and non-English code.
+        unreadable_files=unreadable,
         call_sites=len(sites),
         non_builtin_sites=len(interesting),
         # A10's prevalence denominator: a site with no static callee name can be
