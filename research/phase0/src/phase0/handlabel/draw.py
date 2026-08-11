@@ -2,20 +2,18 @@
 
 WHAT: Runs the outcome classifier over eligible PRs until both buckets are full, then
       emits a blind sheet (`label_id`, `pr_url`) and a sealed key.
-WHY:  A random draw at the base rate hands the labeller roughly two broken PRs in twenty.
-      Marking everything CLEAN would then score about 18/20 and pass a gate that proved
-      nothing. Ten of each makes always-CLEAN score 10/20 and fail, so the gate tests the
-      classifier rather than the base rate.
+WHY:  A random draw at the base rate hands the labeller roughly two broken PRs in twenty,
+      so always-CLEAN would score about 18/20 and prove nothing. The cells fill equally
+      instead; `handlabel/strata.py` owns which cells there are and why.
 
       Balance costs representativeness on purpose: agreement here estimates the average
       of sensitivity and specificity, NOT agreement over the corpus. It is a validation
       quantity, not a prevalence one, and must never be read as "right 80% of the time".
 
-      Repositories are shuffled and capped rather than PRs -- shuffling PRs would mean a
-      clone each, and stopping when the buckets fill would concentrate the sample in
-      whichever repositories came first.
+      Repositories are shuffled and capped rather than PRs: shuffling PRs would mean a
+      clone each, and stopping when the cells fill would concentrate the sample.
 IMPORTS: phase0.extract_prs, phase0.outcome.{conclusion,scan,window},
-      phase0.pipeline.worktree, phase0.handlabel.{select,sheet}.
+      phase0.pipeline.worktree, phase0.handlabel.{select,sheet,strata}.
 CONSUMED BY: phase0/sample_for_labelling.py; tests/handlabel/.
 """
 
@@ -29,6 +27,7 @@ from pathlib import Path
 from phase0.extract_prs import PRRecord
 from phase0.handlabel.select import Candidate
 from phase0.handlabel.sheet import Drawn, KeyRow
+from phase0.handlabel.strata import Cell, band_of, cells_for, unfillable
 from phase0.outcome.conclusion import Outcome, unhandled
 from phase0.outcome.scan import scan
 from phase0.outcome.window import Exclusion
@@ -47,6 +46,7 @@ class _Scored:
     verdict: str  # "BROKE" | "CLEAN"
     criterion: str
     evidence_sha: str
+    band: str  # "<500" | ">=500" -- part of the cell key, never re-derived later
 
 
 def record_for(candidate: Candidate, records: dict[str, PRRecord]) -> PRRecord | None:
@@ -82,6 +82,7 @@ def draw(
     population: list[Candidate],
     workspace: Path,
     records: dict[str, PRRecord],
+    stars: dict[str, int],
     *,
     n_broke: int,
     n_clean: int,
@@ -99,10 +100,14 @@ def draw(
     # Each entry carries its own verdict. An earlier version recovered the verdict by
     # testing bucket membership after shuffling, which would have mislabelled the key
     # the moment two PRs compared equal -- deriving an answer that is already known.
-    buckets: dict[Outcome, list[_Scored]] = {Outcome.BROKE: [], Outcome.CLEAN: []}
-    wanted = {Outcome.BROKE: n_broke, Outcome.CLEAN: n_clean}
+    wanted = cells_for(n_broke, n_clean)
+    buckets: dict[Cell, list[_Scored]] = {cell: [] for cell in wanted}
     considered = 0
     repos_visited = 0
+    # Repositories whose size was never recorded. They cannot be placed in a band, so
+    # they are skipped and COUNTED -- never folded into `<500`, which would put an
+    # unmeasured unit into a stratum that is supposed to mean something about size.
+    unbanded = 0
     # PRs the scan could not look at. They are not eligible for either bucket -- a
     # hand-labeller cannot check a verdict the instrument never reached -- and they are
     # counted rather than skipped so the draw can report what it passed over. Before the
@@ -111,13 +116,17 @@ def draw(
     unscannable: dict[Exclusion, int] = defaultdict(int)
 
     for repo, candidates in _shuffled_by_repo(population, rng):
-        if all(len(buckets[o]) >= wanted[o] for o in wanted):
+        if all(len(buckets[c]) >= wanted[c] for c in wanted):
             break
+        band = band_of(stars.get(repo, -1))
+        if band is None:
+            unbanded += len(candidates)
+            continue
         repos_visited += 1
         try:
             with cloned(repo, workspace) as path:
                 for candidate in candidates:
-                    if all(len(buckets[o]) >= wanted[o] for o in wanted):
+                    if all(len(buckets[c]) >= wanted[c] for c in wanted):
                         break
                     # The pipeline's OWN record, never a reconstruction.
                     source = record_for(candidate, records)
@@ -134,47 +143,38 @@ def draw(
                             unscannable[record.exclusion] += 1
                             continue
                         case Outcome.BROKE | Outcome.CLEAN:
-                            bucket = buckets[record.outcome]
+                            cell = Cell(record.outcome, band)
                         case _:
                             unhandled(record.outcome)
-                    if len(bucket) < wanted[record.outcome]:
-                        buckets[record.outcome].append(
+                    if len(buckets[cell]) < wanted[cell]:
+                        buckets[cell].append(
                             _Scored(
                                 candidate=candidate,
                                 verdict=record.outcome.value.upper(),
                                 criterion=record.criterion.value,
                                 evidence_sha=record.evidence_sha,
+                                band=band,
                             )
                         )
                     if callable(on_progress):
                         on_progress(
                             repo,
                             candidate,
-                            len(buckets[Outcome.BROKE]),
-                            len(buckets[Outcome.CLEAN]),
+                            sum(len(v) for c, v in buckets.items() if c.outcome is Outcome.BROKE),
+                            sum(len(v) for c, v in buckets.items() if c.outcome is Outcome.CLEAN),
                         )
         except CloneFailed:
             # An unreadable repository contributes nothing and is skipped. It is not
             # scored as CLEAN, which is what an untyped failure here would have meant.
             continue
 
-    for outcome, want in wanted.items():
-        if len(buckets[outcome]) < want:
-            got, kind = len(buckets[outcome]), outcome.value.upper()
+    for cell, want in wanted.items():
+        if len(buckets[cell]) < want:
             raise ValueError(
-                f"only {got} {kind} in {considered} examined across {repos_visited} repos, "
-                f"need {want} ({got / considered:.1%}). Do not shrink the bucket. TWO "
-                f"CAUSES, OPPOSITE MEANINGS: (a) on a FIRST draw from an undepleted pool "
-                f"this is a finding about the OUTCOME RULE; (b) on a LATER draw it is "
-                f"DEPLETION -- a stratified draw takes {kind} faster than the pool holds "
-                f"it, and three draws took this corpus 37.07% -> 33.33% BROKE, which says "
-                f"nothing about the rule. Compare the residual pool's rate to the corpus "
-                f"rate. If depleted, WALK MORE REPOSITORIES: re-seeding reshuffles the same "
-                f"pool, and raising MAX_PER_REPO ({MAX_PER_REPO}) defeats the cap that "
-                f"stops one repository supplying the sample."
+                unfillable(cell, len(buckets[cell]), want, considered, repos_visited, MAX_PER_REPO)
             )
 
-    drawn = [row for outcome in (Outcome.BROKE, Outcome.CLEAN) for row in buckets[outcome]]
+    drawn = [row for cell in wanted for row in buckets[cell]]
     rng.shuffle(drawn)
 
     blind = tuple((index, row.candidate.url) for index, row in enumerate(drawn, 1))

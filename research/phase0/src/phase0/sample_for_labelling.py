@@ -31,6 +31,7 @@ from phase0 import arm
 from phase0.handlabel.draw import draw
 from phase0.handlabel.files import write_blind, write_key, write_label_template
 from phase0.handlabel.select import Candidate
+from phase0.pilot.repo_facts import star_counts
 from phase0.pipeline import records_file
 from phase0.population import for_arm
 
@@ -102,10 +103,18 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     print(f"{len(records)} admitted records to draw from", flush=True)
 
+    # The draw is stratified on star band as well as verdict, so it needs sizes. Loaded
+    # from the parquet rather than the journal: the journal records a size per ATTEMPT
+    # and the draw buckets by REPOSITORY, and A52's whole finding is what happens when a
+    # band is read from the wrong population.
+    stars = star_counts(ROOT / "data" / "aidev" / "repository.parquet")
+    print(f"{len(stars)} repositories with a recorded star count", flush=True)
+
     drawn = draw(
         population,
         WORKSPACE,
         records,
+        stars,
         n_broke=args.n_broke,
         n_clean=args.n_clean,
         seed=args.seed,

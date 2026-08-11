@@ -1,10 +1,10 @@
 # Session record — chore/redraw-the-labelling-gate
 
-Written by scripts/guard/hook_session_end.py at 2026-08-11T14:23:24Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-11T14:37:47Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `chore/redraw-the-labelling-gate`
-- Files changed vs `main`: 246
+- Files changed vs `main`: 248
 - Uncommitted at session end: 0
 - `docs/CODEBASE.md` updated: yes
 
@@ -241,6 +241,7 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/src/phase0/pilot/compare.py`
 - `research/phase0/src/phase0/pilot/covariates.py`
 - `research/phase0/src/phase0/pilot/gradient.py`
+- `research/phase0/src/phase0/pilot/report.py`
 - `research/phase0/src/phase0/pilot/run.py`
 - `research/phase0/src/phase0/pipeline/assemble.py`
 - `research/phase0/src/phase0/pipeline/checkout.py`
@@ -250,6 +251,7 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/src/phase0/pipeline/resume.py`
 - `research/phase0/src/phase0/run_pipeline.py`
 - `research/phase0/tests/controls/test_capability_is_the_census.py`
+- `research/phase0/tests/pilot/test_agent_population.py`
 - `research/phase0/tests/pilot/test_band_composition.py`
 - `research/phase0/tests/pilot/test_clone_cause.py`
 - `research/phase0/tests/pipeline/test_checkout_complete.py`
