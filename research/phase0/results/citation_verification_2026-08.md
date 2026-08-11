@@ -22,7 +22,7 @@ as wrong, because the abstract reports **3.45%** and **7.40%**.
 | figure | unit | source text |
 |---|---|---|
 | 3.45% / 7.40% | **per patch** | abstract; body: "805 of 23,333 patches (3.45%)", "2,733 of 36,991 patches (7.40%)" |
-| 11.3% / 21.18% | **per pull request** | §5.1: "affecting 11.3% of agent-generated pull requests"; "impacting 21.18% of human-authored pull requests" |
+| 11.3% / 21.18% | **per pull request** | body: "affecting 11.3% of agent-generated pull requests"; "impacting 21.18% of human-authored pull requests" |
 
 Our outcome variable is per-PR, so **11.3% and 21.18% are the correct anchors** and the
 preregistration uses them correctly. The paper does not state the PR-level denominators;
