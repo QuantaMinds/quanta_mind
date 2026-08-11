@@ -116,6 +116,28 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 2
 
+    # A54's population assertion, and it RAISES rather than filtering. The 2026-08-05
+    # pass consumed 17 rows that were every one arm=human, every one rejected at
+    # clone_failed, none an admitted unit -- and produced a tidy file that nobody
+    # questioned until a human read it. Filtering would have written a smaller tidy file.
+    #
+    # Checked on the artefact this consumer READS, not on the input that produced it:
+    # `arm.verify` already checks the population before the first clone and passed while
+    # every persisted record said `human`, because the two are one layer apart.
+    wrong_arm = sorted({p.arm or "<empty>" for p in prs if p.arm.lower() == "human" or not p.arm})
+    no_parent = [p.pr_id for p in prs if not p.parent_sha]
+    if wrong_arm or no_parent:
+        raise ValueError(
+            f"population assertion failed on {args.records}: "
+            f"{len(wrong_arm)} distinct human/empty arm value(s) {wrong_arm}, "
+            f"{len(no_parent)} record(s) with no parent_sha (first: {no_parent[:3]}). "
+            f"A PRRecord carrying the wrong arm produces an audit carrying the wrong arm, "
+            f"and nothing downstream re-checks it. Fix the records, do not filter them."
+        )
+    print(
+        f"population asserted: {len(prs)} records, arms {sorted({p.arm for p in prs})}", flush=True
+    )
+
     already = len(record.completed_ids(args.out))
     print(f"{len(prs)} records, {already} already audited in {args.out}", flush=True)
 
