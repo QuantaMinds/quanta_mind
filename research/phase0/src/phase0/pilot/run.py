@@ -119,6 +119,9 @@ def main(argv: list[str] | None = None) -> int:
                         repo=repo,
                         merged_at=candidate.merged_at,
                         corpus_files=candidate.changed_files,
+                        # From the CANDIDATE, which is what the journal uses, so the
+                        # record and the journal cannot disagree about the arm.
+                        arm=candidate.arm,
                     )
                     if not isinstance(outcome, Rejection):
                         # Persisted as built. Every later stage needs a PRRecord and

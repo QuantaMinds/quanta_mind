@@ -1,0 +1,106 @@
+{
+  "agreement": 12,
+  "total": 20,
+  "rate": 0.6,
+  "passed": false,
+  "kappa": 0.19999999999999996,
+  "unsure": 0,
+  "minutes_median": 10.0,
+  "confusion": {
+    "both_broke": 2,
+    "both_clean": 10,
+    "machine_broke_human_clean": 8,
+    "machine_clean_human_broke": 0
+  },
+  "disagreements": [
+    {
+      "label_id": 1,
+      "repo": "codegen-sh/codegen",
+      "number": 701,
+      "human": "CLEAN",
+      "machine": "BROKE",
+      "human_reasoning": "SOURCE-CHECKED: the only fix-worded overlap, PR #719, is Slack type definitions and unrelated agent tweaks -- it does not touch LangSmith URL generation and never references #701. The two files this PR created were untouched for the whole window.",
+      "machine_criterion": "fix_touching_same_file",
+      "machine_evidence": "a99e9397f8b110a4e4b8ccf40d9a42abbd0a2e83",
+      "direction": "rule too loose"
+    },
+    {
+      "label_id": 2,
+      "repo": "bruin-data/ingestr",
+      "number": 256,
+      "human": "CLEAN",
+      "machine": "BROKE",
+      "human_reasoning": "SOURCE-CHECKED: PR #260 fixes double-encoding when an access or secret key contains a slash, because Bruin CLI already encodes the URI. That is credential parsing, orthogonal to this PR's gz support, and #260 references neither #256 nor filesystem/gz. Same file, different concern.",
+      "machine_criterion": "fix_touching_same_file",
+      "machine_evidence": "5da8727b2160e26e3a5235ab5006a7e652509e4e",
+      "direction": "rule too loose"
+    },
+    {
+      "label_id": 6,
+      "repo": "bespokelabsai/curator",
+      "number": 308,
+      "human": "CLEAN",
+      "machine": "BROKE",
+      "human_reasoning": "SOURCE-CHECKED: the PR is documentation-only, stated explicitly as no functional changes; the +526 is expanded Args/Returns/Side Effects sections. Every fix-worded overlap in a 22-commit-per-day window addresses batch retry, resubmit and response parsing, none of which a docstring can break.",
+      "machine_criterion": "fix_touching_same_file",
+      "machine_evidence": "597c0747e0a6b7a76db3069e6457015502f91795",
+      "direction": "rule too loose"
+    },
+    {
+      "label_id": 10,
+      "repo": "PrunaAI/pruna",
+      "number": 143,
+      "human": "CLEAN",
+      "machine": "BROKE",
+      "human_reasoning": "SOURCE-CHECKED, GitHub + community. AutoAWQ was officially deprecated in May 2025 with its functionality adopted by vLLM's llm-compressor; this PR merged 2025-05-26, tracking that. The window's 'feat: add llm_compressor quantizer (#144)' is the documented migration path, not a repair, and the awq removal was never reinstated.",
+      "machine_criterion": "fix_touching_same_file",
+      "machine_evidence": "094582fc500e105c3a91cce31c1388bf4c079bb7",
+      "direction": "rule too loose"
+    },
+    {
+      "label_id": 14,
+      "repo": "WorkflowAI/WorkflowAI",
+      "number": 465,
+      "human": "CLEAN",
+      "machine": "BROKE",
+      "human_reasoning": "SOURCE-CHECKED. The largest overlap cluster, PR #651 truncate-input-fields, is general MCP payload-size management to avoid token limits; it references neither #465 nor feedback. Of 64 overlapping commits in a 38-per-day window, exactly one mentions feedback and it renames an unrelated tool. Nothing repairs send_feedback.",
+      "machine_criterion": "fix_touching_same_file",
+      "machine_evidence": "9dd8c8544c4c1dd46e2ebbd1afa327ebb2aa27c9",
+      "direction": "rule too loose"
+    },
+    {
+      "label_id": 15,
+      "repo": "RobHofmann/HomeAssistant-GreeClimateComponent",
+      "number": 256,
+      "human": "CLEAN",
+      "machine": "BROKE",
+      "human_reasoning": "SOURCE-CHECKED TWICE, BROKE -> UNSURE -> CLEAN. Issue #273 is an RFC feature request, not a bug. Issue #274's blocking-open warning is a PLATFORM-WIDE Home Assistant behaviour introduced by HA Core 2024.06.0 and reported identically across hacs, cozytouch, nordpool, ps4 and waste-collection-schedule; it fires on translations_helper.py, which this PR never touched. HA started warning about a pre-existing sync pattern. PR #278 fixes that pattern, not this PR.",
+      "machine_criterion": "fix_touching_same_file",
+      "machine_evidence": "1019937c1150dc64e0e0c7827995a5207e1c5c95",
+      "direction": "rule too loose"
+    },
+    {
+      "label_id": 16,
+      "repo": "bespokelabsai/curator",
+      "number": 316,
+      "human": "CLEAN",
+      "machine": "BROKE",
+      "human_reasoning": "SOURCE-CHECKED, GitHub + community. Passing allowed_special or disallowed_special=() is the standard documented remedy for tiktoken's default ValueError on special tokens; the residual risk is special-token INJECTION, which is latent and would not surface as a same-week repair. None of the 25 overlaps touch encoding -- they are ruff sweeps, lazy-import refactors and a backend-config bug.",
+      "machine_criterion": "fix_touching_same_file",
+      "machine_evidence": "b6886bc4e68a2ade67a386527f929c1c6ea1da9b",
+      "direction": "rule too loose"
+    },
+    {
+      "label_id": 17,
+      "repo": "bmander/graphserver",
+      "number": 28,
+      "human": "CLEAN",
+      "machine": "BROKE",
+      "human_reasoning": "SOURCE-CHECKED, UNSURE -> CLEAN. PR #33 fixes 14 test failures from Python 2-to-3 string/bytes debt across ctypes calls, a bytes-returning property and a pickle str() conversion. THIS PR migrated nose to pytest, which is what made the suite run; it revealed those failures rather than causing them. Repairing what a PR EXPOSED is not repairing what it DID -- a distinct false-positive mechanism for the outcome rule.",
+      "machine_criterion": "fix_touching_same_file",
+      "machine_evidence": "51ea20aefee35c04de1b62cfa0c31b8993517e5d",
+      "direction": "rule too loose"
+    }
+  ],
+  "human_labels_commit": "UNCOMMITTED -- the ordering claim is unverifiable"
+}

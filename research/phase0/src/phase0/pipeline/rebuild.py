@@ -88,5 +88,8 @@ def records_for(
                         repo=repo,
                         merged_at=candidate.merged_at,
                         corpus_files=candidate.changed_files,
+                        # From the CANDIDATE, which is what the journal uses, so the
+                        # record and the journal cannot disagree about the arm.
+                        arm=candidate.arm,
                     ),
                 )

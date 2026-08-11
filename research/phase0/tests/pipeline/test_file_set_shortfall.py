@@ -69,6 +69,7 @@ def test_a_shortfall_is_labelled_file_set_and_does_not_halt_the_run(
         pr_id="9",
         repo="acme/widget",
         merged_at=merge.merged_at,
+        arm="agent",
         corpus_files=("pkg/mod.py",),
     )
 
@@ -91,6 +92,7 @@ def test_the_corpus_is_never_the_denominator(repo: tuple[Path, str, str]) -> Non
         pr_id="9",
         repo="acme/widget",
         merged_at="2025-06-24T22:46:29Z",
+        arm="agent",
         corpus_files=inflated,
     )
     # A value about the repository, never a raise about us. Shape detection refuses it
@@ -114,6 +116,7 @@ def test_a_superset_still_belongs_to_verify_files(repo: tuple[Path, str, str]) -
         pr_id="9",
         repo="acme/widget",
         merged_at="2025-06-24T22:46:29Z",
+        arm="agent",
         corpus_files=("pkg/mod.py",),
     )
     assert getattr(outcome, "stage", "") == "file_set"

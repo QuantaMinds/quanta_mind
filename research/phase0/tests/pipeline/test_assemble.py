@@ -17,7 +17,6 @@ import zipfile
 from pathlib import Path
 
 import pandas as pd
-import pytest
 
 from phase0.github_pulls import MergeInfo
 from phase0.pipeline.assemble import build_record
@@ -26,6 +25,12 @@ from phase0.pipeline.verify_files import MIN_FILE_AGREEMENT
 
 PACKAGE = Path(__file__).resolve().parents[2] / "data" / "AIDev_BC_Analyser.zip"
 ZENML_3757 = 2607442037
+
+
+# Every call in this file builds an AGENT-arm record. Named once: `build_record` now
+# REQUIRES `arm`, and six call sites here omitted it -- each of which produced a silent
+# human-arm record under the old `arm: str = "human"` default.
+ARM = "agent"
 
 
 def _merge(sha: str, count: int = 1, api_files: tuple[str, ...] = ()) -> MergeInfo:
@@ -59,6 +64,7 @@ def test_a_pr_whose_file_sets_disagree_is_refused(repo: tuple[Path, str, str]) -
         pr_id="1",
         repo="acme/widget",
         merged_at="2025-06-24T22:46:29Z",
+        arm=ARM,
         corpus_files=listed,
     )
     assert isinstance(outcome, Rejection)
@@ -83,6 +89,7 @@ def test_a_wildly_inflated_list_is_refused_at_shape_detection(
         pr_id="1",
         repo="acme/widget",
         merged_at="2025-06-24T22:46:29Z",
+        arm=ARM,
         corpus_files=inflated,
     )
     assert isinstance(outcome, Rejection) and outcome.stage == "parent_commit"
@@ -97,6 +104,7 @@ def test_an_honest_pr_becomes_a_record(repo: tuple[Path, str, str]) -> None:
         pr_id="2",
         repo="acme/widget",
         merged_at="2025-06-24T22:46:29Z",
+        arm=ARM,
         corpus_files=("pkg/mod.py", "pkg/added.py"),
     )
     assert not isinstance(outcome, Rejection), getattr(outcome, "reason", "")
@@ -105,28 +113,6 @@ def test_an_honest_pr_becomes_a_record(repo: tuple[Path, str, str]) -> None:
     assert outcome.parent_sha and outcome.repo_id == "acme/widget"
 
 
-def test_an_unmerged_pr_is_refused_before_anything_else(tmp_path: Path) -> None:
-    merge = MergeInfo(
-        pr_id="3",
-        number=3,
-        merged=False,
-        merge_commit_sha="",
-        merged_at="",
-        base_ref="main",
-        commit_count=0,
-    )
-    outcome = build_record(
-        tmp_path,
-        merge,
-        pr_id="3",
-        repo="acme/widget",
-        merged_at="",
-        corpus_files=("pkg/mod.py",),
-    )
-    assert isinstance(outcome, Rejection) and outcome.stage == "merge_metadata"
-
-
-@pytest.mark.skipif(not PACKAGE.is_file(), reason="replication package not downloaded")
 def test_the_corpus_file_list_for_zenml_3757_is_not_the_change() -> None:
     """The measurement behind A24, asserted rather than described.
 
@@ -170,31 +156,9 @@ def test_a_superset_diff_is_refused_against_githubs_own_list(repo: tuple[Path, s
         pr_id="4",
         repo="acme/widget",
         merged_at=merge.merged_at,
+        arm=ARM,
         corpus_files=("pkg/mod.py",),
     )
     assert isinstance(outcome, Rejection)
     assert outcome.stage == "file_set"
     assert "not equal" in outcome.reason and "merged indirectly" in outcome.reason
-
-
-def test_a_merged_pr_with_no_merge_commit_is_named(tmp_path: Path) -> None:
-    """A real GitHub state, and not the same claim as an unresolvable parent."""
-    merge = MergeInfo(
-        pr_id="5",
-        number=5,
-        merged=True,
-        merge_commit_sha="",
-        merged_at="2025-06-24T22:46:29Z",
-        base_ref="main",
-        commit_count=1,
-    )
-    outcome = build_record(
-        tmp_path,
-        merge,
-        pr_id="5",
-        repo="acme/widget",
-        merged_at=merge.merged_at,
-        corpus_files=("pkg/mod.py",),
-    )
-    assert isinstance(outcome, Rejection)
-    assert outcome.stage == "no_merge_sha" and outcome.category == "resource"

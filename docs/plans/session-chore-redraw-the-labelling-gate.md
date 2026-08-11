@@ -1,11 +1,11 @@
 # Session record — chore/redraw-the-labelling-gate
 
-Written by scripts/guard/hook_session_end.py at 2026-08-11T14:45:43Z.
+Written by scripts/guard/hook_session_end.py at 2026-08-11T21:58:00Z.
 Informational. Nothing here was blocked or enforced.
 
 - Branch: `chore/redraw-the-labelling-gate`
-- Files changed vs `main`: 251
-- Uncommitted at session end: 0
+- Files changed vs `main`: 255
+- Uncommitted at session end: 3
 - `docs/CODEBASE.md` updated: yes
 
 ## Changed
@@ -13,6 +13,7 @@ Informational. Nothing here was blocked or enforced.
 - `AGENTS.md`
 - `docs/CODEBASE.md`
 - `docs/PROJECT_CONTEXT.md`
+- `docs/findings/HAND_LABELLING_PROTOCOL.md`
 - `docs/findings/PHASE0_PREREGISTRATION.md`
 - `docs/plans/session-chore-redraw-the-labelling-gate.md`
 - `research/phase0/data/labelling/human_labels.csv`
@@ -20,6 +21,7 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/results/agent_walk2.json`
 - `research/phase0/results/agent_walk2_journal.md`
 - `research/phase0/results/agent_walk2_records.jsonl`
+- `research/phase0/results/agent_walk2_records.unseen.jsonl`
 - `research/phase0/results/citation_verification_2026-08.md`
 - `research/phase0/results/clone_failure_classes.md`
 - `research/phase0/results/clone_failure_corrections.json`
@@ -236,6 +238,7 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/src/phase0/controls/corpus.py`
 - `research/phase0/src/phase0/extract_prs.py`
 - `research/phase0/src/phase0/handlabel/draw.py`
+- `research/phase0/src/phase0/handlabel/sheet.py`
 - `research/phase0/src/phase0/handlabel/strata.py`
 - `research/phase0/src/phase0/parent_commit.py`
 - `research/phase0/src/phase0/pilot/clone_cause.py`
@@ -253,6 +256,7 @@ Informational. Nothing here was blocked or enforced.
 - `research/phase0/src/phase0/run_pipeline.py`
 - `research/phase0/src/phase0/sample_for_labelling.py`
 - `research/phase0/tests/controls/test_capability_is_the_census.py`
+- `research/phase0/tests/handlabel/test_scoring.py`
 - `research/phase0/tests/handlabel/test_strata.py`
 - `research/phase0/tests/pilot/test_agent_population.py`
 - `research/phase0/tests/pilot/test_band_composition.py`

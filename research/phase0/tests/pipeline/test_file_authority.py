@@ -66,6 +66,7 @@ def test_the_corpus_list_is_not_consulted(repo: tuple[Path, str, str]) -> None:
         pr_id="1",
         repo="acme/widget",
         merged_at="2025-06-24T22:46:29Z",
+        arm="agent",
         corpus_files=HONEST,
     )
     assert isinstance(outcome, Rejection)
@@ -81,6 +82,7 @@ def test_a_matching_github_list_still_admits(repo: tuple[Path, str, str]) -> Non
         pr_id="2",
         repo="acme/widget",
         merged_at="2025-06-24T22:46:29Z",
+        arm="agent",
         corpus_files=HONEST,
     )
     assert not isinstance(outcome, Rejection), getattr(outcome, "reason", "")

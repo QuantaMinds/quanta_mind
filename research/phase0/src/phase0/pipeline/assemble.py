@@ -57,7 +57,18 @@ def build_record(
     repo: str,
     merged_at: str,
     corpus_files: tuple[str, ...],
-    arm: str = "human",
+    # REQUIRED, and the absence of a default is the fix. It read `arm: str = "human"`,
+    # so a caller that forgot it produced a HUMAN-ARM RECORD SILENTLY -- and `pilot/run.py`
+    # forgot it, so all 310 records of a `--arm agent` walk said `human` while the journal
+    # beside them said Codex, Copilot, Devin, Cursor and Claude Code. `arm.verify` passed:
+    # it checks the POPULATION before the first clone, not the record the exposure pass
+    # reads. Fourth instance of the arm-confusion class.
+    #
+    # `task_type` and `licence` keep their defaults, and the difference is the point: `""`
+    # means UNRECORDED, which is an honest absence. `"human"` is a VALID VALUE, so its
+    # absence was indistinguishable from a measurement. A default is safe when it denotes
+    # nothing and dangerous when it denotes something.
+    arm: str,
     task_type: str = "",
     licence: str = "",
 ) -> PRRecord | Rejection:
