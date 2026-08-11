@@ -303,7 +303,34 @@ through 4,300 PRs unnoticed:
 **The instrument is in better shape than when the gate was first attempted.** What remains
 is a corpus large enough to draw from, and two hours of human reading.
 
-### 10.1 The deeper pattern: the validation layer was not held to the pipeline's standard
+### 10.1 "They all pushed toward the null" is NOT evidence the study is conservative
+
+The comfortable reading of the twenty-odd defects is that every one of them, left in
+place, would have biased the result toward *no effect* — so the instrument errs safe and
+a positive finding would survive them.
+
+**That reading is a selection effect, and it argues against itself.**
+
+Every defect here was found by someone investigating a number that looked wrong. The
+truncated commit walk was found because one arm's breakage rate looked low. The corpus
+file list was found because a gate disagreement looked inexplicable. `history_rewritten`
+was found because `parent_commit` attrition looked too high. **A number that looks RIGHT
+does not get investigated.**
+
+So the twenty are drawn from the population of defects that made results look bad. That
+population's direction says nothing whatever about the population of defects that made
+results look good — and a defect inflating the effect would have been precisely the
+comfortable one to leave alone, because nothing about it would have prompted a second
+look.
+
+This is a threat to validity in its own right and it is stated here rather than in the
+limitations paragraph, because it changes how the other twenty should be read. **"All
+twenty pushed toward null" is evidence about which defects get NOTICED, not about which
+defects EXIST.** The only defences that do not share this bias are the ones that run
+whether or not anything looks wrong: the pre-registered consistency checks, the
+known-answer tests, and the controls gate with its planted positives.
+
+### 10.2 The deeper pattern: the validation layer was not held to the pipeline's standard
 
 "Nobody knew draws were a limited resource" understates what went wrong. **Three of the
 four attempts were invalidated by defects in the validation machinery itself, not in the
