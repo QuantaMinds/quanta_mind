@@ -9,8 +9,7 @@ stages
 
       Five properties, each chosen because getting it wrong costs a re-run:
 
-      1. Grouped by repository, cloned once. ~3,300 PRs live in a few hundred
-         repositories; cloning per PR is the largest avoidable cost in the study.
+      1. Grouped by repository, cloned once -- the largest avoidable cost.
       2. Deterministic order — sorted by (repo, pr_id) — so a partial run is a
          PREFIX of the full run. Pilot and full results are then comparable rather
          than two arbitrary samples.
@@ -29,7 +28,7 @@ stages
       likeliest way to fake a positive by accident. tests/test_run_pipeline.py
       asserts that import is absent.
 IMPORTS: phase0.extract_prs, pycg_failure, run_graph, and
-      pipeline.{measure,record,worktree}. Never phase0.scan_outcome.
+      pipeline.{checkout,measure,record,worktree}. Never phase0.scan_outcome.
 CONSUMED BY: the run itself; tests/test_run_pipeline.py.
 """
 
@@ -43,6 +42,7 @@ from phase0.extract_prs import PRRecord
 from phase0.graph.pycg_failure import GraphStatus
 from phase0.graph.run_graph import DEFAULT_TIMEOUT_S, HarnessError
 from phase0.pipeline import record, worktree
+from phase0.pipeline.checkout import CheckoutUnverifiable, missing_python
 from phase0.pipeline.measure import measure
 
 PILOT_REPOS = 30
@@ -99,13 +99,12 @@ def one_pr(clone: Path, pr: PRRecord, slot: int, timeout_s: int) -> record.PRAud
 
     CONSUMES the record's parent. It does not re-resolve one.
 
-    The version that re-resolved called `parent_commit.resolve` with the PR's FILE
-    COUNT in the commit-count slot -- the substitution `assemble.build_record`'s own
-    docstring says A24 forbade -- and omitted `pr_commit_subjects` entirely, so
-    `by_subject` returned None every time and the corpus-derived file rules decided
-    every PR. It then overwrote a `parent_sha` the record already carried, resolved by
-    `assemble` from the API's subjects and true commit count. A caller rebuilding what
-    it was handed, which is the `_as_record` defect in the pipeline's own entry point.
+    The version that re-resolved called `parent_commit.resolve` with the PR's FILE COUNT
+    in the commit-count slot -- the substitution `assemble.build_record`'s own docstring
+    says A24 forbade -- and omitted `pr_commit_subjects`, so `by_subject` returned None
+    every time and the corpus file rules decided every PR. It then overwrote a
+    `parent_sha` the record already carried. A caller rebuilding what it was handed:
+    the `_as_record` defect in the pipeline's own entry point.
     """
     try:
         if not pr.parent_sha:
@@ -117,6 +116,22 @@ def one_pr(clone: Path, pr: PRRecord, slot: int, timeout_s: int) -> record.PRAud
         with worktree.at_commit(clone, pr.parent_sha, str(slot)) as tree:
             if tree is None:
                 return failed(pr, "worktree", "parent commit unavailable")
+            # A checkout can stop PARTWAY and leave an ordinary-looking tree: an LFS
+            # smudge failure ends it at the first LFS object, and everything after that
+            # is absent whether tracked or not. `measure` would read fewer files and
+            # report a smaller exposure denominator with nothing saying why. A short
+            # tree is not a small repository, so it is typed rather than tolerated.
+            try:
+                absent = missing_python(tree, clone, pr.parent_sha)
+            except CheckoutUnverifiable as exc:
+                return failed(pr, "checkout", f"completeness unknown: {exc}")
+            if absent:
+                return failed(
+                    pr,
+                    "checkout",
+                    f"{len(absent)} .py file(s) in the commit are absent from the "
+                    f"worktree; the checkout stopped partway. First: {absent[0]}",
+                )
             audit = measure(tree, pr, timeout_s)
             if audit is None:
                 return failed(pr, "scope", "no analysable Python at the parent")
