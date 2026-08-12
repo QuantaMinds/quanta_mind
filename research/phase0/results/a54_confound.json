@@ -1,0 +1,547 @@
+{
+ "broke_with_exposure": 53,
+ "resolved": 53,
+ "rows": [
+  {
+   "pr_id": "3270402787",
+   "repo": "3rdIteration/btcrecover",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "788d599840a4",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 2
+  },
+  {
+   "pr_id": "3270714989",
+   "repo": "3rdIteration/btcrecover",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "788d599840a4",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 2
+  },
+  {
+   "pr_id": "3210213419",
+   "repo": "567-labs/instructor",
+   "exposure": "unexposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "004934622e20",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 0
+  },
+  {
+   "pr_id": "3086930190",
+   "repo": "567-labs/kura",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "beb9a7fbcb91",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 1
+  },
+  {
+   "pr_id": "3094372246",
+   "repo": "567-labs/kura",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "beb9a7fbcb91",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 1
+  },
+  {
+   "pr_id": "3081620313",
+   "repo": "AliAkhtari78/SpotifyScraper",
+   "exposure": "unexposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "3a094f42fc59",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 1
+  },
+  {
+   "pr_id": "3091643325",
+   "repo": "AliAkhtari78/SpotifyScraper",
+   "exposure": "unexposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "507070cc6425",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 0
+  },
+  {
+   "pr_id": "3239615601",
+   "repo": "Bandit-HaxUnit/haxunit",
+   "exposure": "unexposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "d87bb2b351a9",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 5
+  },
+  {
+   "pr_id": "3164250713",
+   "repo": "BeehiveInnovations/zen-mcp-server",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "36bba89325e5",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 4
+  },
+  {
+   "pr_id": "3071657073",
+   "repo": "DannyMac180/meta-agent",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "7352eb79576a",
+   "symbol_overlap": 1,
+   "file_only": false,
+   "commit_symbols": 1
+  },
+  {
+   "pr_id": "3074842735",
+   "repo": "DannyMac180/meta-agent",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "7352eb79576a",
+   "symbol_overlap": 1,
+   "file_only": false,
+   "commit_symbols": 1
+  },
+  {
+   "pr_id": "3075386253",
+   "repo": "DannyMac180/meta-agent",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "7352eb79576a",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 1
+  },
+  {
+   "pr_id": "3080182898",
+   "repo": "DannyMac180/meta-agent",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "9729ecffb896",
+   "symbol_overlap": 2,
+   "file_only": false,
+   "commit_symbols": 4
+  },
+  {
+   "pr_id": "3080712414",
+   "repo": "DannyMac180/meta-agent",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "194650523a0a",
+   "symbol_overlap": 2,
+   "file_only": false,
+   "commit_symbols": 3
+  },
+  {
+   "pr_id": "3230472071",
+   "repo": "FoundationAgents/AFlow",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "df4586427ee9",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 4
+  },
+  {
+   "pr_id": "3266983404",
+   "repo": "Ljzd-PRO/KToolBox",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "69334e9a2b64",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 1
+  },
+  {
+   "pr_id": "3266984732",
+   "repo": "Ljzd-PRO/KToolBox",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "3bbf77b60c6d",
+   "symbol_overlap": 3,
+   "file_only": false,
+   "commit_symbols": 3
+  },
+  {
+   "pr_id": "3271959157",
+   "repo": "Ljzd-PRO/KToolBox",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "a9b0cb7a31c3",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 1
+  },
+  {
+   "pr_id": "3272335041",
+   "repo": "Ljzd-PRO/KToolBox",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "a9b0cb7a31c3",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 1
+  },
+  {
+   "pr_id": "3272353154",
+   "repo": "Ljzd-PRO/KToolBox",
+   "exposure": "unexposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "69334e9a2b64",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 1
+  },
+  {
+   "pr_id": "3070205074",
+   "repo": "MontrealAI/AGI-Alpha-Agent-v0",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "765d14acbe50",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 2
+  },
+  {
+   "pr_id": "3070214030",
+   "repo": "MontrealAI/AGI-Alpha-Agent-v0",
+   "exposure": "unexposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "cbd3d36fcd55",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 6
+  },
+  {
+   "pr_id": "3166124377",
+   "repo": "Nativu5/Gemini-FastAPI",
+   "exposure": "unexposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "34813154d038",
+   "symbol_overlap": 1,
+   "file_only": false,
+   "commit_symbols": 2
+  },
+  {
+   "pr_id": "3168020176",
+   "repo": "Nativu5/Gemini-FastAPI",
+   "exposure": "unexposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "34813154d038",
+   "symbol_overlap": 1,
+   "file_only": false,
+   "commit_symbols": 2
+  },
+  {
+   "pr_id": "3170016626",
+   "repo": "Nativu5/Gemini-FastAPI",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "bea78d0611bc",
+   "symbol_overlap": 1,
+   "file_only": false,
+   "commit_symbols": 6
+  },
+  {
+   "pr_id": "3192545670",
+   "repo": "NewFuture/DDNS",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "33a0c295c10d",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 1
+  },
+  {
+   "pr_id": "3194326319",
+   "repo": "NewFuture/DDNS",
+   "exposure": "unexposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "33a0c295c10d",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 1
+  },
+  {
+   "pr_id": "3127998239",
+   "repo": "ObservedObserver/async-code",
+   "exposure": "unexposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "03f728b1cce9",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 2
+  },
+  {
+   "pr_id": "3177251348",
+   "repo": "OpenPipe/ART",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "82d1b7e1752b",
+   "symbol_overlap": 1,
+   "file_only": false,
+   "commit_symbols": 3
+  },
+  {
+   "pr_id": "3176989811",
+   "repo": "PriorLabs/TabPFN",
+   "exposure": "unexposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "8064cdf63629",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 1
+  },
+  {
+   "pr_id": "3233722470",
+   "repo": "PromtEngineer/localGPT",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "93cdc90e1f00",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 0
+  },
+  {
+   "pr_id": "3206676160",
+   "repo": "QuinnDamerell/OctoPrint-OctoEverywhere",
+   "exposure": "unexposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "a2a3adce70ec",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 0
+  },
+  {
+   "pr_id": "3121749691",
+   "repo": "SirVer/ultisnips",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "b22a86f9dcc5",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 2
+  },
+  {
+   "pr_id": "3085074194",
+   "repo": "Skyvern-AI/skyvern",
+   "exposure": "unexposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "c575ad8bc7b4",
+   "symbol_overlap": 1,
+   "file_only": false,
+   "commit_symbols": 3
+  },
+  {
+   "pr_id": "3071582287",
+   "repo": "Uberi/speech_recognition",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "c354a58b01d6",
+   "symbol_overlap": 1,
+   "file_only": false,
+   "commit_symbols": 2
+  },
+  {
+   "pr_id": "3071613138",
+   "repo": "Uberi/speech_recognition",
+   "exposure": "unexposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "c354a58b01d6",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 2
+  },
+  {
+   "pr_id": "3183504987",
+   "repo": "Z3Prover/z3",
+   "exposure": "unexposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "84a6e4d67241",
+   "symbol_overlap": 3,
+   "file_only": false,
+   "commit_symbols": 3
+  },
+  {
+   "pr_id": "3118493362",
+   "repo": "aavetis/PRarena",
+   "exposure": "unexposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "8bb1cc748a86",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 1
+  },
+  {
+   "pr_id": "3118782981",
+   "repo": "aavetis/PRarena",
+   "exposure": "unexposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "8bb1cc748a86",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 1
+  },
+  {
+   "pr_id": "3119031442",
+   "repo": "aavetis/PRarena",
+   "exposure": "unexposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "8bb1cc748a86",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 1
+  },
+  {
+   "pr_id": "3128820704",
+   "repo": "aavetis/PRarena",
+   "exposure": "unexposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "8bb1cc748a86",
+   "symbol_overlap": 1,
+   "file_only": false,
+   "commit_symbols": 1
+  },
+  {
+   "pr_id": "2814487611",
+   "repo": "airbytehq/airbyte",
+   "exposure": "unexposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "7c065d80f17c",
+   "symbol_overlap": 7,
+   "file_only": false,
+   "commit_symbols": 10
+  },
+  {
+   "pr_id": "3266815573",
+   "repo": "aliev/aioauth",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "13a134a44bf5",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 1
+  },
+  {
+   "pr_id": "2771599553",
+   "repo": "bespokelabsai/curator",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "597c0747e0a6",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 2
+  },
+  {
+   "pr_id": "3224798225",
+   "repo": "bmander/graphserver",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "51ea20aefee3",
+   "symbol_overlap": 1,
+   "file_only": false,
+   "commit_symbols": 2
+  },
+  {
+   "pr_id": "3224819412",
+   "repo": "bmander/graphserver",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "bf5b8186d4f2",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 1
+  },
+  {
+   "pr_id": "3171852682",
+   "repo": "browser-use/browser-use",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "5ba0c7e0bb93",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 5
+  },
+  {
+   "pr_id": "3185381113",
+   "repo": "browser-use/browser-use",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "cfed7f6f86ee",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 1
+  },
+  {
+   "pr_id": "3154179065",
+   "repo": "bruin-data/ingestr",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "5da8727b2160",
+   "symbol_overlap": 1,
+   "file_only": false,
+   "commit_symbols": 1
+  },
+  {
+   "pr_id": "3160287486",
+   "repo": "bruin-data/ingestr",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "5da8727b2160",
+   "symbol_overlap": 1,
+   "file_only": false,
+   "commit_symbols": 1
+  },
+  {
+   "pr_id": "3131654790",
+   "repo": "cartography-cncf/cartography",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "88d245928736",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 0
+  },
+  {
+   "pr_id": "3257783295",
+   "repo": "commaai/opendbc",
+   "exposure": "exposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "6df4df496782",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 1
+  },
+  {
+   "pr_id": "2762078403",
+   "repo": "crewAIInc/crewAI",
+   "exposure": "unexposed",
+   "criterion": "fix_touching_same_file",
+   "evidence_sha": "d85898cf29ca",
+   "symbol_overlap": 0,
+   "file_only": true,
+   "commit_symbols": 1
+  }
+ ],
+ "exposed": {
+  "n": 32,
+  "file_only": 21,
+  "share": 0.6562
+ },
+ "unexposed": {
+  "n": 21,
+  "file_only": 15,
+  "share": 0.7143
+ },
+ "gap_pp": -5.81
+}

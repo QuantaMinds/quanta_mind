@@ -1833,33 +1833,101 @@ expected range because nobody has measured them; they exist so that the A6 fallb
 > **Before filling either block, complete the authenticity checklist in
 > `PHASE0_RUNBOOK.md `PHASE0_PREREGISTRATION.md` “Pre-specified confounders”`. All eight items. A result that fails a control is not a result.**
 
+### PYTHON ARM — AGENT
+
 ```
-Run date:
-Corpus:                     PRs,        repos,        changed symbols
-Exposed (n):
-Unexposed (n):
-Unanalyzed (n, third arm):
+Run date:                   2026-08-12  (exposure pass under the pinned linux image)
+Corpus:                     310 PRs, 200 repos walked / 107 repos in the analysed set,
+                            1,517 changed symbols classified
+Exposed (n):                107 PRs
+Unexposed (n):               73 PRs
+Unanalyzed (n, third arm):   47 PRs   (46 TIMEOUT + 2 OOM, one unscannable outcome)
 
                 broke     did not break
-EXPOSED           a=          b=
-UNEXPOSED         c=          d=
-UNANALYZED        e=          f=
+EXPOSED           a=32        b=75          29.91%
+UNEXPOSED         c=21        d=52          28.77%
+UNANALYZED        e=20        f=27          42.55%
 
-Relative risk (exposed vs unexposed):        [95% CI:      ,      ]
-Relative risk (unanalyzed vs unexposed):     [95% CI:      ,      ]
+Relative risk (exposed vs unexposed):      1.040  [naive Katz 95% CI: 0.654, 1.652]
+                                                  [CLUSTER-ROBUST 95% CI: 0.598, 1.890]
+                                                  Fisher p = 1.0000
+Relative risk (unanalyzed vs unexposed):   1.479  [naive Katz 95% CI: 0.906, 2.416]
+                                                  Fisher p = 0.1672
 
-Stratified RR — changed-lines quartile:
-Stratified RR — framework present / absent:
-Normalised by repo fix-rate:
+Stratified RR — changed-lines quartile:    Q1 0.684 (2/19 vs 4/26)
+                                           Q2 1.020 (6/25 vs 4/17)
+                                           Q3 1.283 (11/30 vs 4/14)
+                                           Q4 0.700 (13/33 vs 9/16)
+                                           NO MONOTONE TREND. Cuts at 17 / 85 / 276 lines.
+Stratified RR — framework present/absent:  NOT COMPUTED — no framework field exists on the
+                                           audit record. Never implemented; not omitted.
+Normalised by repo fix-rate:               NOT COMPUTED — requires a per-repository baseline
+                                           fix rate this pipeline does not produce.
 
-Primary vs tertiary outcome agreement:       %
+Primary vs tertiary outcome agreement:     NOT COMPUTED — the tertiary (AST-detected
+                                           breaking change, from the replication package)
+                                           was never run against this corpus.
 
-Achieved a:                (power target was ≥20)
+Achieved a:                32  (power target was ≥20)  — MET
 
-VERDICT:   [ ] Strong — proceed    [ ] Weak — re-pitch first    [ ] Null — stop
-Signed off by:
+VERDICT:   [ ] Strong — proceed    [ ] Weak — re-pitch first    [X] Null — stop
+Signed off by:  (unsigned — awaiting human sign-off)
 Date:
 ```
+
+**A8 is satisfied: primary inference is cluster-robust at repository level** — a 5,000-draw
+cluster bootstrap resampling the 107 repositories — **with the naive Katz interval reported
+alongside.** Clustering widens the interval from [0.654, 1.652] to [0.598, 1.890], as A8
+predicted it would; both contain 1.
+
+**THE FINDING, AT ITS TRUE WIDTH:** *unresolved statically-named call sites do not predict
+repair-within-7-days in merged agent-authored Python PRs from ≥100-star repositories, at a
+2025-08-01 data cutoff.* 29.91% against 28.77% is a difference of one PR.
+
+**EVERY PRE-REGISTERED GATE, AND HOW IT READ**
+
+- **A54 (confound):** file-only BROKE share 65.6% exposed against 71.4% unexposed,
+  **gap −5.81pp**. A54 fixed the reading asymmetrically because only one direction can
+  fabricate a result; unexposed higher is conservative and **does not block**. All 53
+  verdicts re-derived, none failed to reproduce.
+- **A56 (exclusion):** 11 test-only PRs left the estimand — **exactly the 11 measured
+  before the change was implemented.**
+- **A56 (timeout, second half):** attrition is size-selective — `ok` rows median 34 scope
+  files against 343 for non-`ok`. The first half was withdrawn: its input set is empty by
+  construction, `docs/CORRECTIONS.md` entry 5.
+- **A47 (draw feasibility):** met at repository 100, with all eight prior failed
+  evaluations recorded.
+
+**WHAT WOULD HAVE MADE THIS A POSITIVE, AND DID NOT**
+
+The outcome rule is loose — **65–71% of BROKE verdicts share no symbol with the PR**,
+confirming the hand-labelling gate's 8-of-8 finding at n=53 rather than n=20. Restricting
+BROKE to symbol-overlapping evidence gives **RR 1.251, p = 0.797**: higher, because the
+looseness was slightly worse on the unexposed arm, and still null. **The null survives the
+correction that would have helped it.**
+
+**THE THIRD ARM IS THE ONE WORTH READING.** `UNANALYZED_RESOURCE` breaks at **42.55%**
+against 28.77% unexposed — RR 1.479, CI [0.906, 2.416], not significant but the largest
+contrast in the table. Those are the PRs whose graphs timed out or exhausted 16 GB, i.e.
+the LARGEST scopes. That is consistent with repository size predicting breakage and
+inconsistent with exposure predicting it. **Section 4.4 reads this arm to decide
+*scalability product vs unsoundness product*; it points at the former.**
+
+**THE CEILING ON EVEN A POSITIVE RESULT, STATED SO NOBODY QUOTES THIS WIDER THAN IT IS**
+
+- **One detection mechanism of four.** Only `super()` chains are visible; `computed_getattr`,
+  `string_registry` and `registering_decorator` are structurally invisible (A50) — though
+  measured prevalence of unattributable sites is **0.241%**, not 25%.
+- **42% of the corpus carries no classification** — 47 resource-exhausted, 81 where no call
+  site names the changed symbol, 13 failing before measurement.
+- **79% OpenAI Codex; 11 Claude Code PRs in the analysed set.** Per-agent RR is not computed
+  for any non-Codex cell (A17, A34) and every such cell is DESCRIPTIVE.
+- **Association, not causation.** Cutoff 2025-08-01.
+
+**AUTHENTICITY CHECKLIST: NOT RUN.** `PHASE0_RUNBOOK.md` requires 8/8 before a verdict is
+signed. The verdict box above is marked but **UNSIGNED**, and it is not a result until that
+checklist is complete and a human signs it. Recording the number without the sign-off is
+the honest intermediate state; claiming the study is closed would not be.
 
 ---
 
