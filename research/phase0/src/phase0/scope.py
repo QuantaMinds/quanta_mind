@@ -10,11 +10,28 @@ WHY:  Amendment A3 in PHASE0_PREREGISTRATION.md, made mechanical rather than
       toward 100%. RUNBOOK section 6 Q4 lists that as a stop condition without
       naming the cause; this module is the cause, removed.
 
-      Test files are deliberately IN scope. A test calling a changed symbol is a
-      real caller, and tests resolve unusually well because they call directly --
-      excluding them would strip the best-resolved callers from the denominator
-      and inflate exposure. The MSR breaking-changes paper excluded them, but it
-      was counting AST-level breakage, not callers.
+      Test files WERE deliberately in scope and are NOT any more. This paragraph
+      said the opposite of what `NON_SOURCE_DIRS` does for as long as A56 has been
+      implemented; the entry was added, the rationale here was never revisited.
+
+      The argument for keeping them was OVERRULED, NOT WITHDRAWN, and it is left
+      standing here because it is still true: a test calling a changed symbol is a
+      real caller, tests resolve unusually well because they call directly, and
+      dropping them strips the best-resolved callers from the denominator, which
+      pushes exposure UP. The MSR breaking-changes paper excluded them, but it was
+      counting AST-level breakage, not callers.
+
+      What overruled it is a parser failure, not a change of mind about callers.
+      One unparseable fixture makes PyCG return `SYNTAX_UNSUPPORTED` for the WHOLE
+      package and A7 then drops the PR entirely, so keeping tests in scope cost
+      whole units where excluding them costs some callers. Measured when A56
+      landed: 11 of 310 records excluded outright, and the file set rewritten on
+      86 more.
+
+      THE BIAS THIS TRADE BUYS IS UNMEASURED. Nobody has computed exposure with
+      and without `tests` on one corpus, so its DIRECTION is known and its SIZE is
+      not. It is not asserted to be small. `NON_SOURCE_DIRS` is the only place
+      that decides this.
 IMPORTS: stdlib only (pathlib, dataclasses). No tree-sitter, no pycg -- both
       consumers import this, so it must not depend on either.
 CONSUMED BY: census.py, run_graph.py, classify_exposure.py; tests/test_scope.py.
