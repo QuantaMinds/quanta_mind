@@ -133,13 +133,29 @@ auto-merge, an org-wide kill switch, and **a measured false-merge rate that we p
 
 ## Competition — what each does, and why this is hard for them
 
-| | Reviews | Controls merge | Tracks coverage | Blocked by |
-|---|---|---|---|---|
-| **CodeRabbit** ($1.5B) | ✅ best-in-class | ❌ comments only | ❌ | No merge integration; precision headline |
-| **Graphite** ($52M) | ✅ low-noise, ~6% bug catch | ✅ merge queue | ❌ | Per-seat revenue; *"<5% negative comment rate"* |
-| **Kodus** (1.3k★, AGPLv3) | ✅ BYOK, self-hosted | ❌ | ❌ | Capacity, not structure |
-| **GitHub native** | ✅ Copilot review | ✅ auto-merge + queue | ❌ | Won't publish that Copilot's output needs scrutiny |
-| **Qodo / Greptile / Bugbot** | ✅ | ❌ | ❌ | Review-only products |
+| | Reviews | Controls merge | Merge conditions | Tracks coverage | Priced per | Blocked by |
+|---|---|---|---|---|---|---|
+| **CodeRabbit** ($1.5B) | ✅ best-in-class | ❌ comments only | — | ❌ | seat | No merge integration; precision headline |
+| **Graphite** ($52M) | ✅ low-noise, ~6% bug catch | ✅ merge queue | approvals + CI | ❌ | seat | Per-seat revenue; *"<5% negative comment rate"* |
+| **Kodus** (1.3k★, AGPLv3) | ✅ BYOK, self-hosted | ❌ | — | ❌ | seat | Capacity, not structure |
+| **GitHub native** | ✅ Copilot review | ✅ auto-merge + queue | approvals + CI | ❌ | seat / bundled | Won't publish that Copilot's output needs scrutiny |
+| **Qodo / Greptile / Bugbot** | ✅ | ❌ | — | ❌ | seat / credits | Review-only products |
+| **QuantaMind** *(planned — nothing shipped)* | ✅ capped, never re-raises | ✅ conditional | **ticket · size · findings · coverage** | ✅ **as the gate** | **repository** | Unproven demand |
+
+### The four cells nobody else fills
+
+1. **Merge conditions that read the change, not just the checkboxes.** Every merge product
+   in the market gates on the same two things: approvals and CI status. None gates on
+   **ticket type, diff size, review findings, or coverage.**
+2. **A coverage number at all.** Verified across seven tools — none can say *"I could not
+   analyse this."*
+3. **Review and merge in one product without a second app.** Graphite does both and makes
+   every reviewer sign up. CodeRabbit, Kodus, Qodo, Greptile and Bugbot comment and stop.
+4. **Per-repository pricing.** Everyone in the market charges per seat.
+
+**Row three is the combination that matters.** Any single cell above is copyable. What is
+awkward for them is holding all four at once, because each one costs a different incumbent
+something they sell.
 
 ### Why the coverage gate is hard for all of them
 
