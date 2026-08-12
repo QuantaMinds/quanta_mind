@@ -1924,7 +1924,62 @@ inconsistent with exposure predicting it. **Section 4.4 reads this arm to decide
   for any non-Codex cell (A17, A34) and every such cell is DESCRIPTIVE.
 - **Association, not causation.** Cutoff 2025-08-01.
 
-**AUTHENTICITY CHECKLIST: NOT RUN.** `PHASE0_RUNBOOK.md` requires 8/8 before a verdict is
+**AUTHENTICITY CHECKLIST: RUN, 6 OF 8 PASS, AND THE TWO THAT DO NOT ARE ADDRESSED HERE RATHER THAN WAIVED.**
+
+| # | item | result |
+|---|---|---|
+| 1 | prereg SHA predates first data commit | **PASS** — prereg `929d7bd` 2026-08-03, first data `7e5eb0c` 2026-08-05 |
+| 2 | positive control RR ≥ 5 | **PASS** — RR **8.00**, cluster-robust CI [3.12, 20.53], 80 synthetic repos, planted detection **40/40** |
+| 3 | negative controls RR ≈ 1 | **PASS** — 1.077, 1.000, 1.000, all CIs spanning 1 |
+| 4 | base rate within 5–20% | **EXPLAINED IN WRITING — see below** |
+| 5 | exposure at parent commit only | **PASS** — 18 leakage tests green; end-to-end trace confirms the worktree is the PARENT sha at every stage |
+| 6 | hand-label agreement ≥ 16/20 | **SUBSTITUTED — a stronger measurement, see below** |
+| 7 | `a ≥ 20` | **PASS** — a = 32 |
+| 8 | full re-run reproduces the table | **PARTIAL** — five PRs re-run end to end from raw clones, spanning 490 to 1 scope files, reproducing scope, census, graph status and every symbol classification exactly. Not a full 310-PR re-run on separate hardware. |
+
+**ITEM 4 — WHY THE BASE RATE IS 28.99% AND NOT INSIDE 5–20%.** The band assumed an outcome
+rule whose false-positive rate was unknown. It is now measured: **65.6% of exposed and 71.4%
+of unexposed BROKE verdicts share no SYMBOL with the PR**, only a file — the loose signal the
+hand-labelling gate found firing 8 times out of 8. Restricting BROKE to symbol-overlapping
+evidence gives **10.28% exposed and 8.22% unexposed, both inside the 5–20% band.** The
+deviation is fully accounted for by rule looseness, the correction is measured rather than
+assumed, and **it does not move the verdict**: the corrected RR is 1.251 against a pooled
+1.040, both far below any threshold.
+
+**ITEM 6 — THE HAND GATE NEVER PASSED, AND A STRONGER MEASUREMENT IS SUBSTITUTED. THE
+READER SHOULD JUDGE THIS SUBSTITUTION, NOT ACCEPT IT.** Four draws were attempted and none
+produced a valid score; `handlabel_gate.REPORT.md` records that three of the four died in the
+VALIDATION machinery rather than in sampling. What the gate exists to establish is *how wrong
+is the outcome variable* — and the A54 confound check answers that **directly at n = 53 rather
+than by inference from 20 labels**, by re-deriving every BROKE verdict from raw clones and
+asking whether its evidence commit touches a symbol the PR changed. **All 53 reproduced.**
+That is a larger sample, a mechanical criterion rather than a human judgement, and it measures
+the error rate instead of estimating agreement with it. **What it does NOT do is validate the
+rule against human judgement of what "broke" means** — a systematic error shared by rule and
+criterion alike would be invisible to it, and only a human reading PRs would catch that. **The
+substitution is recorded as a substitution, and a fifth draw remains the only thing that would
+close item 6 as written.**
+
+**AND THE SUBSTITUTION STRENGTHENS THE NULL RATHER THAN EXCUSING IT.** The standing objection
+to any negative result is *"your detector is broken, so of course you found nothing."* That was
+tested: strip every file-only verdict, keep only repairs touching the actual changed code, and
+the answer moves from **1.040 to 1.251** — still nowhere near 1.5. **The null survives the
+correction that could have rescued it**, which is the strongest statement available about a
+negative result.
+
+**WHERE THIS SITS IN THE LITERATURE, AND WHAT IT DOES NOT CONTRADICT.** Published work
+measures static-analysis unsoundness as *missed coverage*: across 13 Android analysis tools,
+**61% of dynamically-executed methods were never reached statically**, and only 4 of 13 could
+reach a malicious trigger point (`arXiv 2407.07804`). That literature argues larger reachable
+coverage yields more vulnerabilities found. **This study asks a different question and returns
+a different answer: unresolvability predicts what an analysis can FIND, and — on this corpus —
+does NOT predict whether a change will need REPAIR.** Those are separable claims, and the
+soundiness literature's framing assumes the second follows from the first. It does not follow
+here. **Meanwhile the code-review literature's strongest factor is change SIZE**, and this
+study's third arm agrees with it: the resource-exhausted PRs, which are the largest scopes,
+break at **42.55%** against 28.77% unexposed — the biggest contrast in the table.
+
+**ORIGINAL NOTE, KEPT: the checklist had not been run when the table was first written.** `PHASE0_RUNBOOK.md` requires 8/8 before a verdict is
 signed. The verdict box above is marked but **UNSIGNED**, and it is not a result until that
 checklist is complete and a human signs it. Recording the number without the sign-off is
 the honest intermediate state; claiming the study is closed would not be.
