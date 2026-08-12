@@ -42,6 +42,16 @@ NON_SOURCE_DIRS: frozenset[str] = frozenset(
         "node_modules",
         "site-packages",
         "vendor",
+        # A56. One unparseable file makes PyCG return SYNTAX_UNSUPPORTED for the WHOLE
+        # package, and A7 then excludes the PR, so a file nobody would call source
+        # removes a real unit from the study. Two causes were observed and only one is
+        # about Python at all: `template_samples/sample.py` reads
+        # `from {{ namespace }} import {{ client_name }}` -- Jinja2, which no interpreter
+        # version parses -- and a `tests/` fixture used PEP 695 `type X[T] = ...`, valid
+        # 3.12 that fails only because PyCG pins CPython 3.10.
+        "templates",
+        "template_samples",
+        "tests",
         "third_party",
         "build",
         "dist",
