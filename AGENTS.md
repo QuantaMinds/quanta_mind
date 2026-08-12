@@ -163,12 +163,12 @@ you remember to obey — the machine will stop you either way.
 
 - `tests/live/fixtures/repos/` contains pinned git submodules. They are large. `just check`
   skips them; `just verify` needs them. Run `just fixtures` once after cloning.
-- tree-sitter grammars are vendored under `vendor/`. Do not `pip install` them; the
-  versions are pinned because grammar changes silently alter parse trees.
+- tree-sitter is PINNED IN `pyproject.toml`, not vendored — there is no `vendor/`. The pin
+  is what matters: a grammar change silently alters parse trees.
 - The SQLite pack format is versioned. Changing `store/schema.py` requires a migration and
   a bump to `PACK_FORMAT_VERSION`. There is no "just delete the pack" fallback in prod.
-- PyCG is vendored and archived upstream. Our fork lives in `vendor/pycg/`. Upstream will
-  not accept patches — see `docs/PROJECT_CONTEXT.md#pycg`.
+- PyCG is `pycg==0.0.7` FROM PyPI and upstream is archived: no fork, no patch path, so a
+  PyCG crash is permanent attrition. See `docs/PROJECT_CONTEXT.md`, “PyCG (ICSE 2021)”.
 
 ---
 
