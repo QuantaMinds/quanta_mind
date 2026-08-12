@@ -31,6 +31,7 @@ import argparse
 import json
 import sys
 from collections import Counter
+from dataclasses import asdict
 from pathlib import Path
 
 from phase0.extract_prs import PRRecord
@@ -142,7 +143,11 @@ def main(argv: list[str] | None = None) -> int:
     print(f"{len(prs)} records, {already} already audited in {args.out}", flush=True)
 
     summary = run(prs, args.out, args.workspace, args.timeout, args.pilot)
-    print(json.dumps(summary.__dict__, indent=2, sort_keys=True))
+    # asdict, not __dict__: RunSummary is `slots=True` per this project's own dataclass
+    # rule, and a slots dataclass has no __dict__. This raised AFTER run() returned and
+    # after every row was appended, so it cost the operational counts and no data --
+    # loud, at the end, with the output already on disk.
+    print(json.dumps(asdict(summary), indent=2, sort_keys=True))
     print(f"\nwritten to {args.out}")
     # Operational counts only, by design: no arm counts, no ratio, no effect size.
     return 0

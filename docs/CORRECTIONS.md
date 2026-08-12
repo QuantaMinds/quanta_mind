@@ -72,3 +72,31 @@ held it**, so the reader had no way to tell from the artefact alone.
 
 Fill the mechanism column honestly, including "NO". An entry claiming coverage it does not
 have would be an instance of the class it is filed under.
+
+## 5 — A pre-registered check with no possible input
+
+**Claimed:** A56 registers, before the exposure pass, *"`TIMEOUT` rate for EXPOSED against
+UNEXPOSED PRs"* as a test of whether graph attrition correlates with the treatment.
+
+**What actually held:** the check cannot be computed and never could have been. A PR that
+times out has **no exposure classification**, because timing out is what prevents one —
+all 46 timeouts and both OOMs classify as `unanalyzed_resource`. The check compares
+timeout rates between two groups that a timeout removes you from.
+
+**How it was caught:** by running it. The join returned zero exposed and zero unexposed
+timeouts, which is not a null result — it is the only result the check can produce.
+
+**Mechanism now:** none, and that is the point of this entry. This is a NEW class, distinct
+from the ones already logged. Rule 14 asks *what does this check output when the thing it
+checks is broken?* — and answers "the same thing", which catches a check that cannot
+discriminate. **This check cannot even be evaluated**: its input set is empty by
+construction, so it has no output at all, working or broken. The question that would have
+caught it is one step earlier: **can this check receive data?**
+
+The second half of A56's timeout check — TIMEOUT rate by scope-file quartile — stands and
+is computable. Size selectivity is measurable; correlation with exposure, through this
+route, is not.
+
+**ADVISORY.** No guard proposed. A mechanism that decided whether a pre-registered check
+has a reachable input set would have to understand the check, and inventing one on a
+single instance is how a guard ends up asserting more than it can test.
