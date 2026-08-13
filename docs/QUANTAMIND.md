@@ -527,46 +527,69 @@ at bug-finding.** The moat is not the ranking. It is that the incumbents cannot 
 themselves, cannot afford to prove value on a prospect's own history, and cannot report coverage
 without first building a layer whose output embarrasses them.
 
-## What an investor will ask: "if you are not better at finding bugs, why fund this?"
+## The investor question: "if you are not better at finding bugs, why should we invest?"
 
-The question deserves a direct answer rather than a deflection.
+The answer, in the order it should be given.
 
-**Nobody is good at finding bugs, and that race is capped.** The independent benchmark puts the
-whole field between 49% and 76% precision. Our own measurement found the market leader left an
-actionable finding on **10 of 65 changes that genuinely came back**. Everyone is running the same
-model class against the same diffs, so detection quality converges — and a company whose entire
-plan is "we detect slightly better" is one model release away from parity in either direction.
+### "You're right. We're not. Neither is anyone else — and that is the point."
 
-**We are not selling detection. We are selling attention.** The bottleneck in an AI-native
-engineering org is not that defects go unnoticed by machines; it is that sixty pull requests a
-week arrive at two senior engineers, each carrying a wall of bot comments a third of which are
-noise. **Adding more findings to that queue is not a product, it is the disease.** We are the
-only entrant whose stated goal is to say *less*, and to be right about the one thing it says.
+The independent benchmark puts the entire field between **49% and 76% precision**. We measured
+the market leader against real breakages: it left an actionable finding on **10 of 65 changes
+that came back**. Everyone runs the same model class against the same diffs, so detection
+converges. **Any company whose plan is "we detect slightly better" is one model release from
+parity, in either direction.** That is not a business worth funding, and we are not proposing it.
 
-**The company is the measurement layer; the reviewer is the wedge.** Every buyer of AI tooling
-now faces a board question — *is the code our agents write getting worse?* — and cannot answer
-it, because their dashboards use an attribution rule that is two-thirds wrong. We fixed it, and
-we sell no reviewer of our own, which makes us the only party that can answer it credibly. That
-is a durable position in a market where nobody can currently prove value.
+### The bottleneck was never detection. It is attention.
 
-**Three properties make it fundable rather than merely true:**
+Agents write most pull requests now. A team that opened twenty a week opens sixty. The two
+senior engineers reading them did not become six. Then the review tools arrived and put a wall
+of comments on every one, a third of it noise. Review did not get faster — it stopped happening.
+**The largest single reason AI pull requests are rejected is inactivity: 17.3%**, auto-closed
+because nobody got to them.
 
-- **Cost structure inverted against the incumbents.** Their marginal cost scales with lines read;
-  ours is compute. We can be free where they cannot, and we can prove value on a prospect's own
-  history where they cannot afford to.
-- **A wedge that is quiet enough to survive contact with developers.** Tools that add noise get
-  muted in week three. Firing on one change in ten is an adoption strategy, not a limitation.
-- **Falsifiable from day one.** We know the single number that decides this — whether a reviewer
-  shown the routing line acts on it — and it costs one month of shadow mode on three
-  repositories, not a funding round.
+Every incumbent answers that flood by generating more text into it. **We are the only entrant
+whose goal is to say less** — one change in ten — and to be right about the one thing it says.
+It is: the function we point at is the one the fix returns to, **22 points above its rate on
+everything else, replicated by an independent rater with no stake in the result**.
 
-**And the honest counter-case, because an investor who finds it themselves will discount
-everything else:** the routing feature alone is a feature, not a company. It is a shell
-one-liner plus packaging. This is only a company if the measurement position holds — if buyers
-will pay an independent party to tell them whether their AI tooling works. **That demand is
-unproven, it is the largest risk in this plan, and no amount of further engineering resolves
-it.** Five conversations with engineering leaders answers it faster than five more months of
-building.
+### The company is not the reviewer. It is the measurement layer.
+
+Every buyer of AI coding tools now has a board question they cannot answer: *is the code our
+agents write getting worse?* They cannot answer it because every dashboard they own attributes
+rework with a rule that is **wrong on 67.9% of its verdicts** — measured here, reproduced three
+times on separate corpora.
+
+We corrected that rule, and we sell no reviewer of our own, so we are the only party who can
+answer the question and be believed. **The auditor cannot be the vendor.** No incumbent can
+credibly publish its own miss rate, for the same reason no company audits its own books.
+
+### Three properties that make it fundable rather than merely true
+
+- **Cost structure inverted.** Their marginal cost scales with lines read; ours is compute. So
+  we can prove value on a prospect's own history — replay their last six months and show what we
+  would have caught. **That costs a model-per-diff reviewer a full inference pass per historical
+  pull request. It costs us CPU.** They demo on a toy repository; we demo on the customer's
+  actual code.
+- **Quiet enough to survive developers.** Firing on 10% of changes is an adoption strategy, not
+  a limitation. Noisy tools get muted in week three.
+- **Falsifiable next month for the price of a pilot**, not a round.
+
+### The risk, handed over before they find it
+
+> *"The routing feature on its own is a feature, not a company — it is a shell one-liner plus
+> packaging, and a competitor ships it in a month. This is a company only if the measurement
+> position holds: if engineering leaders will pay an independent party to tell them whether
+> their AI tooling works. **That demand is unproven.** It is the biggest risk in this plan, and
+> five conversations answer it faster than five months of building."*
+
+An investor who finds that objection unaided discounts everything said before it. An investor
+handed it starts weighing the actual bet.
+
+### If there is time for only one sentence
+
+**"We are not selling better bug-finding — that is capped and commoditised. We are selling the
+only trustworthy answer to 'is this working', in a market where every existing answer is two
+thirds wrong."**
 
 ---
 
@@ -619,6 +642,190 @@ the commits."*
 
 **And an anti-requirement:** no per-pull-request Slack alerts. A tool that pings a channel on
 every change is muted in week three, and the whole design is built on firing rarely.
+
+---
+
+# 6. The evidence, in full
+
+Everything this project measured, including what failed. A reader who only wants the conclusion
+can stop at the previous section; this exists so the conclusions can be checked.
+
+## 6.1 The corrected attribution rule
+
+**The problem.** To know whether any review signal works, you need to know which later fix
+belongs to which earlier change. The industry-standard rule is **file overlap**: a fix touching
+a file the change touched counts against it.
+
+**The measurement.** 53 breakage verdicts were re-derived at symbol level. **36 of 53 — 67.9% —
+blamed a change sharing no symbol with the fix.** Broken out: 65.6% on one arm, 71.4% on the
+other. Survival under correction: **32.1%**, reproduced at **36.1%** and **35.7%** on two further
+corpora.
+
+**Why it matters.** Every AI-code-quality dashboard a buyer reads today runs on this rule, so
+roughly two thirds of what it attributes points at the wrong change.
+
+## 6.2 What the ranking is measured against
+
+Three candidate outcome rules, run on **one population per repository** so they cannot be
+confounded. "Lift" is precision at a 10% firing rate minus the precision a random pick of the
+same changed units would achieve.
+
+| Repository | Units | file lift | **symbol lift** | line lift |
+|---|---|---|---|---|
+| Skyvern | 1,022 | +50 | **+46** | +7 |
+| browser-use | 186 | +20 | **+36** | −4 |
+| cartography | 251 | +1 | **+28** | −5 |
+| opendbc | 17 | −1 | **+17** | +0 |
+
+Base rates tell the same story more plainly. Under the file rule: **90%, 83%, 44%, 33%** —
+implausible as defect rates. Under the symbol rule: **62%, 42%, 27%, 29%**.
+
+**Files measure traffic.** Of 1,316 follow-up fixes examined directly, **989 touched only the
+same file at different lines**, 327 touched the modified lines, and 105 were explicit reverts.
+
+**Lines are unusable.** Every later commit renumbers a file; with a median 26 hours to the
+follow-up, intervening edits are near-certain. The rule under-counts real repairs by an
+unmeasured amount.
+
+**Symbols survive both.** A function keeps its identity when line numbers move.
+
+## 6.3 The ranking itself
+
+**File level, the largest sample:** top-1 accuracy **85.3%** against a **72.0%** alphabetical
+null ranker and a 67.5% random baseline — **4,293 events across 17 repositories, positive in 17
+of 17.** Sign test on direction, p ≈ 1.5 × 10⁻⁵.
+
+**Rank globally, never hierarchically.** Ranking the top file and then the top function inside
+it performs *below* the null ranker:
+
+| Strategy | Top-1, 236 events |
+|---|---|
+| **Rank all changed functions globally** | **75.0%** |
+| Alphabetical null ranker | 61.0% |
+| Any function in the top-ranked file | 58.9% |
+| Top file, then top function inside it | 54.2% |
+
+The highest-history file is usually not where the highest-history function lives, so filtering
+by file first discards better candidates elsewhere in the diff.
+
+**Thresholds must be percentiles, not constants.** "Twelve prior touches" fired on 11% of one
+repository and 53% of another. A top-decile threshold holds the firing rate at **10–12% across
+an 80× range in repository velocity**.
+
+## 6.4 Does the ranking track risk, or activity?
+
+The question everything else depended on. Answered by labelling the outcome by **intent** rather
+than geometry: 300 change pairs labelled **blind**, ranker verdict withheld and order shuffled by
+content hash, by a model from a **different family** with no stake in the result.
+
+| | Hand labels, 60 pairs | Independent model, 300 pairs |
+|---|---|---|
+| Ranker named the symbol on **repairs** | 70% (7/10) | **69% (27/39)** |
+| Ranker named it on **non-repairs** | 48% (21/44) | **47% (117/247)** |
+| Difference | +22 points | **+22 points** |
+| Fisher exact two-sided | p = 0.298 | **p = 0.0151** |
+
+**Two raters — one with every incentive to find the effect, one with none — produced the same
+effect size to within a point.** Agreement on the binary decision: **92%, Cohen's kappa 0.66**.
+The biased rater was the *more liberal* one (17% repairs against 12%), so the stricter
+independent rater should have shrunk the effect and did not.
+
+**And the correction this forces on every other number here:** the independent labels found
+**39 genuine repairs in 300 pairs — 14%**. Symbol overlap is therefore **~86% noise**, and any
+precision figure stated against it must be multiplied by roughly 0.14 to become precision
+against real repairs.
+
+## 6.5 Signals tested and rejected
+
+Sixteen candidate pre-merge signals were tested. These failed, and are recorded so nobody
+rebuilds them.
+
+| Signal | Result |
+|---|---|
+| Gate merges on static-analysis coverage | **Null.** Relative risk 0.916, 95% CI [0.557, 1.505], Fisher p = 0.746. Held changes broke at 22.1%, passed ones at 24.1% — while the gate fired on **45% of pull requests** |
+| Exposure to unresolvable call sites predicts breakage | **Null.** RR 1.040, cluster-robust CI [0.598, 1.890], 310 pull requests. Correcting the outcome rule moved it to 1.251 — *"the null survives the correction that would have helped it"* |
+| "You forgot to change file X", from co-change history | **Dead.** Fired on genuine breakages but named the right file **0 times out of 8** |
+| Fix-history hotspot warning | **Null.** RR 1.56, p = 0.334, firing on 36% of clean changes |
+| Test-coverage gap | **Null and reversed.** Changes touching no test broke *less* (RR 0.91 and 0.76) |
+| Ten pull-request metadata signals | **Nothing survived Bonferroni correction.** Only diff size replicated, at RR ≈ 2.1 — and every competitor already gates on it |
+| Nested file-then-function ranking | **Below its own null ranker** |
+| Structural callers as a localiser | **1 of 5**, while flagging 19% of the repository |
+
+**Why the localisers all failed, measured rather than assumed.** For every genuine breakage, the
+fix commit's files were split into those the change had already touched and those it had not:
+**5 of 11 SELF** (the fix only re-touched changed files), **6 of 11 MIXED**, **0 of 11
+COMPANION**. Every breakage required re-editing a file the change had already touched. **These
+are not incomplete changes; they are wrong changes** — which is why no signal about *which files
+are involved* can localise them, and why inference is in the design at all. Published work
+agrees: semantic errors account for over 60% of faults in model-generated code.
+
+## 6.6 Language coverage
+
+File-level ranking, same code path, pathspec swapped:
+
+| Language | Events | Ranker | Null | **Lift** |
+|---|---|---|---|---|
+| TypeScript | 400 | 80.8% | 54.8% | **+26.0** |
+| Java | 41 | 90.2% | 73.2% | **+17.1** |
+| Python | 5,242 | 85.4% | 70.9% | **+14.5** |
+| C++ | 63 | 82.5% | 68.3% | **+14.3** |
+| Go | 185 | 85.4% | 76.2% | **+9.2** |
+| JavaScript | 168 | 77.4% | 68.5% | **+8.9** |
+
+**Positive in all six, with Python in the middle rather than at the top.** Limits: this is
+file-level only, so it establishes the signal exists in these languages and not that
+function-level extraction works in them; the non-Python samples are small; Kotlin returned no
+result despite being the largest non-Python corpus available; and the outcome rule assumes
+English fix-keywords in commit messages, which is a natural-language assumption travelling under
+a programming-language result.
+
+## 6.7 Measurement defects found and corrected
+
+Four instrumentation failures occurred during this work. All produced plausible numbers. None
+was detectable from the output alone. They are recorded because a document that never reports
+its own errors gives a reader no way to calibrate the rest of it.
+
+**A dead check that could not fail.** A hotspot signal returned zero at every threshold, which
+looked like a clean null. Its window was expressed relative to today while the history it walked
+was ancestral to a 2025 commit, so no commit could satisfy both. A sanity counter now reports
+in-window commits found: **0 before the fix, 1,298 after.**
+
+**Truncated history read as complete.** `git log -p` **exits non-zero on a blob-filtered clone**
+and emits a partial patch stream. The harness did not check the return code, so runs analysed
+**710 and 918 commits on two invocations of an identical command**, against the 3,313 the
+repository holds. **Voided:** the first symbol-versus-file comparison, the nested-ranking
+comparison, and the first retrospective figures — all rerun on full objects. **Unaffected:**
+everything produced with `--name-only`, which reads no file contents.
+
+**A test that could not fail.** Reverts are a repair by definition and need no rater, which made
+them the obvious escape from self-labelling bias. The pooled result looked decisive — ranker
+12/12 on reverted changes against 51% elsewhere, **+49 points, p = 0.0005**. The control killed
+it: **the alphabetical non-informative pick also scored 12/12**, because a revert touches **94%
+of the change's symbols** and 75% of them touch all. Any pick scores. **Withdrawn.** Caught
+before publication, by asking what a broken ranker would score.
+
+**A guard firing correctly.** A wrapper timeout later killed a run mid-stream and the new
+exit-code assertion refused to report from the partial read.
+
+**The rule adopted:** any harness reading patch content asserts the git exit code, any clone used
+for symbol-level work carries full objects, and any precision figure is reported beside a
+non-informative control. **A precision number without a control is not a finding** — two
+repositories produced figures the ranking had not earned.
+
+## 6.8 What remains unproven
+
+**Whether a reviewer shown the routing line before the defect exists catches anything they would
+otherwise miss.** Every measurement above is retrospective. This is a field question — one month
+of shadow mode on three repositories — and no quantity of history substitutes for it.
+
+**Whether allocation actually reduces token cost** against uniform review of the same diffs. The
+2× figure is arithmetic, not measurement.
+
+**Whether the productionised ranker reproduces these numbers.** If it does not, the research is
+not the product.
+
+**Whether anyone will pay an independent party to measure their AI tooling.** The largest risk in
+the plan, and the one that no further engineering resolves.
 
 ---
 
