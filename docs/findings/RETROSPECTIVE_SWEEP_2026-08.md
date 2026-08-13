@@ -139,6 +139,114 @@ diff geometry, and no granularity of overlap will recover it.
 
 ---
 
+## Labelling the outcome by intent: the ranker points the right way, underpowered
+
+Sixty symbol-overlap pairs from Skyvern were labelled **blind** — the ranker's verdict was
+withheld and the ordering shuffled by content hash — as REPAIR, CONTINUED_WORK, UNRELATED, or
+UNCLEAR, reading both subjects, both diffs, and whatever pull-request discussion existed.
+
+| | |
+|---|---|
+| Ranker named the shared symbol on **repairs** | **7 of 10 — 70%** |
+| Ranker named it on **non-repairs** | 21 of 44 — 48% |
+| Difference | **+22 points** |
+| Fisher exact two-sided | **p = 0.298** |
+
+**Two results, and the second is larger than the first.**
+
+**The direction is right and the power is not there.** A 22-point gap is the first evidence
+that the ranker tracks risk rather than traffic, and ten repairs cannot establish it. Reaching
+significance at this effect size needs roughly five times the labels.
+
+**Even symbol overlap is 83% noise.** Of sixty pairs where a fix-labelled commit touched the
+same function within fourteen days, **ten were genuine repairs**; twenty-five were plainly
+unrelated and nineteen were the same feature progressing.
+
+**That recalibrates every precision figure in this document.** Those numbers are precision at
+hitting a symbol-overlap *event*. Multiplied by a 17% repair base rate, Skyvern's 66% becomes
+roughly 11%. **No precision figure here should be quoted without that multiplier** until the
+outcome rule is labelled at scale.
+
+**The weakness of this evidence, stated plainly.** The labels were produced by the same author
+as the hypothesis. Withholding the ranker's verdict prevents seeing which side a pair falls on;
+it does not prevent knowing what result would be convenient. These labels want a second rater,
+or a model with no stake in the outcome. Six pairs were marked UNCLEAR and excluded — mostly
+refactor-then-fix sequences only the author could adjudicate.
+
+---
+
+## The ranker tracks repairs, not traffic — replicated by an independent rater
+
+The open question all along was whether the ranker points at changes that *came back* or merely
+at code that is *busy*. Three hundred symbol-overlap pairs from Skyvern were labelled by
+**Gemini on Vertex** — a different model family, no stake in this hypothesis — reading both
+subjects, both diffs, and any pull-request discussion. Zero failures.
+
+| | Hand labels, 60 pairs | **Gemini, 300 pairs** |
+|---|---|---|
+| Ranker named the symbol on **repairs** | 70% (7 of 10) | **69% (27 of 39)** |
+| Ranker named it on **non-repairs** | 48% (21 of 44) | **47% (117 of 247)** |
+| Difference | +22 points | **+22 points** |
+| Fisher exact two-sided | p = 0.298 | **p = 0.0151** |
+
+**Two raters, one of them the author of the hypothesis and one with no stake, produced the same
+effect size to within a point.** The larger sample makes it significant.
+
+**Inter-rater agreement on the binary decision — repair or not — is 92%, Cohen's kappa 0.66.**
+Four-way agreement is 55%, but the disagreements are almost entirely CONTINUED_WORK against
+UNRELATED, which are the same thing for this measurement. Five binary disagreements in sixty,
+and the **hand rater was the more liberal one** (17% repairs against 12%): the bias ran toward
+finding the effect, and the effect held under the stricter rater.
+
+**Gemini's verdicts:** 197 UNRELATED, 50 CONTINUED_WORK, 39 REPAIR, 14 UNCLEAR — a **14% repair
+base rate**, corroborating the 17% found by hand. **Symbol overlap remains roughly 86% noise**,
+so every precision figure in this document still carries that multiplier.
+
+### What this establishes, and what it does not
+
+**Established.** The ranked symbol lands on genuine repairs materially more often than on
+continued work or unrelated edits. The attention signal is about risk, not activity. That was
+the question the coverage null, the co-change null and the hotspot null all failed to answer,
+and it is now answered in the affirmative on an independent rater's labels.
+
+**Not established.** That a reviewer shown the routing line *before* the defect exists catches
+anything they would otherwise miss. Every number here is retrospective. The commercial question
+is still a field measurement, and no amount of history answers it.
+
+---
+
+## Reverts are excellent ground truth and a vacuous test of this ranker
+
+A revert is a repair by definition, recorded by git, and needs no rater — which makes it the
+obvious way to escape the self-labelling bias above. It does not work here, and the reason is
+worth keeping.
+
+```
+ranker hit on REVERTED changes      : 12/12 = 100%
+alphabetical (non-informative) pick : 12/12 = 100%      <- identical
+reverts that undid the WHOLE change : 9/12  = 75%
+mean share of the change's symbols the revert touched  : 94%
+```
+
+**A revert is the inverse of the change, so it touches the same functions the change touched.**
+The set the ranker is asked to hit is therefore nearly the whole set of candidates, and any
+pick scores. The pooled figures before the control looked decisive — **+49 points,
+p = 0.0005** — and they measure nothing: a completely broken ranker scores 100% on this test.
+
+**Withdrawn:** the revert arm and every figure derived from it.
+
+**The general rule this is an instance of.** Any test of *"did the ranker name the right unit"*
+requires the outcome to touch **some** of a change's units and not others. An outcome that
+touches all of them cannot discriminate, however clean its provenance. Ground-truth quality and
+test power are separate properties, and reverts have the first without the second.
+
+**A narrower detector was not the fix either.** Matching only git's generated
+`This reverts commit <sha>` body found **3 reverts in the entire corpus**, because a
+squash-merged revert pull request keeps its title and loses that body. Subject-linked matching
+found 12. Neither count rescues a test that is satisfied by construction.
+
+---
+
 ## The measurement defect that voided the first attempt
 
 `git log -p` **fails outright on a blob-filtered clone**:
