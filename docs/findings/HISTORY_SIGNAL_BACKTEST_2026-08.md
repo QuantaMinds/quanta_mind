@@ -45,7 +45,8 @@ Fisher exact two-sided p = 0.0066
 Matched to repositories containing **both** arms, which removes two repositories that could
 only contribute to the numerator: **5 of 11 = 45.5%** against **2 of 25 = 8.0%**.
 
-For comparison on a different corpus, an AI reviewer flagged 10 of 65 genuine breakages at a
+**WITHDRAWN — see the withdrawal in `QUANTAMIND.md`; the Wilson interval spans the
+comparison figure, so this distinguishes nothing.** For comparison on a different corpus, an AI reviewer flagged 10 of 65 genuine breakages at a
 23.9% rate on clean pull requests. This signal fires **more often on what broke and less
 often on what did not**, which is the shape the product needed.
 
