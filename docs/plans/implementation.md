@@ -571,6 +571,169 @@ tickets.
 
 ---
 
+# The commercial surface, which the pricing table sells and this plan did not build
+
+**Audited against the four-tier table. Every row below was being sold with no stage, no gate and
+no test.** Listing them as monetisation prose was not the same as planning them, and the gap was
+only visible by reading the price list next to the build order.
+
+| Sold on | Row | Was it planned? |
+|---|---|---|
+| Business | cross-repository aggregation | **No** |
+| Business | quarterly coverage audit | named once, never built |
+| Business | SSO / SAML / SCIM | SSO named, SAML and SCIM absent |
+| Business | verifier drop-rate telemetry | covered by the telemetry section |
+| Business | bring your own key, allowlisted model | mentioned, no mechanism |
+| Enterprise | bring your own **model**, uncertified | **No**, and it implies a recurring process |
+| Enterprise | self-host, audit logs, residency, SLA | self-host named; audit logs and residency absent |
+| Team+ | token budget, fair use per repository | **No** — and it is load-bearing for margin |
+
+Four stages follow. **None may start before the ranker gate**, because all of them are worthless
+if the ranking does not reproduce.
+
+---
+
+## Stage — The budget ceiling
+
+**First of the four, because it is not a feature. It is what keeps the price honest.**
+
+At twenty developers and 400 pull requests a month, inference runs about $56 against $380 of
+revenue — 85% margin. At 2,000 pull requests it is $280 against $380, or **26%**. "Unlimited
+reviews" is a promise the `allocate` layer has to keep.
+
+### Steps
+
+1. `store/quota.py` — spend per repository per billing period, written by the same review record
+   that already carries request count and token spend. **A query over the existing store, never
+   a second counter.**
+2. `allocate/ceiling.py` — a per-repository budget read at allocation time. Above it, the review
+   still runs and still posts the coverage line; **only inference is withheld, and the comment
+   says so.**
+3. Threshold configurable per plan, defaulting to the fair-use figure on the price list.
+
+### Gate
+
+Drive a repository past its ceiling on real traffic. **Reviews keep arriving, coverage lines keep
+appearing, inference stops, and the comment states that it stopped.**
+
+**Known-answer test:** set the ceiling to zero. Every review must degrade to coverage-only and
+none may fail. A ceiling that errors instead of degrading turns a billing limit into an outage.
+
+### What could silently fail
+
+A ceiling never reached and a ceiling never wired up look identical. The monthly analysis already
+required for cost includes **spend against ceiling per repository**; a column of zeroes across
+every repository means the ceiling is not connected, not that nobody is heavy.
+
+---
+
+## Stage — Identity and the organisation view
+
+**What actually separates Team from Business.** Not a bigger quota — a different buyer, who has
+more than one repository and someone above them asking about all of them.
+
+### Steps
+
+1. `serve/auth_sso.py` — SAML and OIDC. **SCIM last**, and only when a customer asks: it is user
+   provisioning, it is where identity integrations rot, and nobody has ever bought because of it.
+2. `types/org.py`, `store/org.py` — an organisation owning repositories. **This is a schema
+   change and needs a migration**, which is why it lands before any Business customer, not after.
+3. `render/org_report.py` — rework concentration across repositories, quarter over quarter.
+4. `serve/admin_org.py` — role-based access. Three roles, not nine.
+
+### Gate
+
+Two repositories, one organisation, one report whose numbers **equal the sum of the per-repository
+records** when checked by hand.
+
+**Known-answer test:** put a repository in the organisation with no reviews. It must appear with
+zeroes rather than be omitted — a silently dropped repository is how an org-wide report becomes
+quietly wrong, and it looks like a clean report.
+
+---
+
+## Stage — Bring your own key, and the certification that follows
+
+**Two features, deliberately split, and the split is the pricing line.** Business gets a key for
+a model we have already evaluated. Enterprise gets a model we have not.
+
+### Steps
+
+1. `infer/providers/` — one module per provider: direct, Bedrock, Vertex, Azure. **They differ on
+   cache semantics, structured-output shape and refusal handling**, and each is a maintained
+   integration rather than a configuration flag.
+2. `store/credentials.py` — customer keys encrypted at rest, never logged, never in a review
+   record. **A key in a log is a breach with a date on it.**
+3. `infer/allowlist.py` — the models certified for Business. Anything outside it is Enterprise.
+4. **`scripts/certify_model.py` — the recurring process this plan had no place for.** For a model
+   we have not evaluated: run the verifier against it on the corpus and record the drop rate by
+   claim class. **We publish a coverage number under our name; publishing one for a model we
+   never measured is the failure this product exists to prevent.**
+
+### Gate
+
+The same pull request reviewed through two providers produces **the same structural claims**.
+Where it does not, the difference is recorded in the certification, not averaged away.
+
+**Known-answer test:** a deliberately weak model must produce a **higher** drop rate, and
+certification must refuse to pass it. If every model certifies, the certification measures
+nothing — and this is the one gate whose failure is silent, because a bad certification still
+prints a number.
+
+### What could silently fail
+
+Certification is **not one-off**. A provider updating a model silently invalidates it. Record the
+model version in every review, and treat an unrecognised version as uncertified rather than
+assuming continuity.
+
+---
+
+## Stage — What procurement requires
+
+**Bought by security review, not by engineers.** None of it improves the product and all of it is
+mandatory above a company size.
+
+### Steps
+
+1. `serve/audit_log.py` — append-only: who changed configuration, when, from where. **Separate
+   from application logs**, because the first question in an audit is whether the log could have
+   been edited.
+2. Data residency — region-pinned storage, chosen at install and not migratable afterwards.
+3. Self-hosted deployment: container, migrations run by command, an offline licence check that
+   **fails open**. A licence check that fails closed takes a customer's reviews down over our
+   billing problem.
+4. Retention controls, and contractual no-training in writing.
+5. SLA measurement before an SLA is offered. **We do not have latency numbers**, and the rule
+   against performance claims without measurement applies hardest in a contract.
+
+### Gate
+
+A full security questionnaire answered **from the running system**, not from a document. Every
+answer demonstrable.
+
+**Known-answer test:** attempt to modify an audit-log entry through any application path. It must
+be impossible, and the attempt must itself be logged.
+
+---
+
+## Where these sit in the order
+
+**All four are gated behind the ranker**, and three of the four should wait for a customer who is
+actually blocked on them:
+
+| Stage | Trigger | Why not sooner |
+|---|---|---|
+| **Budget ceiling** | **before the first paid seat** | It is not a feature, it is what makes the price true |
+| Identity and org view | first Business prospect with two repositories | The schema change wants doing before there is data to migrate |
+| BYO key and certification | first prospect blocked on compliance | Each provider is a maintained integration; build them one customer at a time |
+| Procurement surface | first security questionnaire | It never makes the product better and it always takes longer than estimated |
+
+**Only the budget ceiling is unconditional.** The rest are sold on the price list and built when
+someone tries to buy them — which is the honest way to run a four-tier table with no customers
+yet, provided the table does not promise a delivery date.
+
+---
+
 # Order, and what would make us stop
 
 | Stage | Ships | Stop condition |
@@ -583,7 +746,11 @@ tickets.
 | Allocate/infer/verify | weeks 9–11 | cost exceeds uniform review, or drop rate is 0% or 100% |
 | Serve | week 12 | duplicate comments cannot be eliminated |
 | Telemetry | with each stage | — |
+| **Budget ceiling** | **before the first paid seat** | **degrades to an outage instead of coverage-only** |
 | Billing and integrations | after ten paying repositories | — |
+| Identity and org view | first two-repository prospect | org report disagrees with the per-repository sum |
+| BYO key and certification | first compliance-blocked prospect | every model certifies, so certification measures nothing |
+| Procurement surface | first security questionnaire | audit log is modifiable through any application path |
 
 **The ranker gate is the one that can end the project**, and it is deliberately placed before
 any hosting, any billing, and any model spend. If the productionised ranker does not reproduce,
