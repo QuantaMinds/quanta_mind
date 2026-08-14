@@ -369,59 +369,61 @@ returned 710 and 918 commits against 3,313. So assert the exit code, **and asser
 changed** — if symbol extraction returns the same event count as `--name-only` did, the parser
 did not run.
 
-### Gate 3c — RUN. Function-level loses substantially more, and the decomposition failed
+### Gate 3c — RUN, and re-run after the extraction defect it exposed
 
-**Result, on the 8 full-object clones, 7 of which qualified: 1,377 paired events.**
+**Result, 8 full-object clones, 1,969 paired events.**
 
 | arm | top-3 miss | 95% CI |
 |---|---|---|
-| file-level | 14/1,377 = **1.02%** | 0.61–1.70% |
-| function-level | 116/1,377 = **8.42%** | 7.07–10.01% |
-| **gap** | **+7.41 points** | |
+| file-level | 24/1,969 = **1.22%** | 0.82–1.81% |
+| function-level | 174/1,969 = **8.84%** | 7.66–10.17% |
+| **gap** | **+7.62 points** | |
 
-**Both discordant cells are populated, as pre-specified**: b = 107 (file hit, function miss),
-**c = 5 (file miss, function hit)**. The reverse cell is small but real — which is the cell an
-earlier version of this section assumed was empty. **McNemar exact two-sided p < 0.0001.** The
-sign is settled: function-level allocation loses more.
+**McNemar exact two-sided p < 0.0001.** Both discordant cells populated as pre-specified:
+b = 157 (file hit, function miss), **c = 7 (file miss, function hit)** — the cell an earlier
+version of this section assumed empty. **The sign is settled: function-level allocation loses
+substantially more.**
 
-**And the decomposition did not do what it was meant to.** The hope was that `c′ ≈ c`, reducing
-the whole difference to the unit-count ratio and narrowing transfer to "is functions-per-file
-stable".
+### The first run was wrong, and the diagnostic is why we know
 
-| | value |
-|---|---|
-| mean files per change, k | 4.86 |
-| mean symbols per change, m | 5.70 |
-| **ratio m/k** | **1.17** |
-| c — points per uncovered file | **0.55** |
-| c′ — points per uncovered symbol | **3.12** |
+The first attempt reported +7.41 points on a **broken symbol index**, and the ratio m/k = 1.17
+was the tell — barely one function per changed file, where a real change edits more.
 
-**`c′` is roughly six times `c`, while `m/k` is only 1.17.** So the function arm's loss is not
-explained by having more units — **it is worse per unit.** The narrowing does not happen, and
-transfer remains the broad question it was.
+**Classifying all 250,735 hunk headers found the cause.** Only 35.6% carried a `def`; **38.3%
+carried a `class`.** Git's *default* funcname heuristic takes the nearest preceding line starting
+in column 0 — which in Python is the `class` line, never the indented method. **Every method
+inside a class was attributed to its class and no symbol recorded.**
 
-### The threat to this result, and it is the ratio
+Enabling git's python diff driver, measured on browser-use:
 
-**m/k = 1.17 means the extraction found barely more than one function per changed file**, and a
-change that touches a Python file usually edits more than one function in it. **That is the
-number that decides whether this measurement is sound.**
+| | `def` | `class` |
+|---|---|---|
+| default heuristic | 57.8% | 30.6% |
+| **python diff driver** | **85.4%** | **5.3%** |
 
-Extraction reads git's funcname from `-U0` hunk headers, so a hunk whose header carries no `def`
-— module-level code, imports, constants, class bodies — yields no symbol at all. **Under-extraction
-would sparsify the function-level history index and shrink the target set, and both inflate the
-miss rate in exactly the direction observed.**
+### What the re-run changed, and what it did not
 
-**The two assertions that did pass**: the git exit code, and that symbol slots (7,846) differ
-from file slots (6,699), so the parser ran rather than returning the file arm twice. **Neither
-establishes that extraction is complete**, and completeness is what this now rests on.
+| | broken extraction | corrected |
+|---|---|---|
+| symbol slots | 7,846 | **14,059** (+79%) |
+| m/k | 1.17 | **1.64** |
+| **gap** | +7.41 | **+7.62 points** |
+| c′ / c | 5.7× | **2.4×** |
 
-**The diagnostic before this number is quoted anywhere:** what share of hunks produced a symbol?
-If it is low, the gap is confounded by extraction and the run must be redone with a real parser
-rather than a hunk-header regex.
+**The extraction nearly doubled and the gap moved 0.21 points.** That is the strongest available
+evidence the gap is not an extraction artefact — the threat was real, it was tested, and the
+result survived it.
 
-**Also note the populations differ from the file-level run.** This one requires at least two
-symbols and a non-empty target on both arms, so its file-arm miss is 1.02% against 4.6% in the
-`--name-only` run. **Two different event populations — do not compare the two file-arm figures.**
+**The decomposition still does not fully collapse.** c = 0.90 points per uncovered file against
+c′ = 2.13 per uncovered symbol, with m/k = 1.64. So the function arm remains worse *per unit*,
+not merely burdened with more units — closer than the broken run implied, and not the `c′ ≈ c`
+that would have narrowed transfer to "is functions-per-file stable".
+
+**Populations differ from the corpus-wide run**, which requires no symbols: this file arm is
+1.22% against 4.6% there. **Do not compare those two figures.**
+
+**What still limits it:** 8 convenience-sampled clones carrying larger changes than the other 17,
+so the gap plausibly overstates. The random-5 draw remains the planned second step.
 
 ### Gate 3a — the hard one
 

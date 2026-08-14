@@ -15,9 +15,24 @@ from __future__ import annotations
 
 import re
 import subprocess
+import tempfile
+from pathlib import Path
 
 YEAR = 365 * 86400
 HUNK = re.compile(r"^@@ .*@@\s*(?:async\s+)?def\s+([A-Za-z_]\w*)")
+
+
+# Git's DEFAULT funcname heuristic takes the nearest preceding line starting in column 0, which
+# in Python is the `class` line -- so every method inside a class was attributed to its class and
+# no symbol recorded. Measured on browser-use: the default gives 57.8% `def` and 30.6% `class`;
+# the python diff driver gives 85.4% and 5.3%. The first version of this reader used the default,
+# and the gate 3c function arm was measured against an index missing most methods.
+def _attributes_file() -> str:
+    """Write, once, an attributes file mapping *.py to git's python diff driver."""
+    path = Path(tempfile.gettempdir()) / "quantamind_python_diff.gitattributes"
+    if not path.is_file():
+        path.write_text("*.py diff=python\n", encoding="utf-8")
+    return str(path)
 
 
 class ReadFailed(Exception):
@@ -31,6 +46,8 @@ def stream(repo: str) -> list[tuple[str, int, str, set[str], set[str]]]:
             "git",
             "-C",
             repo,
+            "-c",
+            f"core.attributesFile={_attributes_file()}",
             "log",
             "--no-merges",
             "-U0",
