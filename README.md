@@ -22,6 +22,7 @@ evidence exists, the plan exists, the layers are empty. Start at
 | Build it — stages, gates, tests, telemetry, revenue | `docs/plans/implementation.md` |
 | Know the folder structure and the layer rules | `docs/plans/product-skeleton.md` |
 | Publish anything public — what we may and may not say | `docs/product/publishing-rules.md` |
+| Answer "what is QuantaMind" or "how are you different" out loud | `docs/product/what-to-say.md` |
 
 ```
 docs/product/       what we are building, and the site that sells it

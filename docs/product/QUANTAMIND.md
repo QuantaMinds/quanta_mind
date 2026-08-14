@@ -481,8 +481,15 @@ The underlying technique is old: mining version histories to guide software chan
 | Says what it could not analyse | **no** | **no** | **no** | **yes, on every pull request** |
 | Checks its model's own claims | no | no | no | **yes, parser-verified before publication** |
 | Fires on | nearly every change | nearly every change | nearly every change | **10–12%** |
-| Cost driver | tokens, scaling with lines read | tokens | tokens | **compute; inference only where ranked** |
+| Cost driver | tokens, scaling with lines read | tokens | tokens | **compute, plus inference only where ranked** |
 | Priced | per seat | per seat | per seat / credits | **per repository** |
+
+**The cost-driver row is a claim about *structure*, not a measured saving, and it must not be
+read as one.** The arithmetic puts allocation at **1.25×** cheaper than uniform review at one
+pass — and that figure is derived from a specification rather than observed on real diffs. It is
+listed as unproven at the end of this document and gated in the build plan. **What is
+structural, and does not depend on that number, is that the ranking stage runs without
+inference at all.**
 
 ## Why they cannot kill this in one update
 
@@ -633,8 +640,9 @@ credibly publish its own miss rate, for the same reason no company audits its ow
 ### Three properties that make it fundable rather than merely true
 
 - **Cost structure inverted.** Their marginal cost scales with lines read; ours is compute. So
-  we can prove value on a prospect's own history — replay their last six months and show what we
-  would have caught. **That costs a model-per-diff reviewer a full inference pass per historical
+  we can prove value on a prospect's own history — replay their last six months and show **where
+  we would have pointed.** Not what we would have caught: the replay runs the ranking, which is
+  deterministic, and it produces no findings at all. **That costs a model-per-diff reviewer a full inference pass per historical
   pull request. It costs us CPU.** They demo on a toy repository; we demo on the customer's
   actual code.
 - **Quiet enough to survive developers.** Firing on 10% of changes is an adoption strategy, not
