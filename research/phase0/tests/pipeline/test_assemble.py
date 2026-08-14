@@ -17,6 +17,7 @@ import zipfile
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 from phase0.github_pulls import MergeInfo
 from phase0.pipeline.assemble import build_record
@@ -113,11 +114,23 @@ def test_an_honest_pr_becomes_a_record(repo: tuple[Path, str, str]) -> None:
     assert outcome.parent_sha and outcome.repo_id == "acme/widget"
 
 
+@pytest.mark.skipif(not PACKAGE.is_file(), reason="replication package not downloaded")
 def test_the_corpus_file_list_for_zenml_3757_is_not_the_change() -> None:
     """The measurement behind A24, asserted rather than described.
 
     Fails if the package is ever replaced by one without the defect, which is worth
     knowing: the gate's threshold was chosen against this distribution.
+
+    Guarded like every other reader of this package -- `test_joins.py` and
+    `test_assemble_metadata.py` carry the identical marker and this one did not, so it
+    was the only test in the suite that could not pass anywhere but a machine with the
+    78 MB corpus already unpacked. It failed CI on every branch and on main.
+
+    A checked-in fixture was considered and rejected: the assertion is that THE PACKAGE
+    over-attributes, and a fixture extracted from that package would assert only that the
+    extract still says what it said when extracted. That is the shape of a test that
+    pins its own input. The skip is honest about not running; a fixture would have been
+    dishonest about running.
     """
     with zipfile.ZipFile(PACKAGE) as archive:
         detail = pd.read_parquet(
