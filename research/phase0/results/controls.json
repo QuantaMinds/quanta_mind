@@ -17,13 +17,13 @@
   "negative_controls": [
     {
       "ci": [
-        0.6410465321162561,
+        0.6410465321162557,
         1.8091718081381658
       ],
       "detail": "method=cluster-robust",
       "name": "negative:symbol_initial_a_to_m",
       "passed": true,
-      "relative_risk": 1.076923076923077
+      "relative_risk": 1.0769230769230766
     },
     {
       "ci": [
@@ -50,12 +50,12 @@
   "planted_breaks_unscannable": 0,
   "positive_control": {
     "ci": [
-      3.1171684508250337,
-      20.531453788793783
+      3.1171684508250297,
+      20.531453788793755
     ],
     "detail": "n=80 synthetic, method=cluster-robust",
     "passed": true,
-    "relative_risk": 8.000000000000005
+    "relative_risk": 7.999999999999995
   },
   "reconciliation": {
     "bounds_agree_on_gate": true,
