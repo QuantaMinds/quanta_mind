@@ -1,0 +1,46 @@
+{
+ "train": {
+  "V0_file3": {
+   "true": 1371,
+   "false": 20
+  },
+  "V1_func3": {
+   "true": 1263,
+   "false": 128
+  },
+  "V2_sumfile3": {
+   "true": 1377,
+   "false": 14
+  },
+  "V3_gap": {
+   "true": 1144,
+   "false": 247
+  },
+  "V5_union": {
+   "true": 1374,
+   "false": 17
+  }
+ },
+ "hold": {
+  "V0_file3": {
+   "true": 574,
+   "false": 4
+  },
+  "V1_func3": {
+   "true": 532,
+   "false": 46
+  },
+  "V2_sumfile3": {
+   "true": 569,
+   "false": 9
+  },
+  "V3_gap": {
+   "true": 484,
+   "false": 94
+  },
+  "V5_union": {
+   "true": 574,
+   "false": 4
+  }
+ }
+}

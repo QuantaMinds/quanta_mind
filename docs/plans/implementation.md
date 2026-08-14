@@ -482,6 +482,62 @@ the whole file, which captures most of the locality at a fraction of the input t
 thinking is $0.050 of $0.075 and input on the ranked unit is $0.015. Tripling the input is
 $0.030, not a doubling of the bill.
 
+### Pre-specified: the changed-hunks variant uses a different target, and that is the trap
+
+**Reading the changed hunks of a file is not reading the file.** So the hit criterion changes
+with it, and getting this wrong would make the variant look better than it is by comparing it
+against an easier target.
+
+| variant | what is read | correct target |
+|---|---|---|
+| top-N functions | N symbols | **symbol** target — did the fix return to one of them |
+| top-N → changed hunks in their files | every changed symbol in those files | **symbol** target |
+| top-N → whole files | the files entire | **file** target |
+
+**So the hunks variant is compared against the FUNCTION arms, not against the whole-file arm.**
+The whole-file number (2.03%) was measured against the file target and **is not comparable** to
+what follows.
+
+**And mean units read is reported alongside**, because the confound this whole section exists to
+remove is comparing policies at unequal budgets.
+
+### Four pre-specified variants — RUN, with controls and a holdout. None beats file top-3.
+
+**Not a sweep.** 1,969 paired events on 8 repositories carries about five comparisons before
+multiplicity eats the result, and this project has already recorded ten metadata signals where
+nothing survived Bonferroni. Four variants, each with its non-informative control, Bonferroni
+α = 0.0125.
+
+**Holdout fixed before anything ran:** clones sorted by name, indices 2 and 5 — `OpenPipe_ART`
+and `browser-use_browser-use`. Everything fitted on the other six, winner checked once on those.
+
+| arm | train miss | control | hold miss | control | units |
+|---|---|---|---|---|---|
+| **V0 file top-3** | **1.44%** | 3.31% | **0.69%** | 4.15% | 3.00 |
+| V1 function top-3 | 9.20% | 16.61% | 7.96% | 14.01% | 3.00 |
+| **V2 file ranked by summed touched-function history** | **1.01%** | 3.31% | **1.56%** | 4.15% | 3.00 |
+| V3 score-gap stopping | 17.76% | 32.06% | 16.26% | 28.55% | ~2.0 |
+| V5 union of file-3 and function-1 | 1.22% | 3.09% | 0.69% | 4.15% | 4.00 |
+
+**V2 is the one the holdout killed.** It follows directly from the hybrid post-mortem — keep the
+aggregation, drop history for functions the change never touched — and it **won on train
+(1.01% against 1.44%) and reversed on holdout (1.56% against 0.69%).** Its paired test was never
+significant anyway: b=4, c=10, McNemar p = 0.18, nowhere near 0.0125. **Textbook overfit to a
+convenience sample, caught by a split decided in advance.**
+
+**V3 is decisively rejected.** Score-gap stopping reads about two units and misses 16–18%. It
+beats its control by the widest margin of any arm, +14 points — **which is the clearest
+demonstration in this corpus that beating the control is necessary and not sufficient.** A
+policy can be far better than alphabetical and still be a bad policy.
+
+**V5 buys nothing.** The union ties V0 on holdout at 0.69% and costs a fourth unit.
+
+**V0 survives everything**, at the lowest budget, on both halves.
+
+**Two checks passed.** Every arm beats its alphabetical control, on both halves. And V1 across
+the split is 128 + 46 = **174/1,969 = 8.84%**, reproducing the pooled figure from the earlier run
+exactly — an independent confirmation the split did not disturb the population.
+
 ### The hybrid — RUN, and it does not work
 
 **Rank by function, expand to the enclosing file.** Same paired events, n=1,969.
