@@ -1526,13 +1526,38 @@ a model we have already evaluated. Enterprise gets a model we have not.
    | **What counts as a disagreement** | **both models publish a finding on the same unit with incompatible claims.** One publishing while the other is silent is a *different* case — informative about coverage, not adjudicable head-to-head, and counted separately |
    | **Adjudication** | blind to which model produced which finding |
    | **Sample** | 100 adjudicable disagreements, or the whole set if fewer |
-   | **The price threshold** | **Gemini wins if its published-and-wrong rate is within 2 percentage points of Claude's. Beyond that, 2.3× does not compensate.** |
+   | **The decision rule** | see below — **the first version was set on a denominator the sample cannot carry** |
 
-   **The threshold is decided now and the reasoning is recorded, because otherwise it gets set
-   backwards from whichever result arrives.** Two points is tight relative to the saving, and
-   deliberately: a wrong published finding costs more here than it would a competitor, because
-   what is being sold is that the review can be trusted at its edges. The saving is about $15
-   per repository per month. The cost of the second kind of error is the product.
+   **The threshold and the instrument were mismatched by an order of magnitude.** The rule said
+   *"within 2 percentage points"*. Computing what an adjudicated sample can resolve, by exact
+   binomial on the disagreement wins:
+
+   | adjudicated disagreements | smallest skew resolvable at p < 0.05 |
+   |---|---|
+   | 50 | 32 points |
+   | **100** | **22 points** |
+   | 200 | 15 points |
+   | 400 | 10 points |
+
+   **At the pre-specified n=100 the instrument resolves a 22-point difference. It was being
+   asked to adjudicate 2.** That mismatch would have surfaced exactly when it was most tempting
+   to reinterpret.
+
+   **So the rule is restated in terms the sample can carry:** *Claude is retained only if it
+   wins **≥61 of 100** adjudicated disagreements — an exact-binomial rejection of 50/50 at
+   p < 0.05. Otherwise the test has found nothing.*
+
+   **And what happens when it finds nothing is decided now, because that is the likely
+   outcome.** A coarse instrument returning "no difference" is not evidence the models are
+   equivalent; it is evidence this test cannot tell. **In that case the decision is made on
+   stated grounds rather than on the number: retain Claude while customer count is small, and
+   revisit when volume makes $15 per repository per month material enough to pay for the larger
+   sample.** Conservative on the thing being sold, and it does not pretend the test decided.
+
+   **The reasoning behind wanting a tight threshold survives and is kept**: a wrong published
+   finding costs more here than at a competitor, because what is sold is that the review can be
+   trusted at its edges. What does not survive is the pretence that 100 hand-adjudications can
+   measure it to two points.
 
    ### How much weight can drop rate carry? Measured on real reviews, and the instrument failed
 
@@ -1548,10 +1573,24 @@ a model we have already evaluated. Enterprise gets a model we have not.
    *"i think the return type is a dictionary"* — a genuinely structural claim — landed in the
    residual.
 
-   **What survives the instrument's failure is the direction, and it is the one that matters.**
-   Under any reading of those samples, **structural claims are a small minority of real review
-   content.** The bulk is style, questions, references, design opinion and soft assertion —
-   none of it adjudicable against a parse tree.
+   **The residual is not only a defect — it is the result.** A keyword classifier failing to
+   cover 56.5% of review content is evidence the content **is not keyword-shaped**. The samples
+   say the same from the other side: *"i think the return type is a dictionary"* is a structural
+   claim carried entirely by hedged natural language, with no token a pattern could key on.
+
+   **So the survivable statement is stronger than "structural claims are a minority". It is that
+   structural claims are not reliably identifiable from surface form at all.**
+
+   **And that is a design consequence, not a measurement gap.** Stage four can only adjudicate
+   the fields **the schema forces into structural shape** — not claims a model happens to make.
+   If `infer/schemas.py` requires `claim_type`, `file`, `line_a`, `line_b`, `relation`, then
+   **every finding is structurally checkable by construction**, and the surface form of natural
+   language stops mattering.
+
+   **Which replaces the question.** It is no longer *"what fraction of review claims are
+   checkable"* — it is **"what fraction of USEFUL findings can be expressed in that form without
+   distortion"**. That is answerable from the worked example and the schema, before any model
+   runs, and it is the question `infer/schemas.py` has to be designed against.
 
    **So drop rate is a weak signal for choosing between models**, because it can only speak to
    the minority of findings a parser can touch. **The hand-adjudicated published-and-wrong rate
@@ -1560,6 +1599,15 @@ a model we have already evaluated. Enterprise gets a model we have not.
    **A trustworthy version needs a real classifier**, which means hand-labelling or a model from
    another family — the instrument this project used before for exactly this reason, and cannot
    use now because no key is configured. Recorded as unmeasured rather than approximated.
+
+   **And if it is re-run, change the sampling.** Most-recent-pages is not merely a recency bias:
+   repositories in an active phase produce more review comments, so the fetch over-weights
+   whatever those eight projects were doing lately — a refactor sprint, a release, a dependency
+   bump — and review content varies sharply by activity type. It also inherits the selection
+   problem already on record: the same 8 convenience clones, carrying larger changes than the
+   other 27. **A random draw across each repository's full history costs barely more than the
+   recent pages and removes the confound.** Not worth fixing for a discarded number; worth
+   fixing before a kept one.
 
 ### Gate
 
