@@ -256,11 +256,12 @@ one the same data could carry was tested and held.
 
 - **"They only check 61% of a change."** Invented. There is no measurement anywhere in our
   corpus of what a competitor's coverage would be. It will be heard as measured.
-- **Our own reviewer catch-rate observation (10 of 65).** It exists, and the master document
-  says of it: *treat this as an observation, not a finding, and do not put it in front of that
-  vendor.* No control, and 65 observations cannot separate 15.4% from 23.9%. It supports
-  *"nobody has published a catch rate and the one we measured was not high"* — nothing narrower,
-  and never with the vendor named.
+- **Our own reviewer catch-rate observation (10 of 65). WITHDRAWN — do not use it at all.**
+  Its Wilson 95% interval is 8.6% to 26.1% and the 23.9% comparison figure sits inside it, so
+  the measurement cannot separate that reviewer's rate on changes that broke from its rate on
+  changes that did not. It demonstrates nothing in either direction, and it named a company.
+  **What survives needs no measurement of ours: nobody in this market publishes their own miss
+  rate**, which anyone can verify by looking.
 - **Any accuracy figure of our own.** See `publishing-rules.md`.
 
 **Re-check the two Martian figures before any meeting where you quote them.** The ranking has

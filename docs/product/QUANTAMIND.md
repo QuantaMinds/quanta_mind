@@ -72,22 +72,30 @@ buyer currently reads one as the other.
 **They cost what they cost because they read uniformly.** Feeding an entire diff to a large
 model at full depth is simultaneously the source of the token bill and the source of the noise.
 
-## Our measurement of the reviewers' actual catch rate
+## ~~Our measurement of the reviewers' actual catch rate~~ — WITHDRAWN
 
-On 337 AI-authored pull requests across 14 repositories, using an attribution rule we corrected
-(described in the next section), **one leading reviewer left an actionable inline finding on
-10 of 65 pull requests that later required a symbol-level fix** — and flagged 23.9% of the ones
-that did not.
+**We measured a leading reviewer at 10 of 65 pull requests that later required a symbol-level
+fix, against 23.9% of those that did not, and this document previously carried it with caveats.
+It is withdrawn, and the caveats were not enough.**
 
-**Treat this as an observation, not a finding, and do not put it in front of that vendor.** It
-carries no non-informative control, which this document requires of its own numbers; 65
-observations cannot separate 15.4% from 23.9%; and the 65 inherit the same contamination
-described later — perhaps nine of them are genuine repairs. What it supports is *"nobody has
-published a catch rate and the one we measured was not high"*, not a quantitative claim about a
-named competitor. Its silence is the normal case: roughly three quarters of pull requests received
-a walkthrough with no inline finding at all.
+**The interval settles it.** 10/65 is 15.4% with a Wilson 95% interval of **8.6% to 26.1%** —
+and **the 23.9% comparison figure sits inside that interval.** So the measurement cannot separate
+that reviewer's finding rate on changes that later broke from its rate on changes that did not.
+It demonstrates no targeting deficiency in either direction. A number that cannot distinguish the
+two things it is quoted to contrast is not a weak finding; it is not a finding.
 
-That number is not an indictment of that vendor. It is the state of the art.
+**And the denominator is worse than 65.** By the blind labelling further down this document,
+roughly 86% of symbol-overlap pairs are not genuine repairs — so the real base is somewhere near
+nine observations, where no interval is informative.
+
+**Why it is withdrawn rather than caveated.** Every version of it named a company. A claim about
+a named competitor that its own confidence interval cannot support is a liability before it is a
+methodological error, and a caveat does not travel with a number once the number is quoted. **A
+claim we have withdrawn is not a claim.**
+
+What survives is the weaker statement, which needs no measurement of ours: **nobody in this
+market publishes their own miss rate.** That is verifiable by looking, and it is the argument
+this section was reaching for.
 
 ## What we do differently
 
@@ -608,10 +616,9 @@ The answer, in the order it should be given.
 ### "You're right. We're not. Neither is anyone else — and that is the point."
 
 The independent benchmark puts the entire field between **49% and 76% precision**. We measured
-the market leader against real breakages: it left an actionable finding on **10 of 65 changes
-that came back**. Everyone runs the same model class against the same diffs, so detection
-converges. **Any company whose plan is "we detect slightly better" is one model release from
-parity, in either direction.** That is not a business worth funding, and we are not proposing it.
+the market leader against real breakages. **That measurement is withdrawn** — its
+Wilson interval spans the comparison figure, so it distinguishes nothing. See the
+withdrawal near the top of this document.
 
 ### The bottleneck was never detection. It is attention.
 
@@ -842,6 +849,21 @@ change touching three files or fewer "in the top 3" is **true by construction**:
 **25 repositories, every exclusion printed with its reason and no failed read** — the harness
 refuses to publish a table at all if a history read did not complete, which is how the airflow
 defect recorded further below was caught rather than absorbed.
+
+**This run ranks FILES, and the allocator ranks FUNCTIONS. It does not validate the allocation
+policy.** The harness reads history with `--name-only`, so every unit above is a file. The budget
+is spent on ranked *functions*, globally — and the nested strategy of taking the top file and then
+the top function inside it scored **54.2%, below its own 61.0% null**, in the table further up
+this section. **A file-level top-3 therefore bounds a policy we do not operate.** The
+function-level figure is unmeasured, it is the stage-three gate in the build plan, and until that
+gate runs the honest reading of this table is *"the file-level analogue of the policy loses 4.6%
+of localisable defects"*, not *"our allocator loses 4.6%."*
+
+**The operational number is the pooled row, not the ≥4 row.** Production sees every change, and
+61.4% of them touch three files or fewer where a three-unit budget is not binding. So the figure
+that describes the policy's cost is **1.8% pooled** — at 200 pull requests a month, roughly
+**four changes a month where the defect unit would receive no model call and produce no error**.
+The ≥4 row isolates where ranking does work; the pooled row is what a customer experiences.
 
 **61.4% of events sit in the vacuous stratum**, where a three-unit budget is not binding — so a
 pooled top-3 of 98.2% is mostly arithmetic and the four-or-more row is the real answer. Read off
