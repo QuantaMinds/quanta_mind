@@ -311,7 +311,7 @@ Pricing           vs Greptile        Changelog        Terms
 Docs                                                  DPA
 Security                                              Sub-processors
 
-GitHub · LinkedIn · hello@quantamind.co
+GitHub · LinkedIn · info@quantamind.co
 
 © 2026 QuantaMind
 ```
@@ -852,15 +852,18 @@ pointed. One repository, read access, nothing installed.
 
 # Talk to us
 
-**Sales and demos** — sales@quantamind.co, or book 20 minutes: [link]
 
-**Support** — support@quantamind.co. One working day.
-
-**Security** — security@quantamind.co.
-
-**Anything else** — hello@quantamind.co.
+**Contact** — info@quantamind.co.
 
 *One form: name, work email, company, repository host, message.*
+
+**One address, deliberately.** Four inboxes on a contact page implies four teams behind them.
+One that is answered beats four that are not.
+
+**The single exception is `security@`, kept on the security page.** It should be an alias to the
+same inbox, not a second destination. Researchers and enterprise security reviewers look for
+that address by name — a disclosure route that does not exist reads as a company with no
+process, and aliasing it costs nothing.
 
 ---
 
