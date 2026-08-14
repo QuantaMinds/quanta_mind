@@ -249,8 +249,18 @@ low coefficient of variation in that bin.
 
 **It is the opposite.** The 10–12 bin has the *highest* dispersion of any bin, not the lowest, so
 it is not sweeps. **The reversal is noise, and the intervals say so**: k=9 is 11.18% (95% CI
-7.2–17.0%), the 10–12 bin is 7.51% (5.2–10.8%), and they overlap across a wide range. Reported
-rather than smoothed. And the harness raised on
+7.2–17.0%), the 10–12 bin is 7.51% (5.2–10.8%), and they overlap across a wide range. **Two
+independent lines agreeing on noise is stronger than either alone.** Reported rather than
+smoothed.
+
+**The residual this discriminator cannot see, named rather than run.** A change touching files
+that are individually hot *and* similarly hot passes the dispersion check. Those two conditions
+together describe something specific — a cross-cutting refactor of comparably active core modules
+— and **if that pattern is real it is not an artefact to filter out. It is a change type where
+the ranker has no signal, because every unit looks the same.** The test, for whenever it is worth
+running: within the top bin, split by coefficient of variation and compare miss rates. **If the
+flat-and-hot changes miss more, that is a case the allocator handles badly**, which is worth more
+than a cleaner histogram. And the harness raised on
 serialisation after printing this table; the bins sum to **7,493, matching the known total
 exactly**, which is what establishes the computation completed before the crash.
 
@@ -1213,6 +1223,34 @@ asset. **Being ignored does not destroy it. Being uninstalled does.**
 on routing efficacy would have read as a failure of the company when it is a failure of the
 upside. Every number in this corpus is retrospective and no amount of history substitutes for
 either measurement.
+
+### What a null means, written down before the month starts
+
+**Recorded in advance so the post-hoc reading is constrained.** The old framing is easy to let
+back in once the month is over and somebody asks "did it work".
+
+| Result | Reading, fixed now |
+|---|---|
+| Routing null, survival holds | **The upside did not land.** The asset still accrues on every pull request. Not a failure of the company |
+| **Survival null** | **That is the company.** No amount of routing efficacy compensates for a tool that gets switched off |
+| Both hold | Proceed, and the routing magnitude is worth publishing |
+
+### Survival has to be defined as more than "not uninstalled"
+
+**A team that mutes the bot, filters its comments, or stops reading them has abandoned it, and
+none of that appears as a disable event.** The schema is being written now, so this is the moment
+to decide what counts.
+
+**`reaction` volume is the signal.** Reviews still posting while reactions fall to zero is
+abandonment without uninstallation, and it is the failure mode a naive install-count metric would
+report as success — the same shape as every other check in this plan.
+
+**Exit criterion: survived AND still generating reaction volume at day 30.** Not survived alone.
+
+**And check again at 90 days.** Thirty days may be short for a decision in either direction — a
+team that keeps it for a month and drops it in week seven has said something the experiment as
+specified would not capture. Not a reason to delay the month, a reason not to close the question
+when it ends.
 
 **Whether function-level ranking transfers from the file-level research.** Named as the largest
 technical risk, measured at the ranker gate, and it has no mitigation beyond measuring it early.
