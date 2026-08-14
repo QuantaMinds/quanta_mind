@@ -121,6 +121,32 @@ You cannot tell. So you half-trust the review, read the code yourself anyway, an
 
 ### *(section)*
 
+## The big tools have not fixed this, and here is the receipt
+
+Macroscope tested **118 real bugs across 45 open-source repositories** and published the
+scores. **Macroscope sells an AI reviewer and put itself first.**
+
+| Tool | Bugs found |
+|---|---|
+| Macroscope *(who ran the test)* | 48% |
+| CodeRabbit | 46% |
+| Cursor Bugbot | 42% |
+| Greptile | 24% |
+| Graphite Diamond | 18% |
+
+**Look at the top row.** The company that chose the bugs and marked its own paper reached 48%.
+
+So the honest summary of this entire market is: **every tool you can buy misses most of the
+bugs, and none of them tells you which parts it looked at.** The second half is the one that is
+fixable today.
+
+*(A second benchmark, run by Tenki, another reviewer, put CodeRabbit at 29% and Greptile at 36%
+— a different order entirely. Sources on the comparison pages.)*
+
+---
+
+### *(section)*
+
 ## We do two things
 
 **We decide where to look before we look.**
@@ -160,16 +186,37 @@ Most changes get no finding at all. They still get the two lines.
 
 ### *(section)*
 
-## What changes on Monday
+## What is in it for you
 
-You open a pull request and read the comment, the way you always have.
+**You stop re-reading code a tool already checked.** Today, when a reviewer says nothing about
+a file, you open it anyway — because with the detection rates above, silence is wrong more
+often than it is right. Where we say *checked*, that file is done. That is the time back.
 
-Then you read one line telling you how much of that change it actually covers.
+**You stop triaging comments to find the real ones.** In that same benchmark, CodeRabbit
+averaged 10.84 comments per pull request of which 4.69 were runtime-relevant. Roughly six in
+ten were not about anything that would break. We speak on far less, because we decide where to
+look before we look.
 
-If it covers most of it, you approve.
+**You know what is still yours before you merge, not after something breaks.** The *not
+checked* list is short, specific and named — a generated file, four call sites we could not
+resolve. That is the part a person still has to own, handed over in advance.
 
-If it covers half, **you now know which half still needs you** — and you have never known that
-before, from any tool.
+**Your bill stops moving.** Unlimited reviews at a flat seat price. Two of the biggest tools
+moved to charging per review in 2026; a team that hesitates before asking for a review is a
+team getting less review.
+
+### What it costs, next to what you have now
+
+| | Per developer / month | Reviews |
+|---|---|---|
+| CodeRabbit | $24, or $48 higher tier | unlimited |
+| Greptile | $30 | **50 included, then $1 each** |
+| Graphite | $40 | unlimited |
+| **QuantaMind** | **$19** | **unlimited** |
+
+**We are not going to put an hours-saved number on this page.** We have not measured it on your
+repository, and a number we cannot defend is worth less than the arithmetic you can do yourself
+from the rows above.
 
 ---
 
@@ -344,10 +391,21 @@ competitor lines are ordinary paragraphs — no logos, no comparison table on th
 Plain question-and-answer, all open. **No accordions.** A collapsed FAQ says "we would rather
 you did not read this", and every answer here is one we want read.
 
-### Price
+### "The big tools have not fixed this"
 
-Four lines of text, not four pricing cards. The full table lives on `/pricing`, and putting
-cards here makes the home page end in a shop.
+A plain table, no chart. **Set the publisher's own row in the accent colour** — that row is the
+argument, and a reader skimming should land on "the company that ran the test scored 48%".
+Caption in muted text. No logos: this is evidence, not a competitor callout.
+
+### "What is in it for you"
+
+Four short blocks, each a single benefit with its reason attached, then the cost table. **The
+cost table is a comparison, not a pricing card** — four rows, no buttons, no "most popular"
+badge. A pricing card here makes the page end in a shop; a comparison row makes it end in an
+argument the reader can check.
+
+The closing line — that we will not put an hours-saved number on the page — is set in muted
+text, small. **It is a refusal, and refusals are quieter than claims.**
 
 ### Footer
 
@@ -581,89 +639,120 @@ security@quantamind.co. We reply within one working day.
 
 # Page 7 — `/vs/coderabbit`
 
-**Frame: this page is not "why we beat them". It is "here is the one thing your current tool
-leaves you holding, and it is the thing we built."** Most readers already pay CodeRabbit and are
-not looking to rip it out. Lead with the problem they already have. Concede later, and honestly.
+**Every number on this page is from a benchmark someone else published, linked at the point it
+is used. Where the publisher is a competing tool, the page says so — that is not a disclaimer,
+it is half the argument.**
 
 ---
 
-# You already have a reviewer. This is about the part it cannot do.
+# CodeRabbit misses more than half the bugs. So does everything else.
 
-If you use CodeRabbit, you are not short of comments.
+That is not our claim. It is the result published by the vendor that ranks itself first.
 
-You are short of an answer to one question: **when it says nothing about a file, was that file
-checked?**
+### The benchmark nobody quotes the bottom line from
 
-### The Monday-morning version
+Macroscope ran **118 self-contained runtime bugs across 45 open-source repositories** in eight
+languages, and published the table. **Macroscope is itself an AI reviewer, and it placed itself
+first.**
 
-A pull request comes in. Nine files. CodeRabbit leaves four comments — a naming suggestion, a
-tidier loop, two things you already knew.
+| Tool | Bugs found, out of 118 |
+|---|---|
+| Macroscope *(who published the benchmark)* | 48% |
+| **CodeRabbit** | **46%** |
+| Cursor Bugbot | 42% |
+| Greptile | 24% *(tested on 72 of 118 — access was revoked mid-evaluation)* |
+| Graphite Diamond | 18% |
 
-It says nothing about `process_refund`.
+**Read the top row again.** The company that designed the test, chose the bugs, and ranked
+itself first could only reach **48%.** The best case anyone claims for themselves is that more
+than half the bugs go unfound.
 
-**You now have to decide what that silence means**, and there is nothing on the page to help
-you. So you open the file and read it yourself.
+Source: [Macroscope's benchmark](https://macroscope.com/content/best-ai-code-review-tools-github-2026).
 
-You are paying for a reviewer and doing the review.
+### And the benchmarks do not agree with each other
 
-### That is the gap, and it is not a bug in their product
+Tenki — **also an AI reviewer, also ranking itself** — ran 122 bugs and got a different order
+entirely: Greptile 36%, Cursor 32%, **CodeRabbit 29%**.
+([Tenki's benchmark](https://tenki.cloud/benchmarks/code-reviewer).)
 
-**No AI reviewer publishes what it did not examine.** Not CodeRabbit, not Greptile, not Cursor's
-Bugbot. It is a whole-category blind spot, and it is why the comments pile up while the
-confidence does not.
+So CodeRabbit is either the best tool tested or the worst of the three, depending on who paid
+for the test. **That is the state of the evidence in this market.** Every benchmark is published
+by a company in it, and no two agree.
 
-Adding more comments cannot fix it. **More notes on a change is not more of the change
-examined** — a tool that writes forty notes has not read forty things carefully, it has written
-forty notes.
+### The number you are actually paying for
 
-### What we add
+The same Macroscope run recorded comment volume. **CodeRabbit averaged 10.84 comments per pull
+request, of which 4.69 were runtime-relevant.**
 
-Every review of ours ends with two lines before the findings:
+**Roughly six comments in every ten were not about anything that would break.**
+
+That is the tax. Not that the tool is bad — it is one of the two best in the table — but that
+your reviewers read ten notes to act on four, on every pull request, forever.
+
+### What this costs, in hours
+
+Developers already spend a large share of the week reviewing code — the research literature
+puts it around a fifth of working time
+([systematic review](https://arxiv.org/pdf/2103.08777), [review speed and
+practitioners](https://arxiv.org/pdf/2311.02489)).
+
+Now add the two behaviours the numbers above force:
+
+**One — you triage the six.** Every pull request, someone reads the non-runtime comments to
+find the runtime ones.
+
+**Two — and this is the expensive one — you re-read the files anyway.** When the tool says
+nothing about a file, you cannot tell whether it checked and cleared it or never really looked.
+With a 46% detection rate, silence is wrong more often than it is right. **So the careful
+reviewer opens the file regardless, and the tool has saved nothing on the part that mattered.**
+
+You are paying for a reviewer and performing the review.
+
+### What we do about it
+
+We are not going to tell you we find the missing 54%. **Nobody has shown that any tool finds
+meaningfully more than another** — the two benchmarks above put the same product at 46% and 29%.
+
+We do something the whole category refuses to: **we publish what we did not examine.**
 
 ```
 Checked      2 files · 3 functions
 Not checked  1 file — generated · 4 call sites — could not resolve
 ```
 
-That is it. That is the whole difference.
+Two lines, before the findings, on every review.
 
-**With those two lines the review becomes actionable at its edges.** Covered most of the
-change, you approve. Covered half, you know which half is yours. You stop re-reading files a
-tool already cleared, and you stop trusting silence over files it never opened.
+**This is what changes on Monday.** The 54% does not disappear — but it stops being invisible.
+Where we say *checked*, you stop re-reading. Where we say *not checked*, you know that is yours,
+by name, before you merge rather than after something breaks.
+
+**A reviewer that misses half the bugs and says which half it looked at is a usable tool. One
+that misses half and stays quiet about where is a coin toss you are paying for.**
+
+### And we read the risky part harder
+
+The other half: we do not read every file in a change at the same depth. We decide where to
+look first and spend the effort there, instead of spreading it evenly and producing ten
+comments to get four.
 
 ### What CodeRabbit does better than us
 
-All true, none of it on our roadmap, and if you need any of it they are the better buy:
+Honestly, and if you need any of it they are the better buy: unit test generation · inline chat
+· security scanning · IDE and CLI reviews · pull request summaries · a free plan that posts AI
+findings · far more integrations and years more maturity.
 
-- **Unit test generation**
-- **Inline chat** about the code, in the pull request
-- **Security scanning**, IDE reviews, CLI reviews
-- **Pull request summaries** for people who will not read a diff
-- **A free plan that posts AI findings.** Ours does not
-- Years more maturity and far more integrations
-
-### One thing we will not concede
-
-You might assume the bigger product finds more bugs. **No public evidence says so.**
-
-Independent testing puts every AI reviewer in a similar band on real defects — them, Greptile,
-us. So *"which catches more"* is a question this market has not answered, and a vendor
-answering it confidently is guessing. **We are not going to guess in our own favour, and we are
-not going to concede it either.**
-
-**Switching to us does not cost you bug-finding.** That is not where these two products differ.
+We build none of that. We do one thing.
 
 ### Price
 
-CodeRabbit is $24 per developer per month, $48 for the higher plan. We are $19, unlimited
-reviews.
+CodeRabbit is $24 per developer per month, $48 for the higher tier. **We are $19, unlimited
+reviews.**
 
-### Who should pick which
+### Switching
 
-**Pick CodeRabbit** if you want the widest feature set. We do not build tests, chat or scanning.
-
-**Pick us** if you need to be able to say which parts of a change were examined — which is any
-team that signs off on a merge, not only teams drowning in comments.
+You are not trading away bug-finding — the evidence says that is not where these products
+differ. You are trading a stream of comments you cannot calibrate for a shorter one you can,
+plus a line telling you what is still yours to check.
 
 **[ Run both on your last six months ]** → `/report`
 
@@ -674,31 +763,46 @@ pointed. One repository, read access, nothing installed.
 
 # Page 8 — `/vs/greptile`
 
-**Frame: same shape. The Greptile user's problem is different — not too many comments, but no
-way to check the promise of full context.** Lead there.
+# Greptile publishes 82% recall. Independent tests put it at 24–36%.
 
----
+Greptile's own benchmark reports **82% recall**
+([their benchmarks page](https://www.greptile.com/benchmarks)).
 
-# Full context is a promise. This is about checking it.
+Two benchmarks run by other companies, on real bugs:
 
-Greptile reads your whole codebase and reviews against it. On a large undocumented monolith
-that is a genuinely good idea, and it works.
+| Benchmark | Publisher | Greptile scored |
+|---|---|---|
+| **[Macroscope](https://macroscope.com/content/best-ai-code-review-tools-github-2026)**, 118 bugs / 45 repos | Macroscope, a competing reviewer | **24%** *(on 72 of 118 — access revoked mid-evaluation)* |
+| **[Tenki](https://tenki.cloud/benchmarks/code-reviewer)**, 122 bugs | Tenki, a competing reviewer | **36%** |
 
-It leaves you with one question you cannot answer: **how much of it did it actually read on
-this change?**
+**Both publishers are competitors, and we are telling you that plainly** — a competitor's
+benchmark is marketing, and so is Greptile's own. But when the vendor's figure is two to three
+times every outside measurement, the gap is the finding, whichever direction you discount in.
 
-### The problem is specific to the claim
+### Why this particular gap matters more than usual
 
-A reviewer that says it understands your whole codebase has made the strongest claim in the
-category — and given you no way to check it on any individual pull request.
+Greptile's pitch is **full-codebase context** — the strongest claim in the category. On a large
+undocumented monolith it is a genuinely good idea and it works.
 
-When it stays quiet about a file, that could mean the wider context cleared it. It could mean
-the context never reached it. **The bigger the claimed context, the harder those two are to tell
-apart**, and the more expensive it is to guess wrong.
+It is also the claim that is hardest to check, and the one where being wrong is most expensive.
 
-### What we add
+When the review is quiet about a file, that could mean the wider context reached it and cleared
+it. It could mean the context never got there. **The bigger the claimed context, the less you
+can tell those apart** — and an 82%-versus-24% spread is exactly what that ambiguity looks like
+from the outside.
 
-The same two lines, on every review:
+### The bill moves too
+
+**Greptile now charges $1 per review beyond 50 a seat**
+([announced March 2026](https://www.agent-wars.com/news/2026-05-01-greptile-per-review-pricing);
+[current plans](https://costbench.com/software/ai-code-review/greptile/)).
+
+A team that thinks twice before requesting a review is a team getting less review. **The billing
+model argues against the product.**
+
+### What we do about it
+
+We do not claim more context or more recall. **We publish coverage**, on every review:
 
 ```
 Checked      2 files · 3 functions
@@ -706,49 +810,36 @@ Not checked  1 file — generated · 4 call sites — could not resolve
 ```
 
 **The unresolved list is the important half here.** Where a reference cannot be followed — a
-dynamic import, a runtime-registered handler — we name it instead of quietly reading past it.
+dynamic import, a runtime-registered handler — we name it rather than reading quietly past it.
 
-So cross-file is not a blind spot for us. It is a **labelled** one. Theirs keeps reading at the
+Cross-file is not a blind spot for us. It is a **labelled** one. Theirs keeps reading at the
 edge of what it can follow. Ours stops and tells you where it stopped.
+
+That is the difference between a claim about context and a receipt for it.
 
 ### And a fixed bill
 
-**Greptile charges per review beyond fifty**: $30 a seat including 50, then $1 each. Ours are
-unlimited and we are not planning to change that.
+Unlimited reviews at a flat seat price. **$19 per developer**, no per-review charge, and we are
+not planning to change that.
 
 ### What Greptile does better than us
 
-- **They index your whole codebase. We do not.** On a big monolith that is a real advantage
-- You can ask their AI questions about the repository. Ours does not answer questions
-- Longer in the market, more customers, more integrations
+They index your whole codebase and we do not — on a big monolith that is a real advantage. You
+can ask their AI questions about the repository; ours does not answer questions. They have been
+in the market longer, with more customers and more integrations.
 
 ### One thing nobody has shown, us included
 
-Reading more of your codebase is not the same as finding more defects in a change. It is a
-reasonable thing to expect and **it has not been demonstrated** — not by them, and we would not
-claim it for ourselves.
+Reading more of your codebase is not the same as finding more defects in a change. It is
+reasonable to expect and **it has not been demonstrated** — not by them, and we will not claim
+it for ourselves.
 
-**More context and more comments are inputs. Neither is a result.**
-
-### Price
-
-Greptile is $30 per seat plus $1 per extra review. We are $19 per developer, no per-review
-charge.
-
-### Who should pick which
-
-**Pick Greptile** if indexing the whole repository is what you want most, or you want to ask an
-AI questions about your codebase.
-
-**Pick us** if you need a fixed bill and a review that states its own coverage.
+**More context and more comments are inputs. Neither one is a result.**
 
 ### What we are not going to tell you
 
 **That we are faster.** We have not measured it, so there is no number here. When there is, the
-method will be beside it.
-
-**That your code is safer with us because we read less of it.** Read the
-[security page](/security) and decide. It is a real difference and it is not the reason to buy.
+method will be printed beside it.
 
 **[ Run both on your last six months ]** → `/report`
 
