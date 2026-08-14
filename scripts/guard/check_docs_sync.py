@@ -1,7 +1,7 @@
 """Keeps docs/CODEBASE.md honest about what is in src/.
 
 WHAT: Two checks.
-      1. Every directory under src/qmctx/ is mentioned in docs/CODEBASE.md.
+      1. Every directory under src/quantamind/ is mentioned in docs/CODEBASE.md.
       2. In CI, a diff that touches src/ must also touch docs/CODEBASE.md.
 WHY:  CODEBASE.md is the onboarding map -- a new contributor, or a new agent
       session, should read one file and know which directory to open. A map that
@@ -28,7 +28,7 @@ from pathlib import Path
 from discovery import Violation, is_excluded, report
 
 MAP_PATH = Path("docs") / "CODEBASE.md"
-PACKAGE = Path("src") / "qmctx"
+PACKAGE = Path("src") / "quantamind"
 BASE_REF = "origin/main"
 GIT_TIMEOUT_S = 30
 
@@ -52,7 +52,7 @@ def check_every_directory_is_documented(root: Path) -> list[Violation]:
                     doc,
                     1,
                     "undocumented-directory",
-                    f"src/qmctx/{name}/ exists but is not in {MAP_PATH.as_posix()}. Add a "
+                    f"src/quantamind/{name}/ exists but is not in {MAP_PATH.as_posix()}. Add a "
                     f"row saying what it owns and what it must not do.",
                 )
             )

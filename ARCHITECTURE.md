@@ -68,7 +68,7 @@ small enough that a coverage number would read 95%+ and carry no information.
 
 ## 1. What the system does, in one paragraph
 
-`qmctx` reads a repository, builds a call graph using several independent resolvers,
+`quantamind` reads a repository, builds a call graph using several independent resolvers,
 records **which resolver produced each edge and which call sites no resolver could
 handle**, and serves that labeled graph to AI coding agents over MCP. The differentiator
 is not the graph. Free tools already build graphs. The differentiator is that every answer
@@ -223,7 +223,7 @@ Directories marked ⏳ are declared here but do not exist yet — they arrive in
 authorises them. `docs/CODEBASE.md` describes what is on disk today.
 
 ```
-qmctx/
+quanta_mind/
 ├── AGENTS.md                  agent memory, ≤200 lines
 ├── CLAUDE.md                  one line: @AGENTS.md  (committed, NOT a symlink —
 │                              `ln -sf` needs Developer Mode on Windows and fails silently)
@@ -233,7 +233,7 @@ qmctx/
 ├── CONTRIBUTING.md            branch and PR protocol, prerequisites
 ├── justfile                   requires bash — Git Bash on Windows
 ├── pyproject.toml             every version pinned exactly
-├── src/qmctx/
+├── src/quantamind/
 │   ├── __init__.py            ⏳ the only file until the correlation test reports
 │   ├── types/                 ⏳ shared frozen dataclasses and enums
 │   ├── discover/              ⏳ ≤15 files

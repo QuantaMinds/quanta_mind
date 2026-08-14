@@ -8,17 +8,19 @@
   This file is symlinked as CLAUDE.md so Claude Code, Codex CLI and Cursor all read it.
 -->
 
-# QuantaMind Context (`qmctx`)
+# QuantaMind (`quantamind`)
 
-We build the layer that tells a coding agent **what it does not know** about a repository.
-Static analysis is unsound by design. We measure the unsoundness, label it per call site,
-and serve the labels over MCP so agents abstain instead of guessing.
+Every AI reviewer reads the whole diff at one depth. **We decide where to look first and only
+read hard there.** A model-free pass ranks the changed functions by how often each has needed a
+follow-up fix; that ranking decides where inference goes. A parser checks the model's claims
+before publication, and every review states what it could not analyse.
 
-**The correlation test is not done.** The founding correlation is unmeasured, so no product code is
-written yet — see `docs/findings/PHASE0_PREREGISTRATION.md`. If you are asked to implement
-a layer, check that file has a filled Results section first. If it does not, say so.
-
-Read `ARCHITECTURE.md` before your first change. Read `docs/PROJECT_CONTEXT.md` for why.
+**The founding correlation test returned NULL** (RR 1.040 against a 1.5 stop threshold), killing
+the earlier product — unsoundness labels over MCP. **That architecture is not built and this one
+inherits none of it.** What justifies this one: the ranked function is the one a later fix
+returns to, +22 points above its rate elsewhere, replicated by an independent rater. Read
+`docs/QUANTAMIND.md` for why, `docs/plans/product-skeleton.md` before your first change, and
+treat `research/` as the evidence base, never as product code.
 
 ---
 
@@ -26,8 +28,8 @@ Read `ARCHITECTURE.md` before your first change. Read `docs/PROJECT_CONTEXT.md` 
 
 ```bash
 uv sync --all-extras            # install
-uv run qmctx index .            # build a context pack for the current repo
-uv run qmctx serve              # MCP server on 127.0.0.1:7331
+uv run quantamind review <pr>   # run one review locally, no posting
+uv run quantamind serve         # the webhook service on 127.0.0.1:7331
 just check                      # ruff + mypy + guards + unit tests  (run before every commit)
 just verify                     # check + live data verification      (run before every PR)
 uv run pytest tests/unit -x     # fast loop, ~10s
@@ -68,9 +70,11 @@ you remember to obey — the machine will stop you either way.
    If you need "and" to describe what a file does, split it.
    → **ADVISORY** — no mechanism. Judgement call, caught in review or not at all.
 
-7. **No cross-layer imports.** Layers are `types → discover → ingest → resolve → probe →
-   label → store → serve`. Left only — never right, never sideways into a sibling's
-   internals. → `scripts/guard/check_conventions.py`
+7. **No cross-layer imports.** Layers are `types → store → ingest → parse → rank →
+   allocate → infer → verify → render → serve`. Left only — never right, never sideways
+   into a sibling's internals. This is what stops `verify` importing `infer`: the layer
+   adjudicating the model's claims cannot start trusting them.
+   → `scripts/guard/check_conventions.py`
 
 8. **Every file opens with a docstring** stating: what it does, why it exists, what it
    imports and from which layer, and who consumes it.
@@ -147,9 +151,9 @@ you remember to obey — the machine will stop you either way.
 
 ## Working rules
 
-- **Plan before you edit.** For anything touching `resolve/` or `label/`, write the plan to
-  `docs/plans/<branch>.md` first and have it reviewed. These layers decide what we claim
-  to know; a wrong turn here is a correctness bug, not a style bug.
+- **Plan before you edit.** For anything touching `rank/` or `verify/`, write the plan to
+  `docs/plans/<branch>.md` first and have it reviewed. These layers decide where we look
+  and what we publish; a wrong turn here is a correctness bug, not a style bug.
 - **Fix root causes.** Do not suppress an error, do not add a fallback that fabricates
   data, do not widen a type to make mypy pass. If a resolver cannot resolve something,
   that is a *result*, not a failure — emit `Unresolved`.
@@ -165,10 +169,10 @@ you remember to obey — the machine will stop you either way.
   skips them; `just verify` needs them. Run `just fixtures` once after cloning.
 - tree-sitter is PINNED IN `pyproject.toml`, not vendored — there is no `vendor/`. The pin
   is what matters: a grammar change silently alters parse trees.
-- The SQLite pack format is versioned. Changing `store/schema.py` requires a migration and
-  a bump to `PACK_FORMAT_VERSION`. There is no "just delete the pack" fallback in prod.
-- PyCG is `pycg==0.0.7` FROM PyPI and upstream is archived: no fork, no patch path, so a
-  PyCG crash is permanent attrition. See `docs/PROJECT_CONTEXT.md`, “PyCG (ICSE 2021)”.
+- The SQLite schema is versioned. Changing `store/schema.py` requires a migration and a bump
+  to `SCHEMA_VERSION`. There is no "just delete it and re-index" fallback in prod.
+- **`git log -p` exits non-zero on a blob-filtered clone** and emits a truncated patch stream.
+  Any code reading patch content asserts the exit code. This defect voided four measurements.
 
 ---
 
@@ -193,8 +197,8 @@ A change is done when all seven are true. Not six.
 - **Deterministic beats clever.** If a parser can answer it, a model must not.
 - **The residual is the product.** What we cannot resolve is not our failure to hide; it
   is the thing the customer is paying us to find.
-- **We do not build a graph.** Upstream MIT projects ship daily and we cannot outrun them.
-  We consume one and own the number none of them computes. Resist every temptation to
-  improve their graph instead of measuring it.
+- **We do not build a better bug-finder.** The field is capped at 49–76% precision and we
+  share its ceiling. We own the allocation of attention and the honesty of the coverage
+  line — resist every temptation to compete on detection instead.
 - **Assume the next reader knows nothing.** Every file explains itself to someone who
   joined this morning.

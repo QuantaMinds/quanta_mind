@@ -26,7 +26,7 @@ from pathlib import Path
 
 from discovery import LAYER_ORDER, Violation, iter_python_files, layer_of, report
 
-PACKAGE = "qmctx"
+PACKAGE = "quantamind"
 
 # The union of what this guard banned and what AGENTS.md's style section listed --
 # the two had drifted apart, each holding tokens the other did not.
@@ -83,7 +83,7 @@ def check_layering(root: Path, package_root: Path) -> list[Violation]:
                         "layer-violation",
                         f"'{own_layer}' imports from '{target_layer}', which is at or to "
                         f"its right. Dependencies flow left only. Move the shared type "
-                        f"into qmctx.types, or invert the dependency.",
+                        f"into quantamind.types, or invert the dependency.",
                     )
                 )
     return violations

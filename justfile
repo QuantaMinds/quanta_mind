@@ -1,4 +1,4 @@
-# Task runner for qmctx.
+# Task runner for quantamind.
 #
 # WHAT: Defines the two gates every change passes through.
 # WHY:  `check` is the fast loop you run constantly. `verify` is the honest one — it runs
@@ -162,21 +162,21 @@ install:
 # ---------------------------------------------------------------- product
 
 index PATH=".":
-    uv run qmctx index {{PATH}}
+    uv run quantamind review {{PATH}}
 
 serve:
-    uv run qmctx serve --host 127.0.0.1 --port 7331
+    uv run quantamind serve --host 127.0.0.1 --port 7331
 
 # Read-only local inspection view. Debugging aid, not a product surface.
 view:
-    uv run qmctx view --host 127.0.0.1 --port 7332
+    uv run quantamind view --host 127.0.0.1 --port 7332
 
 # ---------------------------------------------------------------- golden files
 
 # One-shot authorisation for a single golden-file update. hook_pre_edit.py deletes
 # the sentinel after one use, so it cannot be left enabled.
 allow-golden:
-    touch .qmctx-allow-golden
+    touch .quantamind-allow-golden
     @echo "Next golden-file write is authorised. State in the PR why the output changed."
 
 # ---------------------------------------------------------------- pilot

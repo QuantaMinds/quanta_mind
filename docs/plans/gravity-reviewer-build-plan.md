@@ -19,13 +19,18 @@ what each stage costs.
 Nothing below is designed around a hypothesis when a measurement exists — and a measurement
 that turns out to be unsound is marked, not deleted.
 
-| Measurement | Value | Status | What it decides |
-|---|---|---|---|
-| Attention ranking, top-1 | **85.3%** vs a 72.0% null, 4,293 events, 17 of 17 repositories | SOUND | Where inference is spent |
-| Language generalisation | six languages, lift **+8.9 to +26.0** over each null | SOUND | Addressable surface |
-| Breakage localisation by co-change | **0 of 8** | SOUND | Why we do not ship a "missing file" finding |
-| Fix lands inside files already changed | **11 of 11** | SOUND | Why the deterministic layer cannot find the defect alone |
-| Outcome rule granularity | symbol lift **+46/+36/+28/+17**; file erratic; line dead | SOUND (rerun) | **Files give traffic, symbols give the problem** |
+**Status has two columns for a reason.** `Status` says whether the method was sound; `n` says
+how much the number can carry. They are independent, and collapsing them is how 8 observations
+and 4,293 come to sit in one register and read alike.
+
+| Measurement | Value | Status | n | What it decides |
+|---|---|---|---|---|
+| Attention ranking, top-1 | **85.3%** vs a 72.0% null, 17 of 17 repositories | SOUND | **4,293** | Where inference is spent |
+| Attention ranking, **top-3** — the budget's real metric | **95.4%** vs an 89.4% null on changes touching ≥4 files; **cold-miss 4.6%** | SOUND, 25 repositories, skip ledger empty | **2,893** | Whether allocation loses defects |
+| Language generalisation | six languages, lift **+8.9 to +26.0** over each null | SOUND | 6,099, but **41–400 per language** | Addressable surface |
+| Breakage localisation by co-change | **0 of 8** — 95% upper bound **≈37%** | SOUND method, **DIRECTIONAL ONLY** | **8** | Why we do not ship a "missing file" finding |
+| Fix lands inside files already changed | **11 of 11** — 95% lower bound **≈72%** | SOUND method, **DIRECTIONAL ONLY** | **11** | Why the deterministic layer cannot find the defect alone |
+| Outcome rule granularity | symbol lift **+46/+36/+28/+17**; file erratic; line dead | SOUND (rerun) | 4 repositories | **Files give traffic, symbols give the problem** |
 
 **A measurement defect, recorded rather than quietly redone.** Every result above marked SOUND
 was produced with `git log --name-only` or `--numstat`, which read no file contents. Every
@@ -49,10 +54,25 @@ every retrospective figure produced against these clones.** The file-level core 
 clone used for symbol-level work must carry full objects.** The blob-filtered clone is correct
 for `--name-only` work and wrong for anything that reads a diff body.
 
+**What the two DIRECTIONAL rows can and cannot carry.** `0 of 8` is consistent with a true rate
+anywhere up to about 37%, so it supports *"not enough signal to ship a missing-file finding"*
+and does **not** support *"co-change carries no signal"* — the first is a decision under
+uncertainty, the second is a claim we have not earned. `11 of 11` puts the true rate above
+roughly 72%, which is enough to justify pointing inference at changed files and not enough to
+quote as a percentage. **Neither belongs on a slide, and neither should be described in the
+same breath as the 4,293-event result.** They are directional evidence that happens to point
+the way the architecture already goes, which is exactly when a small n is most dangerous.
+
 **Fix lands inside files already changed** is the reason inference is in the design at all: the
-defects are semantic, so a parser cannot judge them. **Attention ranking** is the reason
-inference is affordable: we know which part of the diff to spend it on. Both survive the
-defect above, so the architecture does.
+defects are semantic, so a parser cannot judge them — and note that this is the same sentence
+that bounds what the verification pass can adjudicate. **Attention ranking** is the reason
+inference is affordable: we know which part of the diff to spend it on, and top-3 now says what
+that costs in silence rather than only what it buys. Both survive the defect above, so the
+architecture does.
+
+**Also worth stating internally, before it reaches a slide as "85%":** the null is 72.0%, so
+85.3% is **+13.3 points** — error roughly halved, 28.0% to 14.7%. Real, and worth building on.
+Not the same claim as "85% accurate", which is what the bare number will be heard as.
 
 ---
 
@@ -67,9 +87,10 @@ pull_request
    │       what could not be resolved, and why
    │
    ├─ 2. allocation           the ranking decides the inference budget
-   │       rank 1        → deep read, high effort, multi-pass
-   │       rank 2-3      → single shallow read
+   │       rank 1        → deep read, xhigh effort, ONE pass
+   │       rank 2-3      → one shallow read each
    │       cold units    → no model call at all
+   │       ceiling       → exactly three requests. Not a target, a limit.
    │
    ├─ 3. inference            structured findings only
    │
@@ -79,8 +100,65 @@ pull_request
    └─ 5. one comment, or silence, plus the coverage line
 ```
 
-**The verification pass** is the pillar no competitor can state, and it is cheap: the
-deterministic layer that allocated the budget is the same layer that adjudicates the output.
+### The pass count at rank 1 is ONE, and this is the decision that fixes the cost claim
+
+It read *multi-pass*, which was never a number, and the cost section showed the sign of the
+entire saving depends on it: one pass is 1.25× cheaper than uniform review, two passes is 1.29×
+**more expensive**. An unspecified number that decides whether the product's economics work is
+not a detail to settle later.
+
+**One pass, for three reasons that are not cost.**
+
+**Thinking is already the second pass.** Reasoning is on by default on this model and the deep
+read runs at `xhigh`. A second *request* re-pays the cache read and re-sends the first
+response as input, to buy deliberation the first request's reasoning budget already provides
+inside one billing event. Paying twice at the API boundary for what the model does internally
+is the expensive way to get the cheap thing.
+
+**A model-based triage pass would duplicate the ranker.** The only structurally sound argument
+for two passes is a cheap first call deciding whether to spend an expensive one. That is
+precisely what the deterministic ranking already does, without a key — so a triage pass would
+put a model in front of the thing whose whole claim is that it needs no model. *Deterministic
+beats clever* is not decoration here; it is the cost argument.
+
+**A fixed call count is what makes flat pricing honest.** Three requests per pull request is a
+bounded number, so unlimited reviews at a flat seat price is a promise about arithmetic rather
+than a hope about usage.
+
+**This is a ceiling, enforced, not a default that drifts.** `allocate/` emits a budget carrying
+a maximum request count, and exceeding it raises rather than silently degrading. A ceiling that
+is never hit and a ceiling that was never wired up print the same thing, so the review record
+carries the **observed** request count and token spend, and the live test asserts on those
+values — not on the absence of an error.
+
+**To add a pass later you must bring two numbers, not one:** the measured quality delta, and
+the re-derived comparison against uniform review at the new call count. A quality gain that
+inverts the cost claim is a different product, and should be argued as one.
+
+**Available and deliberately not taken:** batching ranks 2 and 3 into a single request saves
+one cache read, about 7%. It also merges two findings into one response, which makes per-claim
+attribution harder for `verify/` — and adjudication is worth more than $0.010. Revisit once the
+drop-rate counter below has real data.
+
+**The verification pass** is cheap — the deterministic layer that allocated the budget is the
+same layer that adjudicates the output — and its scope is **narrower than "we check the model"
+and must be stated that way.** It is a parser. It can only adjudicate claims a parser can
+decide: that a symbol exists, that a signature has that arity, that a caller is reachable, that
+a reference resolves. **It cannot adjudicate a semantic claim** — that logic is wrong, that an
+edge case is unhandled, that a lock is held. And the justification for running a model at all
+is precisely that *the defects are semantic*, so the verifier is structurally unable to check
+the claim class the model exists to produce. **A wrong semantic finding publishes.**
+
+So the defensible claim is *typed silence on structural claims*, not *verified findings*. State
+it narrowly, or the first customer to receive a confidently wrong semantic finding will state
+it for us, less kindly.
+
+**And the sabotage gate proves the wrong thing on its own.** Injecting a false structural claim
+and requiring it to be dropped proves the verifier *can* reject — once, on the planted case. It
+cannot distinguish "rejecting correctly at some rate" from "rejected that one and nothing
+since." **Ship a live drop-rate counter**: claims received, claims dropped, by claim class, per
+review. A drop rate that goes to zero and stays there is either a perfect model or a dead
+verifier, and those must not look the same on the wire.
 
 ---
 
@@ -147,20 +225,48 @@ is the revenue product, and it runs at 50% off with the same cached prefix.
 Illustrative, at list prices, for a pull request touching six files with a repository summary
 of about 20,000 tokens.
 
-| Component | Tokens | Cost |
-|---|---|---|
-| Repository prefix, cache read | 20,000 at 0.1× | $0.010 |
-| Ranked unit and its neighbours, uncached | 3,000 | $0.015 |
-| Output including thinking | 2,000 | $0.050 |
-| **Per pull request** | | **≈ $0.075** |
+**The allocator makes at least three requests, and an earlier version of this table priced
+one.** Rank 1 gets a deep read, ranks 2 and 3 get a shallow read each, and **every request pays
+its own cache read at 0.1×** — the prefix is cached, not shared across calls for free. The
+corrected table:
 
-Against reading the whole diff at uniform depth — call it 15,000 input tokens and 4,000 output
-— roughly **$0.175**, so allocation saves on the order of **2×**, not 10×. Say two, and be
-right.
+| Call | Component | Tokens | Cost |
+|---|---|---|---|
+| Deep, rank 1 | prefix cache read | 20,000 at 0.1× | $0.010 |
+| Deep, rank 1 | ranked unit and neighbours | 3,000 | $0.015 |
+| Deep, rank 1 | output including thinking, `xhigh` | 2,000 | $0.050 |
+| Shallow ×2 | prefix cache read, once per call | 2 × 20,000 at 0.1× | $0.020 |
+| Shallow ×2 | unit only, `low` | 2 × 1,500 | $0.015 |
+| Shallow ×2 | output | 2 × 600 | $0.030 |
+| **Per pull request, three calls** | | | **≈ $0.140** |
 
-At 200 pull requests a month that is **about $15 of inference per repository per month**,
-against a free tier that costs only compute. That number is the floor under any price we set,
-and it is the first thing to re-measure once real diffs are flowing.
+**The shallow-call token counts are assumed, not specified anywhere.** They are the largest
+soft number in this document after the pass count.
+
+Against reading the whole diff at uniform depth — 15,000 input and 4,000 output, **$0.175** —
+allocation saves **1.25×**, not 2×. The earlier 2× figure came from pricing one call.
+
+**1.25× survives only at one pass, which is why the pass count is now specified rather than
+described.** A second pass re-sends the first pass's output as input and pays another cache
+read — roughly $0.085, taking the total to **$0.225, or 1.29× worse than uniform review.** The
+allocator previously said *multi-pass*, which put the saving's sign in an unfilled blank. It is
+**one pass, enforced as a three-request ceiling** — see the allocator section above.
+
+**Half the remaining saving is an output assumption, and effort cuts against it.** Allocated
+input is $0.025 against uniform $0.075; allocated output is $0.050 against uniform $0.100. The
+output half rests entirely on assuming the model writes 2,000 tokens rather than 4,000 —
+unsourced, and thinking bills as output while the deep read runs at `xhigh`, the most
+output-heavy setting available. A uniform review at `medium` could plausibly emit fewer output
+tokens than one `xhigh` deep read. **Allocation is sold as an input-side story; the arithmetic
+is carried by an output ratio that may point the other way.**
+
+At 200 pull requests a month, three calls at one pass each is **about $28 of inference per
+repository per month**. The earlier $15 figure was the single-call error carried forward.
+
+**$28 is a ceiling derived from a specification, not a measurement**, and it is the honest
+number to price against because the request count is now bounded by construction. What remains
+unverified is the token sizes inside those three calls — the shallow-call figures especially —
+so treat $28 as the planning number and re-derive it the first week real diffs flow.
 
 ---
 
@@ -242,8 +348,10 @@ twice in this repository.
    wrong on 67.9% of its verdicts. Their webhook plus our corrected rule is the measurement.
    Re-implementing their attribution, or emitting a per-incident blame ticket, is out of scope —
    it is an occupied position and the artifact gets disabled.
-2. **The token saving from allocation**, against uniform review. Asserted above, unmeasured.
-3. ~~**Symbol against file granularity.**~~ **Settled — see below.**
+2. **The pass count at rank 1, and the shallow-call token sizes.** Not a refinement — the sign
+   of the saving depends on them, per the cost section. Measure before any price is set.
+3. **The token saving from allocation**, against uniform review. Asserted above, unmeasured.
+4. ~~**Symbol against file granularity.**~~ **Settled — see below.**
 
 ### Language coverage: the signal is not Python-specific
 
