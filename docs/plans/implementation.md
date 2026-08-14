@@ -369,6 +369,60 @@ returned 710 and 918 commits against 3,313. So assert the exit code, **and asser
 changed** — if symbol extraction returns the same event count as `--name-only` did, the parser
 did not run.
 
+### Gate 3c — RUN. Function-level loses substantially more, and the decomposition failed
+
+**Result, on the 8 full-object clones, 7 of which qualified: 1,377 paired events.**
+
+| arm | top-3 miss | 95% CI |
+|---|---|---|
+| file-level | 14/1,377 = **1.02%** | 0.61–1.70% |
+| function-level | 116/1,377 = **8.42%** | 7.07–10.01% |
+| **gap** | **+7.41 points** | |
+
+**Both discordant cells are populated, as pre-specified**: b = 107 (file hit, function miss),
+**c = 5 (file miss, function hit)**. The reverse cell is small but real — which is the cell an
+earlier version of this section assumed was empty. **McNemar exact two-sided p < 0.0001.** The
+sign is settled: function-level allocation loses more.
+
+**And the decomposition did not do what it was meant to.** The hope was that `c′ ≈ c`, reducing
+the whole difference to the unit-count ratio and narrowing transfer to "is functions-per-file
+stable".
+
+| | value |
+|---|---|
+| mean files per change, k | 4.86 |
+| mean symbols per change, m | 5.70 |
+| **ratio m/k** | **1.17** |
+| c — points per uncovered file | **0.55** |
+| c′ — points per uncovered symbol | **3.12** |
+
+**`c′` is roughly six times `c`, while `m/k` is only 1.17.** So the function arm's loss is not
+explained by having more units — **it is worse per unit.** The narrowing does not happen, and
+transfer remains the broad question it was.
+
+### The threat to this result, and it is the ratio
+
+**m/k = 1.17 means the extraction found barely more than one function per changed file**, and a
+change that touches a Python file usually edits more than one function in it. **That is the
+number that decides whether this measurement is sound.**
+
+Extraction reads git's funcname from `-U0` hunk headers, so a hunk whose header carries no `def`
+— module-level code, imports, constants, class bodies — yields no symbol at all. **Under-extraction
+would sparsify the function-level history index and shrink the target set, and both inflate the
+miss rate in exactly the direction observed.**
+
+**The two assertions that did pass**: the git exit code, and that symbol slots (7,846) differ
+from file slots (6,699), so the parser ran rather than returning the file arm twice. **Neither
+establishes that extraction is complete**, and completeness is what this now rests on.
+
+**The diagnostic before this number is quoted anywhere:** what share of hunks produced a symbol?
+If it is low, the gap is confounded by extraction and the run must be redone with a real parser
+rather than a hunk-header regex.
+
+**Also note the populations differ from the file-level run.** This one requires at least two
+symbols and a non-empty target on both arms, so its file-arm miss is 1.02% against 4.6% in the
+`--name-only` run. **Two different event populations — do not compare the two file-arm figures.**
+
 ### Gate 3a — the hard one
 
 **The productionised ranker reproduces the research figures on the corpus already collected:**

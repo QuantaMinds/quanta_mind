@@ -1,0 +1,50 @@
+{
+ "cells": {
+  "(True, True)": 1256,
+  "(True, False)": 107,
+  "(False, True)": 5,
+  "(False, False)": 9
+ },
+ "per_repo": {
+  "567-labs_instructor": {
+   "(True, True)": 131,
+   "(True, False)": 5,
+   "(False, True)": 1
+  },
+  "MontrealAI_AGI-Alpha-Agent-v0": {
+   "(True, True)": 196,
+   "(True, False)": 10,
+   "(False, False)": 2,
+   "(False, True)": 1
+  },
+  "OpenPipe_ART": {
+   "(True, True)": 95,
+   "(True, False)": 5,
+   "(False, False)": 1
+  },
+  "PriorLabs_TabPFN": {
+   "(True, True)": 43,
+   "(True, False)": 12,
+   "(False, False)": 1
+  },
+  "Skyvern-AI_skyvern": {
+   "(True, False)": 24,
+   "(True, True)": 376
+  },
+  "browser-use_browser-use": {
+   "(True, True)": 237,
+   "(True, False)": 16,
+   "(False, False)": 1
+  },
+  "cartography-cncf_cartography": {
+   "(True, True)": 166,
+   "(True, False)": 35,
+   "(False, False)": 4,
+   "(False, True)": 3
+  }
+ },
+ "kbar": 4.864923747276689,
+ "mbar": 5.697893972403777,
+ "file_units": 6699,
+ "sym_units": 7846
+}

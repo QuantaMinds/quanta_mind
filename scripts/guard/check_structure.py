@@ -22,6 +22,12 @@ from discovery import Violation, is_excluded, iter_package_dirs, iter_source_fil
 MAX_FILE_LINES = 200
 MAX_DIR_FILES = 15
 
+# Hook-written session records. They are gitignored and regenerate every session, so they
+# accumulate on disk without ever entering the repository -- and the fan-out cap was
+# counting them, failing a directory that holds three tracked files. A cap that fires on
+# files nobody committed measures the machine, not the codebase.
+SESSION_RECORD_PREFIX = "session-"
+
 # __init__.py is re-export plumbing, not a concern in its own right, so it does not
 # count against the fanout budget. It is still subject to the line cap.
 FANOUT_EXEMPT_NAMES: frozenset[str] = frozenset({"__init__.py"})
@@ -63,6 +69,7 @@ def check_dir_fanout(root: Path) -> list[Violation]:
             and not is_excluded(child)
             and child.name not in FANOUT_EXEMPT_NAMES
             and not child.name.startswith(".")
+            and not child.name.startswith(SESSION_RECORD_PREFIX)
         ]
         if len(entries) > MAX_DIR_FILES:
             names = ", ".join(sorted(entry.name for entry in entries)[:5])
