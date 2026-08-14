@@ -968,6 +968,19 @@ express it as an **absence of capability**, which is what revoking DELETE on `ra
 should be short enough to read in one sitting. A rule on it is a rule someone has to remember,
 and this plan has now demonstrated four times that nobody does.
 
+**Keep the residue visible, not the enforced set.** The enforced rules take care of themselves;
+the unenforced ones are what a new engineer needs on day one. **It is the internal equivalent of
+the coverage line** — a short list saying *here is what nothing stops* — and it is written in the
+same form:
+
+| The rule | Why the database cannot hold it | What catches a violation instead |
+|---|---|---|
+| *(example)* a review must be posted before its outcome arrives | ordering across weeks, no row exists yet | nothing — **live risk** |
+
+**Where the third column says "nothing", that is the live-risk list**, and it should be read
+aloud at the start of the stage that touches it. A residue that never gets shorter is a design
+that has stopped absorbing its own rules.
+
 ### The house rule these three share
 
 Three mechanisms in this plan exist because a check that cannot report having fired is

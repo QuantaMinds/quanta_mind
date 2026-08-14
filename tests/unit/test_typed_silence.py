@@ -17,7 +17,7 @@ import pytest
 
 from quantamind.types.change import ChangedUnit, Language, PullRequest, Repo
 from quantamind.types.finding import Claim, ClaimKind, Finding, Verdict
-from quantamind.types.ranking import Allocation, Budget, RankedUnit, Score
+from quantamind.types.ranking import Allocation, Budget, RankedUnit, Ranking, Score
 from quantamind.types.review import CoverageLine, Review
 from quantamind.types.verdict import Construct, Reason, Site, Unresolved
 
@@ -124,7 +124,7 @@ def test_a_review_refuses_findings_that_verify_never_saw() -> None:
     with pytest.raises(ValueError, match="never adjudicated"):
         Review(
             pull_request=PR,
-            coverage=CoverageLine(units_checked=1, files_checked=1),
+            coverage=CoverageLine(ranking=Ranking(), files_checked=1),
             budget=Budget(max_requests=3),
             findings=(unchecked,),
             spoke=True,
@@ -136,7 +136,7 @@ def test_a_silent_review_cannot_claim_to_have_spoken() -> None:
     with pytest.raises(ValueError, match="claims to have spoken"):
         Review(
             pull_request=PR,
-            coverage=CoverageLine(units_checked=3, files_checked=2),
+            coverage=CoverageLine(ranking=Ranking(), files_checked=2),
             budget=Budget(max_requests=3),
             spoke=True,
         )

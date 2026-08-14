@@ -23,87 +23,65 @@ from quantamind.types.verdict import Unresolved
 
 @dataclass(frozen=True, slots=True)
 class CoverageLine:
-    """What was examined and what was not. The first thing in the comment, deliberately.
+    """What was examined and what was not, as a VIEW over the ranking that produced it.
 
     Order is the argument: a reader who sees coverage before findings can weigh a finding
     before reading it. A reader who sees it afterwards has already formed a view.
 
-    **Three states, not two, and the third was missing.** A unit is read, or the parser could
-    not resolve it, or **the budget never funded it** -- and the first version of this type had
-    no way to say the third. That matters because it is the common case: allocation funds a
-    small number of ranked units and everything below is cold. Measured on the research corpus,
-    the defect sits in a cold unit about 8.8% of the time at a three-unit budget.
+    **Three states, not two.** A unit is read, or the parser could not resolve it, or **the
+    budget never funded it** -- and the third is the common case, measured at 8.84% of changes
+    holding their defect in a cold unit at a three-unit budget. A cold unit is a decision not to
+    read, not a failure to analyse, and reporting it as silence is the thing this product exists
+    to stop.
 
-    **A cold unit is not a failure to analyse. It is a decision not to**, and reporting it as
-    silence is the exact thing this product exists to stop. "Three of eleven functions read" is
-    a coherent product; "we reviewed your change" while reading three of eleven is not.
+    **The cold units are named, not counted.** "Eight functions not read" is untyped silence
+    wearing a number -- it says something was skipped without saying what to look at, which is
+    the failure this product accuses competitors of. Named, a reviewer can say "read that one",
+    which is a judgement on the allocation policy from the position best placed to make it.
 
-    **The cold units are NAMED, not counted, and that is the whole point.** "Eight functions not
-    read" is still untyped silence -- it tells a reviewer something was skipped without telling
-    them what to look at, which is the exact failure this product accuses competitors of. A named
-    list is actionable, and it produces a signal nothing else can: a reviewer who reads
-    `send_refund_email` in that list and says "read that one" has judged the allocation policy
-    from the position best placed to do it.
-
-    `cold` is ordered by rank, least cold first, so truncating a long list keeps the units most
-    nearly worth reading. `cold_not_listed` carries the residual, and a residual with no list is
-    refused -- truncating a list is not the same as replacing it with a number.
-
-    **`cold` holds RankedUnit, not names.** A string would let this line report a unit the
-    ranking never saw, or misspell one, with nothing to object -- the same shape as a rule
-    living in prose while the schema permits its violation. Referencing the ranked unit also
-    links the coverage line to the row shadow evaluation scores against, so a candidate ranker
-    that would have funded a cold unit has something to be credited against.
-
-    **Prefer `from_ranking` to the constructor.** Built by hand, this object can disagree with
-    the ranking it describes; derived from it, disagreement is impossible. That is the same
-    argument as an outcome being a new row rather than an edit -- one source of truth beats two
-    that are usually consistent.
+    **And the counts are derived, not stored, so this cannot disagree with its ranking.** An
+    earlier version held them as fields with a `from_ranking` helper that callers were merely
+    *expected* to use -- a rule in a docstring, which is exactly what this project keeps finding
+    fails. Holding the `Ranking` and computing over it makes the disagreement unrepresentable
+    rather than discouraged: there is no field to set inconsistently.
     """
 
-    @classmethod
-    def from_ranking(
-        cls,
-        ranking: Ranking,
-        files_checked: int,
-        unresolved: tuple[Unresolved, ...] = (),
-        list_limit: int = 10,
-    ) -> CoverageLine:
-        """Derive the line from the ranking that produced it, so the two cannot disagree."""
-        cold = ranking.cold()
-        listed = cold[:list_limit]
-        return cls(
-            units_checked=len(ranking.funded()),
-            files_checked=files_checked,
-            unresolved=unresolved,
-            cold=listed,
-            cold_not_listed=len(cold) - len(listed),
-        )
-
-    units_checked: int
+    ranking: Ranking
     files_checked: int
     unresolved: tuple[Unresolved, ...] = field(default_factory=tuple)
-    cold: tuple[RankedUnit, ...] = field(default_factory=tuple)
-    cold_not_listed: int = 0
+    list_limit: int = 10
 
     def __post_init__(self) -> None:
-        if self.units_checked < 0 or self.files_checked < 0 or self.cold_not_listed < 0:
-            raise ValueError("CoverageLine counts cannot be negative")
-        if self.cold_not_listed and not self.cold:
+        if self.files_checked < 0:
+            raise ValueError("CoverageLine.files_checked cannot be negative")
+        if self.list_limit < 1:
             raise ValueError(
-                "CoverageLine has unlisted cold units and lists none; a residual is a "
-                "truncation of a list, not a substitute for one"
+                f"CoverageLine.list_limit must be at least 1, got {self.list_limit}; a line "
+                "that names no cold units at all is the untyped silence this type exists to end"
             )
+
+    @property
+    def units_checked(self) -> int:
+        return len(self.ranking.funded())
+
+    @property
+    def cold(self) -> tuple[RankedUnit, ...]:
+        """Cold units, least cold first, truncated. Rank order keeps the ones worth reading."""
+        return self.ranking.cold()[: self.list_limit]
+
+    @property
+    def cold_not_listed(self) -> int:
+        return max(0, len(self.ranking.cold()) - self.list_limit)
 
     @property
     def total_considered(self) -> int:
         """Everything the parser saw: read, skipped by budget, or unresolvable.
 
-        `units_cold` is in the denominator because a unit the budget never funded was still
-        part of the change. Leaving it out would report a review that read three of eleven
+        Cold units are in the denominator because a unit the budget never funded was still part
+        of the change. Leaving them out would report a review that read three of eleven
         functions as complete coverage.
         """
-        return self.units_checked + len(self.cold) + self.cold_not_listed + len(self.unresolved)
+        return len(self.ranking.units) + len(self.unresolved)
 
     def ratio(self) -> float:
         """Resolved share of everything considered. 0.0 when nothing was considered.
@@ -117,12 +95,7 @@ class CoverageLine:
 
     @property
     def is_complete(self) -> bool:
-        return (
-            bool(self.units_checked)
-            and not self.unresolved
-            and not self.cold
-            and not self.cold_not_listed
-        )
+        return bool(self.units_checked) and not self.unresolved and not self.ranking.cold()
 
 
 @dataclass(frozen=True, slots=True)
