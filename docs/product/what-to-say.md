@@ -226,6 +226,20 @@ If they push on whether it is measuring anything real:
 > functions, which is a gate that can end this. And whether the token saving is real; it is
 > arithmetic, not a measurement.
 
+**Say "disagrees with", not "is wrong".** What was measured is that the two rules *disagree*
+on 67.9% of verdicts, with symbol-level treated as ground truth. **That is an argument, not a
+measurement**, and a VP's analyst will find the seam. Have the argument ready:
+
+> The file rule implies base rates of 90%, 83%, 44% and 33% across those repositories — that
+> would mean nine in ten changes cause a defect, which is not a rate any codebase runs at. The
+> symbol rule gives 62%, 42%, 27% and 29%. Neither is verified ground truth. One is implausible
+> on its face.
+
+**And print the interval before someone else computes it.** 36 of 53 is a small base for a number
+now doing most of the commercial work. 55%–79% is still decisively "most", which is all the
+argument needs — quoting 67.9% bare invites the recomputation, and being seen to have avoided it
+costs more than the width of the interval.
+
 **The one-line version:**
 
 > *The failure is the credential. We ran a preregistered test, hit a null, tried the correction
@@ -246,10 +260,13 @@ is against us.
 
 > **Probably not much, and I would not sell it to you on speed.**
 >
-> Review cycle time is dominated by waiting, not reading — the research puts pickup time, the
-> gap between a pull request opening and anyone starting, at roughly **40–60% of total cycle
-> time**. A coverage line does nothing about that. Nobody starts reviewing sooner because the
-> tool is more honest.
+> Review cycle time is dominated by waiting, not reading. **Pickup time — the gap between a
+> pull request opening and anyone starting — runs at roughly 40–60% of total cycle time**, from
+> LinearB's benchmark across about 2,000 teams and 847,000 branches. A coverage line does
+> nothing about that. Nobody starts reviewing sooner because the tool is more honest.
+>
+> Even on the reading itself the room is small: elite teams review in under six hours inside a
+> sub-24-hour cycle. A coverage line touches part of those six hours, not the eighteen.
 >
 > So the speed claim would be a fraction of a fraction: the share of cycle time that is actual
 > reading, times the share of reading spent re-checking files a tool already cleared. **And we
@@ -273,14 +290,29 @@ the strongest thing on offer:
 > did anything examine it. Coverage makes that a query rather than a shrug.
 >
 > And every dashboard telling you where rework comes from is built on an attribution rule that
-> is **wrong on 67.9% of its verdicts** — measured here, reproduced three times. We give you a
-> quarterly report on where rework actually concentrates, computed on a rule that is not.
+> **disagrees with symbol-level attribution on 67.9% of its verdicts — 36 of 53, 95% interval
+> 55% to 79%** — reproduced on two further corpora at 36.1% and 35.7% survival. We give you a
+> quarterly report on where rework actually concentrates, computed the other way.
+
+**Say "disagrees with", not "is wrong".** What was measured is that the two rules *disagree*
+on 67.9% of verdicts, with symbol-level treated as ground truth. **That is an argument, not a
+measurement**, and a VP's analyst will find the seam. Have the argument ready:
+
+> The file rule implies base rates of 90%, 83%, 44% and 33% across those repositories — that
+> would mean nine in ten changes cause a defect, which is not a rate any codebase runs at. The
+> symbol rule gives 62%, 42%, 27% and 29%. Neither is verified ground truth. One is implausible
+> on its face.
+
+**And print the interval before someone else computes it.** 36 of 53 is a small base for a number
+now doing most of the commercial work. 55%–79% is still decisively "most", which is all the
+argument needs — quoting 67.9% bare invites the recomputation, and being seen to have avoided it
+costs more than the width of the interval.
 
 **The one-line version:**
 
 > *We are not selling you a faster review. We are selling you the ability to say which parts of
 > a change were examined — and, once a quarter, where your rework actually comes from, measured
-> with a rule that is not two-thirds wrong.*
+> with a rule that does not disagree with symbol-level attribution two times in three.*
 
 **If they press for a number**, give them the measurement instead of a guess:
 

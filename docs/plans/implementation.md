@@ -188,7 +188,24 @@ carry information, and a paired design is far more powerful than two independent
 8 repositories can plausibly establish sign and rough magnitude even where they cannot pin a
 rate.
 
-The sentence that produces is the one the master document needs: *function-level top-3 misses N
+**Pre-specify the discordance criterion before the run, in writing.** McNemar counts only the
+events where the two rankers disagree, so that definition *is* the test: a discordant pair is one
+where the defect unit is inside file-top-3 and outside function-top-3, or the reverse. **Deciding
+what counts after seeing the counts is how a null becomes a finding.**
+
+**The power question is answerable now, from the file-level run**, and it comes out favourable.
+Across the 8 complete clones there are **2,630 events with 54 file-level misses.** A file-level
+miss almost always implies a function-level miss — if the defect's file was outside the top three
+files, its function is outside the top three functions — so the reverse cell should be near zero
+and the discordant count is roughly *function misses minus 54*. Since functions are a finer
+partition and function misses should exceed file misses, **discordance in the tens rather than
+single digits is the expectation, which is adequate for McNemar.**
+
+If it does come back with single-digit discordance, the honest output is **"sign unresolved"**,
+not a magnitude — and the document still improves, because *"floor of 1.77%, function-level gap
+measured but not resolved on 8 repositories"* is truer than what it says today.
+
+The sentence a powered run produces is the one the master document needs: *function-level top-3 misses N
 points more than file-level, measured on 8 repositories; the pooled file figure of 1.77% is
 therefore a floor and the function-level rate is approximately X%.* **A floor plus a measured gap
 beats a wide absolute estimate.**
@@ -594,6 +611,44 @@ and delete the belief it exists to adjudicate.
 
 **This matters most on the free tier**, which is where shadow data accumulates at zero inference
 cost — the counterfactual evaluation a model-per-diff competitor cannot replicate at any tier.
+
+### Enforced by the database, not by the deletion job
+
+A retention job written against table names deletes exactly the rows this policy exists to keep,
+**and produces no error**: the tables still exist, queries still return, and the loss surfaces
+months later when someone asks a question the deleted rows would have answered. That is the
+signature of every instrumentation failure this project has recorded — plausible output, nothing
+detectable from the output alone.
+
+**So it is a constraint, not a comment.** `outcome` holds foreign keys to the `ranked_unit` and
+`shadow_pick` rows it adjudicates, `ON DELETE RESTRICT`. The wrong deletion aborts. A job that
+has to be written around a constraint is one somebody thinks about; a job that silently satisfies
+a policy paragraph is not.
+
+**`ranked_unit` is not deleted at all.** Adjudication arrives two to eight weeks late and
+retention runs on a schedule, so a row at day 89 with no outcome yet is indistinguishable from
+one that will never get an outcome. The rows are small and they are the belief half of the only
+comparison this product sells. Keeping them is cheaper than being wrong about which ones matter.
+
+**And the job reports both numbers**: rows deleted, and rows retained *because* they adjudicate
+an outcome. A retention job that never retains anything is not retaining.
+
+### The house rule these three share
+
+Three mechanisms in this plan exist because a check that cannot report having fired is
+indistinguishable from one that was never connected:
+
+| Mechanism | What its silence would otherwise mean |
+|---|---|
+| The verifier's **drop-rate counter** | a flawless model, or a dead verifier |
+| The **alphabetical ranker running in shadow forever** | a working ranker, or one measuring nothing |
+| The **retention counter** | nothing needed keeping, or the constraint is not wired |
+
+A fourth is already in the research: a dead hotspot check reported zero at every threshold until
+a sanity counter reported in-window commits found — **0 before the fix, 1,298 after.**
+
+**Rule: every check reports what it did, not only what it found.** Ask what a mechanism outputs
+when the thing it protects is broken; if the answer is "the same thing", it is not a mechanism.
 
 ---
 
