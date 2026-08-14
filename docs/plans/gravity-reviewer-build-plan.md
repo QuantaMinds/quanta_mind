@@ -187,6 +187,11 @@ raised whether GCP credits cover partner models. Gemini is Google's own, so that
 arise: **$16,000 of credits is roughly 258,000 reviews.** *(List prices, to re-verify before
 planning against them.)*
 
+**Ask the account representative about Claude on Vertex regardless.** Choosing a model to avoid
+asking a question is a weak reason if the answer might be yes — it is one email. If credits do
+cover partner models, the comparison stands on its own merits and nothing was lost. If they do
+not, the 2.3× sits on top of a real constraint.
+
 **And this project already has evidence Gemini can do the shape of work we need.** The blind
 labelling that decided whether the ranker tracks risk or traffic was run on Gemini precisely
 because it is a different model family with no stake in the result — and it reproduced the hand
@@ -197,9 +202,14 @@ what `infer/` asks for.
 structural claims, so a model that produces fewer parseable claims raises the drop rate without
 raising an error — and **labelling change pairs is not reviewing code.** The build plan already
 specifies a certification run for any model we have not evaluated, and that procedure applies to
-our own default, not only to a customer's. **Run it on both before choosing, and record the drop
-rate by claim class for each.** Choosing on price alone is choosing on the one axis the
-verification pillar does not measure.
+our own default, not only to a customer's. **Run it on both before choosing**, and record **two** numbers for each: the drop rate by claim
+class, which is visible automatically, and the **published-and-wrong rate** — findings that
+passed the parser and were still incorrect — which is visible only if measured and is the number
+that decides. Get it by running both on the same pull requests and adjudicating **only where they
+disagree**, the same logic as McNemar spending its power on discordant pairs.
+
+**Both questions are gated on `infer/` existing**, which is the same blocker as the token-cost
+gate. Neither the cost question nor the model question is answerable by more analysis.
 
 **Effort.** Start at `xhigh` for the deep read — the documented starting point for coding and
 agentic work — then sweep down. On this model `low` and `medium` are unusually strong, and the

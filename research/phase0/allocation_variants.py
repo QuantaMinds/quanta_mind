@@ -1,33 +1,19 @@
-"""Five pre-specified allocation variants, each against its non-informative control.
+"""Six pre-specified allocation variants, each against its non-informative control.
 
-WHAT: V0 file top-3, V1 function top-3, V2 file ranked by summed touched-function history,
-      V3 score-gap stopping, V5 union, V6 recency-weighted files -- each with an alphabetical
-      control and a train/holdout split fixed before the run.
-WHY:  A sweep would find a winner by chance: this corpus carries about five comparisons before
-      multiplicity eats the result, and this project already recorded ten metadata signals where
-      nothing survived Bonferroni. So variants are pre-specified, corrected, and the winner is
-      checked on two clones held out before anything was looked at -- which caught V2 winning on
-      train and reversing on holdout.
+WHAT: V0 file top-3, V1 function top-3, V2 files ranked by summed touched-function history,
+      V3 score-gap stopping, V5 union, V6 recency-weighted files -- with alphabetical controls,
+      a train/holdout split fixed before the run, and set-agreement instrumentation.
+WHY:  A sweep finds a winner by chance: this corpus carries about five comparisons before
+      multiplicity eats the result. So variants are pre-specified, Bonferroni-corrected at 0.01,
+      and checked on two clones held out before anything was looked at -- which caught V2 winning
+      on train and reversing on holdout. The set-agreement counters exist because "same outcome"
+      is not "same decision", and assuming it was would have recorded the wrong mechanism for V6.
 IMPORTS: stdlib (bisect, collections, json, math, os, sys), clone_census, symbol_history_read.
 CONSUMED BY: docs/plans/implementation.md, gate 3c.
 
-PRE-SPECIFIED BEFORE THE RUN. Not a sweep -- this corpus carries about five comparisons before
-multiplicity eats the result.
-
-  HOLDOUT, fixed before any variant ran: clones sorted by name, indices 2 and 5 --
-  OpenPipe_ART and browser-use_browser-use. Everything below is fitted on the other six and
-  the winner is checked once on those two.
-
-  V0 file top-3, the incumbent. V1 function top-3, the architecture as specified. V2 files
-  ranked by the summed history of ONLY the functions this change touched -- from the hybrid
-  post-mortem, keeping the aggregation and dropping irrelevant history. V3 score-gap stopping,
-  units while score >= 0.5x the top, max 5. V5 union of file-3 and function-1. V6 files scored
-  by exponential decay at a 90-day half-life.
-
-  CONTROL for every variant: the alphabetical pick over the same units at the same k -- the rule
-  that killed the 12/12 revert result when its control also scored 12/12.
-
-  MULTIPLICITY: five variants against V0, Bonferroni alpha = 0.01.
+HOLDOUT: clones sorted by name, indices 2 and 5. CONTROL: the alphabetical pick over the same
+units at the same k -- the rule that killed the 12/12 revert result when its control also
+scored 12/12.
 """
 
 from __future__ import annotations
@@ -90,6 +76,7 @@ def main() -> int:
     ctrl = {g: {a: collections.Counter() for a in arms} for g in ("train", "hold")}
     units_read = {g: collections.defaultdict(list) for g in ("train", "hold")}
     paired = {g: collections.Counter() for g in ("train", "hold")}
+    setagree = {g: collections.Counter() for g in ("train", "hold")}
 
     for name in full:
         group = "hold" if name in holdout else "train"
@@ -167,6 +154,9 @@ def main() -> int:
 
             paired[group][(hit(fo[:BUDGET], ftarget), hit(v2o[:BUDGET], ftarget))] += 1
             paired[group][("r", hit(fo[:BUDGET], ftarget), hit(ro[:BUDGET], ftarget))] += 1
+            # Same OUTCOME is not same DECISION: compare the chosen sets directly.
+            setagree[group][set(fo[:BUDGET]) == set(ro[:BUDGET])] += 1
+            setagree[group]["order"] += fo[:BUDGET] == ro[:BUDGET]
             if n_ev >= MAX_EVENTS:
                 break
 
@@ -181,6 +171,12 @@ def main() -> int:
             cmiss = ctrl[group][arm][False] / n
             mu = sum(units_read[group][arm]) / len(units_read[group][arm])
             print(f"  {arm:14s} {miss:7.2%}  {cmiss:7.2%}  {cmiss - miss:+6.2%}  {mu:6.2f}")
+        sa = setagree[group]
+        tot = sa[True] + sa[False]
+        print(
+            f"  V6 vs V0 same top-3 SET: {sa[True]}/{tot} = {sa[True] / tot:.1%}   "
+            f"same ORDER: {sa['order']}/{tot} = {sa['order'] / tot:.1%}"
+        )
         rb = paired[group][("r", True, False)]
         rc = paired[group][("r", False, True)]
         print(f"  V6 vs V0 paired: b={rb} c={rc}  McNemar p={mcnemar(rb, rc):.4f}")

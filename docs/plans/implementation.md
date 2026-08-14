@@ -501,6 +501,23 @@ what follows.
 **And mean units read is reported alongside**, because the confound this whole section exists to
 remove is comparing policies at unequal budgets.
 
+### The signature of a tuned-on-noise result, now seen twice
+
+**V2 and V6 produced the same shape**, and having two instances makes it nameable:
+
+| | train | holdout | paired |
+|---|---|---|---|
+| V2 | better than V0 (1.01% vs 1.44%) | **worse** (1.56% vs 0.69%) | b=4, **c=10**, p=0.18 |
+| V6 | better than V0 (1.15% vs 1.44%) | **identical** (0.69%) | b=2, **c=6**, p=0.29 |
+
+**Both times: a train-set advantage the paired test could not see, with the discordant cells
+favouring the incumbent.** `c > b` means the challenger *lost* more of the events where the two
+disagreed — so whatever produced the train advantage was not the head-to-head comparison.
+
+**That is what a tuned-on-noise result looks like from the inside**, and it is visible without a
+holdout. **When the aggregate favours a challenger and the discordant cells favour the incumbent,
+believe the cells.**
+
 ### Pre-specified: recency weighting, the last cheap test
 
 **Orthogonal to everything else** — it changes the score, not the unit or the budget. If it works
@@ -545,9 +562,29 @@ number here: b=0, c=0.** Not "no significant difference": **zero events where fl
 1.15% against 1.44%, at b=2, c=6, p=0.29 — the same shape as V2, an advantage the paired test
 cannot see.
 
-**So the score axis is closed.** Weighting recent touches more heavily does not reorder the top
-three files in any way that changes whether the defect is covered. That was the last cheap test
-available, and it found nothing.
+**But "same outcome" is not "same decision", and checking the difference changed the
+explanation.** The natural reading of b=0, c=0 is that the top three are so far ahead that
+reweighting cannot reorder them. **That is false.** Comparing the chosen sets directly:
+
+| | same top-3 set | same order | different outcome |
+|---|---|---|---|
+| train | 90.5% | 76.1% | 6 of 1,391 |
+| **holdout** | **94.5%** | **82.5%** | **0 of 578** |
+
+**Recency changed the chosen set on 32 holdout events and the order on 101 — and not one of them
+changed whether the defect was covered.** The ranking is not unshakeable; it is reordered on
+about one event in six, and the reordering is irrelevant.
+
+**So the finding is narrower and more useful than "reweighting is inert".** The signal is
+concentrated in the top one or two units, and **the third slot is close to outcome-irrelevant at
+the margin** — the file swapped in and the file swapped out are almost always both non-targets.
+
+**That also bounds what it implies about other reweightings.** It does *not* say every monotone
+transform of the same counts will be inert; it says transforms that only move the margin will
+be. A reweighting that changed *rank 1* would still matter, and this result says nothing about
+one that did.
+
+**The score axis is closed for recency**, and that was the last cheap test available.
 
 **V2 is not supported, and the paired test says so before the holdout does.** It follows
 directly from the hybrid post-mortem — keep the aggregation, drop history for functions the
@@ -1454,6 +1491,75 @@ a model we have already evaluated. Enterprise gets a model we have not.
    we have not evaluated: run the verifier against it on the corpus and record the drop rate by
    claim class. **We publish a coverage number under our name; publishing one for a model we
    never measured is the failure this product exists to prevent.**
+
+   **Two numbers, not one, because the failure is asymmetric.** A model producing fewer parseable
+   structural claims raises the drop rate **visibly**. A model producing claims that *pass the
+   parser while being semantically wrong* raises **nothing at all** — and the defects this
+   product exists for are semantic, which is why the verifier cannot judge them. The parser
+   confirms *"line 71 precedes line 88"* and publishes a finding whose reasoning is wrong.
+
+   | | What it measures | Visible? |
+   |---|---|---|
+   | **Drop rate by claim class** | what the verifier rejects | yes, automatically |
+   | **Published-and-wrong rate** | findings that passed verification and were judged incorrect | **only if measured** |
+
+   **The second decides the model, and price says nothing about it.**
+
+   **Get it cheaply by running both candidates on the same pull requests and adjudicating only
+   where they disagree.** Where they agree there is little to learn; the disagreements are a
+   small set worth human judgement, and concentrating effort there is the same logic as McNemar
+   using only discordant pairs.
+
+   **And this procedure applies to our own default, not only to a customer's model.**
+
+   ### Pre-specified now, before `infer/` exists, so early results cannot shape it
+
+   **The certification run cannot be improvised.** It needs the real prompt, the real schema and
+   the real verifier — a standalone two-model script would measure two models on an ad-hoc
+   prompt, not this reviewer, and the number would be discarded once the pipeline exists.
+   **Worse, the disagreement events are scarce**: hand-adjudication is expensive and there is
+   one clean read before the prompt starts being shaped by what was seen.
+
+   | | Fixed now |
+   |---|---|
+   | **Population** | 100 pull requests drawn from the 8 full-object clones, seeded, drawn before the run |
+   | **What counts as a disagreement** | **both models publish a finding on the same unit with incompatible claims.** One publishing while the other is silent is a *different* case — informative about coverage, not adjudicable head-to-head, and counted separately |
+   | **Adjudication** | blind to which model produced which finding |
+   | **Sample** | 100 adjudicable disagreements, or the whole set if fewer |
+   | **The price threshold** | **Gemini wins if its published-and-wrong rate is within 2 percentage points of Claude's. Beyond that, 2.3× does not compensate.** |
+
+   **The threshold is decided now and the reasoning is recorded, because otherwise it gets set
+   backwards from whichever result arrives.** Two points is tight relative to the saving, and
+   deliberately: a wrong published finding costs more here than it would a competitor, because
+   what is being sold is that the review can be trusted at its edges. The saving is about $15
+   per repository per month. The cost of the second kind of error is the product.
+
+   ### How much weight can drop rate carry? Measured on real reviews, and the instrument failed
+
+   **Fetched live: 1,213 inline review comments on `.py` files across eight public
+   repositories** — the closest public analogue to what this reviewer emits, attached to a file
+   and about specific code. Classified into *not a finding*, *structural*, *semantic*.
+
+   **The classifier is not trustworthy and the number it produced should not be quoted.** 56.5%
+   fell into the residual bucket, which means the patterns did not cover most of the content.
+   Reading the printed samples, every bucket contains obvious errors: *"Can you add type
+   annotation for the returns?"* was filed as not-a-finding because it ends in a question mark;
+   *"It creates it if it doesn't exist"* was filed structural on the phrase "doesn't exist";
+   *"i think the return type is a dictionary"* — a genuinely structural claim — landed in the
+   residual.
+
+   **What survives the instrument's failure is the direction, and it is the one that matters.**
+   Under any reading of those samples, **structural claims are a small minority of real review
+   content.** The bulk is style, questions, references, design opinion and soft assertion —
+   none of it adjudicable against a parse tree.
+
+   **So drop rate is a weak signal for choosing between models**, because it can only speak to
+   the minority of findings a parser can touch. **The hand-adjudicated published-and-wrong rate
+   is not one number of two — it is close to the whole test.**
+
+   **A trustworthy version needs a real classifier**, which means hand-labelling or a model from
+   another family — the instrument this project used before for exactly this reason, and cannot
+   use now because no key is configured. Recorded as unmeasured rather than approximated.
 
 ### Gate
 
