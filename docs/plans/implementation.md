@@ -188,6 +188,44 @@ carry information, and a paired design is far more powerful than two independent
 8 repositories can plausibly establish sign and rough magnitude even where they cannot pin a
 rate.
 
+### Does a gap measured on those 8 travel? The free check, run first
+
+**The 8 are a convenience sample and the selection is confirmed, not assumed.** All four
+repositories used for the earlier symbol-level work — Skyvern, browser-use, cartography, opendbc
+— are in the full-object set. They have complete objects *because* someone previously wanted
+patch content from them.
+
+So before any fetch, compare the 8 against the other 17 on everything `--name-only` measures
+identically in both. **This cannot prove transfer** — the mechanism driving file-versus-function
+divergence is within-file variance in touch counts, invisible without blobs — **but it can
+falsify it for free, and a check that only fails one way is worth running first.**
+
+| | repos | events | ≥4-file miss rate (95% CI) | share of events touching ≥4 files |
+|---|---|---|---|---|
+| **Full-object** | 8 | 2,630 | 54/1,131 = **4.77%** (3.7–6.2%) | **43.0%** |
+| **Partial** | 17 | 4,863 | 79/1,762 = **4.48%** (3.6–5.6%) | **36.2%** |
+
+**Transfer is not falsified.** The miss rates are within 0.3 points with heavily overlapping
+intervals, and per repository the 8 sit spread through the distribution of the 17 rather than
+clustered — from 0.65% (Skyvern) to 10.48% (opendbc), inside a partial range running 0.00% to
+14.57%.
+
+**One systematic difference, and its direction is knowable.** The 8 carry larger changes: 43.0%
+of their events touch four or more files against 36.2% for the partials. Larger changes hold more
+units, so a three-unit budget covers proportionally less of them. **If that biases the
+file-versus-function gap, it biases it upward** — a gap measured on the 8 would overstate the gap
+on the other 27, not understate it. State that beside the number rather than in a limitations
+section.
+
+**If the free check had come back clean-but-inconclusive, the remedy for a convenience sample is
+not more of it.** Draw 5 of the 27 at random, **pre-specifying the draw before seeing which come
+up**, fetch blobs for their event sets only, and run the same paired comparison — not to pin the
+gap there, but to check the sign and rough magnitude hold outside the set that selected itself.
+
+**And say the scope in the same sentence as the result**: *measured on 8, checked against 17 on
+shared metrics, not established on the remaining 22.* 13 of 35 is not 35, and the transfer claim
+stays an inference.
+
 **Pre-specify the discordance criterion before the run, in writing.** McNemar counts only the
 events where the two rankers disagree, so that definition *is* the test: a discordant pair is one
 where the defect unit is inside file-top-3 and outside function-top-3, or the reverse. **Deciding

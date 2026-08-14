@@ -84,3 +84,14 @@ This project has already had one fabricated statistic survive into a draft.
 - **Re-verify competitor pricing and benchmark figures on the day of publishing.** They move,
   and a stale number in a post about someone else's numbers is the worst error available.
 - **If a claim cannot be sourced, it is cut**, not softened.
+- **Carry the citation inline, at the moment the number lands.** Source name, report year, the
+  exact metric, and the date checked — in the sentence, not in a footnote and not in a
+  reconciliation pass run later. **A reconciliation pass catches drift that already exists; it
+  does nothing about drift introduced afterwards**, which is how a 2021 figure came to sit beside
+  a 2026 one in this repository *one commit after* the pass built to catch that was written. It
+  is the same argument as the drop-rate counter and the shadow ranker: a check that runs once is
+  not a check. This one has to run where the number enters.
+- **Name the metric, not just the source.** "LinearB says pickup is 40–60% of cycle time" failed
+  here because three LinearB datasets are in circulation and the figure traced to *idle share of
+  lifespan*, reported as a distribution across cohorts rather than a mean. The source was real,
+  the year was wrong, and the metric was a different quantity.
