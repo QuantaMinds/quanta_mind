@@ -18,10 +18,18 @@ evidence exists, the plan exists, the layers are empty. Start at
 
 | I want to… | File |
 |---|---|
-| Understand the product, and see the evidence for every claim | `docs/QUANTAMIND.md` |
+| Understand the product, and see the evidence for every claim | `docs/product/QUANTAMIND.md` |
 | Build it — stages, gates, tests, telemetry, revenue | `docs/plans/implementation.md` |
 | Know the folder structure and the layer rules | `docs/plans/product-skeleton.md` |
-| Write the site, pricing, or a LinkedIn line | `docs/WEBSITE.md` |
+| Write the site, pricing, or a LinkedIn line | `docs/product/WEBSITE.md` |
+
+```
+docs/product/       what we are building, and the site that sells it
+docs/plans/         how it gets built
+docs/engineering/   how the repository works
+docs/findings/      the research, including the nulls
+docs/superseded/    the falsified product, kept only for provenance
+```
 
 **Before your first change: `AGENTS.md`.** It is the constitution, capped at 210 lines, and
 every rule in it names the guard that enforces it. Reading it is faster than being stopped by it.
@@ -30,10 +38,10 @@ every rule in it names the guard that enforces it. Reading it is faster than bei
 
 | File | What it holds |
 |---|---|
-| `docs/CODEBASE.md` | Folder-by-folder map. CI fails if behaviour changes and this does not |
-| `docs/VALIDATION.md` | Why a green test is not verified data |
-| `docs/CORRECTIONS.md` | How a published number gets corrected |
-| `docs/HISTORY_SIGNAL_WALKTHROUGH.md` | How the product works, told as a week in an engineer's life |
+| `docs/engineering/CODEBASE.md` | Folder-by-folder map. CI fails if behaviour changes and this does not |
+| `docs/engineering/VALIDATION.md` | Why a green test is not verified data |
+| `docs/engineering/CORRECTIONS.md` | How a published number gets corrected |
+| `docs/product/HISTORY_SIGNAL_WALKTHROUGH.md` | How the product works, told as a week in an engineer's life |
 | `docs/plans/gravity-reviewer-build-plan.md` | Model and API decisions: effort, caching, the request ceiling, cost |
 | `ARCHITECTURE.md` | Layers, contracts, invariants |
 | `CONTRIBUTING.md` | Branch, PR and review protocol |
@@ -43,7 +51,7 @@ every rule in it names the guard that enforces it. Reading it is faster than bei
 
 ### Superseded, kept for provenance
 
-`BRIEFING.md`, `docs/BUILD_PLAN.md` and `docs/PROJECT_CONTEXT.md` describe the **falsified**
+`BRIEFING.md`, `docs/superseded/BUILD_PLAN.md` and `docs/superseded/PROJECT_CONTEXT.md` describe the **falsified**
 product. Each opens with a banner saying so. They survive only because
 `docs/findings/PHASE0_PREREGISTRATION.md` cites them, and a preregistration is not edited to
 accommodate a tidy-up. **Do not take guidance from them.**
@@ -73,7 +81,7 @@ over MCP. **That architecture was never built and this one inherits none of it.*
 What justifies this one: the ranked function is the one a later fix returns to, well above its
 rate elsewhere, replicated by an independent rater from a different model family. The numbers,
 their confidence intervals, and the four measurements that were withdrawn are all in
-`docs/QUANTAMIND.md`.
+`docs/product/QUANTAMIND.md`.
 
 **Four instrumentation failures and two more found since** are recorded rather than quietly
 fixed, because a document that never reports its own errors gives a reader no way to calibrate

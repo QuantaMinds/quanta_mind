@@ -1,8 +1,8 @@
-"""Keeps docs/CODEBASE.md honest about what is in src/.
+"""Keeps docs/engineering/CODEBASE.md honest about what is in src/.
 
 WHAT: Two checks.
-      1. Every directory under src/quantamind/ is mentioned in docs/CODEBASE.md.
-      2. In CI, a diff that touches src/ must also touch docs/CODEBASE.md.
+      1. Every directory under src/quantamind/ is mentioned in docs/engineering/CODEBASE.md.
+      2. In CI, a diff that touches src/ must also touch docs/engineering/CODEBASE.md.
 WHY:  CODEBASE.md is the onboarding map -- a new contributor, or a new agent
       session, should read one file and know which directory to open. A map that
       silently omits a directory is worse than no map, because it is trusted.
@@ -27,7 +27,7 @@ from pathlib import Path
 
 from discovery import Violation, is_excluded, report
 
-MAP_PATH = Path("docs") / "CODEBASE.md"
+MAP_PATH = Path("docs") / "engineering" / "CODEBASE.md"
 PACKAGE = Path("src") / "quantamind"
 BASE_REF = "origin/main"
 GIT_TIMEOUT_S = 30

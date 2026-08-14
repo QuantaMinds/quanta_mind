@@ -54,3 +54,6 @@ Thumbs.db
 .env.*
 *.token
 secrets/
+
+# Hook-written session records, regenerated every session
+docs/plans/session-*.md
