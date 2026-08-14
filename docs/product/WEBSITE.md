@@ -15,8 +15,31 @@ The list at the end says exactly what must never appear on the site, and why.
 - **Numbers only where we would defend them under questioning.** If a number needs three
   sentences of caveat, it belongs in the report we hand the customer, not on a page.
 - **Never claim to catch more bugs.** We do not, and the first customer to test it will find out.
+- **Concede only what is true, and detection is not one of the true things.** Honesty is not
+  the same as agreeing with whatever the market assumes. A comparison page that says *"use them
+  if you want the most bugs found"* hands over the one contest nobody has won, on no evidence,
+  and turns our page into the lite option. What competitors verifiably have is features,
+  maturity, integrations, a bigger free tier. Concede those without flinching. On detection the
+  honest line is that **nobody has shown it — them, us, or anyone** — and saying so is more
+  truthful than the concession, not less.
+- **Never write our value as a niche remedy.** *"If your team has stopped reading the
+  comments"* tells everyone who has not yet reached that pain that this is not for them.
+  Knowing what was examined is what any team signing off on a merge needs. Say it that way.
+- **No performance claim without a measurement.** *"Reviews finish in under two minutes"* is
+  the easiest sentence on any site to write and we have never timed a review. A speed claim is
+  checkable by the customer on day one, which makes it the fastest way to lose the trust the
+  rest of the page is built on.
+- **Never offer a trade the product does not make.** *"You care more about coverage than
+  finding one more bug"* implies choosing us costs bugs. It does not, and inventing that
+  trade-off loses deals we should win.
 - **Name the weakness before the reader does.** It is the only thing on the site a competitor
   cannot copy in a week, because copying it means admitting the same weakness.
+- **Lead with the problem the reader's current tool leaves them holding.** Every visitor
+  already has a reviewer. A page that opens by ranking vendors asks them to re-run a decision
+  they have already made; a page that opens with the specific thing their tool cannot do is
+  about them. State the gap, show what it costs on a Monday morning, then say what we add.
+  **Concede the competitor's strengths after that, never before** — conceding first reads as
+  apologising for existing.
 - **Every page ends with one action.** Not three.
 
 ---
@@ -169,20 +192,24 @@ Free. Nothing installed. Nothing written to your repository. Most come back the 
 
 We are not better at finding bugs.
 
-Nobody is much better than anyone else at that right now, and any vendor telling you otherwise
-is selling. We will not build our pitch on it.
+Nobody is much better than anyone else at that right now. Every reviewer you can buy sits in a
+similar band, and any vendor telling you otherwise is guessing in their own favour.
 
-We are better at telling you where we looked. That is a smaller claim, and it is one we can
-keep.
+**More comments is not more bugs.** A tool that writes forty notes on a change has not found
+forty problems.
 
-So, honestly:
+So we will not build our pitch on detection. We are better at telling you where we looked —
+a smaller claim, and one we can keep.
 
-If you want the most features today, use **CodeRabbit**.
+Honestly, then:
 
-If reading your whole codebase for context matters more to you than knowing what got skipped,
-use **Greptile**.
+If you want the widest feature set — tests written for you, chat, security scanning — use
+**CodeRabbit**. We do not build those.
 
-If your team has quietly stopped reading the comments, talk to us.
+If whole-codebase context is the thing you want most, use **Greptile**.
+
+If you need to be able to say which parts of a change were examined, talk to us. **Whichever
+you pick, you are not trading away bug-finding. That is not where these products differ.**
 
 ---
 
@@ -550,74 +577,173 @@ security@quantamind.co. We reply within one working day.
 
 # Page 7 — `/vs/coderabbit`
 
-# QuantaMind vs CodeRabbit
+**Frame: this page is not "why we beat them". It is "here is the one thing your current tool
+leaves you holding, and it is the thing we built."** Most readers already pay CodeRabbit and are
+not looking to rip it out. Lead with the problem they already have. Concede later, and honestly.
 
-CodeRabbit is the biggest AI reviewer, with about 17,000 customers. It is a real product and
-this page is not going to pretend otherwise.
+---
 
-### Where CodeRabbit is stronger
+# You already have a reviewer. This is about the part it cannot do.
 
-- More features. Test generation, security scanning, IDE and CLI reviews, chat.
-- A bigger free plan — it posts AI findings on your pull requests for nothing.
-- More integrations, and more people have already used it.
+If you use CodeRabbit, you are not short of comments.
 
-### Where we are different
+You are short of an answer to one question: **when it says nothing about a file, was that file
+checked?**
 
-**It reads your whole change at one depth. We do not.** Reading everything at the same depth is
-where the token bill comes from, and it is also where the noise comes from.
+### The Monday-morning version
 
-**It does not tell you what it missed.** No AI reviewer does. Every one of our reviews ends
-with what we could not check.
+A pull request comes in. Nine files. CodeRabbit leaves four comments — a naming suggestion, a
+tidier loop, two things you already knew.
 
-**We will run on your history for free before you install anything.** They cannot — replaying
-six months of your pull requests would cost them six months of AI bills.
+It says nothing about `process_refund`.
+
+**You now have to decide what that silence means**, and there is nothing on the page to help
+you. So you open the file and read it yourself.
+
+You are paying for a reviewer and doing the review.
+
+### That is the gap, and it is not a bug in their product
+
+**No AI reviewer publishes what it did not examine.** Not CodeRabbit, not Greptile, not Cursor's
+Bugbot. It is a whole-category blind spot, and it is why the comments pile up while the
+confidence does not.
+
+Adding more comments cannot fix it. **More notes on a change is not more of the change
+examined** — a tool that writes forty notes has not read forty things carefully, it has written
+forty notes.
+
+### What we add
+
+Every review of ours ends with two lines before the findings:
+
+```
+Checked      2 files · 3 functions
+Not checked  1 file — generated · 4 call sites — could not resolve
+```
+
+That is it. That is the whole difference.
+
+**With those two lines the review becomes actionable at its edges.** Covered most of the
+change, you approve. Covered half, you know which half is yours. You stop re-reading files a
+tool already cleared, and you stop trusting silence over files it never opened.
+
+### What CodeRabbit does better than us
+
+All true, none of it on our roadmap, and if you need any of it they are the better buy:
+
+- **Unit test generation**
+- **Inline chat** about the code, in the pull request
+- **Security scanning**, IDE reviews, CLI reviews
+- **Pull request summaries** for people who will not read a diff
+- **A free plan that posts AI findings.** Ours does not
+- Years more maturity and far more integrations
+
+### One thing we will not concede
+
+You might assume the bigger product finds more bugs. **No public evidence says so.**
+
+Independent testing puts every AI reviewer in a similar band on real defects — them, Greptile,
+us. So *"which catches more"* is a question this market has not answered, and a vendor
+answering it confidently is guessing. **We are not going to guess in our own favour, and we are
+not going to concede it either.**
+
+**Switching to us does not cost you bug-finding.** That is not where these two products differ.
 
 ### Price
 
-CodeRabbit is $24 per developer per month, or $48 for the higher plan. We are $19.
+CodeRabbit is $24 per developer per month, $48 for the higher plan. We are $19, unlimited
+reviews.
 
 ### Who should pick which
 
-**Pick CodeRabbit** if you want the most features today, or you want free AI comments and are
-happy to filter them yourself.
+**Pick CodeRabbit** if you want the widest feature set. We do not build tests, chat or scanning.
 
-**Pick us** if the noise has already made your team stop reading the comments, or if you need
-to be able to say which parts of your code were actually checked.
+**Pick us** if you need to be able to say which parts of a change were examined — which is any
+team that signs off on a merge, not only teams drowning in comments.
 
-**[ Get your free report and compare them yourself ]**
+**[ See both on your own history ]**
 
 ---
 
 # Page 8 — `/vs/greptile`
 
-# QuantaMind vs Greptile
+**Frame: same shape. The Greptile user's problem is different — not too many comments, but no
+way to check the promise of full context.** Lead there.
 
-Greptile reads your whole codebase for context and reviews pull requests against it. Over
-22,000 teams use it.
+---
 
-### Where Greptile is stronger
+# Full context is a promise. This is about checking it.
 
-- Whole-codebase context is genuinely useful on large repositories.
-- It has been in the market longer and has more customers.
+Greptile reads your whole codebase and reviews against it. On a large undocumented monolith
+that is a genuinely good idea, and it works.
 
-### Where we are different
+It leaves you with one question you cannot answer: **how much of it did it actually read on
+this change?**
 
-**They now charge per review. We do not.** Greptile is $30 a seat with 50 reviews included and
-$1 for each one after that. Ours are unlimited, and we are not planning to change that.
+### The problem is specific to the claim
 
-That difference is not a promotion. Their cost goes up with every review because every review
-reads a lot. Ours does not, because most of our work does not use an AI model at all.
+A reviewer that says it understands your whole codebase has made the strongest claim in the
+category — and given you no way to check it on any individual pull request.
 
-**They do not publish what they missed.** We do, on every review.
+When it stays quiet about a file, that could mean the wider context cleared it. It could mean
+the context never reached it. **The bigger the claimed context, the harder those two are to tell
+apart**, and the more expensive it is to guess wrong.
 
-**We will run on your history before you sign anything.** They cannot do that at their cost.
+### What we add
+
+The same two lines, on every review:
+
+```
+Checked      2 files · 3 functions
+Not checked  1 file — generated · 4 call sites — could not resolve
+```
+
+**The unresolved list is the important half here.** Where a reference cannot be followed — a
+dynamic import, a runtime-registered handler — we name it instead of quietly reading past it.
+
+So cross-file is not a blind spot for us. It is a **labelled** one. Theirs keeps reading at the
+edge of what it can follow. Ours stops and tells you where it stopped.
+
+### And a fixed bill
+
+**Greptile charges per review beyond fifty**: $30 a seat including 50, then $1 each. Ours are
+unlimited and we are not planning to change that.
+
+### What Greptile does better than us
+
+- **They index your whole codebase. We do not.** On a big monolith that is a real advantage
+- You can ask their AI questions about the repository. Ours does not answer questions
+- Longer in the market, more customers, more integrations
+
+### One thing nobody has shown, us included
+
+Reading more of your codebase is not the same as finding more defects in a change. It is a
+reasonable thing to expect and **it has not been demonstrated** — not by them, and we would not
+claim it for ourselves.
+
+**More context and more comments are inputs. Neither is a result.**
 
 ### Price
 
-Greptile is $30 per seat per month plus $1 per extra review. We are $19 per developer, with no
-per-review charge.
+Greptile is $30 per seat plus $1 per extra review. We are $19 per developer, no per-review
+charge.
 
-**[ Get your free report ]**
+### Who should pick which
+
+**Pick Greptile** if indexing the whole repository is what you want most, or you want to ask an
+AI questions about your codebase.
+
+**Pick us** if you need a fixed bill and a review that states its own coverage.
+
+### What we are not going to tell you
+
+**That we are faster.** We have not measured it, so there is no number here. When there is, the
+method will be beside it.
+
+**That your code is safer with us because we read less of it.** Read the
+[security page](/security) and decide. It is a real difference and it is not the reason to buy.
+
+**[ See both on your own history ]**
 
 ---
 
