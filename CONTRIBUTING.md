@@ -25,7 +25,7 @@ uv fetches it. See `research/phase0/ENVIRONMENT.lock` for why.
 ## First hour
 
 ```bash
-git clone <repo> && cd qmctx
+git clone <repo> && cd quanta_mind
 just install          # uv sync (product + harness), pre-commit
 just check            # must be green before you change anything
 ```

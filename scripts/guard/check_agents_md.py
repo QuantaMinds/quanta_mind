@@ -33,7 +33,13 @@ from pathlib import Path
 
 from discovery import Violation, report
 
-MAX_LINES = 200
+# Raised from 200 to 210 on 2026-08-13, deliberately and once, to carry the product
+# description for the reviewer product after the earlier product was falsified. The
+# reasoning in the docstring above still holds and is not weakened by this: adherence
+# degrades with length, so the budget is now 210 and the next request to raise it should
+# be answered by deleting something instead. Every line added here costs adherence to
+# every other line.
+MAX_LINES = 210
 
 SECTION_HEADING = "## Non-negotiables"
 

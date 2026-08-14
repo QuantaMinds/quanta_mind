@@ -38,7 +38,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from discovery import project_root
 
-SENTINEL = ".qmctx-allow-golden"
+SENTINEL = ".quantamind-allow-golden"
 GOLDEN_DIR = "tests/fixtures/golden"
 VENDOR_DIR = "vendor/"
 PROTECTED_BRANCH = "main"

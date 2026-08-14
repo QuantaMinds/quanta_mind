@@ -32,6 +32,6 @@ believe the current tests would catch it.
 
 ## Phase gate
 
-- [ ] This change does not add product code under `src/qmctx/` beyond what the correlation test
+- [ ] This change does not add product code under `src/quantamind/` beyond what the correlation test
       authorises. `docs/findings/PHASE0_PREREGISTRATION.md `PHASE0_PREREGISTRATION.md` “Results”` is still empty — if this
       PR implements a layer, say which filled Results section authorises it.

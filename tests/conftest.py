@@ -2,7 +2,7 @@
 
 WHAT: Puts scripts/guard/ on sys.path so tests can import the guard modules.
 WHY:  The guards are deliberately not part of the installable package -- they must
-      run before qmctx is installable, which is why they import each other by bare
+      run before quantamind is installable, which is why they import each other by bare
       name (`from discovery import ...`). That works when they are invoked as
       `python scripts/guard/check_x.py`, because Python puts the script's own
       directory on sys.path[0]. Under pytest there is no such directory, so it is

@@ -1,9 +1,9 @@
-# qmctx — QuantaMind Context
+# QuantaMind
 
 **The layer that tells a coding agent what it does not know about your repository.**
 
 Static analysis is unsound by design — every code-intelligence tool deliberately ignores
-language features it cannot handle, and none of them says so. `qmctx` measures that
+language features it cannot handle, and none of them says so. `quantamind` measures that
 unsoundness per call site, labels every edge with how confident we are and why, and serves
 the result over MCP so Claude Code, Codex and Cursor can **abstain instead of guessing.**
 
@@ -28,7 +28,7 @@ Your agent greps `validate`, finds three direct callers, edits them, and ships. 
 static Python call graphs miss roughly half the edges observed at runtime, and `super()`
 calls are absent entirely. Nothing in your toolchain tells you this happened.
 
-With `qmctx`:
+With `quantamind`:
 
 ```
 callers_of("BasePaymentHandler.validate")
@@ -51,8 +51,8 @@ rather than editing. One I cannot resolve at all; someone should check it by han
 
 ```bash
 uv sync --all-extras
-uv run qmctx index .                     # build the context pack (nothing leaves your machine)
-uv run qmctx serve                       # MCP server on 127.0.0.1:7331
+uv run quantamind review .                     # build the context pack (nothing leaves your machine)
+uv run quantamind serve                       # MCP server on 127.0.0.1:7331
 
 claude mcp add quantamind http://127.0.0.1:7331
 ```

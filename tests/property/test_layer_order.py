@@ -23,7 +23,7 @@ from discovery import LAYER_ORDER, layer_of
 from hypothesis import given
 from hypothesis import strategies as st
 
-PACKAGE_ROOT = Path("src") / "qmctx"
+PACKAGE_ROOT = Path("src") / "quantamind"
 
 # Path components only -- no separators, no dots, nothing empty.
 _NAMES = st.text(
@@ -55,7 +55,7 @@ def test_layer_of_rejects_names_outside_the_declaration(names: list[str]) -> Non
 
 @given(names=st.lists(_NAMES, min_size=1, max_size=4), module=_NAMES)
 def test_paths_outside_the_package_have_no_layer(names: list[str], module: str) -> None:
-    """A path that is not under src/qmctx/ is not a layer, whatever it is called.
+    """A path that is not under src/quantamind/ is not a layer, whatever it is called.
 
     Asserted as a set equality rather than `is None` so the assertion carries a
     value -- check_assert_quality.py treats a lone `x is None` as a weak assert,

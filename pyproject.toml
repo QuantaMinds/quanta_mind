@@ -1,4 +1,4 @@
-# Project and tool configuration for qmctx.
+# Project and tool configuration for quantamind.
 #
 # WHAT: Package metadata, the pinned toolchain, and configuration for ruff, mypy
 #       and pytest.
@@ -21,7 +21,7 @@ requires = ["hatchling==1.31.0"]
 build-backend = "hatchling.build"
 
 [project]
-name = "qmctx"
+name = "quantamind"
 version = "0.0.0"
 description = "Tells a coding agent what it does not know about a repository."
 readme = "README.md"
@@ -30,8 +30,8 @@ requires-python = ">=3.12"
 # Deliberately empty. No runtime dependency is chosen before the correlation test reports.
 dependencies = []
 
-# Deliberately no [project.scripts]. `qmctx` gets an entry point when serve/
-# exists; until then `uv run qmctx` should fail loudly rather than half-work.
+# Deliberately no [project.scripts]. `quantamind` gets an entry point when serve/
+# exists; until then `uv run quantamind` should fail loudly rather than half-work.
 
 [dependency-groups]
 dev = [
@@ -44,7 +44,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/qmctx"]
+packages = ["src/quantamind"]
 
 # ------------------------------------------------------------------ ruff
 

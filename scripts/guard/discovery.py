@@ -49,14 +49,20 @@ EXCLUDED_DIRS: frozenset[str] = frozenset(
 SOURCE_SUFFIXES: frozenset[str] = frozenset({".py", ".pyi", ".toml", ".yaml", ".yml"})
 
 # The declared layer order. Index position defines what may import what.
+#
+# The review pipeline left to right. It does one thing no naming convention can: `verify`
+# cannot import `infer`, so the layer adjudicating the model's claims cannot start trusting
+# them. The previous order (discover/resolve/probe/label) belonged to the falsified product.
 LAYER_ORDER: tuple[str, ...] = (
     "types",
-    "discover",
-    "ingest",
-    "resolve",
-    "probe",
-    "label",
     "store",
+    "ingest",
+    "parse",
+    "rank",
+    "allocate",
+    "infer",
+    "verify",
+    "render",
     "serve",
 )
 
@@ -166,7 +172,7 @@ def iter_package_dirs(root: Path) -> Iterator[Path]:
 def layer_of(path: Path, package_root: Path) -> str | None:
     """Return the layer name a file belongs to, or None if it sits outside the layers.
 
-    Assumes the layout src/qmctx/<layer>/... declared in ARCHITECTURE.md section 5.
+    Assumes the layout src/quantamind/<layer>/... declared in ARCHITECTURE.md section 5.
     """
     try:
         rel = path.relative_to(package_root)

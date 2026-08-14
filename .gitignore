@@ -44,7 +44,7 @@ Thumbs.db
 
 # Sentinel created by hand to authorise one golden-file update. See
 # scripts/guard/hook_pre_edit.py.
-.qmctx-allow-golden
+.quantamind-allow-golden
 
 # Secrets. A GitHub token grants read access to the corpus under a real identity, and a
 # token committed once is a token in the history forever -- rewriting it out is harder
