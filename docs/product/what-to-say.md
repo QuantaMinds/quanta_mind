@@ -230,10 +230,11 @@ If they push on whether it is measuring anything real:
 on 67.9% of verdicts, with symbol-level treated as ground truth. **That is an argument, not a
 measurement**, and a VP's analyst will find the seam. Have the argument ready:
 
-> The file rule implies base rates of 90%, 83%, 44% and 33% across those repositories — that
-> would mean nine in ten changes cause a defect, which is not a rate any codebase runs at. The
-> symbol rule gives 62%, 42%, 27% and 29%. Neither is verified ground truth. One is implausible
-> on its face.
+> The file rule implies base rates of 90%, 83%, 44% and 33% across those repositories — nine in
+> ten changes causing a defect is not a rate any codebase runs at. The symbol rule gives 62%,
+> 42%, 27% and 29%. **Neither is verified ground truth. The file rule's rates are impossible;
+> the symbol rule's are merely high** — and for changed units that later needed a repair, high
+> is what you would expect.
 
 **And print the interval before someone else computes it.** 36 of 53 is a small base for a number
 now doing most of the commercial work. 55%–79% is still decisively "most", which is all the
@@ -260,13 +261,9 @@ is against us.
 
 > **Probably not much, and I would not sell it to you on speed.**
 >
-> Review cycle time is dominated by waiting, not reading. **Pickup time — the gap between a
-> pull request opening and anyone starting — runs at roughly 40–60% of total cycle time**, from
-> LinearB's benchmark across about 2,000 teams and 847,000 branches. A coverage line does
-> nothing about that. Nobody starts reviewing sooner because the tool is more honest.
->
-> Even on the reading itself the room is small: elite teams review in under six hours inside a
-> sub-24-hour cycle. A coverage line touches part of those six hours, not the eighteen.
+> Review cycle time is dominated by waiting, not reading. **The largest single component is the
+> gap between a pull request opening and anyone starting on it** — and a coverage line does
+> nothing about that. Nobody begins reviewing sooner because the tool is more honest.
 >
 > So the speed claim would be a fraction of a fraction: the share of cycle time that is actual
 > reading, times the share of reading spent re-checking files a tool already cleared. **And we
@@ -298,10 +295,11 @@ the strongest thing on offer:
 on 67.9% of verdicts, with symbol-level treated as ground truth. **That is an argument, not a
 measurement**, and a VP's analyst will find the seam. Have the argument ready:
 
-> The file rule implies base rates of 90%, 83%, 44% and 33% across those repositories — that
-> would mean nine in ten changes cause a defect, which is not a rate any codebase runs at. The
-> symbol rule gives 62%, 42%, 27% and 29%. Neither is verified ground truth. One is implausible
-> on its face.
+> The file rule implies base rates of 90%, 83%, 44% and 33% across those repositories — nine in
+> ten changes causing a defect is not a rate any codebase runs at. The symbol rule gives 62%,
+> 42%, 27% and 29%. **Neither is verified ground truth. The file rule's rates are impossible;
+> the symbol rule's are merely high** — and for changed units that later needed a repair, high
+> is what you would expect.
 
 **And print the interval before someone else computes it.** 36 of 53 is a small base for a number
 now doing most of the commercial work. 55%–79% is still decisively "most", which is all the
@@ -313,6 +311,18 @@ costs more than the width of the interval.
 > *We are not selling you a faster review. We are selling you the ability to say which parts of
 > a change were examined — and, once a quarter, where your rework actually comes from, measured
 > with a rule that does not disagree with symbol-level attribution two times in three.*
+
+**Do not put a percentage on the waiting.** Three different LinearB datasets are in
+circulation — a 2021 analysis of ~2,000 teams and 847,000 branches, the 2026 Engineering
+Benchmarks across 8.1M pull requests and ~4,800 organisations, and a 6.1M-pull-request set — and
+the widely repeated "pickup is 40–60% of cycle time" does not map cleanly onto any of them. The
+2021 figure is *idle share of lifespan*, reported as a distribution across cohorts rather than a
+mean, and idle time is not the pickup phase.
+
+**The qualitative claim survives all of that and is the one that matters**: waiting dominates,
+and we cannot move it. **If a number is needed, read the current report and cite it by name and
+year** — this document's own appendix cites the 2026 benchmark, and quoting a 2021 study beside
+it is the same drift that put a superseded cost figure in three files.
 
 **If they press for a number**, give them the measurement instead of a guess:
 

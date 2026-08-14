@@ -876,12 +876,20 @@ that describes the policy's cost is the pooled one:
 At 200 pull requests a month that is **3.5 changes, and between 3.0 and 4.2**, where the defect
 unit would receive no model call and produce no error.
 
-**This is a FLOOR, not an estimate, and the reason is arithmetic rather than caution.** Functions
-are a finer partition than files. A three-unit budget over the five files of a change covers most
-of it; the same budget over that change's fifteen functions covers a fifth. **Top-3 at function
-level therefore covers a smaller share of any change than top-3 at file level, so the
-function-level miss rate should come in ABOVE 1.77%, not below.** Anyone checking this will
-derive that in a minute, which is why it is stated first.
+**The direction of the function-level figure is UNKNOWN, and an earlier version of this
+paragraph claimed otherwise.** It argued the file number was a floor, reasoning from partition
+fineness alone: functions are a finer partition, a three-unit budget covers less of a change at
+function level than at file level, so the miss rate should rise. That is one real effect.
+
+**It ignored the second, which this document measures on the facing page and which points the
+other way.** Ranking functions globally scores **75.0% top-1 against 58.9%** for taking any
+function in the top-ranked file — because the highest-history file is usually not where the
+highest-history function lives. Function-level ranking is substantially better *aimed*, and
+better aim reduces misses.
+
+So: a finer partition raises the miss rate, better targeting lowers it, **and which dominates is
+precisely what the measurement is for.** Quoting 1.77% as a floor asserted a net effect from one
+of two terms, which is the same error as reading a benchmark's headline without its second line.
 
 **And a same-number result would be a warning, not a confirmation.** If a symbol-level re-run
 returns 1.77% again, the likeliest explanation is that the extraction did not actually change

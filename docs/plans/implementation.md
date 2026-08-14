@@ -193,13 +193,30 @@ events where the two rankers disagree, so that definition *is* the test: a disco
 where the defect unit is inside file-top-3 and outside function-top-3, or the reverse. **Deciding
 what counts after seeing the counts is how a null becomes a finding.**
 
-**The power question is answerable now, from the file-level run**, and it comes out favourable.
-Across the 8 complete clones there are **2,630 events with 54 file-level misses.** A file-level
-miss almost always implies a function-level miss — if the defect's file was outside the top three
-files, its function is outside the top three functions — so the reverse cell should be near zero
-and the discordant count is roughly *function misses minus 54*. Since functions are a finer
-partition and function misses should exceed file misses, **discordance in the tens rather than
-single digits is the expectation, which is adequate for McNemar.**
+**Both discordant cells are live, and an earlier version of this section assumed one was
+empty.** It reasoned that a file-level miss implies a function-level miss — if the defect's file
+is outside the top three files, its function is outside the top three functions. **That is
+false, and this document measures why.**
+
+A file's touch count is roughly a *sum* over its functions; a function's is its own. A file of
+eight functions at five touches each scores 40; a file holding one function at 34 and two at 1
+scores 36. File ranking puts the first above the second, function ranking puts that 34-touch
+function above all eight of the first file's. **Defect in the hot function of the lower-ranked
+file: file misses, function hits.** That is the supposedly empty cell, and it is not an edge case
+— it is the measured reason ranking is global rather than file-then-function.
+
+**So the discordant count is (file hit & function miss) + (file miss & function hit), both
+populated**, which means power is probably *better* than the earlier estimate rather than worse.
+That estimate erred in our own favour, which is the direction nothing catches.
+
+**Across the 8 complete clones: 2,630 events, 54 file-level misses, 2.05%, Wilson 95% interval
+1.6%–2.7%.** Discordance is bounded below by the difference between the two miss counts and above
+by their sum, and with both cells live the tens rather than single digits remain the expectation.
+
+**The sign is not predictable either.** Function-level wins where a hot function sits in a cold
+file and loses where a cold function sits in a hot file, and which dominates is the whole reason
+to run the test. **Pre-specify both cells as live**; a criterion written expecting one to be
+empty pre-registers the wrong test.
 
 If it does come back with single-digit discordance, the honest output is **"sign unresolved"**,
 not a magnitude — and the document still improves, because *"floor of 1.77%, function-level gap
@@ -624,6 +641,13 @@ detectable from the output alone.
 `shadow_pick` rows it adjudicates, `ON DELETE RESTRICT`. The wrong deletion aborts. A job that
 has to be written around a constraint is one somebody thinks about; a job that silently satisfies
 a policy paragraph is not.
+
+**The application role has no DELETE on `ranked_unit` or `shadow_pick`.** The constraint above
+cannot express "keep this until we know whether it matters", because that is a fact about the
+future and there is no row to point at yet. So it is expressed as an **absence of capability**
+rather than a rule: a retention job that tries to delete these fails loudly at runtime, and
+nobody has to remember the policy. Pruning later goes through a separate migration role with a
+deliberate grant — a decision somebody makes, not a job that runs.
 
 **`ranked_unit` is not deleted at all.** Adjudication arrives two to eight weeks late and
 retention runs on a schedule, so a row at day 89 with no outcome yet is indistinguishable from
