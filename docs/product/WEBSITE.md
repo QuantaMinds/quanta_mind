@@ -121,27 +121,29 @@ You cannot tell. So you half-trust the review, read the code yourself anyway, an
 
 ### *(section)*
 
-## The big tools have not fixed this, and here is the receipt
+## The big tools have not fixed this, and they publish the proof themselves
 
-Macroscope tested **118 real bugs across 45 open-source repositories** and published the
-scores. **Macroscope sells an AI reviewer and put itself first.**
+Martian, a research lab, built the first genuinely independent benchmark for AI code review —
+roughly **300,000 real pull requests**, scored on which comments developers actually acted on,
+with the dataset and evaluation pipeline open-sourced.
 
-| Tool | Bugs found |
+Four different companies currently announce that they came first on it. All four are telling
+the truth: it is a rolling leaderboard, and each one announced the week it led.
+
+**Read the second line of any of those announcements.**
+
+| Vendor, in its own number-one post | Recall — the share of real issues caught |
 |---|---|
-| Macroscope *(who ran the test)* | 48% |
-| CodeRabbit | 46% |
-| Cursor Bugbot | 42% |
-| Greptile | 24% |
-| Graphite Diamond | 18% |
+| [CodeRabbit](https://www.coderabbit.ai/blog/coderabbit-tops-martian-code-review-benchmark) | **53.5%** *(precision 49.2%)* |
+| [Greptile](https://www.greptile.com/content-library/greptile-martian-code-review-benchmark) | **50.6%** |
 
-**Look at the top row.** The company that chose the bugs and marked its own paper reached 48%.
+**The tools at the top of the most credible benchmark in this market catch about half of what
+developers cared about — and say so, in the post celebrating first place.**
 
-So the honest summary of this entire market is: **every tool you can buy misses most of the
-bugs, and none of them tells you which parts it looked at.** The second half is the one that is
-fixable today.
+Nobody is hiding it. It is simply never the sentence in bold.
 
-*(A second benchmark, run by Tenki, another reviewer, put CodeRabbit at 29% and Greptile at 36%
-— a different order entirely. Sources on the comparison pages.)*
+So the honest summary of this market is: **every tool you can buy misses roughly half, and none
+of them tells you which half it looked at.** The second part is fixable today.
 
 ---
 
@@ -645,39 +647,49 @@ it is half the argument.**
 
 ---
 
-# CodeRabbit misses more than half the bugs. So does everything else.
+# CodeRabbit's own benchmark post reports 53.5% recall.
 
-That is not our claim. It is the result published by the vendor that ranks itself first.
+That is not our number. It is the second line of
+[the post announcing they came first](https://www.coderabbit.ai/blog/coderabbit-tops-martian-code-review-benchmark).
 
-### The benchmark nobody quotes the bottom line from
+### The benchmark, and the line nobody bolds
 
-Macroscope ran **118 self-contained runtime bugs across 45 open-source repositories** in eight
-languages, and published the table. **Macroscope is itself an AI reviewer, and it placed itself
-first.**
+Martian, a research lab, built the first genuinely independent benchmark for AI code review:
+roughly **300,000 real pull requests**, scored on which comments developers actually acted on,
+dataset and pipeline open-sourced. It is the most credible measurement this market has.
 
-| Tool | Bugs found, out of 118 |
+CodeRabbit topped it in March 2026, and reported:
+
+| | |
 |---|---|
-| Macroscope *(who published the benchmark)* | 48% |
-| **CodeRabbit** | **46%** |
-| Cursor Bugbot | 42% |
-| Greptile | 24% *(tested on 72 of 118 — access was revoked mid-evaluation)* |
-| Graphite Diamond | 18% |
+| **Recall** — real issues caught | **53.5%** |
+| **Precision** — comments that were right | **49.2%** |
+| F1 | 51.2% |
 
-**Read the top row again.** The company that designed the test, chose the bugs, and ranked
-itself first could only reach **48%.** The best case anyone claims for themselves is that more
-than half the bugs go unfound.
+**Roughly half the issues found, roughly half the comments not acted on** — from the tool at the
+top, in the post celebrating it.
 
-Source: [Macroscope's benchmark](https://macroscope.com/content/best-ai-code-review-tools-github-2026).
+### And it is a rolling leaderboard, so several vendors are "number one"
 
-### And the benchmarks do not agree with each other
+[Greptile](https://www.greptile.com/content-library/greptile-martian-code-review-benchmark)
+announces first place on 30 July 2026 with 60.8% F1 and **50.6% recall**, listing CodeRabbit
+fifth at 57.5%. [Qodo](https://www.qodo.ai/blog/qodo-ranked-1-ai-code-review-tool-in-martians-code-review-benchmark/)
+and [cubic](https://www.cubic.dev/blog/cubic-is-the-best-ai-code-reviewer-on-martian-s-benchmark)
+also announce number one.
 
-Tenki — **also an AI reviewer, also ranking itself** — ran 122 bugs and got a different order
-entirely: Greptile 36%, Cursor 32%, **CodeRabbit 29%**.
-([Tenki's benchmark](https://tenki.cloud/benchmarks/code-reviewer).)
+**None of them is lying.** Each led the week it announced. But it means a buyer comparing four
+vendors finds four first places — and **every one of those announcements reports recall around
+50%.**
 
-So CodeRabbit is either the best tool tested or the worst of the three, depending on who paid
-for the test. **That is the state of the evidence in this market.** Every benchmark is published
-by a company in it, and no two agree.
+### Before Martian, everyone marked their own paper
+
+[Greptile's own benchmark](https://www.greptile.com/benchmarks) — 50 bugs, 5 repositories —
+scores Greptile 82% and CodeRabbit 44%. [Macroscope's](https://macroscope.com/content/best-ai-code-review-tools-github-2026)
+— 118 bugs, 45 repositories — scores Macroscope 48%, CodeRabbit 46%, Greptile 24%.
+[Tenki's](https://tenki.cloud/benchmarks/code-reviewer) — 122 bugs — scores Tenki 68.9%,
+Greptile 36.1%, CodeRabbit 28.7%.
+
+**Every one is published by a tool in the ranking. Every one puts its publisher first.**
 
 ### The number you are actually paying for
 
@@ -763,21 +775,28 @@ pointed. One repository, read access, nothing installed.
 
 # Page 8 — `/vs/greptile`
 
-# Greptile publishes 82% recall. Independent tests put it at 24–36%.
+# Greptile's own number-one announcement reports 50.6% recall.
 
-Greptile's own benchmark reports **82% recall**
-([their benchmarks page](https://www.greptile.com/benchmarks)).
+That is not our figure. It is in
+[their post announcing first place](https://www.greptile.com/content-library/greptile-martian-code-review-benchmark)
+on Martian's independent benchmark, 30 July 2026 — 60.8% F1, **76.2% precision, 50.6% recall.**
 
-Two benchmarks run by other companies, on real bugs:
+The precision is genuinely the best in that table and worth saying so. **The recall means half
+the real issues were not caught.**
 
-| Benchmark | Publisher | Greptile scored |
-|---|---|---|
-| **[Macroscope](https://macroscope.com/content/best-ai-code-review-tools-github-2026)**, 118 bugs / 45 repos | Macroscope, a competing reviewer | **24%** *(on 72 of 118 — access revoked mid-evaluation)* |
-| **[Tenki](https://tenki.cloud/benchmarks/code-reviewer)**, 122 bugs | Tenki, a competing reviewer | **36%** |
+### The gap between their two benchmarks
 
-**Both publishers are competitors, and we are telling you that plainly** — a competitor's
-benchmark is marketing, and so is Greptile's own. But when the vendor's figure is two to three
-times every outside measurement, the gap is the finding, whichever direction you discount in.
+[Greptile's own benchmark](https://www.greptile.com/benchmarks) — **50 bugs across 5
+repositories**, July 2025 — reports **82%**.
+
+Independent measurement of the same product: **50.6% recall** on Martian's ~300,000 pull
+requests, **36.1%** on [Tenki's](https://tenki.cloud/benchmarks/code-reviewer) 122 bugs, **24%**
+on [Macroscope's](https://macroscope.com/content/best-ai-code-review-tools-github-2026) 118.
+
+**We are not accusing anyone of dishonesty.** A 50-bug sample moves several points on a handful
+of cases, and every vendor in this market publishes a benchmark it wins. But when the in-house
+figure is 82% and every outside figure is half that, **the in-house figure is not the one to
+plan around.**
 
 ### Why this particular gap matters more than usual
 

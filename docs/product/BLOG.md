@@ -1,4 +1,4 @@
-# Five blog posts, ready to publish
+# Six blog posts, ready to publish
 
 Written to be published in this order. Each names its target search, its claim, the data behind
 it, and the citations — every one of which was checked against the source rather than recalled.
@@ -291,10 +291,156 @@ the consequence alone, and the mechanism is the part worth keeping.
 
 ---
 
+# Post 6 — Four companies say they are number one on the same independent benchmark
+
+**Target search:** `ai code review benchmark`, `coderabbit vs greptile vs qodo`, `best ai code
+reviewer 2026`
+**Length:** ~1,600 words · **This is the strongest post in the set. Publish it second, after
+the nulls post has established that we publish inconvenient things.**
+
+**Every figure below was read off the vendor's own live page. Re-read them before publishing —
+these numbers move, and that is the point of the post.**
+
+### The hook
+
+Martian, a research lab, built the first genuinely independent benchmark for AI code review:
+roughly **300,000 real pull requests**, scored on which comments developers actually acted on,
+with the dataset, judge prompts and evaluation pipeline **open-sourced**.
+
+It is the best thing that has happened to this market. And right now, four different companies
+are each telling you they came first on it.
+
+| Vendor | Their headline | Leaderboard date | Their F1 |
+|---|---|---|---|
+| [CodeRabbit](https://www.coderabbit.ai/blog/coderabbit-tops-martian-code-review-benchmark) | *"CodeRabbit tops the first independent AI code review benchmark"* | March 2026 | 51.2% |
+| [Qodo](https://www.qodo.ai/blog/qodo-ranked-1-ai-code-review-tool-in-martians-code-review-benchmark/) | *"Qodo Ranked #1 AI Code Review Tool"* | — | 64.3% |
+| [Greptile](https://www.greptile.com/content-library/greptile-martian-code-review-benchmark) | *"Greptile Ranks #1 on Martian's AI Code Review Benchmark"* | 30 July 2026 | 60.8% |
+| [cubic](https://www.cubic.dev/blog/cubic-is-the-best-ai-code-reviewer-on-martian-s-benchmark) | *"cubic is the #1 AI code reviewer on Code Review Bench"* | — | — |
+
+**None of them is lying.** It is a rolling leaderboard. Each announced the week it led, and left
+the announcement up.
+
+That is worth sitting with. **Even with a genuinely independent, open-source, 300,000-pull-request
+benchmark, a buyer comparing four vendors finds four number ones and no way to resolve them.**
+
+### The number that appears in every one of those announcements and never in the headline
+
+Read the second line of each.
+
+**CodeRabbit's number-one announcement reports recall of 53.5% and precision of 49.2%.**
+
+**Greptile's number-one announcement reports recall of 50.6%.**
+
+So the tool at the top of the most credible benchmark in this market — in its own celebratory
+blog post — **catches about half of what developers cared about.** And in CodeRabbit's case
+roughly half the comments it wrote were not ones developers acted on.
+
+Nobody is hiding this. It is in the announcements. It is simply never the sentence in bold.
+
+### Before Martian, everyone marked their own paper
+
+Worth showing, because it explains why Martian mattered and why it did not fix the problem:
+
+| Benchmark | Published by | Sample | Who won |
+|---|---|---|---|
+| [Greptile's](https://www.greptile.com/benchmarks) (July 2025) | Greptile | **50 bugs, 5 repos** | Greptile 82%, Bugbot 58%, Copilot 54%, CodeRabbit 44%, Graphite 6% |
+| [Macroscope's](https://macroscope.com/content/best-ai-code-review-tools-github-2026) | Macroscope | 118 bugs, 45 repos | Macroscope 48%, CodeRabbit 46%, Bugbot 42%, Greptile 24%, Graphite 18% |
+| [Tenki's](https://tenki.cloud/benchmarks/code-reviewer) (May 2026) | Tenki | 122 bugs, 5 repos | Tenki 68.9%, Devin 36.1%, Greptile 36.1%, Cursor 32%, CodeRabbit 28.7%, Graphite 3.3% |
+
+**Every one is published by a tool in the ranking, and every one puts its publisher first.**
+
+Follow a single product across the three. **Greptile scores 82% on its own benchmark, 36.1% on
+Tenki's, and 24% on Macroscope's.** CodeRabbit scores 46%, 44% and 28.7% depending on whose test
+it is sitting. Graphite scores 18%, 6% and 3.3%.
+
+And note Greptile's headline rests on **50 bugs across 5 repositories** — a sample small enough
+that a handful of cases moves it several points.
+
+### What the research says about why this is the wrong race
+
+Two things, both older than any of these products.
+
+**Noise is what kills analysis tools, not weak detection.** Bessey and colleagues at Coverity
+wrote up a decade of selling static analysis to roughly 700 customers in
+[*A Few Billion Lines of Code Later*](https://cacm.acm.org/research/a-few-billion-lines-of-code-later/)
+(CACM, 2010). The commercial lesson was not that the tool needed to find more. It was what false
+positives did to adoption. **A precision figure near 50% is the exact condition that paper warns
+about**, arriving twenty-six years later with a different label on the box.
+
+**The defects arriving now are not the kind more rules will catch.** Two empirical studies:
+[557 labelled errors across six LLMs](https://arxiv.org/abs/2406.08731) finds a large share
+exhibit *complex semantic characteristics* rather than the subtle slips human programmers make;
+[333 bugs across three LLMs](https://arxiv.org/abs/2403.08937) gives ten patterns including
+*Missing Corner Case* and *Incomplete Generation*. These are judgement calls, and judgement is
+where a reviewer is least reliable and most confident.
+
+### The pain point they are all selling against is not the one you have
+
+**Every product in that table is marketed on detection** — catch more, catch it earlier, catch
+what humans miss. That is the race, and by the leaders' own published figures it is being run at
+around 50% recall by everybody.
+
+**The pain you actually have is different.** When a reviewer with 50% recall says nothing about
+a file, you cannot tell whether it checked and cleared it or never really looked. At that hit
+rate, silence is wrong about as often as it is right.
+
+**So you open the file and read it yourself.** The tool has not removed the work on the part that
+mattered. You are paying for a reviewer and performing the review — and adding a sixth tool at
+55% recall does not change that arithmetic at all.
+
+### What we found, and what we do about it
+
+We are not entering the detection race. We have no evidence we would win it, nobody has shown
+anyone wins it, and the table above is what winning looks like.
+
+**We tested five ways to predict which changes break, and four returned nothing** — a
+static-analysis coverage gate at relative risk 0.916 while firing on 45% of pull requests, an
+exposure signal at 1.040, a co-change localiser that fired on eight real breakages and named the
+right file zero times, and a test-coverage gap that pointed the wrong way. Those are in
+[the nulls post](#), with intervals and sample sizes.
+
+The one thing we do that nobody in that table does: **we publish what we did not examine.**
+
+```
+Checked      2 files · 3 functions
+Not checked  1 file — generated · 4 call sites — could not resolve
+```
+
+**That does not fix the 50%. It makes it addressable.** Where we say *checked*, you stop
+re-reading. Where we say *not checked*, that is yours, named, before you merge rather than after
+something breaks.
+
+A reviewer that misses half and tells you which half it looked at is a tool. One that misses half
+and stays quiet about where is a coin toss with a subscription.
+
+### The close
+
+We are not going to publish our own benchmark. On the evidence above, one more vendor-run
+number would be worth nothing — and the honest version of this post cannot end by doing the
+thing it spent 1,500 words criticising.
+
+Run it on your own repository instead. We replay your last six months and show you where we
+would have pointed.
+
+### Citations, all verified live
+
+Every link above was read from the live page while writing. **Re-verify on the day of
+publishing**: the Martian leaderboard moves, and a post about other people's moving numbers is
+the worst possible place to carry a stale one.
+
+### Do not add
+
+Our own recall, precision or F1. The entire argument is that another self-reported number is
+worthless — printing one would be the post refuting itself.
+
+
+---
+
 # Publishing notes
 
-**One post a month, in this order.** Five honest posts build more than twenty filler pieces, and
-this order earns credibility before it makes an argument.
+**One post a month, in this order.** Six honest posts build more than twenty filler pieces, and
+this order earns credibility before it makes an argument. **Post 6 is the strongest and goes
+second**, once Post 1 has established that we publish inconvenient things about ourselves.
 
 **Every post ends with the same offer, in the same words:** *we do not publish a benchmark. Give
 us a repository and we will run it on your own history.*
