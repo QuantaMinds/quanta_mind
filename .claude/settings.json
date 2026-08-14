@@ -110,7 +110,8 @@
     "no duplicate or orphan modules": "guard:check_module_identity",
     "no --filter on a git clone (A31)": "guard:check_no_partial_clone",
     "a withdrawn amendment names its enforcer": "guard:check_withdrawn_amendments",
-    "a cited document or line exists": "guard:check_citations_resolve",
+    "a cited document or line exists": "guard:citations/resolve",
+    "a dated external figure is re-checked on its cadence": "guard:citations/freshness",
 
     "no source text in pack": "ci:verify-no-source-leak (invariant 6)",
     "deterministic re-index": "ci:verify-determinism (invariant 5)",

@@ -28,7 +28,10 @@ from pathlib import Path
 
 from discovery import Violation, report
 
-TOKEN = re.compile(r"\b(guard|ci|hook):([A-Za-z0-9_.-]+)")
+# The name may carry a sub-package path -- `guard:citations/freshness` -- because
+# scripts/guard/ grew one when it hit its fan-out cap. Without the slash the token
+# silently truncated to `citations` and the map reported an unresolvable claim.
+TOKEN = re.compile(r"\b(guard|ci|hook):([A-Za-z0-9_./-]+)")
 
 # Recipe names in the justfile: a line starting at column 0 ending in ':'.
 JUST_RECIPE = re.compile(r"^([a-z][a-z0-9-]*)\s*(?:[A-Za-z0-9_= \"'.]*)?:", re.MULTILINE)
@@ -73,6 +76,8 @@ def check_tokens_resolve(settings: Path, root: Path) -> list[Violation]:
     for rule, value in _load_map(settings).items():
         for kind, name in TOKEN.findall(value):
             if kind == "guard":
+                # `citations/freshness` names a guard inside a sub-package, which
+                # scripts/guard/ grew when it reached its fifteen-file cap.
                 ok = (root / "scripts" / "guard" / f"{name}.py").is_file()
                 detail = f"scripts/guard/{name}.py does not exist"
             elif kind == "ci":
@@ -118,6 +123,10 @@ def check_no_orphan_guards(settings: Path, root: Path) -> list[Violation]:
     for path in sorted(guard_dir.rglob("*.py")):
         # discovery.py is the shared walker, imported rather than invoked.
         if path.name == "discovery.py":
+            continue
+        # A sub-package's __init__.py declares the package; it is not a guard and has
+        # nothing to invoke. The modules beside it are still checked individually.
+        if path.name == "__init__.py":
             continue
         if path.name not in invokers:
             where = "settings.json" if path.name.startswith(HOOK_PREFIX) else "the justfile or CI"

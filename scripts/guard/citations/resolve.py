@@ -25,6 +25,15 @@ CONSUMED BY: justfile (`just check`), .github/workflows/guards.yml.
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
+# The guards import each other by bare name, which works because Python puts a script's own
+# directory on sys.path[0]. These two live one level down, so the parent is added explicitly
+# rather than relying on an invocation style. A guard that only runs from one directory is a
+# guard that stops running when someone moves the recipe.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import re
 import sys
 from pathlib import Path

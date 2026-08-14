@@ -1,0 +1,58 @@
+{
+ "cells": {
+  "(True, True)": 1788,
+  "(True, False)": 157,
+  "(False, True)": 7,
+  "(False, False)": 17
+ },
+ "per_repo": {
+  "567-labs_instructor": {
+   "(True, True)": 143,
+   "(True, False)": 11,
+   "(False, True)": 1
+  },
+  "MontrealAI_AGI-Alpha-Agent-v0": {
+   "(True, True)": 312,
+   "(True, False)": 33,
+   "(False, False)": 3,
+   "(False, True)": 1
+  },
+  "OpenPipe_ART": {
+   "(True, True)": 151,
+   "(True, False)": 25,
+   "(False, False)": 2
+  },
+  "PriorLabs_TabPFN": {
+   "(True, True)": 100,
+   "(True, False)": 16,
+   "(False, False)": 1,
+   "(False, True)": 1
+  },
+  "Skyvern-AI_skyvern": {
+   "(True, True)": 379,
+   "(True, False)": 19,
+   "(False, False)": 2
+  },
+  "browser-use_browser-use": {
+   "(True, True)": 381,
+   "(True, False)": 17,
+   "(False, False)": 2
+  },
+  "cartography-cncf_cartography": {
+   "(True, True)": 191,
+   "(True, False)": 33,
+   "(False, False)": 6,
+   "(False, True)": 2
+  },
+  "commaai_opendbc": {
+   "(True, True)": 131,
+   "(False, True)": 2,
+   "(True, False)": 3,
+   "(False, False)": 1
+  }
+ },
+ "kbar": 4.350939563230066,
+ "mbar": 7.140172676485526,
+ "file_units": 8567,
+ "sym_units": 14059
+}
