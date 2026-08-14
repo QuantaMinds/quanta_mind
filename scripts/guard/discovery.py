@@ -28,6 +28,8 @@ EXCLUDED_DIRS: frozenset[str] = frozenset(
         ".mypy_cache",
         ".pytest_cache",
         ".ruff_cache",
+        # Generated and unbounded like the other caches; the cap was firing on it.
+        ".hypothesis",
         "vendor",
         "node_modules",
         "htmlcov",
@@ -50,9 +52,8 @@ SOURCE_SUFFIXES: frozenset[str] = frozenset({".py", ".pyi", ".toml", ".yaml", ".
 
 # The declared layer order. Index position defines what may import what.
 #
-# The review pipeline left to right. It does one thing no naming convention can: `verify`
-# cannot import `infer`, so the layer adjudicating the model's claims cannot start trusting
-# them. The previous order (discover/resolve/probe/label) belonged to the falsified product.
+# The review pipeline left to right. `verify` cannot import `infer`, so the layer adjudicating
+# the model's claims cannot start trusting them -- which no naming convention can enforce.
 LAYER_ORDER: tuple[str, ...] = (
     "types",
     "store",

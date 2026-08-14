@@ -356,6 +356,11 @@ resolve it, or **the budget never funded it** — and the third is the common ca
 which is the failure this product accuses competitors of. A residual count with no list is
 refused.
 
+**And they are `RankedUnit` references, not names.** A string would let the line report a unit
+the ranking never saw. Referencing the ranked unit also links the coverage line to the row
+shadow evaluation scores against. **Prefer `CoverageLine.from_ranking` to the constructor** —
+derived from the ranking, the two cannot disagree.
+
 ### `store/`
 **Owns:** persistence — versioned schema, migrations, one repository module per aggregate,
 per-repository spend.

@@ -943,6 +943,31 @@ comparison this product sells. Keeping them is cheaper than being wrong about wh
 **And the job reports both numbers**: rows deleted, and rows retained *because* they adjudicate
 an outcome. A retention job that never retains anything is not retaining.
 
+### Before `store/` is written: one pass asking what the database could enforce
+
+**Four gaps in this plan have had the same shape** — a correctness rule living in prose while
+the schema permits the violation, failing silently while every test passes:
+
+| Gap | Prose said | Now enforced by |
+|---|---|---|
+| Retention | "outcomes are kept forever" | foreign keys, `ON DELETE RESTRICT` |
+| Cold units missing | "the coverage line reports what was skipped" | a required field in the type |
+| Cold units counted | "name what was skipped" | a list, with a residual that cannot stand alone |
+| Cold units as strings | "the names match the ranking" | a reference to `ranked_unit` |
+
+Each was caught one at a time, immediately after the fix that created it. **The cheaper rule is
+general: anything the schema permits will eventually happen, so a rule that matters belongs in
+the type or the constraint rather than the docstring.**
+
+**So `store/` gets one pass before it is written, not after**: for every rule currently stated in
+a comment, ask whether the database could refuse the violation instead. Where it can, it does.
+Where it cannot — "keep this until we know whether it matters" is a fact about the future —
+express it as an **absence of capability**, which is what revoking DELETE on `ranked_unit` does.
+
+**The residue after that pass is the list of rules genuinely enforced by nothing**, and that list
+should be short enough to read in one sitting. A rule on it is a rule someone has to remember,
+and this plan has now demonstrated four times that nobody does.
+
 ### The house rule these three share
 
 Three mechanisms in this plan exist because a check that cannot report having fired is
@@ -1401,6 +1426,13 @@ abandonment without uninstallation, and it is the failure mode a naive install-c
 report as success — the same shape as every other check in this plan.
 
 **Exit criterion: survived AND still generating reaction volume at day 30.** Not survived alone.
+
+**And one more question rides on the same month, recorded here so it is not lost: is a named
+cold list sufficient?** The budget was set at three units rather than five because naming the
+skipped units was judged the cheaper fix for the same problem. **That judgement is untested.** If
+reviewers ignore the cold list, the argument for the smaller budget collapses and top-5 becomes
+the right call at +$13 per repository per month. Measurable from the same reaction rows: do
+reviewers engage with the coverage line's cold list at all?
 
 **Zero reactions is unresolved, not failed.** A careful reader who never clicks is
 indistinguishable in the data from someone who stopped looking — the metric captures

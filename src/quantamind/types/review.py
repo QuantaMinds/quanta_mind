@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 
 from quantamind.types.change import PullRequest
 from quantamind.types.finding import Finding
-from quantamind.types.ranking import Budget
+from quantamind.types.ranking import Budget, RankedUnit, Ranking
 from quantamind.types.verdict import Unresolved
 
 
@@ -48,12 +48,42 @@ class CoverageLine:
     `cold` is ordered by rank, least cold first, so truncating a long list keeps the units most
     nearly worth reading. `cold_not_listed` carries the residual, and a residual with no list is
     refused -- truncating a list is not the same as replacing it with a number.
+
+    **`cold` holds RankedUnit, not names.** A string would let this line report a unit the
+    ranking never saw, or misspell one, with nothing to object -- the same shape as a rule
+    living in prose while the schema permits its violation. Referencing the ranked unit also
+    links the coverage line to the row shadow evaluation scores against, so a candidate ranker
+    that would have funded a cold unit has something to be credited against.
+
+    **Prefer `from_ranking` to the constructor.** Built by hand, this object can disagree with
+    the ranking it describes; derived from it, disagreement is impossible. That is the same
+    argument as an outcome being a new row rather than an edit -- one source of truth beats two
+    that are usually consistent.
     """
+
+    @classmethod
+    def from_ranking(
+        cls,
+        ranking: Ranking,
+        files_checked: int,
+        unresolved: tuple[Unresolved, ...] = (),
+        list_limit: int = 10,
+    ) -> CoverageLine:
+        """Derive the line from the ranking that produced it, so the two cannot disagree."""
+        cold = ranking.cold()
+        listed = cold[:list_limit]
+        return cls(
+            units_checked=len(ranking.funded()),
+            files_checked=files_checked,
+            unresolved=unresolved,
+            cold=listed,
+            cold_not_listed=len(cold) - len(listed),
+        )
 
     units_checked: int
     files_checked: int
     unresolved: tuple[Unresolved, ...] = field(default_factory=tuple)
-    cold: tuple[str, ...] = field(default_factory=tuple)
+    cold: tuple[RankedUnit, ...] = field(default_factory=tuple)
     cold_not_listed: int = 0
 
     def __post_init__(self) -> None:
