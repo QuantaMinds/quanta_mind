@@ -693,17 +693,46 @@ assuming continuity.
 **Bought by security review, not by engineers.** None of it improves the product and all of it is
 mandatory above a company size.
 
+**Checked against what the competition already holds, because this is the one area where being
+behind loses a deal before anyone sees the product.** Greptile lists SOC 2 Type II, self-hosted
+deployment, SSO/SAML, GitHub Enterprise compatibility and a custom DPA. CodeRabbit lists SOC 2
+Type II, GDPR, SSO, audit logs, zero-retention options and self-hosting. **Both hold SOC 2
+Type II today.**
+
+### The item that cannot be triggered on demand
+
+**SOC 2 Type II is the gate, and it has a lead time that breaks the trigger below if ignored.**
+
+A Type II report needs an *observation window* — typically three to six months for a first
+audit — on top of readiness work and fieldwork. **Roughly six to nine months from kickoff to a
+report**, and the auditor cannot compress the window, because the window is the evidence. Budget
+in the region of $20,000–$60,000 all in for a company this size. *(Figures from published
+guidance; confirm with an auditor before planning against them.)*
+
+**So it cannot start when the first questionnaire arrives.** Starting then means losing that deal
+and the two behind it. **It starts when enterprise becomes a target, not when it becomes
+urgent** — and a Type I report is what covers the gap, since it needs no observation window and
+demonstrates the controls exist.
+
 ### Steps
 
-1. `serve/audit_log.py` — append-only: who changed configuration, when, from where. **Separate
+1. **Begin SOC 2 readiness on the decision to sell to enterprise.** Everything else here is
+   evidence that feeds it.
+2. `serve/audit_log.py` — append-only: who changed configuration, when, from where. **Separate
    from application logs**, because the first question in an audit is whether the log could have
    been edited.
-2. Data residency — region-pinned storage, chosen at install and not migratable afterwards.
-3. Self-hosted deployment: container, migrations run by command, an offline licence check that
+3. Data residency — region-pinned storage, chosen at install and not migratable afterwards.
+4. **Zero-retention mode** — asked for by name by regulated buyers, and a competitor already
+   offers it. Nothing but the review record persists; no diff content at rest.
+5. Self-hosted deployment: container, migrations run by command, an offline licence check that
    **fails open**. A licence check that fails closed takes a customer's reviews down over our
    billing problem.
-4. Retention controls, and contractual no-training in writing.
-5. SLA measurement before an SLA is offered. **We do not have latency numbers**, and the rule
+6. **GitHub Enterprise Server**, which is not github.com — a different API surface, self-hosted by
+   the customer, and a real engineering item rather than a configuration flag. A competitor lists
+   it; assume it will be asked for.
+7. Retention controls, and contractual no-training in writing. **A custom DPA has legal lead
+   time** and is not an engineering task.
+8. SLA measurement before an SLA is offered. **We do not have latency numbers**, and the rule
    against performance claims without measurement applies hardest in a contract.
 
 ### Gate
@@ -726,7 +755,7 @@ actually blocked on them:
 | **Budget ceiling** | **before the first paid seat** | It is not a feature, it is what makes the price true |
 | Identity and org view | first Business prospect with two repositories | The schema change wants doing before there is data to migrate |
 | BYO key and certification | first prospect blocked on compliance | Each provider is a maintained integration; build them one customer at a time |
-| Procurement surface | first security questionnaire | It never makes the product better and it always takes longer than estimated |
+| Procurement surface | **SOC 2 readiness on the decision to target enterprise; the rest on the first questionnaire** | The report needs a three-to-six-month observation window, so triggering on the questionnaire loses that deal |
 
 **Only the budget ceiling is unconditional.** The rest are sold on the price list and built when
 someone tries to buy them — which is the honest way to run a four-tier table with no customers
@@ -750,7 +779,7 @@ yet, provided the table does not promise a delivery date.
 | Billing and integrations | after ten paying repositories | — |
 | Identity and org view | first two-repository prospect | org report disagrees with the per-repository sum |
 | BYO key and certification | first compliance-blocked prospect | every model certifies, so certification measures nothing |
-| Procurement surface | first security questionnaire | audit log is modifiable through any application path |
+| Procurement surface | SOC 2 on targeting enterprise; rest on first questionnaire | audit log is modifiable through any application path |
 
 **The ranker gate is the one that can end the project**, and it is deliberately placed before
 any hosting, any billing, and any model spend. If the productionised ranker does not reproduce,
