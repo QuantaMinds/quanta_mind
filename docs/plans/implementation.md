@@ -1247,6 +1247,22 @@ report as success — the same shape as every other check in this plan.
 
 **Exit criterion: survived AND still generating reaction volume at day 30.** Not survived alone.
 
+**Zero reactions is unresolved, not failed.** A careful reader who never clicks is
+indistinguishable in the data from someone who stopped looking — the metric captures
+interaction, not attention. **So accept the asymmetry rather than pretending to fix it: nonzero
+reactions is positive evidence of engagement, zero is no evidence either way.** A zero-reaction
+team is recorded as unresolved, which shrinks the denominator honestly and still gives a decisive
+answer if most teams land on the clean side.
+
+**And ask, once, at day 30.** Three questions by email to any team showing zero reactions. Not a
+survey programme — a single message resolving the one ambiguity the instrumentation cannot.
+**This is the only place in the plan where self-report is the right instrument**, because the
+quantity is a mental state and no row records it.
+
+**This criterion was written in conversation, not derived from a measurement**, and it will be
+tempting to soften at day 30 if the number is close. That is why the readings above are fixed in
+advance — and knowing *why* they were fixed is the part that has to survive with them.
+
 **And check again at 90 days.** Thirty days may be short for a decision in either direction — a
 team that keeps it for a month and drops it in week seven has said something the experiment as
 specified would not capture. Not a reason to delay the month, a reason not to close the question
