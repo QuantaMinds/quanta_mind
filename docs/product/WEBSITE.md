@@ -40,6 +40,10 @@ The list at the end says exactly what must never appear on the site, and why.
   about them. State the gap, show what it costs on a Monday morning, then say what we add.
   **Concede the competitor's strengths after that, never before** — conceding first reads as
   apologising for existing.
+- **Every button names its destination and what happens.** *"See both on your own history"*
+  was on two pages and told the reader nothing — whose history, found where, costing what. A
+  button is a promise about the next screen; if a reader cannot picture that screen, the button
+  is decoration. Write the destination beside it.
 - **Every page ends with one action.** Not three.
 
 ---
@@ -68,7 +72,7 @@ When a code reviewer says nothing about a file, you cannot tell which one it is.
 
 **We tell you which one it is.**
 
-**[ See it on your own code ]**   ·   How it works →
+**[ Run it on your last six months ]** → `/report`   ·   How it works → `/how-it-works`
 
 ---
 
@@ -180,7 +184,7 @@ where we would have pointed — and whether a later fix landed there.
 
 **You will not be reading our claims. You will be reading your own history.**
 
-**[ Get the report ]**
+**[ Run it on your last six months ]** → `/report`
 
 Free. Nothing installed. Nothing written to your repository. Most come back the same day.
 
@@ -244,7 +248,7 @@ check every line of it against what you remember happening.
 
 If the report is not useful, you have lost ten minutes and given nobody your code.
 
-**[ Get the report ]**
+**[ Run it on your last six months ]** → `/report`
 
 ---
 
@@ -409,7 +413,7 @@ later fix went to that same place.
 - We do not need an API key from you.
 - We do not keep your code after the report is made.
 
-**[ Send a repository ]**
+**[ Send a repository ]** → starts the report
 
 ### Why this is free
 
@@ -458,7 +462,7 @@ checked where checking is possible, and the rest is labelled as a suggestion.
 - We do not find every bug. Neither does anything else you can buy.
 - We do not read languages we cannot parse. We name them instead of skipping quietly.
 
-**[ Get your free report ]**
+**[ Run it on your last six months ]** → `/report`
 
 ---
 
@@ -483,7 +487,7 @@ Unlimited reviews on every paid plan. We are not going to bill you per review.
 | Run it on your own servers | — | — | — | ✓ |
 | Audit logs, data location, support agreement | — | — | — | ✓ |
 
-**[ Start free ]**  ·  **[ Talk to us ]**
+**[ Start free ]** → `/report`  ·  **[ Talk to us ]** → `/contact`
 
 ### Which one am I?
 
@@ -661,7 +665,10 @@ reviews.
 **Pick us** if you need to be able to say which parts of a change were examined — which is any
 team that signs off on a merge, not only teams drowning in comments.
 
-**[ See both on your own history ]**
+**[ Run both on your last six months ]** → `/report`
+
+*Under the button:* We replay your own merged pull requests and show where each tool would have
+pointed. One repository, read access, nothing installed.
 
 ---
 
@@ -743,7 +750,10 @@ method will be beside it.
 **That your code is safer with us because we read less of it.** Read the
 [security page](/security) and decide. It is a real difference and it is not the reason to buy.
 
-**[ See both on your own history ]**
+**[ Run both on your last six months ]** → `/report`
+
+*Under the button:* We replay your own merged pull requests and show where each tool would have
+pointed. One repository, read access, nothing installed.
 
 ---
 
