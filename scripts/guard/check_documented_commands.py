@@ -43,7 +43,13 @@ INVOCATION = re.compile(r"python\s+-m\s+(?P<module>[a-zA-Z_][\w.]*)")
 
 # Where a documented command may live. Plans record intent rather than procedure, so a
 # command in a plan is a proposal and not yet a promise.
-DOC_ROOTS = ("docs/findings", "docs/CODEBASE.md", "README.md", "BRIEFING.md", "AGENTS.md")
+DOC_ROOTS = (
+    "docs/findings",
+    "docs/engineering/CODEBASE.md",
+    "README.md",
+    "BRIEFING.md",
+    "AGENTS.md",
+)
 
 # Import roots a documented module name may resolve under.
 PACKAGE_ROOTS = ("src", "research/phase0/src")

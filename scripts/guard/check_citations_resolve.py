@@ -45,9 +45,20 @@ SKIP_DIRS = {".git", ".venv", "node_modules", "__pycache__", "vendor", ".mypy_ca
 ALLOW = "citation:allow"
 
 
+# Hook-written session records. They are transcripts of a session, not prose anyone reads
+# for guidance, and they cite whatever existed at the time -- including files a later commit
+# deletes on purpose. Governing them makes every cleanup fail this guard for a reason that
+# is not a defect. They are gitignored; this keeps a stray one from failing a local run.
+SESSION_RECORD = "session-"
+
+
 def _scan_roots(root: Path) -> list[Path]:
     """The prose this guard governs: docs, plus the rule files at the top level."""
-    found = [p for p in (root / "docs").rglob("*.md") if not _skipped(p)]
+    found = [
+        p
+        for p in (root / "docs").rglob("*.md")
+        if not _skipped(p) and not p.name.startswith(SESSION_RECORD)
+    ]
     found += [root / name for name in ("AGENTS.md", "CLAUDE.md", "README.md", "BRIEFING.md")]
     return [p for p in found if p.is_file()]
 

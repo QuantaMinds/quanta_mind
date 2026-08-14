@@ -23,12 +23,12 @@ believe the current tests would catch it.
 
 ## Docs
 
-- [ ] `docs/CODEBASE.md` updated *(enforced by `check_docs_sync.py`)*
+- [ ] `docs/engineering/CODEBASE.md` updated *(enforced by `check_docs_sync.py`)*
 - [ ] Module docstrings updated where imports changed
 - [ ] New rule added? It has an entry in `.claude/settings.json` `$enforcement_map`
       pointing at a real enforcer, or is tagged **ADVISORY** in `AGENTS.md`
       *(both directions enforced by `check_enforcement_map.py`)*
-- [ ] New way to fail quietly? Added to the table in `docs/`VALIDATION.md` “The silent-failure suite”`
+- [ ] New way to fail quietly? Added to the table in `docs/engineering/`VALIDATION.md` “The silent-failure suite”`
 
 ## Phase gate
 

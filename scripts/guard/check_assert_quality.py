@@ -14,7 +14,7 @@ WHY:  This is the single highest-value guard in the repository. A green test sui
         - a file in tests/live/ that imports mock (live means live)
 IMPORTS: scripts/guard/discovery.py; stdlib ast.
 CONSUMED BY: justfile (`just check`), .github/workflows/guards.yml.
-SEE ALSO: docs/VALIDATION.md for the doctrine this guard mechanises.
+SEE ALSO: docs/engineering/VALIDATION.md for the doctrine this guard mechanises.
 """
 
 from __future__ import annotations

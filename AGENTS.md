@@ -19,7 +19,7 @@ before publication, and every review states what it could not analyse.
 the earlier product — unsoundness labels over MCP. **That architecture is not built and this one
 inherits none of it.** What justifies this one: the ranked function is the one a later fix
 returns to, +22 points above its rate elsewhere, replicated by an independent rater. Read
-`docs/QUANTAMIND.md` for why, `docs/plans/product-skeleton.md` before your first change, and
+`docs/product/QUANTAMIND.md` for why, `docs/plans/product-skeleton.md` before your first change, and
 treat `research/` as the evidence base, never as product code.
 
 ---
@@ -85,7 +85,7 @@ you remember to obey — the machine will stop you either way.
    → `scripts/guard/check_branch_name.py` + `scripts/guard/hooks/hook_pre_edit.py` + branch protection
 
 10. **Docs move with code.** A PR that changes behaviour and does not touch
-    `docs/CODEBASE.md` fails CI. → `scripts/guard/check_docs_sync.py`
+    `docs/engineering/CODEBASE.md` fails CI. → `scripts/guard/check_docs_sync.py`
 
 11. **Research dependencies stay out of the product.** `research/` is a separate uv
     project on a different interpreter. Nothing in `src/` or `scripts/` may import
@@ -183,7 +183,7 @@ A change is done when all seven are true. Not six.
 1. `just verify` is green
 2. A live test asserts on real output, and the golden file was reviewed by a human
 3. Coverage of the changed module did not decrease
-4. `docs/CODEBASE.md` reflects the change
+4. `docs/engineering/CODEBASE.md` reflects the change
 5. Module docstrings updated where imports changed
 6. The PR description states what could still silently fail and why you think it will not
 7. A second reviewer ran `just verify` locally
