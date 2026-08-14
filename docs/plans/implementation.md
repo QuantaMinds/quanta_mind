@@ -1,5 +1,9 @@
 # Implementation plan
 
+> **Derived document.** Measurements here are copied from `QUANTAMIND.md`, which is canonical.
+> Reconciled against it on 2026-08-14. If the two disagree, that one wins and this is the
+> bug.
+
 **Written 2026-08-13.** Filename deliberately does not start with `session-`, because the
 session-end hook writes to that pattern and would overwrite this.
 
@@ -151,7 +155,23 @@ per read, and the review record carries both.
 
 `uv run quantamind rank <repo> <pr>` prints the ranked units with scores and the fire decision.
 
-### Gate — the hard one
+### Three gates, not one — they fail for different reasons and share no evidence
+
+A single stage that can fail three ways gives one bit of information when it fails. Ranker
+reproduction is a correctness check against research already collected. Allocation loss needs
+labelled outcomes. Cost needs live `usage` figures on real diffs. **They are separated so a
+failure names itself.**
+
+| | Gate | Needs |
+|---|---|---|
+| **3a** | the productionised ranker reproduces the research ranker on the collected corpus | nothing new — run it today |
+| **3b** | measured per-pull-request cost across **all** calls, with `cache_read_input_tokens` non-zero | live traffic |
+| **3c** | allocation loss at **function** level, stated with an interval | live traffic, shares 3b's run |
+
+**3a does not wait on the other two**, and it is the one that can end the project. 3b and 3c
+share a single instrumented run.
+
+### Gate 3a — the hard one
 
 **The productionised ranker reproduces the research figures on the corpus already collected:**
 
@@ -166,7 +186,15 @@ per read, and the review record carries both.
 **If it does not reproduce, stop.** The research measured something the product cannot, and
 that must be understood before anything is built on top of it.
 
-**Known-answer test, and it is the important one here.** A ranker returning a constant scores
+**3b's known-answer test** is that the cost figure counts every request, not the deep read
+alone. A per-pull-request cost that matches the single-call arithmetic is evidence the
+instrumentation is counting one call, not that allocation got cheaper.
+
+**3c's known-answer test** is stated in the master document: the function-level miss rate should
+come in **above** the file-level 1.77%, because functions are a finer partition. A result that
+matches the file-level number is a signal the extraction did not change units.
+
+**Known-answer test for 3a, and it is the important one here.** A ranker returning a constant scores
 above 70% on top-1 because the null is 72%. So the gate is not "the number is high" — it is
 **"the number is high AND the null ranker, run through the identical harness, is not."** Three
 sabotages, all required to go red:
@@ -769,7 +797,8 @@ yet, provided the table does not promise a delivery date.
 |---|---|---|
 | Skeleton | week 1 | — |
 | Reader | weeks 2–3 | conservation invariant cannot be made to hold |
-| **Ranker** | weeks 4–5 | **does not reproduce within tolerance — stop and re-examine the research** |
+| **Ranker (3a)** | weeks 4–5 | **does not reproduce within tolerance — stop and re-examine the research** |
+| Allocation instrumented (3b, 3c) | with first live traffic | cost counts one call not three; or function-level miss rate is unstated |
 | Free tier | week 6 | coverage line cannot be made accurate by hand audit |
 | Retrospective | weeks 7–8 | report contradicts the hand audit |
 | Allocate/infer/verify | weeks 9–11 | cost exceeds uniform review, or drop rate is 0% or 100% |

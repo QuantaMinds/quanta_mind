@@ -1,5 +1,9 @@
 # What to say when someone asks
 
+> **Derived document.** Measurements here are copied from `QUANTAMIND.md`, which is canonical.
+> Reconciled against it on 2026-08-14. If the two disagree, that one wins and this is the
+> bug.
+
 Five questions, in the order they get asked. Say the bold line, then stop — the paragraphs under
 it are what to reach for **if** they push, not a script to recite.
 

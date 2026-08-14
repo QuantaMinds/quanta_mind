@@ -1,5 +1,9 @@
 # QuantaMind — how it works, and a week in an engineer's life
 
+> **Derived document.** Every measurement here is copied from `QUANTAMIND.md`, which is
+> canonical. Reconciled against it on 2026-08-14. If the two disagree, that one wins and
+> this is the bug.
+
 **Rewritten 2026-08-13.** This replaces an earlier draft built on a design the measurements
 falsified. The build plan is `docs/plans/gravity-reviewer-build-plan.md`; the evidence is in
 `docs/findings/SIGNAL_SEARCH_LOG_2026-08.md` and
@@ -303,13 +307,19 @@ Paid tier, per pull request, at list prices:
 
 | | Tokens | Cost |
 |---|---|---|
-| Repository prefix, cache read | 20,000 at 0.1× | $0.010 |
-| Ranked function and neighbours | 3,000 | $0.015 |
-| Output including thinking | 2,000 | $0.050 |
-| **Per pull request** | | **≈ $0.075** |
+| Deep call — prefix cache read | 20,000 at 0.1× | $0.010 |
+| Deep call — ranked function and neighbours | 3,000 | $0.015 |
+| Deep call — output including thinking | 2,000 | $0.050 |
+| Two shallow calls — prefix cache read, once each | 2 × 20,000 at 0.1× | $0.020 |
+| Two shallow calls — the function, low effort | 2 × 1,500 in | $0.015 |
+| Two shallow calls — output | 2 × 600 out | $0.030 |
+| **Per pull request, three calls** | | **≈ $0.140** |
 
-Reading the whole diff at uniform depth costs roughly **$0.175**. **Allocation saves about 2×,
-not 10×.** At 200 pull requests a month that is about **$15 of inference per repository**.
+Reading the whole diff at uniform depth costs roughly **$0.175**, so allocation saves **1.25×**
+— not the 2× an earlier single-call version of this table implied. **Every request pays its own
+cache read**, and the budget funds one deep call plus two shallow ones. At 200 pull requests a
+month that is about **$28 of inference per repository**, and that figure is derived from a
+specification rather than observed on real diffs.
 
 ---
 

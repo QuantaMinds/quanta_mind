@@ -1,5 +1,9 @@
 # QuantaMind
 
+> **Canonical document.** Every measurement in this repository is defined here. Other
+> documents copy from it and carry a reconciliation date; where they disagree, this file
+> wins. Vendor figures below are dated at the point of use and re-checked quarterly.
+
 **Written 2026-08-13. Self-contained — nothing here cites another document.**
 
 **Two kinds of number appear.** Ones **we measured**, each stated with its method. Ones taken from
@@ -861,9 +865,28 @@ of localisable defects"*, not *"our allocator loses 4.6%."*
 
 **The operational number is the pooled row, not the ≥4 row.** Production sees every change, and
 61.4% of them touch three files or fewer where a three-unit budget is not binding. So the figure
-that describes the policy's cost is **1.8% pooled** — at 200 pull requests a month, roughly
-**four changes a month where the defect unit would receive no model call and produce no error**.
-The ≥4 row isolates where ranking does work; the pooled row is what a customer experiences.
+that describes the policy's cost is the pooled one:
+
+| | n | misses | rate | 95% CI (Wilson) |
+|---|---|---|---|---|
+| Four or more files | 2,893 | 133 | 4.60% | 3.89% – 5.42% |
+| Three or fewer | 4,600 | 0 | 0% | 0% – 0.08% |
+| **Pooled** | **7,493** | **133** | **1.77%** | **1.50% – 2.10%** |
+
+At 200 pull requests a month that is **3.5 changes, and between 3.0 and 4.2**, where the defect
+unit would receive no model call and produce no error.
+
+**This is a FLOOR, not an estimate, and the reason is arithmetic rather than caution.** Functions
+are a finer partition than files. A three-unit budget over the five files of a change covers most
+of it; the same budget over that change's fifteen functions covers a fifth. **Top-3 at function
+level therefore covers a smaller share of any change than top-3 at file level, so the
+function-level miss rate should come in ABOVE 1.77%, not below.** Anyone checking this will
+derive that in a minute, which is why it is stated first.
+
+**And a same-number result would be a warning, not a confirmation.** If a symbol-level re-run
+returns 1.77% again, the likeliest explanation is that the extraction did not actually change
+units — this harness has already once read truncated history as complete. That run asserts the
+git exit code and reports the unit count so a reader can see the partition got finer.
 
 **61.4% of events sit in the vacuous stratum**, where a three-unit budget is not binding — so a
 pooled top-3 of 98.2% is mostly arithmetic and the four-or-more row is the real answer. Read off
@@ -1069,6 +1092,15 @@ the plan, and the one that no further engineering resolves.
 
 # Appendix — verification of every external claim
 
+**Every vendor figure carries the date it was read, and a re-check date.** This document now
+rests entirely on what vendors publish about themselves, so a reader has to be able to tell how
+stale a number is without asking. **The Martian leaderboard turned over once in five months** —
+CodeRabbit's January–February lead was superseded by Greptile's on 30 July 2026 — so a citation
+without a date is a claim that quietly expires.
+
+**Cadence: quarterly. Next re-check due November 2026.**
+
+
 Checked against primary sources on 2026-08-13. Our own measurements are described with their
 method in the body; this covers only claims about the outside world.
 
@@ -1078,7 +1110,7 @@ method in the body; this covers only claims about the outside world.
 | 2M code reviews/week, 17,000 customers, 150,000 OSS projects | **VERIFIED** | Company announcement |
 | 36% noise: 15% useless, 21% nitpicking, 28 PRs / 32,784 lines / 693 files | **VERIFIED** | Independent audit by the Lychee project |
 | Same audit: 35% genuine improvements, 3% security-critical, 72% relevant | **VERIFIED** | Same audit |
-| Reviewer precision spans ~49–76% | **VERIFIED** | Martian Code Review Bench — top tool 76.2%, market leader 49.2% |
+| Reviewer precision spans ~49–76% | **VERIFIED, dated** | Martian Code Review Bench. Greptile 76.2% precision / 50.6% recall, **leaderboard 30 July 2026**; CodeRabbit 49.2% / 53.5%, **data Jan–Feb 2026**. **Rolling leaderboard — re-check quarterly, next due Nov 2026** |
 | Cursor Bugbot: `neutral` conflates three states; emits no `skipped` | **VERIFIED verbatim** | Cursor's own documentation |
 | Qodo: judge agent filters low-confidence findings before the pull request | **VERIFIED verbatim** | Qodo's own documentation |
 | BreakBot: 8 stars, last push 2023-12-16, ISC licence | **VERIFIED** | GitHub API, queried directly |

@@ -1,5 +1,9 @@
 # Build plan — the reviewer that ranks first, then reads
 
+> **Derived document.** Measurements here are copied from `QUANTAMIND.md`, which is canonical.
+> Reconciled against it on 2026-08-14. If the two disagree, that one wins and this is the
+> bug.
+
 **Written 2026-08-12**, branch `feat/gravity-reviewer`. Product argument and evidence are in
 the August 2026 product blueprint, since deleted; the measurements behind it are in
 `docs/findings/SIGNAL_SEARCH_LOG_2026-08.md` and
