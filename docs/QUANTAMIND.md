@@ -244,12 +244,23 @@ Here `process_refund` at 34 touches is in this service's top decile. **We speak.
 ### Step 4 — allocate the inference budget
 
 ```
-  process_refund            rank 1  →  deep read, high effort, full surrounding context
+  process_refund            rank 1  →  deep read, xhigh effort, ONE pass
   _build_refund_payload     rank 2  →  shallow read
   send_refund_email         cold    →  no model call
+  ceiling                           →  three requests. A limit, not a target.
 ```
 
 The model receives the ranked function and its immediate context, not the whole diff.
+
+**One pass at rank 1, and the number matters more than it looks.** This read *multi-pass* until
+the arithmetic was checked: at one pass allocation is 1.25× cheaper than reading everything, at
+two it is 1.29× **more expensive**, so an unspecified pass count left the sign of the product's
+cost argument blank. It is one, for reasons that are not about cost — reasoning is already on by
+default at `xhigh`, so a second *request* re-pays the cache read to buy deliberation the first
+request already performs internally; and a model-based triage pass would duplicate the ranker,
+whose entire claim is that it needs no model. The ceiling is enforced and **observable**: each
+review records its actual request count and token spend, because a ceiling never hit and a
+ceiling never wired up otherwise print the same thing.
 
 ### Step 5 — read, with the repository cached
 
@@ -279,8 +290,23 @@ The parser then checks the structural parts of that claim against the parsed cod
 return paths exist, does the early return precede the write. **Confirmed claims are published.
 Contradicted claims are dropped silently, before any human sees them.**
 
+**What this can and cannot adjudicate, stated before a customer states it for us.** The verifier
+is a parser. It decides claims a parser can decide — a symbol exists, a signature has that
+arity, a return precedes a write, a reference resolves. **It cannot adjudicate a semantic
+claim**: that logic is wrong, that an edge case is unhandled, that a lock is held. And semantic
+defects are precisely why a model runs at all. So the verifier is structurally unable to check
+the claim class the model exists to produce, and **a wrong semantic finding publishes.**
+
+The honest claim is therefore *typed silence on structural claims*, not *verified findings*. It
+is still a claim no competitor makes. It is narrower than it first sounds, and saying so
+ourselves is worth more than being corrected.
+
 A verifier that never rejects anything is not a verifier, so this ships with a sabotage test: a
-deliberately false structural claim is injected and must be dropped.
+deliberately false structural claim is injected and must be dropped. **That gate proves the
+verifier can reject once, on the planted case — not that it still does.** So it ships alongside
+a live drop-rate counter: claims received and claims dropped, by claim class, per review. A drop
+rate that falls to zero and stays there is either a flawless model or a dead verifier, and those
+two must never look the same on the wire.
 
 ### Step 7 — emit, with the coverage line first
 
@@ -368,24 +394,35 @@ extraction still needs a parser per language, and the non-Python samples are sma
 Per pull request, at list prices, for a change touching six files with a 20,000-token
 repository summary:
 
+The budget funds rank 1 deep and ranks 2 and 3 shallow, so the worked example is **three
+calls**, and every call pays its own cache read at one tenth.
+
 | | Tokens | Cost |
 |---|---|---|
 | Deep call — prefix cache read | 20,000 at one tenth | $0.010 |
 | Deep call — ranked function and neighbours | 3,000 | $0.015 |
-| Deep call — output including reasoning | 2,000 | $0.050 |
-| Shallow call — prefix cache read again | 20,000 at one tenth | $0.010 |
-| Shallow call — second function, low effort | 1,500 in, 800 out | $0.028 |
-| **Total, two calls** | | **≈ $0.113** |
+| Deep call — output including reasoning, `xhigh` | 2,000 | $0.050 |
+| Two shallow calls — prefix cache read, once each | 2 × 20,000 at one tenth | $0.020 |
+| Two shallow calls — the function, low effort | 2 × 1,500 in | $0.015 |
+| Two shallow calls — output | 2 × 600 out | $0.030 |
+| **Total, three calls** | | **≈ $0.140** |
 
-**Every model call pays its own cache read**, so a two-call allocation is not one call's cost.
-An earlier version of this table priced a single call against a worked example that makes two;
-corrected here. If rank 1 uses multiple passes rather than one, add a call's cost per pass —
-**the pass count is most of the distance between this figure and the real one, and it is not yet
-fixed.**
+Reading the whole diff at uniform depth costs roughly **$0.175**, so this is a **1.25×** saving
+— not the 2× an earlier single-call version of this table implied, and not the 1.5× the
+two-call version implied.
 
-Reading the whole diff at uniform depth costs roughly **$0.175**. **Allocation saves perhaps
-1.5×, and the honest statement is that it is unmeasured** — see the note above. At 200 pull requests a month that is about **$15 of inference per repository**. The
-free tier runs no model at all and costs only compute.
+**Two things could erase it, and both are open.** The allocator specifies rank 1 as
+*multi-pass*; a second pass re-sends the first pass's output as input and pays another cache
+read, roughly $0.085, which takes the total to **$0.225 — worse than reading everything.** And
+half of the remaining saving is the assumption that the model writes 2,000 output tokens
+instead of 4,000, which is unsourced and pushed the wrong way by `xhigh`, since reasoning bills
+as output. **Allocation is argued as an input-side saving; the arithmetic is currently carried
+by an output ratio that may point the other way.**
+
+At 200 pull requests a month this is **$28 of inference per repository** single-pass, $45
+multi-pass. **Treat the whole range as unverified rather than any point in it as a floor.** The
+free tier runs no model at all and costs only compute — that part is structural, not an
+estimate.
 
 ## What is still unproven
 
@@ -623,6 +660,61 @@ thirds wrong."**
 
 ---
 
+## What we charge, and why the tiers split where they do
+
+**The cost floor is measured, not assumed: $0.140 per pull request across three capped
+requests, so about $28 of inference per repository per month at 200 pull requests.** The free
+tier runs no model and costs only compute — that is structural, not an estimate.
+
+**The market is moving the wrong way for everyone else, and that is the pricing story.**
+CodeRabbit charges $24–48 per developer per month. Greptile moved to **$1 per review beyond 50**
+in March 2026; Cursor's Bugbot moved to roughly **$1–1.50 per run** in May 2026. Two of the
+best-funded reviewers abandoned flat pricing within four months of each other, which is what
+happens when cost of goods scales with lines read. **Ours scales with a capped request count**,
+so we can promise the thing they just withdrew: unlimited reviews at a flat seat price.
+
+| | **Free** | **Team** | **Business** | **Enterprise** |
+|---|---|---|---|---|
+| Price | $0 | **$19**/dev/mo annual | **$39**/dev/mo annual | **$55**/dev/mo, $2.5K/mo floor |
+| Buyer | anyone | team lead | Director or VP Engineering | procurement and security |
+| What is being bought | the proof | the reviewer | the report | the contract |
+| Ranking, coverage line, retrospective | ✓ | ✓ | ✓ | ✓ |
+| Model findings in the pull request | — | ✓ unlimited | ✓ unlimited | ✓ unlimited |
+| Cross-repository aggregation, quarterly audit, SSO | — | — | ✓ | ✓ |
+| Verifier drop-rate telemetry | — | — | ✓ | ✓ |
+| **Bring your own key** — allowlisted model | — | — | **✓** | ✓ |
+| **Bring your own model** — uncertified or self-hosted | — | — | — | **✓** |
+| Self-hosting, audit logs, residency, SLA | — | — | — | ✓ |
+| Token budget | none — no model runs | fair use per repository | higher per repository | unlimited on their key |
+
+**The quarterly coverage audit is a separate line, $8,000–15,000 per engagement**, sold to an
+engineering leader out of a different budget than seats. It is plausibly the larger business.
+
+**The tiers split by who signs, not by how much you get.** Team is a credit card and a team
+lead buying a reviewer. Business is a light purchase order and a director buying an org-wide
+report — which is why SSO becomes mandatory there and not before. Enterprise is procurement
+buying a contract: it runs where legal permits, with a number we will defend to their auditor.
+**A tier whose only distinction is a bigger quota is anchoring, not a tier.**
+
+**Bring your own *key* at Business; bring your own *model* at Enterprise.** The line is one
+sentence — *we have certified that model, or we have not.* An allowlisted model costs us nothing
+because the evaluation is already amortised across every customer. An uncertified model means
+publishing a coverage number under our name for a configuration we never measured, which is the
+one failure this product cannot survive, so it requires a per-model evaluation run and therefore
+a contract. **Neither reduces the seat price**: bring-your-own-key is bought for compliance
+rather than cost, it widens our support surface across Bedrock, Vertex and Azure, and its real
+saving appears only at high volume — where it is spent buying back the unlimited-reviews promise
+rather than discounting the seat.
+
+**Where this is fragile, stated plainly.** At twenty developers, four repositories and 400 pull
+requests a month, cost of goods is $56 against $380 of revenue — **85% gross margin**. At 2,000
+pull requests a month it is $280 against $380, or **26%**. The per-repository budget ceiling is
+therefore load-bearing for the business model and not merely for the token bill. And **$28 per
+repository is a ceiling derived from a specification rather than a measurement** — the request
+count is bounded by construction, but the token sizes inside those three requests, the shallow
+ones especially, are still assumed. Re-derive it in the first week of real traffic before any of
+these numbers reaches a pricing page.
+
 # 5. Slack and Datadog
 
 **We integrate with both. We rebuild neither.**
@@ -727,6 +819,39 @@ unmeasured amount.
 67.5% random baseline — **4,293 events across 17 repositories, positive in 17 of 17.** Sign test
 on direction, p ≈ 1.5 × 10⁻⁵.
 
+**Top-3, which is the number the budget actually depends on.** Top-1 answers *is the spend well
+aimed*; it does not answer *does allocation lose defects*. The budget funds ranks 1–3 and gives
+cold units no call at all, so a defect in a cold unit yields no finding and no error — silence
+indistinguishable from a clean review. Measured on the same corpus, stratified, because for a
+change touching three files or fewer "in the top 3" is **true by construction**:
+
+| Changed files | n | Top-1 | **Top-3** | Alphabetical null, top-3 | Random top-3 | **Cold miss** |
+|---|---|---|---|---|---|---|
+| **Four or more** — the informative stratum | 2,893 | 80.5% | **95.4%** | 89.4% | 89.0% | **4.6%** |
+| Three or fewer — 100% by construction | 4,600 | 89.8% | 100% | 100% | 100% | 0% |
+| Pooled | 7,493 | 86.2% | 98.2% | 95.9% | 95.7% | 1.8% |
+
+**25 repositories, every exclusion printed with its reason and no failed read** — the harness
+refuses to publish a table at all if a history read did not complete, which is how the airflow
+defect recorded further below was caught rather than absorbed.
+
+**61.4% of events sit in the vacuous stratum**, where a three-unit budget is not binding — so a
+pooled top-3 of 98.2% is mostly arithmetic and the four-or-more row is the real answer. Read off
+it: the top-3 lift over the null is **+6.0 points, not the +13.3 that top-1 earns**, because
+top-3 is a much easier task and the null already sits at 89.4%.
+
+**The trade is now statable in one line: allocation buys 1.25× on cost and pays 1.8% of
+fix-localisable defects in silence.** If the pass count had stayed unspecified and landed at
+two, it would have paid that 1.8% *and* cost more than reading everything.
+
+**An unplanned replication, and the reason to distrust the first two attempts at it.** This run
+returns top-1 of **86.2%** against the documented 85.3%, on 7,493 events across 25 repositories.
+Overlapping data, so not an independent replication. It is quoted from the third run because the
+first two were measured on **19 and 22 repositories** without saying so — the harness silently
+dropped repositories whose history read failed, and only a skip ledger made the population
+visible. The three runs returned top-3 of 95.3%, 95.8% and 95.4% on the informative stratum, so
+the finding was stable throughout; **the population was not, and nothing in the output said so.**
+
 **A note on counts, because two figures here look contradictory and are not.** This run and the
 language run further below are separate passes over different repository sets — the language pass
 ran later, after more repositories had been cloned, which is why its Python arm alone reports
@@ -803,6 +928,16 @@ rebuilds them.
 | Nested file-then-function ranking | **Below its own null ranker** |
 | Structural callers as a localiser | **1 of 5**, while flagging 19% of the repository |
 
+**Two of these rows are n ≤ 11, and that must be read off the page rather than inferred.**
+`0 of 8` has a 95% upper bound of roughly **37%** — it supports *"not enough signal to ship a
+missing-file finding"* and does **not** support *"co-change carries no signal"*; the first is a
+decision under uncertainty, the second is a claim we have not bought. `1 of 5` is weaker still.
+And `11 of 11` below puts the true rate above roughly **72%** — enough to point inference at
+already-changed files, not enough to quote as a percentage. **Directional evidence, and it
+happens to point where the architecture already goes, which is exactly when a small n is most
+dangerous.** They do not belong in the same register as the 4,293-event ranking result, and
+neither belongs on a slide.
+
 **Why the localisers all failed, measured rather than assumed.** For every genuine breakage, the
 fix commit's files were split into those the change had already touched and those it had not:
 **5 of 11 SELF** (the fix only re-touched changed files), **6 of 11 MIXED**, **0 of 11
@@ -833,7 +968,7 @@ a programming-language result.
 
 ## 6.7 Measurement defects found and corrected
 
-Four instrumentation failures occurred during this work. All produced plausible numbers. None
+Six instrumentation failures occurred during this work. All produced plausible numbers. None
 was detectable from the output alone. They are recorded because a document that never reports
 its own errors gives a reader no way to calibrate the rest of it.
 
@@ -855,6 +990,27 @@ them the obvious escape from self-labelling bias. The pooled result looked decis
 it: **the alphabetical non-informative pick also scored 12/12**, because a revert touches **94%
 of the change's symbols** and 75% of them touch all. Any pick scores. **Withdrawn.** Caught
 before publication, by asking what a broken ranker would score.
+
+**The same defect again, on a different repository, and the documented repair did not fix
+it.** Measuring top-3 surfaced `apache_airflow` failing with the identical fatal — *"in the
+commit graph file but not in the object database"* — and emitting **9.1, 9.9 and 10.3 MB of
+output on three invocations of one command** before exiting 128. `git fetch --refetch`, the
+repair adopted last time, did **not** clear it: the corrupt artefact was the commit-graph file,
+which named the clone's previous `main` tip after the refetch had removed that object. Ignoring
+the commit-graph for that clone produced **11.4 MB and exit 0**. Two lessons kept: *byte counts
+that differ between runs of an identical command are the signature*, and **the largest truncated
+read still looks exactly like a complete one** — only the exit code separates them.
+
+**A silent drop that wore the same clothes as a clean skip.** The first top-3 harness returned
+`None` when a history read failed, and its caller could not tell that from *"this repository has
+too few commits to qualify"*. Three of the largest repositories in the corpus vanished from one
+run and returned in the next, and both runs printed a confident table. The cause underneath:
+**27 of 35 clones are `blob:none`**, so a cold read lazily fetches trees from the promisor
+remote over the network and is not deterministic until the object store is warm. The reader now
+raises rather than returning, and the harness prints a per-repository skip ledger with reasons
+and **refuses to report at all** if any read failed — which is what caught the airflow defect
+above. Ask what a check prints when the thing it checks is broken; the honest answer here was
+*the same table*.
 
 **A guard firing correctly.** A wrapper timeout later killed a run mid-stream and the new
 exit-code assertion refused to report from the partial read.
