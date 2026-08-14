@@ -166,6 +166,7 @@ failure names itself.**
 |---|---|---|
 | **3a** | the productionised ranker reproduces the research ranker on the collected corpus | nothing new — run it today |
 | **3b** | measured per-pull-request cost across **all** calls, with `cache_read_input_tokens` non-zero | live traffic |
+| **3b′** | **the shipping policy's miss rate stated on the record, at whatever budget ships** — 8.84% at three units, 3.50% at five — **and the coverage line naming what it did not read** | measured; the coverage line is a build item |
 | **3c** | allocation loss at **function** level, stated with an interval | live traffic, shares 3b's run |
 
 **3a does not wait on the other two**, and it is the one that can end the project. 3b and 3c
@@ -384,6 +385,28 @@ b = 157 (file hit, function miss), **c = 7 (file miss, function hit)** — the c
 version of this section assumed empty. **The sign is settled: function-level allocation loses
 substantially more.**
 
+### Pre-specified before running: the matched-coverage test
+
+**Top-3 files and top-3 functions are not the same net.** With m/k = 1.64, three functions is
+about 1.8 files' worth of units — **the function arm runs at roughly half the coverage of the
+file arm.** A smaller net catching less is not a ranking-quality finding.
+
+And it sits against a measurement pointing the other way: global function ranking scores **75.0%
+top-1 against 58.9%** for any-function-in-the-top-file. Function *ordering* is better. This run
+says function *allocation* is worse. Both can hold, and the reconciliation is budget — better
+ordering, smaller net, net wins.
+
+**The rule, fixed before the run:** function budget = `round(3 × m/k)` on the measured ratio.
+With m/k = 1.64 that is **round(4.92) = 5**. So **top-3 files against top-5 functions**, which is
+5/1.64 ≈ 3.05 file-equivalents.
+
+**What each outcome means, also fixed now:**
+
+| Outcome at matched coverage | Reading |
+|---|---|
+| functions still lose | **granularity is genuinely worse** — a real finding about the unit |
+| functions win or draw | **the ranking is better and the BUDGET is what costs us** — a different problem with a different fix |
+
 ### The first run was wrong, and the diagnostic is why we know
 
 The first attempt reported +7.41 points on a **broken symbol index**, and the ratio m/k = 1.17
@@ -401,6 +424,29 @@ Enabling git's python diff driver, measured on browser-use:
 | default heuristic | 57.8% | 30.6% |
 | **python diff driver** | **85.4%** | **5.3%** |
 
+### Matched coverage — RUN. Seventy per cent of the gap was budget, not granularity
+
+**Top-3 files against top-5 functions, the pre-specified rule.**
+
+| | miss | 95% CI | gap vs file top-3 |
+|---|---|---|---|
+| file, top-3 | 24/1,969 = 1.22% | 0.82–1.81% | — |
+| function, top-3 | 174/1,969 = 8.84% | 7.66–10.17% | **+7.62 pts** |
+| **function, top-5 (matched)** | **69/1,969 = 3.50%** | **2.78–4.41%** | **+2.29 pts** |
+
+**Seventy per cent of the apparent gap was the smaller net.** McNemar at matched coverage still
+gives p < 0.0001, and the reverse cell grows as predicted (c = 7 → 15) when the function net
+widens.
+
+**Read against the rule fixed before the run: functions still lose, so granularity is genuinely
+worse** — but by 2.29 points, not 7.62. **Both prior measurements survive together.** Function
+*ordering* is better (75.0% vs 58.9% top-1). Function *allocation* at equal budget is slightly
+worse. The headline gap was mostly the third thing: three functions is not three files.
+
+**So the earlier framing overstated by roughly 3×**, and the honest sentence is: at a fixed
+number of units the function unit costs about two points of recall; at a fixed *count of three*
+it costs seven and a half, because three functions covers less of a change than three files.
+
 ### What the re-run changed, and what it did not
 
 | | broken extraction | corrected |
@@ -410,9 +456,15 @@ Enabling git's python diff driver, measured on browser-use:
 | **gap** | +7.41 | **+7.62 points** |
 | c′ / c | 5.7× | **2.4×** |
 
-**The extraction nearly doubled and the gap moved 0.21 points.** That is the strongest available
-evidence the gap is not an extraction artefact — the threat was real, it was tested, and the
-result survived it.
+**The extraction nearly doubled and the gap moved 0.21 points** — but **this is not a
+before/after on the same events, and must not be read as a stability result.** Better extraction
+qualified more events, so n went 1,377 → 1,969, a 43% increase. Two measurements on overlapping
+but different populations. The claim that survives is *the gap is present in both*, not *the gap
+is stable*; establishing the latter needs the corrected run restricted to the original events.
+
+**And something did move a great deal: c′/c fell from 5.7× to 2.4×, a 58% change**, while the
+headline barely shifted. **That argues the decomposition is poorly constrained rather than
+confirmed**, and against leaning on c and c′ for the transfer question.
 
 **The decomposition still does not fully collapse.** c = 0.90 points per uncovered file against
 c′ = 2.13 per uncovered symbol, with m/k = 1.64. So the function arm remains worse *per unit*,
@@ -422,8 +474,21 @@ that would have narrowed transfer to "is functions-per-file stable".
 **Populations differ from the corpus-wide run**, which requires no symbols: this file arm is
 1.22% against 4.6% there. **Do not compare those two figures.**
 
-**What still limits it:** 8 convenience-sampled clones carrying larger changes than the other 17,
-so the gap plausibly overstates. The random-5 draw remains the planned second step.
+**Say "at most", not "is".** Three separate biases push the same way — the function arm's miss
+rate is inflated by each, and nothing corrects any of them:
+
+1. **8 convenience-sampled clones** carrying larger changes than the other 17.
+2. **Residual misattribution.** Git reports the *nearest preceding* match, so a hunk between two
+   functions is credited to the earlier one — a symbol in the index that is not the one changed.
+3. **14.6% of hunks still yield no `def`** even with the driver.
+
+Each puts a defect's true function outside the index or outside the target set, which inflates
+the function arm and nothing else. **So it is at most +2.29 at matched coverage, and at most
++7.62 at equal count.** The random-5 draw remains the planned second step.
+
+**Cheap partial check, since m/k is the tell:** with correct extraction, how does m/k
+*distribute*? A substantial share of changes still yielding exactly 1.0 functions per file are
+candidates for residual misattribution and can be eyeballed.
 
 ### Gate 3a — the hard one
 

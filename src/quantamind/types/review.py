@@ -27,19 +27,36 @@ class CoverageLine:
 
     Order is the argument: a reader who sees coverage before findings can weigh a finding
     before reading it. A reader who sees it afterwards has already formed a view.
+
+    **Three states, not two, and the third was missing.** A unit is read, or the parser could
+    not resolve it, or **the budget never funded it** -- and the first version of this type had
+    no way to say the third. That matters because it is the common case: allocation funds a
+    small number of ranked units and everything below is cold. Measured on the research corpus,
+    the defect sits in a cold unit about 8.8% of the time at a three-unit budget.
+
+    **A cold unit is not a failure to analyse. It is a decision not to**, and reporting it as
+    silence is the exact thing this product exists to stop. "Three of eleven functions read" is
+    a coherent product; "we reviewed your change" while reading three of eleven is not.
     """
 
     units_checked: int
     files_checked: int
     unresolved: tuple[Unresolved, ...] = field(default_factory=tuple)
+    units_cold: int = 0
 
     def __post_init__(self) -> None:
-        if self.units_checked < 0 or self.files_checked < 0:
+        if self.units_checked < 0 or self.files_checked < 0 or self.units_cold < 0:
             raise ValueError("CoverageLine counts cannot be negative")
 
     @property
     def total_considered(self) -> int:
-        return self.units_checked + len(self.unresolved)
+        """Everything the parser saw: read, skipped by budget, or unresolvable.
+
+        `units_cold` is in the denominator because a unit the budget never funded was still
+        part of the change. Leaving it out would report a review that read three of eleven
+        functions as complete coverage.
+        """
+        return self.units_checked + self.units_cold + len(self.unresolved)
 
     def ratio(self) -> float:
         """Resolved share of everything considered. 0.0 when nothing was considered.
@@ -53,7 +70,7 @@ class CoverageLine:
 
     @property
     def is_complete(self) -> bool:
-        return bool(self.units_checked) and not self.unresolved
+        return bool(self.units_checked) and not self.unresolved and not self.units_cold
 
 
 @dataclass(frozen=True, slots=True)

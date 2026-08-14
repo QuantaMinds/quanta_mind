@@ -36,6 +36,7 @@ import os
 import subprocess
 import sys
 
+from gate3c_report import render
 from symbol_history_read import ReadFailed, stream
 
 CL = os.path.join(os.path.dirname(os.path.abspath(__file__)), "clones")
@@ -48,7 +49,7 @@ MAX_EVENTS = 400
 BUDGET = 3
 
 
-def top3_hit(units, idx, ts, target):
+def top3_hit(units, idx, ts, target, budget=BUDGET):
     """Rank units by prior-year touches, return (hit, k). None when the choice is degenerate."""
 
     def prior(u):
@@ -59,7 +60,7 @@ def top3_hit(units, idx, ts, target):
     if len(set(scores.values())) == 1:
         return None, len(units)
     ordered = sorted(units, key=lambda u: (-scores[u], u))
-    return bool(set(ordered[:BUDGET]) & target), len(units)
+    return bool(set(ordered[:budget]) & target), len(units)
 
 
 def main() -> int:
@@ -78,7 +79,8 @@ def main() -> int:
             full.append(d)
     print(f"  full-object clones: {len(full)}\n")
 
-    cells = collections.Counter()  # (file_hit, sym_hit) -> n
+    cells = collections.Counter()
+    matched = collections.Counter()  # (file_hit, sym_hit) -> n
     sizes = []  # (k files, m symbols) per event
     per_repo = {}
     sym_units_total = file_units_total = 0
@@ -116,13 +118,15 @@ def main() -> int:
             if not ftarget or not starget:
                 continue
 
-            fhit, k = top3_hit(files, fidx, ts, ftarget)
-            shit, m = top3_hit(syms, sidx, ts, starget)
+            fhit, k = top3_hit(files, fidx, ts, ftarget, 3)
+            shit, m = top3_hit(syms, sidx, ts, starget, 3)
+            shit5, _ = top3_hit(syms, sidx, ts, starget, 5)
             if fhit is None or shit is None:
                 continue
 
             n_ev += 1
             cells[(fhit, shit)] += 1
+            matched[(fhit, shit5)] += 1
             local[(fhit, shit)] += 1
             sizes.append((k, m))
             file_units_total += k
@@ -136,56 +140,16 @@ def main() -> int:
             sm = local[(True, False)] + local[(False, False)]
             print(f"  {name:34s} n={n_ev:4d}  file-miss={fm:3d}  sym-miss={sm:3d}")
 
-    n = sum(cells.values())
-    if n == 0:
-        print("\n  no events. Nothing to report.")
+    if not render(cells, matched, sizes, per_repo, file_units_total, sym_units_total, BUDGET):
         return 1
-
-    # THE SECOND ASSERTION: symbol extraction must have produced different units.
-    print(f"\n  units seen: {file_units_total} file-slots, {sym_units_total} symbol-slots")
-    if sym_units_total == file_units_total:
-        print("  REFUSING TO REPORT — symbol count equals file count; the parser did not run.")
-        return 1
-
-    b = cells[(True, False)]  # file hit, function miss
-    c = cells[(False, True)]  # file miss, function hit
-    fmiss = cells[(False, True)] + cells[(False, False)]
-    smiss = cells[(True, False)] + cells[(False, False)]
-
-    print(f"\n  PAIRED, n={n} events across {len(per_repo)} repositories\n")
-    print(f"    file-level top-3 miss      {fmiss}/{n} = {fmiss / n:.2%}")
-    print(f"    function-level top-3 miss  {smiss}/{n} = {smiss / n:.2%}")
-    print(f"    gap (function - file)      {100 * (smiss - fmiss) / n:+.2f} points\n")
-    print(f"    discordant: file-hit/fn-miss b={b}   file-miss/fn-hit c={c}")
-
-    if b + c == 0:
-        print("    no discordant pairs — sign unresolved.")
-    else:
-        # exact binomial two-sided on b of (b+c) under p=0.5
-        from math import comb
-
-        nn = b + c
-        tail = sum(comb(nn, i) for i in range(0, min(b, c) + 1)) / (2**nn)
-        print(f"    McNemar exact two-sided p = {min(1.0, 2 * tail):.4f}")
-
-    ks = [k for k, _ in sizes]
-    ms = [m for _, m in sizes]
-    kbar, mbar = sum(ks) / len(ks), sum(ms) / len(ms)
-    print("\n  DECOMPOSITION")
-    print(f"    mean files per change k    {kbar:.2f}")
-    print(f"    mean symbols per change m  {mbar:.2f}   ratio m/k = {mbar / kbar:.2f}")
-    if kbar > BUDGET:
-        print(f"    c  = {100 * fmiss / n / (kbar - BUDGET):.2f} pts per uncovered file")
-    if mbar > BUDGET:
-        print(f"    c' = {100 * smiss / n / (mbar - BUDGET):.2f} pts per uncovered symbol")
 
     with open(OUT, "w") as fh:
         json.dump(
             {
                 "cells": {str(k): v for k, v in cells.items()},
                 "per_repo": per_repo,
-                "kbar": kbar,
-                "mbar": mbar,
+                "kbar": sum(k for k, _ in sizes) / len(sizes),
+                "mbar": sum(m for _, m in sizes) / len(sizes),
                 "file_units": file_units_total,
                 "sym_units": sym_units_total,
             },

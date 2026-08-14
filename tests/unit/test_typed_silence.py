@@ -147,3 +147,29 @@ def test_a_silent_review_cannot_claim_to_have_spoken() -> None:
             budget=Budget(max_requests=3),
             spoke=True,
         )
+
+
+def test_a_cold_unit_is_counted_but_is_not_an_unresolved() -> None:
+    """Three states, not two: read, unresolvable, and never funded by the budget.
+
+    Cold units go in the denominator because a unit the budget skipped was still part of the
+    change. A version that omitted them would report a review reading three of eleven
+    functions as complete coverage -- which is the claim this product exists to refuse.
+    """
+    line = CoverageLine(
+        units_checked=3,
+        files_checked=2,
+        units_cold=8,
+        unresolved=(Unresolved(Site("gen.py", 0), Reason.GENERATED_FILE, Construct.FILE),),
+    )
+    assert line.total_considered == 12
+    assert line.ratio() == pytest.approx(3 / 12)
+    assert line.is_complete is False
+
+
+def test_coverage_with_cold_units_is_not_complete_even_with_nothing_unresolved() -> None:
+    """Everything parsed cleanly and the budget still skipped most of it. Not complete."""
+    line = CoverageLine(units_checked=3, files_checked=2, units_cold=8)
+    assert not line.unresolved
+    assert line.is_complete is False
+    assert line.ratio() == pytest.approx(3 / 11)
