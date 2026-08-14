@@ -1,6 +1,10 @@
 # What to say when someone asks
 
-Five questions, in the order they get asked. Say the bold line, then stop — the paragraphs under
+> **Derived document.** Measurements here are copied from `QUANTAMIND.md`, which is canonical.
+> Reconciled against it on 2026-08-14. If the two disagree, that one wins and this is the
+> bug.
+
+Six questions, in the order they get asked. Say the bold line, then stop — the paragraphs under
 it are what to reach for **if** they push, not a script to recite.
 
 ---
@@ -222,6 +226,21 @@ If they push on whether it is measuring anything real:
 > functions, which is a gate that can end this. And whether the token saving is real; it is
 > arithmetic, not a measurement.
 
+**Say "disagrees with", not "is wrong".** What was measured is that the two rules *disagree*
+on 67.9% of verdicts, with symbol-level treated as ground truth. **That is an argument, not a
+measurement**, and a VP's analyst will find the seam. Have the argument ready:
+
+> The file rule implies base rates of 90%, 83%, 44% and 33% across those repositories — nine in
+> ten changes causing a defect is not a rate any codebase runs at. The symbol rule gives 62%,
+> 42%, 27% and 29%. **Neither is verified ground truth. The file rule's rates are impossible;
+> the symbol rule's are merely high** — and for changed units that later needed a repair, high
+> is what you would expect.
+
+**And print the interval before someone else computes it.** 36 of 53 is a small base for a number
+now doing most of the commercial work. 55%–79% is still decisively "most", which is all the
+argument needs — quoting 67.9% bare invites the recomputation, and being seen to have avoided it
+costs more than the width of the interval.
+
 **The one-line version:**
 
 > *The failure is the credential. We ran a preregistered test, hit a null, tried the correction
@@ -232,6 +251,89 @@ If they push on whether it is measuring anything real:
 **Do not say "we pivoted."** It invites the read that a hypothesis was shopped around until one
 worked. What happened is narrower and more defensible: a strong claim was refused, and a weaker
 one the same data could carry was tested and held.
+
+---
+
+## 6. "Will this make our pull requests move faster?" — the VP question
+
+**Do not say yes.** It is checkable within a month, we have no measurement, and the arithmetic
+is against us.
+
+> **Probably not much, and I would not sell it to you on speed.**
+>
+> Review cycle time is dominated by waiting, not reading. **The largest single component is the
+> gap between a pull request opening and anyone starting on it** — and a coverage line does
+> nothing about that. Nobody begins reviewing sooner because the tool is more honest.
+>
+> So the speed claim would be a fraction of a fraction: the share of cycle time that is actual
+> reading, times the share of reading spent re-checking files a tool already cleared. **And we
+> have not measured it.** Whether a reviewer shown our routing line acts differently is the
+> largest unproven item in this project.
+
+**Then say what it does change**, which is a different and defensible claim:
+
+> It changes what a reviewer is allowed to skip. Today silence is unreadable, so a careful
+> reviewer re-reads anyway — you are paying for a tool and doing the work. With coverage there
+> is a rule: **high coverage and no findings, approve without a full re-read; low coverage, one
+> person looks at the named part only.**
+>
+> That is not reviewing faster. It is **reviewing less**, and it is the claim we can keep.
+
+**Then move to the ground that is actually yours**, because this is a VP and the reviewer is not
+the strongest thing on offer:
+
+> There is a second thing, and for your role it is the larger one. **You cannot answer "was that
+> change actually reviewed" for any specific merge today** — not "did a tool comment on it", but
+> did anything examine it. Coverage makes that a query rather than a shrug.
+>
+> And every dashboard telling you where rework comes from is built on an attribution rule that
+> **disagrees with symbol-level attribution on 67.9% of its verdicts — 36 of 53, 95% interval
+> 55% to 79%** — reproduced on two further corpora at 36.1% and 35.7% survival. We give you a
+> quarterly report on where rework actually concentrates, computed the other way.
+
+**Say "disagrees with", not "is wrong".** What was measured is that the two rules *disagree*
+on 67.9% of verdicts, with symbol-level treated as ground truth. **That is an argument, not a
+measurement**, and a VP's analyst will find the seam. Have the argument ready:
+
+> The file rule implies base rates of 90%, 83%, 44% and 33% across those repositories — nine in
+> ten changes causing a defect is not a rate any codebase runs at. The symbol rule gives 62%,
+> 42%, 27% and 29%. **Neither is verified ground truth. The file rule's rates are impossible;
+> the symbol rule's are merely high** — and for changed units that later needed a repair, high
+> is what you would expect.
+
+**And print the interval before someone else computes it.** 36 of 53 is a small base for a number
+now doing most of the commercial work. 55%–79% is still decisively "most", which is all the
+argument needs — quoting 67.9% bare invites the recomputation, and being seen to have avoided it
+costs more than the width of the interval.
+
+**The one-line version:**
+
+> *We are not selling you a faster review. We are selling you the ability to say which parts of
+> a change were examined — and, once a quarter, where your rework actually comes from, measured
+> with a rule that does not disagree with symbol-level attribution two times in three.*
+
+**Do not put a percentage on the waiting.** Three different LinearB datasets are in
+circulation — a 2021 analysis of ~2,000 teams and 847,000 branches, the 2026 Engineering
+Benchmarks across 8.1M pull requests and ~4,800 organisations, and a 6.1M-pull-request set — and
+the widely repeated "pickup is 40–60% of cycle time" does not map cleanly onto any of them. The
+2021 figure is *idle share of lifespan*, reported as a distribution across cohorts rather than a
+mean, and idle time is not the pickup phase.
+
+**The qualitative claim survives all of that and is the one that matters**: waiting dominates,
+and we cannot move it. **If a number is needed, read the current report and cite it by name and
+year** — this document's own appendix cites the 2026 benchmark, and quoting a 2021 study beside
+it is the same drift that put a superseded cost figure in three files.
+
+**If they press for a number**, give them the measurement instead of a guess:
+
+> One month, three repositories, shadow mode: does a reviewer shown the routing line act
+> differently? Nothing substitutes for that run, and if it shows a speed effect we will tell you
+> the size of it. **Right now the honest answer is that we do not know.**
+
+**Why this beats the confident version.** A VP who is told "30% faster reviews" tests it in one
+sprint. A VP who is told "we do not know, here is the run that would settle it, and here is what
+we can back today" has been given something no other vendor in this market will give them —
+which is the product's whole argument, made in the room before the product is installed.
 
 ---
 

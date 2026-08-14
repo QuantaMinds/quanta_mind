@@ -1,5 +1,9 @@
 # Implementation plan
 
+> **Derived document.** Measurements here are copied from `QUANTAMIND.md`, which is canonical.
+> Reconciled against it on 2026-08-14. If the two disagree, that one wins and this is the
+> bug.
+
 **Written 2026-08-13.** Filename deliberately does not start with `session-`, because the
 session-end hook writes to that pattern and would overwrite this.
 
@@ -151,7 +155,221 @@ per read, and the review record carries both.
 
 `uv run quantamind rank <repo> <pr>` prints the ranked units with scores and the fire decision.
 
-### Gate — the hard one
+### Three gates, not one — they fail for different reasons and share no evidence
+
+A single stage that can fail three ways gives one bit of information when it fails. Ranker
+reproduction is a correctness check against research already collected. Allocation loss needs
+labelled outcomes. Cost needs live `usage` figures on real diffs. **They are separated so a
+failure names itself.**
+
+| | Gate | Needs |
+|---|---|---|
+| **3a** | the productionised ranker reproduces the research ranker on the collected corpus | nothing new — run it today |
+| **3b** | measured per-pull-request cost across **all** calls, with `cache_read_input_tokens` non-zero | live traffic |
+| **3c** | allocation loss at **function** level, stated with an interval | live traffic, shares 3b's run |
+
+**3a does not wait on the other two**, and it is the one that can end the project. 3b and 3c
+share a single instrumented run.
+
+### How gate 3c gets measured, given the clones we have
+
+**Not as an absolute rate on a reduced population.** 27 of 35 clones are `blob:none`, and
+symbol extraction needs patch bodies. Running only on the 8 complete clones cuts events roughly
+proportionally, and a ~2% rate on a few hundred events carries an interval whose upper bound is
+several times its point estimate — the run would be spent and still not distinguish one missed
+change a month from six. **Worse, those 8 are not a random subsample**: they are the clones
+already completed for symbol-level work, selected for reasons correlated with the analysis.
+
+**Measure the paired difference instead.** The load-bearing question is not the absolute rate —
+it is whether function-level allocation loses *more* than the file-level analogue. That is a
+paired comparison on identical events: same pull requests, same defects, file-top-3 against
+function-top-3, **McNemar on the discordant pairs**. Only events where the two rankers disagree
+carry information, and a paired design is far more powerful than two independent proportions, so
+8 repositories can plausibly establish sign and rough magnitude even where they cannot pin a
+rate.
+
+### Does a gap measured on those 8 travel? The free check, run first
+
+**The 8 are a convenience sample and the selection is confirmed, not assumed.** All four
+repositories used for the earlier symbol-level work — Skyvern, browser-use, cartography, opendbc
+— are in the full-object set. They have complete objects *because* someone previously wanted
+patch content from them.
+
+So before any fetch, compare the 8 against the other 17 on everything `--name-only` measures
+identically in both. **This cannot prove transfer** — the mechanism driving file-versus-function
+divergence is within-file variance in touch counts, invisible without blobs — **but it can
+falsify it for free, and a check that only fails one way is worth running first.**
+
+| | repos | events | ≥4-file miss rate (95% CI) | share of events touching ≥4 files |
+|---|---|---|---|---|
+| **Full-object** | 8 | 2,630 | 54/1,131 = **4.77%** (3.7–6.2%) | **43.0%** |
+| **Partial** | 17 | 4,863 | 79/1,762 = **4.48%** (3.6–5.6%) | **36.2%** |
+
+**Transfer is not falsified.** The miss rates are within 0.3 points with heavily overlapping
+intervals, and per repository the 8 sit spread through the distribution of the 17 rather than
+clustered — from 0.65% (Skyvern) to 10.48% (opendbc), inside a partial range running 0.00% to
+14.57%.
+
+**One systematic difference, and its direction is knowable — but name the mechanism, not the
+correlate.** The 8 carry larger changes: 43.0% of their events touch four or more files against
+36.2% for the partials.
+
+**Change size raises the miss rate on BOTH arms**, because a larger change holds more files *and*
+more functions, so top-3 files also covers proportionally less of it. For a paired comparison
+what matters is not that size hurts each side — it is whether size hurts the **function** side
+faster. **The claim carrying the direction is that functions-per-change grows faster than
+files-per-change**, so the function partition inflates faster as changes grow.
+
+That is an additional claim, not a restatement, and it is what the direction rests on. **Stated
+properly: a gap measured on the 8 likely overstates, because functions-per-change grows faster
+than files-per-change** — not merely because the changes are bigger.
+
+**That partial test has been run**, binning the file-level events by files touched. The file arm
+is steep:
+
+| files touched | 2–3 | 4 | 5 | 6 | 7 | 8 | 9 | 10–12 |
+|---|---|---|---|---|---|---|---|---|
+| events | 4,600 | 899 | 609 | 401 | 280 | 197 | 161 | 346 |
+| miss rate | 0% *(by construction)* | 2.22% | 3.28% | 4.24% | 6.43% | 7.11% | **11.18%** | 7.51% |
+
+**Miss rate rises roughly linearly in the number of UNCOVERED files** — about 1.4 to 2.2 points
+per file beyond the three the budget funds, near-flat across the range. So the file arm is
+already steep, and the ratio argument needs the care that steepness implies: it survives only
+because the *function* arm's uncovered count grows faster than the file arm's with change size,
+which is the functions-per-change claim above and not something these bins establish.
+
+**The reversal at the top bin was tested, not left as a hypothesis.** A mechanical sweep — a
+lockfile bump, generated code, a mass rename — touches many files uniformly, so its prior-touch
+counts should be **flat across the change**: low variance. Composition would show as an unusually
+low coefficient of variation in that bin.
+
+| files touched | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10–12 |
+|---|---|---|---|---|---|---|---|---|---|
+| median CV of prior-touch counts | 0.529 | 0.707 | 0.773 | 0.849 | 0.908 | 0.972 | 0.993 | 0.961 | **1.016** |
+
+**It is the opposite.** The 10–12 bin has the *highest* dispersion of any bin, not the lowest, so
+it is not sweeps. **The reversal is noise, and the intervals say so**: k=9 is 11.18% (95% CI
+7.2–17.0%), the 10–12 bin is 7.51% (5.2–10.8%), and they overlap across a wide range. **Two
+independent lines agreeing on noise is stronger than either alone.** Reported rather than
+smoothed.
+
+**The residual this discriminator cannot see, named rather than run.** A change touching files
+that are individually hot *and* similarly hot passes the dispersion check. Those two conditions
+together describe something specific — a cross-cutting refactor of comparably active core modules
+— and **if that pattern is real it is not an artefact to filter out. It is a change type where
+the ranker has no signal, because every unit looks the same.** The test, for whenever it is worth
+running: within the top bin, split by coefficient of variation and compare miss rates. **If the
+flat-and-hot changes miss more, that is a case the allocator handles badly**, which is worth more
+than a cleaner histogram. And the harness raised on
+serialisation after printing this table; the bins sum to **7,493, matching the known total
+exactly**, which is what establishes the computation completed before the crash.
+
+**What makes that assertion work is that 7,493 is independently known** — it comes from a prior
+run, not from this one. **Bins summing to each other would prove nothing.** That is the
+difference between this check and the dead hotspot check that returned clean zeros at every
+threshold: one compares against an outside quantity, the other was internally consistent and
+wrong.
+
+**Two miss rates now live in this document on different populations, and they must be labelled
+everywhere they appear:** **4.77% and 4.48% are ≥4-file rates**, and **1.77% is pooled across all
+changes**. An unlabelled 4.6% beside an unlabelled 1.8% is the next `$15`.
+
+### The random draw is the second step, not a contingency
+
+**The free check cannot rule out a mechanism-level difference, by construction.** File and
+function rankings diverge exactly when a file's touch total is concentrated in one function
+rather than spread across many. Two repositories can match on events, change size, velocity and
+file-level accuracy while differing entirely on whether their hot files are hot because of one
+function or ten. **That is within-file touch variance, it is invisible without blobs, and blobs
+are the thing the other 27 do not have.**
+
+So the free check ruled out gross non-representativeness and nothing more. **The random draw is
+promoted from fallback to planned second step**, because it is the only thing that tests transfer
+at all.
+
+**Draw 5 of the 27 at random, and pre-specify the draw now, while the answer is still
+unobservable.** Fetch blobs for their event sets only and run the same paired comparison — not to
+pin the gap there, but to check the sign and rough magnitude hold outside the set that selected
+itself.
+
+**And say the scope in the same sentence as the result**: *measured on 8, checked against 17 on
+shared metrics, not established on the remaining 22.* 13 of 35 is not 35, and the transfer claim
+stays an inference.
+
+### Pre-specified decomposition — write this down before the numbers exist
+
+The near-flat normalisation above is not just a slope, it is a **model**: misses ≈ `c·(k−3)`
+with `c` about 1.4–2.2 points per uncovered file. If the function arm follows the same form with
+its own uncovered count, misses ≈ `c′·(m−3)` where `m` is functions per change, and **the
+expected gap is `c′(m−3) − c(k−3)`.**
+
+`c′` and `m` are unobservable without blobs — **and both are measurable on the 8 once the run
+happens.** So 3c reports the **constant**, not only the gap.
+
+**That reframes the transfer question into a much narrower one.** If `c′ ≈ c`, the entire
+difference between the arms reduces to the unit-count ratio `m/k`, and what has to generalise is
+no longer "the gap" but **"is functions-per-file stable across repositories"** — which the
+random-5 draw can actually answer, where it could never have answered the broader question.
+
+**This decomposition is pre-specified here, before the numbers exist**, because added afterwards
+it is indistinguishable from post-hoc fitting.
+
+**Two caveats that travel with the model, not footnotes to it.** Linearity is fitted over k = 4
+to 9 and the top bin reverses. And `c` is estimated on the 8 clones, which carry larger changes
+than the 27 — **so `c` is measured where the arm is steepest.** Neither breaks the decomposition;
+both belong beside it.
+
+**Pre-specify the discordance criterion before the run, in writing.** McNemar counts only the
+events where the two rankers disagree, so that definition *is* the test: a discordant pair is one
+where the defect unit is inside file-top-3 and outside function-top-3, or the reverse. **Deciding
+what counts after seeing the counts is how a null becomes a finding.**
+
+**Both discordant cells are live, and an earlier version of this section assumed one was
+empty.** It reasoned that a file-level miss implies a function-level miss — if the defect's file
+is outside the top three files, its function is outside the top three functions. **That is
+false, and this document measures why.**
+
+A file's touch count is roughly a *sum* over its functions; a function's is its own. A file of
+eight functions at five touches each scores 40; a file holding one function at 34 and two at 1
+scores 36. File ranking puts the first above the second, function ranking puts that 34-touch
+function above all eight of the first file's. **Defect in the hot function of the lower-ranked
+file: file misses, function hits.** That is the supposedly empty cell, and it is not an edge case
+— it is the measured reason ranking is global rather than file-then-function.
+
+**So the discordant count is (file hit & function miss) + (file miss & function hit), both
+populated**, which means power is probably *better* than the earlier estimate rather than worse.
+That estimate erred in our own favour, which is the direction nothing catches.
+
+**Across the 8 complete clones: 2,630 events, 54 file-level misses, 2.05%, Wilson 95% interval
+1.6%–2.7%.** Discordance is bounded below by the difference between the two miss counts and above
+by their sum, and with both cells live the tens rather than single digits remain the expectation.
+
+**The sign is not predictable either.** Function-level wins where a hot function sits in a cold
+file and loses where a cold function sits in a hot file, and which dominates is the whole reason
+to run the test. **Pre-specify both cells as live**; a criterion written expecting one to be
+empty pre-registers the wrong test.
+
+If it does come back with single-digit discordance, the honest output is **"sign unresolved"**,
+not a magnitude — and the document still improves, because *"floor of 1.77%, function-level gap
+measured but not resolved on 8 repositories"* is truer than what it says today.
+
+The sentence a powered run produces is the one the master document needs: *function-level top-3 misses N
+points more than file-level, measured on 8 repositories; the pooled file figure of 1.77% is
+therefore a floor and the function-level rate is approximately X%.* **A floor plus a measured gap
+beats a wide absolute estimate.**
+
+**Do not unfilter 27 repositories wholesale.** Blobs are needed for the commits in the event set
+— base and head pairs, and the fix commits — not for all history. Fetching those objects
+specifically is a much smaller job than removing the filter. Whether git scopes that cleanly on
+a promisor clone is worth an hour of investigation before committing to a large download.
+
+**And assert twice, because this is the exact operation that failed before.** `git log -p` exits
+non-zero on a blob-filtered clone and emits a partial patch stream: identical invocations
+returned 710 and 918 commits against 3,313. So assert the exit code, **and assert the unit count
+changed** — if symbol extraction returns the same event count as `--name-only` did, the parser
+did not run.
+
+### Gate 3a — the hard one
 
 **The productionised ranker reproduces the research figures on the corpus already collected:**
 
@@ -166,7 +384,15 @@ per read, and the review record carries both.
 **If it does not reproduce, stop.** The research measured something the product cannot, and
 that must be understood before anything is built on top of it.
 
-**Known-answer test, and it is the important one here.** A ranker returning a constant scores
+**3b's known-answer test** is that the cost figure counts every request, not the deep read
+alone. A per-pull-request cost that matches the single-call arithmetic is evidence the
+instrumentation is counting one call, not that allocation got cheaper.
+
+**3c's known-answer test** is stated in the master document: the function-level miss rate should
+come in **above** the file-level 1.77%, because functions are a finer partition. A result that
+matches the file-level number is a signal the extraction did not change units.
+
+**Known-answer test for 3a, and it is the important one here.** A ranker returning a constant scores
 above 70% on top-1 because the null is 72%. So the gate is not "the number is high" — it is
 **"the number is high AND the null ranker, run through the identical harness, is not."** Three
 sabotages, all required to go red:
@@ -368,11 +594,47 @@ outcome         review_id, unit_path, fix_sha, fix_at, source, matched_rank
                                                 -- git | datadog | manual
 reaction        review_id, finding_id, kind, actor_hash, at
                                                 -- resolved | dismissed | replied | emoji
-shadow_pick     review_id, ranker_name, unit_path, rank
+shadow_pick     review_id, ranker_name, unit_path, rank, score, percentile
+                -- ranks 1..k for k >= 3, NOT the top pick only
+request         id, review_id, ordinal, model, model_version, effort,
+                tokens_in, tokens_out, cache_read_tokens, cache_creation_tokens,
+                latency_ms, stop_reason
 ```
+
+### Three things the schema must record from the first row, because append-only cannot backfill
+
+**`shadow_pick` stores a ranked LIST, not a top pick.** The allocator funds ranks 1–3 and
+top-3 recall is the metric that decides whether allocation loses defects — and **top-3 for a
+candidate ranker cannot be computed from a top-1 record.** Scores and percentiles go in too, or
+the firing threshold cannot be re-derived either. This is the most consequential line in the
+design: shadow evaluation on free-tier traffic is the strongest asset here, and a top-1 schema
+silently halves it.
+
+**Token counts per request, and cost derived from them — never a stored `cost_cents`.** Prices
+change and token counts do not. Cents cannot separate a cache read from fresh input, and they
+round away shallow calls that cost fractions of a cent. **Gate 3b is measured against uniform
+review, and a cents column cannot produce that measurement.** `requests=3` on the review row is
+a summary; the `request` table is the data.
+
+**`outcome` carries a `rule_version` and the inputs to re-derive it.** The attribution rule has
+already been corrected once — file overlap to symbol overlap, which changed 67.9% of verdicts.
+Correct it again and every stored outcome needs re-deriving, and without a version stamp nobody
+can tell which rule labelled which row. The rule also assumes English fix-keywords in commit
+subjects, so the subject is stored rather than just the verdict.
 
 **`outcome` is the table the product is built to fill.** Everything else describes what we did;
 this one says whether it was right.
+
+### The cache monitor lives in the data, not in a test
+
+The build plan verifies `cache_read_tokens` in tests, where a persistent zero means an
+invalidator is in the cached prefix. **On Cloud Run that becomes a production concern**: many
+short-lived instances, and any per-instance value that reaches the prefix — an instance id, a
+boot timestamp, a request id threaded through the system prompt — is a **total cache miss with
+no error and no failing test.**
+
+Because `request` stores cache-read tokens per call, a persistent zero is visible as data.
+**Alert on it.** A test that passed once cannot see a regression that arrives with a deploy.
 
 ### The two rules on this store
 
@@ -394,6 +656,156 @@ waiting for a date.
 
 The git path is the one we control and the one the research validated. **Datadog is the faster
 signal and we consume rather than rebuild it** — see the integrations section.
+
+## Before routing inference through Vertex, three things to confirm
+
+Claude runs on Vertex AI, so model spend could land on a GCP bill and against GCP credits.
+**Three checks before any plan depends on that**, and none is a formality:
+
+1. **Do the credits apply to partner models?** Some GCP credit programmes exclude marketplace
+   and partner models. Ask the account representative about Claude on Vertex specifically.
+2. **Does prompt caching behave identically?** Same cache-read multiplier, same five-minute and
+   one-hour window economics. **The entire cost architecture rests on this**, and a difference is
+   not a rounding error.
+3. **Is structured output the same?** The verification pillar requires findings to arrive as
+   parseable structure. Free-text output makes adjudication impossible, so a gap here is not a
+   degradation — it removes a layer.
+
+**And keep the label attached to any figure derived from it.** $0.140 per pull request is
+derived from a specification, and its shallow-call token sizes are assumed rather than observed.
+Any headline built on it — "$16,000 of credits is roughly 114,000 reviews" — inherits that, and
+should carry it.
+
+## Which database runs, and when
+
+**The split is not free versus paid. It is local versus hosted.** Both engines run the same
+schema and the same migrations, and the store layer is written to SQL both accept.
+
+| Where the product runs | Engine | Whose machine |
+|---|---|---|
+| `quantamind review` / `retrospective` on a laptop | **SQLite**, one file | theirs |
+| The GitHub App, **any tier including free** | **Postgres**, one shared database | ours |
+| Enterprise self-host | **Postgres** in their VPC | theirs |
+
+### Walking one customer through it
+
+**They run the retrospective first.** `uv run quantamind retrospective` against a clone. That
+writes `quantamind.db`, a SQLite file in their working directory. **No account, no upload, and
+we never see it.** This is the whole point of the CLI existing: a sceptic can check the claim
+before granting anything.
+
+**They install the App on the free tier.** Now reviews run on our infrastructure, so rows land
+in our Postgres — one row in `repo`, then a `review` row per pull request with its
+`ranked_unit` and `unresolved` children. **`finding` and `claim` stay empty**, because the free
+tier runs no model. Their SQLite file stays on their laptop; nothing is imported, because a
+retrospective is a report rather than state worth migrating.
+
+**They upgrade to Team.** *No data moves and no database changes.* It is a plan column on their
+organisation row. From the next pull request, `allocate` permits inference, so `finding` and
+`claim` rows start appearing beside the ones already there. **The upgrade is visible in the
+data as the moment those tables start filling** — which is exactly how it should read, because
+that is what they started paying for.
+
+**They upgrade to Business.** Again no migration. The `org` row gains their second and third
+repositories, and the cross-repository report becomes a query over rows that were already being
+written. **Everything the org view needs has been collected since the free tier**, which is why
+the schema change for `org` lands before the first Business customer rather than after.
+
+**They go Enterprise and self-host.** A container plus a Postgres they operate. Same schema,
+same migrations, run by command. **We hold nothing.** Telemetry from that install is opt-in and
+sends counts only.
+
+### Why one shared Postgres rather than a database per customer
+
+A database per customer means a migration is a fleet operation and a schema bug is discovered
+customer by customer. One database with rows keyed by organisation means one migration, run
+once, verified once. **The cost is that isolation is now a query predicate rather than a
+boundary**, so every read is scoped by organisation at the repository layer and that scoping is
+what the tests target — a missing `WHERE org_id` is the failure mode this trade buys, and it
+must be tested for directly rather than assumed.
+
+### The constraint that keeps both engines possible
+
+**No engine-specific features in `store/`.** No Postgres arrays or `JSONB`-only queries, no
+SQLite pragmas doing anything but performance. The moment one appears, self-hosting on SQLite
+stops working and the CLI stops being able to run the same code as the App — and the CLI's
+whole value is that it runs *the same pipeline*.
+
+**Gate, and it is a CI job rather than a note.** `.github/workflows/ci.yml` gains a `store`
+job that runs the `store/` suite twice — once against SQLite, once against a Postgres service
+container — and asserts identical results. A written rule that nothing can fail is a wish; this
+is the same argument the sabotage test rests on, applied to a rule this plan had left as prose.
+
+**Row-level security is worth an hour before the first Business customer.** Postgres RLS turns
+the `org_id` predicate back into a boundary without giving up the single-migration benefit, and
+it is far harder to retrofit once queries exist that assume it is absent.
+
+### Retention
+
+**Retention is set on the measurement, not on the table**, and the earlier version of this
+policy got it wrong in a way that would have destroyed the asset it meant to protect.
+
+An `outcome` row on its own is unusable. `review=8801, unit=process_refund, fix_sha=b71e` says a
+fix happened — it does not say what rank we gave that unit, or what any candidate ranker would
+have picked. **The `ranked_unit` and `shadow_pick` rows are what turn an outcome into a
+measurement.** Expiring those at 90 days while keeping outcomes forever would retain the truth
+and delete the belief it exists to adjudicate.
+
+| What | Kept |
+|---|---|
+| An `outcome`, **and the `ranked_unit` and `shadow_pick` rows it adjudicates** | **indefinitely, together, at every tier** |
+| Reviews with no outcome, findings, claims, comment bodies | 90 days free · 2 years paid |
+| Enterprise | their policy, and they hold it |
+
+**This matters most on the free tier**, which is where shadow data accumulates at zero inference
+cost — the counterfactual evaluation a model-per-diff competitor cannot replicate at any tier.
+
+### Enforced by the database, not by the deletion job
+
+A retention job written against table names deletes exactly the rows this policy exists to keep,
+**and produces no error**: the tables still exist, queries still return, and the loss surfaces
+months later when someone asks a question the deleted rows would have answered. That is the
+signature of every instrumentation failure this project has recorded — plausible output, nothing
+detectable from the output alone.
+
+**So it is a constraint, not a comment.** `outcome` holds foreign keys to the `ranked_unit` and
+`shadow_pick` rows it adjudicates, `ON DELETE RESTRICT`. The wrong deletion aborts. A job that
+has to be written around a constraint is one somebody thinks about; a job that silently satisfies
+a policy paragraph is not.
+
+**The application role has no DELETE on `ranked_unit` or `shadow_pick`.** The constraint above
+cannot express "keep this until we know whether it matters", because that is a fact about the
+future and there is no row to point at yet. So it is expressed as an **absence of capability**
+rather than a rule: a retention job that tries to delete these fails loudly at runtime, and
+nobody has to remember the policy. Pruning later goes through a separate migration role with a
+deliberate grant — a decision somebody makes, not a job that runs.
+
+**`ranked_unit` is not deleted at all.** Adjudication arrives two to eight weeks late and
+retention runs on a schedule, so a row at day 89 with no outcome yet is indistinguishable from
+one that will never get an outcome. The rows are small and they are the belief half of the only
+comparison this product sells. Keeping them is cheaper than being wrong about which ones matter.
+
+**And the job reports both numbers**: rows deleted, and rows retained *because* they adjudicate
+an outcome. A retention job that never retains anything is not retaining.
+
+### The house rule these three share
+
+Three mechanisms in this plan exist because a check that cannot report having fired is
+indistinguishable from one that was never connected:
+
+| Mechanism | What its silence would otherwise mean |
+|---|---|
+| The verifier's **drop-rate counter** | a flawless model, or a dead verifier |
+| The **alphabetical ranker running in shadow forever** | a working ranker, or one measuring nothing |
+| The **retention counter** | nothing needed keeping, or the constraint is not wired |
+
+A fourth is already in the research: a dead hotspot check reported zero at every threshold until
+a sanity counter reported in-window commits found — **0 before the fix, 1,298 after.**
+
+**Rule: every check reports what it did, not only what it found.** Ask what a mechanism outputs
+when the thing it protects is broken; if the answer is "the same thing", it is not a mechanism.
+
+---
 
 ### Shadow ranking: how the product improves without shipping regressions
 
@@ -769,7 +1181,8 @@ yet, provided the table does not promise a delivery date.
 |---|---|---|
 | Skeleton | week 1 | — |
 | Reader | weeks 2–3 | conservation invariant cannot be made to hold |
-| **Ranker** | weeks 4–5 | **does not reproduce within tolerance — stop and re-examine the research** |
+| **Ranker (3a)** | weeks 4–5 | **does not reproduce within tolerance — stop and re-examine the research** |
+| Allocation instrumented (3b, 3c) | with first live traffic | cost counts one call not three; or function-level miss rate is unstated |
 | Free tier | week 6 | coverage line cannot be made accurate by hand audit |
 | Retrospective | weeks 7–8 | report contradicts the hand audit |
 | Allocate/infer/verify | weeks 9–11 | cost exceeds uniform review, or drop rate is 0% or 100% |
@@ -791,10 +1204,53 @@ everything after it is built on a number that did not survive contact with the p
 
 **Whether anyone will pay.** Unchanged by any amount of building, and still the largest risk.
 
-**Whether a reviewer shown the routing line before the defect exists catches anything they
-would otherwise miss.** Every number here is retrospective. This is a field measurement and no
-amount of history substitutes for it. It is the first thing to measure once real traffic flows,
-and it is not gated on anything above.
+**Whether the tool survives thirty days on a team with no stake in it** — and this is the
+necessary condition, which the plan had wrong for most of its life.
+
+It specified: does a reviewer shown the routing line catch anything they otherwise would miss.
+That is the right *upside* question and the wrong *necessary* one. **If the reviewer is the
+distribution mechanism for the measurement layer, what has to be true of it is that it gets
+installed and left on.** A reviewer firing on 10–12% and largely ignored still writes
+`ranked_unit`, `shadow_pick` and `outcome` rows on every pull request, and those rows are the
+asset. **Being ignored does not destroy it. Being uninstalled does.**
+
+| | Question | Cost |
+|---|---|---|
+| **Necessary** | does it survive 30 days on an uninvested team? | an install date, a disable event, and the rows in between — data already collected |
+| **Upside** | does a reviewer shown the routing line catch or clear anything they otherwise would not? | measure alongside; a null here is survivable |
+
+**Both come from the same month**, which is why specifying only the second was expensive: a null
+on routing efficacy would have read as a failure of the company when it is a failure of the
+upside. Every number in this corpus is retrospective and no amount of history substitutes for
+either measurement.
+
+### What a null means, written down before the month starts
+
+**Recorded in advance so the post-hoc reading is constrained.** The old framing is easy to let
+back in once the month is over and somebody asks "did it work".
+
+| Result | Reading, fixed now |
+|---|---|
+| Routing null, survival holds | **The upside did not land.** The asset still accrues on every pull request. Not a failure of the company |
+| **Survival null** | **That is the company.** No amount of routing efficacy compensates for a tool that gets switched off |
+| Both hold | Proceed, and the routing magnitude is worth publishing |
+
+### Survival has to be defined as more than "not uninstalled"
+
+**A team that mutes the bot, filters its comments, or stops reading them has abandoned it, and
+none of that appears as a disable event.** The schema is being written now, so this is the moment
+to decide what counts.
+
+**`reaction` volume is the signal.** Reviews still posting while reactions fall to zero is
+abandonment without uninstallation, and it is the failure mode a naive install-count metric would
+report as success — the same shape as every other check in this plan.
+
+**Exit criterion: survived AND still generating reaction volume at day 30.** Not survived alone.
+
+**And check again at 90 days.** Thirty days may be short for a decision in either direction — a
+team that keeps it for a month and drops it in week seven has said something the experiment as
+specified would not capture. Not a reason to delay the month, a reason not to close the question
+when it ends.
 
 **Whether function-level ranking transfers from the file-level research.** Named as the largest
 technical risk, measured at the ranker gate, and it has no mitigation beyond measuring it early.
