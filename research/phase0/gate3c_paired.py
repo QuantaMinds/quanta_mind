@@ -1,30 +1,19 @@
 """Gate 3c: does function-level allocation lose more than the file-level analogue?
 
-WHAT: A paired comparison on identical events -- file-top-3 against function-top-3 -- with
-      McNemar on the discordant pairs and the c/c' decomposition.
+WHAT: A paired comparison on identical events -- file-top-3, function-top-3, function-top-5 at
+      matched coverage, and the hybrid that ranks by function and reads the enclosing file --
+      with McNemar on the discordant pairs and the c/c' decomposition.
 WHY:  Top-1 says whether the spend is well aimed; only top-3 says whether allocation loses
       defects. The allocator ranks FUNCTIONS and the corpus-wide figure was measured on FILES,
-      so the two arms had never been compared on the same events. Paired rather than two
-      independent proportions because only disagreements carry information, which is far more
-      powerful on the 8 repositories that have complete objects.
-IMPORTS: stdlib (bisect, collections, json, os, subprocess, sys) and symbol_history_read.
+      so the arms had never been compared on the same events. Paired, because only
+      disagreements carry information.
+IMPORTS: stdlib (bisect, collections, json, os, subprocess, sys), symbol_history_read,
+      gate3c_report.
 CONSUMED BY: docs/plans/implementation.md, gate 3c.
 
-PRE-SPECIFIED BEFORE THE RUN (docs/plans/implementation.md):
-
-  Discordance criterion -- a discordant pair is an event where the defect unit is inside
-  file-top-3 and outside function-top-3, OR the reverse. BOTH cells are live: a file's touch
-  count is roughly a sum over its functions, so a hot function in a lower-ranked file gives
-  file-miss/function-hit. Deciding what counts after seeing counts is how a null becomes a
-  finding, so it is fixed here.
-
-  Decomposition -- report c and c' (points per uncovered unit) and the ratio m/k, not only
-  the gap. Population -- the 8 full-object clones, a convenience sample carrying larger
-  changes than the other 17, so a gap measured here plausibly overstates.
-
-TWO ASSERTIONS, because this operation has failed before: the git exit code (asserted in
-symbol_history_read), and that symbol slots differ from file slots -- if they match, the
-parser did not run and the two arms are the same measurement twice.
+Every rule here -- the discordance criterion, the matched-coverage budget, the hybrid's
+expansion -- was pre-specified in the plan before the run. Two assertions guard the read: the
+git exit code, and that symbol slots differ from file slots.
 """
 
 from __future__ import annotations
@@ -33,9 +22,9 @@ import bisect
 import collections
 import json
 import os
-import subprocess
 import sys
 
+from clone_census import full_object_clones
 from gate3c_report import render
 from symbol_history_read import ReadFailed, stream
 
@@ -64,23 +53,15 @@ def top3_hit(units, idx, ts, target, budget=BUDGET):
 
 
 def main() -> int:
-    full = []
-    for d in sorted(os.listdir(CL)):
-        p = os.path.join(CL, d)
-        if not os.path.isdir(os.path.join(p, ".git")):
-            continue
-        if (
-            subprocess.run(
-                ["git", "-C", p, "config", "--get", "remote.origin.partialclonefilter"],
-                capture_output=True,
-            ).returncode
-            != 0
-        ):
-            full.append(d)
-    print(f"  full-object clones: {len(full)}\n")
+    full = full_object_clones(CL)
 
     cells = collections.Counter()
-    matched = collections.Counter()  # (file_hit, sym_hit) -> n
+    matched = collections.Counter()
+    hybrid = {
+        1: collections.Counter(),
+        2: collections.Counter(),
+        3: collections.Counter(),
+    }  # (file_hit, sym_hit) -> n
     sizes = []  # (k files, m symbols) per event
     per_repo = {}
     sym_units_total = file_units_total = 0
@@ -121,6 +102,16 @@ def main() -> int:
             fhit, k = top3_hit(files, fidx, ts, ftarget, 3)
             shit, m = top3_hit(syms, sidx, ts, starget, 3)
             shit5, _ = top3_hit(syms, sidx, ts, starget, 5)
+
+            # HYBRID: rank globally by function, then read the ENCLOSING FILE of each.
+            def _prior_sym(u, _i=sidx, _t=ts):
+                lst = _i.get(u, [])
+                return bisect.bisect_left(lst, _t) - bisect.bisect_left(lst, _t - YEAR)
+
+            ordered_syms = sorted(syms, key=lambda u: (-_prior_sym(u), u))
+            for nn in (1, 2, 3):
+                expanded = {u.split("::", 1)[0] for u in ordered_syms[:nn]}
+                hybrid[nn][bool(expanded & ftarget)] += 1
             if fhit is None or shit is None:
                 continue
 
@@ -140,8 +131,13 @@ def main() -> int:
             sm = local[(True, False)] + local[(False, False)]
             print(f"  {name:34s} n={n_ev:4d}  file-miss={fm:3d}  sym-miss={sm:3d}")
 
+    n = sum(cells.values())
     if not render(cells, matched, sizes, per_repo, file_units_total, sym_units_total, BUDGET):
         return 1
+    print("\n  HYBRID — rank by function, allocate by enclosing file")
+    for nn in (1, 2, 3):
+        hm = hybrid[nn][False]
+        print(f"    top-{nn} functions -> their files   miss {hm}/{n}")
 
     with open(OUT, "w") as fh:
         json.dump(

@@ -694,17 +694,35 @@ so we can promise the thing they just withdrew: unlimited reviews at a flat seat
 
 | | **Free** | **Team** | **Business** | **Enterprise** |
 |---|---|---|---|---|
-| Price | $0 | **$19**/dev/mo annual | **$39**/dev/mo annual | **$55**/dev/mo, $2.5K/mo floor |
+| Price | $0 | **$19**/dev/mo annual · $24 monthly | **$39**/dev/mo annual · $49 monthly | **$55**/dev/mo, $2.5K/mo floor |
 | Buyer | anyone | team lead | Director or VP Engineering | procurement and security |
 | What is being bought | the proof | the reviewer | the report | the contract |
+| Bought with | nothing | credit card | light purchase order | MSA, DPA, security review |
 | Ranking, coverage line, retrospective | ✓ | ✓ | ✓ | ✓ |
+| **Coverage line names every skipped unit** | ✓ | ✓ | ✓ | ✓ |
 | Model findings in the pull request | — | ✓ unlimited | ✓ unlimited | ✓ unlimited |
+| **Review depth** | none | **3 units** | **5 units** | 5 units |
 | Cross-repository aggregation, quarterly audit, SSO | — | — | ✓ | ✓ |
 | Verifier drop-rate telemetry | — | — | ✓ | ✓ |
 | **Bring your own key** — allowlisted model | — | — | **✓** | ✓ |
 | **Bring your own model** — uncertified or self-hosted | — | — | — | **✓** |
 | Self-hosting, audit logs, residency, SLA | — | — | — | ✓ |
 | Token budget | none — no model runs | fair use per repository | higher per repository | unlimited on their key |
+| **Our cost of goods** | **$0** | ~$28/repo/month | ~$41/repo/month | $0 — their key |
+
+**Review depth is a tier lever because it is measured, and it is the most honest upsell available
+to us.** Three units miss at most 8.84% of the changes where a defect exists; five units miss at
+most 3.50%. Both figures are paired, McNemar p < 0.0001. The sentence a competitor cannot say
+back is *"we tell you what we skipped, and on higher tiers we skip less."*
+
+**Do not print those two percentages on a pricing page.** They belong in a conversation, where
+they are the strongest thing we can offer. Printed, they detach from the coverage line that makes
+them survivable, and they disclose the budget. The page says *deeper review*.
+
+**And the margin improves at the deeper tier**, which is why depth sits at Business rather than
+being sold as an add-on: twenty developers across four repositories is $380 of revenue against
+$112 of cost at three units (71%), or $780 against $164 at five (79%). Paying more buys less
+silence and costs us proportionally less.
 
 **The quarterly coverage audit is a separate line, $8,000–15,000 per engagement**, sold to an
 engineering leader out of a different budget than seats. It is plausibly the larger business.

@@ -438,6 +438,86 @@ allocation time would take the coverage line's content away, and it would also b
 evaluation — a candidate ranker that would have chosen a cold unit needs that unit to exist in
 the record to be credited for it.
 
+### Pre-specified before running: the hybrid, and what it is not
+
+**The buried result in the matched-coverage run is that FILES WON.** Top-3 files reads about 4.9
+function-equivalents and misses 1.22%; top-5 functions reads 5 and misses 3.50%. **Read the same
+amount of code either way and file-level allocation misses less than half as often.**
+
+That sits against `QUANTAMIND.md` "The ranking itself", where global function ranking scores 75.0% top-1 against 58.9% for
+any-function-in-the-top-file. **Functions order better. Files cover better.**
+
+**The likely mechanism is locality, and it is already measured** in `QUANTAMIND.md` "Signals tested and rejected": 5 of 11 SELF, 6 of 11 MIXED,
+**0 of 11 COMPANION** — every breakage required re-editing a file the change had already touched.
+Defects cluster inside files. A file is a bundle, so reading one captures the target *and its
+neighbours*; reading a function captures the target only, and pointing one function off yields
+nothing.
+
+**So the hybrid worth testing is not a union.** A union of top-3 files and top-3 functions would
+miss only d = 17 events = 0.86% — but that is ~8 function-equivalents of budget against 5, which
+is the same confound the matched-coverage run just removed. **The union's real ceiling is the c
+cell: 7 events, 0.36 points.**
+
+**The hybrid is: rank by function, allocate by file.** Use the global function ranking to choose
+the target — the part functions are better at — then read the *enclosing file* rather than the
+function alone — the part files are better at.
+
+**This is not the nested strategy that scored 54.2%.** That ranked the top file *first* and then
+picked a function inside it, discarding better candidates elsewhere in the diff. **This is the
+inverse: rank globally across all functions, then expand.** Nothing measured argues against it.
+
+**The expansion rule, fixed now:**
+
+| | Rule |
+|---|---|
+| **Expansion** | the enclosing file of each of the top-N ranked functions, deduplicated |
+| **Hit** | the expanded file set intersects the file-level target set |
+| **Budgets reported** | N = 1, 2, 3, so the cost is visible rather than hidden |
+| **The comparison that decides it** | **N = 3 expanded against top-3 files** — same file count, same rough token cost. Does function ordering pick better files than file ranking does? |
+
+**And a cheaper variant in the same run:** expand to the *changed hunks* in that file rather than
+the whole file, which captures most of the locality at a fraction of the input tokens.
+
+**On cost, the objection is weaker than it looks.** In the illustrative table, output including
+thinking is $0.050 of $0.075 and input on the ranked unit is $0.015. Tripling the input is
+$0.030, not a doubling of the bill.
+
+### The hybrid — RUN, and it does not work
+
+**Rank by function, expand to the enclosing file.** Same paired events, n=1,969.
+
+| policy | files read | miss | 95% CI |
+|---|---|---|---|
+| **top-3 files** | 3 | **1.22%** | 0.82–1.81% |
+| top-3 functions → their files | ≤3 | **2.03%** | 1.50–2.75% |
+| top-5 functions | — | 3.50% | 2.78–4.41% |
+| top-2 functions → their files | ≤2 | 4.37% | |
+| top-1 function → its file | 1 | 12.09% | |
+
+**At the same file count, function ordering picks WORSE files than file ranking does** — 2.03%
+against 1.22%, intervals barely touching. The hybrid is rejected.
+
+**It does beat pure function allocation** (2.03% against 3.50%), so expanding to the enclosing
+file recovers most of what the function unit gives up. **It just never catches plain file
+ranking.**
+
+**The likely reason, and it inverts the intuition that motivated the test.** A file's touch count
+is roughly a *sum* over its functions, so file ranking **aggregates** signal across the whole
+file. Taking the top function and expanding **discards** the rest of that file's history and then
+reads the file anyway. Summing beats taking the maximum — which is the same arithmetic that made
+the reverse discordant cell exist in the first place, pointing the other way this time.
+
+**So the ordering result and the allocation result are about different questions and both hold.**
+Global function ranking is better at *naming the unit a fix returns to* (75.0% vs 58.9% top-1).
+File ranking is better at *choosing what to read*. Nothing reconciles those into a hybrid that
+wins; they are answers to two questions and the allocator only asks the second.
+
+**What this puts on the table, and it is bigger than the hybrid.** Three policies at roughly one
+budget: files 1.22%, hybrid 2.03%, functions 3.50%. **The architecture specifies ranking and
+reading functions, and the measurement says files are better at both parts of allocation.** That
+is a live question for the ranker stage, not a settled one — everything here is "at most", on 8
+convenience-sampled clones, with residual extraction error pushing the function arms' way.
+
 ### The first run was wrong, and the diagnostic is why we know
 
 The first attempt reported +7.41 points on a **broken symbol index**, and the ratio m/k = 1.17
