@@ -171,8 +171,35 @@ verifier, and those must not look the same on the wire.
 ## Model and API decisions
 
 **Model: `claude-opus-5`** at $5 per million input tokens and $25 per million output. 1M
-context, 128K max output. Cheaper tiers exist and are a real lever, but that is a decision to
-make against measured quality on our own corpus, not a default to assume.
+context, 128K max output.
+
+**Gemini 3 Pro is a serious alternative and the arithmetic is not close.** It also carries a 1M
+context, and on Vertex it is roughly **$2 per million input, $12 output, $0.20 cached** —
+against Claude's $5 / $25 / $0.50. Running the identical three-call architecture:
+
+| | per pull request | per repository per month at 200 |
+|---|---|---|
+| Claude Opus 5 | $0.1400 | **$28.00** |
+| Gemini 3 Pro | $0.0624 | **$12.48** |
+
+**2.3× cheaper, and it removes the credits question rather than answering it.** Claude on Vertex
+raised whether GCP credits cover partner models. Gemini is Google's own, so that doubt does not
+arise: **$16,000 of credits is roughly 258,000 reviews.** *(List prices, to re-verify before
+planning against them.)*
+
+**And this project already has evidence Gemini can do the shape of work we need.** The blind
+labelling that decided whether the ranker tracks risk or traffic was run on Gemini precisely
+because it is a different model family with no stake in the result — and it reproduced the hand
+labels to within a point, 69% against 70%. That is structured judgement under a schema, which is
+what `infer/` asks for.
+
+**What it does not settle, and this is the whole of the decision.** The verifier adjudicates
+structural claims, so a model that produces fewer parseable claims raises the drop rate without
+raising an error — and **labelling change pairs is not reviewing code.** The build plan already
+specifies a certification run for any model we have not evaluated, and that procedure applies to
+our own default, not only to a customer's. **Run it on both before choosing, and record the drop
+rate by claim class for each.** Choosing on price alone is choosing on the one axis the
+verification pillar does not measure.
 
 **Effort.** Start at `xhigh` for the deep read — the documented starting point for coding and
 agentic work — then sweep down. On this model `low` and `medium` are unusually strong, and the
