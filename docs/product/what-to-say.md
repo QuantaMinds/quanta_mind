@@ -1,6 +1,6 @@
 # What to say when someone asks
 
-Four questions, in the order they get asked. Say the bold line, then stop — the paragraphs under
+Five questions, in the order they get asked. Say the bold line, then stop — the paragraphs under
 it are what to reach for **if** they push, not a script to recite.
 
 ---
@@ -177,6 +177,61 @@ Then land it:
 On the rest there is a coverage line and no finding. If they ask whether we would have caught
 their last incident, the answer is *"possibly not — but you would have known which parts we never
 examined."* Say that before they work it out.
+
+---
+
+## 5. "Your first product failed. Why should I believe this one?"
+
+**Answer it as the credential it is.** Do not soften the null, and do not imply the same test was
+re-run and passed — it was not.
+
+> **The first bet was that the places static analysis cannot resolve are the places that break.
+> That is false.**
+>
+> We preregistered a stop threshold of 1.5 relative risk. The measurement came back at **1.040**
+> — dead centre on no effect, 310 pull requests. We then applied the correction that would have
+> rescued it, and it moved to 1.251. **The null survived the fix that would have helped it.** So
+> we killed that product. None of its architecture is in this one.
+
+Then the part that matters, and be exact about it:
+
+> **What we build now is not that test re-run. It is a different and deliberately weaker claim.**
+>
+> The old one tried to *predict* — will this change break? The new one only *allocates* — of the
+> parts of this change, which should be read first. We stopped asking what the parser could not
+> resolve and started asking what has needed fixing before. And we moved from files to symbols,
+> because the standard rule for attributing a fix to its cause is wrong on 67.9% of verdicts.
+>
+> That claim holds: the ranked unit is the one a later fix returns to, **85.3% against a 72.0%
+> non-informative ranker, positive in 17 of 17 repositories.**
+
+If they push on whether it is measuring anything real:
+
+> Fair question, and it is the one we spent the most on. A busy file gets touched for lots of
+> reasons. So we had 300 change pairs labelled **blind** — our verdict withheld, order shuffled
+> by content hash — by a model from a **different family** with no stake in the answer. The
+> ranker named the symbol on **69% of genuine repairs against 47% of non-repairs. +22 points.**
+> The author's own hand labels had said 70% and 48%, so the independent rater reproduced it to
+> within a point, and the biased rater was the more generous one.
+
+**Close on what is still open**, before they ask:
+
+> Three things are unproven and I would rather say them than have you find them. Whether a
+> reviewer shown the routing line before the defect exists catches anything they otherwise would
+> not — every number above is retrospective. Whether the ranking survives moving from files to
+> functions, which is a gate that can end this. And whether the token saving is real; it is
+> arithmetic, not a measurement.
+
+**The one-line version:**
+
+> *The failure is the credential. We ran a preregistered test, hit a null, tried the correction
+> that would have saved it, watched it fail anyway, and wrote it into the first paragraph of our
+> own engineering rules. That is the same thing this product does for your code — and we did it
+> to ourselves first.*
+
+**Do not say "we pivoted."** It invites the read that a hypothesis was shopped around until one
+worked. What happened is narrower and more defensible: a strong claim was refused, and a weaker
+one the same data could carry was tested and held.
 
 ---
 
