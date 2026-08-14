@@ -171,6 +171,39 @@ failure names itself.**
 **3a does not wait on the other two**, and it is the one that can end the project. 3b and 3c
 share a single instrumented run.
 
+### How gate 3c gets measured, given the clones we have
+
+**Not as an absolute rate on a reduced population.** 27 of 35 clones are `blob:none`, and
+symbol extraction needs patch bodies. Running only on the 8 complete clones cuts events roughly
+proportionally, and a ~2% rate on a few hundred events carries an interval whose upper bound is
+several times its point estimate — the run would be spent and still not distinguish one missed
+change a month from six. **Worse, those 8 are not a random subsample**: they are the clones
+already completed for symbol-level work, selected for reasons correlated with the analysis.
+
+**Measure the paired difference instead.** The load-bearing question is not the absolute rate —
+it is whether function-level allocation loses *more* than the file-level analogue. That is a
+paired comparison on identical events: same pull requests, same defects, file-top-3 against
+function-top-3, **McNemar on the discordant pairs**. Only events where the two rankers disagree
+carry information, and a paired design is far more powerful than two independent proportions, so
+8 repositories can plausibly establish sign and rough magnitude even where they cannot pin a
+rate.
+
+The sentence that produces is the one the master document needs: *function-level top-3 misses N
+points more than file-level, measured on 8 repositories; the pooled file figure of 1.77% is
+therefore a floor and the function-level rate is approximately X%.* **A floor plus a measured gap
+beats a wide absolute estimate.**
+
+**Do not unfilter 27 repositories wholesale.** Blobs are needed for the commits in the event set
+— base and head pairs, and the fix commits — not for all history. Fetching those objects
+specifically is a much smaller job than removing the filter. Whether git scopes that cleanly on
+a promisor clone is worth an hour of investigation before committing to a large download.
+
+**And assert twice, because this is the exact operation that failed before.** `git log -p` exits
+non-zero on a blob-filtered clone and emits a partial patch stream: identical invocations
+returned 710 and 918 commits against 3,313. So assert the exit code, **and assert the unit count
+changed** — if symbol extraction returns the same event count as `--name-only` did, the parser
+did not run.
+
 ### Gate 3a — the hard one
 
 **The productionised ranker reproduces the research figures on the corpus already collected:**
@@ -396,11 +429,47 @@ outcome         review_id, unit_path, fix_sha, fix_at, source, matched_rank
                                                 -- git | datadog | manual
 reaction        review_id, finding_id, kind, actor_hash, at
                                                 -- resolved | dismissed | replied | emoji
-shadow_pick     review_id, ranker_name, unit_path, rank
+shadow_pick     review_id, ranker_name, unit_path, rank, score, percentile
+                -- ranks 1..k for k >= 3, NOT the top pick only
+request         id, review_id, ordinal, model, model_version, effort,
+                tokens_in, tokens_out, cache_read_tokens, cache_creation_tokens,
+                latency_ms, stop_reason
 ```
+
+### Three things the schema must record from the first row, because append-only cannot backfill
+
+**`shadow_pick` stores a ranked LIST, not a top pick.** The allocator funds ranks 1–3 and
+top-3 recall is the metric that decides whether allocation loses defects — and **top-3 for a
+candidate ranker cannot be computed from a top-1 record.** Scores and percentiles go in too, or
+the firing threshold cannot be re-derived either. This is the most consequential line in the
+design: shadow evaluation on free-tier traffic is the strongest asset here, and a top-1 schema
+silently halves it.
+
+**Token counts per request, and cost derived from them — never a stored `cost_cents`.** Prices
+change and token counts do not. Cents cannot separate a cache read from fresh input, and they
+round away shallow calls that cost fractions of a cent. **Gate 3b is measured against uniform
+review, and a cents column cannot produce that measurement.** `requests=3` on the review row is
+a summary; the `request` table is the data.
+
+**`outcome` carries a `rule_version` and the inputs to re-derive it.** The attribution rule has
+already been corrected once — file overlap to symbol overlap, which changed 67.9% of verdicts.
+Correct it again and every stored outcome needs re-deriving, and without a version stamp nobody
+can tell which rule labelled which row. The rule also assumes English fix-keywords in commit
+subjects, so the subject is stored rather than just the verdict.
 
 **`outcome` is the table the product is built to fill.** Everything else describes what we did;
 this one says whether it was right.
+
+### The cache monitor lives in the data, not in a test
+
+The build plan verifies `cache_read_tokens` in tests, where a persistent zero means an
+invalidator is in the cached prefix. **On Cloud Run that becomes a production concern**: many
+short-lived instances, and any per-instance value that reaches the prefix — an instance id, a
+boot timestamp, a request id threaded through the system prompt — is a **total cache miss with
+no error and no failing test.**
+
+Because `request` stores cache-read tokens per call, a persistent zero is visible as data.
+**Alert on it.** A test that passed once cannot see a regression that arrives with a deploy.
 
 ### The two rules on this store
 
@@ -422,6 +491,25 @@ waiting for a date.
 
 The git path is the one we control and the one the research validated. **Datadog is the faster
 signal and we consume rather than rebuild it** — see the integrations section.
+
+## Before routing inference through Vertex, three things to confirm
+
+Claude runs on Vertex AI, so model spend could land on a GCP bill and against GCP credits.
+**Three checks before any plan depends on that**, and none is a formality:
+
+1. **Do the credits apply to partner models?** Some GCP credit programmes exclude marketplace
+   and partner models. Ask the account representative about Claude on Vertex specifically.
+2. **Does prompt caching behave identically?** Same cache-read multiplier, same five-minute and
+   one-hour window economics. **The entire cost architecture rests on this**, and a difference is
+   not a rounding error.
+3. **Is structured output the same?** The verification pillar requires findings to arrive as
+   parseable structure. Free-text output makes adjudication impossible, so a gap here is not a
+   degradation — it removes a layer.
+
+**And keep the label attached to any figure derived from it.** $0.140 per pull request is
+derived from a specification, and its shallow-call token sizes are assumed rather than observed.
+Any headline built on it — "$16,000 of credits is roughly 114,000 reviews" — inherits that, and
+should carry it.
 
 ## Which database runs, and when
 
@@ -478,19 +566,34 @@ SQLite pragmas doing anything but performance. The moment one appears, self-host
 stops working and the CLI stops being able to run the same code as the App — and the CLI's
 whole value is that it runs *the same pipeline*.
 
-**Gate:** the store test suite runs against both engines and asserts identical results. A test
-suite that passes on SQLite and was never run against Postgres is how the divergence arrives.
+**Gate, and it is a CI job rather than a note.** `.github/workflows/ci.yml` gains a `store`
+job that runs the `store/` suite twice — once against SQLite, once against a Postgres service
+container — and asserts identical results. A written rule that nothing can fail is a wish; this
+is the same argument the sabotage test rests on, applied to a rule this plan had left as prose.
+
+**Row-level security is worth an hour before the first Business customer.** Postgres RLS turns
+the `org_id` predicate back into a boundary without giving up the single-migration benefit, and
+it is far harder to retrofit once queries exist that assume it is absent.
 
 ### Retention
 
-| Tier | Reviews kept | Outcomes kept |
-|---|---|---|
-| Free | 90 days | **forever** |
-| Team, Business | 2 years | **forever** |
-| Enterprise | their policy | their policy |
+**Retention is set on the measurement, not on the table**, and the earlier version of this
+policy got it wrong in a way that would have destroyed the asset it meant to protect.
 
-**Outcomes outlive reviews deliberately.** An outcome row is small, it is the asset, and it is
-the only thing that can still be learned from after the review it describes has been deleted.
+An `outcome` row on its own is unusable. `review=8801, unit=process_refund, fix_sha=b71e` says a
+fix happened — it does not say what rank we gave that unit, or what any candidate ranker would
+have picked. **The `ranked_unit` and `shadow_pick` rows are what turn an outcome into a
+measurement.** Expiring those at 90 days while keeping outcomes forever would retain the truth
+and delete the belief it exists to adjudicate.
+
+| What | Kept |
+|---|---|
+| An `outcome`, **and the `ranked_unit` and `shadow_pick` rows it adjudicates** | **indefinitely, together, at every tier** |
+| Reviews with no outcome, findings, claims, comment bodies | 90 days free · 2 years paid |
+| Enterprise | their policy, and they hold it |
+
+**This matters most on the free tier**, which is where shadow data accumulates at zero inference
+cost — the counterfactual evaluation a model-per-diff competitor cannot replicate at any tier.
 
 ---
 

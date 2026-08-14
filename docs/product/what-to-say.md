@@ -4,7 +4,7 @@
 > Reconciled against it on 2026-08-14. If the two disagree, that one wins and this is the
 > bug.
 
-Five questions, in the order they get asked. Say the bold line, then stop — the paragraphs under
+Six questions, in the order they get asked. Say the bold line, then stop — the paragraphs under
 it are what to reach for **if** they push, not a script to recite.
 
 ---
@@ -236,6 +236,62 @@ If they push on whether it is measuring anything real:
 **Do not say "we pivoted."** It invites the read that a hypothesis was shopped around until one
 worked. What happened is narrower and more defensible: a strong claim was refused, and a weaker
 one the same data could carry was tested and held.
+
+---
+
+## 6. "Will this make our pull requests move faster?" — the VP question
+
+**Do not say yes.** It is checkable within a month, we have no measurement, and the arithmetic
+is against us.
+
+> **Probably not much, and I would not sell it to you on speed.**
+>
+> Review cycle time is dominated by waiting, not reading — the research puts pickup time, the
+> gap between a pull request opening and anyone starting, at roughly **40–60% of total cycle
+> time**. A coverage line does nothing about that. Nobody starts reviewing sooner because the
+> tool is more honest.
+>
+> So the speed claim would be a fraction of a fraction: the share of cycle time that is actual
+> reading, times the share of reading spent re-checking files a tool already cleared. **And we
+> have not measured it.** Whether a reviewer shown our routing line acts differently is the
+> largest unproven item in this project.
+
+**Then say what it does change**, which is a different and defensible claim:
+
+> It changes what a reviewer is allowed to skip. Today silence is unreadable, so a careful
+> reviewer re-reads anyway — you are paying for a tool and doing the work. With coverage there
+> is a rule: **high coverage and no findings, approve without a full re-read; low coverage, one
+> person looks at the named part only.**
+>
+> That is not reviewing faster. It is **reviewing less**, and it is the claim we can keep.
+
+**Then move to the ground that is actually yours**, because this is a VP and the reviewer is not
+the strongest thing on offer:
+
+> There is a second thing, and for your role it is the larger one. **You cannot answer "was that
+> change actually reviewed" for any specific merge today** — not "did a tool comment on it", but
+> did anything examine it. Coverage makes that a query rather than a shrug.
+>
+> And every dashboard telling you where rework comes from is built on an attribution rule that
+> is **wrong on 67.9% of its verdicts** — measured here, reproduced three times. We give you a
+> quarterly report on where rework actually concentrates, computed on a rule that is not.
+
+**The one-line version:**
+
+> *We are not selling you a faster review. We are selling you the ability to say which parts of
+> a change were examined — and, once a quarter, where your rework actually comes from, measured
+> with a rule that is not two-thirds wrong.*
+
+**If they press for a number**, give them the measurement instead of a guess:
+
+> One month, three repositories, shadow mode: does a reviewer shown the routing line act
+> differently? Nothing substitutes for that run, and if it shows a speed effect we will tell you
+> the size of it. **Right now the honest answer is that we do not know.**
+
+**Why this beats the confident version.** A VP who is told "30% faster reviews" tests it in one
+sprint. A VP who is told "we do not know, here is the run that would settle it, and here is what
+we can back today" has been given something no other vendor in this market will give them —
+which is the product's whole argument, made in the room before the product is installed.
 
 ---
 
