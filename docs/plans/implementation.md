@@ -210,17 +210,61 @@ intervals, and per repository the 8 sit spread through the distribution of the 1
 clustered — from 0.65% (Skyvern) to 10.48% (opendbc), inside a partial range running 0.00% to
 14.57%.
 
-**One systematic difference, and its direction is knowable.** The 8 carry larger changes: 43.0%
-of their events touch four or more files against 36.2% for the partials. Larger changes hold more
-units, so a three-unit budget covers proportionally less of them. **If that biases the
-file-versus-function gap, it biases it upward** — a gap measured on the 8 would overstate the gap
-on the other 27, not understate it. State that beside the number rather than in a limitations
-section.
+**One systematic difference, and its direction is knowable — but name the mechanism, not the
+correlate.** The 8 carry larger changes: 43.0% of their events touch four or more files against
+36.2% for the partials.
 
-**If the free check had come back clean-but-inconclusive, the remedy for a convenience sample is
-not more of it.** Draw 5 of the 27 at random, **pre-specifying the draw before seeing which come
-up**, fetch blobs for their event sets only, and run the same paired comparison — not to pin the
-gap there, but to check the sign and rough magnitude hold outside the set that selected itself.
+**Change size raises the miss rate on BOTH arms**, because a larger change holds more files *and*
+more functions, so top-3 files also covers proportionally less of it. For a paired comparison
+what matters is not that size hurts each side — it is whether size hurts the **function** side
+faster. **The claim carrying the direction is that functions-per-change grows faster than
+files-per-change**, so the function partition inflates faster as changes grow.
+
+That is an additional claim, not a restatement, and it is what the direction rests on. **Stated
+properly: a gap measured on the 8 likely overstates, because functions-per-change grows faster
+than files-per-change** — not merely because the changes are bigger.
+
+**That partial test has been run**, binning the file-level events by files touched. The file arm
+is steep:
+
+| files touched | 2–3 | 4 | 5 | 6 | 7 | 8 | 9 | 10–12 |
+|---|---|---|---|---|---|---|---|---|
+| events | 4,600 | 899 | 609 | 401 | 280 | 197 | 161 | 346 |
+| miss rate | 0% *(by construction)* | 2.22% | 3.28% | 4.24% | 6.43% | 7.11% | **11.18%** | 7.51% |
+
+**Miss rate rises roughly linearly in the number of UNCOVERED files** — about 1.4 to 2.2 points
+per file beyond the three the budget funds, near-flat across the range. So the file arm is
+already steep, and the ratio argument needs the care that steepness implies: it survives only
+because the *function* arm's uncovered count grows faster than the file arm's with change size,
+which is the functions-per-change claim above and not something these bins establish.
+
+**Two honesty notes.** The 10–12 bin drops to 7.51% from 11.18% at nine files, which is
+non-monotonic — small-n noise across 346 events, or a composition effect if very wide changes are
+mechanical sweeps rather than features. Not smoothed over here. And the harness raised on
+serialisation after printing this table; the bins sum to **7,493, matching the known total
+exactly**, which is what establishes the computation completed before the crash.
+
+**Two miss rates now live in this document on different populations, and they must be labelled
+everywhere they appear:** **4.77% and 4.48% are ≥4-file rates**, and **1.77% is pooled across all
+changes**. An unlabelled 4.6% beside an unlabelled 1.8% is the next `$15`.
+
+### The random draw is the second step, not a contingency
+
+**The free check cannot rule out a mechanism-level difference, by construction.** File and
+function rankings diverge exactly when a file's touch total is concentrated in one function
+rather than spread across many. Two repositories can match on events, change size, velocity and
+file-level accuracy while differing entirely on whether their hot files are hot because of one
+function or ten. **That is within-file touch variance, it is invisible without blobs, and blobs
+are the thing the other 27 do not have.**
+
+So the free check ruled out gross non-representativeness and nothing more. **The random draw is
+promoted from fallback to planned second step**, because it is the only thing that tests transfer
+at all.
+
+**Draw 5 of the 27 at random, and pre-specify the draw now, while the answer is still
+unobservable.** Fetch blobs for their event sets only and run the same paired comparison — not to
+pin the gap there, but to check the sign and rough magnitude hold outside the set that selected
+itself.
 
 **And say the scope in the same sentence as the result**: *measured on 8, checked against 17 on
 shared metrics, not established on the remaining 22.* 13 of 35 is not 35, and the transfer claim

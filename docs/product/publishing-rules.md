@@ -91,6 +91,11 @@ This project has already had one fabricated statistic survive into a draft.
   a 2026 one in this repository *one commit after* the pass built to catch that was written. It
   is the same argument as the drop-rate counter and the shadow ranker: a check that runs once is
   not a check. This one has to run where the number enters.
+- **A load-bearing figure carries a re-check date, not only a checked date.** The next drift is
+  not a wrong citation — it is a **correct one that goes stale**. CodeRabbit's leaderboard claim
+  was accurate the day it was written and superseded five months later. *Date checked* records
+  when someone looked; it says nothing about when the fact expired. Anything the argument rests
+  on gets a cadence attached, or the same failure recurs with a clean audit trail behind it.
 - **Name the metric, not just the source.** "LinearB says pickup is 40–60% of cycle time" failed
   here because three LinearB datasets are in circulation and the figure traced to *idle share of
   lifespan*, reported as a distribution across cohorts rather than a mean. The source was real,
