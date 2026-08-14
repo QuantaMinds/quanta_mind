@@ -21,7 +21,7 @@ Pack format: `v0` · Phase: **pre-Phase-0, no product code written**
 
 | Path | Owns | Constraints |
 |---|---|---|
-| `src/quantamind/` | The product | layered, ≤200 lines/file, ≤15 files/dir. **Currently `__init__.py` only** — layers arrive in phase PRs |
+| `src/quantamind/` | The product | layered, ≤200 lines/file, ≤15 files/dir. **`types/` populated; the other nine layers are empty packages** — each arrives behind a gate |
 | `tests/` | Evidence | five tiers, see `docs/VALIDATION.md` |
 | `research/` | Measurement | separate uv projects, separate interpreters. Never on the product's dependency graph |
 | `scripts/guard/` | Rule enforcement | stdlib only — must run before the package installs |
@@ -324,84 +324,73 @@ narrower" is the same failure class as every other silent absence in this codeba
 Dependencies flow **left to right only**. Enforced by `check_conventions.py`.
 
 ```
-types → discover → ingest → resolve → probe → label → store → serve
-                            (the MRO and framework resolvers, optional)
+types → store → ingest → parse → rank → allocate → infer → verify → render → serve
 ```
 
 The order is declared once, in `discovery.LAYER_ORDER`, and that declaration is what
-`check_conventions.py` enforces. If this diagram and that tuple ever disagree, the tuple
-wins and this file is the bug.
+`check_conventions.py` enforces. If this diagram and that tuple ever disagree, the tuple wins
+and this file is the bug.
+
+**The ordering earns its keep in one place:** `verify` sits to the right of `infer` and so
+cannot import it. The layer that adjudicates the model's claims is structurally unable to
+start trusting them.
+
+**Status: `types/` is populated. Every other layer is a package with a docstring and no
+modules.** They arrive one stage at a time, each behind a gate in
+`docs/plans/implementation.md`.
 
 ### `types/`
-**Owns:** the vocabulary. Frozen dataclasses and enums shared across layers —
-`Confidence`, `Provenance`, `Edge`, `CallSite`, `Unresolved`, `Pack`.
-**Imports:** nothing from the project.
+**Owns:** the vocabulary — `Site`, `Unresolved`, `Confidence`, `Provenance`, `Reason`,
+`Construct`, `Repo`, `PullRequest`, `ChangedUnit`, `Diff`, `Score`, `RankedUnit`, `Ranking`,
+`Allocation`, `Budget`, `Claim`, `Finding`, `Verdict`, `CoverageLine`, `RequestLedger`,
+`Review`, `Settings`.
+**Imports:** nothing from the project. Stdlib only.
 **Consumed by:** every layer.
+**Must not:** perform I/O, or grow a type that needs a database to be constructed.
 **Why it exists separately:** so a shared type never becomes a reason to import sideways.
 
-### `discover/`
-**Owns:** answering "what is this repository?" — language, Python version, frameworks
-present, package layout, entry points, test command.
-**Output:** `RepoProfile`.
-**Must not:** parse code, execute anything, touch the network.
+### `store/`
+**Owns:** persistence — versioned schema, migrations, one repository module per aggregate,
+per-repository spend.
+**Must not:** hold a delete-and-reindex path. The outcome history is the asset, and outcome
+labels arrive weeks after the review they belong to.
 
 ### `ingest/`
-**Owns:** (a) adapting an upstream call graph behind one `GraphSource` protocol, and
-(b) a thin tree-sitter call-site census producing the coverage **denominator**.
-**Output:** `Graph` + `CallSite[]`.
-**Why we do not build the graph:** ~165k stars of MIT code ships daily in this category.
-We consume it. See ``ARCHITECTURE.md` “We do not build a call graph”`.
-**Why the census is ours:** upstream emits edges; nobody emits the denominator. Mixing
-counting with resolving is how the denominator silently shrinks — silent failure #2.
+**Owns:** every read from outside — git history, diffs, pull-request metadata, comments.
+**Must not:** ignore a subprocess exit code. That defect voided four measurements and
+reproduced once since.
 
-| File | Source | Notes |
-|---|---|---|
-| `protocol.py` | — | the `GraphSource` interface |
-| `codegraph.py` | CodeGraph (MIT) | default adapter |
-| `graphify.py` | Graphify (MIT) | alternative |
-| `pycg.py` | PyCG (archived, MIT) | the the correlation test instrument |
-| `census.py` | tree-sitter | call-site denominator — **ours** |
+### `parse/`
+**Owns:** changed units, signatures, references, and the language table.
+**Must not:** return nothing for something it failed to resolve. It emits `Unresolved`, which
+is what gives the coverage line its content.
 
-### `resolve/` — the MRO and framework resolvers only, conditional
-**Owns:** edges upstream structurally cannot produce. Built only where the correlation test exposure
-data shows the risk concentrates.
+### `rank/`
+**Owns:** the prior-touch index, the percentile threshold, the ranking.
+**Must not:** call a model, or rank file-then-function — nested ranking scored below its own
+null ranker.
 
-| File | Handles | Known limits |
-|---|---|---|
-| `mro.py` | `super()` chains — PyCG misses these entirely | — |
-| `frameworks/django.py` | URL dispatch, signals, admin | version-coupled |
-| `frameworks/celery.py` | task registry | — |
-| `frameworks/sqlalchemy.py` | relationships | — |
-| `frameworks/pytest.py` | fixture graph | — |
+### `allocate/`
+**Owns:** the budget, the tiers, and the per-repository ceiling.
+**Must not:** degrade silently at the ceiling. It raises, or it withholds inference and says
+so in the comment.
 
-**Contract:** every resolver returns `(edges, unresolved)`. Returning fewer edges is
-legitimate. Returning a guess is not. **No LLM calls in this layer.**
-**Deleted by decision:** `static.py` (upstream's job), `runtime.py` (~180× overhead —
-``ARCHITECTURE.md` “We do not build a runtime oracle in v1”`).
+### `infer/`
+**Owns:** model calls — structured output, caching, refusal handling, provider adapters.
+**Must not:** be required for a review to complete. Everything left of here runs with no key.
 
-### `probe/`
-**Owns:** the Python feature-prevalence scanner — where this repo is unknowable.
-Scans for `eval`, `exec`, computed `getattr`/`setattr`, `importlib`, metaclasses,
-`__getattr__`, registering decorators, monkeypatching, C extensions, `globals()`.
-**Why it matters:** this is the prevalence half of the capability × prevalence
-decomposition, and it does not exist for Python anywhere in the literature.
+### `verify/`
+**Owns:** adjudication of structural claims against the parse, and the drop-rate counter.
+**Must not:** import `infer`, or mark a semantic claim confirmed. A parser cannot decide one.
 
-### `label/`
-**Owns:** confidence assignment and coverage math. Builtins excluded from both numerator
-and denominator.
-**Invariant:** every call site lands in exactly one `Confidence` bucket. Nothing is lost.
-
-### `store/`
-**Owns:** the SQLite pack. Versioned schema, SHA-pinned, per-directory staleness.
-**Hard constraint:** no source text, no argument values. Proven by
-`verify-no-source-leak`, not merely asserted.
+### `render/`
+**Owns:** the comment body, the coverage line, the digest, the report.
+**Must not:** print findings above coverage. The order is the argument.
 
 ### `serve/`
-**Owns:** MCP server, PR comment renderer, localhost read-only view.
-**Every response carries `pack_sha`.** If it does not match `git rev-parse HEAD`, the
-response is marked stale rather than served silently.
-
----
+**Owns:** the HTTP webhook, the CLI, health, configuration, and the contracts at the edge.
+**Must not:** let the two adapters diverge. What a customer verifies with the CLI must be what
+the App runs.
 
 ## `tests/`
 

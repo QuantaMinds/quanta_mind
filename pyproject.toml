@@ -30,8 +30,12 @@ requires-python = ">=3.12"
 # Deliberately empty. No runtime dependency is chosen before the correlation test reports.
 dependencies = []
 
-# Deliberately no [project.scripts]. `quantamind` gets an entry point when serve/
-# exists; until then `uv run quantamind` should fail loudly rather than half-work.
+[project.scripts]
+# The CLI is the first surface and it is permanent -- it runs the retrospective, it is how a
+# sceptic verifies us before granting repository access, and it answers the ranker gate.
+# Subcommands with no implementation exit non-zero naming the stage that delivers them,
+# rather than exiting 0 having done nothing.
+quantamind = "quantamind.serve.cli:main"
 
 [dependency-groups]
 dev = [
