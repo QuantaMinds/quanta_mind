@@ -1,5 +1,9 @@
 # Project Context — Research Record, Business Case, Competitive Landscape
 
+> **SUPERSEDED — kept only because `docs/findings/PHASE0_PREREGISTRATION.md` cites it, and a preregistration is not edited to accommodate a tidy-up.**
+> This document describes the product the correlation test falsified (RR 1.040). It is a historical record, not guidance.
+> For the product being built read `docs/QUANTAMIND.md` and `docs/plans/implementation.md`.
+
 > The complete reasoning behind this project, including the parts that were wrong.
 > If you are joining the team, read this second (after `ARCHITECTURE.md`).
 >

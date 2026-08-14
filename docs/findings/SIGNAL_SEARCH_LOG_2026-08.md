@@ -86,7 +86,7 @@ RR ≈ 2.1 on the discovery set and RR ≈ 1.7–2.3 on the validation set, same
 additions, deletions, changed files and churn.
 
 That is the oldest result in defect prediction, and **it is already a shipping feature in
-every competitor** — `PRODUCT_PLAN_2026-08.md` lists `max_changed_lines` and `max_files`
+every competitor** — the then-current product plan listed `max_changed_lines` and `max_files`
 among the conditions Mergify's `auto_merge_conditions` has expressed since 2026-05-06. It is
 a true signal and not a differentiator.
 
@@ -276,7 +276,7 @@ nowhere else.
 - **Test-coverage gap** — changed code with no covering test. Fix commits in this corpus did
   touch tests.
 - **Anything requiring a model.** Excluded by the no-inference decision in
-  `PRODUCT_PLAN_2026-08.md`, and the defect class measured here is precisely the one that
+  the then-current product plan, and the defect class measured here is precisely the one that
   needs it.
 
 ---

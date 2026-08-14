@@ -6,7 +6,7 @@ WHAT: Three checks that protect separation of concerns and readability.
                      < serve). Sideways imports into a sibling's internals are banned.
                      The order lives in discovery.LAYER_ORDER and is authoritative;
                      `parse` was removed when we decided to consume an upstream graph
-                     rather than build one (docs/BUILD_PLAN.md).
+                     rather than build one (docs/plans/implementation.md).
       2. Docstring — every module opens with a docstring containing WHAT, WHY and
                      IMPORTS, so a new contributor can read any single file cold.
       3. Naming    — bans placeholder tokens (util, helper, manager, ...) that mark a

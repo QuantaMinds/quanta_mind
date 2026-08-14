@@ -1,7 +1,7 @@
 # Build plan — the reviewer that ranks first, then reads
 
 **Written 2026-08-12**, branch `feat/gravity-reviewer`. Product argument and evidence are in
-`docs/PRODUCT_BLUEPRINT_2026-08.md`; the measurements behind it are in
+the August 2026 product blueprint, since deleted; the measurements behind it are in
 `docs/findings/SIGNAL_SEARCH_LOG_2026-08.md` and
 `docs/findings/HISTORY_SIGNAL_BACKTEST_2026-08.md`.
 

@@ -8,7 +8,7 @@ a product claim rather than a risk claim.
 
 ## What was tested
 
-`docs/plans/session-feat-history-signal.md` proposed a signal no shipping reviewer emits:
+A session plan on the `feat/history-signal` branch, since removed with the other auto-written session records, proposed a signal no shipping reviewer emits:
 
 > Historically, when this function changed, that other file changed with it. This pull
 > request changes the first and not the second. **Here is the companion change you are
