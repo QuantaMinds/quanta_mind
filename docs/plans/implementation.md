@@ -423,6 +423,77 @@ waiting for a date.
 The git path is the one we control and the one the research validated. **Datadog is the faster
 signal and we consume rather than rebuild it** — see the integrations section.
 
+## Which database runs, and when
+
+**The split is not free versus paid. It is local versus hosted.** Both engines run the same
+schema and the same migrations, and the store layer is written to SQL both accept.
+
+| Where the product runs | Engine | Whose machine |
+|---|---|---|
+| `quantamind review` / `retrospective` on a laptop | **SQLite**, one file | theirs |
+| The GitHub App, **any tier including free** | **Postgres**, one shared database | ours |
+| Enterprise self-host | **Postgres** in their VPC | theirs |
+
+### Walking one customer through it
+
+**They run the retrospective first.** `uv run quantamind retrospective` against a clone. That
+writes `quantamind.db`, a SQLite file in their working directory. **No account, no upload, and
+we never see it.** This is the whole point of the CLI existing: a sceptic can check the claim
+before granting anything.
+
+**They install the App on the free tier.** Now reviews run on our infrastructure, so rows land
+in our Postgres — one row in `repo`, then a `review` row per pull request with its
+`ranked_unit` and `unresolved` children. **`finding` and `claim` stay empty**, because the free
+tier runs no model. Their SQLite file stays on their laptop; nothing is imported, because a
+retrospective is a report rather than state worth migrating.
+
+**They upgrade to Team.** *No data moves and no database changes.* It is a plan column on their
+organisation row. From the next pull request, `allocate` permits inference, so `finding` and
+`claim` rows start appearing beside the ones already there. **The upgrade is visible in the
+data as the moment those tables start filling** — which is exactly how it should read, because
+that is what they started paying for.
+
+**They upgrade to Business.** Again no migration. The `org` row gains their second and third
+repositories, and the cross-repository report becomes a query over rows that were already being
+written. **Everything the org view needs has been collected since the free tier**, which is why
+the schema change for `org` lands before the first Business customer rather than after.
+
+**They go Enterprise and self-host.** A container plus a Postgres they operate. Same schema,
+same migrations, run by command. **We hold nothing.** Telemetry from that install is opt-in and
+sends counts only.
+
+### Why one shared Postgres rather than a database per customer
+
+A database per customer means a migration is a fleet operation and a schema bug is discovered
+customer by customer. One database with rows keyed by organisation means one migration, run
+once, verified once. **The cost is that isolation is now a query predicate rather than a
+boundary**, so every read is scoped by organisation at the repository layer and that scoping is
+what the tests target — a missing `WHERE org_id` is the failure mode this trade buys, and it
+must be tested for directly rather than assumed.
+
+### The constraint that keeps both engines possible
+
+**No engine-specific features in `store/`.** No Postgres arrays or `JSONB`-only queries, no
+SQLite pragmas doing anything but performance. The moment one appears, self-hosting on SQLite
+stops working and the CLI stops being able to run the same code as the App — and the CLI's
+whole value is that it runs *the same pipeline*.
+
+**Gate:** the store test suite runs against both engines and asserts identical results. A test
+suite that passes on SQLite and was never run against Postgres is how the divergence arrives.
+
+### Retention
+
+| Tier | Reviews kept | Outcomes kept |
+|---|---|---|
+| Free | 90 days | **forever** |
+| Team, Business | 2 years | **forever** |
+| Enterprise | their policy | their policy |
+
+**Outcomes outlive reviews deliberately.** An outcome row is small, it is the asset, and it is
+the only thing that can still be learned from after the review it describes has been deleted.
+
+---
+
 ### Shadow ranking: how the product improves without shipping regressions
 
 Every review runs the live ranker **and** every candidate ranker, recording all picks in
