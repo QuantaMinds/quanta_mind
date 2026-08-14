@@ -876,20 +876,56 @@ that describes the policy's cost is the pooled one:
 At 200 pull requests a month that is **3.5 changes, and between 3.0 and 4.2**, where the defect
 unit would receive no model call and produce no error.
 
-**The direction of the function-level figure is UNKNOWN, and an earlier version of this
-paragraph claimed otherwise.** It argued the file number was a floor, reasoning from partition
-fineness alone: functions are a finer partition, a three-unit budget covers less of a change at
-function level than at file level, so the miss rate should rise. That is one real effect.
+## The function-level figure, measured — this is the number the product has
 
-**It ignored the second, which this document measures on the facing page and which points the
-other way.** Ranking functions globally scores **75.0% top-1 against 58.9%** for taking any
-function in the top-ranked file — because the highest-history file is usually not where the
-highest-history function lives. Function-level ranking is substantially better *aimed*, and
-better aim reduces misses.
+**The table above ranks FILES. The allocator ranks FUNCTIONS**, so the figure that describes the
+shipping policy is this one, measured paired on identical events across the 8 clones with
+complete objects.
 
-So: a finer partition raises the miss rate, better targeting lowers it, **and which dominates is
-precisely what the measurement is for.** Quoting 1.77% as a floor asserted a net effect from one
-of two terms, which is the same error as reading a benchmark's headline without its second line.
+| arm | top-3 miss | 95% CI |
+|---|---|---|
+| file-level | 24/1,969 = 1.22% | 0.82–1.81% |
+| **function-level, three-unit budget** | **174/1,969 = 8.84%** | **7.66–10.17%** |
+| function-level, five-unit budget | 69/1,969 = 3.50% | 2.78–4.41% |
+
+**At 200 pull requests a month, 8.84% is roughly eighteen changes where the defect sits in a unit
+that received no model call.** That is the honest cost of allocation, and it is far above the
+1.77% the file-level analogue suggested.
+
+**Most of the apparent gap was the budget, not the unit.** Three functions is not three files —
+with 1.64 functions per file, three functions covers about half what three files does. At
+**matched coverage** (top-3 files against top-5 functions, 3.05 file-equivalents) the gap is
+**+2.29 points**, not +7.62. McNemar exact p < 0.0001 on both.
+
+**So two earlier measurements that looked contradictory both hold.** Function *ordering* is
+better — 75.0% top-1 against 58.9% for any-function-in-the-top-file. Function *allocation at
+equal budget* is slightly worse. **Granularity costs about two points; the rest was the smaller
+net.**
+
+**Every figure here is an upper bound.** Three biases push the same way and none is corrected:
+the 8 clones are a convenience sample carrying larger changes than the other 17; git credits a
+hunk between two functions to the nearest preceding one; and 14.6% of hunks yield no function at
+all. Each puts a defect's true function outside the index, inflating the function arm alone. **So
+"at most 8.84%", not "8.84%".**
+
+**And the budget stays at three.** Five units would halve the miss for about +$13 per repository
+per month — defensible, and unnecessary, because **naming the cold units in the coverage line
+removes what makes a cold miss expensive.** The cost is not the miss; it is that nobody knew.
+
+**Two claims about this were made before it was measured, and both were wrong.** They are kept
+because the pattern is instructive.
+
+**The first said 1.77% was a floor** — reasoning from partition fineness alone: functions are a
+finer partition, so a three-unit budget covers less and the miss rate should rise. Real effect,
+and it turned out to dominate — but the reasoning ignored the second term, better aim, which
+pulls the other way. **Asserting a net from one of two opposing terms is the error, even when the
+sign happens to come out right.**
+
+**The second said the direction was unknown.** Correct at the time and superseded by the
+measurement above: function-level loses, by about 2.3 points at matched coverage.
+
+**The lesson kept from both:** the file figure was never a floor *or* an unknown. It was a
+different arm, and only a paired run on identical events could say how the two related.
 
 **And a same-number result would be a warning, not a confirmation.** If a symbol-level re-run
 returns 1.77% again, the likeliest explanation is that the extraction did not actually change

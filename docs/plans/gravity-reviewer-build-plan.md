@@ -30,7 +30,9 @@ and 4,293 come to sit in one register and read alike.
 | Measurement | Value | Status | n | What it decides |
 |---|---|---|---|---|
 | Attention ranking, top-1 | **85.3%** vs a 72.0% null, 17 of 17 repositories | SOUND | **4,293** | Where inference is spent |
-| Attention ranking, **top-3** — the budget's real metric | **95.4%** vs an 89.4% null on changes touching ≥4 files; **cold-miss 4.6%** | SOUND, 25 repositories, skip ledger empty | **2,893** | Whether allocation loses defects |
+| Attention ranking, top-3, **FILE level** | 95.4% vs an 89.4% null on ≥4-file changes; cold-miss 4.6%, or **1.77% pooled** | SOUND, 25 repositories, skip ledger empty | 2,893 | The file-level analogue only |
+| **The shipping policy's miss rate — FUNCTION level** | **8.84%** at a three-unit budget, **3.50%** at five. The allocator ranks functions, so this is the number the product has | SOUND, **8 clones, "at most"** | **1,969 paired** | **Whether allocation loses defects** |
+| Granularity cost at **matched coverage** | **+2.29 points**, top-3 files vs top-5 functions. The raw +7.62 gap was **70% budget, not granularity** | SOUND, paired, McNemar p < 0.0001 | 1,969 | Whether the unit choice is the problem |
 | Language generalisation | six languages, lift **+8.9 to +26.0** over each null | SOUND | 6,099, but **41–400 per language** | Addressable surface |
 | Breakage localisation by co-change | **0 of 8** — 95% upper bound **≈37%** | SOUND method, **DIRECTIONAL ONLY** | **8** | Why we do not ship a "missing file" finding |
 | Fix lands inside files already changed | **11 of 11** — 95% lower bound **≈72%** | SOUND method, **DIRECTIONAL ONLY** | **11** | Why the deterministic layer cannot find the defect alone |

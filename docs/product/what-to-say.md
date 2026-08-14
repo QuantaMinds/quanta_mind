@@ -182,6 +182,20 @@ On the rest there is a coverage line and no finding. If they ask whether we woul
 their last incident, the answer is *"possibly not — but you would have known which parts we never
 examined."* Say that before they work it out.
 
+**In the room, that number is now measured and it is the strongest version of this argument.**
+On the research corpus, the defect sits in a unit our budget never funded about **one change in
+eleven**. Do not hide it — it is the whole case:
+
+> Our allocation reads a few units and skips the rest. On roughly one change in eleven, the
+> defect is in something we skipped. **Every reviewer has a number like that and none of them
+> publishes it — and more to the point, none of them can tell you which units it was.** We name
+> them. So the one-in-eleven stops being a coin toss and becomes a short list with your name
+> against it, before you merge.
+
+**That is why we did not simply buy the number down.** A wider budget would roughly halve it and
+cost about 50% more inference. **The cost of a skipped unit is not the skip — it is that nobody
+knew.** Naming them removes that for nothing.
+
 ---
 
 ## 5. "Your first product failed. Why should I believe this one?"
