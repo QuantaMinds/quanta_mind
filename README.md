@@ -21,7 +21,7 @@ evidence exists, the plan exists, the layers are empty. Start at
 | Understand the product, and see the evidence for every claim | `docs/product/QUANTAMIND.md` |
 | Build it — stages, gates, tests, telemetry, revenue | `docs/plans/implementation.md` |
 | Know the folder structure and the layer rules | `docs/plans/product-skeleton.md` |
-| Write the site, pricing, or a LinkedIn line | `docs/product/WEBSITE.md` |
+| Publish anything public — what we may and may not say | `docs/product/publishing-rules.md` |
 
 ```
 docs/product/       what we are building, and the site that sells it
