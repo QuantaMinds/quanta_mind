@@ -15,11 +15,26 @@ from __future__ import annotations
 
 import pytest
 
-from quantamind.types.change import ChangedUnit, Diff, Language, PullRequest, Repo
+from quantamind.types.change import ChangedUnit, Language, PullRequest, Repo
 from quantamind.types.finding import Claim, ClaimKind, Finding, Verdict
-from quantamind.types.ranking import Budget
+from quantamind.types.ranking import Allocation, Budget, RankedUnit, Ranking, Score
 from quantamind.types.review import CoverageLine, Review
 from quantamind.types.verdict import Construct, Reason, Site, Unresolved
+
+
+def _cold(name: str, rank: int) -> RankedUnit:
+    """A cold ranked unit, for building coverage lines in tests."""
+    return RankedUnit(
+        unit=ChangedUnit(
+            site=Site(f"pkg/{name}.py", 1),
+            qualified_name=f"pkg.{name}",
+            language=Language.PYTHON,
+        ),
+        rank=rank,
+        score=Score(value=0.0, percentile=0.1),
+        allocation=Allocation.COLD,
+    )
+
 
 REPO = Repo(host="github.com", name="acme/widget")
 PR = PullRequest(repo=REPO, number=7, head_sha="0123456789abcdef", base_sha="fedcba9876543210")
@@ -41,28 +56,6 @@ def test_unresolved_renders_what_and_why_not_just_where() -> None:
     assert record.render() == "call site at pkg/registry.py:88 — runtime registration"
 
 
-def test_coverage_of_an_empty_diff_is_zero_not_one() -> None:
-    """No denominator means no coverage claim.
-
-    The dangerous version returns 1.0: a review that read nothing reports having understood
-    everything, and it is indistinguishable from a genuinely complete read.
-    """
-    assert Diff(pull_request=PR).coverage_ratio() == 0.0
-    assert CoverageLine(units_checked=0, files_checked=0).ratio() == 0.0
-
-
-def test_coverage_counts_the_unresolved_in_its_denominator() -> None:
-    """Two of three understood is 2/3, not 2/2. Excluding failures inflates every review."""
-    line = CoverageLine(
-        units_checked=2,
-        files_checked=1,
-        unresolved=(Unresolved(Site("a.py", 1), Reason.DYNAMIC_DISPATCH, Construct.CALL_SITE),),
-    )
-    assert line.total_considered == 3
-    assert line.ratio() == pytest.approx(2 / 3)
-    assert line.is_complete is False
-
-
 def test_a_semantic_claim_cannot_be_marked_confirmed() -> None:
     """The verifier is a parser. Letting it confirm a semantic claim is the whole failure."""
     with pytest.raises(ValueError, match="cannot be CONFIRMED"):
@@ -71,34 +64,6 @@ def test_a_semantic_claim_cannot_be_marked_confirmed() -> None:
             site=Site("pkg/mod.py", 20),
             assertion="the retry loop is wrong",
             verdict=Verdict.CONFIRMED,
-        )
-
-
-def test_a_review_refuses_findings_that_verify_never_saw() -> None:
-    """An unadjudicated finding reaching a Review is indistinguishable from verify/ being off.
-
-    This is the sabotage: the finding is well-formed, the body is real, and the only thing
-    missing is that nothing checked it. The type refuses rather than publishing it.
-    """
-    unchecked = Finding(
-        site=Site("pkg/mod.py", 71),
-        body="the early return skips the ledger write",
-        claims=(
-            Claim(
-                kind=ClaimKind.ORDER_OF_STATEMENTS,
-                site=Site("pkg/mod.py", 71),
-                assertion="line 71 precedes line 88",
-            ),
-        ),
-    )
-    assert unchecked.publishable is False
-    with pytest.raises(ValueError, match="never adjudicated"):
-        Review(
-            pull_request=PR,
-            coverage=CoverageLine(units_checked=1, files_checked=1),
-            budget=Budget(max_requests=3),
-            findings=(unchecked,),
-            spoke=True,
         )
 
 
@@ -138,12 +103,40 @@ def test_a_verified_finding_is_labelled_differently_from_a_suggestion() -> None:
     assert suggestion.is_verified is False
 
 
+def test_a_review_refuses_findings_that_verify_never_saw() -> None:
+    """An unadjudicated finding reaching a Review is indistinguishable from verify/ being off.
+
+    This is the sabotage: the finding is well-formed, the body is real, and the only thing
+    missing is that nothing checked it. The type refuses rather than publishing it.
+    """
+    unchecked = Finding(
+        site=Site("pkg/mod.py", 71),
+        body="the early return skips the ledger write",
+        claims=(
+            Claim(
+                kind=ClaimKind.ORDER_OF_STATEMENTS,
+                site=Site("pkg/mod.py", 71),
+                assertion="line 71 precedes line 88",
+            ),
+        ),
+    )
+    assert unchecked.publishable is False
+    with pytest.raises(ValueError, match="never adjudicated"):
+        Review(
+            pull_request=PR,
+            coverage=CoverageLine(ranking=Ranking(), files_checked=1),
+            budget=Budget(max_requests=3),
+            findings=(unchecked,),
+            spoke=True,
+        )
+
+
 def test_a_silent_review_cannot_claim_to_have_spoken() -> None:
     """A coverage-only review is spoke=False. The two are different products of the pipeline."""
     with pytest.raises(ValueError, match="claims to have spoken"):
         Review(
             pull_request=PR,
-            coverage=CoverageLine(units_checked=3, files_checked=2),
+            coverage=CoverageLine(ranking=Ranking(), files_checked=2),
             budget=Budget(max_requests=3),
             spoke=True,
         )

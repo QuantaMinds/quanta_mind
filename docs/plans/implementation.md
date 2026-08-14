@@ -166,6 +166,7 @@ failure names itself.**
 |---|---|---|
 | **3a** | the productionised ranker reproduces the research ranker on the collected corpus | nothing new — run it today |
 | **3b** | measured per-pull-request cost across **all** calls, with `cache_read_input_tokens` non-zero | live traffic |
+| **3b′** | **the shipping policy's miss rate stated on the record, at whatever budget ships** — 8.84% at three units, 3.50% at five — **and the coverage line naming what it did not read** | measured; the coverage line is a build item |
 | **3c** | allocation loss at **function** level, stated with an interval | live traffic, shares 3b's run |
 
 **3a does not wait on the other two**, and it is the one that can end the project. 3b and 3c
@@ -384,6 +385,59 @@ b = 157 (file hit, function miss), **c = 7 (file miss, function hit)** — the c
 version of this section assumed empty. **The sign is settled: function-level allocation loses
 substantially more.**
 
+### Pre-specified before running: the matched-coverage test
+
+**Top-3 files and top-3 functions are not the same net.** With m/k = 1.64, three functions is
+about 1.8 files' worth of units — **the function arm runs at roughly half the coverage of the
+file arm.** A smaller net catching less is not a ranking-quality finding.
+
+And it sits against a measurement pointing the other way: global function ranking scores **75.0%
+top-1 against 58.9%** for any-function-in-the-top-file. Function *ordering* is better. This run
+says function *allocation* is worse. Both can hold, and the reconciliation is budget — better
+ordering, smaller net, net wins.
+
+**The rule, fixed before the run:** function budget = `round(3 × m/k)` on the measured ratio.
+With m/k = 1.64 that is **round(4.92) = 5**. So **top-3 files against top-5 functions**, which is
+5/1.64 ≈ 3.05 file-equivalents.
+
+**What each outcome means, also fixed now:**
+
+| Outcome at matched coverage | Reading |
+|---|---|
+| functions still lose | **granularity is genuinely worse** — a real finding about the unit |
+| functions win or draw | **the ranking is better and the BUDGET is what costs us** — a different problem with a different fix |
+
+### The budget is re-decided against these numbers: it stays at three, and the cold list is why
+
+The plan fixed ranks 1–3 before any of this was measured. It should not be inherited, so here is
+the decision made against the data.
+
+| budget | miss | changes/month at 200 PRs | cost/PR | cost/repo/month |
+|---|---|---|---|---|
+| **top-3** | 8.84% | ~18 | $0.140 | **$28** |
+| top-5 | 3.50% | ~7 | $0.205 | **$41** |
+
+Halving the miss costs about **+$13 per repository per month**, and at 20 developers across 4
+repositories that moves gross margin from roughly 70% to 57% on a $19 seat. Defensible on its
+own terms.
+
+**It stays at three, because the cold list is the cheaper fix for the same problem.**
+
+The cost of a cold miss is not the miss. It is that **nobody knew** — the defect sat in a unit
+no one was told went unread. **Naming the eight skipped functions costs nothing and removes
+exactly that**, where reading two more of them costs 50% more inference and still leaves six
+unnamed.
+
+So: **top-3, with every cold unit named in the coverage line.** Revisit only if the field shows
+a named cold list is insufficient — which is a question about whether reviewers act on it, and
+therefore folds into the shadow-mode month rather than needing its own experiment.
+
+**And this is why every changed unit gets a `ranked_unit` row, cold ones included.** The schema
+allows `allocation = cold`; it must be *required* rather than permitted. Dropping cold units at
+allocation time would take the coverage line's content away, and it would also blind shadow
+evaluation — a candidate ranker that would have chosen a cold unit needs that unit to exist in
+the record to be credited for it.
+
 ### The first run was wrong, and the diagnostic is why we know
 
 The first attempt reported +7.41 points on a **broken symbol index**, and the ratio m/k = 1.17
@@ -401,6 +455,29 @@ Enabling git's python diff driver, measured on browser-use:
 | default heuristic | 57.8% | 30.6% |
 | **python diff driver** | **85.4%** | **5.3%** |
 
+### Matched coverage — RUN. Seventy per cent of the gap was budget, not granularity
+
+**Top-3 files against top-5 functions, the pre-specified rule.**
+
+| | miss | 95% CI | gap vs file top-3 |
+|---|---|---|---|
+| file, top-3 | 24/1,969 = 1.22% | 0.82–1.81% | — |
+| function, top-3 | 174/1,969 = 8.84% | 7.66–10.17% | **+7.62 pts** |
+| **function, top-5 (matched)** | **69/1,969 = 3.50%** | **2.78–4.41%** | **+2.29 pts** |
+
+**Seventy per cent of the apparent gap was the smaller net.** McNemar at matched coverage still
+gives p < 0.0001, and the reverse cell grows as predicted (c = 7 → 15) when the function net
+widens.
+
+**Read against the rule fixed before the run: functions still lose, so granularity is genuinely
+worse** — but by 2.29 points, not 7.62. **Both prior measurements survive together.** Function
+*ordering* is better (75.0% vs 58.9% top-1). Function *allocation* at equal budget is slightly
+worse. The headline gap was mostly the third thing: three functions is not three files.
+
+**So the earlier framing overstated by roughly 3×**, and the honest sentence is: at a fixed
+number of units the function unit costs about two points of recall; at a fixed *count of three*
+it costs seven and a half, because three functions covers less of a change than three files.
+
 ### What the re-run changed, and what it did not
 
 | | broken extraction | corrected |
@@ -410,9 +487,15 @@ Enabling git's python diff driver, measured on browser-use:
 | **gap** | +7.41 | **+7.62 points** |
 | c′ / c | 5.7× | **2.4×** |
 
-**The extraction nearly doubled and the gap moved 0.21 points.** That is the strongest available
-evidence the gap is not an extraction artefact — the threat was real, it was tested, and the
-result survived it.
+**The extraction nearly doubled and the gap moved 0.21 points** — but **this is not a
+before/after on the same events, and must not be read as a stability result.** Better extraction
+qualified more events, so n went 1,377 → 1,969, a 43% increase. Two measurements on overlapping
+but different populations. The claim that survives is *the gap is present in both*, not *the gap
+is stable*; establishing the latter needs the corrected run restricted to the original events.
+
+**And something did move a great deal: c′/c fell from 5.7× to 2.4×, a 58% change**, while the
+headline barely shifted. **That argues the decomposition is poorly constrained rather than
+confirmed**, and against leaning on c and c′ for the transfer question.
 
 **The decomposition still does not fully collapse.** c = 0.90 points per uncovered file against
 c′ = 2.13 per uncovered symbol, with m/k = 1.64. So the function arm remains worse *per unit*,
@@ -422,8 +505,21 @@ that would have narrowed transfer to "is functions-per-file stable".
 **Populations differ from the corpus-wide run**, which requires no symbols: this file arm is
 1.22% against 4.6% there. **Do not compare those two figures.**
 
-**What still limits it:** 8 convenience-sampled clones carrying larger changes than the other 17,
-so the gap plausibly overstates. The random-5 draw remains the planned second step.
+**Say "at most", not "is".** Three separate biases push the same way — the function arm's miss
+rate is inflated by each, and nothing corrects any of them:
+
+1. **8 convenience-sampled clones** carrying larger changes than the other 17.
+2. **Residual misattribution.** Git reports the *nearest preceding* match, so a hunk between two
+   functions is credited to the earlier one — a symbol in the index that is not the one changed.
+3. **14.6% of hunks still yield no `def`** even with the driver.
+
+Each puts a defect's true function outside the index or outside the target set, which inflates
+the function arm and nothing else. **So it is at most +2.29 at matched coverage, and at most
++7.62 at equal count.** The random-5 draw remains the planned second step.
+
+**Cheap partial check, since m/k is the tell:** with correct extraction, how does m/k
+*distribute*? A substantial share of changes still yielding exactly 1.0 functions per file are
+candidates for residual misattribution and can be eyeballed.
 
 ### Gate 3a — the hard one
 
@@ -641,6 +737,9 @@ review          id, repo_id, pr_number, head_sha, created_at,
                 tokens_out, cost_cents, latency_ms, tier
 ranked_unit     review_id, unit_path, unit_name, rank, score,
                 percentile, allocation          -- deep | shallow | cold
+                -- EVERY changed unit, including cold ones. Not the funded subset.
+                -- Cold rows are the coverage line's content and shadow evaluation's
+                -- denominator; dropping them silently removes both.
 finding         id, review_id, unit_path, kind, body, published,
                 confidence, provenance
 claim           id, finding_id, claim_kind, verdict, reason
@@ -843,6 +942,44 @@ comparison this product sells. Keeping them is cheaper than being wrong about wh
 
 **And the job reports both numbers**: rows deleted, and rows retained *because* they adjudicate
 an outcome. A retention job that never retains anything is not retaining.
+
+### Before `store/` is written: one pass asking what the database could enforce
+
+**Four gaps in this plan have had the same shape** — a correctness rule living in prose while
+the schema permits the violation, failing silently while every test passes:
+
+| Gap | Prose said | Now enforced by |
+|---|---|---|
+| Retention | "outcomes are kept forever" | foreign keys, `ON DELETE RESTRICT` |
+| Cold units missing | "the coverage line reports what was skipped" | a required field in the type |
+| Cold units counted | "name what was skipped" | a list, with a residual that cannot stand alone |
+| Cold units as strings | "the names match the ranking" | a reference to `ranked_unit` |
+
+Each was caught one at a time, immediately after the fix that created it. **The cheaper rule is
+general: anything the schema permits will eventually happen, so a rule that matters belongs in
+the type or the constraint rather than the docstring.**
+
+**So `store/` gets one pass before it is written, not after**: for every rule currently stated in
+a comment, ask whether the database could refuse the violation instead. Where it can, it does.
+Where it cannot — "keep this until we know whether it matters" is a fact about the future —
+express it as an **absence of capability**, which is what revoking DELETE on `ranked_unit` does.
+
+**The residue after that pass is the list of rules genuinely enforced by nothing**, and that list
+should be short enough to read in one sitting. A rule on it is a rule someone has to remember,
+and this plan has now demonstrated four times that nobody does.
+
+**Keep the residue visible, not the enforced set.** The enforced rules take care of themselves;
+the unenforced ones are what a new engineer needs on day one. **It is the internal equivalent of
+the coverage line** — a short list saying *here is what nothing stops* — and it is written in the
+same form:
+
+| The rule | Why the database cannot hold it | What catches a violation instead |
+|---|---|---|
+| *(example)* a review must be posted before its outcome arrives | ordering across weeks, no row exists yet | nothing — **live risk** |
+
+**Where the third column says "nothing", that is the live-risk list**, and it should be read
+aloud at the start of the stage that touches it. A residue that never gets shorter is a design
+that has stopped absorbing its own rules.
 
 ### The house rule these three share
 
@@ -1302,6 +1439,13 @@ abandonment without uninstallation, and it is the failure mode a naive install-c
 report as success — the same shape as every other check in this plan.
 
 **Exit criterion: survived AND still generating reaction volume at day 30.** Not survived alone.
+
+**And one more question rides on the same month, recorded here so it is not lost: is a named
+cold list sufficient?** The budget was set at three units rather than five because naming the
+skipped units was judged the cheaper fix for the same problem. **That judgement is untested.** If
+reviewers ignore the cold list, the argument for the smaller budget collapses and top-5 becomes
+the right call at +$13 per repository per month. Measurable from the same reaction rows: do
+reviewers engage with the coverage line's cold list at all?
 
 **Zero reactions is unresolved, not failed.** A careful reader who never clicks is
 indistinguishable in the data from someone who stopped looking — the metric captures

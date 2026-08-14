@@ -24,6 +24,7 @@ explaining any of it.**
 | **The share of pull requests we comment on** | A tuned number. "Most get no finding" says enough |
 | **How many repositories and changes we tested on** | Invites method questions and points at the source data |
 | **Our accuracy, precision, recall or F1** | Two reasons. It tells a competitor what to optimise, and one number invites a fight about method. **Hand the customer their own number instead** — more convincing, and it gives away nothing |
+| **Our own miss rate, on a public page** | Different from the rest of this list, and the line is subtle. **Say it in a room, never in print.** In conversation "the defect is in a unit we skipped about one change in eleven" is the strongest thing we can say, because no competitor will say theirs. Printed, it becomes a soundbite detached from the coverage line that makes it survivable — and it discloses the budget, which is mechanism |
 | **Which model, at what setting** | Free tuning advice for anyone reading |
 | **Customer names without written permission** | Obvious, and people still get it wrong |
 

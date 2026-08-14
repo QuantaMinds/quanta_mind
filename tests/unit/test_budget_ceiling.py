@@ -16,13 +16,13 @@ from __future__ import annotations
 import pytest
 
 from quantamind.types.change import PullRequest, Repo
-from quantamind.types.ranking import Budget, BudgetExceeded
+from quantamind.types.ranking import Budget, BudgetExceeded, Ranking
 from quantamind.types.review import CoverageLine, RequestLedger, Review
 from quantamind.types.settings import SettingsError, load
 
 REPO = Repo(host="github.com", name="acme/widget")
 PR = PullRequest(repo=REPO, number=7, head_sha="0123456789abcdef", base_sha="fedcba9876543210")
-COVERAGE = CoverageLine(units_checked=3, files_checked=2)
+COVERAGE = CoverageLine(ranking=Ranking(), files_checked=2)
 
 
 def test_overspend_is_read_from_the_ledger_not_from_the_budget() -> None:
@@ -63,7 +63,7 @@ def test_a_zero_ceiling_still_produces_a_review() -> None:
     assert review.budget.is_free_tier is True
     assert review.ran_model is False
     assert review.overspent is False
-    assert review.coverage.units_checked == 3
+    assert review.coverage.files_checked == 2
 
 
 def test_budget_exceeded_names_both_numbers() -> None:
