@@ -1,7 +1,10 @@
 # QuantaMind
 
-**Written 2026-08-13. Self-contained: every number below was measured by this project, and the
-method is stated beside it. Nothing here cites another document.**
+**Written 2026-08-13. Self-contained — nothing here cites another document.**
+
+**Two kinds of number appear.** Ones **we measured**, each stated with its method. Ones taken from
+**external sources** — vendor documentation, published benchmarks, industry studies — each listed
+with its source and verification status in the appendix. Where a claim is unproven it says so.
 
 Nothing described here is shipped. Where a claim is unproven it says so.
 
@@ -19,9 +22,10 @@ look first, and only reads hard there.**
 A team that opened twenty pull requests a week opens sixty. The same two or three senior
 engineers still have to read them, and they are the same people you least want spending their
 day on line-by-line review. Industry figures put senior engineers at **8–12 hours a week**
-reviewing — roughly **$9,600 a year per engineer** at a $150K salary — and **44% of teams** name
-slow review as their single biggest delivery bottleneck.
-AI-authored pull requests merge at **32.7%** against **84.4%** for human-authored ones, and the
+reviewing. At a $150K salary that is **roughly $28,000–$42,000 a year of senior engineering time
+per engineer**, and **44% of teams** name slow review as their single biggest delivery
+bottleneck.
+AI-authored pull requests merge at **32.7%** against roughly **84.5%** for human-authored ones, and the
 largest single reason they are rejected is **inactivity — 17.3%**, auto-closed after a week
 because nobody got to them.
 
@@ -73,7 +77,14 @@ model at full depth is simultaneously the source of the token bill and the sourc
 On 337 AI-authored pull requests across 14 repositories, using an attribution rule we corrected
 (described in the next section), **one leading reviewer left an actionable inline finding on
 10 of 65 pull requests that later required a symbol-level fix** — and flagged 23.9% of the ones
-that did not. Its silence is the normal case: roughly three quarters of pull requests received
+that did not.
+
+**Treat this as an observation, not a finding, and do not put it in front of that vendor.** It
+carries no non-informative control, which this document requires of its own numbers; 65
+observations cannot separate 15.4% from 23.9%; and the 65 inherit the same contamination
+described later — perhaps nine of them are genuine repairs. What it supports is *"nobody has
+published a catch rate and the one we measured was not high"*, not a quantitative claim about a
+named competitor. Its silence is the normal case: roughly three quarters of pull requests received
 a walkthrough with no inline finding at all.
 
 That number is not an indictment of that vendor. It is the state of the art.
@@ -93,7 +104,7 @@ Four properties follow, and each is measured or verified rather than asserted:
 | **Quiet** | Fires on 10–12% of changes, held steady across repositories differing 80× in velocity |
 | **Honest** | Reports its own blind spots — verified as unavailable to all seven competitors |
 | **Right about where to look** | Names the function a later fix returns to, +22 points above its rate on non-repairs, p = 0.015 |
-| **Cheaper** | Inference on a fraction of the diff instead of all of it |
+| **Cheaper** — *not yet measured* | Inference on a fraction of the diff instead of all of it. The 2× figure later in this document is arithmetic, not a measurement |
 
 ---
 
@@ -359,13 +370,21 @@ repository summary:
 
 | | Tokens | Cost |
 |---|---|---|
-| Repository prefix, cache read | 20,000 at one tenth | $0.010 |
-| Ranked function and neighbours | 3,000 | $0.015 |
-| Output including reasoning | 2,000 | $0.050 |
-| **Total** | | **≈ $0.075** |
+| Deep call — prefix cache read | 20,000 at one tenth | $0.010 |
+| Deep call — ranked function and neighbours | 3,000 | $0.015 |
+| Deep call — output including reasoning | 2,000 | $0.050 |
+| Shallow call — prefix cache read again | 20,000 at one tenth | $0.010 |
+| Shallow call — second function, low effort | 1,500 in, 800 out | $0.028 |
+| **Total, two calls** | | **≈ $0.113** |
 
-Reading the whole diff at uniform depth costs roughly **$0.175**. **Allocation saves about 2×,
-not 10×.** At 200 pull requests a month that is about **$15 of inference per repository**. The
+**Every model call pays its own cache read**, so a two-call allocation is not one call's cost.
+An earlier version of this table priced a single call against a worked example that makes two;
+corrected here. If rank 1 uses multiple passes rather than one, add a call's cost per pass —
+**the pass count is most of the distance between this figure and the real one, and it is not yet
+fixed.**
+
+Reading the whole diff at uniform depth costs roughly **$0.175**. **Allocation saves perhaps
+1.5×, and the honest statement is that it is unmeasured** — see the note above. At 200 pull requests a month that is about **$15 of inference per repository**. The
 free tier runs no model at all and costs only compute.
 
 ## What is still unproven
@@ -374,10 +393,16 @@ free tier runs no model at all and costs only compute.
 would otherwise miss.** Every number above is retrospective. This is a field measurement, and
 no amount of history substitutes for it.
 
-**And a correction that applies to every precision figure:** only **14%** of the change pairs
-our outcome rule admits are genuine repairs — the rest are continued work or coincidence. Any
-precision number stated against that rule must be multiplied by roughly 0.14 to become
-precision against real repairs.
+**And a limit on what the outcome rule can support:** only **14%** of the change pairs it admits
+are genuine repairs — the rest are continued work or coincidence. That caps the *firing*
+precision of anything gated on the rule alone: fire on an admitted event and you are right about
+it being a repair roughly one time in seven.
+
+**It does not discount the ranking accuracy**, which is measured separately and conditionally:
+given a genuine repair, the ranker names the repaired function **69%** of the time. Multiplying
+85.3% by 0.14 yields the *joint* probability of naming the right unit **and** the event being a
+real repair — a different quantity, and one that assumes the ranker performs equally on repairs
+and non-repairs when it measurably does not.
 
 ---
 
@@ -483,7 +508,12 @@ Positions do not get shipped in an update.
 ### Three: they cannot give away the proof, because it costs them what it saves us
 
 The single strongest sales act in this product is replaying a prospect's last six months and
-showing what we would have caught, before they commit to anything.
+showing **where we would have pointed** — before they commit to anything.
+
+**Stated precisely, because the distinction is the whole argument:** a model-free replay can show
+which changes came back, how often we would have spoken, and whether we named the function the
+fix returned to. It **cannot** show what a reviewer would have *found*, because finding requires
+inference over historical diffs — and that costs us exactly what it costs them.
 
 **For a model-per-diff reviewer, doing that costs a full inference pass over every historical
 pull request.** A thousand pull requests is a thousand reviews of compute spend, per prospect,
@@ -681,7 +711,9 @@ Base rates tell the same story more plainly. Under the file rule: **90%, 83%, 44
 implausible as defect rates. Under the symbol rule: **62%, 42%, 27%, 29%**.
 
 **Files measure traffic.** Of 1,316 follow-up fixes examined directly, **989 touched only the
-same file at different lines**, 327 touched the modified lines, and 105 were explicit reverts.
+same file at different lines** and 327 touched the modified lines — those two are exhaustive and
+sum to 1,316. Separately, **105 of the 1,316 were explicit reverts**; that is an overlapping
+count, not a third category.
 
 **Lines are unusable.** Every later commit renumbers a file; with a median 26 hours to the
 follow-up, intervening edits are near-certain. The rule under-counts real repairs by an
@@ -691,9 +723,15 @@ unmeasured amount.
 
 ## 6.3 The ranking itself
 
-**File level, the largest sample:** top-1 accuracy **85.3%** against a **72.0%** alphabetical
-null ranker and a 67.5% random baseline — **4,293 events across 17 repositories, positive in 17
-of 17.** Sign test on direction, p ≈ 1.5 × 10⁻⁵.
+**File level:** top-1 accuracy **85.3%** against a **72.0%** alphabetical null ranker and a
+67.5% random baseline — **4,293 events across 17 repositories, positive in 17 of 17.** Sign test
+on direction, p ≈ 1.5 × 10⁻⁵.
+
+**A note on counts, because two figures here look contradictory and are not.** This run and the
+language run further below are separate passes over different repository sets — the language pass
+ran later, after more repositories had been cloned, which is why its Python arm alone reports
+5,242 events against this run's 4,293 total. Same method, different populations; neither is a
+subset of the other.
 
 **Rank globally, never hierarchically.** Ranking the top file and then the top function inside
 it performs *below* the null ranker:
@@ -708,9 +746,15 @@ it performs *below* the null ranker:
 The highest-history file is usually not where the highest-history function lives, so filtering
 by file first discards better candidates elsewhere in the diff.
 
-**Thresholds must be percentiles, not constants.** "Twelve prior touches" fired on 11% of one
-repository and 53% of another. A top-decile threshold holds the firing rate at **10–12% across
-an 80× range in repository velocity**.
+**Thresholds must be percentiles, not constants.** This is the finding, and the contrast is
+where it lives: **"twelve prior touches" fired on 11% of one repository and 53% of another** —
+the same rule, an order of magnitude apart in volume, which is what makes an absolute threshold
+unusable across a customer base.
+
+A top-decile threshold then fires at **10–12%** everywhere. **That number is close to definitional
+and should not be presented as a discovery** — a top-decile rule selects a tenth of units by
+construction, and landing at 10–12% of *pull requests* rather than units is a mild fact about
+pull-request size distributions. The evidence is the 11%-versus-53% contrast, not the constancy.
 
 ## 6.4 Does the ranking track risk, or activity?
 
@@ -724,6 +768,12 @@ content hash, by a model from a **different family** with no stake in the result
 | Ranker named it on **non-repairs** | 48% (21/44) | **47% (117/247)** |
 | Difference | +22 points | **+22 points** |
 | Fisher exact two-sided | p = 0.298 | **p = 0.0151** |
+| 95% confidence interval | — | **+6.1 to +37.6 points** |
+
+**The interval matters more than the point estimate.** The effect rests on 39 genuine repairs,
+so the honest claim is *"+22 points, 95% CI +6 to +38"*. A six-point product is a materially
+different product from a thirty-eight-point one, and this document's own standard is to quote
+the range rather than the midpoint.
 
 **Two raters — one with every incentive to find the effect, one with none — produced the same
 effect size to within a point.** Agreement on the binary decision: **92%, Cohen's kappa 0.66**.
@@ -731,9 +781,11 @@ The biased rater was the *more liberal* one (17% repairs against 12%), so the st
 independent rater should have shrunk the effect and did not.
 
 **And the correction this forces on every other number here:** the independent labels found
-**39 genuine repairs in 300 pairs — 14%**. Symbol overlap is therefore **~86% noise**, and any
-precision figure stated against it must be multiplied by roughly 0.14 to become precision
-against real repairs.
+**39 genuine repairs in 300 pairs — 14%**. Symbol overlap is therefore **~86% noise as a
+trigger**: gate on it alone and six of seven firings are not repairs. **This is a cap on firing
+precision, not a discount on ranking accuracy** — the 69% above is already conditional on a
+genuine repair and needs no correction. Multiplying a conditional by a base rate produces a
+joint probability, not a corrected conditional.
 
 ## 6.5 Signals tested and rejected
 
@@ -744,7 +796,7 @@ rebuilds them.
 |---|---|
 | Gate merges on static-analysis coverage | **Null.** Relative risk 0.916, 95% CI [0.557, 1.505], Fisher p = 0.746. Held changes broke at 22.1%, passed ones at 24.1% — while the gate fired on **45% of pull requests** |
 | Exposure to unresolvable call sites predicts breakage | **Null.** RR 1.040, cluster-robust CI [0.598, 1.890], 310 pull requests. Correcting the outcome rule moved it to 1.251 — *"the null survives the correction that would have helped it"* |
-| "You forgot to change file X", from co-change history | **Dead.** Fired on genuine breakages but named the right file **0 times out of 8** |
+| "You forgot to change file X", from co-change history | **Dead.** Fired on 8 genuine breakages and named the right file **0 times**. The 8 are the subset it fired on; the 11 in the paragraph below are the breakages whose fix commits were retrievable, a different denominator |
 | Fix-history hotspot warning | **Null.** RR 1.56, p = 0.334, firing on 36% of clean changes |
 | Test-coverage gap | **Null and reversed.** Changes touching no test broke *less* (RR 0.91 and 0.76) |
 | Ten pull-request metadata signals | **Nothing survived Bonferroni correction.** Only diff size replicated, at RR ≈ 2.1 — and every competitor already gates on it |

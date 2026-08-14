@@ -288,27 +288,12 @@ File-level ranking remains the fallback where no symbol can be resolved, and rem
 4,293-event result was measured on — but it measures **which file is busy**, not which change
 came back.
 
----|---|---|---|---|---|
-| **Symbol** | 75.9% | 59.1% | 55.4% | **+16.8 points** | 340 |
-| **File** | 87.8% | 77.5% | 71.5% | +10.3 points | 809 |
-
-**Read the lift column, not the accuracy column.** Symbol accuracy is lower because there are
-more candidate units per change and therefore a lower random baseline — 55.4% against 71.5%.
-Against its own null, the symbol ranker does substantially better.
-
-**The design follows directly: rank at symbol level where a symbol is extractable, fall back
-to file level otherwise.** There is no need to choose — the fallback is strictly better than
-silence, and both tiers are independently validated.
-
-**The coverage gap is an instrument limitation, not a property of symbols.** The symbol ranker
-produced 340 events against the file ranker's 809 — **42%** — because changed units were
-extracted from diff hunk headers, which only name a unit when the hunk begins at a `def`. A
-real parser over the changed ranges should close much of that gap, and closing it is a task on
-the branch, not an open research question.
-
-**This is also the differentiator claim, and it survives.** CodeScene and CodeRabbit both
-operate at file granularity; the tier that carries the most information is the one neither
-ships.
+**The symbol-versus-file comparison quoted here previously was VOID** — it was produced by a
+patch-reading run against blob-filtered clones, where `git log -p` exits non-zero mid-stream, so
+it analysed a truncated slice of history (n = 340 and 809). It has been superseded by the
+blob-complete rerun recorded above: symbol lift **+46, +36, +28, +17** against a random pick,
+file overlap erratic, line overlap dead. **Do not quote the old figures; they measured a
+fragment of the corpus.**
 
 ---
 
