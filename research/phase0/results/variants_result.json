@@ -19,6 +19,10 @@
   "V5_union": {
    "true": 1374,
    "false": 17
+  },
+  "V6_recency3": {
+   "true": 1375,
+   "false": 16
   }
  },
  "hold": {
@@ -39,6 +43,10 @@
    "false": 94
   },
   "V5_union": {
+   "true": 574,
+   "false": 4
+  },
+  "V6_recency3": {
    "true": 574,
    "false": 4
   }

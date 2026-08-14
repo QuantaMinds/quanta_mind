@@ -1,39 +1,33 @@
-"""Four pre-specified allocation variants, each against its non-informative control.
+"""Five pre-specified allocation variants, each against its non-informative control.
 
 WHAT: V0 file top-3, V1 function top-3, V2 file ranked by summed touched-function history,
-      V3 score-gap stopping, V5 union -- each with an alphabetical control and a train/holdout
-      split fixed before the run.
+      V3 score-gap stopping, V5 union, V6 recency-weighted files -- each with an alphabetical
+      control and a train/holdout split fixed before the run.
 WHY:  A sweep would find a winner by chance: this corpus carries about five comparisons before
       multiplicity eats the result, and this project already recorded ten metadata signals where
-      nothing survived Bonferroni. So the variants are pre-specified, corrected at 0.0125, and
-      the winner is checked on two clones held out before anything was looked at -- which is
-      what caught V2 winning on train and reversing on holdout.
+      nothing survived Bonferroni. So variants are pre-specified, corrected, and the winner is
+      checked on two clones held out before anything was looked at -- which caught V2 winning on
+      train and reversing on holdout.
 IMPORTS: stdlib (bisect, collections, json, math, os, sys), clone_census, symbol_history_read.
 CONSUMED BY: docs/plans/implementation.md, gate 3c.
 
-PRE-SPECIFIED BEFORE THE RUN. Not a sweep -- 1,969 paired events on 8 repositories can carry
-about five comparisons before multiplicity eats the result, and this project has already
-recorded ten metadata signals where nothing survived Bonferroni.
+PRE-SPECIFIED BEFORE THE RUN. Not a sweep -- this corpus carries about five comparisons before
+multiplicity eats the result.
 
   HOLDOUT, fixed before any variant ran: clones sorted by name, indices 2 and 5 --
   OpenPipe_ART and browser-use_browser-use. Everything below is fitted on the other six and
   the winner is checked once on those two.
 
-  V0  file top-3                     the incumbent, for reference
-  V1  function top-3                 the architecture as specified
-  V2  file ranked by SUM of the touch counts of ONLY the functions this change touched.
-      Follows directly from the hybrid post-mortem: summing beat taking the maximum, but
-      whole-file ranking sums history for functions the change never touched. This keeps the
-      aggregation and drops the irrelevant part. Highest-value single test.
-  V3  score-gap stopping instead of fixed k: take units while score >= 0.5 x the top score,
-      minimum 1, maximum 5. One parameter, stated. Reports mean units so cost is visible.
-  V5  union of file top-3 and function top-1. Bounded by the discordance cell at 17/1,969.
+  V0 file top-3, the incumbent. V1 function top-3, the architecture as specified. V2 files
+  ranked by the summed history of ONLY the functions this change touched -- from the hybrid
+  post-mortem, keeping the aggregation and dropping irrelevant history. V3 score-gap stopping,
+  units while score >= 0.5x the top, max 5. V5 union of file-3 and function-1. V6 files scored
+  by exponential decay at a 90-day half-life.
 
-  CONTROL for every variant: the alphabetical pick over the same units at the same k. A policy
-  that does not beat alphabetical is not a policy -- the rule that killed the 12/12 revert
-  result when its control also scored 12/12.
+  CONTROL for every variant: the alphabetical pick over the same units at the same k -- the rule
+  that killed the 12/12 revert result when its control also scored 12/12.
 
-  MULTIPLICITY: four variants against V0, so Bonferroni alpha = 0.05/4 = 0.0125.
+  MULTIPLICITY: five variants against V0, Bonferroni alpha = 0.01.
 """
 
 from __future__ import annotations
@@ -55,11 +49,20 @@ WINDOW = 90 * 86400
 FIXWORDS = ("fix", "bug", "revert", "hotfix", "regression", "broken")
 MAX_FILES, MAX_EVENTS, BUDGET = 12, 400, 3
 GAP_FRACTION, GAP_MAX = 0.5, 5
+HALF_LIFE = 90 * 86400  # pre-specified, one parameter, chosen before any result
 
 
 def prior(idx, unit, ts):
     lst = idx.get(unit, [])
     return bisect.bisect_left(lst, ts) - bisect.bisect_left(lst, ts - YEAR)
+
+
+def recency(idx, unit, ts):
+    """Exponential decay: a touch 90 days before the change counts half a fresh one."""
+    lst = idx.get(unit, [])
+    lo = bisect.bisect_left(lst, ts - YEAR)
+    hi = bisect.bisect_left(lst, ts)
+    return sum(0.5 ** ((ts - t) / HALF_LIFE) for t in lst[lo:hi])
 
 
 def ordered(units, scores):
@@ -82,7 +85,7 @@ def main() -> int:
     holdout = {full[2], full[5]}
     print(f"  holdout: {sorted(holdout)}\n")
 
-    arms = ("V0_file3", "V1_func3", "V2_sumfile3", "V3_gap", "V5_union")
+    arms = ("V0_file3", "V1_func3", "V2_sumfile3", "V3_gap", "V5_union", "V6_recency3")
     res = {g: {a: collections.Counter() for a in arms} for g in ("train", "hold")}
     ctrl = {g: {a: collections.Counter() for a in arms} for g in ("train", "hold")}
     units_read = {g: collections.defaultdict(list) for g in ("train", "hold")}
@@ -132,7 +135,9 @@ def main() -> int:
             for f in files:
                 sumscore.setdefault(f, 0)
 
+            rscore = {f: recency(fidx, f, ts) for f in files}
             fo, so = ordered(files, fscore), ordered(syms, sscore)
+            ro = ordered(files, rscore)
             v2o = ordered(list(sumscore), sumscore)
 
             # V3: score-gap stopping over functions
@@ -145,6 +150,7 @@ def main() -> int:
                 "V2_sumfile3": (v2o[:BUDGET], ftarget, BUDGET),
                 "V3_gap": (gap, starget, len(gap)),
                 "V5_union": (fo[:BUDGET], ftarget, BUDGET + 1),
+                "V6_recency3": (ro[:BUDGET], ftarget, BUDGET),
             }
             for arm, (picked, target, k) in picks.items():
                 got = hit(picked, target)
@@ -160,6 +166,7 @@ def main() -> int:
                 ctrl[group][arm][cgot] += 1
 
             paired[group][(hit(fo[:BUDGET], ftarget), hit(v2o[:BUDGET], ftarget))] += 1
+            paired[group][("r", hit(fo[:BUDGET], ftarget), hit(ro[:BUDGET], ftarget))] += 1
             if n_ev >= MAX_EVENTS:
                 break
 
@@ -174,6 +181,9 @@ def main() -> int:
             cmiss = ctrl[group][arm][False] / n
             mu = sum(units_read[group][arm]) / len(units_read[group][arm])
             print(f"  {arm:14s} {miss:7.2%}  {cmiss:7.2%}  {cmiss - miss:+6.2%}  {mu:6.2f}")
+        rb = paired[group][("r", True, False)]
+        rc = paired[group][("r", False, True)]
+        print(f"  V6 vs V0 paired: b={rb} c={rc}  McNemar p={mcnemar(rb, rc):.4f}")
         b = paired[group][(True, False)]
         c = paired[group][(False, True)]
         print(f"  V2 vs V0 paired: b={b} c={c}  McNemar p={mcnemar(b, c):.4f}  (Bonferroni 0.0125)")

@@ -501,29 +501,67 @@ what follows.
 **And mean units read is reported alongside**, because the confound this whole section exists to
 remove is comparing policies at unequal budgets.
 
-### Four pre-specified variants — RUN, with controls and a holdout. None beats file top-3.
+### Pre-specified: recency weighting, the last cheap test
+
+**Orthogonal to everything else** — it changes the score, not the unit or the budget. If it works
+it *improves* V0 rather than competing with it, which is why it is worth one more draw on the
+holdout.
+
+| | Rule, fixed now |
+|---|---|
+| Score | exponential decay: each prior touch contributes `0.5 ** (age_days / HALF_LIFE)` |
+| **Half-life** | **90 days**, one parameter, chosen before seeing any result |
+| Unit | files, so it competes against V0 directly |
+| Budget | top-3, matched to V0 |
+| Control | alphabetical, same units, same k |
+| Holdout | the same two clones, unchanged |
+
+**And this is the last variant run against these 8.** Six have now been tested against a
+two-clone, 578-event holdout. It can catch a reversal and cannot certify a winner, and further
+variants draw down a resource that is nearly spent. **After this, the random-5 draw is the
+binding constraint on every number in the table.**
+
+### Five pre-specified variants — RUN, with controls and a holdout. None beats file top-3.
 
 **Not a sweep.** 1,969 paired events on 8 repositories carries about five comparisons before
 multiplicity eats the result, and this project has already recorded ten metadata signals where
-nothing survived Bonferroni. Four variants, each with its non-informative control, Bonferroni
-α = 0.0125.
+nothing survived Bonferroni. Five variants, each with its non-informative control, Bonferroni α = 0.01.
 
 **Holdout fixed before anything ran:** clones sorted by name, indices 2 and 5 — `OpenPipe_ART`
 and `browser-use_browser-use`. Everything fitted on the other six, winner checked once on those.
 
 | arm | train miss | control | hold miss | control | units |
 |---|---|---|---|---|---|
-| **V0 file top-3** | **1.44%** | 3.31% | **0.69%** | 4.15% | 3.00 |
-| V1 function top-3 | 9.20% | 16.61% | 7.96% | 14.01% | 3.00 |
-| **V2 file ranked by summed touched-function history** | **1.01%** | 3.31% | **1.56%** | 4.15% | 3.00 |
-| V3 score-gap stopping | 17.76% | 32.06% | 16.26% | 28.55% | ~2.0 |
+| **V0 file top-3** | **1.44%** | 3.31% | **0.69%** | 4.15% | **3.00** |
+| V6 recency-weighted files, 90-day half-life | 1.15% | 3.31% | **0.69%** | 4.15% | 3.00 |
 | V5 union of file-3 and function-1 | 1.22% | 3.09% | 0.69% | 4.15% | 4.00 |
+| V2 file ranked by summed touched-function history | 1.01% | 3.31% | 1.56% | 4.15% | 3.00 |
+| V1 function top-3 | 9.20% | 16.61% | 7.96% | 14.01% | 3.00 |
+| V3 score-gap stopping | 17.76% | 32.06% | 16.26% | 28.55% | ~2.0 |
 
-**V2 is the one the holdout killed.** It follows directly from the hybrid post-mortem — keep the
-aggregation, drop history for functions the change never touched — and it **won on train
-(1.01% against 1.44%) and reversed on holdout (1.56% against 0.69%).** Its paired test was never
-significant anyway: b=4, c=10, McNemar p = 0.18, nowhere near 0.0125. **Textbook overfit to a
-convenience sample, caught by a split decided in advance.**
+**V6, recency weighting, is a clean null — and its holdout paired test is the most decisive
+number here: b=0, c=0.** Not "no significant difference": **zero events where flat counting and
+90-day exponential decay disagreed on the outcome at all.** On train it is nominally better,
+1.15% against 1.44%, at b=2, c=6, p=0.29 — the same shape as V2, an advantage the paired test
+cannot see.
+
+**So the score axis is closed.** Weighting recent touches more heavily does not reorder the top
+three files in any way that changes whether the defect is covered. That was the last cheap test
+available, and it found nothing.
+
+**V2 is not supported, and the paired test says so before the holdout does.** It follows
+directly from the hybrid post-mortem — keep the aggregation, drop history for functions the
+change never touched.
+
+**Lead with the paired result: b=4, c=10, McNemar p=0.18 against a 0.0125 threshold. Fourteen
+discordant events in total. Whatever V2 did, this corpus cannot see it.** And the direction is
+the tell — **c > b means V2 LOST more discordant events than it won on the pooled data**, so its
+train-set advantage came from somewhere other than the paired comparison, most likely a handful
+of events where both arms were close.
+
+The holdout reversal — train 1.01% against V0's 1.44%, holdout 1.56% against 0.69%, **both arms
+moving in opposite directions** — is corroborating evidence for a conclusion the paired test had
+already reached on its own.
 
 **V3 is decisively rejected.** Score-gap stopping reads about two units and misses 16–18%. It
 beats its control by the widest margin of any arm, +14 points — **which is the clearest
@@ -568,11 +606,17 @@ Global function ranking is better at *naming the unit a fix returns to* (75.0% v
 File ranking is better at *choosing what to read*. Nothing reconciles those into a hybrid that
 wins; they are answers to two questions and the allocator only asks the second.
 
-**What this puts on the table, and it is bigger than the hybrid.** Three policies at roughly one
-budget: files 1.22%, hybrid 2.03%, functions 3.50%. **The architecture specifies ranking and
-reading functions, and the measurement says files are better at both parts of allocation.** That
-is a live question for the ranker stage, not a settled one — everything here is "at most", on 8
-convenience-sampled clones, with residual extraction error pushing the function arms' way.
+**This is no longer a live question. It is a finding the plan has not absorbed.** Six independent
+variants, each against its control, on both halves of a pre-declared split, all point one way:
+**allocate at file level.** The plan specifies ranking *and reading* functions, and the reading
+half is wrong on every measurement taken.
+
+**What survives of the function unit is routing** — naming which unit a fix returns to, where
+global function ranking scores 75.0% top-1 against 58.9%. That is a different question from what
+to read, and the allocator only asks the second.
+
+**The honest remaining uncertainty is not which is better on this corpus.** It is whether this
+corpus generalises — the random-5 draw, and nothing else.
 
 ### The first run was wrong, and the diagnostic is why we know
 

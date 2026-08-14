@@ -1083,7 +1083,7 @@ a programming-language result.
 
 ## 6.7 Measurement defects found and corrected
 
-Six instrumentation failures occurred during this work. All produced plausible numbers. None
+Eight instrumentation findings came out of this work. All produced plausible numbers. None
 was detectable from the output alone. They are recorded because a document that never reports
 its own errors gives a reader no way to calibrate the rest of it.
 
@@ -1126,6 +1126,29 @@ raises rather than returning, and the harness prints a per-repository skip ledge
 and **refuses to report at all** if any read failed — which is what caught the airflow defect
 above. Ask what a check prints when the thing it checks is broken; the honest answer here was
 *the same table*.
+
+**A control beaten by fourteen points, by a policy that was catastrophically worse.** This is
+the quantitative version of the revert lesson above, and it is the more useful half.
+
+Testing allocation policies, a score-gap stopping rule beat its alphabetical control by **+14.3
+points — the widest margin of any arm measured** — while missing **17.76%** of events against
+1.44% for the incumbent. It is the worst policy tested and it has the best lift.
+
+**The mechanism: it reads about two units instead of three, so it selects a small, hard
+population where alphabetical does terribly.** Both numbers move together. Neither says the
+policy is good.
+
+**The rule, and it generalises past this project: a control establishes that a result is not
+noise. It says nothing about whether the policy is good. Both require the absolute number.**
+Every lift figure in this document should be read beside its absolute, and a lift quoted alone
+is uninterpretable in a direction that flatters.
+
+**A split that reproduced its own pooled figure.** Partitioning the corpus into train and
+holdout, the function-level arm scored 128 misses on one side and 46 on the other — **174/1,969
+= 8.84%, landing exactly on the pre-split pooled value.** Nothing forced that. It is the same
+class of assertion as the bin-sum check: against a quantity known from elsewhere, not internal
+consistency. **Adopted as a rule — any future split must reproduce the pre-split pooled figure,
+and a mismatch means the partition is doing something.**
 
 **A guard firing correctly.** A wrapper timeout later killed a run mid-stream and the new
 exit-code assertion refused to report from the partial read.
