@@ -23,312 +23,350 @@ The list at the end says exactly what must never appear on the site, and why.
 
 # Page 1 — Home `/`
 
-Fifteen blocks, top to bottom. Each one is a screen's worth. **A reader who stops after block
-three should still know what we sell and what to do next.**
+**Read the copy straight through first.** It is written to be read aloud, top to bottom, as one
+piece — each section hands off to the next. Layout notes are kept out of the way, at the end.
+
+Nothing here says how the product works internally. That is deliberate and the reasons are in
+*What never goes on the website*.
 
 ---
 
-## Block 1 — Top navigation
+---
 
-```
-QuantaMind        How it works    Pricing    Docs    Security          [ Free report ]
-```
-
-Five links. **No "Products" dropdown**, because we have one product and a menu implying
-otherwise is the first small lie a site tells. The button is the only coloured thing above the
-fold.
+## THE PAGE
 
 ---
 
-## Block 2 — Hero
+### *(hero)*
 
-# Your code reviewer never tells you what it missed.
+# The file nobody checked looks exactly like the file that was fine.
 
-We check the riskiest part of every change first. Then we print a list of what we could not
-check. Run it on your last six months before you install anything.
+When a code reviewer says nothing about a file, you cannot tell which one it is.
 
-**[ Get your free report ]**   ·   See how it works →
+**We tell you which one it is.**
 
-*Grey text under the buttons:* No install. No credit card. Read access to one repository.
-
-**Layout:** left-aligned text, no illustration. To the right, the review comment from Block 7 —
-the real artefact, not a drawing of a dashboard. **Show the thing you are selling, at the top.**
+**[ See it on your own code ]**   ·   How it works →
 
 ---
 
-## Block 3 — The evidence strip
+### *(section)*
 
-We have no customers yet, so a row of logos would be a lie. This is what goes there instead:
+## Two weeks later
 
-```
-Built and tested on          25 repositories  ·  7,493 changes  ·  6 languages
-Every claim on this site     traceable to a public measurement
-Not claimed anywhere         that we find more bugs than anyone else
-```
+Someone opened a pull request. Nine files. The AI reviewer left four comments — a naming
+suggestion, a tidier loop, two things everybody already knew.
 
-**The third line is the one people will remember.** A vendor telling you what it is not better
-at buys more trust than a logo wall, and it costs nothing because it is true.
+It said nothing about `process_refund`.
 
----
-
-## Block 4 — The problem
-
-## More code is being written than anyone can read.
-
-Your team ships more pull requests than it did last year. Writing got faster. Reading did not.
-
-So teams buy an AI reviewer. Most now get a wall of comments on every pull request. A few are
-useful. Most are not. After two weeks, people scroll past them.
-
-Then it gets worse in a way nobody talks about.
-
-**When the tool says nothing about a file, you cannot tell whether the file is fine or whether
-the tool never really looked at it.** Quiet and safe look exactly the same.
-
-So you half-trust the review, and you read the code yourself anyway, and you have now paid for
-both.
+The change was approved. It shipped. Two weeks later, refunds were wrong, and somebody lost a
+Thursday finding out why.
 
 ---
 
-## Block 5 — What we do differently
+### *(section)*
 
-## Two things. That is the whole product.
+## Now go back and read that review again
 
-**Three-column layout, third column deliberately empty of features.**
+It never said `process_refund` was fine.
 
-**1 — We do not read every file the same way.**
+It just did not mention it.
 
-A change touching ten files is not ten equal files. We use your repository's own history to
-work out which part of *this* change deserves a careful read.
-
-That part gets read properly. The rest gets a quick look. **Nothing gets the
-pretend-thorough treatment**, which is where both the noise and the bill come from.
-
-**2 — We tell you what we skipped.**
-
-Every review ends with a short list. What we checked. What we could not, and why: a language we
-do not parse, a generated file, code we could not follow.
-
-**You see the gap instead of guessing at it.**
-
-**3 — That is it.**
-
-No test generation. No security scanner. No chat. No dashboard.
-
-Those are good features and other people build them well. We do one thing, and the thing we do
-is decide where to look and admit where we did not.
+**And there was no way to tell those two things apart.**
 
 ---
 
-## Block 6 — Why the second one matters more
+### *(section)*
 
-## Any tool can find bugs. None of them will tell you where they did not look.
+## That is the thing we fixed. Not the refund — the silence.
 
-They will not, because the honest number is uncomfortable.
+Every AI reviewer reads your change and writes down what it noticed. Whatever it did not get
+to, it simply does not mention.
 
-We print it anyway. If we covered 74% of your change, the review says 74%.
+So silence means two completely different things, and they arrive looking identical:
 
-You then know something you have never known from a review tool: **which parts still need a
-person.** That is worth more than a longer list of comments you cannot calibrate.
+*This is fine.*
 
-> *"A review you can trust the edges of is worth more than a longer review you cannot."*
+*I did not really look here.*
+
+You cannot tell. So you half-trust the review, read the code yourself anyway, and pay for both.
 
 ---
 
-## Block 7 — What a review actually looks like
+### *(section)*
 
-## Three parts, every time.
+## We do two things
+
+**We decide where to look before we look.**
+
+Not every file in a change deserves the same attention. Pretending otherwise is where the noise
+comes from, and where the bill comes from.
+
+**We publish where we looked.**
+
+Every review ends by saying what we checked and what we did not, and why.
+
+That is the whole product. No test generation, no security scanner, no chat, no dashboard.
+Other people build those, and build them well.
+
+---
+
+### *(section)*
+
+## What you actually get
 
 ```
 QuantaMind
 
-Checked      2 files · 3 functions · 38 call sites
-Not checked  1 file (generated) · 4 call sites (dynamic import)
+Checked      2 files · 3 functions
+Not checked  1 file — generated · 4 call sites — could not resolve
 
 In process_refund, the partial-refund path returns before the ledger
 entry is written. On a full refund the entry is written at line 88.
 The new early return at line 71 skips it.
-
-                                                    Coverage 78% · why?
 ```
 
-**What we checked. What we did not. What we found.** In that order, because the order is the
-argument — coverage comes first, so you can weigh the finding before you read it.
+Two lines you have never had from a review tool, followed by the finding.
 
-*Caption:* Most pull requests get no comment at all. We speak on about one in ten. A reviewer
-that comments on everything is not reviewing, it is decorating.
+Most changes get no finding at all. They still get the two lines.
 
 ---
 
-## Block 8 — The offer, and the main call to action
+### *(section)*
 
-## Do not take our word for it. Take your own history.
+## What changes on Monday
 
-Give us one repository. We replay your last six months of merged pull requests and show you,
-for each one, which part of the change we would have pointed at — and whether a later fix
-actually went there.
+You open a pull request and read the comment, the way you always have.
 
-**You are not reading our benchmark. You are reading yours.**
+Then you read one line telling you how much of that change it actually covers.
 
-**[ Get your free report ]**
+If it covers most of it, you approve.
 
-*Grey text:* Most reports come back the same day. Read access only. We do not post anything, we
-do not need a key from you, and we delete the copy when the report is done.
-
-**Layout:** full-width, different background colour. This is the page's centre of gravity, not
-its ending.
+If it covers half, **you now know which half still needs you** — and you have never known that
+before, from any tool.
 
 ---
 
-## Block 9 — Why nobody else offers that
+### *(section)*
 
-## The reason is boring, and it is in our favour.
+## Do not believe any of this. Check it.
 
-Replaying six months of history through an AI model costs the other tools six months of AI
-bills. That is why they demo on a sample repository instead of yours.
+Give us read access to one repository.
 
-**The part of our tool that picks where to look does not use an AI model at all.** Running it
-across your whole history costs us computing time.
+We go back over your last six months of merged pull requests and show you, change by change,
+where we would have pointed — and whether a later fix landed there.
 
-So we can give it away, and they cannot. Not because they are worse — because of how they are
-built.
+**You will not be reading our claims. You will be reading your own history.**
 
----
+**[ Get the report ]**
 
-## Block 10 — Where it fits
-
-## It goes where you already are.
-
-| | |
-|---|---|
-| **GitHub and GitLab** | A comment on the pull request, where the reviewer already is |
-| **Slack** | One message a week. Not an alert per finding |
-| **Jira** | We read the linked ticket so we know what the change was for. We never file one |
-| **Datadog** | Optional. Tells us which changes actually caused problems, so we can check our own work |
-| **Your own AI key** | From the Business plan up |
-
-**And one thing we do not have:** a dashboard.
-
-Nobody opens a dashboard to review a pull request. A tool that asks you to is standing next to
-your work instead of in it.
+Free. Nothing installed. Nothing written to your repository. Most come back the same day.
 
 ---
 
-## Block 11 — Price, briefly
+### *(section)*
 
-## Unlimited reviews on every paid plan.
+## What we are not
 
-**Free $0** — ranking, the coverage line, and the full history report. No AI findings.
+We are not better at finding bugs.
 
-**Team $19** per developer per month — everything, unlimited reviews.
+Nobody is much better than anyone else at that right now, and any vendor telling you otherwise
+is selling. We will not build our pitch on it.
 
-**Business $39** — all repositories in one view, the quarterly report, single sign-on.
+We are better at telling you where we looked. That is a smaller claim, and it is one we can
+keep.
 
-**Enterprise $55** — your own model, your own servers, audit logs.
+So, honestly:
 
-See full pricing →
+If you want the most features today, use **CodeRabbit**.
 
-*Small text:* Two of our competitors moved to charging per review in 2026. We are not going to.
-Our costs do not go up the way theirs do, and [the pricing page](/pricing) explains exactly why.
+If reading your whole codebase for context matters more to you than knowing what got skipped,
+use **Greptile**.
 
----
-
-## Block 12 — Honest comparison
-
-## Should you use something else?
-
-**Sometimes, yes.**
-
-**Use CodeRabbit** if you want the most features today — test generation, security scanning, IDE
-reviews — or you want free AI comments and are happy filtering them yourself.
-
-**Use Greptile** if whole-codebase context matters more to you than knowing what was skipped.
-
-**Use us** if the comments have already become noise your team scrolls past, or if you need to
-be able to say which parts of your code were actually checked.
-
-Compare properly: CodeRabbit → · Greptile →
-
-*Caption:* We would rather you pick correctly than pick us. A customer who churns in month two
-costs us more than the one we did not win.
+If your team has quietly stopped reading the comments, talk to us.
 
 ---
 
-## Block 13 — Questions
+### *(section)*
 
-**Do you find more bugs than CodeRabbit or Greptile?**
-No. Probably nobody does — the whole field sits in a similar range. We are not selling more
-findings. We are selling knowing where they were looked for.
+## Questions people actually ask
 
-**Does it work on my language?**
-Python, TypeScript, JavaScript, Java, Go and C++ today. Anything else appears in the "not
-checked" list by name rather than being quietly ignored.
+**Do you find more bugs than the others?**
+No. See above. We are selling the coverage line, not a longer list.
 
 **Will it comment on everything?**
-No. About one pull request in ten. If we have nothing worth saying, we post the coverage line
-and stop.
+No. Most pull requests get the two lines and nothing else. A reviewer that comments on
+everything is not reviewing, it is decorating.
 
 **Where does my code go?**
-The part that picks where to look sends nothing anywhere. The part that reads sends only the
-specific functions being reviewed. Full details →
+Only the specific parts being reviewed leave your repository, and on our larger plans they go to
+your own account instead of ours. The details are on the security page, in full.
 
 **Do you train on my code?**
-No. Not us, and not the AI provider — that is off by contract.
+No. Not us, and not the model provider — that is off by contract.
 
 **What if I do not trust any of this?**
-Then start with the report. You give us read access to one repository and no money, and you get
-a document you can check against your own memory of those six months.
+Start with the report. It costs you read access to one repository and ten minutes, and you can
+check every line of it against what you remember happening.
 
 ---
 
-## Block 14 — Final call to action
+### *(section)*
 
-## Start with the report.
+## Price
 
-If it is not useful, you have lost ten minutes and given nobody your code.
+**Unlimited reviews on every paid plan.** We are not going to bill you per review.
 
-**[ Get your free report ]**
+Free — the coverage line and the full history report.
+**Team, $19** per developer per month — everything, unlimited.
+**Business, $39** — every repository in one view, single sign-on, the quarterly report.
+**Enterprise, $55** — your own model, your own servers, audit logs.
+
+See the full table →
 
 ---
 
-## Block 15 — Footer
+### *(section)*
+
+## One last thing
+
+If the report is not useful, you have lost ten minutes and given nobody your code.
+
+**[ Get the report ]**
+
+---
+
+### *(footer)*
 
 ```
 QuantaMind
 The code reviewer that tells you what it did not check.
 
-PRODUCT              COMPARE                 COMPANY            LEGAL
-How it works         vs CodeRabbit           Contact            Privacy
-Pricing              vs Greptile             Status             Terms
-Docs                                         Changelog          DPA
-Security                                                        Sub-processors
+PRODUCT           COMPARE            COMPANY          LEGAL
+How it works      vs CodeRabbit      Contact          Privacy
+Pricing           vs Greptile        Changelog        Terms
+Docs                                                  DPA
+Security                                              Sub-processors
 
-GitHub   ·   LinkedIn   ·   hello@quantamind.co
+GitHub · LinkedIn · hello@quantamind.co
 
-© 2026 QuantaMind. Built in the open about what it cannot do.
+© 2026 QuantaMind
 ```
-
-**Footer rules:**
-
-- **Four columns, no newsletter box.** Nobody wants it and it lowers the whole page.
-- **No fake trust badges.** When SOC 2 is real it goes on `/security`, with the date.
-- **`Status` and `Changelog` ship as real pages or are removed from the footer.** A dead footer
-  link is the cheapest possible way to look abandoned.
-- **The tagline repeats the LinkedIn line word for word.** Same sentence everywhere, so it is
-  the one people repeat back to you.
 
 ---
 
-## What this page must never say
+---
 
-Checked against the withheld list at the end of this document before it goes live:
+## THE DESIGN
 
-- No accuracy percentage. **The report gives each customer their own number** — more convincing,
-  and it hands nothing to a competitor.
-- No description of what the ranking is built from.
-- No per-review cost, and no token figures.
-- No customer name without written permission.
-- No claim to catch more bugs than anyone else.
+Notes by section, kept out of the copy so the copy can be read as a page.
+
+### Overall
+
+- **One column, centred, roughly 640px of text.** This page is an argument, and an argument
+  reads down, not across. Multi-column marketing grids exist to fill space we do not need.
+- **Two typefaces at most.** Code in monospace, everything else in one sans.
+- **One accent colour, used only on buttons and the coverage line.** If the accent appears in
+  five places it stops meaning "act here".
+- **Plenty of vertical space between sections.** The page's rhythm is the story's pacing; a
+  cramped page reads as a pitch, a spaced one reads as an explanation.
+- **No illustrations, no stock photography, no abstract 3D shapes.** The only picture on the
+  page is the review comment, because that is the actual product.
+
+### Hero
+
+Text left-aligned, not centred — centred headlines read as slogans, left-aligned reads as
+someone talking to you. The review comment sits to the right on desktop and directly beneath on
+mobile. **Show the artefact above the fold.** No animation.
+
+### "Two weeks later"
+
+Set slightly larger than body text and given the most space on the page. This is the only
+section carrying a scene, so let it breathe. `process_refund` in monospace both times it
+appears, so the eye connects them.
+
+### "Now go back and read that review again"
+
+Short lines, large spacing, each on its own line. **This is the turn of the argument** and it
+should take four seconds to read, not one.
+
+### "That is the thing we fixed"
+
+The two italic lines — *This is fine* and *I did not really look here* — sit side by side on
+desktop, identical in every respect. **The design makes the point: they look the same.** Stacked
+on mobile, still identical.
+
+### "We do two things"
+
+Two blocks, stacked, not a three-column feature grid. The closing paragraph naming what we do
+not build is set in muted text — an aside, not a boast.
+
+### "What you actually get"
+
+A real terminal block with the site's code styling. `Checked` and `Not checked` in the accent
+colour. **Do not screenshot this** — real text so it can be copied, read by a screen reader, and
+indexed.
+
+### "What changes on Monday"
+
+Three short paragraphs with real space between them. The if/then pair reads as a decision, so
+give the two branches their own lines.
+
+### "Do not believe any of this"
+
+**Full-bleed band, background colour change, the only one on the page.** This is the centre of
+gravity and it sits two-thirds down, not at the end. Button large. The "Free. Nothing
+installed." line small and grey underneath.
+
+### "What we are not"
+
+Plain body text, no box, no card. **A design that decorates this section undoes it.** The three
+competitor lines are ordinary paragraphs — no logos, no comparison table on the home page.
+
+### Questions
+
+Plain question-and-answer, all open. **No accordions.** A collapsed FAQ says "we would rather
+you did not read this", and every answer here is one we want read.
+
+### Price
+
+Four lines of text, not four pricing cards. The full table lives on `/pricing`, and putting
+cards here makes the home page end in a shop.
+
+### Footer
+
+Four columns on desktop, stacked on mobile. Muted, small, no newsletter box, no trust badges
+until SOC 2 is real and dated. **`Changelog` ships as a real page or comes out of the footer** —
+a dead footer link is the cheapest possible way to look abandoned.
+
+### Performance
+
+Server-rendered HTML. No framework needed for a page with one interaction. Under 100KB, loads
+in under a second on a phone. **A code-quality product with a slow website is arguing against
+itself.**
+
+---
+
+## What never goes on this page
+
+Trimmed from the previous draft, because a site is read by competitors before it is read by
+customers, and the free report proves every claim without explaining any of it.
+
+| Cut | Why |
+|---|---|
+| **What the ranking is built from** | The earlier draft named the source in the second section. That is the product |
+| **That part of the pipeline runs without a model** | It explains the cost structure, which explains why the free report is possible, which is the strategy. The offer stands alone without the reason |
+| **The share of pull requests we comment on** | A tuned number. "Most get no finding" says enough |
+| **How many repositories and changes we tested on** | Invites method questions and points at the source data |
+| **The list of supported languages** | Belongs in the docs where it can be kept current. On a home page it becomes a promise the parser has to catch up to |
+| **Any accuracy percentage** | Two reasons. It tells a competitor what to optimise, and one number invites a fight about method. **The report gives each customer their own number** — more convincing, and it gives away nothing |
+| **Why competitors cannot match the free report** | Correct, and it is strategy written down for them. Make the offer; skip the reasoning |
+
+**The line: say what the customer gets. Never say how it is worked out.**
+
+When someone asks for the benchmark:
+
+> *We do not publish one. Benchmarks are chosen by the vendor. Give us a repository and we will
+> run it on your own history, and you can check the answer yourself.*
 
 # Page 2 — Free report `/report`
 
