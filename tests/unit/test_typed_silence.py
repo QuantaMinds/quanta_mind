@@ -149,7 +149,7 @@ def test_a_silent_review_cannot_claim_to_have_spoken() -> None:
         )
 
 
-def test_a_cold_unit_is_counted_but_is_not_an_unresolved() -> None:
+def test_cold_units_are_named_not_merely_counted() -> None:
     """Three states, not two: read, unresolvable, and never funded by the budget.
 
     Cold units go in the denominator because a unit the budget skipped was still part of the
@@ -159,7 +159,8 @@ def test_a_cold_unit_is_counted_but_is_not_an_unresolved() -> None:
     line = CoverageLine(
         units_checked=3,
         files_checked=2,
-        units_cold=8,
+        cold=("pkg.mod.send_email", "pkg.mod.validate"),
+        cold_not_listed=6,
         unresolved=(Unresolved(Site("gen.py", 0), Reason.GENERATED_FILE, Construct.FILE),),
     )
     assert line.total_considered == 12
@@ -169,7 +170,17 @@ def test_a_cold_unit_is_counted_but_is_not_an_unresolved() -> None:
 
 def test_coverage_with_cold_units_is_not_complete_even_with_nothing_unresolved() -> None:
     """Everything parsed cleanly and the budget still skipped most of it. Not complete."""
-    line = CoverageLine(units_checked=3, files_checked=2, units_cold=8)
+    line = CoverageLine(units_checked=3, files_checked=2, cold=("a.b", "a.c"), cold_not_listed=6)
     assert not line.unresolved
     assert line.is_complete is False
     assert line.ratio() == pytest.approx(3 / 11)
+
+
+def test_a_residual_without_a_list_is_refused() -> None:
+    """ "Eight functions not read" is untyped silence wearing a number.
+
+    A residual truncates a list; it does not replace one. Allowing it alone would let a review
+    report the same unusable silence this product exists to argue against.
+    """
+    with pytest.raises(ValueError, match="not a substitute"):
+        CoverageLine(units_checked=3, files_checked=1, cold_not_listed=8)

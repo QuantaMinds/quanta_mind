@@ -407,6 +407,37 @@ With m/k = 1.64 that is **round(4.92) = 5**. So **top-3 files against top-5 func
 | functions still lose | **granularity is genuinely worse** — a real finding about the unit |
 | functions win or draw | **the ranking is better and the BUDGET is what costs us** — a different problem with a different fix |
 
+### The budget is re-decided against these numbers: it stays at three, and the cold list is why
+
+The plan fixed ranks 1–3 before any of this was measured. It should not be inherited, so here is
+the decision made against the data.
+
+| budget | miss | changes/month at 200 PRs | cost/PR | cost/repo/month |
+|---|---|---|---|---|
+| **top-3** | 8.84% | ~18 | $0.140 | **$28** |
+| top-5 | 3.50% | ~7 | $0.205 | **$41** |
+
+Halving the miss costs about **+$13 per repository per month**, and at 20 developers across 4
+repositories that moves gross margin from roughly 70% to 57% on a $19 seat. Defensible on its
+own terms.
+
+**It stays at three, because the cold list is the cheaper fix for the same problem.**
+
+The cost of a cold miss is not the miss. It is that **nobody knew** — the defect sat in a unit
+no one was told went unread. **Naming the eight skipped functions costs nothing and removes
+exactly that**, where reading two more of them costs 50% more inference and still leaves six
+unnamed.
+
+So: **top-3, with every cold unit named in the coverage line.** Revisit only if the field shows
+a named cold list is insufficient — which is a question about whether reviewers act on it, and
+therefore folds into the shadow-mode month rather than needing its own experiment.
+
+**And this is why every changed unit gets a `ranked_unit` row, cold ones included.** The schema
+allows `allocation = cold`; it must be *required* rather than permitted. Dropping cold units at
+allocation time would take the coverage line's content away, and it would also blind shadow
+evaluation — a candidate ranker that would have chosen a cold unit needs that unit to exist in
+the record to be credited for it.
+
 ### The first run was wrong, and the diagnostic is why we know
 
 The first attempt reported +7.41 points on a **broken symbol index**, and the ratio m/k = 1.17
@@ -706,6 +737,9 @@ review          id, repo_id, pr_number, head_sha, created_at,
                 tokens_out, cost_cents, latency_ms, tier
 ranked_unit     review_id, unit_path, unit_name, rank, score,
                 percentile, allocation          -- deep | shallow | cold
+                -- EVERY changed unit, including cold ones. Not the funded subset.
+                -- Cold rows are the coverage line's content and shadow evaluation's
+                -- denominator; dropping them silently removes both.
 finding         id, review_id, unit_path, kind, body, published,
                 confidence, provenance
 claim           id, finding_id, claim_kind, verdict, reason

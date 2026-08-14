@@ -349,6 +349,13 @@ modules.** They arrive one stage at a time, each behind a gate in
 **Must not:** perform I/O, or grow a type that needs a database to be constructed.
 **Why it exists separately:** so a shared type never becomes a reason to import sideways.
 
+**`CoverageLine` carries three states, not two.** A unit is read, or the parser could not
+resolve it, or **the budget never funded it** — and the third is the common case, measured at
+8.84% of changes holding their defect in a cold unit at a three-unit budget. Cold units are
+**named, not counted**: a bare "eight functions not read" is untyped silence wearing a number,
+which is the failure this product accuses competitors of. A residual count with no list is
+refused.
+
 ### `store/`
 **Owns:** persistence — versioned schema, migrations, one repository module per aggregate,
 per-repository spend.

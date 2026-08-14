@@ -37,16 +37,33 @@ class CoverageLine:
     **A cold unit is not a failure to analyse. It is a decision not to**, and reporting it as
     silence is the exact thing this product exists to stop. "Three of eleven functions read" is
     a coherent product; "we reviewed your change" while reading three of eleven is not.
+
+    **The cold units are NAMED, not counted, and that is the whole point.** "Eight functions not
+    read" is still untyped silence -- it tells a reviewer something was skipped without telling
+    them what to look at, which is the exact failure this product accuses competitors of. A named
+    list is actionable, and it produces a signal nothing else can: a reviewer who reads
+    `send_refund_email` in that list and says "read that one" has judged the allocation policy
+    from the position best placed to do it.
+
+    `cold` is ordered by rank, least cold first, so truncating a long list keeps the units most
+    nearly worth reading. `cold_not_listed` carries the residual, and a residual with no list is
+    refused -- truncating a list is not the same as replacing it with a number.
     """
 
     units_checked: int
     files_checked: int
     unresolved: tuple[Unresolved, ...] = field(default_factory=tuple)
-    units_cold: int = 0
+    cold: tuple[str, ...] = field(default_factory=tuple)
+    cold_not_listed: int = 0
 
     def __post_init__(self) -> None:
-        if self.units_checked < 0 or self.files_checked < 0 or self.units_cold < 0:
+        if self.units_checked < 0 or self.files_checked < 0 or self.cold_not_listed < 0:
             raise ValueError("CoverageLine counts cannot be negative")
+        if self.cold_not_listed and not self.cold:
+            raise ValueError(
+                "CoverageLine has unlisted cold units and lists none; a residual is a "
+                "truncation of a list, not a substitute for one"
+            )
 
     @property
     def total_considered(self) -> int:
@@ -56,7 +73,7 @@ class CoverageLine:
         part of the change. Leaving it out would report a review that read three of eleven
         functions as complete coverage.
         """
-        return self.units_checked + self.units_cold + len(self.unresolved)
+        return self.units_checked + len(self.cold) + self.cold_not_listed + len(self.unresolved)
 
     def ratio(self) -> float:
         """Resolved share of everything considered. 0.0 when nothing was considered.
@@ -70,7 +87,12 @@ class CoverageLine:
 
     @property
     def is_complete(self) -> bool:
-        return bool(self.units_checked) and not self.unresolved and not self.units_cold
+        return (
+            bool(self.units_checked)
+            and not self.unresolved
+            and not self.cold
+            and not self.cold_not_listed
+        )
 
 
 @dataclass(frozen=True, slots=True)
