@@ -238,11 +238,27 @@ already steep, and the ratio argument needs the care that steepness implies: it 
 because the *function* arm's uncovered count grows faster than the file arm's with change size,
 which is the functions-per-change claim above and not something these bins establish.
 
-**Two honesty notes.** The 10–12 bin drops to 7.51% from 11.18% at nine files, which is
-non-monotonic — small-n noise across 346 events, or a composition effect if very wide changes are
-mechanical sweeps rather than features. Not smoothed over here. And the harness raised on
+**The reversal at the top bin was tested, not left as a hypothesis.** A mechanical sweep — a
+lockfile bump, generated code, a mass rename — touches many files uniformly, so its prior-touch
+counts should be **flat across the change**: low variance. Composition would show as an unusually
+low coefficient of variation in that bin.
+
+| files touched | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10–12 |
+|---|---|---|---|---|---|---|---|---|---|
+| median CV of prior-touch counts | 0.529 | 0.707 | 0.773 | 0.849 | 0.908 | 0.972 | 0.993 | 0.961 | **1.016** |
+
+**It is the opposite.** The 10–12 bin has the *highest* dispersion of any bin, not the lowest, so
+it is not sweeps. **The reversal is noise, and the intervals say so**: k=9 is 11.18% (95% CI
+7.2–17.0%), the 10–12 bin is 7.51% (5.2–10.8%), and they overlap across a wide range. Reported
+rather than smoothed. And the harness raised on
 serialisation after printing this table; the bins sum to **7,493, matching the known total
 exactly**, which is what establishes the computation completed before the crash.
+
+**What makes that assertion work is that 7,493 is independently known** — it comes from a prior
+run, not from this one. **Bins summing to each other would prove nothing.** That is the
+difference between this check and the dead hotspot check that returned clean zeros at every
+threshold: one compares against an outside quantity, the other was internally consistent and
+wrong.
 
 **Two miss rates now live in this document on different populations, and they must be labelled
 everywhere they appear:** **4.77% and 4.48% are ≥4-file rates**, and **1.77% is pooled across all
@@ -269,6 +285,29 @@ itself.
 **And say the scope in the same sentence as the result**: *measured on 8, checked against 17 on
 shared metrics, not established on the remaining 22.* 13 of 35 is not 35, and the transfer claim
 stays an inference.
+
+### Pre-specified decomposition — write this down before the numbers exist
+
+The near-flat normalisation above is not just a slope, it is a **model**: misses ≈ `c·(k−3)`
+with `c` about 1.4–2.2 points per uncovered file. If the function arm follows the same form with
+its own uncovered count, misses ≈ `c′·(m−3)` where `m` is functions per change, and **the
+expected gap is `c′(m−3) − c(k−3)`.**
+
+`c′` and `m` are unobservable without blobs — **and both are measurable on the 8 once the run
+happens.** So 3c reports the **constant**, not only the gap.
+
+**That reframes the transfer question into a much narrower one.** If `c′ ≈ c`, the entire
+difference between the arms reduces to the unit-count ratio `m/k`, and what has to generalise is
+no longer "the gap" but **"is functions-per-file stable across repositories"** — which the
+random-5 draw can actually answer, where it could never have answered the broader question.
+
+**This decomposition is pre-specified here, before the numbers exist**, because added afterwards
+it is indistinguishable from post-hoc fitting.
+
+**Two caveats that travel with the model, not footnotes to it.** Linearity is fitted over k = 4
+to 9 and the top bin reverses. And `c` is estimated on the 8 clones, which carry larger changes
+than the 27 — **so `c` is measured where the arm is steepest.** Neither breaks the decomposition;
+both belong beside it.
 
 **Pre-specify the discordance criterion before the run, in writing.** McNemar counts only the
 events where the two rankers disagree, so that definition *is* the test: a discordant pair is one
@@ -1155,10 +1194,25 @@ everything after it is built on a number that did not survive contact with the p
 
 **Whether anyone will pay.** Unchanged by any amount of building, and still the largest risk.
 
-**Whether a reviewer shown the routing line before the defect exists catches anything they
-would otherwise miss.** Every number here is retrospective. This is a field measurement and no
-amount of history substitutes for it. It is the first thing to measure once real traffic flows,
-and it is not gated on anything above.
+**Whether the tool survives thirty days on a team with no stake in it** — and this is the
+necessary condition, which the plan had wrong for most of its life.
+
+It specified: does a reviewer shown the routing line catch anything they otherwise would miss.
+That is the right *upside* question and the wrong *necessary* one. **If the reviewer is the
+distribution mechanism for the measurement layer, what has to be true of it is that it gets
+installed and left on.** A reviewer firing on 10–12% and largely ignored still writes
+`ranked_unit`, `shadow_pick` and `outcome` rows on every pull request, and those rows are the
+asset. **Being ignored does not destroy it. Being uninstalled does.**
+
+| | Question | Cost |
+|---|---|---|
+| **Necessary** | does it survive 30 days on an uninvested team? | an install date, a disable event, and the rows in between — data already collected |
+| **Upside** | does a reviewer shown the routing line catch or clear anything they otherwise would not? | measure alongside; a null here is survivable |
+
+**Both come from the same month**, which is why specifying only the second was expensive: a null
+on routing efficacy would have read as a failure of the company when it is a failure of the
+upside. Every number in this corpus is retrospective and no amount of history substitutes for
+either measurement.
 
 **Whether function-level ranking transfers from the file-level research.** Named as the largest
 technical risk, measured at the ranker gate, and it has no mitigation beyond measuring it early.
