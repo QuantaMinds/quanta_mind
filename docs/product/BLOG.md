@@ -144,9 +144,16 @@ argument about a number that was never meant as a benchmark.
 
 ### The hook
 
-Every AI reviewer benchmark published so far ranks its own publisher at or near the top. That is
-not a scandal — it is a structural fact about who pays for benchmarks. It does mean the numbers
-you are comparing were chosen by the people being compared.
+Macroscope tested 118 real bugs across 45 repositories and published the table. It scored 48%
+and placed itself first. Tenki ran 122 bugs and produced a completely different ranking —
+CodeRabbit at 29% where Macroscope had it at 46%, Greptile at 36% where Macroscope had it at
+24%. Greptile's own benchmark reports 82%.
+
+**Every benchmark in this market is published by a company in it, and no two agree.** That is
+not a scandal — it is a structural fact about who pays for benchmarks. But it means the numbers
+being compared were chosen by the people being compared.
+
+**And the bottom line nobody quotes: the best score any vendor claims for itself is 48%.**
 
 ### The argument
 
@@ -173,7 +180,10 @@ the customer can take themselves:
 
 ### Citations
 
-- **Cite the vendor benchmarks *as marketing*, by name, with publishers.** [DeepSource](https://deepsource.com/resources/ai-code-review-tools), [CodeAnt](https://www.codeant.ai/blogs/ai-code-review-benchmark-results-from-200-000-real-pull-requests) and [Augment Code](https://www.augmentcode.com/guides/deep-code-review-recall-vs-precision) each publish one, and each ranks its publisher at or near the top. **Do not use any of them as evidence for a claim of ours** — the point of the post is that they cannot carry that weight.
+- **[Macroscope's benchmark](https://macroscope.com/content/best-ai-code-review-tools-github-2026)** — 118 self-contained runtime bugs, 45 repositories, 8 languages. Macroscope 48%, CodeRabbit 46%, Cursor Bugbot 42%, Greptile 24% (on 72 of 118; access revoked mid-run), Graphite Diamond 18%. Also records CodeRabbit at 10.84 comments per pull request, 4.69 runtime-relevant. **Published by a competing tool that ranked itself first — say so every time it is cited.**
+- **[Tenki's benchmark](https://tenki.cloud/benchmarks/code-reviewer)** — 122 bugs, a different ranking: Greptile 36%, Cursor 32%, CodeRabbit 29%. Also a competing tool.
+- **[Greptile's own benchmarks](https://www.greptile.com/benchmarks)** — 82% recall, two to three times every outside measurement of the same product.
+- Also vendor-published and self-favouring: [DeepSource](https://deepsource.com/resources/ai-code-review-tools), [CodeAnt](https://www.codeant.ai/blogs/ai-code-review-benchmark-results-from-200-000-real-pull-requests), [Augment Code](https://www.augmentcode.com/guides/deep-code-review-recall-vs-precision). **Do not use any of these as evidence for a claim of ours** — the post's point is that none can carry that weight, including the ones that flatter us.
 - **[Towards Understanding the Characteristics of Code Generation Errors Made by Large Language Models](https://arxiv.org/abs/2406.08731)** — 557 labelled errors across six LLMs on HumanEval. Finds a large share exhibit **complex semantic characteristics** rather than the subtle slips human programmers make. Use for: the errors arriving now are not the ones a rule-based checker was designed for.
 
 ### Do not add
