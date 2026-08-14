@@ -1,13 +1,13 @@
 # The coverage merge gate does not separate defective from clean AI pull requests
 
 **Measured 2026-08-12** on the agent-arm corpus. This is the fourth negative result in this
-repository and the one that closes the product line described in `PRODUCT_PLAN_2026-08.md`.
+repository and the one that closes the auto-merge product line proposed in the August 2026 product plan, since deleted.
 
 ---
 
 ## The claim being tested
 
-`PRODUCT_PLAN_2026-08.md` proposed auto-merging low-risk pull requests, gated on a condition
+That plan proposed auto-merging low-risk pull requests, gated on a condition
 no competitor can express:
 
 > Auto-merge only if **every call site in the diff resolved**. If we could not check
@@ -126,7 +126,7 @@ clustered interval would be **wider**, not narrower, so it cannot rescue the res
 
 ## What this triggers
 
-`PRODUCT_PLAN_2026-08.md` lists among its falsification criteria:
+It listed among its falsification criteria:
 
 > Coverage is the deciding condition on **under 5%** of held PRs — the gate is decoration
 

@@ -113,7 +113,7 @@ def decide(rel: str, root: Path) -> int:
         print(
             f"{rel} is vendored third-party source and is never edited. Versions are "
             f"pinned because a grammar or analyzer change silently alters output. "
-            f"Patch upstream, or record a fork in docs/PROJECT_CONTEXT.md.",
+            f"Patch upstream, or record a fork in docs/CODEBASE.md.",
             file=sys.stderr,
         )
         return DENY

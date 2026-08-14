@@ -210,20 +210,6 @@ check every line of it against what you remember happening.
 
 ---
 
-### *(section)*
-
-## Price
-
-**Unlimited reviews on every paid plan.** We are not going to bill you per review.
-
-Free — the coverage line and the full history report.
-**Team, $19** per developer per month — everything, unlimited.
-**Business, $39** — every repository in one view, single sign-on, the quarterly report.
-**Enterprise, $55** — your own model, your own servers, audit logs.
-
-See the full table →
-
----
 
 ### *(section)*
 

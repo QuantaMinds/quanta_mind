@@ -335,7 +335,7 @@ sourced. Same defect class as `CORRECTIONS.md`.
 | Greptile “comments only appeared in this summary” complaint | **UNVERIFIED.** Source never located | Searched |
 | “Copilot reviewed 115 out of 191 files” | **REJECTED.** Appears nowhere in discussion #152385. Introduced by a page summariser | Pulled the thread via GraphQL |
 | “38% of Tier 0 is framework-registered, n=8” | **UNVERIFIED.** Hand-classified, no artefact in the repository | Searched the repo |
-| Gemini critique: GPU-agnostic inference system, aerospace-thermodynamics co-founder search | **UNVERIFIED.** No mention in this repository, `AGENTS.md`, `PROJECT_CONTEXT.md`, or `BUILD_PLAN.md`. The “vision disconnect” argument rests entirely on it | Searched the repository |
+| Gemini critique: GPU-agnostic inference system, aerospace-thermodynamics co-founder search | **UNVERIFIED.** No mention in this repository, `AGENTS.md`, or the two planning documents then present and since deleted as dead-product records. The “vision disconnect” argument rests entirely on it | Searched the repository |
 
 ---
 

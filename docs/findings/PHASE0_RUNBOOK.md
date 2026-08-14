@@ -267,7 +267,7 @@ because it kills a live thesis on noise.
 | RR | CI lower | Verdict | Action |
 |---|---|---|---|
 | ≥ 3.0 | > 1.5 | **Strong** | Proceed to the call-site census layer |
-| 1.5–3.0 | > 1.0 | **Weak but real** | Proceed — but rewrite ``PROJECT_CONTEXT.md` “Business case”` first. Pitch becomes "prioritise review," not "prevent breakage." |
+| 1.5–3.0 | > 1.0 | **Weak but real** | Proceed — but rewrite the business case first. Pitch becomes "prioritise review," not "prevent breakage." |
 | < 1.5 | any | **Null** | `PHASE0_RUNBOOK.md` “Failure deep-dive” |
 | any | ≤ 1.0 | **No result** | `PHASE0_RUNBOOK.md` “Failure deep-dive” |
 

@@ -1,5 +1,9 @@
 # Founder Briefing
 
+> **SUPERSEDED — kept only because `docs/findings/PHASE0_PREREGISTRATION.md` cites it, and a preregistration is not edited to accommodate a tidy-up.**
+> This document describes the product the correlation test falsified (RR 1.040). It is a historical record, not guidance.
+> For the product being built read `docs/QUANTAMIND.md` and `docs/plans/implementation.md`.
+
 > How to explain this project to someone smart who has never heard of it. Read top to
 > bottom once. After that, `BRIEFING.md` “The five questions, and your answers” is the part you re-read before a conversation.
 >

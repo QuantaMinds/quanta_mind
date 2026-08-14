@@ -1,129 +1,80 @@
 # QuantaMind
 
-**The layer that tells a coding agent what it does not know about your repository.**
+Every AI reviewer reads the whole diff at one depth. **We decide where to look first, read hard
+only there, and state what we could not analyse.**
 
-Static analysis is unsound by design — every code-intelligence tool deliberately ignores
-language features it cannot handle, and none of them says so. `quantamind` measures that
-unsoundness per call site, labels every edge with how confident we are and why, and serves
-the result over MCP so Claude Code, Codex and Cursor can **abstain instead of guessing.**
+A model-free pass ranks the changed functions and decides where inference goes. A parser checks
+the model's structural claims before publication. Every review ends with its coverage.
 
-Your source code never leaves your network. We store derived facts, never code.
-
----
-
-## The problem in one example
-
-```python
-class BasePaymentHandler:
-    def validate(self, req): ...        # you change this
-
-class StripeHandler(BasePaymentHandler):
-    def validate(self, req):
-        super().validate(req)           # invisible to static analysis
-        ...
-```
-
-Your agent greps `validate`, finds three direct callers, edits them, and ships. Six
-`super()` edges were never in the graph. The published measurement: state-of-the-art
-static Python call graphs miss roughly half the edges observed at runtime, and `super()`
-calls are absent entirely. Nothing in your toolchain tells you this happened.
-
-With `quantamind`:
-
-```
-callers_of("BasePaymentHandler.validate")
-
-  RESOLVED     3   direct call sites
-  FRAMEWORK    6   super() chain — StripeHandler, PaypalHandler, +4
-  AMBIGUOUS    2   flow-insensitive; candidates listed, not chosen
-  UNRESOLVED   1   plugins/legacy.py:88 — getattr(mod, cfg["handler"])
-                   → cannot be determined statically. Human review required.
-
-  coverage(payments/) = 91%   pack a3f9c1
-```
-
-The agent now says: *"I updated 9 call sites, not 3. Two are ambiguous — I listed them
-rather than editing. One I cannot resolve at all; someone should check it by hand."*
+**Status: no product code yet.** `src/quantamind/` holds the package root and nothing else. The
+evidence exists, the plan exists, the layers are empty. Start at
+`docs/plans/implementation.md`.
 
 ---
 
-## Quick start
+## Where to look
 
-```bash
-uv sync --all-extras
-uv run quantamind review .                     # build the context pack (nothing leaves your machine)
-uv run quantamind serve                       # MCP server on 127.0.0.1:7331
+**Read these four. Everything else is reference or history.**
 
-claude mcp add quantamind http://127.0.0.1:7331
-```
-
-Four tools become available to any MCP-speaking agent:
-
-| Tool | Returns |
+| I want to… | File |
 |---|---|
-| `callers_of(symbol)` | every caller, each with a confidence label and provenance |
-| `reaches(symbol)` | transitive callees, labeled |
-| `coverage(path)` | resolved / total call sites for a region |
-| `unresolved(path)` | every call site we could not resolve, with the construct that defeated us |
+| Understand the product, and see the evidence for every claim | `docs/QUANTAMIND.md` |
+| Build it — stages, gates, tests, telemetry, revenue | `docs/plans/implementation.md` |
+| Know the folder structure and the layer rules | `docs/plans/product-skeleton.md` |
+| Write the site, pricing, or a LinkedIn line | `docs/WEBSITE.md` |
 
----
+**Before your first change: `AGENTS.md`.** It is the constitution, capped at 210 lines, and
+every rule in it names the guard that enforces it. Reading it is faster than being stopped by it.
 
-## What makes this different
+### Reference
 
-Every competing tool reports what it **found**. None reports what it **missed**.
-
-- A call site we cannot resolve produces `Unresolved(site, reason, construct)` — never
-  silence. "No edge here" and "we failed here" are different values on the wire.
-- Coverage is computed per directory, pinned to a commit SHA, and excludes builtin calls
-  (which account for ~59% of the apparent static/dynamic gap and tell a developer nothing).
-- We never build a "smarter" general analyzer. Soundness causes imprecision causes
-  unscalability — that chain is documented and we do not fight it. We add narrow resolvers
-  where framework semantics make the answer structurally guaranteed.
-
----
-
-## Repository map
-
-| Path | What lives there |
+| File | What it holds |
 |---|---|
-| `AGENTS.md` (`CLAUDE.md` →) | Agent memory file. Capped at 200 lines, every rule paired with an enforcer. |
-| `ARCHITECTURE.md` | Layers, contracts, tech stack with justification, invariants |
-| `CONTRIBUTING.md` | Branch / PR / review protocol |
-| `docs/PROJECT_CONTEXT.md` | Full research record, business case, competitor table, corrections log |
-| `docs/BUILD_PLAN.md` | Phased plan with gates and kill criteria |
-| `docs/VALIDATION.md` | Why a green test is not verified data; the silent-failure suite |
-| `docs/CODEBASE.md` | Folder-wise map, regenerated every PR |
+| `docs/CODEBASE.md` | Folder-by-folder map. CI fails if behaviour changes and this does not |
+| `docs/VALIDATION.md` | Why a green test is not verified data |
+| `docs/CORRECTIONS.md` | How a published number gets corrected |
+| `docs/HISTORY_SIGNAL_WALKTHROUGH.md` | How the product works, told as a week in an engineer's life |
+| `docs/plans/gravity-reviewer-build-plan.md` | Model and API decisions: effort, caching, the request ceiling, cost |
+| `ARCHITECTURE.md` | Layers, contracts, invariants |
+| `CONTRIBUTING.md` | Branch, PR and review protocol |
+| `docs/findings/` | The research write-ups, including the results that came back null |
+| `research/` | The evidence base. Never product code, never imported by `src/` |
 | `scripts/guard/` | The enforcement layer — the rules that are real |
 
+### Superseded, kept for provenance
+
+`BRIEFING.md`, `docs/BUILD_PLAN.md` and `docs/PROJECT_CONTEXT.md` describe the **falsified**
+product. Each opens with a banner saying so. They survive only because
+`docs/findings/PHASE0_PREREGISTRATION.md` cites them, and a preregistration is not edited to
+accommodate a tidy-up. **Do not take guidance from them.**
+
 ---
 
-## Development
+## Commands
 
 ```bash
-just check      # lint + types + guards + unit + property   (~60s, run constantly)
-just verify     # check + live runs + golden diff           (~10min, before every PR)
+uv sync --all-extras            # install
+uv run quantamind review <pr>   # one review locally, posts nothing
+uv run quantamind serve         # the webhook service on 127.0.0.1:7331
+just check                      # ruff + mypy + guards + unit tests — before every commit
+just verify                     # check + live data verification — before every PR
 ```
 
-`just check` green means the code is well-formed. **It does not mean the data is right.**
-Only `just verify` claims that, and it claims it by running the real pipeline against real
-repositories and diffing against golden files a human reviewed.
+`just check` is the gate. If it is red, nothing else matters.
 
 ---
 
-## Status
+## What this project already knows
 
-**Pre-Phase-0. No product code exists, and none will be written until the founding
-correlation is measured.**
+**The founding correlation test returned null** — relative risk 1.040 against a preregistered
+stop threshold of 1.5. It falsified the earlier product, which was unsoundness labels served
+over MCP. **That architecture was never built and this one inherits none of it.**
 
-The thesis — that `unresolved` predicts breakage in AI-authored changes — is **plausible
-and unverified.** The protocol to test it is pre-registered at
-`docs/findings/PHASE0_PREREGISTRATION.md`: a 2×2 over ~7,191 agent-authored PRs, relative
-risk with a confidence interval, thresholds fixed before the data is touched. One week.
-It can end this project, and if it does we publish the null.
+What justifies this one: the ranked function is the one a later fix returns to, well above its
+rate elsewhere, replicated by an independent rater from a different model family. The numbers,
+their confidence intervals, and the four measurements that were withdrawn are all in
+`docs/QUANTAMIND.md`.
 
-Everything else in this repository — the architecture, the build plan, the guards — is a
-draft that survives only if that number clears RR ≥ 3.0.
-
-Read `docs/PROJECT_CONTEXT.md#7-corrections-log` before repeating any number from this
-README to anyone outside the team. Several early estimates were wrong and are recorded
-there so nobody re-derives them.
+**Four instrumentation failures and two more found since** are recorded rather than quietly
+fixed, because a document that never reports its own errors gives a reader no way to calibrate
+the rest of it.
