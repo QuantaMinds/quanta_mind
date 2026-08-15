@@ -155,12 +155,13 @@ you remember to obey — the machine will stop you either way.
 - **Fix root causes.** Do not suppress an error, do not add a fallback that fabricates
   data, do not widen a type to make mypy pass. If a resolver cannot resolve something,
   that is a *result*, not a failure — emit `Unresolved`.
+- **A corpus drawn from the present cannot answer a question about the future.** Twice — recent
+  pages measured activity phase; newly merged PRs gave 0.4 days of forward history against a
+  90-day rule. → `research/phase0/corpus_age.py`, which fails at fetch time
 - **On a failure or a null, investigate before you fix.** Classify every wrong case by *why*,
-  print the distribution, then make the suspected cause a mechanical check over the raw data
-  and cross-tabulate it against the outcome — **a cause that does not separate outcomes is a
-  story.** Three fixes to the reviewer moved nothing (p = 0.53); one deep-dive found the
-  mechanism — 87.3% of claims quote code absent from the line they cite — which explained why
-  none of the three could have worked. **Say whether you have a diagnosis or a detector.**
+  print the distribution, then make the suspected cause a mechanical check and cross-tabulate it
+  against the outcome — **a cause that does not separate outcomes is a story.** Three fixes moved
+  nothing (p = 0.53); one deep-dive found the mechanism. **Diagnosis or detector — say which.**
 - **Reference `file.py:42`, never paste code** into plans or PR descriptions.
 - **Scope investigations.** "Read the resolve layer" not "understand the codebase".
 - **When you disagree with a rule here, say so in the PR.** Do not silently work around it.
