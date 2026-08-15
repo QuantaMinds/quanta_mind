@@ -1655,6 +1655,31 @@ a model we have already evaluated. Enterprise gets a model we have not.
    draw unreliable. Both affected numbers were already discarded, so nothing published moves.
    The corrected reader is `research/phase0/corpus/fetch.py`.
 
+   **The bot detector was then given a known-answer test, and passed one it could have failed.**
+   It is a login-and-marker match; it is never shown a date. If it is really detecting AI
+   reviewers, its rate must collapse to zero before those tools existed:
+
+   | year | comments | bot share | human structural |
+   |---|---|---|---|
+   | 2019 | 234 | **0.0%** | 9.9% |
+   | 2020 | 301 | **0.0%** | 4.2% |
+   | 2023 | 573 | **0.0%** | 3.0% |
+   | 2024 | 468 | 8.1% | 4.3% |
+   | 2025 | 1,352 | 38.4% | 4.2% |
+   | 2026 | 2,267 | **47.7%** | 7.8% |
+
+   **Zero through 2023, then a monotone climb tracking the adoption curve of the tools by name.**
+   A detector matching something else — verbosity, templating, length — would not respect a
+   boundary it was never told about.
+
+   **And the same table answers the era question the sampling objection implied.** Only three
+   repositories predate 2022, so era is confounded with repository; comparing *within* repository
+   across the boundary: pre-2022 **6.7%** (25/374) against 2023+ **6.5%** (55/850), **p = 0.889**.
+   Airflow moved +5.9 points and transformers −5.3, in opposite directions. **The human
+   structural rate does not depend on the era**, which means the figure is not an artefact of the
+   AI-reviewer period or of the bot subtraction — it is what human review has looked like for
+   seven years.
+
    **Two things are worth keeping.** The human structural rate lands at **5.9%** (132/2,241) —
    computed on a seven-year window with bots removed, and pointing the same way as the discarded
    figure: **structural claims are rare in human review, so a verifier that waits for a model to
