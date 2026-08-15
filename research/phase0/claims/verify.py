@@ -163,7 +163,18 @@ check("window CORRECT count", cwv["CORRECT"], 1, 0)
 check("cleared the <50% bar", cwv["WRONG"] / nw < 0.50, False)
 check("anchor failures nearly eliminated (<=3 remain)", cwv["WRONG"] <= 32, True)
 
-print("\n  I. COST")
+print("\n  I. THE FUTURE-FIX INSTRUMENT")
+ff = json.loads((R / "future_fix_scored.json").read_text())
+base = sum(1 for r in ff if r["returned"]) / len(ff)
+conf = [r for r in ff if r["confirmed"]]
+cr = sum(1 for r in conf if r["returned"]) / len(conf)
+check("units scored against git", len(ff), 275, 0)
+check("ranker base hit rate %", round(base * 100, 1), 50.5, 0.1)
+check("CONFIRMED units", len(conf), 85, 0)
+check("CONFIRMED fix-return %", round(cr * 100, 1), 36.5, 0.1)
+check("gate selects AWAY from defects", cr < base, True)
+
+print("\n  J. COST")
 cost = json.loads((R / "vertex_cost_c3.json").read_text())
 IN, OUT = 1.25, 10.00
 per = collections.defaultdict(float)
