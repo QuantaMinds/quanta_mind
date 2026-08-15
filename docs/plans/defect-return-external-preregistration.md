@@ -86,3 +86,93 @@ so that rewrite is not negotiated afterwards.**
 **INCONCLUSIVE** — say so, name the missing power, and do not report the point estimate as
 directional. The failure mode this project has hit twice is an instrument that could not have
 detected the effect being asked about; the discordant-pair floor exists to catch it a third time.
+
+
+---
+
+# RESULT — 2026-08-14. **CONFIRMED.**
+
+| | |
+|---|---|
+| n | **2,400** events, **6** fresh repositories, 400 each |
+| history top-3 miss | **1.21%**, Wilson [0.84%, 1.73%] |
+| alphabetical control miss | **3.12%**, Wilson [2.50%, 3.90%] |
+| **lift** | **+1.92 points** |
+| relative risk | alphabetical misses **2.59×** as often |
+| discordant | b = 62 (history wins), c = 16 (control wins) |
+| **McNemar exact** | **p < 0.000001** |
+| repositories where history beats the control | **6 of 6** |
+
+**All three pre-registered conditions met**: control beaten, p < 0.05, and ≥ 4 of 6 repositories
+individually positive. The floors were cleared with room — 2,400 events against a 500 minimum, 78
+discordant pairs against a 20 minimum.
+
+## The replication is the part that matters
+
+| | history | control | lift |
+|---|---|---|---|
+| original 8 repositories, n = 1,969 | 1.44% | 3.31% | **+1.87** |
+| **fresh 6 repositories, n = 2,400** | **1.21%** | **3.12%** | **+1.92** |
+
+**The two lifts differ by 0.05 points.** This is the first result in the project to reproduce
+out-of-sample, on repositories chosen after the method was fixed, with every parameter copied
+rather than re-picked.
+
+## Per repository, and where the effect actually lives
+
+| repo | n | history | control | lift | b | c | p |
+|---|---|---|---|---|---|---|---|
+| scrapy | 400 | 2.25% | 9.25% | **+7.00** | 30 | 2 | **0.00000** |
+| celery | 400 | 1.00% | 2.50% | +1.50 | 9 | 3 | 0.146 |
+| scikit-learn | 400 | 3.00% | 4.00% | +1.00 | 12 | 8 | 0.503 |
+| ansible | 400 | 0.25% | 1.00% | +0.75 | 4 | 1 | 0.375 |
+| django | 400 | 0.25% | 1.00% | +0.75 | 4 | 1 | 0.375 |
+| pandas | 400 | 0.50% | 1.00% | +0.50 | 3 | 1 | 0.625 |
+
+**Only scrapy is individually significant, and that has to be said before the headline is used.**
+At a ~1% miss rate, 400 events yield 4–20 discordant pairs, which is nowhere near enough to detect
+a one-point difference in a single repository. The individual repositories are *counted*, not
+tested — as the pre-registration said they would be.
+
+## Leave-one-out — the result does not rest on scrapy
+
+| excluded | n | lift | p |
+|---|---|---|---|
+| (none) | 2,400 | +1.92 | < 0.000001 |
+| **scrapy** | 2,000 | **+0.90** | **0.011** |
+| scikit-learn | 2,000 | +2.10 | < 0.000001 |
+| every other repo | 2,000 | +2.00 to +2.20 | < 0.00001 |
+
+**Dropping any single repository, scrapy included, leaves the effect significant.** But scrapy
+roughly **doubles** it: without it the lift is +0.90 rather than +1.92. **So the honest effect size
+is a range — +0.90 to +1.92 points — and the conservative end is the one to quote.** Scrapy's
+alphabetical control misses 9.25%, far worse than anywhere else, which is what a repository with
+`scrapy/` and `tests/` at opposite ends of the alphabet looks like.
+
+## Three caveats that travel with the number
+
+**The 400-event cap takes the EARLIEST 400 admissible events per repository**, because the log is
+read oldest-first. So this measures early repository history, not recent. It is the same behaviour
+as the original harness, which is why the comparison is fair — and it means neither result speaks
+to a mature codebase.
+
+**"Defect-return" is the outcome-rule proxy, not a defect oracle.** A later commit within 90 days
+whose message contains a fix word and touches the same file. Its own limit is measured: **only 14%
+of admitted pairs are genuine repairs.**
+
+**The control is alphabetical, not random.** Alphabetical ordering is not neutral in a Python
+repository — it correlates with directory layout. That makes it a *harder* control than random in
+some repositories and an easier one in others, and it is the control the original result used,
+which is the only reason the two are comparable.
+
+## What this changes
+
+**The ranking half has external validity.** The claim that survived every retraction in this
+project — that ranking changed files by prior touch count beats a trivial ordering at containing
+the file a later fix returns to — now holds on six repositories it was never developed against, at
+an effect size within 0.05 points of the original.
+
+**It does not resurrect the review half**, which was measured at 3 of 66 correct by consensus. It
+does not restore *"we allocate attention the way a good reviewer would"*, which failed twice on its
+own terms. **Knowing where to look and being right about what you see remain separate, and only the
+first is now demonstrated off-corpus.**

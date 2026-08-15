@@ -116,17 +116,29 @@ against an alphabetical control at 50.0%. Pre-registered reading: **NULL**.
 
 **Which fixes the sentence this ledger has to carry, and it is the sharpest one in the file:**
 
-> **The ranker has been shown to beat an alphabetical control at defect-return on eight
-> repositories, and at nothing on any repository outside them.** Both out-of-sample tests it has
-> faced returned a null against the same trivial control, and in both the ranker scored *lower*
-> than alphabetical — −2.9 points, then −9.1.
+**That question has now been run, and it CONFIRMED.** 2,400 events across the six fresh
+repositories, every parameter copied from the original harness rather than re-picked, reading
+fixed in advance:
 
-**This does not show the ranker fails at what it is for.** Human-comment location and
-defect-return are different targets, and on the original eight the ranker does beat alphabetical
-at defect-return (1.44% miss against a 3.31% control, 1,969 events). **But the untested claim is
-now named exactly: does the ranker beat alphabetical at DEFECT-RETURN on repositories it was not
-developed on?** That has never been run, it needs full-object clones rather than the GitHub API,
-and it is the single most important open question the company has.
+| | history | alphabetical control | lift |
+|---|---|---|---|
+| original 8 repositories, n = 1,969 | 1.44% | 3.31% | +1.87 |
+| **fresh 6 repositories, n = 2,400** | **1.21%** | **3.12%** | **+1.92** |
+
+**McNemar exact p < 0.000001, discordant b = 62 / c = 16, and 6 of 6 repositories positive.** The
+two lifts differ by **0.05 points**. This is the first result in the project to reproduce
+out-of-sample.
+
+**With the honest qualifier attached: scrapy roughly doubles the effect.** Excluding it the lift is
+**+0.90** and p = 0.011 — still significant, and the conservative end of the range to quote. Only
+scrapy is individually significant; at a ~1% miss rate 400 events give too few discordant pairs to
+test a single repository, so repositories are counted rather than tested.
+
+**So the sentence this ledger carried an hour ago is now wrong and is replaced:** the ranker beats
+an alphabetical control at defect-return **on fourteen repositories across two disjoint samples,
+one of them pre-registered and out-of-sample**. It still predicts nothing about where human
+reviewers comment, which failed twice — those are different targets and only defect-return is
+claimed.
 
 **Also corrected here.** The +22-point result's independent replication is cited across this
 project as κ = 0.92. **Agreement was 92%; Cohen's κ was 0.66** — moderate, not strong. And the

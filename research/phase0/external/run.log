@@ -1,0 +1,17 @@
+  ansible_ansible              n= 400  history miss  0.25%  alphabetical miss  1.00%
+  celery_celery                n= 400  history miss  1.00%  alphabetical miss  2.50%
+  django_django                n= 400  history miss  0.25%  alphabetical miss  1.00%
+  pandas-dev_pandas            n= 400  history miss  0.50%  alphabetical miss  1.00%
+  scikit-learn_scikit-learn    n= 400  history miss  3.00%  alphabetical miss  4.00%
+  scrapy_scrapy                n= 400  history miss  2.25%  alphabetical miss  9.25%
+
+  POOLED  n = 2400 events over 6 fresh repositories
+    history top-3 miss        29/2400 = 1.21%
+    alphabetical control miss 75/2400 = 3.12%
+    lift                      +1.92 points
+    discordant  b=62 (history wins)  c=16 (control wins)
+    McNemar exact p = 0.00000
+    repositories where history beats control: 6/6
+
+  READING against docs/plans/defect-return-external-preregistration.md
+    CONFIRMED — control beaten, p < 0.05, and >=4 of 6 repositories positive
