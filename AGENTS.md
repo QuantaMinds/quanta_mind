@@ -15,11 +15,11 @@ read hard there.** A model-free pass ranks the changed files by how often each h
 follow-up fix, and that ranking decides where inference goes.
 
 **The founding correlation test returned NULL** (RR 1.040), killing the earlier product; **this one
-inherits none of it.** What justifies it is the only claim here that has reproduced out-of-sample:
-**top-three-by-fix-history misses 1.21% of the changes a later fix returns to, against 3.12% for
-alphabetical order — six repositories the method never saw, n = 2,400, p < 1e-6, 6 of 6 positive,
-0.05 points from the original eight.** The model-free half replicated; **the model's findings
-measured 66.7–74.2% wrong and are not shipped.** Read `docs/product/QUANTAMIND.md` for why and
+inherits none of it.** What justifies it is the only claim here that reproduced out-of-sample:
+**top-three-by-fix-history misses 1.21% of the changes a later fix returns to against alphabetical
+order's 3.12% — six repositories the method never saw, n = 2,400, p < 1e-6, 6 of 6 positive, 0.05
+points from the original eight.** The model-free half replicated; **the model's own findings are
+66.7–82.1% wrong and are not shipped.** Read `docs/product/QUANTAMIND.md` for why and
 `docs/product/evidence-ledger.md` for what failed; `research/` is evidence, never product code.
 
 ---
@@ -118,16 +118,14 @@ you remember to obey — the machine will stop you either way.
 
     **Ask what a check outputs when the thing it checks is broken. If the answer is "the
     same thing", it is not a check.** *Wrong logic*: `all(b >= a)` said True on a flat
-    gradient. *Unreachable*: `history_rewritten` sat in `scan()`, which runs only on
-    admitted records, so it never met its cases — zero across 515 attempts, identical to a
-    genuine null. **When a fix breaks a test, ask whether it *asserted* the old behaviour
-    or merely *relied* on it.** Two tests certified the corpus-for-GitHub substitution —
-    invert them. A control fixture carried `parent_sha=""` and scored 2/2 only because its
-    consumer re-resolved — rebuild it. The second is harder to see: the assertion is right,
-    and the data was constructible only while the bug lived. **Only a known-answer test
-    tells these from a real negative, and only sabotaging the WHOLE mechanism tests the
-    known-answer test** — sabotaging the entry point alone left one of ours green and
-    reading as coverage: this rule, found inside a sabotage. → **ADVISORY** — notice the verb.
+    gradient. *Unreachable*: `history_rewritten` sat in `scan()`, which runs only on admitted
+    records — zero across 515 attempts, identical to a genuine null. *Measuring a proxy*: an
+    anchor check read 98.1% while blind raters found the anchors still wrong. **When a fix
+    breaks a test, ask whether it *asserted* the old behaviour or merely *relied* on it** —
+    two tests certified the corpus-for-GitHub substitution, and a control fixture scored 2/2
+    only because its consumer re-resolved. **Only a known-answer test tells these from a real
+    negative, and only sabotaging the WHOLE mechanism tests it** — sabotaging the entry point
+    left one of ours green and reading as coverage. → **ADVISORY** — notice the verb.
 
 15. **A documented command must run, or carry `documented-command:unbuilt`.** `python -m`
     with no `__main__` ignores flags, writes nothing, exits 0 — the runbook's "Days 3–5" reported success and did nothing. → `scripts/guard/check_documented_commands.py`
@@ -157,6 +155,12 @@ you remember to obey — the machine will stop you either way.
 - **Fix root causes.** Do not suppress an error, do not add a fallback that fabricates
   data, do not widen a type to make mypy pass. If a resolver cannot resolve something,
   that is a *result*, not a failure — emit `Unresolved`.
+- **On a failure or a null, investigate before you fix.** Classify every wrong case by *why*,
+  print the distribution, then make the suspected cause a mechanical check over the raw data
+  and cross-tabulate it against the outcome — **a cause that does not separate outcomes is a
+  story.** Three fixes to the reviewer moved nothing (p = 0.53); one deep-dive found the
+  mechanism — 87.3% of claims quote code absent from the line they cite — which explained why
+  none of the three could have worked. **Say whether you have a diagnosis or a detector.**
 - **Reference `file.py:42`, never paste code** into plans or PR descriptions.
 - **Scope investigations.** "Read the resolve layer" not "understand the codebase".
 - **When you disagree with a rule here, say so in the PR.** Do not silently work around it.
@@ -197,14 +201,9 @@ A change is done when all seven are true. Not six.
 - **Deterministic beats clever.** If a parser can answer it, a model must not.
 - **The residual is the product.** What we cannot resolve is not our failure to hide; it
   is the thing the customer is paying us to find.
-- **We do not build a better bug-finder.** **Measured: 66.7% and 74.2% of our findings wrong
-  under two blind raters (κ = 0.82), 3 of 66 correct by consensus, against a 50% threshold
-  fixed before a finding was read.** That is self-contained and it is the whole reason the
-  review half stopped. **Do NOT reach for rivals' 49–76% to dramatise it** — theirs is a
-  *behavioural* metric (did the developer make the change), ours is a *truth* metric
-  (is the claim true and anchored). They do not compare, and 49% is not a floor — Augment sits
-  at 47.0%. The revival argument is "36.4% were only pointer bugs"; repair every pointer AND
-  assume every one correct and you reach **45.5%** — ten times the measured rate, still not a
-  product. **That** is the number to answer, not a rival's. → `docs/plans/adjudication-preregistration.md`
+- **We do not build a better bug-finder.** **Two corpora, four blind rater pools: 66.7%, 74.2%
+  and 82.1% of findings wrong, ZERO correct of 39 off-corpus.** Anchor repair, structured
+  context and a rejection filter each moved nothing. **Never quote rivals' 49–76% beside it** —
+  theirs is behavioural, ours is truth. → `docs/plans/adjudication-preregistration.md`
 - **Assume the next reader knows nothing.** Every file explains itself to someone who
   joined this morning.

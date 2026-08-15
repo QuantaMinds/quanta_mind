@@ -128,7 +128,17 @@ check("bot share %", round(bot / len(rows) * 100, 1), 31.5, 0.1)
 pre = [r for r in rows if r["created_at"] and r["created_at"][:4] < "2022"]
 check("pre-2022 bot count is zero", sum(1 for r in pre if r["is_bot"]), 0, 0)
 
-print("\n  E. COST")
+print("\n  E. THE FIX EXPERIMENT ON UNSEEN REPOSITORIES")
+fr = json.loads((R / "fresh_verdicts.json").read_text())
+cf = collections.Counter(fr.values())
+nf = len(fr)
+check("findings on unseen repositories", nf, 39, 0)
+check("unseen WRONG %", round(cf["WRONG"] / nf * 100, 1), 82.1, 0.1)
+check("unseen CORRECT count is zero", cf["CORRECT"], 0, 0)
+flo, fhi = wilson(cf["WRONG"], nf)
+check("unseen Wilson low", round(flo * 100, 1), 67.3, 0.1)
+
+print("\n  F. COST")
 cost = json.loads((R / "vertex_cost_c3.json").read_text())
 IN, OUT = 1.25, 10.00
 per = collections.defaultdict(float)
