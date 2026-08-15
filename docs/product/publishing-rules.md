@@ -42,6 +42,23 @@ When someone asks for our benchmark:
 - **Say the thing, then stop.** No sentence exists to sound impressive. No "seamless",
   "revolutionise", "empower", "leverage".
 - **Never claim to catch more bugs.** We do not, and the first customer to test it will find out.
+- **The routing number is sayable, out loud, with the control attached — and it is the only one
+  that has ever replicated.** *"Ranking the changed files by prior fix history and reading the top
+  three missed 1.21% of the changes a later fix returned to; alphabetical ordering missed 3.12%.
+  Six repositories we had never touched. n = 2,400, p < 0.000001."* **Say the control every time.**
+  A miss rate without the thing it beats is the number a competitor quotes back at you, and this
+  project has already withdrawn one figure for exactly that.
+  **Quote the conservative effect size when a single number is needed: excluding the strongest
+  repository the lift is +0.90 points rather than +1.92.** Both are true; the smaller one is the
+  one that cannot be attacked.
+  **And two caveats travel with the number or it is being misquoted.** *"Changes a later fix
+  returns to"* is an **outcome-rule proxy, not a defect oracle** — a fix-word commit within 90 days
+  touching the same file — and **only 14% of the pairs it admits are genuine repairs**. The
+  measurement also takes the **earliest 400 events per repository**, so it describes early
+  repository history and says nothing about a mature codebase. **Neither caveat may be dropped
+  because a sentence reads better without it.** This is the drift class that produced the $15
+  figure and the granularity row: a number survives, its conditions do not, and nobody notices
+  because the sentence still parses.
 - **Never imply our findings are correct — that has now been measured, and they are not.** Two
   blind raters put **66.7% and 74.2% of published findings wrong** (κ = 0.82 on the binary), with
   **3 of 66 correct by consensus**. Nothing may be said or implied about the quality of what this

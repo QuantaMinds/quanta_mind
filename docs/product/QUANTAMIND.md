@@ -109,14 +109,16 @@ reading on the one or two functions history says changes come back to, nothing a
 cold ones. Structural claims the model makes are checked by a parser before publication. And
 every pull request carries a line saying what could not be analysed and why.
 
-Four properties follow, and each is measured or verified rather than asserted:
+Four properties follow. **Two are now measured out-of-sample, one is billed, one is verified —
+and a fifth that this document used to claim has been measured and withdrawn.** See
+`docs/product/evidence-ledger.md` for the full accounting, including what failed.
 
 | | |
 |---|---|
 | **Quiet** | Fires on 10–12% of changes, held steady across repositories differing 80× in velocity |
 | **Honest** | Reports its own blind spots — verified as unavailable to all seven competitors |
-| **Right about where to look** | Names the function a later fix returns to, +22 points above its rate on non-repairs, p = 0.015 |
-| **Cheaper** — *not yet measured* | Inference on a fraction of the diff instead of all of it. The 2× figure later in this document is arithmetic, not a measurement |
+| **Right about where to look** | **Replicated out-of-sample.** Ranking the changed files by prior touch count and reading the top three misses **1.21%** of the changes a later fix returns to, against **3.12%** for an alphabetical ordering — on **six repositories the method was never developed against**, n = 2,400, McNemar **p < 0.000001**, positive in **6 of 6**. The original eight gave **1.44% vs 3.31%**. The two lifts differ by **0.05 points** |
+| **Cheaper** — *billed, not estimated* | **$0.119 per pull request** on real diffs through Vertex, against a $0.140 derived estimate — but the estimate was right by luck: input is 5.2% of the bill and **thinking is 91.3%** |
 
 ---
 

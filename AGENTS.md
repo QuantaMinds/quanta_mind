@@ -11,16 +11,16 @@
 # QuantaMind (`quantamind`)
 
 Every AI reviewer reads the whole diff at one depth. **We decide where to look first and only
-read hard there.** A model-free pass ranks the changed functions by how often each has needed a
-follow-up fix; that ranking decides where inference goes. A parser checks the model's claims
-before publication, and every review states what it could not analyse.
+read hard there.** A model-free pass ranks the changed files by how often each has needed a
+follow-up fix, and that ranking decides where inference goes.
 
-**The founding correlation test returned NULL** (RR 1.040 against a 1.5 stop threshold), killing
-the earlier product — unsoundness labels over MCP. **That architecture is not built and this one
-inherits none of it.** What justifies this one: the ranked function is the one a later fix
-returns to, +22 points above its rate elsewhere, replicated by an independent rater. Read
-`docs/product/QUANTAMIND.md` for why, `docs/plans/product-skeleton.md` before your first change, and
-treat `research/` as the evidence base, never as product code.
+**The founding correlation test returned NULL** (RR 1.040), killing the earlier product; **this one
+inherits none of it.** What justifies it is the only claim here that has reproduced out-of-sample:
+**top-three-by-fix-history misses 1.21% of the changes a later fix returns to, against 3.12% for
+alphabetical order — six repositories the method never saw, n = 2,400, p < 1e-6, 6 of 6 positive,
+0.05 points from the original eight.** The model-free half replicated; **the model's findings
+measured 66.7–74.2% wrong and are not shipped.** Read `docs/product/QUANTAMIND.md` for why and
+`docs/product/evidence-ledger.md` for what failed; `research/` is evidence, never product code.
 
 ---
 
