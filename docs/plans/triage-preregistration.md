@@ -191,3 +191,79 @@ should screen `ast` import nodes, not text.
 pandas, django, ansible, scrapy and celery where the same model scored 82.1% wrong and zero correct.
 Same schema, same gate, same rubric. **If 27.8% is the gate, it survives. If it is the corpus, it
 collapses back toward 80%.** That is one run and it is the only way to attribute this number.
+
+
+---
+
+# THE GATE ON THE HARD CORPUS — **52.4% wrong. FAILS.** And the easy corpus was most of the story.
+
+| | easy 2010–12 (18) | **hard, recent (21)** |
+|---|---|---|
+| CORRECT | 11.1% | **4.8%** |
+| **WRONG** | **27.8%** | **52.4%**, Wilson [32.4%, 71.7%] |
+| UNFALSIFIABLE | 44.4% | 14.3% |
+| TRIVIAL | 16.7% | **28.6%** |
+
+**52.4% against a bar of under 50%. It fails, and the 27.8% did not transfer.** Easy versus hard is
++24.6 points at p = 0.119 — not significant on these numbers, but the point estimate nearly doubles
+and the gate lands on the wrong side of the bar exactly where every previous design did.
+
+## But the gate is not nothing, and this is the one honest positive
+
+Same model, same hard corpus, four designs:
+
+| design | wrong | correct |
+|---|---|---|
+| line anchors | 82.1% | 0.0% |
+| symbol anchors | 77.8% | 2.8% |
+| ±10 window | 66.7% | 2.6% |
+| **execution gate** | **52.4%** | 4.8% |
+
+**Gate against line anchors on the same corpus: p = 0.0150.** That is the first statistically
+detectable improvement any design has produced. **It is real and it is not enough** — 52.4% is
+still worse than a coin, and the bar was fixed at 50% before any of this ran.
+
+## What the gate actually buys, and it is not correctness
+
+**TRIVIAL rose from 7.7% ungated to 28.6% gated.** The raters' words:
+
+> *"Two SETTINGS frames are genuinely queued, but they flush in one `_write_to_transport()` write"*
+> *"`or {}` does swallow a falsy non-mapping, but an empty list yields the identical result"*
+> *"NaN yielding NaT under `errors="raise"` is the documented, comment-stated intent"*
+
+**True, demonstrable, correctly anchored, worth nothing.** Requiring a runnable snippet biases the
+model toward claims it *can* reduce to a self-contained program, and those are the small, local,
+inconsequential ones. **The gate buys precision by trading away importance.**
+
+**Useful yield: 1 correct finding of 21 published, across 20 pull requests — 0.05 per pull
+request.** One comment every twenty reviews.
+
+## And the crash rate says something about the claims themselves
+
+| | easy | hard |
+|---|---|---|
+| CRASHED | 6.7% | **31.7%** |
+
+**On hard code the model cannot write a demonstration that runs, a third of the time.** A crash is
+not a refutation — those 13 findings are undecided, not disproven — but it measures how far the
+claims are from being reducible to a program.
+
+## Two caveats on this run, both mine
+
+**It used the pre-fix substring screen.** `execute.py` was corrected to screen `ast` import nodes
+after this process had loaded the module, so the 5 REFUSED here still come from the crude version
+that wrongly rejected `requests` as a variable name.
+
+**And n = 21 is small.** The Wilson interval [32.4%, 71.7%] spans the bar. This is a failure by
+point estimate on a sample that cannot resolve much — which is itself the answer to whether to keep
+going.
+
+## The reading
+
+**Six designs, six failures.** 82.1%, 77.8%, 66.7%, 61.1%, and now 52.4% — a real downward trend,
+statistically detectable at the ends, and it stops above the bar while the useful yield stays at
+roughly one finding per twenty pull requests.
+
+**The review half does not work, and the sequence of attempts is now informative enough to say
+why**: every fix that helped did so by narrowing what the model was allowed to claim, and the
+narrowing that finally moved the number also emptied it of content.

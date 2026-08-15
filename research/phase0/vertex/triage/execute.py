@@ -21,24 +21,45 @@ CONSUMED BY: `execution_run.py` in this package.
 
 from __future__ import annotations
 
+import ast
 import os
 import subprocess
 import sys
 import tempfile
 
 TIMEOUT_S = 10
-BANNED = (
-    "import os",
-    "import shutil",
-    "import subprocess",
-    "open(",
-    "__import__",
-    "socket",
-    "requests",
-    "urllib",
-    "eval(",
-    "exec(",
+
+# Modules a demonstration has no business touching. Matched against RESOLVED IMPORT NAMES from the
+# parse tree, never against text -- the substring version refused `requests` where it was a local
+# variable name in a scrapy snippet, and `import os` where it was a legitimate use of os.path.
+# It killed 5 of 30 findings, some of them wrongly, which is a screen failing the way the thing it
+# screens for fails.
+BANNED_MODULES = frozenset(
+    {
+        "os",
+        "sys",
+        "shutil",
+        "subprocess",
+        "socket",
+        "urllib",
+        "urllib2",
+        "requests",
+        "http",
+        "ftplib",
+        "smtplib",
+        "pathlib",
+        "tempfile",
+        "pickle",
+        "ctypes",
+        "signal",
+        "multiprocessing",
+        "threading",
+        "importlib",
+        "builtins",
+        "webbrowser",
+    }
 )
+BANNED_CALLS = frozenset({"open", "eval", "exec", "compile", "__import__", "input"})
 
 
 class Unsafe(RuntimeError):
@@ -46,11 +67,33 @@ class Unsafe(RuntimeError):
 
 
 def screen(snippet: str) -> None:
-    """Refuse a snippet that does anything but compute. A demonstration needs no I/O."""
-    low = snippet.lower()
-    for b in BANNED:
-        if b in low:
-            raise Unsafe(f"snippet contains {b!r}; a demonstration needs no I/O")
+    """Refuse a snippet that does anything but compute, judged from the parse tree.
+
+    A snippet that will not parse is refused too -- it cannot demonstrate anything, and letting
+    the interpreter reject it later would report CRASHED, conflating "the model wrote nonsense"
+    with "the claim is false".
+    """
+    try:
+        tree = ast.parse(snippet)
+    except (SyntaxError, ValueError) as exc:
+        raise Unsafe(f"snippet does not parse: {exc}") from None
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for a in node.names:
+                root = a.name.split(".")[0]
+                if root in BANNED_MODULES:
+                    raise Unsafe(f"imports {root!r}; a demonstration needs no I/O")
+        elif isinstance(node, ast.ImportFrom):
+            root = (node.module or "").split(".")[0]
+            if root in BANNED_MODULES:
+                raise Unsafe(f"imports from {root!r}; a demonstration needs no I/O")
+        elif (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id in BANNED_CALLS
+        ):
+            raise Unsafe(f"calls {node.func.id}(); a demonstration needs no I/O")
 
 
 def run(snippet: str) -> dict[str, object]:
