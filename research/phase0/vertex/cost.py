@@ -28,7 +28,7 @@ from units import changed_units
 MODEL = "gemini-2.5-pro"
 BUDGET = 3
 WORKERS = 6
-OUT = "vertex_cost.jsonl"
+OUT = "corpora/vertex_cost.jsonl"
 
 # Thinking is billed at the output rate and the first run showed it consuming the whole budget,
 # truncating answers to one token. A ceiling is set so the answer always has room; the ceiling

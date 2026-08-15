@@ -8,7 +8,7 @@ WHY:  This project has already shipped a wrong number three ways -- a cost table
       drift, and the receipt has to be a computation over the raw data rather than a citation of
       a document that might itself be stale.
 IMPORTS: stdlib only (json, pathlib, collections, math).
-CONSUMED BY: nobody -- it prints. Run it from `research/phase0/`.
+CONSUMED BY: nobody -- it prints. Run it from `research/phase0/claims/`.
 """
 
 from __future__ import annotations
@@ -17,10 +17,12 @@ import collections
 import json
 import pathlib
 import statistics
-from math import comb, erfc, sqrt
+from math import erfc, sqrt
 
-R = pathlib.Path(__file__).parent / "results"
-V = pathlib.Path(__file__).parent / "vertex"
+from stats import chance, kappa, mcnemar, wilson
+
+R = pathlib.Path(__file__).parent.parent / "results"
+V = pathlib.Path(__file__).parent.parent / "vertex"
 PASS = FAIL = 0
 
 
@@ -34,28 +36,6 @@ def check(label: str, got: object, want: object, tol: float = 0.05) -> None:
     PASS, FAIL = PASS + int(ok), FAIL + int(not ok)
     mark = "PASS" if ok else "FAIL"
     print(f"    [{mark}] {label:52s} computed {got}   claimed {want}")
-
-
-def wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
-    p = k / n
-    d = 1 + z * z / n
-    c = (p + z * z / (2 * n)) / d
-    h = z * sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
-    return max(0.0, c - h), min(1.0, c + h)
-
-
-def mcnemar(b: int, c: int) -> float:
-    n = b + c
-    return 1.0 if n == 0 else min(1.0, 2 * sum(comb(n, i) for i in range(min(b, c) + 1)) / 2**n)
-
-
-def kappa(a: dict[str, str], b: dict[str, str], cats: tuple[str, ...]) -> float:
-    n = len(a)
-    po = sum(1 for k in a if a[k] == b[k]) / n
-    pe = sum(
-        (sum(1 for k in a if a[k] == c) / n) * (sum(1 for k in b if b[k] == c) / n) for c in cats
-    )
-    return (po - pe) / (1 - pe)
 
 
 print("  A. THE REVIEW HALF — first run, two blind raters")
@@ -142,15 +122,11 @@ check("unseen Wilson low", round(flo * 100, 1), 67.3, 0.1)
 print("\n  F. THE CHANCE BASELINE, ALL THREE SAMPLES")
 
 
-def _chance(n, t, b=3):
-    return 1.0 if n - t < b else 1 - comb(n - t, b) / comb(n, b)
-
-
 allev = []
 for f in ("discriminability_first", "discriminability_fresh", "discriminability_third"):
     per = json.loads((R / f"{f}.json").read_text())
     allev += [e for v in per.values() for e in v]
-ch = 1 - statistics.mean(_chance(int(e["n_files"]), int(e["n_target"])) for e in allev)
+ch = 1 - statistics.mean(chance(int(e["n_files"]), int(e["n_target"])) for e in allev)
 hh = 1 - statistics.mean(e["hit"] for e in allev)
 aa = 1 - statistics.mean(e["alpha_hit"] for e in allev)
 check("pooled events across 20 repositories", len(allev), 7989, 0)
@@ -177,7 +153,17 @@ check(
     0.02,
 )
 
-print("\n  H. COST")
+print("\n  H. THE +/-10 WINDOW RUBRIC")
+wv = json.loads((R / "window_verdicts.json").read_text())
+cwv = collections.Counter(wv.values())
+nw = len(wv)
+check("re-adjudicated findings", nw, 39, 0)
+check("window WRONG %", round(cwv["WRONG"] / nw * 100, 1), 66.7, 0.1)
+check("window CORRECT count", cwv["CORRECT"], 1, 0)
+check("cleared the <50% bar", cwv["WRONG"] / nw < 0.50, False)
+check("anchor failures nearly eliminated (<=3 remain)", cwv["WRONG"] <= 32, True)
+
+print("\n  I. COST")
 cost = json.loads((R / "vertex_cost_c3.json").read_text())
 IN, OUT = 1.25, 10.00
 per = collections.defaultdict(float)

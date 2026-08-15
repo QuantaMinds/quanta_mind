@@ -59,3 +59,64 @@ to checking a window, which is a smaller and more achievable guarantee.
 suggested, and widening the window trades precision away for nothing. **Then the review half is
 closed on the strongest evidence yet: strict anchors, symbol anchors, and forgiving anchors all
 land in the same place.**
+
+
+---
+
+# RESULT — **FAILS at 66.7%**, and the failure is precise about why
+
+| | strict line | **±10 window** |
+|---|---|---|
+| CORRECT | 0.0% | 2.6% |
+| **WRONG** | 82.1% | **66.7%**, Wilson [51.0%, 79.4%] |
+| UNFALSIFIABLE | 10.3% | 20.5% |
+| TRIVIAL | 7.7% | 10.3% |
+
+**26 of 39 wrong against a bar of 50%. p = 0.120 on the change.** The pre-registration said it
+clears only by rescuing all 14 anchor failures into CORRECT. **It rescued 6, and 1 reached
+CORRECT** — the other 5 went to UNFALSIFIABLE and TRIVIAL.
+
+## The window did exactly what it was supposed to. That is the finding.
+
+| bucket | strict | ±10 window |
+|---|---|---|
+| **describes code that is not there** | **14 of 32 (43.8%)** | **2 of 26 (7.7%)** |
+
+**The anchor problem is solved.** From the largest failure class to two findings. And the
+wrong-rate barely moved, because **the anchor was never what most of these were failing on.**
+
+## Why the remaining 26 are wrong
+
+| n | share | reason |
+|---|---|---|
+| **9** | **34.6%** | claims a **merged, passing test** is broken |
+| 5 | 19.2% | refuted by code a few lines away |
+| 5 | 19.2% | misreads what the code does |
+| 4 | 15.4% | wrong about Python itself |
+| 2 | 7.7% | describes code that is not there |
+| 1 | 3.8% | arithmetic it could have performed itself |
+
+**Forgiving the anchor converts WRONG into UNFALSIFIABLE, never into CORRECT.** Removing a reason
+to reject a claim does not make the claim true. An unfalsifiable finding is still unpublishable —
+a reviewer cannot act on it either.
+
+## The one bucket that deserves a caveat, and it does not rescue the result
+
+**Nine of 26 assert that a test which demonstrably passes is broken.** A reviewer at review time
+does not know the test passes — but **the developer does, and finds out in seconds.** Those cost
+trust rather than correctness.
+
+**Excluding that entire bucket as an artefact of grading merged pull requests: 17 of 39 = 43.6%
+wrong.** Below the bar — and it is not a legitimate exclusion, because the claims are still false
+and the developer still pays to discover it. **Recorded because someone will propose it, and the
+answer is that the honest number is 66.7% with the caveat attached, not 43.6% with it removed.**
+
+## What this closes
+
+**Strict line anchors, symbol anchors, and forgiving ±10 anchors all land in the same place**:
+82.1%, 77.8%, 66.7% wrong. Three different anchoring schemes, one corpus, no design clears 50%.
+
+**And one real defect was found twice.** `get_namespace(X)` called without `xp=xp`, discarding the
+caller's argument, was independently marked CORRECT by the symbol-anchor raters and the window
+raters — different designs, different rater pools, same bug. **The model is not incapable of
+finding a defect. It produces one real finding surrounded by thirty-eight that are not.**

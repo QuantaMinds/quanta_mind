@@ -30,7 +30,7 @@ from units import changed_units
 
 MODEL, BUDGET, WORKERS = "gemini-2.5-pro", 3, 6
 MAX_OUTPUT_TOKENS, THINKING_BUDGET = 8192, 4096
-OUT = "enriched_findings.jsonl"
+OUT = "corpora/enriched_findings.jsonl"
 
 SCHEMA = """Return ONLY a JSON array. Each element MUST have exactly these fields:
   claim_type : one of "missing_guard", "wrong_order", "unhandled_case", "resource_leak",
