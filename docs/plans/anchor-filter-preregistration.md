@@ -117,3 +117,64 @@ value"*), and claims contradicted by lines adjacent to the ones cited.
 **What would be needed next is not a fix, it is a different design** — and this project's own rule
 applies: the review half is a separate project, and nothing in four turns of measurement argues for
 starting it now.
+
+
+---
+
+# INSIDE THE WRONG DATA — the mechanism, cross-referenced
+
+The 32 wrong findings on the unseen corpus, classified by the raters' own stated reason:
+
+| why it is wrong | n | share |
+|---|---|---|
+| **the cited line does not contain the code the claim describes** | 14 | **43.8%** |
+| the merged test's assertion passed | 7 | 21.9% |
+| **refuted by code one to three lines from the citation** | 6 | 18.8% |
+| wrong about the language or framework | 4 | 12.5% |
+| arithmetic it could have performed itself | 1 | 3.1% |
+
+**The top two are the same failure and together they are 62.5%: the claim is not about the code at
+the line it names.**
+
+## The mechanical test, across both corpora
+
+If a claim quotes an identifier in backticks, that identifier should appear at the line the claim
+cites. Across **93 findings**, 71 quote code:
+
+| | n | wrong | correct |
+|---|---|---|---|
+| quoted code **is** at the cited line | 9 | 44.4% | 11.1% |
+| quoted code is **not** at the cited line | **62** | 72.6% | 4.8% |
+
+> **87.3% of claims that quote code, quote code that is not at the line they cite.**
+
+**That is the mechanism.** The model writes a plausible defect narrative naming
+`flat_data.view()`, and separately emits a line number pointing at
+`images = flat_data.reshape(-1, 8, 8)`. **The prose and the anchors are generated independently of
+one another**, and nothing in the schema forces them to agree.
+
+## Why this explains every failed fix
+
+| fix | why it could not work |
+|---|---|
+| **snap anchors to statements** | the numbers were never coupled to the prose; snapping relocates an unrelated number to a tidier unrelated place |
+| **add structured context** | more context improves the narrative; it does not bind the narrative to a line number |
+| **reject on imprecise anchors** | the decoupling is near-universal (87.3%), so it does not separate good findings from bad — there is nothing on the other side of the line |
+
+## And it is a diagnosis, not a detector — stated because the temptation is obvious
+
+The exact-line signal looks usable (44.4% wrong versus 72.6%) and **is not significant: Fisher
+exact p = 0.124 on n = 9.** It also **inverts** as the window widens — at ±10 lines the "present"
+group is 75.0% wrong and the "absent" group 61.3%. **That is the shape of a small-sample artefact,
+and building on it would repeat the mistake this whole thread has been correcting.**
+
+## What would actually follow from this
+
+**The fix implied is not a better prompt — it is removing the model's freedom to invent the
+anchor.** Have the model name the *symbol* it means, and derive the line number from the parse tree
+rather than accepting one from the model. Then prose and anchor cannot disagree, because only one
+of them is generated.
+
+**That is a different design, not a repair of this one**, and this project's rule stands: the review
+half is a separate project. What this deep-dive contributes is that the separate project now has a
+specific first requirement rather than a hope.
