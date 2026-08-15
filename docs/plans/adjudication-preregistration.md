@@ -79,7 +79,7 @@ place where being wrong is worse than being noisy.
 no protocol inside it fixes the incentive. Two partial mitigations: every verdict is recorded with
 the specific line of code that decides it, so a second reader can overturn it cheaply; and the
 thresholds above are fixed before reading. **A second rater is required before any of this is
-published**, exactly as the ranking result required one and got it at κ = 0.92.
+published**, exactly as the ranking result required one and got it at 92% agreement, κ = 0.66.
 
 ---
 
@@ -198,7 +198,7 @@ given the same anchor rule and the same four buckets.
 | quantity | why |
 |---|---|
 | raw agreement on the 4-way verdict | the headline |
-| **Cohen's κ** | agreement corrected for chance, the same instrument that replicated the ranking result at κ = 0.92 |
+| **Cohen's κ** | agreement corrected for chance, the same instrument that replicated the ranking result at **κ = 0.66** |
 | agreement on the binary WRONG / not-WRONG | the only distinction the STOP threshold depends on |
 | **W/n under rater 2 alone** | does the decision survive a reading that is not mine |
 
@@ -224,7 +224,14 @@ in the protocol and it was mine.
 
 **Rater 2 is the same model family as rater 1.** Independent context, independent reading, blind —
 but correlated priors. This is a genuine replication of the *reading*, and it is not the
-independent-family check the project used on the ranking result. **A human rater, or one from
+independent-family check the project used on the ranking result.
+
+**Correction, found while auditing this file:** the ranking result's replication is repeatedly
+cited in this session as κ = 0.92. **It is not. Agreement was 92%; Cohen's κ was 0.66**
+(`QUANTAMIND.md`, "Two raters — one with every incentive to find the effect"). The two numbers
+were conflated and the error propagated. It runs against the author in both directions: **today's
+κ = 0.711 is above this project's own precedent, not below it**, and the historical replication is
+weaker than it has been described as. **A human rater, or one from
 another family, remains the standard this has not yet met**, and any published version of this
 number must say so.
 

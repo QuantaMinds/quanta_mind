@@ -29,7 +29,7 @@ carries the protocol, the verdicts and the disagreements.
 
 | Measurement | n | Result | Claim it carries | Reaches it? |
 |---|---|---|---|---|
-| **Ranker names the repaired function** | 53 verdicts, 2 raters | 69–70% on repairs vs 47–48% on non-repairs, **+22 points**, Fisher p = 0.0151 | "We are right about where to look" | **Yes.** Replicated by an independent rater at 92% agreement, Cohen's κ = 0.92, same effect size to within a point |
+| **Ranker names the repaired function** | 53 verdicts, 2 raters | 69–70% on repairs vs 47–48% on non-repairs, **+22 points**, Fisher p = 0.0151 | "We are right about where to look" | **Qualified.** Replicated by an independent rater at 92% agreement, **Cohen's κ = 0.66** (moderate, not strong), same effect size to within a point. Rests on **39 genuine repairs**; the honest claim is +22 points, **95% CI +6 to +38** |
 | **Firing rate holds across velocity** | repos differing 80× | **10–12%** everywhere, via a percentile rather than a threshold | "Quiet" | **Yes.** The percentile is what makes it hold; a fixed threshold fired on 11% of one repo and 53% of another |
 | **Three units cover the change** | 1,969 paired events, 8 repos | file top-3 misses **1.22%**; function top-3 misses **8.84%**; five units miss 3.50% | "Three units miss at most 8.84%" | **Yes, with a named proxy.** See the caveat below |
 | **File-level allocation beats function-level** | same 1,969 | +7.62 points, McNemar exact **p < 0.0001**, discordant b = 157 / c = 7 | The allocation choice in the architecture | **Yes** |
@@ -76,6 +76,54 @@ at 4,096 by the harness; **46% of requests pinned that cap**. The first run set 
 observed a mean of 5,744 with a maximum of 13,108 — **1.51× the cost, $0.183 per pull request**.
 The price of a review is currently set by a dial, and the dial has never been tuned against
 output quality.
+
+---
+
+## 1a. "Ten measurements" is a count, not a weight — and the count is inflated
+
+**Written against the author's own repeated phrasing.** "Ten measurements support the ranking half"
+has been said in this project many times, including throughout the session that produced the
+adjudication. Audited strictly, the table above does not contain ten independent supports for the
+ranking half.
+
+| row | what it actually is |
+|---|---|
+| three units cover the change | **the same 1,969 events on the same 8 repositories** |
+| file-level beats function-level | **the same 1,969** |
+| six allocation variants | **the same 1,969** |
+| ranker names the repaired function | 53 hand-labelled verdicts |
+| the attribution rule is wrong | the same verdict corpus, extended to 3 corpora |
+| leaking the future degrades the ranker | **a known-answer test on the harness.** It proves the instrument measures something. It is not evidence for the product |
+| bot prevalence | **corpus hygiene. It says nothing about the ranking half** |
+| cost, and thinking's share of it | **says nothing about either half's quality** |
+
+**So the ranking half rests on roughly two datasets, not ten measurements: 1,969 paired events and
+53 hand-labelled verdicts, both drawn from the same eight convenience repositories.** Three
+analyses of one dataset are three analyses, not three replications. Counting them as ten let a
+number do work the evidence does not.
+
+**And the strictest true sentence available is worse than that.** The *only* test of the ranking
+half ever run on repositories **outside those eight** — whether the ranker points where human
+reviewers actually commented, on pre-2022 code — **returned a null.** The reconciliation offered
+for it (human comments are 5.9% structural, so where reviewers comment is not where defects live)
+is coherent and rests on an independently measured number, **and it was constructed after seeing
+the null.** It is an explanation, not a defence, and it has been labelled that way from the moment
+it was written.
+
+**What that means for the position the company is taking.** The measurement-layer claim is the one
+the evidence reaches — but it reaches it on two datasets from eight repositories, with one
+out-of-sample test that failed and was explained. **The properly powered rerun on six fresh
+repositories is therefore not a nice-to-have. It is the first real external-validity test the
+ranking half will ever have faced**, and its reading was fixed in advance in
+`docs/plans/ranking-rerun-preregistration.md` precisely because the temptation to explain a second
+null would be very strong.
+
+**Also corrected here.** The +22-point result's independent replication is cited across this
+project as κ = 0.92. **Agreement was 92%; Cohen's κ was 0.66** — moderate, not strong. And the
+effect rests on **39 genuine repairs**, so the defensible claim is *+22 points, 95% CI +6 to +38*.
+A six-point product and a thirty-eight-point product are different products.
+
+---
 
 **The named proxy on the coverage figure.** "Where a defect exists" means *a later commit within
 90 days whose message contains a fix word touched the same unit*. That is an outcome rule, not a

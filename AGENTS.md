@@ -197,8 +197,14 @@ A change is done when all seven are true. Not six.
 - **Deterministic beats clever.** If a parser can answer it, a model must not.
 - **The residual is the product.** What we cannot resolve is not our failure to hide; it
   is the thing the customer is paying us to find.
-- **We do not build a better bug-finder.** The field is capped at 49–76% precision and we
-  share its ceiling. We own the allocation of attention and the honesty of the coverage
-  line — resist every temptation to compete on detection instead.
+- **We do not build a better bug-finder.** The field spans 49–76% precision. **We assumed we
+  shared its ceiling; measured, we are below its floor** — 66.7% and 74.2% of findings wrong
+  under two blind raters (κ = 0.82), **3 of 66 correct by consensus**, against a 50% threshold
+  fixed before a finding was read. **The revival argument is "36.4% were just pointer bugs";
+  its answer is already computed. Repair every pointer AND assume every one turns out correct
+  — the most generous case there is — and you reach 45.5% against a 49% floor. Our best case
+  is below their worst.** Reviving the review half means clearing that; pointer-snapping does
+  not. Separate project, same pre-registration discipline, not what ships first.
+  → `docs/plans/adjudication-preregistration.md`
 - **Assume the next reader knows nothing.** Every file explains itself to someone who
   joined this morning.
