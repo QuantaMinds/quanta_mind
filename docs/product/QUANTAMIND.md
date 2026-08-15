@@ -440,10 +440,11 @@ estimate.
 
 **The full ledger is `docs/product/evidence-ledger.md`** — every measurement run, against the
 claim it carries, and the rows where argument is currently covering for a gap. Its summary:
-**ten measurements support the ranking and zero support the review**, because the ranker is
-model-free and could be measured against seven years of history, while the review does not
-exist until a model runs. The two paragraphs below are the sharpest cases; the ledger is the
-list.
+**the ranking rests on two datasets and the review was measured and failed its own
+pre-registered bar** — 66.7% and 74.2% of findings wrong under two blind raters. The asymmetry
+is structural: the ranker is model-free and could be checked against seven years of history,
+while the review did not exist until a model ran. The paragraphs below are the sharpest cases;
+the ledger is the list.
 
 **Whether a reviewer shown the routing line before the defect exists catches anything they
 would otherwise miss.** Every number above is retrospective. This is a field measurement, and

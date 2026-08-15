@@ -71,7 +71,7 @@ repository because it disagrees is the move this entire pre-registration exists 
 
 ## What a NULL would mean — decided before it can be argued about
 
-**It would not overturn the ten measurements.** Those target *the function a later fix returns
+**It would not overturn the retrospective results.** Those target *the function a later fix returns
 to*. This targets *the file a human commented on*. Different quantities, and the corpus work
 already gives a reason they need not coincide: only **5.9%** of human review comments assert
 anything structurally checkable, so where reviewers comment is mostly not where defects live.

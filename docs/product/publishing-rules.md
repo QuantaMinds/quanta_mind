@@ -42,6 +42,18 @@ When someone asks for our benchmark:
 - **Say the thing, then stop.** No sentence exists to sound impressive. No "seamless",
   "revolutionise", "empower", "leverage".
 - **Never claim to catch more bugs.** We do not, and the first customer to test it will find out.
+- **Never imply our findings are correct — that has now been measured, and they are not.** Two
+  blind raters put **66.7% and 74.2% of published findings wrong** (κ = 0.82 on the binary), with
+  **3 of 66 correct by consensus**. Nothing may be said or implied about the quality of what this
+  reviewer finds, and the review half is not shipped. **The dangerous sentence is not a boast, it
+  is the true one that gets completed for us:** a reader who hears *"we tell you what we could not
+  read"* finishes it as *"…so what they did read, they got right."* **Whenever the coverage line
+  is stated externally, that inference has to be closed off in the same breath**, because it is
+  the one a customer will make unprompted and it is the one the evidence contradicts.
+- **Never quote a competitor's precision beside one of our own numbers.** Martian's precision is
+  *behavioural* — did the developer make the change — and our adjudication measured whether a claim
+  is *true and anchored*. They are different quantities, and the comparison was made internally
+  before it was caught. Their band is quotable **about them**, never as a backdrop for us.
 - **Concede only what is true, and detection is not one of the true things.** Honesty is not
   agreeing with whatever the market assumes. A page saying *"use them if you want the most bugs
   found"* hands over the one contest nobody has won, on no evidence, and turns us into the lite

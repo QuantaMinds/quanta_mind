@@ -40,3 +40,8 @@
   scrapy/scrapy                   140 pre-2022 PRs with human .py comments
     #426     28 files  rank of first commented file: 21
     #570     10 files  rank of first commented file: 2
+    #799     21 files  rank of first commented file: 4
+    #803     18 files  rank of first commented file: 6
+    #1149    20 files  rank of first commented file: 10
+    #1236    11 files  rank of first commented file: 1
+  celery/celery                   159 pre-2022 PRs with human .py comments

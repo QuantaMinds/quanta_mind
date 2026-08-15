@@ -16,7 +16,7 @@ gate.**
 | the review half, adjudicated | rater 1 | rater 2 | agreement |
 |---|---|---|---|
 | **wrong** | 66.7% | **74.2%** | 92.4%, κ = 0.82 |
-| correct | 9.1% | 4.5% | both far below the field's 49% floor |
+| correct | 9.1% | **4.5%** | 3 of 66 by consensus |
 
 **The threshold was 50% wrong, committed before a single finding was read. Both readings clear it,
 and every disagreement between them made the result worse rather than better.** The reading is:
@@ -212,7 +212,12 @@ worked example before any model runs, and not yet answered.
 
 ## 4. The gap, stated once
 
-Ten measurements support the **ranking**. Zero measurements support the **review**.
+**Two datasets support the ranking. The review was measured and failed.**
+
+That is the corrected form of a sentence this project repeated for weeks as "ten measurements
+support the ranking and zero support the review". The count was inflated — see *"Ten measurements"
+is a count, not a weight* above — and the second half is now out of date in the worse direction:
+the review half is no longer unmeasured, it is measured and below its own pre-registered bar.
 
 That is not an accident of sequencing — it is what made the project buildable. The ranker is
 model-free, so it could be measured against seven years of history before a single API call. The
