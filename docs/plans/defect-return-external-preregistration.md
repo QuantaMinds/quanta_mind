@@ -176,3 +176,26 @@ an effect size within 0.05 points of the original.
 does not restore *"we allocate attention the way a good reviewer would"*, which failed twice on its
 own terms. **Knowing where to look and being right about what you see remain separate, and only the
 first is now demonstrated off-corpus.**
+
+---
+
+# SECOND REPLICATION — a third disjoint sample, pre-registered before cloning
+
+**Repositories: `numpy`, `sqlalchemy`, `matplotlib`, `pytest`, `poetry`, `home-assistant/core`.**
+None appears in the original eight or the fresh six. Chosen for domain spread — numerics, an ORM,
+plotting, a test framework, packaging, and a large IoT platform — because both prior samples were
+weighted toward ML and web tooling.
+
+**Everything else is identical and nothing is tuned**: same harness, same parameters copied from
+`allocation_variants.py`, same alphabetical control, same 400-event cap, same readings.
+
+| reading | rule |
+|---|---|
+| **CONFIRMED** | control beaten, McNemar **p < 0.05**, and ≥ 4 of 6 repositories individually positive |
+| **NULL** | history at or above the control, or p ≥ 0.05 |
+| **INCONCLUSIVE** | < 500 events or < 20 discordant pairs |
+
+**What a failure here would mean, decided now.** Two replications and one failure would put the
+effect at "holds on some repository populations and not others", which is a materially weaker claim
+than the one now in `AGENTS.md` — and the constitution would have to say so. **A third sample is
+worth running precisely because the first replication was strong enough to be worth attacking.**
