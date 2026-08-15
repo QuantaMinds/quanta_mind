@@ -57,3 +57,4 @@ secrets/
 
 # Hook-written session records, regenerated every session
 docs/plans/session-*.md
+research/phase0/vertex/pr_corpus.json

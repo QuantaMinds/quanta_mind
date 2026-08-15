@@ -1029,24 +1029,34 @@ waiting for a date.
 The git path is the one we control and the one the research validated. **Datadog is the faster
 signal and we consume rather than rebuild it** — see the integrations section.
 
-## Before routing inference through Vertex, three things to confirm
+## Routing inference through Vertex — checked, 2026-08-14
 
-Claude runs on Vertex AI, so model spend could land on a GCP bill and against GCP credits.
-**Three checks before any plan depends on that**, and none is a formality:
+**Gemini only.** The project is `quantamind-oss`, billing is enabled, `aiplatform.googleapis.com`
+is on, and `gemini-2.5-pro`, `gemini-2.5-flash` and `gemini-2.5-flash-lite` all answered live.
+Claude on Vertex was probed at the same time: `claude-sonnet-4-5` is offered in `us-east5` but
+returns `NOT_FOUND` for this project — a Model Garden subscription gate — and it will not be
+opened.
 
-1. **Do the credits apply to partner models?** Some GCP credit programmes exclude marketplace
-   and partner models. Ask the account representative about Claude on Vertex specifically.
-2. **Does prompt caching behave identically?** Same cache-read multiplier, same five-minute and
-   one-hour window economics. **The entire cost architecture rests on this**, and a difference is
-   not a rounding error.
+**That settles the first of the three checks by removing it.** The partner-model question was
+whether GCP credits apply to marketplace models. Gemini is first-party Google, billed as ordinary
+Vertex usage, so the credits apply on the same terms as any other Vertex spend. **The other two
+remain open and neither is a formality:**
+
+1. ~~Do the credits apply to partner models?~~ **Moot.** First-party model, ordinary Vertex
+   billing. This was the largest single risk to the $16,000-of-credits arithmetic and it is gone.
+2. **Does prompt caching behave identically?** Gemini's context caching is a *different
+   mechanism* from Anthropic's prefix caching — explicit cached-content objects with their own
+   minimum token count and TTL, not an automatic prefix match. **The entire cost architecture
+   rests on this**, the design in the render step was written against prefix semantics, and this
+   is now the top open question rather than a checkbox.
 3. **Is structured output the same?** The verification pillar requires findings to arrive as
    parseable structure. Free-text output makes adjudication impossible, so a gap here is not a
    degradation — it removes a layer.
 
-**And keep the label attached to any figure derived from it.** $0.140 per pull request is
-derived from a specification, and its shallow-call token sizes are assumed rather than observed.
-Any headline built on it — "$16,000 of credits is roughly 114,000 reviews" — inherits that, and
-should carry it.
+**And keep the label attached to any figure derived from it.** $0.140 per pull request was
+derived from a specification, and its shallow-call token sizes were assumed rather than observed.
+Any headline built on it — "$16,000 of credits is roughly 114,000 reviews" — inherited that. **It
+has now been billed rather than priced; see the measured figure below.**
 
 ## Which database runs, and when
 
@@ -1526,11 +1536,22 @@ a model we have already evaluated. Enterprise gets a model we have not.
    | **What counts as a disagreement** | **both models publish a finding on the same unit with incompatible claims.** One publishing while the other is silent is a *different* case — informative about coverage, not adjudicable head-to-head, and counted separately |
    | **Adjudication** | blind to which model produced which finding |
    | **Sample** | 100 adjudicable disagreements, or the whole set if fewer |
-   | **The decision rule** | see below — **the first version was set on a denominator the sample cannot carry** |
+   | **The decision rule** | **superseded — the provider question was decided by direction, not by measurement** |
 
-   **The threshold and the instrument were mismatched by an order of magnitude.** The rule said
-   *"within 2 percentage points"*. Computing what an adjudicated sample can resolve, by exact
-   binomial on the disagreement wins:
+   **Gemini only. Decided 2026-08-14, and recorded as a decision rather than dressed up as a
+   result.** Claude on Vertex was probed the same day: `claude-sonnet-4-5` is offered in
+   `us-east5` but returns `NOT_FOUND` for this project, which is a Model Garden subscription
+   gate rather than an availability one. It will not be opened. Everything runs on Gemini.
+
+   **What that retires.** The Claude-versus-Gemini adjudication does not need running, and the
+   `$15 per repository per month` saving it was meant to arbitrate is no longer a live trade.
+   Two providers were also the only justification for keeping the render path provider-neutral
+   at cost to its clarity; that justification is gone, and the constraint should be dropped
+   deliberately rather than left standing as a cost nobody remembers paying for.
+
+   **What survives, because the arithmetic was about the instrument and not about Anthropic.**
+   The threshold was mismatched to its sample by an order of magnitude — the rule said *"within
+   2 percentage points"* while an exact binomial on adjudicated disagreements resolves this:
 
    | adjudicated disagreements | smallest skew resolvable at p < 0.05 |
    |---|---|
@@ -1539,25 +1560,23 @@ a model we have already evaluated. Enterprise gets a model we have not.
    | 200 | 15 points |
    | 400 | 10 points |
 
-   **At the pre-specified n=100 the instrument resolves a 22-point difference. It was being
-   asked to adjudicate 2.** That mismatch would have surfaced exactly when it was most tempting
-   to reinterpret.
+   **At n=100 the instrument resolves 22 points. It was being asked to adjudicate 2.** Any
+   future two-way model comparison inherits that table, and any rule written against it must
+   state the skew it can actually see.
 
-   **So the rule is restated in terms the sample can carry:** *Claude is retained only if it
-   wins **≥61 of 100** adjudicated disagreements — an exact-binomial rejection of 50/50 at
-   p < 0.05. Otherwise the test has found nothing.*
+   **And there is still a live comparison, now within one provider: `gemini-2.5-pro` versus
+   `gemini-2.5-flash`.** Unlike the retired one it is runnable today — both answered on this
+   project — and it matters more, because the probe showed pro spending **204 thinking tokens
+   to answer a one-word prompt** against flash's 20, and thinking bills at the output rate. The
+   same rule applies with the same arithmetic: *pro is retained only if it wins ≥61 of 100
+   adjudicated disagreements, an exact-binomial rejection of 50/50 at p < 0.05.* If it finds
+   nothing, that is not evidence of equivalence — it is evidence this instrument cannot tell,
+   and the choice then falls to measured cost, which is now available rather than estimated.
 
-   **And what happens when it finds nothing is decided now, because that is the likely
-   outcome.** A coarse instrument returning "no difference" is not evidence the models are
-   equivalent; it is evidence this test cannot tell. **In that case the decision is made on
-   stated grounds rather than on the number: retain Claude while customer count is small, and
-   revisit when volume makes $15 per repository per month material enough to pay for the larger
-   sample.** Conservative on the thing being sold, and it does not pretend the test decided.
-
-   **The reasoning behind wanting a tight threshold survives and is kept**: a wrong published
-   finding costs more here than at a competitor, because what is sold is that the review can be
-   trusted at its edges. What does not survive is the pretence that 100 hand-adjudications can
-   measure it to two points.
+   **The reasoning behind wanting a tight threshold is kept**: a wrong published finding costs
+   more here than at a competitor, because what is sold is that the review can be trusted at its
+   edges. What does not survive is the pretence that 100 hand-adjudications measure it to two
+   points.
 
    ### How much weight can drop rate carry? Measured on real reviews, and the instrument failed
 
