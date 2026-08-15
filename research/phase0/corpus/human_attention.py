@@ -26,6 +26,7 @@ import json
 import re
 import subprocess
 import sys
+import time
 from math import comb
 
 # FRESH repositories. The 8 convenience clones have now carried six variants, a holdout, a
@@ -50,11 +51,23 @@ BOT_MARK = re.compile(
 )
 
 
-def gh(path: str) -> object:
-    p = subprocess.run(["gh", "api", path], capture_output=True, text=True, timeout=90)
-    if p.returncode != 0:
-        raise RuntimeError(f"{path}: {p.stderr.strip()[:150]}")
-    return json.loads(p.stdout)
+def gh(path: str, attempts: int = 4) -> object:
+    """GitHub read, retried on the transient 5xx that killed the first run at repo four.
+
+    A 502 is not a result. Retrying it is not papering over a failure -- the failure that must
+    stay fatal is a read that keeps failing, because a dropped repository silently shrinks the
+    denominator and reads as a smaller sample rather than as an error.
+    """
+    last = ""
+    for i in range(attempts):
+        p = subprocess.run(["gh", "api", path], capture_output=True, text=True, timeout=120)
+        if p.returncode == 0:
+            return json.loads(p.stdout)
+        last = p.stderr.strip()[:150]
+        if not any(code in last for code in ("502", "503", "504", "timeout")):
+            break
+        time.sleep(3 * (i + 1))
+    raise RuntimeError(f"{path}: {last}")
 
 
 def is_bot(c: dict[str, object]) -> bool:
