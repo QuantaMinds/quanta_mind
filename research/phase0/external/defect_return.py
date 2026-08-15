@@ -46,15 +46,15 @@ def mcnemar(b: int, c: int) -> float:
     return min(1.0, 2 * sum(comb(n, i) for i in range(min(b, c) + 1)) / (2**n))
 
 
-def run_repo(name: str, path: str) -> list[tuple[bool, bool]]:
-    """(history top-3 hit, alphabetical top-3 hit) per admissible event."""
+def run_repo(name: str, path: str) -> list[dict[str, object]]:
+    """One record per admissible event, carrying everything a later question might need."""
     commits = stream(path)
     idx: dict[str, list[int]] = collections.defaultdict(list)
     for ts, _, files in commits:
         for f in files:
             idx[f].append(ts)
 
-    events: list[tuple[bool, bool]] = []
+    events: list[dict[str, object]] = []
     for i, (ts, _msg, files) in enumerate(commits):
         if not (2 <= len(files) <= MAX_FILES):
             continue
@@ -67,14 +67,24 @@ def run_repo(name: str, path: str) -> list[tuple[bool, bool]]:
         if not target:
             continue
         score = {f: prior(idx, f, ts) for f in files}
-        if len(set(score.values())) == 1:
+        vals = sorted(score.values(), reverse=True)
+        if len(set(vals)) == 1:
             continue  # nothing for a ranking to distinguish
         ranked = sorted(files, key=lambda f: (-score[f], f))
+        # The full record, not just hit/hit. The first version stored two booleans, so the
+        # later question "how does this compare to CHANCE?" could not be answered from the
+        # results at all -- it needed every repository re-cloned and every history re-scanned.
+        # Storing n_files and n_target costs nothing and makes the baseline a computation.
         events.append(
-            (
-                bool(set(ranked[:BUDGET]) & target),
-                bool(set(sorted(files)[:BUDGET]) & target),
-            )
+            {
+                "hit": bool(set(ranked[:BUDGET]) & target),
+                "alpha_hit": bool(set(sorted(files)[:BUDGET]) & target),
+                "n_files": len(files),
+                "n_target": len(target),
+                "top_score": vals[0],
+                "gap_1_2": vals[0] - vals[1] if len(vals) > 1 else 0,
+                "target_is_rank1": ranked[0] in target,
+            }
         )
         if len(events) >= MAX_EVENTS:
             break
@@ -82,18 +92,31 @@ def run_repo(name: str, path: str) -> list[tuple[bool, bool]]:
 
 
 def main() -> int:
-    per: dict[str, list[tuple[bool, bool]]] = {}
-    for name in sorted(os.listdir(CLONES)):
+    per: dict[str, list[dict[str, object]]] = {}
+
+    def on_disk(name: str) -> int:
+        total = 0
+        for root, _, fs in os.walk(os.path.join(CLONES, name)):
+            total += sum(
+                os.path.getsize(os.path.join(root, f))
+                for f in fs
+                if os.path.exists(os.path.join(root, f))
+            )
+        return total
+
+    # SMALLEST FIRST. One repository in the third sample was larger than the other five
+    # combined, and running it first meant no output at all until the whole sweep finished.
+    # Cheap repositories first gives a readable signal early and makes a doomed run killable.
+    names = [n for n in os.listdir(CLONES) if os.path.isdir(os.path.join(CLONES, n))]
+    for name in sorted(names, key=on_disk):
         path = os.path.join(CLONES, name)
-        if not os.path.isdir(path):
-            continue
         try:
             per[name] = run_repo(name, path)
         except ReadFailed as exc:
             print(f"  REFUSING TO REPORT — {exc}")
             return 1
-        h = sum(1 for a, _ in per[name] if not a)
-        a_ = sum(1 for _, b in per[name] if not b)
+        h = sum(1 for e in per[name] if not e["hit"])
+        a_ = sum(1 for e in per[name] if not e["alpha_hit"])
         n = len(per[name])
         if n:
             print(
@@ -108,15 +131,15 @@ def main() -> int:
     if not n:
         print("  REFUSING TO REPORT — no admissible events anywhere")
         return 1
-    hm = sum(1 for a, _ in allev if not a)
-    am = sum(1 for _, b in allev if not b)
-    b = sum(1 for a, bb in allev if a and not bb)
-    c = sum(1 for a, bb in allev if bb and not a)
+    hm = sum(1 for e in allev if not e["hit"])
+    am = sum(1 for e in allev if not e["alpha_hit"])
+    b = sum(1 for e in allev if e["hit"] and not e["alpha_hit"])
+    c = sum(1 for e in allev if e["alpha_hit"] and not e["hit"])
     p = mcnemar(b, c)
     pos = sum(
         1
         for v in per.values()
-        if v and sum(1 for a, _ in v if not a) < sum(1 for _, bb in v if not bb)
+        if v and sum(1 for e in v if not e["hit"]) < sum(1 for e in v if not e["alpha_hit"])
     )
     nrep = sum(1 for v in per.values() if v)
 
