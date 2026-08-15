@@ -197,14 +197,14 @@ A change is done when all seven are true. Not six.
 - **Deterministic beats clever.** If a parser can answer it, a model must not.
 - **The residual is the product.** What we cannot resolve is not our failure to hide; it
   is the thing the customer is paying us to find.
-- **We do not build a better bug-finder.** The field spans 49–76% precision. **We assumed we
-  shared its ceiling; measured, we are below its floor** — 66.7% and 74.2% of findings wrong
-  under two blind raters (κ = 0.82), **3 of 66 correct by consensus**, against a 50% threshold
-  fixed before a finding was read. **The revival argument is "36.4% were just pointer bugs";
-  its answer is already computed. Repair every pointer AND assume every one turns out correct
-  — the most generous case there is — and you reach 45.5% against a 49% floor. Our best case
-  is below their worst.** Reviving the review half means clearing that; pointer-snapping does
-  not. Separate project, same pre-registration discipline, not what ships first.
-  → `docs/plans/adjudication-preregistration.md`
+- **We do not build a better bug-finder.** **Measured: 66.7% and 74.2% of our findings wrong
+  under two blind raters (κ = 0.82), 3 of 66 correct by consensus, against a 50% threshold
+  fixed before a finding was read.** That is self-contained and it is the whole reason the
+  review half stopped. **Do NOT reach for rivals' 49–76% to dramatise it** — theirs is a
+  *behavioural* metric (did the developer make the change), ours is a *truth* metric
+  (is the claim true and anchored). They do not compare, and 49% is not a floor — Augment sits
+  at 47.0%. The revival argument is "36.4% were only pointer bugs"; repair every pointer AND
+  assume every one correct and you reach **45.5%** — ten times the measured rate, still not a
+  product. **That** is the number to answer, not a rival's. → `docs/plans/adjudication-preregistration.md`
 - **Assume the next reader knows nothing.** Every file explains itself to someone who
   joined this morning.

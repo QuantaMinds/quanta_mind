@@ -304,3 +304,59 @@ correct-rate far below the field's floor.
 blocks, and it disagreed with rater 1 nine times — but correlated priors remain. **This replicates
 the reading. It is not the different-family or human check the ranking result received, and no
 published version of this number may imply otherwise.**
+
+
+---
+
+# WEB CROSS-CHECK — and it breaks one of my own arguments
+
+**Checked against live sources on 2026-08-14, after the conclusions above were committed.**
+
+## The "below the field's floor" comparison does not survive, on two counts
+
+**One: 49% is not the field's floor.** It is CodeRabbit's precision. The board runs lower —
+**Augment at 47.0% precision** on the offline benchmark, and raw models lower still (Haiku 4.5
+32.6%, Sonnet 4.6 35.3%). Graphite reaches 75.0% precision at 8.8% recall, which is the shape of
+a tool that almost never speaks. **So "our best case (45.5%) is below their worst" is false as
+written.** 45.5% sits below the named commercial reviewers and near Augment's offline figure.
+
+**Two, and this is the more serious error: the metrics were never comparable.** Martian defines
+precision as *"what share of the reviewer's suggestions matched changes the developer made after
+review"*. That is **behavioural** — it measures whether a developer acted. This adjudication
+measured whether a claim is **true and correctly anchored**. A true finding a developer ignores
+counts *against* Martian precision; a false finding a developer happens to act on counts *for* it.
+**Putting 9.1% beside 49–76% compared two different quantities, and I did it in a commit message,
+in the ledger, and in the constitution.**
+
+## What survives, and it is the part that was always doing the work
+
+**The decision does not depend on the comparison.** 66.7% and 74.2% of published findings wrong,
+under two blind raters at κ = 0.82 on the binary, against a threshold of **50% fixed before a
+finding was read**. That is a self-contained result measured against a self-set bar, and it is
+unaffected by anything on anyone's leaderboard.
+
+**The 45.5% ceiling also survives, with its comparator removed.** It is still the answer to
+"pointer-snapping will fix this": the most generous imaginable repair yields ten times the
+measured correct rate and remains far short of a product. It just is not a statement about
+competitors.
+
+**Corrected in `AGENTS.md`, which now says explicitly not to reach for the competitors' band to
+dramatise our own number.** The temptation to borrow a rival's figure for rhetorical force is
+exactly the drift that produced the withdrawn catch rate.
+
+## What did verify
+
+| claim | status |
+|---|---|
+| Greptile 76.2% precision, leaderboard 30 July 2026 | **confirmed** |
+| Gemini 2.5 Pro on Vertex: $1.25 / $10.00 per 1M under 200K context | **confirmed** |
+| Thinking tokens billed at the **output** rate | **confirmed** — the basis of the 91.3% finding |
+
+**And one thing the check found that makes our own cost figure too low.** Vertex **non-global
+endpoints carry a 10% premium from 1 July 2026**, and the C3 run used `us-central1`. If that
+applies to this usage, **$0.1193 per pull request understates by roughly 10%** — call it
+**$0.131**. Flagged rather than silently corrected, because it should be read off an actual bill
+rather than off a pricing page.
+
+*Sources: Martian Code Review Bench leaderboard and coverage; Google Cloud Vertex AI generative-AI
+pricing. Re-check the leaderboard Nov 2026 — it is rolling.*

@@ -37,7 +37,7 @@ carries the protocol, the verdicts and the disagreements.
 | **Leaking the future degrades the ranker** | corpus-wide | top-1 moved **50.0% → 37.5%** when future commits were visible | The index is genuinely bounded by the past | **Yes — and this is a known-answer test**, not a result. It is how we know the harness measures anything |
 | **Six allocation variants against controls** | 1,969, pre-specified, held-out | **V0 (file top-3) still standing**; V2 not significant (train p = 0.18, holdout p = 0.125) | That the shipped policy is the best of those tried | **Yes**, and the holdout caught V2 overfitting on its first use |
 | **Bot prevalence in OSS review** | 5,195 comments, 8 repos | **31.5%** bot-written, 0.0% to 92.0% by repository; bot output **52.9%** structural vs human **5.9%** | Corpus hygiene — and the argument for schema-forced structure | **Yes**, as a floor. The detector is a login-and-marker match, so undetected bots bias it down |
-| **Cost per review, billed** | 68 requests, 23 PRs, live Vertex | **$0.119 mean** per PR (median $0.125, p90 $0.131, max $0.145) at a 4,096 thinking cap | "$0.140 per pull request" | **Yes — but the estimate was right by luck.** See below |
+| **Cost per review, billed** | 68 requests, 23 PRs, live Vertex | **$0.119 mean** per PR at a 4,096 thinking cap; **likely ~$0.131** once the 10% non-global-endpoint premium in force since 1 July 2026 is applied | "$0.140 per pull request" | **Yes — but the estimate was right by luck.** See below |
 
 **The cost figure was right in magnitude and wrong in structure, and the structure is what
 matters.** The $0.140 estimate modelled a large prompt made cheap by caching. The measurement
