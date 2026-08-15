@@ -16,7 +16,7 @@ WHY:  Every ranking result in this project is validated against a LATER FIX -- a
       bug was. That is the quantity the product sells, which is why it is worth measuring, and
       it is not the quantity a bug-finder would want.
 IMPORTS: stdlib only (collections, json, re, subprocess, sys). Shells out to `gh api`.
-CONSUMED BY: nobody -- it prints and writes human_attention.json.
+CONSUMED BY: nobody -- it prints and writes human_attention_v2.json.
 """
 
 from __future__ import annotations
@@ -28,11 +28,20 @@ import subprocess
 import sys
 from math import comb
 
-REPOS = ["cartography-cncf/cartography", "apache/airflow", "huggingface/transformers"]
+# FRESH repositories. The 8 convenience clones have now carried six variants, a holdout, a
+# corpus study and a cost run; whatever they say next about themselves is already known.
+REPOS = [
+    "scikit-learn/scikit-learn",
+    "pandas-dev/pandas",
+    "django/django",
+    "ansible/ansible",
+    "scrapy/scrapy",
+    "celery/celery",
+]
 CUTOFF = "2022-01-01"
 BUDGET = 3
-MIN_FILES, MAX_FILES = 4, 15  # >BUDGET, or top-3 covers everything and the test is vacuous
-EARLY_PAGES = 6
+MIN_FILES, MAX_FILES = 9, 30  # 4 put exact chance at 79.7% -- top-3 of 4 files is not a test
+EARLY_PAGES = 10
 
 BOT_MARK = re.compile(
     r"cubic:v=|cubic:review-run=|coderabbit|sourcery-ai|greptile|<!--\s*metadata:\{"
@@ -146,7 +155,7 @@ def main() -> int:
     if not events:
         print("  REFUSING TO REPORT — no admissible events")
         return 1
-    with open("human_attention.json", "w") as fh:
+    with open("human_attention_v2.json", "w") as fh:
         json.dump(events, fh, indent=1)
 
     n = len(events)

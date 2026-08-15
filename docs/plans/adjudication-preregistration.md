@@ -88,3 +88,91 @@ published**, exactly as the ranking result required one and got it at κ = 0.92.
 It does not measure whether the findings are *useful*, only whether they are *true*. A correct
 finding nobody cares about is a different failure, and the field's 36%-noise problem is exactly
 that failure. Usefulness needs the customer, and that is C4.
+
+
+---
+
+# RESULT — read 2026-08-14, after the thresholds above were committed
+
+**All 66 findings adjudicated, shuffled, blinded to rank.** Verdicts with the deciding line are in
+`research/phase0/results/adjudication_verdicts.json`.
+
+| bucket | count | share | Wilson 95% |
+|---|---|---|---|
+| **CORRECT** | 6 | **9.1%** | 4.2% – 18.4% |
+| **WRONG** | 44 | **66.7%** | 54.7% – 76.8% |
+| UNFALSIFIABLE | 5 | 7.6% | 3.3% – 16.5% |
+| TRIVIAL | 11 | 16.7% | 9.6% – 27.4% |
+
+**The pre-registered STOP condition fired, and not marginally.** W/n = 66.7% against a threshold
+of 50%, and **the lower bound of the interval is 54.7% — above the threshold**, so this is not a
+call that turns on sampling noise. C/n = 9.1% against the field's 49% floor.
+
+## The split inside WRONG is the whole diagnosis
+
+| failure | count | share |
+|---|---|---|
+| **anchor only** — the line numbers do not point at the code the claim is about | 24 | **36.4%** |
+| **semantically wrong** about the code | 20 | **30.3%** |
+
+**These have different fixes and only one of them is a model problem.** The anchor failures are
+systematic and dull: the model cites blank lines, comments, closing parentheses, and argument
+lines one or two below the statement it is describing. 19.7% of all 132 cited anchors land on
+something that is not a line of code at all, and 12.1% fall outside the function the model was
+shown. That is a tooling problem — anchors can be snapped to the nearest enclosing statement by a
+parser that already exists in this codebase.
+
+**But fixing it does not save the product, and the bound is worth stating precisely.** If every
+one of the 24 anchor failures were repaired *and every one turned out to be correct* — the most
+generous assumption available — C/n reaches **45.5%**, which is **still below the field's 49%
+floor**. The ceiling of the optimistic case does not clear the bottom of the competition.
+
+## What the rank comparison says about the allocation architecture
+
+| rank | findings | correct | wrong |
+|---|---|---|---|
+| 1 (deep) | 27 | 11.1% | 66.7% |
+| 2 | 20 | 10.0% | 60.0% |
+| 3 | 19 | 5.3% | 73.7% |
+
+**Flat.** The rank-1 deep read is not producing better findings than rank 3. On these counts
+nothing is significant and it should not be over-read — but there is no sign here that the
+allocation is buying quality, which is the thing it exists to buy. Found inside a test of the
+review half, about the ranking half, because the grading was blinded.
+
+## The 8 silences
+
+**Every one returned `finishReason: STOP`.** None was a truncation wearing the appearance of
+silence — the defect from the crashed run is genuinely fixed, and the mechanism that would make
+silence untrustworthy did not fire.
+
+**One thing to watch rather than to conclude: 6 of the 8 pinned the 4,096 thinking cap and then
+said nothing.** Under a lower budget that is exactly where truncation-shaped silence would appear.
+**Whether each silence was *correct* — no defect present — was not independently audited**, and
+that is a gap in this exercise rather than a finding.
+
+## Findings per pull request
+
+66 findings over 23 pull requests, **2.9 per PR**, against a product that promises **one comment**.
+The selection rule is unbuilt, and this result changes what it has to do: it is not choosing the
+best of three good findings, it is choosing one from a set where two of three are wrong.
+
+## The reading
+
+**W/n ≥ 0.50: stop building the review half in this configuration.** Not "tune the prompt" — the
+threshold was fixed in advance precisely so that this reading could not be renegotiated once the
+number arrived.
+
+What this does **not** say: that the model cannot review code, that a different prompt or schema
+would fail the same way, or that the ranking half is affected. The ranking half keeps its ten
+measurements. **What it says is that the first honest look at the review half found it below the
+floor of the field it was going to compete with, and that the company as an attention-allocation
+and measurement layer — the position the evidence ledger already supports — is the one the
+evidence actually reaches.**
+
+## The conflict, restated because it now matters more
+
+**I wrote the prompt and I graded its output, and the result is bad.** That direction is the less
+suspicious one for an author-grader, but it is still one rater. Every verdict carries the line
+that decided it so a second reader can overturn it cheaply. **A second rater is required before
+this number is used to make the decision it implies.**
