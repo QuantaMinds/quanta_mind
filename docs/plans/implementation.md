@@ -1600,14 +1600,50 @@ a model we have already evaluated. Enterprise gets a model we have not.
    another family — the instrument this project used before for exactly this reason, and cannot
    use now because no key is configured. Recorded as unmeasured rather than approximated.
 
-   **And if it is re-run, change the sampling.** Most-recent-pages is not merely a recency bias:
-   repositories in an active phase produce more review comments, so the fetch over-weights
-   whatever those eight projects were doing lately — a refactor sprint, a release, a dependency
-   bump — and review content varies sharply by activity type. It also inherits the selection
-   problem already on record: the same 8 convenience clones, carrying larger changes than the
-   other 27. **A random draw across each repository's full history costs barely more than the
-   recent pages and removes the confound.** Not worth fixing for a discarded number; worth
-   fixing before a kept one.
+   **It was re-run, and it found something bigger than the sampling bias.**
+
+   A uniform draw across each repository's full page range — fixed seed, 3,812 comments,
+   spanning 2019-03 to 2026-07 against the recent draw's narrow window — moved the structural
+   share by a mean of 12.5 points per repository and 61 points at the extreme. But the largest
+   mover, browser-use at 5.0% → 62.9%, was too large to be review-content drift, and inspecting
+   it showed why:
+
+   **A third of the inline review comments in this corpus are written by other AI review bots.**
+
+   | repository | comments | bot | share | principal bot authors |
+   |---|---|---|---|---|
+   | browser-use/browser-use | 636 | 585 | **92.0%** | cubic-dev-ai, cursor |
+   | Skyvern-AI/skyvern | 536 | 463 | **86.4%** | github-advanced-security, ellipsis-dev |
+   | cartography-cncf/cartography | 724 | 270 | 37.3% | cubic-dev-ai |
+   | vllm-project/vllm | 684 | 171 | 25.0% | gemini-code-assist, cursor |
+   | langchain-ai/langchain | 668 | 96 | 14.4% | open-swe, corridor-security |
+   | bespokelabsai/curator | 653 | 54 | 8.3% | cursor |
+   | apache/airflow | 583 | 0 | 0.0% | — |
+   | huggingface/transformers | 711 | 0 | 0.0% | — |
+   | **all** | **5,195** | **1,639** | **31.5%** | |
+
+   **The contamination pointed the same way as the thing being measured**, which is why it was
+   invisible: of comments that assert anything, **bot output is 52.9% structural against a
+   human's 5.9% — nine times the rate.** A templated `### Bug: … **Medium Severity**` block
+   matches structural patterns almost by construction. Neither earlier fetch stored the author,
+   so neither could subtract it. **Fourth instance of the same defect class: a machine artefact
+   wearing a corpus label.**
+
+   **On human comments only, the sampling objection survives but changes character.** Mean
+   absolute shift 12.5 points, maximum 61 — the scheme moves the answer a lot — but 6 of 8
+   repositories moved *down* and the sign test is p = 0.29. **Recency is a noise source, not a
+   directional bias**: it does not inflate or deflate the figure predictably, it makes any single
+   draw unreliable. Both affected numbers were already discarded, so nothing published moves.
+   The corrected reader is `research/phase0/corpus/fetch.py`.
+
+   **Two things are worth keeping.** The human structural rate lands at **5.9%** (132/2,241) —
+   computed on a seven-year window with bots removed, and pointing the same way as the discarded
+   figure: **structural claims are rare in human review, so a verifier that waits for a model to
+   volunteer one will mostly wait.** That is the argument for forcing structure through the
+   schema rather than detecting it in prose. And separately: **on repositories that have adopted
+   an AI reviewer, the AI writes most of the inline comments** — 92.0% and 86.4% at the top.
+   That is a statement about volume and nothing else. It is not evidence about quality and must
+   not be published as if it were.
 
 ### Gate
 
