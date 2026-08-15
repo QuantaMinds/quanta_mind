@@ -438,6 +438,13 @@ estimate.
 
 ## What is still unproven
 
+**The full ledger is `docs/product/evidence-ledger.md`** — every measurement run, against the
+claim it carries, and the rows where argument is currently covering for a gap. Its summary:
+**ten measurements support the ranking and zero support the review**, because the ranker is
+model-free and could be measured against seven years of history, while the review does not
+exist until a model runs. The two paragraphs below are the sharpest cases; the ledger is the
+list.
+
 **Whether a reviewer shown the routing line before the defect exists catches anything they
 would otherwise miss.** Every number above is retrospective. This is a field measurement, and
 no amount of history substitutes for it.
