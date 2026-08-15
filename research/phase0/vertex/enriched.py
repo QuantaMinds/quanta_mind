@@ -23,9 +23,9 @@ import json
 import sys
 from concurrent.futures import ThreadPoolExecutor
 
-from anchors import snap_pair
+from anchoring.anchors import snap_pair
+from anchoring.context import build as build_context
 from client import Client, VertexError
-from context import build as build_context
 from units import changed_units
 
 MODEL, BUDGET, WORKERS = "gemini-2.5-pro", 3, 6

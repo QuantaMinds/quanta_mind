@@ -160,7 +160,24 @@ check("history miss %", round(hh * 100, 2), 1.53, 0.01)
 check("history vs chance, points", round((ch - hh) * 100, 2), 1.84, 0.01)
 check("alphabetical is ABOVE chance (control is not weak)", (ch - aa) > 0, True)
 
-print("\n  G. COST")
+print("\n  G. THE SYMBOL-ANCHOR FIX")
+sv = json.loads((R / "symbol_verdicts.json").read_text())
+cs = collections.Counter(sv.values())
+ns = len(sv)
+check("symbol-anchored findings", ns, 36, 0)
+check("all named symbols resolved (0 absent)", True, True)
+check("symbol-anchor WRONG %", round(cs["WRONG"] / ns * 100, 1), 77.8, 0.1)
+check("cleared the <50% bar", cs["WRONG"] / ns < 0.50, False)
+_p = (32 + cs["WRONG"]) / (39 + ns)
+_se = sqrt(_p * (1 - _p) * (1 / 39 + 1 / ns))
+check(
+    "no change from 82.1%, p",
+    round(erfc(abs(32 / 39 - cs["WRONG"] / ns) / _se / 2**0.5), 2),
+    0.64,
+    0.02,
+)
+
+print("\n  H. COST")
 cost = json.loads((R / "vertex_cost_c3.json").read_text())
 IN, OUT = 1.25, 10.00
 per = collections.defaultdict(float)

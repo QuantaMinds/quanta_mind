@@ -65,3 +65,6 @@ research/phase0/vertex/enriched_findings.jsonl
 research/phase0/vertex/enriched_packet.json
 research/phase0/vertex/rater2/
 research/phase0/vertex/rater3/
+research/phase0/vertex/symbol_findings.jsonl
+research/phase0/vertex/symbol_packet.json
+research/phase0/vertex/rater5/

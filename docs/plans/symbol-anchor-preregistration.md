@@ -43,3 +43,69 @@ is only a virtue if those findings are right.
 **And one thing that must be reported whatever happens:** how many findings name a symbol that does
 not exist in the code shown. That count is a direct measure of the decoupling, and it is the number
 that says whether the model can even refer to the code in front of it.
+
+
+---
+
+# RESULT — the second branch fired. **The decoupling was a symptom.**
+
+| | line anchors | **symbol anchors** |
+|---|---|---|
+| CORRECT | 0.0% | **2.8%** (1 of 36) |
+| **WRONG** | 82.1% | **77.8%**, Wilson [61.9%, 88.3%] |
+| UNFALSIFIABLE | 10.3% | 13.9% |
+| TRIVIAL | 7.7% | 5.6% |
+
+**77.8% against a bar of under 50%. FAILS. And the change from 82.1% is nothing: p = 0.644.**
+
+## The failure mode moved; the failure rate did not
+
+| why the wrong findings are wrong | line anchors | symbol anchors |
+|---|---|---|
+| anchor-driven | **62.5%** | **32.1%** |
+| semantic — wrong about code fully shown | ~12.5% | **53.6%** |
+| merged test's assertion passed | 21.9% | 14.3% |
+
+**Anchor failures halved. Semantic failures quadrupled. The total did not move.** Removing the
+model's ability to invent a line number did exactly what it was designed to do, and the reviewer is
+no more correct than before.
+
+**That is the pre-registered second branch, and it was written down before the run: the decoupling
+was a symptom, not a cause. The reasoning was always the problem, and the anchors were how it
+showed.**
+
+## What the run established on the way, which is worth more than the verdict
+
+**Asked for a line number, the model is wrong 87.3% of the time. Asked for a symbol, it names one
+that exists 36 times out of 36.** The model knows what code it is looking at. It cannot count
+lines. Those are separate failures and only the second was ever a parser's to fix.
+
+## Two flaws in this experiment, both mine
+
+**The `IndentationError` that nearly became a finding.** `ast.parse` fails on an indented method
+body, so `occurrences()` returned `[]` for every method — indistinguishable from *"the symbol is
+absent"*. It reported **77.8% of findings naming non-existent symbols**, and 79.6% of funded units
+are methods, which is where that number came from. Caught because the per-request log showed four
+consecutive resolutions before collapsing, which is not how a model fails. **`occurrences()` now
+raises `Unparseable`**, so rule 3 holds inside the harness: a failure and a real negative can never
+again be the same value.
+
+**The anchors are not fully "correct by construction" and the claim should be weakened.** A named
+symbol occurs more than once in **91.7%** of findings — up to 22 times. The resolver takes the
+first occurrence for `line_a` and the last for `line_b`, which is a guess. **The fix removed the
+model's freedom to invent a line and handed the same freedom to me**, and the 32.1% residual anchor
+failures are partly that. A stricter design would require the symbol to be unique in the unit, or
+have the model name the enclosing statement.
+
+**Neither flaw rescues the result.** Even crediting every anchor-driven failure as repairable, the
+remaining 53.6% semantic and 14.3% merged-test failures leave the wrong-rate near 68% — far above
+the bar, on a corpus where the reviewer has produced **one** correct finding in 75 attempts across
+two designs.
+
+## The reading
+
+**Four fixes, four failures, and the last one removed the failure mode by construction rather than
+treating it.** The review half is not anchor-limited, context-limited, or filter-limited. It is
+limited by the claims being wrong about code the model can see.
+
+**Recorded as the final nail, which is what the pre-registration said this outcome would be.**
