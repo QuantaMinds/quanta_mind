@@ -35,9 +35,15 @@ REPOS = [
     "psf/requests",
     "tornadoweb/tornado",
     "encode/django-rest-framework",
+    "psf/black",
+    "pallets/click",
+    "kennethreitz/records",
+    "benoitc/gunicorn",
+    "boto/boto3",
+    "getsentry/responses",
 ]
 CUTOFF = "2022-01-01"
-PER_REPO = 4
+PER_REPO = 14
 MAX_PY = 10
 
 
@@ -124,7 +130,7 @@ def main() -> int:
         print(f"  REFUSING TO REPORT — {exc}")
         return 1
 
-    with open("corpus_aged.json", "w") as fh:
+    with open("corpus_aged_big.json", "w") as fh:
         json.dump(out, fh)
     print(f"\n  {len(out)} pull requests, all merged before {CUTOFF}")
     print("  every one passes the outcome-window check, so a later-fix relevance test is possible")

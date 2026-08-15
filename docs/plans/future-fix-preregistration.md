@@ -59,3 +59,67 @@ opinion.
 **A positive result here does NOT rescue the findings.** It would mean the model's *distress* is
 informative, not its claims. Publishing the claims would remain forbidden by everything already
 measured.
+
+
+---
+
+# RESULT — the gate selects code that does **not** break. Significant, and inverted.
+
+**165 aged pull requests, 278 requests, 229 findings, 275 funded units scored against git.** No
+raters. The outcome is a commit.
+
+**The ranker's own hit rate on these units: 50.5%.** Every model signal is measured against that,
+not against chance.
+
+| signal | units | fix returned | vs ranker | p |
+|---|---|---|---|---|
+| the model spoke | 217 | 49.3% | −1.2 | 0.462 |
+| a snippet showed **confusion** | 40 | **57.5%** | **+7.0** | 0.394 |
+| a snippet **CONFIRMED** | 85 | **36.5%** | **−14.1** | **0.003** |
+| emitted ≥ 2 findings | 9 | 44.4% | −6.1 | 0.748 |
+
+## The significant result is the one nobody wanted
+
+**When the model successfully demonstrates its claim, the code is significantly LESS likely to have
+a fix return to it.** −14.1 points, p = 0.003, surviving Bonferroni at five comparisons (α = 0.01).
+
+**And it is not function length in disguise.** Median unit length is 12 lines for CONFIRMED against
+13 for the rest. Controlling for length makes it *stronger*:
+
+| length band | CONFIRMED | not confirmed | p |
+|---|---|---|---|
+| **≤15 lines** | 50 units, **24.0%** | 111 units, **51.4%** | **0.001** |
+| 16–40 | 26 units, 42.3% | 52 units, 57.7% | 0.235 |
+| >40 | 9 units, 88.9% | 27 units, 77.8% | 0.652 |
+
+## What it means, and it is the sharpest thing this investigation produced
+
+**The execution gate — built to raise precision — actively selects away from defects.** The model
+can construct a working demonstration when the code is simple enough to reason about in isolation,
+and code simple enough to reason about in isolation is code that does not break. **Demonstrability
+and defectiveness are anti-correlated.**
+
+That also explains the earlier result that the gate raised TRIVIAL from 7.7% to 28.6%. It was not a
+side effect. **It is the same fact measured two ways**: the gate finds claims that are easy to
+prove, and easy-to-prove claims are about code where nothing is wrong.
+
+## The inversion the data supports, and the one it does not
+
+**Supported and significant**: model *succeeds* → code is stable.
+
+**Directional only**: model *confused* → code more likely to break, 57.5% against 50.5%, **+7.0
+points, p = 0.394 on 40 units. That is not evidence.** The pre-registration set the underpowered
+floor at 20 units and this clears it, but it does not clear the significance bar and must not be
+reported as if it did.
+
+## What this closes and what it opens
+
+**Closes:** the execution gate is not a fix, it is a defect *avoider*. Any future design that gates
+on demonstrability inherits this. It should be recorded next to the gate itself.
+
+**Opens, as a hypothesis and not a finding:** the model's distress may be a locating signal where
+its claims are not. To test it needs roughly 80 confused units against a 50.5% base — about three
+times this corpus — and it must beat the ranker, which is free.
+
+**Does not change:** the review half stops. Nothing here rescues a claim; the significant result is
+that the reviewer's confident output points at stable code.

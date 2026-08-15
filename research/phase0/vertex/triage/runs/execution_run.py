@@ -22,11 +22,13 @@ import os
 import sys
 from concurrent.futures import ThreadPoolExecutor
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+_H = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.dirname(os.path.dirname(_H)))  # vertex/
+sys.path.insert(0, os.path.dirname(_H))  # vertex/triage/
 
-from client import Client, VertexError
-from execute import run as run_snippet
-from units import changed_units
+from client import Client, VertexError  # noqa: E402
+from execute import run as run_snippet  # noqa: E402
+from units import changed_units  # noqa: E402
 
 MODEL, BUDGET, WORKERS = "gemini-2.5-pro", 3, 6
 OUT = "execution_findings.jsonl"

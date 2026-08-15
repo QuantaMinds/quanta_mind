@@ -78,3 +78,5 @@ research/phase0/vertex/triage/*_packet.json
 research/phase0/vertex/triage/hard_verdicts.json
 research/phase0/vertex/triage/*.jsonl
 research/phase0/vertex/triage/*_verdicts.json
+research/phase0/vertex/triage/runs/corpus_aged_big.json
+research/phase0/claims/future_fix_scored.json

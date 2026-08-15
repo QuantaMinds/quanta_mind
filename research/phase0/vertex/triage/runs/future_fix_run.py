@@ -1,16 +1,16 @@
 """Ask the model for a claim AND the program that would demonstrate it, then run the program.
 
-WHAT: Same reviewer, on the HARD corpus -- 82.1% wrong and 0 correct before. Adds `check_snippet`:
+WHAT: Same reviewer, on 24 pull requests all merged before 2022. The schema adds `check_snippet`:
       self-contained Python that prints CONFIRMED if the claimed behaviour occurs and REFUTED if
       it does not. The snippet is executed and the finding is promoted only on CONFIRMED.
 WHY:  Three of the measured wrong findings asserted things about Python that Python contradicts in
       one line. The model is not asked whether it is right -- it is asked to write the program that
       would show it, and the interpreter answers.
 
-      THIS VARIANT RUNS ON THE HARD CORPUS and deliberately skips the corpus-age guard. That guard
-      exists for questions about what happened NEXT; this is a question about PRECISION, and the
-      only corpus that can answer it is the one where the previous designs were measured -- the 20
-      recent pull requests where this model scored 82.1% wrong and zero correct of 39.
+      THE CORPUS IS PRE-2022 ON PURPOSE, and enforced by `corpus_age`. Every prior corpus in this
+      session was drawn from the present and could not be scored against a later outcome; these
+      have more than a decade of forward history, so the same findings can later be checked against
+      whether a fix returned to that code.
 IMPORTS: stdlib only (json, os, sys, concurrent.futures). Local: `execute`, `units`, `client`.
 CONSUMED BY: nobody -- it prints and writes execution_findings.jsonl.
 """
@@ -30,8 +30,8 @@ from client import Client, VertexError  # noqa: E402
 from execute import run as run_snippet  # noqa: E402
 from units import changed_units  # noqa: E402
 
-MODEL, BUDGET, WORKERS = "gemini-2.5-pro", 3, 6
-OUT = "execution_hard.jsonl"
+MODEL, BUDGET, WORKERS = "gemini-2.5-pro", 3, 8
+OUT = "future_fix_findings.jsonl"
 
 SCHEMA = """Return ONLY a JSON array. Each element MUST have exactly these fields:
   claim_type    : one of "missing_guard", "wrong_order", "unhandled_case", "resource_leak",
@@ -52,7 +52,7 @@ If you find nothing you can demonstrate this way, return []."""
 
 
 def main() -> int:
-    with open("../corpora/pr_corpus_fresh.json") as fh:
+    with open("corpus_aged_big.json") as fh:
         prs = json.load(fh)
 
     jobs = []
@@ -66,7 +66,7 @@ def main() -> int:
         funded.sort(key=lambda p: (-int(p[1]["touched"]), -int(p[1]["n_lines"])))
         for f, u in funded[:BUDGET]:
             jobs.append((pr, f, u))
-    print(f"  {len(jobs)} requests over {len(prs)} pull requests, THE HARD CORPUS")
+    print(f"  {len(jobs)} requests over {len(prs)} pull requests, all merged before 2022")
 
     client = Client(MODEL)
     open(OUT, "w").close()
