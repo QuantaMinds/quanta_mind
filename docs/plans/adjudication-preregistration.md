@@ -442,3 +442,64 @@ bar fixed in advance.
 **The remaining honest position on the review half:** its failures are not a pointer problem and not
 a context problem. They are the model asserting relationships between lines of code that are not
 there — and the two cheapest, most obvious interventions have now been tried and measured.
+
+
+---
+
+# GOING DEEP ON THE ANCHOR PROBLEM — the pattern, and why the repair was backwards
+
+One failure mode, taken alone and pushed until it gave up a pattern. The anchor bucket was chosen
+because it is the largest: 57.6% of the enriched run's wrong findings.
+
+## What the data says about where anchors land
+
+| property of a finding | n | wrong | correct |
+|---|---|---|---|
+| **an anchor falls outside the function the model was shown** | 9 | **100.0%** | **0.0%** |
+| the parser had to move an anchor | 29 | **72.4%** | 3.4% |
+| the parser did not have to move it | 25 | 48.0% | **24.0%** |
+| line_a equals line_b | 17 | 58.8% | 11.8% |
+| model self-reported confidence "low" | **0** | — | — |
+
+**Two findings, and the first inverts what I built.**
+
+**Anchor imprecision is a symptom of a bad finding, not a cause of one.** A finding whose anchor
+needed snapping is wrong 72.4% of the time; one that did not is wrong 48.0% and correct seven times
+as often. **The model that cannot point at the line is the model that does not know what it is
+talking about — so repairing the pointer preserves exactly the findings that should have been
+thrown away.** The fix and the failure had the same input, and I chose the wrong response to it.
+
+**And citing a line outside the shown function is a perfect negative signal here: 9 of 9 wrong,
+none correct.** That is the model reasoning about code it was never given.
+
+**Self-reported confidence carries zero information.** The model said `"high"` on all 54 findings,
+including every one of the 33 that were wrong. A confidence field that never varies is not a
+signal, and any design that gates on it is gating on a constant.
+
+## What rejection does that repair did not
+
+| filter | kept | wrong | Wilson |
+|---|---|---|---|
+| none | 54 | 61.1% | [47.8%, 73.0%] |
+| drop anchors outside the function | 45 | 53.3% | [39.1%, 67.1%] |
+| drop findings the parser had to snap | 25 | 48.0% | [30.0%, 66.5%] |
+| **drop either** | **20** | **35.0%** | **[18.1%, 56.7%]** |
+
+**And it keeps 0.87 findings per pull request — against a product that promises one comment.**
+The filter and the product specification arrive at the same number from opposite directions.
+
+## Why this is a hypothesis and not a result
+
+**Eight filters were tried on n = 54, and every one of them is listed above rather than only the
+winner.** With eight looks, one landing below 50% by chance is expected. Bonferroni puts the
+required alpha at 0.05/8 = 0.00625. **No filter's interval excludes 50%** — the best one spans it,
+[18.1%, 56.7%].
+
+**It was also found by searching the same data it is scored on.** That is precisely the failure the
+holdout caught on variant V2, and the honest label for this is *tuned on noise until shown
+otherwise*.
+
+**So it does not reverse the stop and must not be reported as if it did.** What it does is name a
+specific, cheap, pre-registerable test: **does a reject-on-imprecise-anchor rule hold on a fresh
+set of pull requests?** That test needs new repositories, a bar fixed in advance, and it is the
+next thing to run — not the thing to build on.
