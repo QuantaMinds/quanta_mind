@@ -266,6 +266,40 @@ spending on it.
 
 ---
 
+## 1d. Is the model's ATTENTION worth anything, even when its claims are wrong?
+
+**The question every adjudication was unable to ask.** A rater judges whether a sentence is true of
+the code in front of them. None of them can see whether that code later broke. So a reviewer whose
+claims are 65% wrong might still be *pointing at the right code* — and that would be shippable with
+the prose thrown away.
+
+**The aged corpus can answer it**, because every pull request in it predates the outcome window by
+more than a decade.
+
+| | funded units | a later fix returned within 90 days |
+|---|---|---|
+| the model **spoke** | 30 | **30.0%** |
+| the model was **silent** | 10 | **40.0%** |
+
+**−10.0 points, Fisher exact p = 0.70. Null, and pointing the wrong way.**
+
+**The instrument is weak and that is stated rather than buried**: with 30 against 10, the smallest
+detectable difference is roughly **+40 points**. A real but modest signal would be invisible. This
+is a null on a test that could only have seen something very large.
+
+**But the number underneath it is the useful one.** All 40 units were *ranker-funded*, and **13 of
+40 — 32.5% — had a later fix return to them.** That is the ranker's hit rate on this corpus. The
+model's decision to speak moves it to 30.0%.
+
+> **The location signal belongs to the ranker. The model adds nothing on top of it.**
+
+That is the cleanest statement of the split this project has been circling: **the model-free half
+selects the code that later breaks, and the model half neither improves that selection nor
+describes it correctly.** Which is precisely why the product is the allocator and the coverage
+line, and not the reviewer.
+
+---
+
 **Seven nulls is the asset, not the embarrassment.** Every one of them is a feature a competitor
 could ship tomorrow with a straight face, and each was killed here by a control the competitor
 has no reason to run.
