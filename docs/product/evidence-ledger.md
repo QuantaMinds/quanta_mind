@@ -201,6 +201,71 @@ anything structurally checkable**, so where reviewers comment is mostly not wher
 That reconciliation is coherent and rests on an independently measured number — **and it was
 constructed after seeing the null, so it is an explanation, not a finding.**
 
+---
+
+## 1b. The pooled pattern across all 207 adjudicated findings
+
+**Six designs, three corpora, one table, computed without a hypothesis first.**
+
+| factor | spread in wrong-rate | p |
+|---|---|---|
+| **repository** | pandas 96.3% → ansible 36.4%, **+59.9 pts** | < 0.0001 |
+| **design** | line anchors 82.1% → execution gate on easy 27.8%, **+54.3 pts** | 0.0001 |
+| **corpus** | hard 71.9% → easy 27.8%, **+44.1 pts** | 0.0002 |
+| **claim type** | wrong_order 73.9% → resource_leak 33.3%, **+40.6 pts** | 0.0016 |
+| **function size** | >60 lines 85.7% → ≤20 lines 57.6%, **+28.1 pts** | 0.0032 |
+| test vs source | 68.5% vs 61.5%, +7.0 pts | 0.29 — **nothing** |
+| lines touched | +4.4 pts | 0.61 — **nothing** |
+
+**Function size is the one actionable factor and it was never tested for.** Finer buckets:
+
+| function length | wrong | correct |
+|---|---|---|
+| ≤10 lines | **45.9%** | 10.8% |
+| 11–20 | 66.7% | 4.2% |
+| 21–40 | 62.3% | 6.6% |
+| 41–80 | 69.7% | 3.0% |
+| **>80 lines** | **89.3%** | 3.6% |
+
+**And the repository effect is largely function size wearing a repository's name**: correlation
+between a repository's median function length and its wrong-rate is **r = +0.65**. pandas has a
+median funded unit of 98 lines and a 96.3% wrong-rate; scrapy has 22 lines and 51.4%.
+
+**It is not monotonic in the middle**, and within the hard corpus the ≤20 band (73.6%) is worse than
+21–60 (63.2%), so this is a real effect at the extremes rather than a clean dose-response. **It is
+a diagnosis, not a detector.**
+
+**Two factors that carry nothing**, recorded because both were plausible and one was proposed
+explicitly: whether the unit is a test (p = 0.29) and how many lines the change touched (p = 0.61).
+
+## 1c. The published benchmark says the same thing, at ten times the sample
+
+[SWR-Bench](https://arxiv.org/html/2509.01494v1) — 1,000 pull requests, five automated code-review
+techniques:
+
+| technique | precision |
+|---|---|
+| PR-Review | 15.39% |
+| LLM-Reviewer | 9.22% |
+| SWR-Agent | 9.11% |
+| CR-Agent | 6.23% |
+| Hybrid-Review | 2.79% |
+
+**Ours: 5.80% across all 207 findings, 2.22% on the hard corpus, 12.96% at the best single
+design. We land inside their range, near the middle.**
+
+Their conclusion, in their words: *"A primary factor limiting higher F1 scores for all techniques
+is their low precision, indicative of a high false positive rate… SOTA ACR techniques, when paired
+with SOTA LLMs, are not yet ready for real-world code review deployment."*
+
+**This is the single most important external check in this document.** Six designs failed here, and
+the field's own benchmark shows five published systems failing the same way at the same magnitude
+on ten times the data. **The review half is not badly built. It is a problem nobody has solved**,
+and the evidence that we are not merely incompetent is also the evidence that we should not be
+spending on it.
+
+---
+
 **Seven nulls is the asset, not the embarrassment.** Every one of them is a feature a competitor
 could ship tomorrow with a straight face, and each was killed here by a control the competitor
 has no reason to run.
