@@ -26,6 +26,45 @@ say* has never run. Everything below elaborates that split.
 | **Leaking the future degrades the ranker** | corpus-wide | top-1 moved **50.0% → 37.5%** when future commits were visible | The index is genuinely bounded by the past | **Yes — and this is a known-answer test**, not a result. It is how we know the harness measures anything |
 | **Six allocation variants against controls** | 1,969, pre-specified, held-out | **V0 (file top-3) still standing**; V2 not significant (train p = 0.18, holdout p = 0.125) | That the shipped policy is the best of those tried | **Yes**, and the holdout caught V2 overfitting on its first use |
 | **Bot prevalence in OSS review** | 5,195 comments, 8 repos | **31.5%** bot-written, 0.0% to 92.0% by repository; bot output **52.9%** structural vs human **5.9%** | Corpus hygiene — and the argument for schema-forced structure | **Yes**, as a floor. The detector is a login-and-marker match, so undetected bots bias it down |
+| **Cost per review, billed** | 68 requests, 23 PRs, live Vertex | **$0.119 mean** per PR (median $0.125, p90 $0.131, max $0.145) at a 4,096 thinking cap | "$0.140 per pull request" | **Yes — but the estimate was right by luck.** See below |
+
+**The cost figure was right in magnitude and wrong in structure, and the structure is what
+matters.** The $0.140 estimate modelled a large prompt made cheap by caching. The measurement
+found the opposite shape:
+
+| where the money goes | share of the bill |
+|---|---|
+| input (prompt) | **5.2%** |
+| **thinking** | **91.3%** |
+| answer | 3.5% |
+
+**Two errors that partly cancelled.** The prompt is far smaller than assumed — 1,674 tokens mean,
+because one function and one diff is not much text — and *thinking*, which the estimate did not
+model at all, is nine tenths of the bill. Net: $0.119 measured against $0.140 derived, a 0.85×
+that flatters the estimate for reasons it did not contain.
+
+**The consequence is architectural, not financial. Prompt caching — the whole of "Step 5 — read,
+with the repository cached" — would save 4.7% of this bill.** It is optimising a rounding error
+against a term that dominates it twenty to one. That verdict is conditional on prefix size and
+the relationship is worth stating, because the prefix here is a ~150-token stub rather than the
+"repository conventions, resolved signatures, index summary" the design specifies:
+
+| cached prefix | input share | caching saves |
+|---|---|---|
+| stub (as measured) | 5.2% | **4.7%** |
+| 2,000 tokens | 10.7% | 9.6% |
+| 10,000 tokens | 27.6% | 24.8% |
+| 40,000 tokens | 57.6% | 51.9% |
+
+**So caching is worth building only if the prefix is deliberately made large, and that is a
+design decision nobody has made yet.** It cannot be inherited from the Anthropic-era plan, where
+prefix caching was automatic and free to assume.
+
+**And the headline number is a parameter, not a property of the workload.** Thinking was capped
+at 4,096 by the harness; **46% of requests pinned that cap**. The first run set no budget and
+observed a mean of 5,744 with a maximum of 13,108 — **1.51× the cost, $0.183 per pull request**.
+The price of a review is currently set by a dial, and the dial has never been tuned against
+output quality.
 
 **The named proxy on the coverage figure.** "Where a defect exists" means *a later commit within
 90 days whose message contains a fix word touched the same unit*. That is an outcome rule, not a
@@ -97,8 +136,7 @@ is measured; and the distinction has to survive contact with a customer asking "
 | **Verification catches the model's bad claims** | Design. `verify` cannot import `infer`, enforced by the layer guard | Precision and recall of the verifier against hand-adjudicated model output | **No model has ever run** |
 | **Our published findings are trustworthy** | Nothing yet | Published-and-wrong rate on real PRs | Same |
 | **It makes pull requests move faster** | Nothing. The market data says review latency is the bottleneck; it does not say we fix it | One month, three teams, cycle time before and after | **No customers.** This is the VP question and it has no answer |
-| **$0.140 per review, $28/repo/month** | Token arithmetic on real diffs — but priced, not billed | The same diffs through a real API with billing attached | **No key configured** |
-| **85% gross margin at 300 PRs/month** | Derived from the line above | Inherits | Same |
+| **85% gross margin at 300 PRs/month** | Derived from the cost line, which is now measured | Inherits — recompute against the billed figure | Nothing; arithmetic |
 | **Claude vs Gemini for the inference pass** | Nothing | Adjudicated disagreements, exact binomial at pre-specified n | Same — and the instrument resolves **22 points at n = 100**, not the 2 the rule originally asked for |
 
 **The structural claim that replaced a measurement.** The checkability classifier failed at 56.5%

@@ -1053,10 +1053,68 @@ remain open and neither is a formality:**
    parseable structure. Free-text output makes adjudication impossible, so a gap here is not a
    degradation — it removes a layer.
 
-**And keep the label attached to any figure derived from it.** $0.140 per pull request was
-derived from a specification, and its shallow-call token sizes were assumed rather than observed.
-Any headline built on it — "$16,000 of credits is roughly 114,000 reviews" — inherited that. **It
-has now been billed rather than priced; see the measured figure below.**
+## C3 — the cost, billed rather than priced
+
+**68 requests over 23 merged pull requests, live against `gemini-2.5-pro` on Vertex, 2026-08-14.**
+The prompt is the one the architecture specifies: repository prefix, the funded function's full
+source, its file's diff, and the schema a finding must satisfy. Unit of record is the **request**,
+because aggregating three calls into one line is the defect that inverted this table's sign once.
+
+| | measured |
+|---|---|
+| mean per pull request | **$0.1193** |
+| median | $0.1247 |
+| p90 | $0.1310 |
+| max | $0.1452 |
+| the derived estimate it replaces | $0.140 — ratio **0.85×** |
+
+**The estimate was right in magnitude and wrong in structure.** It modelled a large prompt made
+cheap by caching. The bill has the opposite shape: **input 5.2%, thinking 91.3%, answer 3.5%.**
+The prompt is far smaller than assumed — 1,674 tokens mean, because one function and one diff is
+not much text — and thinking, which the estimate did not model at all, is nine tenths of the cost.
+Two errors that partly cancelled.
+
+**Which makes the consequence architectural rather than financial. Prompt caching would save 4.7%
+of this bill** — the whole of the "read, with the repository cached" design, optimising a term
+that a dial beside it dominates twenty to one. That verdict depends on prefix size, and the prefix
+measured here is a ~150-token stub rather than the conventions-and-signatures block specified:
+
+| cached prefix | input share of cost | caching saves |
+|---|---|---|
+| stub, as measured | 5.2% | **4.7%** |
+| 2,000 tokens | 10.7% | 9.6% |
+| 10,000 tokens | 27.6% | 24.8% |
+| 40,000 tokens | 57.6% | 51.9% |
+
+**Caching is worth building only if the prefix is deliberately made large, and nobody has decided
+that.** It cannot be inherited from the Anthropic-era plan where prefix caching was automatic.
+
+**And the headline is a parameter, not a property of the workload.** Thinking was capped at 4,096
+by the harness and **46% of requests pinned the cap**. The first run set no budget and observed a
+mean of 5,744, maximum 13,108 — **1.51×, or $0.183 per pull request**. The price of a review is
+currently set by a dial that has never been tuned against output quality.
+
+**Three things this run cannot say**, recorded beside the number so they travel with it:
+
+1. **No cached content was declared**, so this is the uncached figure. Given the table above that
+   matters less than it would have.
+2. **Nothing here evaluates whether a finding is any good.** 68 requests emitted 66 findings and
+   all 68 responses parsed as a JSON array, with 8 returning the empty array. Near-total schema
+   conformance is the *expected* outcome of forcing the schema — it says the schema works, not
+   that the findings are right. Published-and-wrong remains untested and needs hands.
+3. **Population**: 24 merged pull requests from the same 8 repositories, median 20-line units.
+   Whether that resembles a customer's diff is unestablished, exactly as with everything else
+   measured on these 8.
+
+**One defect found by running it.** The first attempt died at request 66 of 72 on a 401 — the
+`gcloud` token expires after about an hour and the serial run took fifty minutes — and wrote
+nothing. Worse, **11 of its 39 recorded answers were one token long** behind six to thirteen
+thousand thinking tokens: a `MAX_TOKENS` truncation that, reported without the finish reason,
+would have read as *"the model found nothing."* The reader now returns `finishReason` rather than
+letting a caller infer it, re-mints the token on a 401, and appends each row as it lands.
+
+**Any headline built on the old figure — "$16,000 of credits is roughly 114,000 reviews" — should
+be recomputed against $0.1193, and should carry the thinking-budget dial with it.**
 
 ## Which database runs, and when
 
