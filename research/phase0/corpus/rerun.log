@@ -30,3 +30,13 @@
     #4850    15 files  rank of first commented file: 2
     #4924     9 files  rank of first commented file: 4
   django/django                   114 pre-2022 PRs with human .py comments
+  ansible/ansible                 183 pre-2022 PRs with human .py comments
+    #11719    9 files  rank of first commented file: 6
+    #12226   28 files  rank of first commented file: 27
+    #12244    9 files  rank of first commented file: 9
+    #13691    9 files  rank of first commented file: 4
+    #15226   13 files  rank of first commented file: 1
+    #15246   28 files  rank of first commented file: 9
+  scrapy/scrapy                   140 pre-2022 PRs with human .py comments
+    #426     28 files  rank of first commented file: 21
+    #570     10 files  rank of first commented file: 2

@@ -41,6 +41,34 @@ Let **H** be the history top-3 hit rate, **A** the alphabetical control, **X** e
 | **NULL** | H − X < 5 points, or the control matches within 2 points | The ranker does not predict human review attention on a test that could have detected it |
 | **INCONCLUSIVE** | anything between, or n < 40 | Say so. Do not round toward either |
 
+## The mixed case — written because it is the one that gets rationalised
+
+The bands above are **pooled**, and a pooled figure can hide the exact failure this rerun exists to
+detect. **A pooled positive driven by one repository is not external validity — it is the
+eight-repository artifact happening again on different repositories.** So consistency across repos
+is the real test and the pooled p-value is not.
+
+**Primary analysis: pooled, against the bands above. Consistency guard, binding on top of it:**
+
+| condition | reading |
+|---|---|
+| pooled clears CONFIRM **and** ≥ 4 of 6 repositories individually show H > X | **CONFIRMED.** The effect travels |
+| pooled clears CONFIRM **but** ≤ 3 of 6 repositories are individually positive | **INCONCLUSIVE, not confirmed.** A pooled win carried by one or two repos is the artifact, not the refutation of it |
+| pooled is null **and** repositories are split in direction | **NULL.** A split with no pooled effect is noise, and calling the positive half a signal is choosing a subgroup after the fact |
+| repositories disagree sharply in *magnitude* while agreeing in direction | Report the **range across repositories**, and quote the range rather than the mean |
+
+**A sign test across the six repositories is reported alongside the pooled McNemar**, and where the
+two disagree, **the sign test wins**, because it is the one measuring whether the effect is a
+property of ranking rather than of a particular codebase.
+
+**Per-repository n will be small — probably 10–25 events each — and no single repository's result
+is interpretable on its own.** They are counted, not individually tested. The count is the
+instrument; the individual repository is not.
+
+**And the subgroup rule, stated before any subgroup exists:** no repository may be excluded after
+the fact for any reason other than a *read failure recorded in the skip ledger*. Dropping a
+repository because it disagrees is the move this entire pre-registration exists to prevent.
+
 ## What a NULL would mean — decided before it can be argued about
 
 **It would not overturn the ten measurements.** Those target *the function a later fix returns
@@ -58,6 +86,13 @@ what the evidence actually reaches.
 only a virtue if the 10–12% is the right 10–12%. A null here does not show it is the wrong one; it
 shows one instrument could not confirm it is the right one, and the honest description becomes
 "quiet, and validated against later fixes rather than against reviewers."
+
+**A null would also mean the ranking is, on the evidence, a property of eight repositories rather
+than of ranking.** What survives that is narrower and worth naming now so it is not assembled in a
+hurry afterwards: **the corrected attribution rule** — 67.9% of file-overlap verdicts blame a
+change sharing no symbol with the fix, reproduced across three corpora, **and independent of the
+ranker entirely** — and **typed coverage**, which is a construction rather than a measurement. That
+is a real thing to sell and it is a smaller company than the one currently written down.
 
 **And a null would put the measurement-layer company on a narrower base than yesterday** — three
 measured pillars, one of which (attribution) is the strongest and least contested. That is still a
