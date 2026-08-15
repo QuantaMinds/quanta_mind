@@ -110,13 +110,23 @@ is coherent and rests on an independently measured number, **and it was construc
 the null.** It is an explanation, not a defence, and it has been labelled that way from the moment
 it was written.
 
-**What that means for the position the company is taking.** The measurement-layer claim is the one
-the evidence reaches — but it reaches it on two datasets from eight repositories, with one
-out-of-sample test that failed and was explained. **The properly powered rerun on six fresh
-repositories is therefore not a nice-to-have. It is the first real external-validity test the
-ranking half will ever have faced**, and its reading was fixed in advance in
-`docs/plans/ranking-rerun-preregistration.md` precisely because the temptation to explain a second
-null would be very strong.
+**The rerun has now run, and it returned a second null.** 44 pull requests, five fresh
+repositories, an instrument selective enough to detect an effect (chance 36.6%): history 40.9%
+against an alphabetical control at 50.0%. Pre-registered reading: **NULL**.
+
+**Which fixes the sentence this ledger has to carry, and it is the sharpest one in the file:**
+
+> **The ranker has been shown to beat an alphabetical control at defect-return on eight
+> repositories, and at nothing on any repository outside them.** Both out-of-sample tests it has
+> faced returned a null against the same trivial control, and in both the ranker scored *lower*
+> than alphabetical — −2.9 points, then −9.1.
+
+**This does not show the ranker fails at what it is for.** Human-comment location and
+defect-return are different targets, and on the original eight the ranker does beat alphabetical
+at defect-return (1.44% miss against a 3.31% control, 1,969 events). **But the untested claim is
+now named exactly: does the ranker beat alphabetical at DEFECT-RETURN on repositories it was not
+developed on?** That has never been run, it needs full-object clones rather than the GitHub API,
+and it is the single most important open question the company has.
 
 **Also corrected here.** The +22-point result's independent replication is cited across this
 project as κ = 0.92. **Agreement was 92%; Cohen's κ was 0.66** — moderate, not strong. And the
@@ -152,6 +162,7 @@ remembers discarding.
 | "Function ranking is a floor" | Reasoned from partition fineness, ignoring that aim differs (75.0% vs 58.9%) | **Withdrawn** |
 | Claim checkability from review text | Keyword classifier, **56.5%** residual | **Discarded.** The residual *is* the result — see below |
 | **Does the ranker predict where a human reviewer commented?** | 69 pre-2022 PRs. History top-3 **69.6%**, alphabetical **72.5%**, exact chance **69.1%**. McNemar p = 0.81 | **Null**, and the instrument was half the problem — see below |
+| **…rerun, properly powered, 5 fresh repos** | 44 PRs, 9–30 files each (chance 36.6%). History **40.9%**, alphabetical **50.0%**, H−X **+4.3**, McNemar p = 0.48 | **NULL**, pre-registered. Second null, and history lost to alphabetical **both** times |
 
 **On the human-attention null, two things must be said in order.** First the result: the
 model-free ranker shows **no advantage over an alphabetical control, and none over exact chance**,

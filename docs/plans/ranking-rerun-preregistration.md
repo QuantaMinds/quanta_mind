@@ -115,3 +115,92 @@ see are separate, and the second was measured at 4.5% correct by consensus.
 not as "directionally positive". The first version of this test was reported as a null with its
 instrument criticised in the same breath; that was only credible because the criticism was made
 against my own result. The same standard applies here in whichever direction it falls.
+
+
+---
+
+# RESULT — 2026-08-14. **NULL.**
+
+| | |
+|---|---|
+| n | **44** pull requests (above the n < 40 inconclusive floor, barely) |
+| history top-3 | **40.9%**, Wilson [27.7%, 55.6%] |
+| alphabetical control | **50.0%** |
+| exact chance | **36.6%** |
+| **H − X** | **+4.3 points** — the pre-registered quantity |
+| **H − A** | **−9.1 points** |
+| McNemar vs control | b = 7, c = 11, **p = 0.48** |
+
+**Against the bands fixed in advance: NULL.** The rule was *"NULL if H − X < 5 points"*. It is 4.3.
+CONFIRM needed ≥ 10 points and p < 0.05 and got neither.
+
+**And the direction is worse than a null.** History did not merely fail to beat the alphabetical
+control — it **lost to it by 9.1 points**. Not significant at n = 44, and it must not be reported
+as if it were. But an informed policy losing to alphabetical ordering is not the shape of a weak
+effect; it is the shape of no effect plus noise.
+
+## Per repository, and the consistency guard
+
+| repo | n | history | chance | H − X | alphabetical |
+|---|---|---|---|---|---|
+| pandas | 15 | 53.3% | 42.9% | **+10.4** | 60.0% |
+| scikit-learn | 14 | 28.6% | 34.5% | −5.9 | 28.6% |
+| ansible | 6 | 16.7% | 24.1% | −7.4 | 66.7% |
+| scrapy | 6 | 33.3% | 32.1% | +1.2 | 33.3% |
+| celery | 3 | 100.0% | 49.3% | +50.7 | 100.0% |
+
+**3 of 5 positive, sign test p = 1.00.** The guard required ≥ 4 of 6 for CONFIRMED and the pooled
+reading is null regardless. **celery's +50.7 points is three events and means nothing** — it is
+listed because the pre-registration forbids dropping a repository that disagrees, and the same rule
+forbids promoting one that agrees.
+
+**It is five repositories, not six. Django contributed zero of its 114 candidate pull requests** —
+not a read failure, which would have refused to report, but its historical patch-and-Trac workflow
+means most Django PRs were never merged *through GitHub*. "Not merged" is the largest skip bucket
+at 373. **Recorded because a repository that silently contributes nothing is exactly the
+denominator defect this harness was hardened against**, and here it is visible rather than assumed.
+
+## The cross-run observation, which is more informative than either run
+
+**This is the second null on human attention, and history lost to alphabetical both times, on
+disjoint repository sets.**
+
+| | history | alphabetical | gap |
+|---|---|---|---|
+| first run — 8 original repos, n = 69 | 69.6% | 72.5% | **−2.9** |
+| this run — 5 fresh repos, n = 44 | 40.9% | 50.0% | **−9.1** |
+
+Neither gap is individually significant. **Two independent samples pointing the same way is worth
+more than either**, and the way they point is: the history ranker does not predict where human
+reviewers look, and an alphabetical ordering does at least as well.
+
+## What this does and does not establish
+
+**It does NOT show the ranker fails at what it was built for.** The +22-point result targets *the
+function a later fix returns to*. This targets *the file a human commented on*. On the original
+eight repositories the ranker **does** beat alphabetical at defect-return — 1.44% miss against a
+3.31% control across 1,969 events.
+
+**What it establishes is the precise gap, and it is the important sentence in this document:**
+
+> **The ranker has been shown to beat an alphabetical control at defect-return on eight
+> repositories, and at nothing on any repository outside them.** Every out-of-sample test it has
+> faced — two of them now — has returned a null against the same trivial control.
+
+**So the open question is no longer "does the ranker predict human attention".** It is
+**"does the ranker beat alphabetical at DEFECT-RETURN on repositories it was not developed on"** —
+and that has never been run. It is the single most important untested claim the company has, it
+needs full-object clones rather than the GitHub API, and it should be pre-registered before it is
+attempted.
+
+## Consequences, applied as pre-registered rather than argued now
+
+- **"We allocate attention the way a good reviewer would" comes out of every document.** It was
+  never measured and it has now failed twice.
+- **The claim narrows to defect-return**, which is what the evidence reaches, and which is itself
+  unreplicated outside eight repositories.
+- **"Quiet" becomes "quiet, and validated against later fixes rather than against reviewers."**
+- **What is independent of all of this and survives untouched: the corrected attribution rule** —
+  67.9% of file-overlap verdicts blame a change sharing no symbol with the fix, reproduced across
+  three corpora, **and computed without the ranker** — **and typed coverage**, which is a
+  construction rather than a measurement.
