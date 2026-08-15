@@ -70,3 +70,59 @@ must be reported beside the wrong-rate rather than after it.
 **And the comparison must be like for like.** The bar is the same 50%, the raters are blind, and the
 corpus is fresh. **No credit for the schema being narrower** — a narrower question that produces
 fewer, better findings is the point, but it has to beat the same threshold.
+
+
+---
+
+# BEFORE THAT RUN — two checks that reorder the queue
+
+## 1. Production relevance could not be measured, and the reason is my sampling
+
+**Every finding sits on a pull request merged days ago.** Median forward history in the clones:
+**0.4 days. Zero of 14 pull requests have the 90 days the outcome rule requires.**
+
+| repo | PR | forward history |
+|---|---|---|
+| langchain | 39646 | **0.0 days** |
+| vllm | 52374 | 0.2 |
+| cartography | 3130 | 0.8 |
+| transformers | 47152 | 4.2 |
+
+**The harness refused to report rather than printing a spurious zero.** But the corpus cannot answer
+whether these findings track real defects, because there is no "later" in it yet.
+
+**This is the recency error from the review-comment corpus, committed a second time.** I fetched the
+most recently merged pull requests — the exact wrong sample for any question about what happens
+next. **Any future run that wants the defect-return check must draw pull requests merged at least
+90 days ago, and that constraint belongs in the fetcher rather than in a reader's memory.**
+
+## 2. Executing the claims settles a whole failure bucket in seconds
+
+Four of the wrong findings are *"wrong about Python itself"*. Each is decidable by a three-line
+snippet, and none of them needed the repository:
+
+| the model's claim | executed |
+|---|---|
+| *"closing a coroutine that was never started raises"* | `close()` returned cleanly — **false** |
+| *"`shape.insert(0, n)` can raise ValueError"* | returned `[4]` — **false** |
+| *"aware datetimes in different zones compare unequal"* | `08:40+00:00 == 11:40+03:00` → `True` — **false** |
+| *"`all()` on an empty list is falsy"* | `all([]) → True` — **the model was right** |
+
+**The model asserted three things about Python that Python contradicts in one line each.** It also
+got the fourth right, and that one is a genuine defect.
+
+**So an execution gate is not a research programme — it is a subprocess.** For claims of the form
+*"this expression raises / returns / compares like so"*, generate the snippet, run it, and publish
+only what survives. That is exactly the execution-grounded verification the literature reports, and
+it costs milliseconds.
+
+**It does not fix the other buckets** — *"refuted by code a few lines away"* and *"misreads what the
+code does"* need the repository, not a snippet. But it removes an entire class, deterministically,
+and the class is one where the model is confidently wrong.
+
+## Revised order
+
+1. **Execution gate on executable claims** — cheap, deterministic, removes a measured class.
+2. **The incomplete-check schema** — as pre-registered above, on the fresh six.
+3. **Defect-return relevance** — needs a corpus of pull requests merged 90+ days ago, which is a
+   different fetch and should be built once, properly, with the age constraint enforced in code.
