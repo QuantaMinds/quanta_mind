@@ -1,0 +1,17 @@
+  home-assistant_core          n= 400  history miss  2.50%  alphabetical miss  2.50%
+  matplotlib_matplotlib        n= 400  history miss  0.50%  alphabetical miss  3.50%
+  numpy_numpy                  n= 400  history miss  1.25%  alphabetical miss  1.75%
+  pytest-dev_pytest            n= 400  history miss  0.75%  alphabetical miss  3.00%
+  python-poetry_poetry         n= 400  history miss  0.50%  alphabetical miss  4.50%
+  sqlalchemy_sqlalchemy        n= 400  history miss  0.50%  alphabetical miss  0.00%
+
+  POOLED  n = 2400 events over 6 fresh repositories
+    history top-3 miss        24/2400 = 1.00%
+    alphabetical control miss 61/2400 = 2.54%
+    lift                      +1.54 points
+    discordant  b=46 (history wins)  c=9 (control wins)
+    McNemar exact p = 0.00000
+    repositories where history beats control: 4/6
+
+  READING against docs/plans/defect-return-external-preregistration.md
+    CONFIRMED — control beaten, p < 0.05, and >=4 of 6 repositories positive

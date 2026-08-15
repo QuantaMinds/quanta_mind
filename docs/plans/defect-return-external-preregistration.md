@@ -199,3 +199,68 @@ weighted toward ML and web tooling.
 effect at "holds on some repository populations and not others", which is a materially weaker claim
 than the one now in `AGENTS.md` — and the constitution would have to say so. **A third sample is
 worth running precisely because the first replication was strong enough to be worth attacking.**
+
+
+---
+
+# SECOND REPLICATION — RESULT: **CONFIRMED**, and it exposes a flaw in how the number is reported
+
+| repo | history | alphabetical | lift |
+|---|---|---|---|
+| poetry | 0.50% | 4.50% | +4.00 |
+| matplotlib | 0.50% | 3.50% | +3.00 |
+| pytest | 0.75% | 3.00% | +2.25 |
+| numpy | 1.25% | 1.75% | +0.50 |
+| **home-assistant/core** | **2.50%** | **2.50%** | **0.00** |
+| sqlalchemy | 0.50% | 0.00% | −0.50 |
+
+**Pooled: history 1.00%, alphabetical 2.54%, and the pre-registered reading is CONFIRMED.** Three
+disjoint samples, twenty repositories, same direction each time.
+
+## Investigating the tie — the first hypothesis was wrong
+
+**Predicted:** home-assistant's changes have flat fix-history, so no ranking can discriminate.
+**Measured: false.** Its rank-1-to-rank-2 score gap is **15.19**, *larger* than numpy (7.63),
+pytest (9.23) and poetry (9.58) — all repositories where the ranker wins comfortably.
+
+## What actually happened, with the column that was missing
+
+Adding **exact hypergeometric chance**, computed per event, separates the two policies properly:
+
+| repo | history vs chance | alphabetical vs chance |
+|---|---|---|
+| **home-assistant/core** | **+1.75** | **+1.75** |
+| numpy | +1.11 | +0.61 |
+| sqlalchemy | −0.04 | +0.46 |
+| pytest | +2.17 | −0.08 |
+| poetry | +2.80 | −1.20 |
+| matplotlib | +1.34 | −1.66 |
+
+**The ranker did not fail on home-assistant. It beat chance by +1.75 there — comparable to
+matplotlib and numpy. The control got better.** In five of six repositories alphabetical ordering
+sits at or below chance; in home-assistant it is +1.75.
+
+**The reason is layout.** `homeassistant/components/<integration>/…` means the alphabetically first
+file in a change is usually that component's `__init__.py` or `config_flow.py` — which is also the
+churn-heavy one. **The control accidentally encodes importance there**, so it stops being
+non-informative.
+
+**And sqlalchemy's −0.50 is a ceiling effect, not a loss.** Alphabetical missed **0.00%** against a
+chance baseline of 0.46%: with 3.53 files per change and a budget of three, there was almost
+nothing left to win.
+
+## The correction this forces on the headline
+
+**The published figure — "1.21% against an alphabetical control's 3.12%" — is measured against a
+baseline whose strength varies by repository layout.** Part of that gap is the control being weak,
+not the ranker being strong.
+
+**The invariant comparison is against exact chance, and it is the one to quote:**
+
+> Third sample, pooled: chance 2.52%, alphabetical 2.54% (**−0.02**, i.e. *no better than
+> chance*), history 1.00% (**+1.52**).
+
+**That is a stronger claim, not a weaker one** — it says the ranker beats the arithmetic baseline
+rather than beating one arbitrary ordering — and it removes a line of attack a sceptic would
+otherwise find. `publishing-rules.md` requires the control be stated with the number; it should now
+require the **chance** baseline, because alphabetical alone is not a stable reference.
