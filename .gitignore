@@ -60,3 +60,8 @@ docs/plans/session-*.md
 research/phase0/vertex/pr_corpus.json
 research/phase0/vertex/vertex_cost.jsonl
 research/phase0/vertex/run2.log
+research/phase0/vertex/*.log
+research/phase0/vertex/enriched_findings.jsonl
+research/phase0/vertex/enriched_packet.json
+research/phase0/vertex/rater2/
+research/phase0/vertex/rater3/

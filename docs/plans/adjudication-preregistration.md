@@ -360,3 +360,85 @@ rather than off a pricing page.
 
 *Sources: Martian Code Review Bench leaderboard and coverage; Google Cloud Vertex AI generative-AI
 pricing. Re-check the leaderboard Nov 2026 — it is rolling.*
+
+
+---
+
+# THE FIX EXPERIMENT — run 2026-08-14. **STOP CONFIRMED.**
+
+Both mechanical fixes built and tested live against the same 23 pull requests, so the comparison is
+on the same code. Blind adjudication, same rubric, fresh raters who were not told this was the
+improved run.
+
+**What was changed, and only this:** every line the model returns is snapped by `ast` to its
+enclosing statement; and the prompt carries the enclosing class's attribute assignments, the file's
+other signatures, its imports, and the call sites of the target function — plus rules written
+against the first run's actual failures. **Deliberately excluded: whether the PR merged and whether
+CI passed.** Several first-run findings would die on that information, and a real reviewer does not
+have it, so using it would measure a reviewer that cannot exist.
+
+| | first run | enriched |
+|---|---|---|
+| CORRECT | 9.1% | **13.0%** |
+| **WRONG** | 66.7% | **61.1%** |
+| UNFALSIFIABLE | 7.6% | 14.8% |
+| TRIVIAL | 16.7% | 11.1% |
+
+**WRONG = 33/54 = 61.1%, Wilson [47.8%, 73.0%]. The bar was under 50%. STOP CONFIRMED.**
+
+**And nothing moved measurably.** Wrong-rate 66.7% → 61.1%, **p = 0.53**. Correct-rate 9.1% →
+13.0%, **p = 0.50**. Two fixes, aimed at the two largest failure buckets, produced no detectable
+improvement.
+
+## The finding that matters more than the headline
+
+**The parser fixed the symptom I could measure and left the defect.** My own mechanical check said
+anchors on a real line of code went from 80.3% to **98.1%**, and findings with both anchors clean
+from 63.6% to **96.3%**. That looked like the largest bucket closing.
+
+**The blind raters disagree, and they are right.** Anchor failures are **57.6% of the remaining
+wrong findings — a larger share of the wrong bucket than before the fix (54.5%).** In their words:
+
+> *"line 978 is the assignment inside the `if`, not the `if` itself"*
+> *"line 419 is the `def` line, not the 425-427 configuration the claim rests on"*
+> *"line 574 is the `if` guard, not the clearing at 579"*
+
+**Snapping moved anchors off blank lines and onto plausible-but-wrong statements.** The model was
+never confused about brackets; it was pointing at the wrong *place*, and a blank-line anchor was
+merely the visible tail of that. **Worse, the fix made the defect harder to see** — a blank-line
+citation is obviously broken, a wrong-statement citation reads as fine.
+
+**This is exactly the rule about checks: ask what a check outputs when the thing it checks is
+broken. My anchor check outputs 98.1% either way.** It measured a property that correlates with
+correctness rather than correctness itself, and I built it, believed it, and reported it before the
+adjudication corrected me.
+
+## What context did
+
+**Nothing detectable, and possibly the opposite.** UNFALSIFIABLE rose from 7.6% to 14.8% — given
+more surrounding code the model made *more* claims that could not be decided from what it was
+shown. Small numbers and a different rater pool, so this is not a finding, but there is certainly
+no sign of the reduction the hypothesis predicted.
+
+**The model did get quieter**: 19 requests returned nothing against 8, and 54 findings against 66.
+It suppressed volume without improving accuracy.
+
+**And cost is not the obstacle**: $0.1211 → $0.1278 per pull request, +5.5%, on a 76% larger
+prompt — because thinking is 91% of the bill and input barely registers. If context had worked,
+its price was never the problem.
+
+## The confound, stated
+
+**The two runs were graded by different rater pools.** A 5.6-point difference in wrong-rate is well
+inside that variation, which is another reason to read this as "nothing moved" rather than as a
+small improvement.
+
+## What this closes
+
+The stop decision rested on one configuration. **It now rests on two, the second built specifically
+to fix the first's two largest, most mechanically tractable failure modes.** Both failed to clear a
+bar fixed in advance.
+
+**The remaining honest position on the review half:** its failures are not a pointer problem and not
+a context problem. They are the model asserting relationships between lines of code that are not
+there — and the two cheapest, most obvious interventions have now been tried and measured.
