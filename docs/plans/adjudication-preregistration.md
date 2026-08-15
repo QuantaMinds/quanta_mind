@@ -176,3 +176,124 @@ evidence actually reaches.**
 suspicious one for an author-grader, but it is still one rater. Every verdict carries the line
 that decided it so a second reader can overturn it cheaply. **A second rater is required before
 this number is used to make the decision it implies.**
+
+
+---
+
+# SECOND RATER — protocol fixed before any verdict was returned
+
+The result above rests on one reading by the person who wrote the prompt. This section is written
+**while the second rating is still running**, so the way it is read cannot be chosen after seeing
+whether it agrees.
+
+## Setup
+
+Six independent adjudicators, each given the same rubric and a disjoint block of 11 findings, with
+the claim and the code around both cited lines. **Blind to the first rater's verdicts, to each
+other, and to which rank produced each finding.** They were told the pull requests are merged, and
+given the same anchor rule and the same four buckets.
+
+## What is computed
+
+| quantity | why |
+|---|---|
+| raw agreement on the 4-way verdict | the headline |
+| **Cohen's κ** | agreement corrected for chance, the same instrument that replicated the ranking result at κ = 0.92 |
+| agreement on the binary WRONG / not-WRONG | the only distinction the STOP threshold depends on |
+| **W/n under rater 2 alone** | does the decision survive a reading that is not mine |
+
+## The decision rules, fixed now
+
+**The STOP conclusion stands only if rater 2 independently reaches W/n ≥ 0.50.** If rater 2's W/n
+lands below 0.50, the first reading is not confirmed and the conclusion is **suspended, not
+averaged** — a decision this consequential does not get to be rescued by pooling two disagreeing
+readings into one convenient mean.
+
+| κ | reading |
+|---|---|
+| ≥ 0.70 | The rubric is reproducible. Whichever way the counts fall, they mean something |
+| 0.40 – 0.70 | Moderate. The result is directional; the specific percentages are not quotable |
+| < 0.40 | **The rubric is the problem, not the findings.** Nothing here is usable and the exercise must be redesigned before it decides anything |
+
+**Where they disagree, the disagreements get read, not discarded.** A systematic pattern — for
+instance rater 2 accepting anchors the first rater rejected — is a finding about the *rubric* and
+must be reported as one, because the anchor rule is the single most consequential judgement call
+in the protocol and it was mine.
+
+## The limitation that survives all of this
+
+**Rater 2 is the same model family as rater 1.** Independent context, independent reading, blind —
+but correlated priors. This is a genuine replication of the *reading*, and it is not the
+independent-family check the project used on the ranking result. **A human rater, or one from
+another family, remains the standard this has not yet met**, and any published version of this
+number must say so.
+
+Gemini is not eligible: it wrote the findings, and an author grading its own work measures
+something else.
+
+
+---
+
+# SECOND-RATER RESULT
+
+| bucket | rater 1 | rater 2 |
+|---|---|---|
+| CORRECT | 6 (9.1%) | **3 (4.5%)** |
+| **WRONG** | 44 (**66.7%**) | 49 (**74.2%**) |
+| UNFALSIFIABLE | 5 (7.6%) | 5 (7.6%) |
+| TRIVIAL | 11 (16.7%) | 9 (13.6%) |
+
+| | |
+|---|---|
+| raw agreement, 4-way | **86.4%** (57/66) |
+| **Cohen's κ, 4-way** | **0.711** |
+| agreement on WRONG vs not — the only cut the threshold uses | **92.4%** |
+| κ on that binary | **0.819** |
+
+**Against the bands fixed before the rating: κ = 0.711 clears 0.70, so the rubric is reproducible
+and the counts mean something.** On the distinction that actually decides the question — is this
+finding wrong — the two readings agree 92.4% of the time at κ = 0.819.
+
+**The STOP condition is independently confirmed.** Rater 2 alone: **W/n = 74.2%, Wilson
+62.6%–83.3%**, against a threshold of 50%. The interval's lower bound clears the threshold by more
+than twelve points.
+
+## Every disagreement that moved, moved against the first rater
+
+Nine disagreements. **Five made a finding worse; none rescued one.** There is no case where rater
+2 accepted a finding rater 1 called wrong.
+
+| # | rater 1 | rater 2 | |
+|---|---|---|---|
+| 20 `init_model_state` | UNFALSIFIABLE | **WRONG** | anchor is the import inside the branch, not the condition above it |
+| 28 `test_challenge_state…` | CORRECT | **WRONG** | anchor is the `continue`, not the `if` that performs the check |
+| 42 `is_quantization_compressed` | UNFALSIFIABLE | **WRONG** | `is_quantized` *itself* dereferences `quantization_config`, so it cannot be the safe guard the claim assumes |
+| 51 `load_model` | UNFALSIFIABLE | **WRONG** | anchor is an argument line, not the assignment |
+| 59 `_credential_bound_workflow` | TRIVIAL | **WRONG** | anchor is inside the return call, not the return |
+| 15, 17, 52, 55 | — | — | reclassified between the non-WRONG buckets |
+
+**Two of these are substantive, not procedural.** On #42 rater 2 produced a refutation the first
+rater missed entirely — the claim assumes `is_quantized` is a safe existence check, and it is not,
+because it dereferences the same attribute one line earlier. And on #28 rater 2 applied the first
+rater's own anchor rule more strictly than the first rater did.
+
+**Which is the direction that matters for the conflict.** The concern was that the prompt's author
+would grade generously. **The independent reading says the first rater was too generous, not too
+harsh** — so the bias ran the way the conflict predicted, and correcting it makes the result worse.
+
+## The consensus floor
+
+**Findings both raters independently called CORRECT: 3 of 66 — 4.5%.** Those three are
+`all([])` returning True on an empty worker list, a case-sensitive scan whose sibling test
+lowercases, and a test forcing 32×32 tokens while its expectation string still says 64×64.
+
+## What this settles and what it does not
+
+**Settled: the STOP conclusion no longer rests on one reading.** Two independent adjudications, at
+κ = 0.82 on the binary, both put the wrong-rate far above the pre-registered threshold and the
+correct-rate far below the field's floor.
+
+**Not settled: rater 2 is the same model family as rater 1.** Independent context, blind, disjoint
+blocks, and it disagreed with rater 1 nine times — but correlated priors remain. **This replicates
+the reading. It is not the different-family or human check the ranking result received, and no
+published version of this number may imply otherwise.**

@@ -9,8 +9,19 @@ that was honest when measured drifts into carrying weight it cannot hold. `publi
 governs what may be said; this file governs what is *known*.
 
 **The one-sentence summary, stated before the detail so it cannot be buried:** the half of the
-product that decides *where to look* is measured and holds up; the half that decides *what to
-say* has never run. Everything below elaborates that split.
+product that decides *where to look* is measured and holds up; **the half that decides *what to
+say* has now been measured, by two independent raters, and it failed its own pre-registered
+gate.**
+
+| the review half, adjudicated | rater 1 | rater 2 | agreement |
+|---|---|---|---|
+| **wrong** | 66.7% | **74.2%** | 92.4%, κ = 0.82 |
+| correct | 9.1% | 4.5% | both far below the field's 49% floor |
+
+**The threshold was 50% wrong, committed before a single finding was read. Both readings clear it,
+and every disagreement between them made the result worse rather than better.** The reading is:
+stop building the review half in this configuration. `docs/plans/adjudication-preregistration.md`
+carries the protocol, the verdicts and the disagreements.
 
 ---
 
@@ -134,7 +145,7 @@ is measured; and the distinction has to survive contact with a customer asking "
 |---|---|---|---|
 | **The coverage line is honest** | Construction. `Unresolved(site, reason, construct)` cannot be built without all three fields, and `CoverageLine` is a view over its `Ranking` so it cannot disagree with what was funded | A live run whose stated coverage is checked against what was actually read | Nothing — this is buildable now |
 | **Verification catches the model's bad claims** | Design. `verify` cannot import `infer`, enforced by the layer guard | Precision and recall of the verifier against hand-adjudicated model output | **No model has ever run** |
-| **Our published findings are trustworthy** | Nothing yet | Published-and-wrong rate on real PRs | Same |
+| ~~**Our published findings are trustworthy**~~ | **MEASURED, AND FALSE.** 66.7% / 74.2% wrong across two blind raters, κ = 0.82 on the binary; 4.5% correct by consensus against a 49% field floor | — | — |
 | **It makes pull requests move faster** | Nothing. The market data says review latency is the bottleneck; it does not say we fix it | One month, three teams, cycle time before and after | **No customers.** This is the VP question and it has no answer |
 | **85% gross margin at 300 PRs/month** | Derived from the cost line, which is now measured | Inherits — recompute against the billed figure | Nothing; arithmetic |
 | **Claude vs Gemini for the inference pass** | Nothing | Adjudicated disagreements, exact binomial at pre-specified n | Same — and the instrument resolves **22 points at n = 100**, not the 2 the rule originally asked for |

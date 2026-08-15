@@ -19,3 +19,15 @@
     #2922     9 files  rank of first commented file: 7
     #3060    13 files  rank of first commented file: 1
     #3787    11 files  rank of first commented file: 1
+    #4039    24 files  rank of first commented file: 3
+    #4092    22 files  rank of first commented file: 8
+    #4419    16 files  rank of first commented file: 4
+    #4515    10 files  rank of first commented file: 7
+    #4610    21 files  rank of first commented file: 3
+    #4732    16 files  rank of first commented file: 2
+    #4822    12 files  rank of first commented file: 1
+    #4830    12 files  rank of first commented file: 2
+    #4850    15 files  rank of first commented file: 2
+    #4924     9 files  rank of first commented file: 4
+  django/django                   114 pre-2022 PRs with human .py comments
+  REFUSING TO REPORT — /repos/ansible/ansible/pulls/comments?per_page=100&page=1: gh: Server Error (HTTP 502)
