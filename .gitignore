@@ -68,3 +68,5 @@ research/phase0/vertex/rater3/
 research/phase0/vertex/symbol_findings.jsonl
 research/phase0/vertex/symbol_packet.json
 research/phase0/vertex/rater5/
+research/phase0/vertex/triage/triage_results.jsonl
+research/phase0/vertex/triage/*.log
