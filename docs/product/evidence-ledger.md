@@ -53,6 +53,32 @@ remembers discarding.
 | Competitor catch rate, 10/65 | 15.4%, Wilson **8.6–26.1%** — spans the 23.9% comparison | **Withdrawn**, because it named a company |
 | "Function ranking is a floor" | Reasoned from partition fineness, ignoring that aim differs (75.0% vs 58.9%) | **Withdrawn** |
 | Claim checkability from review text | Keyword classifier, **56.5%** residual | **Discarded.** The residual *is* the result — see below |
+| **Does the ranker predict where a human reviewer commented?** | 69 pre-2022 PRs. History top-3 **69.6%**, alphabetical **72.5%**, exact chance **69.1%**. McNemar p = 0.81 | **Null**, and the instrument was half the problem — see below |
+
+**On the human-attention null, two things must be said in order.** First the result: the
+model-free ranker shows **no advantage over an alphabetical control, and none over exact chance**,
+at predicting which file a human reviewer chose to comment on. That was a pre-specified test and
+it failed.
+
+**Second, the test was badly built, and saying so does not rescue it.** Admitting pull requests
+with as few as 4 changed files put the chance baseline at **79.7%** — top-3 of 4 files is not a
+selective instrument. Across the whole sample chance was 69.1%, so there were 31 points of
+headroom for two policies to compete in. This is the same defect as the certification threshold:
+**an instrument asked to resolve something it cannot see.** A properly powered version admits
+only pull requests with enough files for top-3 to mean something, and it needs a fresh sample —
+re-cutting this one after seeing the answer is the failure mode the whole project is built to
+avoid.
+
+**A post-hoc stratum, labelled as such and not usable as evidence.** Among the 24 PRs with 9–15
+changed files, where chance falls to 51.9%, history scored 58.3% and alphabetical 54.2%. That is
+a hypothesis. It is not a result, it was not pre-specified, and n = 24.
+
+**What the null does not touch.** The +22-point ranking result targets *the function a later fix
+returns to*. This test targeted *the file a human commented on*. They are different quantities,
+and the corpus work says why they might not coincide: **only 5.9% of human review comments assert
+anything structurally checkable**, so where reviewers comment is mostly not where defects live.
+That reconciliation is coherent and rests on an independently measured number — **and it was
+constructed after seeing the null, so it is an explanation, not a finding.**
 
 **Seven nulls is the asset, not the embarrassment.** Every one of them is a feature a competitor
 could ship tomorrow with a straight face, and each was killed here by a control the competitor
