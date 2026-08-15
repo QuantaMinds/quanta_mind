@@ -74,3 +74,4 @@ research/phase0/vertex/rater6/
 research/phase0/vertex/triage/*.log
 research/phase0/vertex/triage/*.jsonl
 research/phase0/vertex/triage/corpus_aged.json
+research/phase0/vertex/triage/*_packet.json

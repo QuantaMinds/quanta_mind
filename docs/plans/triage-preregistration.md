@@ -120,3 +120,74 @@ than this test assumed.
 **The honest summary: the review half now has no cheap path.** Four fixes failed on the model as
 finder; the model as triager has nothing to triage because the analyzer available to us finds
 nothing where the ranker looks.
+
+
+---
+
+# THE EXECUTION GATE — 27.8% wrong, the first design under the bar, and the control says why not to believe it yet
+
+**24 pull requests merged 2010–2012, every one past the outcome window, enforced by
+`corpus_age.assert_corpus_age` at fetch time.** The model emits a claim *and* a self-contained
+snippet that would demonstrate it; the snippet is executed; only `CONFIRMED` is published.
+
+| outcome | n | |
+|---|---|---|
+| **CONFIRMED** | 18 | published |
+| REFUTED | 5 | the model's own snippet contradicted its own claim |
+| REFUSED | 5 | snippet attempted I/O |
+| CRASHED | 2 | snippet raised |
+
+## The published findings clear the bar
+
+| | published (18) | **killed (12)** |
+|---|---|---|
+| CORRECT | 11.1% | 16.7% |
+| **WRONG** | **27.8%** | **50.0%** |
+| UNFALSIFIABLE | 44.4% | 25.0% |
+| TRIVIAL | 16.7% | 8.3% |
+
+**27.8% wrong against a 50% bar — the first of six designs to clear it**, after 82.1%, 77.8% and
+66.7% on the previous corpus.
+
+## Three reasons not to believe it yet, in order of severity
+
+**1. The separation is not significant.** Published 27.8% against killed 50.0% is **+22.2 points,
+p = 0.216**. The gate looks like it works and n = 30 cannot show that it does. The Wilson intervals
+overlap heavily: [12.5%, 50.9%] against [25.4%, 74.6%].
+
+**2. The gate discarded half the real findings it saw.** Two CORRECT findings were published and
+**two were killed** — the `render_template` signature rename that genuinely breaks callers passing
+`template_name=`, and a `fname, fields = fname` unpack that genuinely raises on a non-two-element
+spec. **Both were killed by the model writing a bad snippet, not by the claim being wrong.** A gate
+that throws away 50% of true findings is not a filter, it is a coin with a good story.
+
+**3. The corpus is easier and that alone could explain the result.** 2010–2012 flask, scrapy and
+celery are far simpler than modern vllm and transformers. **This design has never been run on the
+hard corpus, and the hard corpus is where every previous design failed.**
+
+## And the number that moved most is not the good one
+
+**UNFALSIFIABLE went from 10–20% to 44.4%.** Nearly half of what is published cannot be decided
+from what the reviewer was shown — *"whether `cache` is class-level depends on `__init__`, which is
+not shown"*. **That is the wrong-rate converting into undecidability rather than into correctness**,
+and an undecidable comment is no more actionable than a false one.
+
+**Counting UNFALSIFIABLE as unpublishable, the useful yield is 2 of 18 findings across 24 pull
+requests — 0.08 per pull request.**
+
+## What it does establish
+
+**The interpreter catches self-contradiction for free.** Five findings died because the model's own
+demonstration refuted its own claim. That is a real, deterministic, zero-cost class of rejection and
+it needs no rater.
+
+**And one flaw of mine is in the numbers:** the snippet screen bans substrings, so it refused
+`requests` as a *variable name* and `import os` where it was legitimate — 5 of 30, some wrongly. It
+should screen `ast` import nodes, not text.
+
+## The one test that would settle it
+
+**Run the identical gate on the hard corpus** — the 20 unseen pull requests from scikit-learn,
+pandas, django, ansible, scrapy and celery where the same model scored 82.1% wrong and zero correct.
+Same schema, same gate, same rubric. **If 27.8% is the gate, it survives. If it is the corpus, it
+collapses back toward 80%.** That is one run and it is the only way to attribute this number.

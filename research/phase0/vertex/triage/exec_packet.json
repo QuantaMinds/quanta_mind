@@ -1,0 +1,326 @@
+[
+ {
+  "repo": "pallets/flask",
+  "pr": 307,
+  "file": "flask/blueprints.py",
+  "unit": "decorator",
+  "finding": {
+   "claim_type": "unhandled_case",
+   "file": "flask/blueprints.py",
+   "symbol_a": "decorator",
+   "symbol_b": "add_url_rule",
+   "relation": "The function `decorator` extracts `endpoint` from `options` and passes it to `add_url_rule`, but `add_url_rule` does not validate that `endpoint` is a string before performing a substring check, causing a `TypeError` if a non-iterable value like an integer is passed.",
+   "check_snippet": "import sys\nimport traceback\n\ntry:\n    # Simplified mock of the Blueprint class to isolate the logic\n    class MockBlueprint:\n        def __init__(self):\n            pass\n\n        def add_url_rule(self, rule, endpoint=None, view_func=None, **options):\n            # This check was added in the patch, but it's incomplete\n            if endpoint:\n                # This line will raise a TypeError if `endpoint` is not iterable\n                assert '.' not in endpoint, \"Blueprint endpoint's should not contain dot's\"\n\n        def route(self, rule, **options):\n            # This is the function under review\n            def decorator(f):\n                # The patch allows `endpoint` to be passed via `options`\n                endpoint = options.pop(\"endpoint\", f.__name__)\n                self.add_url_rule(rule, endpoint, f, **options)\n                return f\n            return decorator\n\n    bp = MockBlueprint()\n\n    # The decorator is used with a non-string, non-iterable endpoint\n    @bp.route('/', endpoint=123)\n    def my_view():\n        pass\n\n    print(\"REFUTED\")\n\nexcept TypeError as e:\n    # This is expected because of `'.' not in 123`\n    if \"argument of type 'int' is not iterable\" in str(e):\n        print(\"CONFIRMED\")\n    else:\n        traceback.print_exc(file=sys.stdout)\n        print(\"REFUTED\")\nexcept Exception:\n    traceback.print_exc(file=sys.stdout)\n    print(\"REFUTED\")\n",
+   "execution": {
+    "outcome": "CONFIRMED",
+    "detail": "CONFIRMED"
+   }
+  }
+ },
+ {
+  "repo": "psf/requests",
+  "pr": 26,
+  "file": "requests/__init__.py",
+  "unit": "__enter__",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "requests/__init__.py",
+   "symbol_a": "settings.cache",
+   "symbol_b": "timeout",
+   "relation": "Because `settings.cache` is a class attribute shared across all instances, a nested `settings` context manager overwrites the value cached by the outer context, preventing the outer context from correctly restoring the original module-level `timeout` upon exit.",
+   "check_snippet": "import inspect\n\n# --- Code from the file ---\ntimeout = None\n\nclass settings:\n    \"\"\"Context manager for settings.\"\"\"\n    \n    cache = {}\n    \n    def __init__(self, timeout):\n        # We need to get the module object of the calling code\n        # This is a bit tricky to do in a self-contained snippet\n        # so we will simulate it by having a 'module' object\n        class Module:\n            pass\n        self.module = Module()\n        self.module.timeout = globals()['timeout']\n\n        # Cache settings\n        self.cache['timeout'] = self.module.timeout\n        \n        self.module.timeout = timeout\n        globals()['timeout'] = timeout\n        \n    def __enter__(self):\n        pass\n        \n    def __exit__(self, type, value, traceback):\n        # Restore settings \n        for key in self.cache:\n            # In the original code, this would be setattr(self.module, ...)\n            # but we simulate by updating the global\n            globals()['timeout'] = self.cache[key]\n\n# --- Test case ---\noriginal_timeout_val = \"original\"\ntimeout = original_timeout_val\n\nwith settings(timeout=\"nested_1\"):\n    with settings(timeout=\"nested_2\"):\n        pass\n\nif timeout == original_timeout_val:\n    print(\"REFUTED\")\nelse:\n    print(\"CONFIRMED\")",
+   "execution": {
+    "outcome": "CONFIRMED",
+    "detail": "CONFIRMED"
+   }
+  }
+ },
+ {
+  "repo": "celery/celery",
+  "pr": 186,
+  "file": "celery/schedules.py",
+  "unit": "_expand_range",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "celery/schedules.py",
+   "symbol_a": "_expand_range",
+   "symbol_b": "_expand_range",
+   "relation": "The range expansion logic for wrap-around cron fields incorrectly calculates the upper bound of the first part of the range as `self.min_ + self.max_`, which fails to include the maximum value when `self.min_` is 0.",
+   "check_snippet": "from typing import Sequence\n\nclass MockCrontabParser:\n    def __init__(self, min_, max_):\n        self.min_ = min_\n        self.max_ = max_\n\n    def _expand_number(self, s: str) -> int:\n        return int(s)\n\n    def _expand_range(self, toks: Sequence[str]) -> list[int]:\n        fr = self._expand_number(toks[0])\n        if len(toks) > 1:\n            to = self._expand_number(toks[1])\n            if to < fr:  # Wrap around max_ if necessary\n                return (list(range(fr, self.min_ + self.max_)) +\n                        list(range(self.min_, to + 1)))\n            return list(range(fr, to + 1))\n        return [fr]\n\n# For hour fields in a crontab, the valid range is 0-23.\n# A wrap-around range like \"22-2\" should expand to [22, 23, 0, 1, 2].\n# The parser is initialized with min_=0, max_=23 for hours.\nparser = MockCrontabParser(min_=0, max_=23)\n\n# The buggy logic calculates the upper part of the range as\n# range(22, 0 + 23), which is range(22, 23), producing only [22].\n# The value 23 is incorrectly omitted.\nresult = parser._expand_range(['22', '2'])\n\nif result == [22, 0, 1, 2]:\n    print(\"CONFIRMED\")\nelse:\n    print(\"REFUTED\")\n",
+   "execution": {
+    "outcome": "CONFIRMED",
+    "detail": "CONFIRMED"
+   }
+  }
+ },
+ {
+  "repo": "pallets/flask",
+  "pr": 413,
+  "file": "examples/blueprintexample/blueprintexample_test.py",
+  "unit": "test_urls",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "examples/blueprintexample/blueprintexample_test.py",
+   "symbol_a": "unittest.TestCase",
+   "symbol_b": "self.assertEquals",
+   "relation": "The method `assertEquals` was removed from `unittest.TestCase` in Python 3.2, so calling it violates the class's modern API contract and will raise an `AttributeError`.",
+   "check_snippet": "import unittest\n\n# The `assertEquals` method was an alias for `assertEqual` that was\n# deprecated in Python 3.1 and removed in Python 3.2. Its use violates\n# the contract of `unittest.TestCase` in modern Python versions.\n# This snippet confirms that the method is no longer present.\ntry:\n    # In an environment where `assertEquals` is missing (e.g., Python >= 3.2),\n    # this will raise an AttributeError.\n    getattr(unittest.TestCase, 'assertEquals')\n    print(\"REFUTED\")\nexcept AttributeError:\n    print(\"CONFIRMED\")\n",
+   "execution": {
+    "outcome": "CONFIRMED",
+    "detail": "CONFIRMED"
+   }
+  }
+ },
+ {
+  "repo": "celery/celery",
+  "pr": 215,
+  "file": "celery/apps/beat.py",
+  "unit": "setup_logging",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "celery/apps/beat.py",
+   "symbol_a": "start_scheduler",
+   "symbol_b": "logging.Handler",
+   "relation": "The call to `logger.critical` in `start_scheduler` manually formats the exception traceback into the message string instead of using the `exc_info` argument, preventing log handlers from accessing structured exception information for custom processing.",
+   "check_snippet": "import logging\nimport sys\nimport traceback\n\nclass ExcInfoCapturingHandler(logging.Handler):\n    def __init__(self, *args, **kwargs):\n        super(ExcInfoCapturingHandler, self).__init__(*args, **kwargs)\n        self.exc_info_received = False\n\n    def emit(self, record):\n        if record.exc_info:\n            self.exc_info_received = True\n\ndef demonstrate_defect():\n    handler = ExcInfoCapturingHandler()\n    logger = logging.getLogger('test_celery_beat')\n    logger.setLevel(logging.CRITICAL)\n    logger.addHandler(handler)\n\n    try:\n        raise RuntimeError(\"beat service failed\")\n    except Exception as exc:\n        # This is the problematic call from the original code.\n        # It manually formats the traceback into the string,\n        # but doesn't pass exc_info, so handlers don't get structured data.\n        logger.critical(\"celerybeat raised exception %s: %r\\n%s\" % (\n                        exc.__class__, exc, traceback.format_exc()))\n\n    if not handler.exc_info_received:\n        print(\"CONFIRMED\")\n    else:\n        print(\"REFUTED\")\n\ndemonstrate_defect()\n",
+   "execution": {
+    "outcome": "CONFIRMED",
+    "detail": "CONFIRMED"
+   }
+  }
+ },
+ {
+  "repo": "tornadoweb/tornado",
+  "pr": 273,
+  "file": "tornado/database.py",
+  "unit": "execute_rowcount",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "tornado/database.py",
+   "symbol_a": "_execute",
+   "symbol_b": "execute_rowcount",
+   "relation": "The helper function _execute, upon a database disconnect, attempts to reconnect and retry the query using a cursor that belongs to the old, now-closed connection, which is invalid and violates the DB-API contract.",
+   "check_snippet": "import sys\n\nCONFIRMED = False\n\nclass DBAPI_Error(Exception):\n    pass\n\nclass DBAPI_OperationalError(DBAPI_Error):\n    pass\n\nclass MockCursor:\n    def __init__(self, conn):\n        self.conn = conn\n        self.closed = False\n        self.rowcount = -1\n\n    def execute(self, query, params):\n        if self.closed or self.conn.closed:\n            raise DBAPI_OperationalError(\"cursor/connection is closed\")\n        if self.conn.fail_on_execute:\n            self.conn.fail_on_execute = False\n            self.conn.closed = True  # Simulate disconnect\n            raise DBAPI_OperationalError(\"server has gone away\")\n        self.rowcount = 1\n        return None\n\n    def close(self):\n        self.closed = True\n\nclass MockConnection:\n    def __init__(self):\n        self.closed = False\n        self.fail_on_execute = False\n        self.autocommit_called_with = None\n\n    def cursor(self):\n        if self.closed:\n            raise DBAPI_OperationalError(\"connection is closed\")\n        return MockCursor(self)\n\n    def close(self):\n        self.closed = True\n\n    def autocommit(self, value):\n        self.autocommit_called_with = value\n\nclass MockDbModule:\n    def connect(self, **kwargs):\n        return MockConnection()\n    \n    # Make exceptions available on the module object\n    OperationalError = DBAPI_OperationalError\n\n# Simplified tornado.database.Connection for demonstration\nclass Connection:\n    def __init__(self):\n        self._db_args = {\"database_module\": MockDbModule()}\n        self._db_kwargs = {}\n        self._db = self._db_args[\"database_module\"].connect(**self._db_kwargs)\n        self._db.autocommit(True)\n\n    def close(self):\n        if self._db is not None:\n            self._db.close()\n            self._db = None\n\n    def reconnect(self):\n        self.close()\n        self._db = self._db_args[\"database_module\"].connect(**self._db_kwargs)\n        self._db.autocommit(True)\n\n    def _cursor(self):\n        return self._db.cursor()\n\n    def _execute(self, cursor, query, parameters):\n        try:\n            return cursor.execute(query, parameters)\n        except DBAPI_OperationalError:\n            # Simplified disconnect check\n            self.reconnect()\n            # Bug: cursor belongs to old connection, which is now closed\n            return cursor.execute(query, parameters)\n\n    def execute_rowcount(self, query, *parameters):\n        cursor = self._cursor()\n        try:\n            self._execute(cursor, query, parameters)\n            return cursor.rowcount\n        finally:\n            cursor.close()\n\n# --- Test --- \ntry:\n    db = Connection()\n    db._db.fail_on_execute = True  # Setup failure on first execute\n    db.execute_rowcount(\"SELECT 1\")\nexcept DBAPI_OperationalError as e:\n    if \"cursor/connection is closed\" in str(e):\n        CONFIRMED = True\nexcept Exception:\n    pass # Other exceptions mean the test is flawed\n\nif CONFIRMED:\n    print(\"CONFIRMED\")\nelse:\n    print(\"REFUTED\")",
+   "execution": {
+    "outcome": "CONFIRMED",
+    "detail": "CONFIRMED"
+   }
+  }
+ },
+ {
+  "repo": "pallets/flask",
+  "pr": 307,
+  "file": "flask/blueprints.py",
+  "unit": "add_url_rule",
+  "finding": {
+   "claim_type": "unhandled_case",
+   "file": "flask/blueprints.py",
+   "symbol_a": "add_url_rule",
+   "symbol_b": "url_for",
+   "relation": "By not validating that an endpoint name contains a dot, `add_url_rule` allows registering a view that later causes infinite recursion in `url_for` during URL resolution.",
+   "check_snippet": "# This snippet models the interaction between flask.url_for and Blueprint.url_for\n# when an endpoint with a dot has been registered via a blueprint.\n\n# Represents the application and its registered blueprints\nclass App:\n    def __init__(self):\n        self.blueprints = {}\n\n# Represents a blueprint\nclass Blueprint:\n    def __init__(self, name):\n        self.name = name\n\n    # Simplified Blueprint.url_for\n    def url_for(self, endpoint, **values):\n        # This is the crucial part of the blueprint's URL generation logic,\n        # which prepends the blueprint name to the endpoint.\n        return url_for(self.name + '.' + endpoint, **values)\n\n# Global application object and a mock url_for function\napp = App()\n\n# Simplified flask.helpers.url_for\ndef url_for(endpoint, **values):\n    # This logic splits the endpoint to find the blueprint\n    if '.' in endpoint:\n        blueprint_name, endpoint_name = endpoint.split('.', 1)\n        if blueprint_name in app.blueprints:\n            # It then delegates to the blueprint's url_for, causing recursion\n            # if endpoint_name itself contains a dot.\n            return app.blueprints[blueprint_name].url_for(endpoint_name, **values)\n    # Base case for non-blueprint or resolved URLs (not reached in the bug)\n    return f\"/url/for/{endpoint}\"\n\ndef run_test():\n    # Setup: Create a blueprint and register it.\n    # The old add_url_rule allowed registering an endpoint like 'a.b',\n    # leading to this state.\n    bp = Blueprint('my_bp')\n    app.blueprints['my_bp'] = bp\n\n    try:\n        # Attempt to build a URL for the endpoint 'a.b' on blueprint 'my_bp'.\n        # The full endpoint string is 'my_bp.a.b'.\n        # flask.url_for('my_bp.a.b') splits it into 'my_bp' and 'a.b',\n        # then calls my_bp.url_for('a.b').\n        # my_bp.url_for('a.b') calls flask.url_for('my_bp.a.b') again, causing a loop.\n        url_for('my_bp.a.b')\n        print(\"REFUTED\")\n    except RecursionError:\n        print(\"CONFIRMED\")\n    except Exception:\n        print(\"REFUTED\")\n\nrun_test()\n",
+   "execution": {
+    "outcome": "CONFIRMED",
+    "detail": "CONFIRMED"
+   }
+  }
+ },
+ {
+  "repo": "tornadoweb/tornado",
+  "pr": 273,
+  "file": "tornado/database.py",
+  "unit": "executemany_rowcount",
+  "finding": {
+   "claim_type": "missing_guard",
+   "file": "tornado/database.py",
+   "symbol_a": "executemany_rowcount",
+   "symbol_b": "executemany_rowcount",
+   "relation": "When `cursor.executemany` raises an `OperationalError` indicating a lost connection, `executemany_rowcount` fails to call `self.close()` to mark the connection as closed, which prevents future automatic reconnection.",
+   "check_snippet": "import sys\nimport time\n\n# Mock DB-API 2.0 driver and classes\nclass MockOperationalError(Exception):\n    pass\n\nclass MockCursor:\n    def __init__(self, connection):\n        self.connection = connection\n    def executemany(self, query, parameters):\n        raise self.connection.db_module.OperationalError(\"connection gone\")\n    def close(self):\n        pass\n\nclass MockDbConnection:\n    def __init__(self, db_module):\n        self.db_module = db_module\n    def cursor(self):\n        return MockCursor(self)\n    def close(self):\n        pass\n\nclass MockDbModule:\n    def __init__(self):\n        self.OperationalError = MockOperationalError\n    def connect(self, **kwargs):\n        return MockDbConnection(self)\n\n# tornado.database tries to import MySQLdb or pymysql. We mock one.\nsys.modules['MySQLdb'] = MockDbModule()\n\n# --- Pasted and adapted code from tornado/database.py --- #\nimport logging\n\nclass Connection(object):\n    def __init__(self, host, database, user=None, password=None,\n                 max_idle_time=7 * 3600, connect_timeout=0):\n        self.host = host\n        self.database = database\n        self.max_idle_time = float(max_idle_time)\n        self._db = None\n        self._last_use_time = time.time()\n        self._db_args = dict(host=host, db=database, user=user, passwd=password,\n                             connect_timeout=connect_timeout)\n        try:\n            import MySQLdb\n        except ImportError:\n            raise RuntimeError(\"Mocked MySQLdb not found\")\n        self.reconnect()\n\n    def close(self):\n        if self._db is not None:\n            self._db.close()\n            self._db = None\n\n    def reconnect(self):\n        self.close()\n        import MySQLdb\n        self._db = MySQLdb.connect(**self._db_args)\n        \n    def _ensure_connected(self):\n        if (self._db is None or \n            (time.time() - self._last_use_time > self.max_idle_time)):\n            self.reconnect()\n        self._last_use_time = time.time()\n\n    def _cursor(self):\n        self._ensure_connected()\n        return self._db.cursor()\n    \n    def executemany_rowcount(self, query, parameters):\n        cursor = self._cursor()\n        try:\n            cursor.executemany(query, parameters)\n            return cursor.rowcount\n        finally:\n            cursor.close()\n# --- End of pasted code ---\n\ndb = Connection(host=\"localhost\", database=\"test\")\n# Pre-condition: connection object exists.\nassert db._db is not None, \"Mock connection failed\"\n\ntry:\n    db.executemany_rowcount(\"INSERT...\", [(1,), (2,)])\n    print(\"REFUTED\") # Should have raised\nexcept MockOperationalError:\n    # Post-condition check: after OperationalError, the connection should be\n    # marked as closed (_db=None), but it is not.\n    if db._db is not None:\n        print(\"CONFIRMED\")\n    else:\n        print(\"REFUTED\")\nexcept Exception:\n    print(\"REFUTED\") # Some other exception occurred",
+   "execution": {
+    "outcome": "CONFIRMED",
+    "detail": "CONFIRMED"
+   }
+  }
+ },
+ {
+  "repo": "psf/requests",
+  "pr": 26,
+  "file": "requests/__init__.py",
+  "unit": "__init__",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "requests/__init__.py",
+   "symbol_a": "self.cache['timeout'] = self.module.timeout",
+   "symbol_b": "setattr(self.module, key, self.cache[key])",
+   "relation": "The assignment to the shared class attribute `self.cache` in `__init__` overwrites the cached value, causing `__exit__` to restore an incorrect value when `settings` context managers are nested.",
+   "check_snippet": "import sys\n\n# Mock a module to hold the settings and class\nmodule = sys.modules[__name__]\n\n# The class under test, using a shared class-level cache\nclass settings:\n    cache = {}\n    \n    def __init__(self, timeout):\n        self.module = sys.modules[__name__]\n        self.cache['timeout'] = self.module.timeout\n        self.module.timeout = timeout\n        \n    def __enter__(self):\n        pass\n        \n    def __exit__(self, type, value, traceback):\n        for key in self.cache:\n            setattr(self.module, key, self.cache[key])\n\n# Set an original value that should be restored\noriginal_timeout = 10\nmodule.timeout = original_timeout\n\n# Nest the context managers, which triggers the bug\n# 1. Outer __init__ runs: cache={'timeout': 10}, module.timeout becomes 20\n# 2. Inner __init__ runs: cache={'timeout': 20} (overwritten), module.timeout becomes 30\n# 3. Inner __exit__ runs: restores from cache['timeout'] (20), so module.timeout becomes 20\n# 4. Outer __exit__ runs: restores from cache['timeout'] (still 20), so module.timeout remains 20\nwith settings(timeout=20):\n    with settings(timeout=30):\n        pass\n\n# The context manager contract is to restore the original state.\nif module.timeout == original_timeout:\n    print(\"REFUTED\")\nelse:\n    # The timeout is 20 instead of the original 10, violating the contract.\n    print(\"CONFIRMED\")\n",
+   "execution": {
+    "outcome": "CONFIRMED",
+    "detail": "CONFIRMED"
+   }
+  }
+ },
+ {
+  "repo": "scrapy/scrapy",
+  "pr": 97,
+  "file": "scrapy/tests/test_http_response.py",
+  "unit": "test_encoding",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "scrapy/tests/test_http_response.py",
+   "symbol_a": "self.assertEqual(r3._declared_encoding(), \"cp1252\")",
+   "symbol_b": "self._assert_response_values(r3, 'iso-8859-1', u\"\\xa3\")",
+   "relation": "The change to a new encoding utility causes 'iso-8859-1' to be resolved to 'cp1252', as checked at symbol_a, which makes the response's final encoding 'cp1252', contradicting the outdated check at symbol_b which still expects 'iso-8859-1'.",
+   "check_snippet": "import re\n\n# This function mimics w3lib.encoding.resolve_encoding's behavior\n# for the relevant case where it canonicalizes iso-8859-1.\ndef resolve_encoding(encoding_alias):\n    if encoding_alias.lower() == 'iso-8859-1':\n        return 'cp1252'\n    return encoding_alias\n\nclass MockTextResponse:\n    \"\"\"A mock response class that mimics Scrapy's encoding detection logic.\"\"\"\n    def __init__(self, headers=None):\n        self._headers = headers or {}\n        self._encoding = None  # Cache for the public .encoding property\n\n    def _headers_encoding(self):\n        content_type = self._headers.get(\"Content-type\", [None])[0]\n        if not content_type:\n            return None\n        match = re.search(r\"charset=([\\w-]+)\", content_type, re.I)\n        return resolve_encoding(match.group(1)) if match else None\n\n    def _declared_encoding(self):\n        return self._headers_encoding()\n\n    def _get_encoding(self):\n        # This simplified logic follows Scrapy's TextResponse for this case\n        return self._declared_encoding()\n\n    @property\n    def encoding(self):\n        if self._encoding is None:\n            self._encoding = self._get_encoding()\n        return self._encoding\n\n# In the test, r3 is created with an 'iso-8859-1' header.\nr3 = MockTextResponse(headers={\"Content-type\": [\"text/html; charset=iso-8859-1\"]})\n\n# The test was updated to assert the *declared* encoding is now 'cp1252'.\n# This is symbol_a's behavior.\ndeclared_encoding_is_cp1252 = r3._declared_encoding() == 'cp1252'\n\n# As a consequence, the final public `encoding` property also becomes 'cp1252'.\nfinal_encoding_is_cp1252 = r3.encoding == 'cp1252'\n\n# However, the test still contains a later assertion (symbol_b) that expects\n# the final encoding to be 'iso-8859-1'. This old expectation is now incorrect.\nold_assertion_is_invalid = final_encoding_is_cp1252\n\nif old_assertion_is_invalid:\n    print(\"CONFIRMED\")\nelse:\n    print(\"REFUTED\")\n",
+   "execution": {
+    "outcome": "CONFIRMED",
+    "detail": "CONFIRMED"
+   }
+  }
+ },
+ {
+  "repo": "psf/requests",
+  "pr": 26,
+  "file": "requests/__init__.py",
+  "unit": "__exit__",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "requests/__init__.py",
+   "symbol_a": "settings.__init__",
+   "symbol_b": "settings.__exit__",
+   "relation": "The `settings.__init__` method stores the original module state in a class-level dictionary `cache`, which is shared by all instances, causing nested `settings` contexts to overwrite this cache and leading `settings.__exit__` to restore an incorrect state.",
+   "check_snippet": "class MockModule:\n    pass\n\n_module_instance = MockModule()\n_module_instance.timeout = 'original'\n\nclass settings:\n    \"\"\"Context manager for settings.\"\"\"\n    \n    cache = {}\n    \n    def __init__(self, timeout):\n        self.module = _module_instance\n        # BUG: self.cache is a class attribute, shared across all instances.\n        # A nested context will overwrite the value saved by an outer one.\n        self.cache['timeout'] = self.module.timeout\n        self.module.timeout = timeout\n        \n    def __enter__(self):\n        pass\n        \n    def __exit__(self, type, value, traceback):\n        # Restore settings\n        # This reads from the shared cache, which may hold the wrong value\n        # if a nested context has modified it.\n        for key in self.cache:\n            setattr(self.module, key, self.cache[key])\n\noriginal_timeout = _module_instance.timeout\n\n# Outer context saves 'original' to cache, then sets timeout to 'level1'\nwith settings(timeout='level1'):\n    # Inner context overwrites cache with 'level1', then sets timeout to 'level2'\n    with settings(timeout='level2'):\n        pass\n    # Inner __exit__ restores from cache, setting timeout to 'level1'. Correct for this scope.\n\n# Outer __exit__ restores from cache, but cache still contains 'level1'.\n# The original value 'original' was lost.\nif _module_instance.timeout != original_timeout:\n    print(\"CONFIRMED\")\nelse:\n    print(\"REFUTED\")\n",
+   "execution": {
+    "outcome": "CONFIRMED",
+    "detail": "CONFIRMED"
+   }
+  }
+ },
+ {
+  "repo": "scrapy/scrapy",
+  "pr": 97,
+  "file": "scrapy/http/response/text.py",
+  "unit": "_auto_detect_fun",
+  "finding": {
+   "claim_type": "wrong_order",
+   "file": "scrapy/http/response/text.py",
+   "symbol_a": "_auto_detect_fun",
+   "symbol_b": "_auto_detect_fun",
+   "relation": "When the default encoding is a permissive single-byte encoding like 'latin1' or 'cp1252', the loop in `_auto_detect_fun` successfully decodes any byte sequence with it, causing it to incorrectly return the default encoding even if the text is actually UTF-8.",
+   "check_snippet": "def resolve_encoding(encoding):\n    return encoding\n\nclass MockTextResponse:\n    _DEFAULT_ENCODING = 'latin1'\n\n    def _auto_detect_fun(self, text):\n        for enc in (self._DEFAULT_ENCODING, 'utf-8', 'cp1252'):\n            try:\n                text.decode(enc)\n            except UnicodeError:\n                continue\n            return resolve_encoding(enc)\n\n\ndef check():\n    # This text is 'caf\u00e9' encoded in UTF-8\n    body_bytes = b'caf\\xc3\\xa9'\n    \n    # The function under test is called with a permissive default encoding\n    response = MockTextResponse()\n    \n    # The function tries 'latin1' first. Since any byte sequence is valid\n    # latin1, text.decode('latin1') succeeds without a UnicodeError.\n    detected_encoding = response._auto_detect_fun(body_bytes)\n    \n    # The function incorrectly returns 'latin1' instead of 'utf-8'\n    # because the 'utf-8' check is never reached.\n    if detected_encoding == 'latin1':\n        print(\"CONFIRMED\")\n    else:\n        print(\"REFUTED\")\n\ncheck()",
+   "execution": {
+    "outcome": "CONFIRMED",
+    "detail": "CONFIRMED"
+   }
+  }
+ },
+ {
+  "repo": "pallets/flask",
+  "pr": 309,
+  "file": "flask/testing.py",
+  "unit": "session_transaction",
+  "finding": {
+   "claim_type": "wrong_order",
+   "file": "flask/testing.py",
+   "symbol_a": "kwargs.pop('environ_overrides', {})",
+   "symbol_b": "app.test_request_context(*args, **kwargs)",
+   "relation": "The call to `kwargs.pop()` removes the `environ_overrides` key from `kwargs`, so when `app.test_request_context` is called with `**kwargs`, any environment overrides provided by the user are lost.",
+   "check_snippet": "from contextlib import contextmanager\n\n# Simplified mock objects to reproduce the mechanism\nclass MockApp:\n    def __init__(self):\n        self.recorded_environ_overrides = None\n\n    @contextmanager\n    def test_request_context(self, *args, **kwargs):\n        # In a real scenario, this would create a request context.\n        # We just record the environ_overrides it received.\n        self.recorded_environ_overrides = kwargs.get('environ_overrides')\n        yield type('RequestContext', (), {})()\n\nclass MockCookieJar:\n    def inject_wsgi(self, environ):\n        environ['HTTP_COOKIE'] = 'injected=cookie'\n    def extract_wsgi(self, environ, headers):\n        pass\n\n_request_ctx_stack = type('LocalStack', (), {'top': None, 'push': lambda s,x: None, 'pop': lambda s: None})()\n\n# A recreation of the problematic function structure from the old code\n@contextmanager\ndef buggy_session_transaction(client_self, *args, **kwargs):\n    if client_self.cookie_jar is None:\n        raise RuntimeError('Session transactions only make sense with cookies enabled.')\n    app = client_self.application\n    # This is the line with the defect\n    environ_overrides = kwargs.pop('environ_overrides', {})\n    client_self.cookie_jar.inject_wsgi(environ_overrides)\n    outer_reqctx = _request_ctx_stack.top\n    with app.test_request_context(*args, **kwargs) as c:\n        # Simplified body for demonstration\n        _request_ctx_stack.push(outer_reqctx)\n        try:\n            yield {}\n        finally:\n            _request_ctx_stack.pop()\n\nclass MockClient:\n    def __init__(self, app):\n        self.application = app\n        self.cookie_jar = MockCookieJar()\n    \n    def session_transaction(self, *args, **kwargs):\n        return buggy_session_transaction(self, *args, **kwargs)\n\n# --- Test setup ---\napp = MockApp()\nclient = MockClient(app)\n\n# --- Test execution ---\n# Call session_transaction with custom environ_overrides\ncustom_overrides = {'HTTP_X_FORWARDED_FOR': '127.0.0.1'}\nwith client.session_transaction(environ_overrides=custom_overrides):\n    pass\n\n# --- Verification ---\n# In the buggy version, pop() removes environ_overrides from kwargs,\n# so test_request_context receives None for that argument.\n# In the fixed version (with setdefault), it would receive the dictionary.\nif app.recorded_environ_overrides is None:\n    print('CONFIRMED')\nelse:\n    print('REFUTED')",
+   "execution": {
+    "outcome": "CONFIRMED",
+    "detail": "CONFIRMED"
+   }
+  }
+ },
+ {
+  "repo": "scrapy/scrapy",
+  "pr": 96,
+  "file": "scrapy/tests/test_downloadermiddleware_cookies.py",
+  "unit": "test_cookiejar_key",
+  "finding": {
+   "claim_type": "resource_leak",
+   "file": "scrapy/tests/test_downloadermiddleware_cookies.py",
+   "symbol_a": "tearDown",
+   "symbol_b": "test_cookiejar_key",
+   "relation": "The test `tearDown` method no longer calls `spider_closed`, causing `test_cookiejar_key` to leak `CookieJar` objects that are not cleaned up from the middleware's internal `jars` dictionary.",
+   "check_snippet": "import sys\nfrom collections import defaultdict\nfrom http.cookiejar import CookieJar\n\n\n# Mock Scrapy's CookiesMiddleware\nclass CookiesMiddleware:\n    def __init__(self):\n        self.jars = defaultdict(CookieJar)\n        self.initial_refcount = sys.getrefcount(self.jars)\n\n    def process_request(self, request, spider):\n        cookiejarkey = request.get('meta', {}).get('cookiejar')\n        jar = self.jars[cookiejarkey]\n        # Simplified cookie extraction and adding to request\n\n    def spider_closed(self, spider):\n        self.jars.clear()\n\n\n# Mock Request\nclass Request(dict):\n    pass\n\n# Mock Spider\nclass Spider:\n    pass\n\n# Simulate the test case\nleaked_jars = False\nmw = CookiesMiddleware()\nspider = Spider()\n\n# Simulate test_cookiejar_key\nreq1 = Request(meta={'cookiejar': 'store1'})\nmw.process_request(req1, spider)\n\nreq2 = Request(meta={'cookiejar': 'store2'})\nmw.process_request(req2, spider)\n\n# At the end of the test, spider_closed is NOT called due to the diff\n\n# Check if the jars are still present\nif 'store1' in mw.jars and 'store2' in mw.jars:\n    # With spider_closed, self.jars would be empty.\n    # Without it, the jars created during the test persist in the middleware instance.\n    # Although the test framework deletes 'mw' and it gets garbage collected,\n    # the cleanup contract (spider_closed) is violated, which constitutes a resource leak\n    # in the sense that resources are not explicitly released as designed.\n    leaked_jars = True\n\n# Simulate old tearDown behavior for comparison\nclean_mw = CookiesMiddleware()\nreq3 = Request(meta={'cookiejar': 'store1'})\nclean_mw.process_request(req3, spider)\n# Old tearDown would call this\nclean_mw.spider_closed(spider)\n\nif leaked_jars and not clean_mw.jars:\n    print(\"CONFIRMED\")\nelse:\n    print(\"REFUTED\")\n",
+   "execution": {
+    "outcome": "CONFIRMED",
+    "detail": "CONFIRMED"
+   }
+  }
+ },
+ {
+  "repo": "tornadoweb/tornado",
+  "pr": 273,
+  "file": "tornado/test/httpserver_test.py",
+  "unit": "prepare",
+  "finding": {
+   "claim_type": "missing_guard",
+   "file": "tornado/test/httpserver_test.py",
+   "symbol_a": "prepare",
+   "symbol_b": "self.request.cookies.keys()[0]",
+   "relation": "The function accesses the first element of `self.request.cookies` without checking if it is empty, causing an `IndexError` if a request is made without any cookies.",
+   "check_snippet": "import sys\nif sys.version_info[0] < 3:\n    from Cookie import SimpleCookie\nelse:\n    from http.cookies import SimpleCookie\n\nclass MockRequest(object):\n    def __init__(self):\n        # A request without a Cookie header results in an empty SimpleCookie object\n        self.cookies = SimpleCookie()\n\nclass TypeCheckHandler(object):\n    def __init__(self, request):\n        self.request = request\n\n    def check_type(self, *args):\n        pass\n\n    def prepare(self):\n        # This code assumes at least one cookie is present\n        self.check_type('cookie_key', list(self.request.cookies.keys())[0], str)\n\n\ndef run_test():\n    try:\n        handler = TypeCheckHandler(MockRequest())\n        handler.prepare()\n        print(\"REFUTED\")\n    except IndexError:\n        print(\"CONFIRMED\")\n    except Exception as e:\n        print(\"REFUTED\")\n\nrun_test()\n",
+   "execution": {
+    "outcome": "CONFIRMED",
+    "detail": "CONFIRMED"
+   }
+  }
+ },
+ {
+  "repo": "encode/django-rest-framework",
+  "pr": 23,
+  "file": "djangorestframework/tests/parsers.py",
+  "unit": "test_parse",
+  "finding": {
+   "claim_type": "resource_leak",
+   "file": "djangorestframework/tests/parsers.py",
+   "symbol_a": "StringIO(self.string)",
+   "symbol_b": "test_parse",
+   "relation": "The function creates a `StringIO` stream object that is passed to a parser but is never explicitly closed before the function returns.",
+   "check_snippet": "class MockStringIO:\n    def __init__(self, content):\n        self._content = content\n        self.closed = False\n\n    def read(self):\n        return self._content\n\n    def close(self):\n        self.closed = True\n\n# Simplified version of the code under test\nclass MockFormParser:\n    def parse(self, stream):\n        data = stream.read()\n        # The parser does not close the stream\n        return (data, None)\n\n# The function being analyzed\ndef test_parse():\n    parser = MockFormParser()\n\n    stream = MockStringIO(\"field1=abc&field2=defghijk\")\n    (data, files) = parser.parse(stream)\n\n    # At the end of the function, the stream has not been closed\n    return stream.closed\n\nif not test_parse():\n    print(\"CONFIRMED\")\nelse:\n    print(\"REFUTED\")\n",
+   "execution": {
+    "outcome": "CONFIRMED",
+    "detail": "CONFIRMED"
+   }
+  }
+ },
+ {
+  "repo": "pallets/flask",
+  "pr": 413,
+  "file": "examples/blueprintexample/blueprintexample_test.py",
+  "unit": "setUp",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "examples/blueprintexample/blueprintexample_test.py",
+   "symbol_a": "blueprintexample.app",
+   "symbol_b": "setUp",
+   "relation": "The setUp method creates a test client from a global, module-level app object, so state modifications made in one test will leak into subsequent tests, violating test isolation.",
+   "check_snippet": "import sys\n\n# Mock the flask app and test client behavior\nsys.modules['blueprintexample'] = type('module', (), {})()\nsys.modules['blueprintexample'].app = type('app', (), {})()\nsys.modules['blueprintexample'].app.config = {}\nsys.modules['blueprintexample'].app.test_client = lambda: 'test_client'\n\nfrom blueprintexample import app\n\nclass TestCase:\n    def setUp(self):\n        # This function is the subject of the claim.\n        # It uses the global 'app' object from the module.\n        self.app = app.test_client()\n\n    def test_that_sets_state(self):\n        # A test can modify the shared app's state.\n        app.config['STATE_LEAK'] = True\n\n    def test_that_observes_state(self):\n        # A subsequent test observes the modified state.\n        if app.config.get('STATE_LEAK') is True:\n            print(\"CONFIRMED\")\n        else:\n            print(\"REFUTED\")\n\n# Simulate a test run where tests are not isolated.\n# In a real test runner (like unittest), each test method gets a new\n# TestCase instance, but setUp is called for each.\n\n# Run first test\ntest1 = TestCase()\ntest1.setUp()\ntest1.test_that_sets_state()\n\n# Run second test\ntest2 = TestCase()\ntest2.setUp()\ntest2.test_that_observes_state()",
+   "execution": {
+    "outcome": "CONFIRMED",
+    "detail": "CONFIRMED"
+   }
+  }
+ },
+ {
+  "repo": "scrapy/scrapy",
+  "pr": 96,
+  "file": "scrapy/contrib/downloadermiddleware/cookies.py",
+  "unit": "process_response",
+  "finding": {
+   "claim_type": "resource_leak",
+   "file": "scrapy/contrib/downloadermiddleware/cookies.py",
+   "symbol_a": "jar = self.jars[cookiejarkey]",
+   "symbol_b": "self.jars",
+   "relation": "The removal of the `spider_closed` signal handler, which previously cleared cookie jars after a spider finished, means that jars created for `cookiejar` keys in `request.meta` are now stored indefinitely in `self.jars`, causing a memory leak over multiple spider runs within the same process.",
+   "check_snippet": "from collections import defaultdict\n\n# Mock Scrapy components for demonstration\nclass CookieJar(object):\n    def extract_cookies(self, response, request): pass\n\nclass MockRequest:\n    def __init__(self, meta=None):\n        self.meta = meta or {}\n\nclass MockResponse: pass\nclass MockSpider: pass\n\n# Re-implementation of the changed middleware logic\nclass CookiesMiddleware:\n    def __init__(self):\n        self.jars = defaultdict(CookieJar)\n\n    def process_response(self, request, response, spider):\n        if 'dont_merge_cookies' in request.meta:\n            return response\n\n        cookiejarkey = request.meta.get(\"cookiejar\")\n        jar = self.jars[cookiejarkey]\n        jar.extract_cookies(response, request)\n        return response\n\n# The old implementation had a cleanup method like this, which is now gone:\n# def spider_closed(self, spider):\n#     self.jars.pop(spider, None)\n\n\ndef demonstrate_leak():\n    # A single middleware instance lives for the whole process\n    middleware = CookiesMiddleware()\n    spider = MockSpider()\n    response = MockResponse()\n\n    # Simulate first spider run using a specific cookie jar key\n    request1 = MockRequest(meta={'cookiejar': 'spider_run_1'})\n    middleware.process_response(request1, response, spider)\n\n    # Simulate second spider run using a different key\n    request2 = MockRequest(meta={'cookiejar': 'spider_run_2'})\n    middleware.process_response(request2, response, spider)\n\n    # Simulate third spider run using the default key (None)\n    request3 = MockRequest(meta={})\n    middleware.process_response(request3, response, spider)\n\n    # In the old implementation, a spider_closed signal would have cleaned up\n    # the jars. Without it, the `jars` dictionary grows indefinitely.\n    # We expect 3 jars to be stored now: 'spider_run_1', 'spider_run_2', and None.\n    if len(middleware.jars) == 3:\n        print(\"CONFIRMED\")\n    else:\n        print(f\"REFUTED: Expected 3 jars, found {len(middleware.jars)}\")\n\ndemonstrate_leak()\n",
+   "execution": {
+    "outcome": "CONFIRMED",
+    "detail": "CONFIRMED"
+   }
+  }
+ }
+]
