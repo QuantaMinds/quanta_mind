@@ -264,3 +264,56 @@ not the ranker being strong.
 rather than beating one arbitrary ordering — and it removes a line of attack a sceptic would
 otherwise find. `publishing-rules.md` requires the control be stated with the number; it should now
 require the **chance** baseline, because alphabetical alone is not a stable reference.
+
+
+---
+
+# THE CHANCE BASELINE, ALL THREE SAMPLES — the published figure is conservative, not inflated
+
+Exact hypergeometric chance recomputed per event for every sample, including the original eight.
+
+| sample | n | chance | alphabetical | vs chance | history | vs chance |
+|---|---|---|---|---|---|---|
+| 1 — the original eight | 3,189 | 4.31% | 3.17% | **+1.14** | 2.16% | **+2.14** |
+| 2 — the fresh six | 2,400 | 2.97% | 3.12% | −0.16 | 1.21% | +1.76 |
+| 3 — numpy … home-assistant | 2,400 | 2.52% | 2.54% | −0.02 | 1.00% | +1.52 |
+| **pooled, 20 repositories** | **7,989** | **3.37%** | **2.97%** | **+0.40** | **1.53%** | **+1.84** |
+
+**McNemar on the pooled set: b = 172, c = 57, p = 1.34 × 10⁻¹⁴. History beats the control in 17 of
+20 repositories.** Wilson interval on the history miss rate: **[1.28%, 1.82%]**.
+
+## The worry was backwards
+
+**The concern was that alphabetical might be an unusually weak control, inflating the lift. The
+opposite is true: alphabetical is mildly *informative*, +0.40 points better than chance pooled, and
++1.14 in the original eight.**
+
+**So the published `history vs alphabetical` figure UNDERSTATES the effect.** Against a truly
+non-informative baseline the ranker is **+1.84** points, not +1.44. The number in the pitch is the
+conservative one, which is where a number should sit.
+
+**And an earlier entry in this file overstated the problem.** It said part of the headline gap was
+"the control being weak, not the ranker being strong". At the pooled level that is wrong —
+alphabetical lands within 0.16 and 0.02 points of chance in samples 2 and 3, and *above* it in
+sample 1. **Correcting a good result too eagerly is the same error as defending a bad one too
+long**, and it happened here in the direction of understatement.
+
+## What genuinely does not survive: per-repository lift
+
+Alphabetical's strength swings by **3.4 points** across repositories, entirely on directory layout:
+
+| repo | alphabetical vs chance |
+|---|---|
+| home-assistant | **+1.75** — `components/<integration>/` puts the churn-heavy file first |
+| numpy | +0.61 |
+| scrapy | −0.81 |
+| poetry | −1.20 |
+| matplotlib | **−1.66** |
+
+**Quote the pooled figure. Never quote a single repository's lift** — there the control is not a
+fixed reference and the number is mostly a fact about folder naming.
+
+**Also corrected by this column: scrapy's +7.00 lift is largely a high baseline.** Its chance miss
+is 8.44%, far above any other repository. Against chance it is +6.19 — still the strongest, but the
++7.00 flattered it, and the earlier note that "scrapy roughly doubles the effect" should be read
+with that in mind.

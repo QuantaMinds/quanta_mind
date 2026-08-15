@@ -48,6 +48,12 @@ When someone asks for our benchmark:
   Six repositories we had never touched. n = 2,400, p < 0.000001."* **Say the control every time.**
   A miss rate without the thing it beats is the number a competitor quotes back at you, and this
   project has already withdrawn one figure for exactly that.
+  **Quote the POOLED figure across all twenty repositories, never one repository's lift** — the
+  alphabetical control's strength swings 3.4 points on directory layout alone, so a single repo's
+  number is mostly a fact about folder naming. The defensible pooled statement: **history misses
+  1.53%, alphabetical 2.97%, exact chance 3.37%, n = 7,989, McNemar p = 1.3e-14, 17 of 20
+  repositories positive.** Against chance the ranker is **+1.84 points**, so the
+  history-versus-alphabetical figure quoted in the pitch is the conservative one.
   **Quote the conservative effect size when a single number is needed: excluding the strongest
   repository the lift is +0.90 points rather than +1.92.** Both are true; the smaller one is the
   one that cannot be attacked.

@@ -16,6 +16,7 @@ from __future__ import annotations
 import collections
 import json
 import pathlib
+import statistics
 from math import comb, erfc, sqrt
 
 R = pathlib.Path(__file__).parent / "results"
@@ -138,7 +139,28 @@ check("unseen CORRECT count is zero", cf["CORRECT"], 0, 0)
 flo, fhi = wilson(cf["WRONG"], nf)
 check("unseen Wilson low", round(flo * 100, 1), 67.3, 0.1)
 
-print("\n  F. COST")
+print("\n  F. THE CHANCE BASELINE, ALL THREE SAMPLES")
+
+
+def _chance(n, t, b=3):
+    return 1.0 if n - t < b else 1 - comb(n - t, b) / comb(n, b)
+
+
+allev = []
+for f in ("discriminability_first", "discriminability_fresh", "discriminability_third"):
+    per = json.loads((R / f"{f}.json").read_text())
+    allev += [e for v in per.values() for e in v]
+ch = 1 - statistics.mean(_chance(int(e["n_files"]), int(e["n_target"])) for e in allev)
+hh = 1 - statistics.mean(e["hit"] for e in allev)
+aa = 1 - statistics.mean(e["alpha_hit"] for e in allev)
+check("pooled events across 20 repositories", len(allev), 7989, 0)
+check("exact chance miss %", round(ch * 100, 2), 3.37, 0.01)
+check("alphabetical miss %", round(aa * 100, 2), 2.97, 0.01)
+check("history miss %", round(hh * 100, 2), 1.53, 0.01)
+check("history vs chance, points", round((ch - hh) * 100, 2), 1.84, 0.01)
+check("alphabetical is ABOVE chance (control is not weak)", (ch - aa) > 0, True)
+
+print("\n  G. COST")
 cost = json.loads((R / "vertex_cost_c3.json").read_text())
 IN, OUT = 1.25, 10.00
 per = collections.defaultdict(float)
