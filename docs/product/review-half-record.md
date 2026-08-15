@@ -138,14 +138,14 @@ real-world code review deployment."*
 **Do not do:**
 - **A seventh review design.** Seven have failed against pre-registered bars, and the field's
   benchmark is the prior.
-- **A function-length hard gate.** Refuted in §2 row 10 before it was built.
-- **Publishing findings, or locations derived from findings.** §6 shows the locations are the
+- **A function-length hard gate.** Refuted under "What was predicted, and what actually happened" before it was built.
+- **Publishing findings, or locations derived from findings.** the section "What survives, and it is the product" shows the locations are the
   ranker's.
 
 **Open hypotheses, pre-registered for whenever the review half is picked up as a separate project:**
-- **Model confusion as a defect locator** (§2 row 12). Needs ~80 confused units against a 50.5%
+- **Model confusion as a defect locator** — `future-fix-preregistration.md` "The inversion the data supports, and the one it does not". Needs ~80 confused units against a 50.5%
   base ≈ 3× the current aged corpus. **Must beat the ranker, which is free.**
-- **Function size as a moderator** (§1b of the evidence ledger). Real at the extremes — 45.9% wrong
+- **Function size as a moderator** — `evidence-ledger.md` "The pooled pattern across all 207 adjudicated findings". Real at the extremes — 45.9% wrong
   at ≤10 lines against 89.3% above 80 — but not monotonic, and found by sweeping 207 findings, so
   it needs a fresh corpus and a bar fixed first.
 
