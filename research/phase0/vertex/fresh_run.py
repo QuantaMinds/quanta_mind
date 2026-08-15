@@ -1,4 +1,4 @@
-"""Re-run the same 23 pull requests with structured context and parser-snapped anchors.
+"""Run the identical reviewer on 20 pull requests from six previously unused repositories.
 
 WHAT: Same repositories, same funded units, same schema, same model. Two changes only: the prompt
       carries the enclosing class's attributes, the file's other signatures, its imports and the
@@ -30,7 +30,7 @@ from units import changed_units
 
 MODEL, BUDGET, WORKERS = "gemini-2.5-pro", 3, 6
 MAX_OUTPUT_TOKENS, THINKING_BUDGET = 8192, 4096
-OUT = "enriched_findings.jsonl"
+OUT = "fresh_findings.jsonl"
 
 SCHEMA = """Return ONLY a JSON array. Each element MUST have exactly these fields:
   claim_type : one of "missing_guard", "wrong_order", "unhandled_case", "resource_leak",
@@ -64,7 +64,7 @@ def prompt(repo: str) -> str:
 
 
 def main() -> int:
-    with open("corpora/pr_corpus.json") as fh:
+    with open("corpora/pr_corpus_fresh.json") as fh:
         prs = json.load(fh)
 
     jobs = []

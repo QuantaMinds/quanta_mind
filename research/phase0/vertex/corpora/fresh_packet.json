@@ -1,0 +1,704 @@
+[
+ {
+  "repo": "django/django",
+  "pr": 21773,
+  "file": "django/db/models/fields/tuple_lookups.py",
+  "unit": "check_rhs_is_supported_expression",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "django/db/models/fields/tuple_lookups.py",
+   "line_a": 77,
+   "line_b": 80,
+   "relation": "The check at line 77 is updated to allow `ColPairs` as a valid type for the right-hand side, but the error message raised at line 80 for invalid types was not updated to mention `ColPairs` as a supported type.",
+   "confidence": "high",
+   "line_a_raw": 77,
+   "line_b_raw": 80
+  },
+  "lo": 76,
+  "hi": 83
+ },
+ {
+  "repo": "pandas-dev/pandas",
+  "pr": 66717,
+  "file": "pandas/tests/indexes/multi/test_indexing.py",
+  "unit": "test_get_locs_list_like_not_a_list",
+  "finding": {
+   "claim_type": "unhandled_case",
+   "file": "pandas/tests/indexes/multi/test_indexing.py",
+   "line_a": 1092,
+   "line_b": 1103,
+   "relation": "The test creates a key from a set `lambda: {1, 2}`, whose iteration order is not guaranteed, but compares the result against a hardcoded array `np.array([0, 1])` that assumes a specific order, making the test non-deterministic.",
+   "confidence": "high",
+   "line_a_raw": 1092,
+   "line_b_raw": 1103
+  },
+  "lo": 1086,
+  "hi": 1103
+ },
+ {
+  "repo": "celery/celery",
+  "pr": 10459,
+  "file": "t/unit/backends/test_rpc.py",
+  "unit": "test_final_state_cached_when_cache_enabled",
+  "finding": {
+   "claim_type": "resource_leak",
+   "file": "t/unit/backends/test_rpc.py",
+   "line_a": 359,
+   "line_b": 361,
+   "relation": "Creating an `RPCBackend` instance at line 361 starts a consumer thread, but this instance is local to the `try` block and there is no corresponding `b.close()` or `b.stop()` call to terminate the thread before the function returns.",
+   "confidence": "high",
+   "line_a_raw": 359,
+   "line_b_raw": 361
+  },
+  "lo": 355,
+  "hi": 371
+ },
+ {
+  "repo": "pandas-dev/pandas",
+  "pr": 65195,
+  "file": "pandas/core/tools/datetimes.py",
+  "unit": "_assemble_from_unit_mappings",
+  "finding": {
+   "claim_type": "missing_guard",
+   "file": "pandas/core/tools/datetimes.py",
+   "line_a": 1396,
+   "line_b": 1439,
+   "relation": "The `coerce` call at line 1404 converts boolean columns to integer type, so the check `is_bool_dtype(vals.dtype)` at line 1439 is always false, causing boolean values in 'year', 'month', or 'day' columns to be incorrectly treated as numeric components instead of raising an error or being converted to NaT.",
+   "confidence": "high",
+   "line_a_raw": 1404,
+   "line_b_raw": 1439
+  },
+  "lo": 1286,
+  "hi": 1516
+ },
+ {
+  "repo": "celery/celery",
+  "pr": 10298,
+  "file": "celery/backends/redis.py",
+  "unit": "_reconnect_pubsub",
+  "finding": {
+   "claim_type": "unhandled_case",
+   "file": "celery/backends/redis.py",
+   "line_a": 111,
+   "line_b": 111,
+   "relation": "When reconnecting with no active subscriptions, the connection acquired at line 114 is not configured with an `on_connect` callback, which prevents the client from automatically re-subscribing to channels if they are added later and the connection subsequently drops.",
+   "confidence": "high",
+   "line_a_raw": 114,
+   "line_b_raw": 114
+  },
+  "lo": 97,
+  "hi": 128
+ },
+ {
+  "repo": "scrapy/scrapy",
+  "pr": 7946,
+  "file": "scrapy/core/spidermw.py",
+  "unit": "process_start",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "scrapy/core/spidermw.py",
+   "line_a": 247,
+   "line_b": 247,
+   "relation": "Calling `close()` on a newly-created coroutine object `start` that has not been started raises a `TypeError`.",
+   "confidence": "high",
+   "line_a_raw": 247,
+   "line_b_raw": 247
+  },
+  "lo": 230,
+  "hi": 251
+ },
+ {
+  "repo": "pandas-dev/pandas",
+  "pr": 65195,
+  "file": "pandas/tests/tools/test_to_datetime.py",
+  "unit": "test_dataframe_time_field_outside_int32_valid",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "pandas/tests/tools/test_to_datetime.py",
+   "line_a": 2521,
+   "line_b": 2522,
+   "relation": "The expected `Series` is created with `datetime64[us]` dtype, but `to_datetime` with a DataFrame argument returns a `Series` with `datetime64[ns]` dtype, causing `tm.assert_series_equal` to fail due to a dtype mismatch.",
+   "confidence": "high",
+   "line_a_raw": 2521,
+   "line_b_raw": 2522
+  },
+  "lo": 2506,
+  "hi": 2522
+ },
+ {
+  "repo": "scrapy/scrapy",
+  "pr": 7985,
+  "file": "tests/utils/bases/download_handlers_http.py",
+  "unit": "test_download_with_spider",
+  "finding": {
+   "claim_type": "missing_guard",
+   "file": "tests/utils/bases/download_handlers_http.py",
+   "line_a": 1573,
+   "line_b": 1575,
+   "relation": "If the crawl fails due to a timeout or other error, `crawler.spider` is not assigned, causing line 1575 to raise an AttributeError when accessing `crawler.spider.meta`.",
+   "confidence": "high",
+   "line_a_raw": 1573,
+   "line_b_raw": 1575
+  },
+  "lo": 1564,
+  "hi": 1576
+ },
+ {
+  "repo": "scikit-learn/scikit-learn",
+  "pr": 34741,
+  "file": "sklearn/datasets/_arff_parser.py",
+  "unit": "_liac_arff_parser",
+  "finding": {
+   "claim_type": "wrong_order",
+   "file": "sklearn/datasets/_arff_parser.py",
+   "line_a": 272,
+   "line_b": 262,
+   "relation": "The assignment at line 272 swaps the row and column indices because it uses `arff_data[1]` (which is `(rows, cols)`) instead of `arff_data[1][0]` (which is `rows`), causing line 273 to use the wrong indices when creating the sparse array.",
+   "confidence": "high",
+   "line_a_raw": 272,
+   "line_b_raw": 273
+  },
+  "lo": 108,
+  "hi": 309
+ },
+ {
+  "repo": "django/django",
+  "pr": 21724,
+  "file": "django/db/models/base.py",
+  "unit": "_perform_unique_checks",
+  "finding": {
+   "claim_type": "unhandled_case",
+   "file": "django/db/models/base.py",
+   "line_a": 1556,
+   "line_b": 1587,
+   "relation": "The condition at line 1559 fails to account for field values of type `DatabaseDefault`, causing such values to be passed to `model_class._default_manager.filter()` at line 1587, which in turn raises an unhandled `NotSupportedError` because `DatabaseDefault` expressions cannot be used in queries.",
+   "confidence": "high",
+   "line_a_raw": 1559,
+   "line_b_raw": 1587
+  },
+  "lo": 1553,
+  "hi": 1607
+ },
+ {
+  "repo": "scrapy/scrapy",
+  "pr": 7986,
+  "file": "tests/test_http2_client_protocol.py",
+  "unit": "test_inactive_stream",
+  "finding": {
+   "claim_type": "wrong_order",
+   "file": "tests/test_http2_client_protocol.py",
+   "line_a": 616,
+   "line_b": 627,
+   "relation": "The test sends 100 requests to a fast endpoint, which can complete and free up a stream before the connection is closed, allowing one of the subsequent 10 requests that are expected to fail to instead succeed and trigger a test failure.",
+   "confidence": "high",
+   "line_a_raw": 617,
+   "line_b_raw": 627
+  },
+  "lo": 596,
+  "hi": 636
+ },
+ {
+  "repo": "pandas-dev/pandas",
+  "pr": 65195,
+  "file": "pandas/tests/tools/test_to_datetime.py",
+  "unit": "test_dataframe_leap_year_valid",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "pandas/tests/tools/test_to_datetime.py",
+   "line_a": 2394,
+   "line_b": 2395,
+   "relation": "The `expected` Series is created with a default `datetime64[ns]` dtype, but the implementation of `to_datetime` being tested now returns a `datetime64[us]` dtype for dataframe inputs without time components, causing `tm.assert_series_equal` to fail on a dtype mismatch.",
+   "confidence": "high",
+   "line_a_raw": 2394,
+   "line_b_raw": 2395
+  },
+  "lo": 2377,
+  "hi": 2395
+ },
+ {
+  "repo": "ansible/ansible",
+  "pr": 87250,
+  "file": "lib/ansible/module_utils/basic.py",
+  "unit": "log",
+  "finding": {
+   "claim_type": "missing_guard",
+   "file": "lib/ansible/module_utils/basic.py",
+   "line_a": 1243,
+   "line_b": 1257,
+   "relation": "The `log_args` parameter defaults to `None` at line 1243 and is passed to `_logging.log_to_system` at line 1258 without the prior code's guard to initialize it to a dictionary, likely causing a TypeError inside the called function.",
+   "confidence": "high",
+   "line_a_raw": 1243,
+   "line_b_raw": 1258
+  },
+  "lo": 1243,
+  "hi": 1270
+ },
+ {
+  "repo": "django/django",
+  "pr": 21750,
+  "file": "tests/migrations/test_operations.py",
+  "unit": "test_alter_field_python_level_on_delete_noop",
+  "finding": {
+   "claim_type": "wrong_order",
+   "file": "tests/migrations/test_operations.py",
+   "line_a": 2598,
+   "line_b": 2600,
+   "relation": "The call to `database_forwards` at line 2598 incorrectly passes `project_state` as the `from_state` and `new_state` as the `to_state`, which causes the reverse call in `database_backwards` at line 2600 to fail with an `AttributeError` because its `from_state` and `to_state` arguments are then swapped, leading it to try to find a field on a model state where it no longer exists.",
+   "confidence": "high",
+   "line_a_raw": 2598,
+   "line_b_raw": 2600
+  },
+  "lo": 2576,
+  "hi": 2601
+ },
+ {
+  "repo": "pandas-dev/pandas",
+  "pr": 66717,
+  "file": "pandas/core/indexes/multi.py",
+  "unit": "get_locs",
+  "finding": {
+   "claim_type": "wrong_order",
+   "file": "pandas/core/indexes/multi.py",
+   "line_a": 4349,
+   "line_b": 4319,
+   "relation": "The check for unused codes at line 4351 is performed before handling duplicate codes in `k_codes`, causing it to incorrectly raise a `KeyError` if a label is duplicated in `k` and is used in `level_codes`, but not all of its duplicate appearances in `k_codes` are present in `used`.",
+   "confidence": "high",
+   "line_a_raw": 4349,
+   "line_b_raw": 4351
+  },
+  "lo": 4120,
+  "hi": 4413
+ },
+ {
+  "repo": "scikit-learn/scikit-learn",
+  "pr": 34740,
+  "file": "sklearn/datasets/_lfw.py",
+  "unit": "_fetch_lfw_pairs",
+  "finding": {
+   "claim_type": "unhandled_case",
+   "file": "sklearn/datasets/_lfw.py",
+   "line_a": 432,
+   "line_b": 478,
+   "relation": "If the input index file contains no valid pair specifications, `n_pairs` will be 0 at line 445, leading `pairs` to be an empty array, which causes the in-place shape assignment at line 478 to raise a `ValueError`.",
+   "confidence": "high",
+   "line_a_raw": 445,
+   "line_b_raw": 478
+  },
+  "lo": 432,
+  "hi": 481
+ },
+ {
+  "repo": "django/django",
+  "pr": 21752,
+  "file": "tests/forms_tests/tests/test_media.py",
+  "unit": "test_html_safe_string_merging",
+  "finding": {
+   "claim_type": "wrong_order",
+   "file": "tests/forms_tests/tests/test_media.py",
+   "line_a": 902,
+   "line_b": 911,
+   "relation": "The JavaScript list for m1 is `[\"/path/to/js1\", js_tag]`, which is reordered to `[js_tag, \"/path/to/js1\"]` during Media object construction, so the assertion for JavaScript order in the merged media is incorrect.",
+   "confidence": "high",
+   "line_a_raw": 904,
+   "line_b_raw": 916
+  },
+  "lo": 897,
+  "hi": 918
+ },
+ {
+  "repo": "celery/celery",
+  "pr": 10420,
+  "file": "celery/schedules.py",
+  "unit": "remaining_delta",
+  "finding": {
+   "claim_type": "unhandled_case",
+   "file": "celery/schedules.py",
+   "line_a": 627,
+   "line_b": 627,
+   "relation": "When `self.day_of_week` is an empty set, the expression `[day for day in self.day_of_week if day > dow_num] or self.day_of_week` evaluates to an empty set, causing `min()` to be called on an empty sequence which raises a `ValueError`.",
+   "confidence": "high",
+   "line_a_raw": 628,
+   "line_b_raw": 628
+  },
+  "lo": 580,
+  "hi": 642
+ },
+ {
+  "repo": "scrapy/scrapy",
+  "pr": 7986,
+  "file": "tests/test_http2_client_protocol.py",
+  "unit": "test_connection_timeout",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "tests/test_http2_client_protocol.py",
+   "line_a": 734,
+   "line_b": 743,
+   "relation": "Setting a 1-second timeout at line 734 triggers a generic transport timeout, but the assertion at line 744 incorrectly checks for an error message specific to the much longer application-level idle timeout.",
+   "confidence": "high",
+   "line_a_raw": 734,
+   "line_b_raw": 744
+  },
+  "lo": 727,
+  "hi": 749
+ },
+ {
+  "repo": "django/django",
+  "pr": 21750,
+  "file": "tests/schema/tests.py",
+  "unit": "test_fk_alter_on_delete_python_level_noop",
+  "finding": {
+   "claim_type": "unhandled_case",
+   "file": "tests/schema/tests.py",
+   "line_a": 655,
+   "line_b": 655,
+   "relation": "The test `test_fk_alter_on_delete_python_level_noop` wrongly asserts that changing a ForeignKey's `on_delete` from `PROTECT` back to `CASCADE` results in zero database queries, but this change requires altering the foreign key constraint which is not a no-op.",
+   "confidence": "high",
+   "line_a_raw": 655,
+   "line_b_raw": 655
+  },
+  "lo": 643,
+  "hi": 656
+ },
+ {
+  "repo": "scikit-learn/scikit-learn",
+  "pr": 34740,
+  "file": "sklearn/datasets/_base.py",
+  "unit": "load_digits",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "sklearn/datasets/_base.py",
+   "line_a": 1006,
+   "line_b": 1031,
+   "relation": "The assignment `images = flat_data.view()` on line 1006 (in the original code) creates a view, causing `images` and `flat_data` to share the same underlying memory, and when both are returned in the Bunch object on line 1033, modifying one array unexpectedly modifies the other.",
+   "confidence": "high",
+   "line_a_raw": 1006,
+   "line_b_raw": 1033
+  },
+  "lo": 903,
+  "hi": 1039
+ },
+ {
+  "repo": "celery/celery",
+  "pr": 10459,
+  "file": "t/smoke/tests/test_rpc_backend.py",
+  "unit": "test_repeated_final_polls_do_not_recirculate",
+  "finding": {
+   "claim_type": "unhandled_case",
+   "file": "t/smoke/tests/test_rpc_backend.py",
+   "line_a": 145,
+   "line_b": 146,
+   "relation": "The first loop from lines 136-138, via `poll_until_ready`, caches task results upon completion, so the subsequent polls in the loop at line 145 will always hit the cache at line 146 and never interact with the broker, failing to test the bug's core behavior of requeueing on repeated polls.",
+   "confidence": "high",
+   "line_a_raw": 145,
+   "line_b_raw": 146
+  },
+  "lo": 112,
+  "hi": 162
+ },
+ {
+  "repo": "scrapy/scrapy",
+  "pr": 7988,
+  "file": "scrapy/core/_http2/protocol.py",
+  "unit": "connectionMade",
+  "finding": {
+   "claim_type": "wrong_order",
+   "file": "scrapy/core/_http2/protocol.py",
+   "line_a": 252,
+   "line_b": 265,
+   "relation": "Calling `self.conn.initiate_connection()` before `self.conn.update_settings()` causes an unnecessary default SETTINGS frame to be sent before the intended custom settings, which is inefficient and delays the application of the custom settings.",
+   "confidence": "high",
+   "line_a_raw": 262,
+   "line_b_raw": 265
+  },
+  "lo": 252,
+  "hi": 268
+ },
+ {
+  "repo": "celery/celery",
+  "pr": 10298,
+  "file": "celery/backends/redis.py",
+  "unit": "_reconnect_pubsub",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "celery/backends/redis.py",
+   "line_a": 111,
+   "line_b": 111,
+   "relation": "The call to `get_connection()` without arguments violates the API contract for redis-py versions older than 5.3.0, which require a `command_name` argument, causing a `TypeError`.",
+   "confidence": "high",
+   "line_a_raw": 114,
+   "line_b_raw": 114
+  },
+  "lo": 97,
+  "hi": 128
+ },
+ {
+  "repo": "celery/celery",
+  "pr": 10420,
+  "file": "t/unit/app/test_schedules.py",
+  "unit": "test_aware_last_run_at_in_different_timezone",
+  "finding": {
+   "claim_type": "wrong_order",
+   "file": "t/unit/app/test_schedules.py",
+   "line_a": 566,
+   "line_b": 569,
+   "relation": "The timedelta returned by `remaining_estimate` is added to `now` (a datetime in the Vilnius timezone) at line 566, but the result is compared to a datetime in the UTC timezone at line 569, which is only valid if `ZoneInfo` is not affected by daylight saving time transitions.",
+   "confidence": "low",
+   "line_a_raw": 566,
+   "line_b_raw": 569
+  },
+  "lo": 552,
+  "hi": 569
+ },
+ {
+  "repo": "django/django",
+  "pr": 21752,
+  "file": "tests/forms_tests/tests/test_media.py",
+  "unit": "test_html_safe_string_css",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "tests/forms_tests/tests/test_media.py",
+   "line_a": 877,
+   "line_b": 878,
+   "relation": "The Media object initialized on line 877 with a SafeString asset under the 'all' media type ignores this media type during rendering, and the test on line 878 incorrectly asserts this behavior is correct by comparing the output to the original tag which lacks a `media=\"all\"` attribute.",
+   "confidence": "high",
+   "line_a_raw": 877,
+   "line_b_raw": 878
+  },
+  "lo": 875,
+  "hi": 878
+ },
+ {
+  "repo": "pandas-dev/pandas",
+  "pr": 66762,
+  "file": "pandas/tests/io/json/test_pandas.py",
+  "unit": "test_blocks_compat_GH9037",
+  "finding": {
+   "claim_type": "wrong_order",
+   "file": "pandas/tests/io/json/test_pandas.py",
+   "line_a": 635,
+   "line_b": 635,
+   "relation": "The serialization of `df_mixed` at line 637 uses the original nanosecond-precision index, while the modification of `df_mixed` at line 639 to have a millisecond-precision index happens after the serialization, which is the wrong order for a true round-trip test.",
+   "confidence": "high",
+   "line_a_raw": 637,
+   "line_b_raw": 639
+  },
+  "lo": 543,
+  "hi": 640
+ },
+ {
+  "repo": "ansible/ansible",
+  "pr": 87250,
+  "file": "lib/ansible/module_utils/basic.py",
+  "unit": "log",
+  "finding": {
+   "claim_type": "wrong_order",
+   "file": "lib/ansible/module_utils/basic.py",
+   "line_a": 1254,
+   "line_b": 1257,
+   "relation": "The sanitization via `remove_values` on line 1254 now runs before the message is combined with `self._target_log_info`, causing the latter to be passed unsanitized on line 1262 and potentially leak secrets into system logs.",
+   "confidence": "high",
+   "line_a_raw": 1254,
+   "line_b_raw": 1262
+  },
+  "lo": 1243,
+  "hi": 1270
+ },
+ {
+  "repo": "scrapy/scrapy",
+  "pr": 7985,
+  "file": "tests/utils/bases/download_handlers_http.py",
+  "unit": "get_dh",
+  "finding": {
+   "claim_type": "resource_leak",
+   "file": "tests/utils/bases/download_handlers_http.py",
+   "line_a": 1549,
+   "line_b": 1554,
+   "relation": "A spider instance is created on line 1549 and assigned to the crawler, but it is never closed, causing a potential resource leak if a spider subclass allocates resources during initialization.",
+   "confidence": "low",
+   "line_a_raw": 1549,
+   "line_b_raw": 1554
+  },
+  "lo": 1542,
+  "hi": 1554
+ },
+ {
+  "repo": "scrapy/scrapy",
+  "pr": 7988,
+  "file": "tests/test_http2_client_protocol.py",
+  "unit": "test_GET_large_frames",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "tests/test_http2_client_protocol.py",
+   "line_a": 194,
+   "line_b": 327,
+   "relation": "The `@pytest.mark.parametrize` decorator on line 324 targets the `crawler` parameter, but the test function signature on line 327 does not include a parameter named `crawler`, which violates the pytest contract and will cause the test to fail at runtime.",
+   "confidence": "high",
+   "line_a_raw": 324,
+   "line_b_raw": 327
+  },
+  "lo": 323,
+  "hi": 332
+ },
+ {
+  "repo": "scrapy/scrapy",
+  "pr": 7946,
+  "file": "tests/test_engine_loop.py",
+  "unit": "test_start_not_an_async_generator",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "tests/test_engine_loop.py",
+   "line_a": 188,
+   "line_b": 188,
+   "relation": "The assertion on line 191 fails because the f-string on line 189 uses the spider's class name (`spider_cls.__name__`) to construct the expected error message, but the Scrapy engine logs the spider's `name` attribute (\"test\").",
+   "confidence": "high",
+   "line_a_raw": 189,
+   "line_b_raw": 191
+  },
+  "lo": 167,
+  "hi": 193
+ },
+ {
+  "repo": "celery/celery",
+  "pr": 10420,
+  "file": "t/unit/app/test_schedules.py",
+  "unit": "test_aware_last_run_at_in_different_timezone_without_utc",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "t/unit/app/test_schedules.py",
+   "line_a": 576,
+   "line_b": 586,
+   "relation": "Setting `self.app.conf.enable_utc = False` on line 576 creates a test of local time processing, but the assertion on line 586 incorrectly compares the result to a UTC-aware datetime, which will fail if the system's local timezone is not UTC.",
+   "confidence": "high",
+   "line_a_raw": 576,
+   "line_b_raw": 586
+  },
+  "lo": 571,
+  "hi": 586
+ },
+ {
+  "repo": "pandas-dev/pandas",
+  "pr": 66696,
+  "file": "pandas/tests/util/test_assert_almost_equal.py",
+  "unit": "test_assert_almost_equal_large_integers_within_atol",
+  "finding": {
+   "claim_type": "wrong_order",
+   "file": "pandas/tests/util/test_assert_almost_equal.py",
+   "line_a": 150,
+   "line_b": 151,
+   "relation": "The subtraction to calculate the difference of 76 in the comment at line 151 is performed on values `a` (line 150) and `b` (line 151) that do not match the values used in the test.",
+   "confidence": "high",
+   "line_a_raw": 150,
+   "line_b_raw": 151
+  },
+  "lo": 146,
+  "hi": 153
+ },
+ {
+  "repo": "ansible/ansible",
+  "pr": 87250,
+  "file": "lib/ansible/module_utils/_internal/_logging.py",
+  "unit": "log_to_system",
+  "finding": {
+   "claim_type": "unhandled_case",
+   "file": "lib/ansible/module_utils/_internal/_logging.py",
+   "line_a": 85,
+   "line_b": 56,
+   "relation": "The `except OSError` block at line 85 assumes the `_log_to_syslog` fallback at line 86 will succeed, but if `HAS_SYSLOG` is false, `_log_to_syslog` does nothing, causing the log message to be silently dropped.",
+   "confidence": "high",
+   "line_a_raw": 85,
+   "line_b_raw": 86
+  },
+  "lo": 28,
+  "hi": 87
+ },
+ {
+  "repo": "scrapy/scrapy",
+  "pr": 7986,
+  "file": "tests/test_http2_client_protocol.py",
+  "unit": "client",
+  "finding": {
+   "claim_type": "resource_leak",
+   "file": "tests/test_http2_client_protocol.py",
+   "line_a": 262,
+   "line_b": 263,
+   "relation": "The call to `loseConnection` on line 262 for a graceful connection teardown is immediately subverted by the call to `abortConnection` on line 263, which forcefully terminates the connection without allowing the graceful shutdown to complete.",
+   "confidence": "high",
+   "line_a_raw": 262,
+   "line_b_raw": 263
+  },
+  "lo": 239,
+  "hi": 263
+ },
+ {
+  "repo": "celery/celery",
+  "pr": 10459,
+  "file": "celery/backends/rpc.py",
+  "unit": "get_task_meta",
+  "finding": {
+   "claim_type": "resource_leak",
+   "file": "celery/backends/rpc.py",
+   "line_a": 325,
+   "line_b": 336,
+   "relation": "In the loop that processes messages from the queue, if a message for a given task ID is not the last one, the `ack()` is called at line 341, but this does not prevent the message reference from being stored in `latest_by_id` at line 337, leading to it being processed again after the loop.",
+   "confidence": "high",
+   "line_a_raw": 341,
+   "line_b_raw": 337
+  },
+  "lo": 325,
+  "hi": 369
+ },
+ {
+  "repo": "celery/celery",
+  "pr": 10470,
+  "file": "t/unit/app/test_schedules.py",
+  "unit": "test_raises_improperly_configured_when_ephem_is_missing",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "t/unit/app/test_schedules.py",
+   "line_a": 102,
+   "line_b": 108,
+   "relation": "The test class `test_solar_without_ephem` does not have a `setup_method` to initialize the `self.app` attribute, causing an `AttributeError` when it is accessed on line 108.",
+   "confidence": "high",
+   "line_a_raw": 102,
+   "line_b_raw": 108
+  },
+  "lo": 105,
+  "hi": 109
+ },
+ {
+  "repo": "scikit-learn/scikit-learn",
+  "pr": 34741,
+  "file": "sklearn/mixture/_gaussian_mixture.py",
+  "unit": "_estimate_gaussian_covariances_spherical",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "sklearn/mixture/_gaussian_mixture.py",
+   "line_a": 255,
+   "line_b": 276,
+   "relation": "The function signature at line 255 accepts an `xp` parameter, but its value is unconditionally overwritten at line 276, meaning any value passed by the caller for `xp` is ignored.",
+   "confidence": "high",
+   "line_a_raw": 255,
+   "line_b_raw": 276
+  },
+  "lo": 255,
+  "hi": 279
+ },
+ {
+  "repo": "pandas-dev/pandas",
+  "pr": 66717,
+  "file": "pandas/core/indexes/multi.py",
+  "unit": "get_locs",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "pandas/core/indexes/multi.py",
+   "line_a": 4357,
+   "line_b": 4319,
+   "relation": "The assignment to `vec_indexer` at line 4357 does not account for the possibility that `k_codes` can contain duplicate values, but `wanted` is created from unique values, which causes `wanted[level_codes]` to incorrectly select only the first occurrence of a duplicated code from the level's codes, leading to missing results at line 4359.",
+   "confidence": "high",
+   "line_a_raw": 4357,
+   "line_b_raw": 4359
+  },
+  "lo": 4120,
+  "hi": 4413
+ }
+]

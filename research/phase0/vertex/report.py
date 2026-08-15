@@ -32,7 +32,7 @@ def cost_of(r: dict[str, object]) -> float:
 
 
 def main() -> int:
-    with open("vertex_cost.json") as fh:
+    with open("corpora/vertex_cost.json") as fh:
         rows = json.load(fh)
     if not rows:
         print("  REFUSING TO REPORT — empty result file")

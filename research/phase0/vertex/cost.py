@@ -101,7 +101,7 @@ def funded_units(pr: dict[str, object]) -> list[tuple[dict[str, object], dict[st
 
 
 def main() -> int:
-    with open("pr_corpus.json") as fh:
+    with open("corpora/pr_corpus.json") as fh:
         prs = json.load(fh)
 
     jobs: list[tuple[dict[str, object], dict[str, object], dict[str, object]]] = []

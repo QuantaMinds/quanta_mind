@@ -17,12 +17,12 @@ import subprocess
 import sys
 
 REPOS = [
-    "huggingface/transformers",
-    "langchain-ai/langchain",
-    "cartography-cncf/cartography",
-    "vllm-project/vllm",
-    "apache/airflow",
-    "Skyvern-AI/skyvern",
+    "scikit-learn/scikit-learn",
+    "pandas-dev/pandas",
+    "django/django",
+    "ansible/ansible",
+    "scrapy/scrapy",
+    "celery/celery",
 ]
 PER_REPO = 4
 MAX_PY_FILES = 12
@@ -88,9 +88,9 @@ def main() -> int:
                 f"  {repo:30s} #{num:<7} {len(py):2d} py files  "
                 f"{sum(len(x['source']) for x in rec['files']):7d} src chars"
             )
-    with open("pr_corpus.json", "w") as fh:
+    with open("pr_corpus_fresh.json", "w") as fh:
         json.dump(out, fh)
-    print(f"\n  {len(out)} pull requests written to pr_corpus.json")
+    print(f"\n  {len(out)} pull requests written to pr_corpus_fresh.json")
     return 0
 
 
