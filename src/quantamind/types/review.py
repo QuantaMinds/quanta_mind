@@ -1,4 +1,4 @@
-"""The review itself: what we checked, what we did not, what we found, what it cost.
+"""The review itself: what we checked, what we did not, and what it cost.
 
 WHAT: `CoverageLine`, `RequestLedger` and `Review` -- the record posted to a pull request and
       written to the store, carrying its own coverage and its own spend.
@@ -6,8 +6,14 @@ WHY:  Two things have to be observable rather than asserted. Coverage, because t
       whole claim is that silence is readable. And spend, because a request ceiling that is
       never hit and one that was never wired up print the same thing -- so the ledger records
       what actually happened and the gate compares it against the budget.
-IMPORTS: stdlib only (dataclasses), and types.change, types.finding, types.ranking,
-      types.verdict.
+
+      A REVIEW CARRIES NO FINDINGS, AND THAT IS THE PRODUCT DECISION, NOT AN OMISSION. It once
+      held `findings` and `spoke`. Nothing populated them: seven review designs were measured
+      against pre-registered bars and all seven failed, so no `infer/` ships and no `verify/`
+      adjudicates. Fields nothing can fill describe a capability to the next reader that the
+      system does not have, and the two guards that policed them could not fire -- an
+      unreachable check reads exactly like a passing one. → `docs/product/review-half-record.md`
+IMPORTS: stdlib only (dataclasses), and types.change, types.ranking, types.verdict.
 CONSUMED BY: render turns this into a comment; store persists it; telemetry queries it.
 """
 
@@ -16,7 +22,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from quantamind.types.change import PullRequest
-from quantamind.types.finding import Finding
 from quantamind.types.ranking import Budget, RankedUnit, Ranking
 from quantamind.types.verdict import Unresolved
 
@@ -136,29 +141,21 @@ class Review:
     """One review of one commit: the unit of work, of record, and of measurement.
 
     Identified by the pull request's head SHA, so a redelivered webhook resolves to the same
-    review rather than a second one. The findings here are the ones that survived
-    adjudication; what was dropped lives in the store, not in the comment.
+    review rather than a second one.
+
+    **A review is its coverage.** There is no field for a claim about whether code is wrong,
+    because the product does not make one -- 207 adjudicated findings came back 5.80% correct,
+    and 87.3% of the ones quoting code quoted code absent from the line they cited. Every
+    attribute below is derived from git or from a counter, so a review can be recomputed and
+    disagreed with. `ran_model` stays because it is the one that would change if inference were
+    ever wired up by accident, and a claim of "no model runs here" that nothing can falsify is
+    the kind this project stopped accepting.
     """
 
     pull_request: PullRequest
     coverage: CoverageLine
     budget: Budget
     ledger: RequestLedger = field(default_factory=RequestLedger)
-    findings: tuple[Finding, ...] = field(default_factory=tuple)
-    spoke: bool = False
-
-    def __post_init__(self) -> None:
-        unpublishable = [f for f in self.findings if not f.publishable]
-        if unpublishable:
-            raise ValueError(
-                f"Review {self.pull_request.key} carries {len(unpublishable)} finding(s) that "
-                "were contradicted or never adjudicated; verify/ must run before a Review exists"
-            )
-        if self.spoke and not self.findings:
-            raise ValueError(
-                f"Review {self.pull_request.key} claims to have spoken with no findings; "
-                "a coverage-only review has spoke=False"
-            )
 
     @property
     def key(self) -> str:

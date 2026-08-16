@@ -342,8 +342,7 @@ modules.** They arrive one stage at a time, each behind a gate in
 ### `types/`
 **Owns:** the vocabulary — `Site`, `Unresolved`, `Confidence`, `Provenance`, `Reason`,
 `Construct`, `Repo`, `PullRequest`, `ChangedUnit`, `Diff`, `Score`, `RankedUnit`, `Ranking`,
-`Allocation`, `Budget`, `Claim`, `Finding`, `Verdict`, `CoverageLine`, `RequestLedger`,
-`Review`, `Settings`.
+`Allocation`, `Budget`, `CoverageLine`, `RequestLedger`, `Review`, `Settings`.
 **Imports:** nothing from the project. Stdlib only.
 **Consumed by:** every layer.
 **Must not:** perform I/O, or grow a type that needs a database to be constructed.
@@ -360,6 +359,15 @@ refused.
 the ranking never saw. Referencing the ranked unit also links the coverage line to the row
 shadow evaluation scores against. **Prefer `CoverageLine.from_ranking` to the constructor** —
 derived from the ranking, the two cannot disagree.
+
+**`Review` has no field for a finding, and that is the product decision.** `Claim`, `Finding`,
+`ClaimKind` and `Verdict` were deleted with `types/finding.py`, along with `Review.findings`
+and `Review.spoke`. Nothing could populate them — seven review designs failed pre-registered
+bars, 207 findings came back 5.80% correct — and the two validations guarding them could
+therefore never fire, which is an unreachable check reading exactly like a passing one.
+`test_a_review_cannot_carry_a_model_claim_at_all` asserts the constructor refuses them.
+`ran_model` survives because it reads the ledger rather than the configuration, so "no model
+runs here" stays falsifiable. → `docs/product/review-half-record.md`
 
 ### `store/`
 **Owns:** persistence — versioned schema, migrations, one repository module per aggregate,
@@ -387,17 +395,20 @@ null ranker.
 **Must not:** degrade silently at the ceiling. It raises, or it withholds inference and says
 so in the comment.
 
-### `infer/`
-**Owns:** model calls — structured output, caching, refusal handling, provider adapters.
-**Must not:** be required for a review to complete. Everything left of here runs with no key.
-
-### `verify/`
-**Owns:** adjudication of structural claims against the parse, and the drop-rate counter.
-**Must not:** import `infer`, or mark a semantic claim confirmed. A parser cannot decide one.
+### `infer/` and `verify/` — **NOT BUILT, AND NOT PLANNED**
+The packages remain so the layer order in `AGENTS.md` still describes a real import graph, and
+they stay empty. `infer/` would own model calls; `verify/` would adjudicate their structural
+claims. Neither ships: seven designs failed a bar fixed before each run, the pooled result is
+**5.80% correct across 207 adjudicated findings**, and **87.3% of claims quoting code quote code
+absent from the line they cite**. SWR-Bench puts five published systems at 2.79–15.39% precision
+on 1,000 pull requests, so this is an unsolved problem rather than a local defect.
+**Do not add an eighth design without a fresh corpus and a bar fixed first.**
+→ `docs/product/review-half-record.md`
 
 ### `render/`
 **Owns:** the comment body, the coverage line, the digest, the report.
-**Must not:** print findings above coverage. The order is the argument.
+**Must not:** state or imply that a piece of code is wrong. It reports where fix history
+concentrates and what was not read. Every line it prints is derived from git or from a counter.
 
 ### `serve/`
 **Owns:** the HTTP webhook, the CLI, health, configuration, and the contracts at the edge.

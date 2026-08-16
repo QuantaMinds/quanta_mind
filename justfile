@@ -42,6 +42,7 @@ types:
     cd research/phase0 && uv run mypy src/
 
 guards:
+    uv run python scripts/guard/check_branch_name.py . "$(git branch --show-current)"
     uv run python scripts/guard/check_structure.py .
     uv run python scripts/guard/check_conventions.py .
     uv run python scripts/guard/check_assert_quality.py tests
