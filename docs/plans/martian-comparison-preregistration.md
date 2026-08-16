@@ -132,3 +132,19 @@ inflates every arm's true positives. Our recall figure in particular is not comp
 
 **This does not void the run.** It narrows what it can say: a ranking against CodeRabbit on this
 corpus under one judge, not a position on Martian's board.
+
+### And the limitation above was wrong — it was a 10-pull-request artefact
+
+**The full calibration arm finished at P = 37.8%, R = 62.4%, against their Claude judge's
+P = 34.7%, R = 59.5%. Both within 3.1 points.**
+
+The recall gap I recorded — 80.5% at 10 pull requests, "roughly 21 points higher" — **converged
+away as the sample filled in**: 80.5% → 72.0% → 67.3% → 65.7% → 62.4%.
+
+**I drew a conclusion from 10 of 50 observations, which is the error this project keeps
+cataloguing, committed while warning about post-hoc excuses.** The paragraphs above are kept
+rather than deleted because the correction is the point.
+
+**What this restores:** the judge is calibrated on BOTH axes, not just precision, so the run's
+absolute figures are defensible beside the offline layer's published numbers — still never beside
+the online leaderboard, which measures a different quantity entirely.
