@@ -107,3 +107,28 @@ where 87.3% of our claims fail.
 
 **May not:** a rank. 48 tools were scored by judges we did not use; inserting ourselves into their
 ordering would be exactly the drift this project's publishing rules forbid.
+
+---
+
+## A limitation found DURING the run, recorded before the result
+
+**Noted while the calibration arm was still executing, so it cannot be a post-hoc excuse.**
+
+At 10 of 50 pull requests our Gemini judge scored CodeRabbit at **P = 38.8%, R = 80.5%** against
+their Claude judge's **P = 34.7%, R = 59.5%** on the full set.
+
+**Precision tracks within a few points. Recall does not — it is roughly 21 points higher.** Our
+judge matches a candidate to a golden comment more readily than theirs does.
+
+**P0 as written checks precision only.** That was not a considered decision; precision is the
+primary metric and I wrote the bar around it without asking whether the same tolerance held for
+recall. It does not.
+
+**What this permits and forbids.** The same judge scores every arm, so **the within-run comparison
+between us and CodeRabbit remains valid** — that is what P1 and P2 test. But **no absolute number
+from this run may be quoted beside the published leaderboard**, because a more lenient judge
+inflates every arm's true positives. Our recall figure in particular is not comparable to the
+59.5% published for CodeRabbit.
+
+**This does not void the run.** It narrows what it can say: a ranking against CodeRabbit on this
+corpus under one judge, not a position on Martian's board.
