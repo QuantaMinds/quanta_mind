@@ -223,3 +223,39 @@ condition and this benchmark never tests it.**
 figures**, and that this project has spent a campaign comparing a strict number against lenient
 ones and concluding it was far behind. On the industry's own axis, on their corpus, with their
 judge, we are level with CodeRabbit.
+
+---
+
+## Two threats to the headline, found in the literature after the run
+
+**Recorded because they weaken our own result, and neither was anticipated in the bars above.**
+
+### Our arm is the only one judged by its own model family
+
+The reviewer is Gemini and the judge is Gemini. CodeRabbit's and Greptile's candidates were written
+by other systems. **Self-preference in LLM judges is a documented effect, and it would inflate our
+precision alone.**
+
+**Partial evidence against it:** on CodeRabbit's candidates our Gemini judge scored **higher** than
+their Claude judge (37.8% against 34.7%), which is the wrong direction for a judge biased against
+foreign text. **That does not test pro-self bias**, which is the one that matters here.
+
+**It cannot be tested on this project.** Anthropic models return 404 on our Vertex project and we
+hold no OpenAI key, so no judge outside the Gemini family is reachable. A second judge is the first
+thing to run if these figures are ever quoted externally.
+
+**Effect on the conclusion:** P1's +7.2 points is already non-significant at p = 0.145. This makes
+it weaker, not stronger. **"At level with CodeRabbit" survives; "better than CodeRabbit" was never
+supported and is now doubly unsupported.**
+
+### Martian says their own gold set is incomplete
+
+Their published analysis notes that comments scored as false positives sometimes turn out to be
+real issues absent from the gold set. **Every tool's precision is understated and every tool's
+recall is overstated**, ours included.
+
+This is symmetric across arms, so the comparison holds. It means **no absolute figure from this
+benchmark — ours or anyone's — is a defect-detection rate.** It is agreement with one curated list.
+
+**And it bounds the whole exercise:** no tool of the 48 exceeds roughly 63% recall on this set.
+Greptile's 52.6% and our 45.7% sit under a ceiling that nobody has passed.
