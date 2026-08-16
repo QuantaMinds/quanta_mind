@@ -28,7 +28,7 @@ from client import Client
 import corpus
 
 MODEL = "gemini-2.5-pro"
-RIVALS = ("coderabbit", "greptile-v4-1", "copilot-v2")
+RIVALS = ("coderabbit", "greptile-v4-1")  # calibration tool + the offline precision leader
 CALIBRATION_TOOL = "coderabbit"
 CALIBRATION_TOLERANCE = 0.10
 OUT = pathlib.Path(__file__).resolve().parent / "martian_comparison.json"
