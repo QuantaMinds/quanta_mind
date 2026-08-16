@@ -1,0 +1,111 @@
+"""The Martian offline corpus: golden comments, rival candidates, and the diffs under review.
+
+WHAT: Loads the 50 pull requests and their human-verified issue lists from a checked-out copy of
+      `withmartian/code-review-benchmark`, loads the candidates every other tool produced, and
+      fetches each pull request's diff from its ORIGINAL repository.
+WHY:  The comparison is only like-for-like if every arm is scored against the same ground truth on
+      the same changes. Reading the golden comments and the rivals' candidates from their
+      repository rather than transcribing them is what makes that checkable by someone else.
+
+      THE DIFF COMES FROM `original_url`, NOT `url`. The golden file's `url` points at a fork in
+      `ai-code-review-evaluation/` created so the tools could be run; several carry an
+      `az_comment` saying the reviewed commit is not in the repo. The original pull request is the
+      change the golden comments describe.
+IMPORTS: stdlib only (json, pathlib, subprocess).
+CONSUMED BY: `run.py` in this package.
+"""
+
+from __future__ import annotations
+
+import json
+import pathlib
+import subprocess
+
+BENCH = pathlib.Path(
+    "/private/tmp/claude-501/-Users-dhanu-Documents-SaaS-quanta-mind/"
+    "6063c1dc-2654-4975-b12a-47677aad0026/scratchpad/bench/code-review-benchmark/offline"
+)
+CACHE = pathlib.Path(
+    "/private/tmp/claude-501/-Users-dhanu-Documents-SaaS-quanta-mind/"
+    "6063c1dc-2654-4975-b12a-47677aad0026/scratchpad/bench/diffs"
+)
+JUDGE_DIR = "anthropic_claude-opus-4-5-20251101"
+MAX_DIFF_CHARS = 180_000
+
+
+class FetchFailed(RuntimeError):
+    """A diff that could not be read. Never silently an empty diff."""
+
+
+def pulls() -> list[dict[str, object]]:
+    """The 50 pull requests, each with its golden comments and its original URL."""
+    out: list[dict[str, object]] = []
+    for f in sorted((BENCH / "golden_comments").glob("*.json")):
+        for pr in json.loads(f.read_text()):
+            out.append(
+                {
+                    "repo_file": f.stem,
+                    "key": pr["url"],  # the benchmark's own identifier, used to join to rivals
+                    "original": pr.get("original_url") or pr["url"],
+                    "title": pr.get("pr_title", ""),
+                    "golden": [c["comment"] for c in pr["comments"]],
+                }
+            )
+    return out
+
+
+def rival_candidates(tool: str) -> dict[str, list[str]]:
+    """{benchmark pull-request url: [candidate text]} for one already-evaluated tool."""
+    data = json.loads((BENCH / "results" / JUDGE_DIR / "candidates.json").read_text())
+    out: dict[str, list[str]] = {}
+    for url, tools in data.items():
+        if tool in tools:
+            out[url] = [c["text"] for c in tools[tool] if c.get("text")]
+    return out
+
+
+def published(tool: str) -> tuple[int, int, int]:
+    """(true positives, false positives, false negatives) as THEIR judge scored this tool.
+
+    Used only for the calibration bar. If our judge disagrees with this wildly, the run measures
+    our judge and not our reviewer, and the comparison is void rather than interesting.
+    """
+    ev = json.loads((BENCH / "results" / JUDGE_DIR / "evaluations.json").read_text())
+    tp = fp = fn = 0
+    for _url, tools in ev.items():
+        r = tools.get(tool)
+        if not r or r.get("skipped"):
+            continue
+        tp += len(r.get("true_positives", []))
+        fp += len(r.get("false_positives", []))
+        fn += len(r.get("false_negatives", []))
+    return tp, fp, fn
+
+
+def diff(original_url: str) -> str:
+    """The unified diff, cached on disk. Raises rather than returning an empty string."""
+    CACHE.mkdir(parents=True, exist_ok=True)
+    slug = original_url.replace("https://github.com/", "").replace("/", "_")
+    path = CACHE / f"{slug}.diff"
+    if path.exists() and path.stat().st_size > 0:
+        return path.read_text()[:MAX_DIFF_CHARS]
+
+    repo, _, tail = original_url.replace("https://github.com/", "").partition("/pull/")
+    p = subprocess.run(
+        [
+            "gh",
+            "api",
+            f"repos/{repo}/pulls/{tail}",
+            "-H",
+            "Accept: application/vnd.github.v3.diff",
+        ],
+        capture_output=True,
+        timeout=180,
+    )
+    if p.returncode != 0:
+        raise FetchFailed(f"{original_url}: gh exited {p.returncode}: {p.stderr[:160]!r}")
+    text = p.stdout.decode("utf-8", "replace")
+    if not text.strip():
+        raise FetchFailed(f"{original_url}: gh returned an empty diff at exit 0")
+    path.write_text(text)
+    return text[:MAX_DIFF_CHARS]
