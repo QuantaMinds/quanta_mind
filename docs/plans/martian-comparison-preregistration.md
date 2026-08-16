@@ -148,3 +148,78 @@ rather than deleted because the correction is the point.
 **What this restores:** the judge is calibrated on BOTH axes, not just precision, so the run's
 absolute figures are defensible beside the offline layer's published numbers — still never beside
 the online leaderboard, which measures a different quantity entirely.
+
+---
+
+# The result — at level with CodeRabbit, significantly behind Greptile
+
+Run: `research/phase0/bench/run.py`. 50 pull requests, 173 golden comments, one Gemini judge
+across every arm. Artefact: `research/phase0/bench/martian_comparison.json`.
+
+**P0 passed first**: our judge scored CodeRabbit at **P = 37.8%, R = 62.4%** against their Claude
+judge's **34.7% / 59.5%** — 3.1 and 2.9 points. Calibrated on both axes.
+
+| arm | PRs | TP | FP | FN | precision | 95% CI | recall | F1 |
+|---|---|---|---|---|---|---|---|---|
+| greptile-v4-1 | 50 | 91 | 70 | 82 | **56.5%** | 48.8–63.9% | 52.6% | **54.5%** |
+| coderabbit | 49 | 105 | 183 | 68 | 36.5% | 31.1–42.2% | **60.7%** | 45.6% |
+| **OURS** | 50 | 79 | 102 | 94 | **43.6%** | 36.6–50.9% | 45.7% | 44.6% |
+
+| bar | result | |
+|---|---|---|
+| P1 our precision ≥ CodeRabbit's | 43.6% vs 36.5% | **PASS** |
+| P2 our F1 ≥ CodeRabbit's | 44.6% vs 45.6% | **FAIL** |
+| P4 ≥ 40 of 50 reviewed | 50/50, zero failures, every reply `STOP` | **PASS** |
+| P3 recall, no bar | 45.7% | — |
+
+## P1 passed as written, and the bar was too weak to mean what it sounds like
+
+**+7.2 points, Fisher exact p = 0.145.** The intervals overlap across most of their width.
+
+**"We beat CodeRabbit on precision" is not supported by this run.** What is supported is that we
+are **indistinguishable from CodeRabbit on precision with the point estimate in our favour.** The
+bar compared point estimates on 181 and 288 candidates and I wrote it without a significance
+requirement — the same class of error as B1 in the effort test, which is twice in two days.
+
+**Greptile beats us and the difference is real: +12.9 points, p = 0.0228.**
+
+## The one number that is unambiguously ours
+
+**Bad comments per pull request** — what a developer actually pays for in attention:
+
+| | comments | noise | noise per PR |
+|---|---|---|---|
+| greptile-v4-1 | 161 | 70 | **1.4** |
+| **OURS** | **181** | **102** | **2.0** |
+| coderabbit | 288 | 183 | **3.7** |
+
+**We produce 37% fewer comments than CodeRabbit and 44% less noise per pull request**, while
+finding 75% as many real issues.
+
+## Against the predictions
+
+| # | predicted | actual |
+|---|---|---|
+| 1 | recall **under 25%** | **45.7% — badly wrong, and wrong in our favour** |
+| 2 | precision 30–50%, at or above CodeRabbit | 43.6%, above — **right** |
+| 3 | we lose on F1 | 44.6% vs 45.6% — **right, by 1.0 point** |
+| 4 | this benchmark cannot see the anchor defect | **holds** — no anchors were emitted and none were checked |
+
+**Two of four right, one badly wrong.** Predicting recall under 25% was the reasoning that the
+reviewer is "tuned to speak rarely"; it emits 3.9 issues per pull request against CodeRabbit's 6.4,
+which is fewer but nowhere near silent.
+
+## What this does NOT mean
+
+**It does not mean the reviewer is fixed.** The same reviewer scores **5.80% correct** under our
+own adjudication and **43.6% precision** here. Those numbers are not in conflict and neither
+corrects the other — different corpus (Python functions against Java/Go/TS/Ruby diffs), different
+task (one unit against a whole diff), and above all **different questions**. Their judge asks
+whether a comment describes the same issue a human reviewer flagged. Ours asked whether a claim is
+**true of the code AND anchored to the line it cites**. **87.3% of our claims fail the second
+condition and this benchmark never tests it.**
+
+**What it does mean is that our 5.80% should never have been placed beside the industry's
+figures**, and that this project has spent a campaign comparing a strict number against lenient
+ones and concluding it was far behind. On the industry's own axis, on their corpus, with their
+judge, we are level with CodeRabbit.
