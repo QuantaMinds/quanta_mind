@@ -1,0 +1,838 @@
+[
+ {
+  "repo": "cartography-cncf/cartography",
+  "pr": 68,
+  "n_files": 4,
+  "targets": [
+   "cartography/intel/gcp/__init__.py",
+   "cartography/intel/gcp/crm.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 3
+ },
+ {
+  "repo": "cartography-cncf/cartography",
+  "pr": 71,
+  "n_files": 4,
+  "targets": [
+   "cartography/intel/gcp/__init__.py",
+   "cartography/intel/gcp/compute.py",
+   "cartography/intel/gcp/crm.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 2
+ },
+ {
+  "repo": "cartography-cncf/cartography",
+  "pr": 75,
+  "n_files": 4,
+  "targets": [
+   "tests/integration/cartography/test_cli.py",
+   "tests/integration/conftest.py",
+   "tests/integration/settings.py",
+   "tests/integration/test_basic.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "cartography-cncf/cartography",
+  "pr": 76,
+  "n_files": 6,
+  "targets": [
+   "cartography/intel/gcp/compute.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "cartography-cncf/cartography",
+  "pr": 82,
+  "n_files": 4,
+  "targets": [
+   "cartography/intel/gcp/compute.py",
+   "tests/integration/cartography/intel/gcp/test_compute.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "cartography-cncf/cartography",
+  "pr": 92,
+  "n_files": 12,
+  "targets": [
+   "cartography/driftdetect/cli.py",
+   "cartography/driftdetect/config.py",
+   "cartography/driftdetect/detect_drift.py",
+   "cartography/driftdetect/reporter.py",
+   "setup.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "cartography-cncf/cartography",
+  "pr": 102,
+  "n_files": 8,
+  "targets": [
+   "cartography/intel/crxcavator/__init__.py",
+   "cartography/intel/crxcavator/crxcavator.py",
+   "cartography/sync.py",
+   "tests/integration/cartography/intel/crxcavator/test_crxcavator.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 2
+ },
+ {
+  "repo": "cartography-cncf/cartography",
+  "pr": 110,
+  "n_files": 6,
+  "targets": [
+   "cartography/driftdetect/add_shortcut.py",
+   "cartography/driftdetect/storage.py",
+   "tests/integration/driftdetect/test_shortcuts.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "cartography-cncf/cartography",
+  "pr": 111,
+  "n_files": 4,
+  "targets": [
+   "cartography/driftdetect/detect_deviations.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": true,
+  "rank_of_first": 4
+ },
+ {
+  "repo": "cartography-cncf/cartography",
+  "pr": 124,
+  "n_files": 4,
+  "targets": [
+   "cartography/intel/aws/ec2.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 2
+ },
+ {
+  "repo": "cartography-cncf/cartography",
+  "pr": 126,
+  "n_files": 6,
+  "targets": [
+   "cartography/intel/gsuite/__init__.py",
+   "cartography/intel/gsuite/api.py",
+   "cartography/sync.py",
+   "tests/unit/cartography/intel/gsuite/test_api.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 32,
+  "n_files": 9,
+  "targets": [
+   "airflow/__init__.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 2
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 103,
+  "n_files": 9,
+  "targets": [
+   "airflow/hooks/http_hook.py",
+   "airflow/operators/http_operator.py",
+   "airflow/operators/sensors.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 3
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 146,
+  "n_files": 9,
+  "targets": [
+   "airflow/hooks/mysql_hook.py",
+   "airflow/hooks/postgres_hook.py",
+   "airflow/hooks/presto_hook.py",
+   "airflow/operators/presto_check_operator.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 3
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 183,
+  "n_files": 10,
+  "targets": [
+   "airflow/utils.py",
+   "airflow/www/app.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": false,
+  "rank_of_first": 2
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 185,
+  "n_files": 5,
+  "targets": [
+   "airflow/hooks/jdbc_hook.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": true,
+  "rank_of_first": 5
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 254,
+  "n_files": 4,
+  "targets": [
+   "airflow/hooks/base_hook.py",
+   "airflow/models.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 292,
+  "n_files": 13,
+  "targets": [
+   "airflow/migrations/versions/e3a246e0dc1_current_schema.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 8
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 354,
+  "n_files": 5,
+  "targets": [
+   "airflow/hooks/base_hook.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": true,
+  "rank_of_first": 4
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 368,
+  "n_files": 5,
+  "targets": [
+   "airflow/hooks/oracle_hook.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": true,
+  "rank_of_first": 5
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 400,
+  "n_files": 5,
+  "targets": [
+   "airflow/hooks/hive_hooks.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": true,
+  "rank_of_first": 4
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 590,
+  "n_files": 5,
+  "targets": [
+   "airflow/www/utils.py",
+   "airflow/www/views.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 3
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 604,
+  "n_files": 9,
+  "targets": [
+   "airflow/hooks/webhdfs_hook.py",
+   "tests/core.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": false,
+  "rank_of_first": 3
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 668,
+  "n_files": 5,
+  "targets": [
+   "airflow/jobs.py",
+   "airflow/models.py",
+   "tests/core.py",
+   "tests/models.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 676,
+  "n_files": 5,
+  "targets": [
+   "airflow/bin/cli.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": true,
+  "rank_of_first": 4
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 697,
+  "n_files": 4,
+  "targets": [
+   "airflow/contrib/hooks/ssh_hook.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 3
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 740,
+  "n_files": 11,
+  "targets": [
+   "airflow/settings.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 7
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 808,
+  "n_files": 6,
+  "targets": [
+   "airflow/contrib/example_dags/example_qubole_operator.py",
+   "airflow/contrib/hooks/qubole_hook.py",
+   "airflow/contrib/operators/qubole_operator.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": true,
+  "rank_of_first": 4
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 882,
+  "n_files": 9,
+  "targets": [
+   "airflow/example_dags/docker_copy_data.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": true,
+  "rank_of_first": 6
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 949,
+  "n_files": 6,
+  "targets": [
+   "airflow/contrib/hooks/bigquery_hook.py",
+   "airflow/contrib/hooks/gc_base_hook.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 981,
+  "n_files": 4,
+  "targets": [
+   "airflow/contrib/hooks/bigquery_hook.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 1076,
+  "n_files": 4,
+  "targets": [
+   "airflow/example_dags/example_subdag_operator.py",
+   "airflow/example_dags/subdags/subdag.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 2
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 1080,
+  "n_files": 5,
+  "targets": [
+   "airflow/contrib/operators/mysql_to_gcs.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 5
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 1119,
+  "n_files": 5,
+  "targets": [
+   "setup.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": false,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 1137,
+  "n_files": 6,
+  "targets": [
+   "airflow/bin/cli.py",
+   "airflow/www/views.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 1139,
+  "n_files": 4,
+  "targets": [
+   "airflow/contrib/hooks/bigquery_hook.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 1170,
+  "n_files": 6,
+  "targets": [
+   "airflow/hooks/hive_hooks.py",
+   "tests/core.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 3
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 1175,
+  "n_files": 13,
+  "targets": [
+   "airflow/contrib/hooks/datastore_hook.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 12
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 1285,
+  "n_files": 6,
+  "targets": [
+   "setup.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": false,
+  "rank_of_first": 3
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 1290,
+  "n_files": 12,
+  "targets": [
+   "tests/core.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 5
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 1292,
+  "n_files": 7,
+  "targets": [
+   "tests/models.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 4
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 1318,
+  "n_files": 6,
+  "targets": [
+   "airflow/configuration.py",
+   "airflow/models.py",
+   "tests/dags/test_raise_executor_error.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 1352,
+  "n_files": 4,
+  "targets": [
+   "airflow/models.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 1376,
+  "n_files": 4,
+  "targets": [
+   "airflow/configuration.py",
+   "airflow/jobs.py",
+   "airflow/utils/db.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 1378,
+  "n_files": 7,
+  "targets": [
+   "airflow/executors/base_executor.py",
+   "airflow/models.py",
+   "tests/dags/test_issue_1225.py",
+   "tests/jobs.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 2
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 1448,
+  "n_files": 12,
+  "targets": [
+   "airflow/utils/logging.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 6
+ },
+ {
+  "repo": "apache/airflow",
+  "pr": 1453,
+  "n_files": 6,
+  "targets": [
+   "airflow/contrib/hooks/gcp_api_base_hook.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": true,
+  "rank_of_first": 6
+ },
+ {
+  "repo": "huggingface/transformers",
+  "pr": 218,
+  "n_files": 5,
+  "targets": [
+   "examples/run_lm_finetuning.py",
+   "examples/run_squad.py",
+   "examples/run_squad2.py",
+   "examples/run_swag.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 2
+ },
+ {
+  "repo": "huggingface/transformers",
+  "pr": 604,
+  "n_files": 4,
+  "targets": [
+   "examples/run_classifier.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "huggingface/transformers",
+  "pr": 748,
+  "n_files": 7,
+  "targets": [
+   "pytorch_pretrained_bert/modeling_gpt2.py",
+   "pytorch_pretrained_bert/modeling_xlnet.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 3
+ },
+ {
+  "repo": "huggingface/transformers",
+  "pr": 964,
+  "n_files": 15,
+  "targets": [
+   "examples/utils_glue.py",
+   "pytorch_transformers/modeling_roberta.py",
+   "pytorch_transformers/tests/modeling_roberta_test.py",
+   "pytorch_transformers/tests/tokenization_roberta_test.py",
+   "pytorch_transformers/tokenization_bert.py",
+   "pytorch_transformers/tokenization_roberta.py",
+   "pytorch_transformers/tokenization_utils.py",
+   "pytorch_transformers/tokenization_xlm.py",
+   "pytorch_transformers/tokenization_xlnet.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 2
+ },
+ {
+  "repo": "huggingface/transformers",
+  "pr": 987,
+  "n_files": 9,
+  "targets": [
+   "examples/run_lm_finetuning.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "huggingface/transformers",
+  "pr": 1077,
+  "n_files": 10,
+  "targets": [
+   "pytorch_transformers/modeling_gpt2.py",
+   "pytorch_transformers/modeling_openai.py",
+   "pytorch_transformers/modeling_utils.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "huggingface/transformers",
+  "pr": 1110,
+  "n_files": 12,
+  "targets": [
+   "pytorch_transformers/modeling_auto.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 5
+ },
+ {
+  "repo": "huggingface/transformers",
+  "pr": 1195,
+  "n_files": 11,
+  "targets": [
+   "pytorch_transformers/modeling_bert.py",
+   "pytorch_transformers/modeling_gpt2.py",
+   "pytorch_transformers/modeling_openai.py",
+   "pytorch_transformers/tests/modeling_bert_test.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "huggingface/transformers",
+  "pr": 1455,
+  "n_files": 13,
+  "targets": [
+   "examples/run_summarization_finetuning.py",
+   "examples/utils_summarization.py",
+   "transformers/__init__.py",
+   "transformers/modeling_beam_search.py",
+   "transformers/modeling_bert.py",
+   "transformers/modeling_encoder_decoder.py",
+   "transformers/modeling_xlm.py",
+   "transformers/tests/modeling_bert_test.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "huggingface/transformers",
+  "pr": 1624,
+  "n_files": 9,
+  "targets": [
+   "transformers/file_utils.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": true,
+  "rank_of_first": 4
+ },
+ {
+  "repo": "huggingface/transformers",
+  "pr": 1746,
+  "n_files": 5,
+  "targets": [
+   "transformers/tests/modeling_bert_test.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": false,
+  "rank_of_first": 3
+ },
+ {
+  "repo": "huggingface/transformers",
+  "pr": 1773,
+  "n_files": 9,
+  "targets": [
+   "examples/summarization/run_summarization.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 7
+ },
+ {
+  "repo": "huggingface/transformers",
+  "pr": 1839,
+  "n_files": 8,
+  "targets": [
+   "transformers/tests/utils.py",
+   "transformers/tokenization_auto.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 4
+ },
+ {
+  "repo": "huggingface/transformers",
+  "pr": 1840,
+  "n_files": 9,
+  "targets": [
+   "examples/run_generation.py",
+   "transformers/modeling_utils.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 2
+ },
+ {
+  "repo": "huggingface/transformers",
+  "pr": 1984,
+  "n_files": 12,
+  "targets": [
+   "transformers/tokenization_utils.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": false,
+  "rank_of_first": 3
+ },
+ {
+  "repo": "huggingface/transformers",
+  "pr": 2044,
+  "n_files": 5,
+  "targets": [
+   "transformers/commands/user.py",
+   "transformers/hf_api.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 3
+ },
+ {
+  "repo": "huggingface/transformers",
+  "pr": 2046,
+  "n_files": 5,
+  "targets": [
+   "transformers/__init__.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "huggingface/transformers",
+  "pr": 2101,
+  "n_files": 4,
+  "targets": [
+   "transformers/tokenization_utils.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": false,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "huggingface/transformers",
+  "pr": 2144,
+  "n_files": 9,
+  "targets": [
+   "transformers/file_utils.py",
+   "transformers/modeling_tf_utils.py",
+   "transformers/modeling_utils.py",
+   "transformers/tokenization_utils.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "huggingface/transformers",
+  "pr": 2173,
+  "n_files": 5,
+  "targets": [
+   "transformers/data/processors/squad.py",
+   "transformers/modeling_roberta.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": false,
+  "rank_of_first": 3
+ },
+ {
+  "repo": "huggingface/transformers",
+  "pr": 2189,
+  "n_files": 9,
+  "targets": [
+   "transformers/modeling_xlm_roberta.py",
+   "transformers/tokenization_xlm_roberta.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 8
+ },
+ {
+  "repo": "huggingface/transformers",
+  "pr": 2211,
+  "n_files": 8,
+  "targets": [
+   "src/transformers/tokenization_bert.py",
+   "src/transformers/tokenization_utils.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 3
+ }
+]

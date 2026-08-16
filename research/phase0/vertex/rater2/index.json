@@ -1,0 +1,398 @@
+[
+ {
+  "idx": 0,
+  "repo": "langchain-ai/langchain",
+  "pr": 39367,
+  "unit": "batch_iterate"
+ },
+ {
+  "idx": 1,
+  "repo": "cartography-cncf/cartography",
+  "pr": 3130,
+  "unit": "test_aug_2026_facts_use_explicit_relationship_labels"
+ },
+ {
+  "idx": 2,
+  "repo": "cartography-cncf/cartography",
+  "pr": 3130,
+  "unit": "test_aug_2026_queries_and_visual_queries_agree"
+ },
+ {
+  "idx": 3,
+  "repo": "apache/airflow",
+  "pr": 68734,
+  "unit": "test_non_deadline_edit_preserves_alert_in_update_branch"
+ },
+ {
+  "idx": 4,
+  "repo": "apache/airflow",
+  "pr": 68734,
+  "unit": "test_deadline_reuse_skips_write_when_hash_matches"
+ },
+ {
+  "idx": 5,
+  "repo": "apache/airflow",
+  "pr": 71640,
+  "unit": "_lang_sdk_resolve_sdk_sources"
+ },
+ {
+  "idx": 6,
+  "repo": "apache/airflow",
+  "pr": 70152,
+  "unit": "test_create_task_without_task_arn"
+ },
+ {
+  "idx": 7,
+  "repo": "Skyvern-AI/skyvern",
+  "pr": 8213,
+  "unit": "test_control_heavy_oversized_log_keeps_correlation_fields"
+ },
+ {
+  "idx": 8,
+  "repo": "huggingface/transformers",
+  "pr": 47948,
+  "unit": "test_model_generation_batched"
+ },
+ {
+  "idx": 9,
+  "repo": "Skyvern-AI/skyvern",
+  "pr": 8213,
+  "unit": "test_oversized_structured_payload_is_bounded_to_one_log_record"
+ },
+ {
+  "idx": 10,
+  "repo": "Skyvern-AI/skyvern",
+  "pr": 8214,
+  "unit": "test_mutating_the_workflow_mid_turn_does_not_approve_the_injected_credential"
+ },
+ {
+  "idx": 11,
+  "repo": "huggingface/transformers",
+  "pr": 47944,
+  "unit": "_init_weights"
+ },
+ {
+  "idx": 12,
+  "repo": "apache/airflow",
+  "pr": 61702,
+  "unit": "test_deadline_interval_change_triggers_new_serdag"
+ },
+ {
+  "idx": 13,
+  "repo": "apache/airflow",
+  "pr": 61702,
+  "unit": "_try_reuse_deadline_uuids"
+ },
+ {
+  "idx": 14,
+  "repo": "langchain-ai/langchain",
+  "pr": 39651,
+  "unit": "_gateway_or_provider_key"
+ },
+ {
+  "idx": 15,
+  "repo": "huggingface/transformers",
+  "pr": 47152,
+  "unit": "test_frozen_fp8_dequantized_on_load"
+ },
+ {
+  "idx": 16,
+  "repo": "cartography-cncf/cartography",
+  "pr": 3111,
+  "unit": "from_matchlink"
+ },
+ {
+  "idx": 17,
+  "repo": "langchain-ai/langchain",
+  "pr": 39367,
+  "unit": "test_abatch_iterate_invalid_size"
+ },
+ {
+  "idx": 18,
+  "repo": "cartography-cncf/cartography",
+  "pr": 3111,
+  "unit": "aws_handle_regions"
+ },
+ {
+  "idx": 19,
+  "repo": "langchain-ai/langchain",
+  "pr": 39367,
+  "unit": "test_abatch_iterate_invalid_size"
+ },
+ {
+  "idx": 20,
+  "repo": "vllm-project/vllm",
+  "pr": 52374,
+  "unit": "init_model_state"
+ },
+ {
+  "idx": 21,
+  "repo": "cartography-cncf/cartography",
+  "pr": 3152,
+  "unit": "test_load_cve_metadata_bounds_batch_size"
+ },
+ {
+  "idx": 22,
+  "repo": "vllm-project/vllm",
+  "pr": 51316,
+  "unit": "_make_ready_response"
+ },
+ {
+  "idx": 23,
+  "repo": "Skyvern-AI/skyvern",
+  "pr": 8211,
+  "unit": "test_stored_context_carrying_a_signin_email_still_loads"
+ },
+ {
+  "idx": 24,
+  "repo": "cartography-cncf/cartography",
+  "pr": 3111,
+  "unit": "from_matchlink"
+ },
+ {
+  "idx": 25,
+  "repo": "Skyvern-AI/skyvern",
+  "pr": 8213,
+  "unit": "render_bounded_json"
+ },
+ {
+  "idx": 26,
+  "repo": "vllm-project/vllm",
+  "pr": 51216,
+  "unit": "test_select_common_block_size_accepts_rocm_sparse_block_size_16"
+ },
+ {
+  "idx": 27,
+  "repo": "vllm-project/vllm",
+  "pr": 51216,
+  "unit": "get_supported_kernel_block_sizes"
+ },
+ {
+  "idx": 28,
+  "repo": "Skyvern-AI/skyvern",
+  "pr": 8210,
+  "unit": "test_challenge_state_is_never_the_condition_for_abandoning_a_run"
+ },
+ {
+  "idx": 29,
+  "repo": "Skyvern-AI/skyvern",
+  "pr": 8210,
+  "unit": "test_no_model_facing_surface_orders_a_stop_from_challenge_evidence"
+ },
+ {
+  "idx": 30,
+  "repo": "langchain-ai/langchain",
+  "pr": 39367,
+  "unit": "abatch_iterate"
+ },
+ {
+  "idx": 31,
+  "repo": "langchain-ai/langchain",
+  "pr": 39651,
+  "unit": "_test_stream"
+ },
+ {
+  "idx": 32,
+  "repo": "cartography-cncf/cartography",
+  "pr": 3145,
+  "unit": "test_transform_findings_labels_non_cve_vulnerabilities_as_security_issues"
+ },
+ {
+  "idx": 33,
+  "repo": "vllm-project/vllm",
+  "pr": 50597,
+  "unit": "_setup_kernel"
+ },
+ {
+  "idx": 34,
+  "repo": "Skyvern-AI/skyvern",
+  "pr": 8214,
+  "unit": "test_turn_start_snapshot_does_not_follow_the_workflow_through_the_turn"
+ },
+ {
+  "idx": 35,
+  "repo": "vllm-project/vllm",
+  "pr": 51216,
+  "unit": "test_reasoning_config_without_custom_logitsprocs_does_not_need_output_token_ids"
+ },
+ {
+  "idx": 36,
+  "repo": "cartography-cncf/cartography",
+  "pr": 3145,
+  "unit": "test_transform_findings_extracts_configuration_metadata"
+ },
+ {
+  "idx": 37,
+  "repo": "cartography-cncf/cartography",
+  "pr": 3111,
+  "unit": "from_matchlink"
+ },
+ {
+  "idx": 38,
+  "repo": "langchain-ai/langchain",
+  "pr": 39635,
+  "unit": "test_stream_encrypted_reasoning"
+ },
+ {
+  "idx": 39,
+  "repo": "Skyvern-AI/skyvern",
+  "pr": 8211,
+  "unit": "test_dynamic_system_prompt_never_mentions_a_sign_in_address"
+ },
+ {
+  "idx": 40,
+  "repo": "huggingface/transformers",
+  "pr": 47948,
+  "unit": "forward"
+ },
+ {
+  "idx": 41,
+  "repo": "langchain-ai/langchain",
+  "pr": 39651,
+  "unit": "_gateway_or_provider_key"
+ },
+ {
+  "idx": 42,
+  "repo": "huggingface/transformers",
+  "pr": 47152,
+  "unit": "is_quantization_compressed"
+ },
+ {
+  "idx": 43,
+  "repo": "Skyvern-AI/skyvern",
+  "pr": 8210,
+  "unit": "inspect_page_for_composition_tool"
+ },
+ {
+  "idx": 44,
+  "repo": "huggingface/transformers",
+  "pr": 47948,
+  "unit": "test_model_generation_multi_image"
+ },
+ {
+  "idx": 45,
+  "repo": "langchain-ai/langchain",
+  "pr": 39635,
+  "unit": "test_responses_stream_encrypted_reasoning_replays_with_store_false"
+ },
+ {
+  "idx": 46,
+  "repo": "huggingface/transformers",
+  "pr": 47896,
+  "unit": "get_video_features"
+ },
+ {
+  "idx": 47,
+  "repo": "langchain-ai/langchain",
+  "pr": 39651,
+  "unit": "test_astream"
+ },
+ {
+  "idx": 48,
+  "repo": "huggingface/transformers",
+  "pr": 47948,
+  "unit": "test_model_generation_multi_image"
+ },
+ {
+  "idx": 49,
+  "repo": "huggingface/transformers",
+  "pr": 47944,
+  "unit": "_init_weights"
+ },
+ {
+  "idx": 50,
+  "repo": "huggingface/transformers",
+  "pr": 47944,
+  "unit": "_init_weights"
+ },
+ {
+  "idx": 51,
+  "repo": "vllm-project/vllm",
+  "pr": 52374,
+  "unit": "load_model"
+ },
+ {
+  "idx": 52,
+  "repo": "apache/airflow",
+  "pr": 70152,
+  "unit": "test_no_task_identified_or_created"
+ },
+ {
+  "idx": 53,
+  "repo": "cartography-cncf/cartography",
+  "pr": 3130,
+  "unit": "test_aug_2026_facts_cover_the_same_packages"
+ },
+ {
+  "idx": 54,
+  "repo": "vllm-project/vllm",
+  "pr": 50597,
+  "unit": "mxfp4_round_up_hidden_size_and_intermediate_size"
+ },
+ {
+  "idx": 55,
+  "repo": "Skyvern-AI/skyvern",
+  "pr": 8211,
+  "unit": "test_trust_floor_trace_data_carries_no_signin_intent_key"
+ },
+ {
+  "idx": 56,
+  "repo": "huggingface/transformers",
+  "pr": 47896,
+  "unit": "get_video_features"
+ },
+ {
+  "idx": 57,
+  "repo": "vllm-project/vllm",
+  "pr": 50597,
+  "unit": "convert_weight_to_mxfp4_moe_kernel_format"
+ },
+ {
+  "idx": 58,
+  "repo": "vllm-project/vllm",
+  "pr": 51316,
+  "unit": "supports_draft_weight_updates"
+ },
+ {
+  "idx": 59,
+  "repo": "Skyvern-AI/skyvern",
+  "pr": 8214,
+  "unit": "_credential_bound_workflow"
+ },
+ {
+  "idx": 60,
+  "repo": "apache/airflow",
+  "pr": 61702,
+  "unit": "write_dag"
+ },
+ {
+  "idx": 61,
+  "repo": "vllm-project/vllm",
+  "pr": 52374,
+  "unit": "_run_mamba_prefix_cache_mrv1"
+ },
+ {
+  "idx": 62,
+  "repo": "apache/airflow",
+  "pr": 71640,
+  "unit": "test_checkout_with_both_sdks_builds_from_them"
+ },
+ {
+  "idx": 63,
+  "repo": "apache/airflow",
+  "pr": 68734,
+  "unit": "test_non_deadline_edit_creates_deadline_alert_for_new_serdag"
+ },
+ {
+  "idx": 64,
+  "repo": "huggingface/transformers",
+  "pr": 47896,
+  "unit": "get_image_features"
+ },
+ {
+  "idx": 65,
+  "repo": "vllm-project/vllm",
+  "pr": 51316,
+  "unit": "supports_draft_weight_updates"
+ }
+]

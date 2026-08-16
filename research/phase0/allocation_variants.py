@@ -1,0 +1,196 @@
+"""Six pre-specified allocation variants, each against its non-informative control.
+
+WHAT: V0 file top-3, V1 function top-3, V2 files ranked by summed touched-function history,
+      V3 score-gap stopping, V5 union, V6 recency-weighted files -- with alphabetical controls,
+      a train/holdout split fixed before the run, and set-agreement instrumentation.
+WHY:  A sweep finds a winner by chance: this corpus carries about five comparisons before
+      multiplicity eats the result. So variants are pre-specified, Bonferroni-corrected at 0.01,
+      and checked on two clones held out before anything was looked at -- which caught V2 winning
+      on train and reversing on holdout. The set-agreement counters exist because "same outcome"
+      is not "same decision", and assuming it was would have recorded the wrong mechanism for V6.
+IMPORTS: stdlib (bisect, collections, json, math, os, sys), clone_census, symbol_history_read.
+CONSUMED BY: docs/plans/implementation.md, gate 3c.
+
+HOLDOUT: clones sorted by name, indices 2 and 5. CONTROL: the alphabetical pick over the same
+units at the same k -- the rule that killed the 12/12 revert result when its control also
+scored 12/12.
+"""
+
+from __future__ import annotations
+
+import bisect
+import collections
+import json
+import os
+import sys
+from math import comb
+
+from clone_census import full_object_clones
+from symbol_history_read import ReadFailed, stream
+
+CL = os.path.join(os.path.dirname(os.path.abspath(__file__)), "clones")
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "variants_result.json")
+YEAR = 365 * 86400
+WINDOW = 90 * 86400
+FIXWORDS = ("fix", "bug", "revert", "hotfix", "regression", "broken")
+MAX_FILES, MAX_EVENTS, BUDGET = 12, 400, 3
+GAP_FRACTION, GAP_MAX = 0.5, 5
+HALF_LIFE = 90 * 86400  # pre-specified, one parameter, chosen before any result
+
+
+def prior(idx, unit, ts):
+    lst = idx.get(unit, [])
+    return bisect.bisect_left(lst, ts) - bisect.bisect_left(lst, ts - YEAR)
+
+
+def recency(idx, unit, ts):
+    """Exponential decay: a touch 90 days before the change counts half a fresh one."""
+    lst = idx.get(unit, [])
+    lo = bisect.bisect_left(lst, ts - YEAR)
+    hi = bisect.bisect_left(lst, ts)
+    return sum(0.5 ** ((ts - t) / HALF_LIFE) for t in lst[lo:hi])
+
+
+def ordered(units, scores):
+    return sorted(units, key=lambda u: (-scores[u], u))
+
+
+def hit(picked, target):
+    return bool(set(picked) & target)
+
+
+def mcnemar(b, c):
+    n = b + c
+    if n == 0:
+        return 1.0
+    return min(1.0, 2 * sum(comb(n, i) for i in range(min(b, c) + 1)) / (2**n))
+
+
+def main() -> int:
+    full = full_object_clones(CL)
+    holdout = {full[2], full[5]}
+    print(f"  holdout: {sorted(holdout)}\n")
+
+    arms = ("V0_file3", "V1_func3", "V2_sumfile3", "V3_gap", "V5_union", "V6_recency3")
+    res = {g: {a: collections.Counter() for a in arms} for g in ("train", "hold")}
+    ctrl = {g: {a: collections.Counter() for a in arms} for g in ("train", "hold")}
+    units_read = {g: collections.defaultdict(list) for g in ("train", "hold")}
+    paired = {g: collections.Counter() for g in ("train", "hold")}
+    setagree = {g: collections.Counter() for g in ("train", "hold")}
+
+    for name in full:
+        group = "hold" if name in holdout else "train"
+        try:
+            commits = stream(os.path.join(CL, name))
+        except ReadFailed as exc:
+            print(f"  REFUSING TO REPORT — {exc}")
+            return 1
+        if len(commits) < 200:
+            continue
+
+        fidx, sidx = collections.defaultdict(list), collections.defaultdict(list)
+        for _, ts, _, files, syms in commits:
+            for f in files:
+                fidx[f].append(ts)
+            for s in syms:
+                sidx[s].append(ts)
+
+        n_ev = 0
+        for i, (_sha, ts, _msg, files, syms) in enumerate(commits):
+            if not (2 <= len(files) <= MAX_FILES) or len(syms) < 2:
+                continue
+            ftarget, starget = set(), set()
+            for _s2, ts2, msg2, files2, syms2 in commits[i + 1 :]:
+                if ts2 - ts > WINDOW:
+                    break
+                if any(w in msg2 for w in FIXWORDS):
+                    ftarget |= files2 & files
+                    starget |= syms2 & syms
+            if not ftarget or not starget:
+                continue
+
+            fscore = {f: prior(fidx, f, ts) for f in files}
+            sscore = {s: prior(sidx, s, ts) for s in syms}
+            if len(set(fscore.values())) == 1 or len(set(sscore.values())) == 1:
+                continue
+            n_ev += 1
+
+            # V2: rank files by the summed history of ONLY the functions this change touched
+            sumscore: dict[str, int] = collections.defaultdict(int)
+            for s in syms:
+                sumscore[s.split("::", 1)[0]] += sscore[s]
+            for f in files:
+                sumscore.setdefault(f, 0)
+
+            rscore = {f: recency(fidx, f, ts) for f in files}
+            fo, so = ordered(files, fscore), ordered(syms, sscore)
+            ro = ordered(files, rscore)
+            v2o = ordered(list(sumscore), sumscore)
+
+            # V3: score-gap stopping over functions
+            top = sscore[so[0]] if so else 0
+            gap = [u for u in so[:GAP_MAX] if sscore[u] >= GAP_FRACTION * top] or so[:1]
+
+            picks = {
+                "V0_file3": (fo[:BUDGET], ftarget, BUDGET),
+                "V1_func3": (so[:BUDGET], starget, BUDGET),
+                "V2_sumfile3": (v2o[:BUDGET], ftarget, BUDGET),
+                "V3_gap": (gap, starget, len(gap)),
+                "V5_union": (fo[:BUDGET], ftarget, BUDGET + 1),
+                "V6_recency3": (ro[:BUDGET], ftarget, BUDGET),
+            }
+            for arm, (picked, target, k) in picks.items():
+                got = hit(picked, target)
+                if arm == "V5_union":
+                    got = got or hit(so[:1], starget)
+                res[group][arm][got] += 1
+                units_read[group][arm].append(k)
+                # non-informative control: alphabetical over the same units, same k
+                pool = sorted(files) if target is ftarget else sorted(syms)
+                cgot = hit(pool[: len(picked)], target)
+                if arm == "V5_union":
+                    cgot = cgot or hit(sorted(syms)[:1], starget)
+                ctrl[group][arm][cgot] += 1
+
+            paired[group][(hit(fo[:BUDGET], ftarget), hit(v2o[:BUDGET], ftarget))] += 1
+            paired[group][("r", hit(fo[:BUDGET], ftarget), hit(ro[:BUDGET], ftarget))] += 1
+            # Same OUTCOME is not same DECISION: compare the chosen sets directly.
+            setagree[group][set(fo[:BUDGET]) == set(ro[:BUDGET])] += 1
+            setagree[group]["order"] += fo[:BUDGET] == ro[:BUDGET]
+            if n_ev >= MAX_EVENTS:
+                break
+
+    for group in ("train", "hold"):
+        n = sum(res[group]["V0_file3"].values())
+        if not n:
+            continue
+        print(f"\n  === {group.upper()}  n={n} ===")
+        print(f"  {'arm':14s} {'miss':>8}  {'control':>8}  {'lift':>7}  {'units':>6}")
+        for arm in arms:
+            miss = res[group][arm][False] / n
+            cmiss = ctrl[group][arm][False] / n
+            mu = sum(units_read[group][arm]) / len(units_read[group][arm])
+            print(f"  {arm:14s} {miss:7.2%}  {cmiss:7.2%}  {cmiss - miss:+6.2%}  {mu:6.2f}")
+        sa = setagree[group]
+        tot = sa[True] + sa[False]
+        print(
+            f"  V6 vs V0 same top-3 SET: {sa[True]}/{tot} = {sa[True] / tot:.1%}   "
+            f"same ORDER: {sa['order']}/{tot} = {sa['order'] / tot:.1%}"
+        )
+        rb = paired[group][("r", True, False)]
+        rc = paired[group][("r", False, True)]
+        print(f"  V6 vs V0 paired: b={rb} c={rc}  McNemar p={mcnemar(rb, rc):.4f}")
+        b = paired[group][(True, False)]
+        c = paired[group][(False, True)]
+        print(f"  V2 vs V0 paired: b={b} c={c}  McNemar p={mcnemar(b, c):.4f}  (Bonferroni 0.0125)")
+
+    with open(OUT, "w") as fh:
+        json.dump(
+            {g: {a: dict(res[g][a]) for a in arms} for g in ("train", "hold")},
+            fh,
+            indent=1,
+        )
+    return 0
+
+
+sys.exit(main())

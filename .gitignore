@@ -57,3 +57,26 @@ secrets/
 
 # Hook-written session records, regenerated every session
 docs/plans/session-*.md
+research/phase0/vertex/pr_corpus.json
+research/phase0/vertex/vertex_cost.jsonl
+research/phase0/vertex/run2.log
+research/phase0/vertex/*.log
+research/phase0/vertex/enriched_findings.jsonl
+research/phase0/vertex/enriched_packet.json
+research/phase0/vertex/rater2/
+research/phase0/vertex/rater3/
+research/phase0/vertex/symbol_findings.jsonl
+research/phase0/vertex/symbol_packet.json
+research/phase0/vertex/rater5/
+research/phase0/vertex/triage/triage_results.jsonl
+research/phase0/vertex/triage/*.log
+research/phase0/vertex/rater6/
+research/phase0/vertex/triage/*.log
+research/phase0/vertex/triage/*.jsonl
+research/phase0/vertex/triage/corpus_aged.json
+research/phase0/vertex/triage/*_packet.json
+research/phase0/vertex/triage/hard_verdicts.json
+research/phase0/vertex/triage/*.jsonl
+research/phase0/vertex/triage/*_verdicts.json
+research/phase0/vertex/triage/runs/corpus_aged_big.json
+research/phase0/claims/future_fix_scored.json

@@ -1,0 +1,220 @@
+[
+ {
+  "repo": "scrapy/scrapy",
+  "pr": 96,
+  "file": "scrapy/contrib/downloadermiddleware/cookies.py",
+  "unit": "process_request",
+  "finding": {
+   "claim_type": "resource_leak",
+   "file": "scrapy/contrib/downloadermiddleware/cookies.py",
+   "symbol_a": "process_request",
+   "symbol_b": "CookiesMiddleware.jars",
+   "relation": "The `process_request` method populates the `self.jars` dictionary using keys from request metadata (`request.meta['cookiejar']`), but because the `spider_closed` cleanup mechanism was removed in the same change, these dictionary entries are never deleted, causing a memory leak.",
+   "check_snippet": "from collections import defaultdict\n\n# --- Mock objects and classes from Scrapy library ---\nclass CookieJar:\n    \"\"\"A mock CookieJar, the defaultdict value.\"\"\"\n    def set_cookie_if_ok(self, cookie, request): pass\n    def add_cookie_header(self, request): pass\n\nclass MockRequest:\n    \"\"\"A mock Request object.\"\"\"\n    def __init__(self, meta=None):\n        self.meta = meta if meta is not None else {}\n        self.headers = {}\n\n# --- The code under test, based on the file and diff ---\nclass CookiesMiddleware:\n    def __init__(self):\n        self.jars = defaultdict(CookieJar)\n        # The problem is that the signal handler (`spider_closed`) that would\n        # clean up self.jars has been removed.\n\n    def process_request(self, request, spider):\n        if 'dont_merge_cookies' in request.meta:\n            return\n\n        cookiejarkey = request.meta.get(\"cookiejar\")\n        # This line populates self.jars. Because defaultdict is used, a new\n        # CookieJar is created for any new key and is never removed.\n        jar = self.jars[cookiejarkey]\n\n        # Dummy implementations of other calls in the original function\n        def _get_request_cookies(jar, request): return []\n        cookies = _get_request_cookies(jar, request)\n        for cookie in cookies:\n            jar.set_cookie_if_ok(cookie, request)\n\n        request.headers.pop('Cookie', None)\n        jar.add_cookie_header(request)\n\n\n# --- Test Case ---\ntry:\n    # Instantiate the middleware. Its `jars` dict is empty.\n    middleware = CookiesMiddleware()\n    \n    # Simulate processing requests with different cookiejar keys.\n    # This might happen in a long-running Scrapy process with many jobs.\n    middleware.process_request(MockRequest(meta={'cookiejar': 'session1'}), 'spider_a')\n    middleware.process_request(MockRequest(meta={'cookiejar': 'session2'}), 'spider_a')\n    middleware.process_request(MockRequest(meta={}), 'spider_b') # Uses 'None' as key\n\n    # The old implementation connected to a `spider_closed` signal to clean up\n    # the jars dictionary. The new implementation has no cleanup mechanism.\n    # After spiders finish, the jars created for their sessions remain in memory.\n    \n    # We expect 3 jars to have been created and stored.\n    # The keys are: 'session1', 'session2', and None.\n    if len(middleware.jars) == 3 and 'session1' in middleware.jars and 'session2' in middleware.jars and None in middleware.jars:\n        print(\"CONFIRMED\")\n    else:\n        print(\"REFUTED\")\nexcept Exception:\n    print(\"REFUTED\")\n",
+   "execution": {
+    "outcome": "REFUSED",
+    "detail": "snippet contains 'requests'; a demonstration needs no I/O"
+   }
+  }
+ },
+ {
+  "repo": "tornadoweb/tornado",
+  "pr": 232,
+  "file": "tornado/test/testing_test.py",
+  "unit": "set_environ",
+  "finding": {
+   "claim_type": "missing_guard",
+   "file": "tornado/test/util.py",
+   "symbol_a": "del os.environ[name]",
+   "symbol_b": "set_environ",
+   "relation": "The `finally` block unconditionally attempts to `del os.environ[name]` if the variable did not exist before the `with` block, but fails with a `KeyError` if the variable was unset within the `with` block itself.",
+   "check_snippet": "import os\nimport contextlib\n\n@contextlib.contextmanager\ndef set_environ(name, value):\n    old_value = os.environ.get(name)\n    os.environ[name] = value\n\n    try:\n        yield\n    finally:\n        if old_value is None:\n            del os.environ[name]\n        else:\n            os.environ[name] = old_value\n\ndef check():\n    test_var = 'TORNADO_TEST_VAR_BUG_CHECK'\n    if test_var in os.environ:\n        del os.environ[test_var]\n\n    try:\n        with set_environ(test_var, 'new_value'):\n            del os.environ[test_var]\n    except KeyError:\n        print(\"CONFIRMED\")\n        return\n    except Exception:\n        # Any other exception is not what we're testing for\n        pass\n    \n    print(\"REFUTED\")\n\ncheck()\n\n# Cleanup after check\ntest_var = 'TORNADO_TEST_VAR_BUG_CHECK'\nif test_var in os.environ:\n    del os.environ[test_var]",
+   "execution": {
+    "outcome": "REFUSED",
+    "detail": "snippet contains 'import os'; a demonstration needs no I/O"
+   }
+  }
+ },
+ {
+  "repo": "tornadoweb/tornado",
+  "pr": 302,
+  "file": "tornado/test/twistedreactor_test.py",
+  "unit": "_testNoWriter",
+  "finding": {
+   "claim_type": "resource_leak",
+   "file": "tornado/test/twistedreactor_test.py",
+   "symbol_a": "_testNoWriter",
+   "symbol_b": "ReactorFDTest.tearDown",
+   "relation": "The function `_testNoWriter` prematurely closes a file object via its inner `stopTest` function, which `ReactorFDTest.tearDown` later attempts to close again, causing a `ValueError` from a double-close operation.",
+   "check_snippet": "import os\n\nclass MockWriter:\n    def __init__(self, fd):\n        self._fd = fd\n\n    def close(self):\n        self._fd.close()\n\nclass MockTestCase:\n    def __init__(self):\n        self._writer = None\n\n    def setUp(self):\n        r, w = os.pipe()\n        os.close(r) # Not needed for this test\n        self.writer_fd = os.fdopen(w, 'w')\n        self._writer = MockWriter(self.writer_fd)\n\n    def tearDown(self):\n        if self._writer:\n            self._writer.close() # This will be the second close\n\n    def _testNoWriter(self):\n        def stopTest():\n            self._writer.close() # First close\n        stopTest()\n\ndef demonstrate_double_close():\n    test = MockTestCase()\n    try:\n        test.setUp()\n        test._testNoWriter()\n        test.tearDown()\n    except ValueError as e:\n        if 'closed file' in str(e):\n            print(\"CONFIRMED\")\n            return\n    except Exception:\n        # Any other exception means the test setup is wrong\n        pass\n    finally:\n        # Ensure the file descriptor is closed if an exception occurred before tearDown\n        if not test.writer_fd.closed:\n            test.writer_fd.close()\n\n    print(\"REFUTED\")\n\ndemonstrate_double_close()\n",
+   "execution": {
+    "outcome": "REFUSED",
+    "detail": "snippet contains 'import os'; a demonstration needs no I/O"
+   }
+  }
+ },
+ {
+  "repo": "celery/celery",
+  "pr": 186,
+  "file": "celery/schedules.py",
+  "unit": "__init__",
+  "finding": {
+   "claim_type": "unhandled_case",
+   "file": "celery/schedules.py",
+   "symbol_a": "iso_next_day",
+   "symbol_b": "delta",
+   "relation": "The calculation for `add_week` becomes true when the next scheduled day is the earliest day in the week (e.g., from Friday to Monday), causing `relativedelta` to incorrectly add a week and schedule the task for the wrong day.",
+   "check_snippet": "from datetime import datetime\nfrom dateutil import relativedelta as rd\n\n# Simplified crontab class to focus on the bug\nclass crontab:\n    def __init__(self, minute='*', hour='*', day_of_week='*'):\n        # In a real scenario, these would be parsed sets of integers\n        self.minute = self.parse_cron(minute, 60)\n        self.hour = self.parse_cron(hour, 24)\n        # day_of_week: Monday is 1 and Sunday is 7\n        self.day_of_week = self.parse_cron(day_of_week, 8, 1) \n\n    def parse_cron(self, spec, max, min=0):\n        if isinstance(spec, set):\n            return spec\n        if spec == '*':\n            return set(range(min, max))\n        return set(map(int, spec.split(',')))\n\n    def remaining_estimate(self, last_run_at):\n        weekday = last_run_at.isoweekday()\n        # Simplified logic to reach the buggy part\n        \n        # Assume not executing this hour or today\n        next_minute = min(self.minute)\n        next_hour = min(self.hour)\n        \n        # The problematic logic\n        days = [day for day in self.day_of_week if day > weekday]\n        iso_next_day_list = days or self.day_of_week\n        iso_next_day = min(iso_next_day_list)\n\n        add_week = iso_next_day == weekday and not days\n\n        delta = rd.relativedelta(\n            weeks=1 if add_week else 0,\n            weekday=(iso_next_day - 1) % 7, # dateutil: MON=0, celery: MON=1\n            hour=next_hour,\n            minute=next_minute,\n            second=0,\n            microsecond=0\n        )\n        return last_run_at + delta\n\n\ndef demonstrate_bug():\n    # Schedule: every Friday at 10:30 (isoweekday for Friday is 5)\n    # Celery's day_of_week uses 1-7 for Mon-Sun, but can also accept '5' or 'fri'.\n    # We use a set of integers to simulate the parsed crontab values.\n    schedule = crontab(minute={30}, hour={10}, day_of_week={5})\n\n    # last_run_at is a Saturday (isoweekday=6), after the scheduled time.\n    last_run_at = datetime(2023, 1, 7, 12, 0) # A Saturday\n\n    next_run = schedule.remaining_estimate(last_run_at)\n\n    # Expected: Next Friday (2023, 1, 13)\n    # Buggy behavior: it will schedule for the Friday after next (2023, 1, 20)\n\n    if next_run.day == 20 and next_run.month == 1 and next_run.year == 2023:\n        print(\"CONFIRMED\")\n    else:\n        print(\"REFUTED\")\n\ndemonstrate_bug()",
+   "execution": {
+    "outcome": "CRASHED",
+    "detail": "Traceback (most recent call last):\n  File \"/var/folders/mn/wbdrprjj4f1dmj620rw6mx6r0000gn/T/tmpble50p77/claim.py\", line 2, in <module>\n    from dateutil import relativedelta as rd\nModuleNotFoundError:",
+    "stdout": ""
+   }
+  }
+ },
+ {
+  "repo": "encode/django-rest-framework",
+  "pr": 23,
+  "file": "djangorestframework/tests/parsers.py",
+  "unit": "setUp",
+  "finding": {
+   "claim_type": "wrong_order",
+   "file": "djangorestframework/tests/parsers.py",
+   "symbol_a": "setUp",
+   "symbol_b": "test_fail",
+   "relation": "The test `test_fail` relies on a `max_length` validation failure, but the string set up in `setUp` for `field1` also fails `min_length` validation, masking the intended test behavior.",
+   "check_snippet": "import sys\n\n# Mock necessary Django and other components to isolate the logic\n\nclass Field:\n    def __init__(self, min_length=None, max_length=None):\n        self.min_length = min_length\n        self.max_length = max_length\n        self.error_messages = {'min_length': 'min', 'max_length': 'max'}\n\n    def clean(self, value):\n        # Simplified version of Django's CharField.clean\n        # In reality, it would call to_python, which stringifies the list.\n        str_value = str(value)\n        errors = []\n        # Django forms validate min_length before max_length\n        if self.min_length is not None and len(str_value) < self.min_length:\n            errors.append(self.error_messages['min_length'])\n        if self.max_length is not None and len(str_value) > self.max_length:\n            errors.append(self.error_messages['max_length'])\n        return errors\n\nclass Form:\n    def __init__(self, data):\n        self.data = data\n        self.fields = {\n            'field1': Field(min_length=1, max_length=3),\n        }\n        self.errors = []\n\n    def is_valid(self):\n        for name, field in self.fields.items():\n            value = self.data.get(name)\n            if value is not None:\n                field_errors = field.clean(value)\n                if field_errors:\n                    self.errors.extend(field_errors)\n        return not self.errors\n\n# This function mocks cgi.parse_qs behavior\ndef parse_qs(qs):\n    # Simplified: only handles one field\n    key, val = qs.split('=', 1)\n    return {key: [val]}\n\ndef setUp():\n    # The problematic string from the file\n    return \"field1=\"\n\ndef test_fail():\n    # Simulates the test logic\n    string = setUp()\n    data = parse_qs(string)\n    form = Form(data)\n    form.is_valid()\n    # The claim is that min_length fails first, not max_length\n    if form.errors and form.errors[0] == 'min':\n        return True\n    return False\n\nif test_fail():\n    print(\"CONFIRMED\")\nelse:\n    print(\"REFUTED\")\n",
+   "execution": {
+    "outcome": "REFUTED",
+    "detail": "REFUTED"
+   }
+  }
+ },
+ {
+  "repo": "pallets/flask",
+  "pr": 409,
+  "file": "flask/templating.py",
+  "unit": "render_template",
+  "finding": {
+   "claim_type": "contract_violation",
+   "file": "flask/templating.py",
+   "symbol_a": "def render_template(template_name_or_list, **context):",
+   "symbol_b": "render_template(template_name=...)",
+   "relation": "Renaming the `template_name` parameter to `template_name_or_list` breaks backward compatibility for callers that passed the template name using a keyword argument.",
+   "check_snippet": "def render_template(template_name_or_list, **context):\n    \"\"\"New function signature.\"\"\"\n    pass\n\ntry:\n    # This call would have worked with the old signature:\n    # def render_template(template_name, **context):\n    render_template(template_name='mytemplate.html')\n    # If no error is raised, the breaking change did not occur.\n    print('REFUTED')\nexcept TypeError as e:\n    # The new signature does not have a 'template_name' parameter, so a\n    # TypeError for an unexpected keyword argument is expected.\n    if \"unexpected keyword argument 'template_name'\" in str(e):\n        print('CONFIRMED')\n    else:\n        # A different TypeError occurred.\n        print('REFUTED')\nexcept Exception:\n    # Any other exception is unexpected.\n    print('REFUTED')",
+   "execution": {
+    "outcome": "REFUTED",
+    "detail": "REFUTED"
+   }
+  }
+ },
+ {
+  "repo": "encode/django-rest-framework",
+  "pr": 18,
+  "file": "djangorestframework/resources.py",
+  "unit": "_model_to_dict",
+  "finding": {
+   "claim_type": "unhandled_case",
+   "file": "djangorestframework/resources.py",
+   "symbol_a": "fname, fields = fname",
+   "symbol_b": "_model_to_dict",
+   "relation": "The tuple unpacking `fname, fields = fname` assumes that if `fname` is a tuple or list it will have exactly two elements, causing a `ValueError` that crashes the `_model_to_dict` function if the tuple/list has a different number of elements.",
+   "check_snippet": "def check():\n    import inspect\n\n    # --- Mocks for dependencies ---\n    class MockField:\n        def __init__(self, name):\n            self.name = name\n        def value_from_object(self, instance):\n            return getattr(instance, self.name, 'mock_value')\n\n    class MockMeta:\n        def __init__(self):\n            self.fields = []\n            self.many_to_many = []\n\n    class MockInstance:\n        def __init__(self):\n            self._meta = MockMeta()\n            self.my_method_obj = 'some_value'\n        \n    class NoReverseMatch(Exception):\n        pass\n\n    def _object_to_data(obj, resource=None):\n        return f\"data_for_{obj}\"\n\n    # --- Function under test (with diff applied) ---\n    def _model_to_dict(instance, resource=None):\n        models = type('models', (), {'ForeignKey': type('ForeignKey', (object,), {})})\n        opts = instance._meta\n        data = {}\n\n        fields = resource and resource.fields or ()\n        include = resource and resource.include or ()\n        exclude = resource and resource.exclude or ()\n\n        extra_fields = fields and list(fields) or list(include)\n\n        # Model fields\n        for f in opts.fields + opts.many_to_many:\n            if fields and not f.name in fields:\n                continue\n            if exclude and f.name in exclude:\n                continue\n            if isinstance(f, models.ForeignKey):\n                data[f.name] = getattr(instance, f.name)\n            else:\n                data[f.name] = f.value_from_object(instance)\n            \n            if extra_fields and f.name in extra_fields:\n                extra_fields.remove(f.name)\n        \n        # Method fields\n        for fname in extra_fields:\n            \n            if isinstance(fname, (tuple, list)):\n                fname, fields = fname\n            else:\n                fname, fields = fname, False\n\n            try:\n                if hasattr(resource, fname):\n                    obj = getattr(resource, fname)\n                    if inspect.ismethod(obj) and len(inspect.getargspec(obj)[0]) == 2:\n                        obj = obj(instance)\n                elif hasattr(instance, fname):\n                    obj = getattr(instance, fname)\n                else:\n                    continue\n        \n                if fields:\n                    Resource = type('Resource', (object,), {'fields': fields,\n                                                            'include': (),\n                                                            'exclude': ()})\n                    data[fname] = _object_to_data(obj, Resource())\n                else:\n                    data[fname] = _object_to_data(obj)\n\n            except NoReverseMatch:\n                pass\n    \n        return data\n\n    # --- Test case ---\n    class TestResource:\n        # 'extra_fields' is populated from 'include' or 'fields'.\n        # This tuple has only 1 element, but the code expects 2.\n        fields = [('my_method',)]\n\n    instance = MockInstance()\n    setattr(instance, 'my_method', 'value')\n    resource = TestResource()\n            \n    try:\n        _model_to_dict(instance, resource)\n        print(\"REFUTED\")\n    except ValueError as e:\n        if 'not enough values to unpack' in str(e):\n             print(\"CONFIRMED\")\n        else:\n             print(\"REFUTED\")\n    except Exception:\n        print(\"REFUTED\")\n\ncheck()",
+   "execution": {
+    "outcome": "REFUTED",
+    "detail": "REFUTED"
+   }
+  }
+ },
+ {
+  "repo": "pallets/flask",
+  "pr": 307,
+  "file": "flask/blueprints.py",
+  "unit": "route",
+  "finding": {
+   "claim_type": "unhandled_case",
+   "file": "flask/blueprints.py",
+   "symbol_a": "route",
+   "symbol_b": "add_url_rule",
+   "relation": "The `route` decorator calls `add_url_rule` with a positional argument for `endpoint` (`f.__name__`) and also forwards `**options` which may contain a keyword argument `endpoint`, causing a `TypeError` for receiving the same argument twice.",
+   "check_snippet": "class MockBlueprint:\n    # This is the OLD implementation of the 'route' decorator before the change.\n    def route(self, rule, **options):\n        def decorator(f):\n            # This line causes the error if 'options' contains 'endpoint'.\n            # It passes f.__name__ as the positional 'endpoint' argument,\n            # and potentially another 'endpoint' from **options as a keyword argument.\n            self.add_url_rule(rule, f.__name__, f, **options)\n            return f\n        return decorator\n\n    # The signature of the called method is what matters for the TypeError.\n    def add_url_rule(self, rule, endpoint=None, view_func=None, **options):\n        # The error occurs during the call, before this body is executed.\n        pass\n\ntry:\n    bp = MockBlueprint()\n\n    # Applying the decorator with an 'endpoint' keyword argument triggers the bug.\n    @bp.route('/test', endpoint='my_endpoint')\n    def my_view():\n        pass\n    \n    # If the decorator application succeeds, the bug is not present.\n    print(\"REFUTED\")\n\nexcept TypeError as e:\n    # A TypeError is expected. Check if it's the correct one.\n    if \"got multiple values for keyword argument 'endpoint'\" in str(e):\n        print(\"CONFIRMED\")\n    else:\n        # It was a different TypeError.\n        print(\"REFUTED\")\nexcept Exception:\n    # Any other exception indicates a problem with the test itself.\n    print(\"REFUTED\")",
+   "execution": {
+    "outcome": "REFUTED",
+    "detail": "REFUTED"
+   }
+  }
+ },
+ {
+  "repo": "tornadoweb/tornado",
+  "pr": 232,
+  "file": "tornado/test/testing_test.py",
+  "unit": "test_wait_timeout",
+  "finding": {
+   "claim_type": "resource_leak",
+   "file": "tornado/test/testing_test.py",
+   "symbol_a": "test_wait_timeout",
+   "symbol_b": "AsyncTestCase.tearDown",
+   "relation": "In test_wait_timeout, add_timeout schedules a callback, but when wait() times out, this callback is never cancelled, leaving it pending when tearDown is executed, which can cause spurious failures or warnings.",
+   "check_snippet": "import unittest\nimport os\nimport time as time_mod\nfrom tornado.testing import AsyncTestCase, gen_test\nfrom tornado.ioloop import IOLoop\n\n# This is a simplified version of the mechanism in tornado.testing.py\n# to demonstrate the issue.\n\n_LEAK_DETECTED = False\n\nclass PatchedAsyncTestCase(AsyncTestCase):\n\n    def tearDown(self):\n        global _LEAK_DETECTED\n        # In real Tornado, this check is more complex and may result in\n        # warnings or errors. We simplify to a boolean.\n        # The key is that _timeouts is not empty.\n        if self.io_loop._timeouts:\n            _LEAK_DETECTED = True\n\n        # Original teardown logic to prevent the test runner from hanging\n        # It's important to close the loop to clean up.\n        if self.io_loop and not self.io_loop.is_closed():\n            self.io_loop.close(all_fds=True)\n\nclass MyTest(PatchedAsyncTestCase):\n    \n    # This is the function under review, simplified to the problematic part\n    def test_wait_timeout(self):\n        # A timeout is scheduled to call self.stop() in the future\n        self.io_loop.add_timeout(self.io_loop.time() + 1, self.stop)\n        try:\n            # self.wait() is called with a shorter timeout, so it will expire\n            # before self.stop() is called, raising an exception.\n            self.wait(timeout=0.01)\n        except self.failureException:\n            # The exception is caught, so the test continues.\n            # However, the timeout for self.stop() is not cancelled.\n            pass\n\nif __name__ == '__main__':\n    # In a real test run, unittest framework calls setUp, test method, then tearDown.\n    test = MyTest('test_wait_timeout')\n    # Create a fresh IOLoop for the test via setUp\n    test.setUp()\n    try:\n        # Run the test method\n        test.test_wait_timeout()\n    finally:\n        # tearDown will be called, where we check for the leak.\n        test.tearDown()\n\n    if _LEAK_DETECTED:\n        print(\"CONFIRMED\")\n    else:\n        print(\"REFUTED\")\n",
+   "execution": {
+    "outcome": "REFUSED",
+    "detail": "snippet contains 'import os'; a demonstration needs no I/O"
+   }
+  }
+ },
+ {
+  "repo": "encode/django-rest-framework",
+  "pr": 18,
+  "file": "djangorestframework/tests/resources.py",
+  "unit": "test_tuples",
+  "finding": {
+   "claim_type": "wrong_order",
+   "file": "djangorestframework/tests/resources.py",
+   "symbol_a": "_object_to_data",
+   "symbol_b": "_object_to_data",
+   "relation": "The implementation of `_object_to_data` processes nested fields but incorrectly uses a `filter` object, which is an iterator, leading to only the first nested field being processed in a recursive call if multiple are specified.",
+   "check_snippet": "import datetime\nimport decimal\n\n# Simplified mock of _object_to_data based on DRF < 1.0\ndef _object_to_data(obj, resource=None):\n    if not resource:\n        return str(obj.pk)\n\n    fields = getattr(resource, 'fields', ())\n    ret = {}\n    field_names = []\n    for field in fields:\n        if isinstance(field, str):\n            field_names.append(field)\n        elif isinstance(field, tuple):\n            field_names.append(field[0])\n\n    for field_name in field_names:\n        attr = getattr(obj, field_name)\n\n        # Check for nested resource definition\n        # In the original code, `filter` returns an iterator.\n        # In Python 3, `filter` is an iterator. In Python 2, it could be a list\n        # but let's assume it's used as an iterator.\n        nested_filter = filter(lambda f: isinstance(f, tuple) and f[0] == field_name, fields)\n\n        # next() consumes from the iterator. list() would show all items.\n        try:\n            nested = next(nested_filter)\n        except StopIteration:\n            nested = None\n\n        if nested:\n            nested_fields = nested[1]\n            new_resource = type('Resource', (object,), {'fields': nested_fields})()\n            ret[field_name] = _object_to_data(attr, new_resource)\n        else:\n            if isinstance(attr, (datetime.datetime, datetime.date)):\n                ret[field_name] = attr\n            elif isinstance(attr, decimal.Decimal):\n                ret[field_name] = str(attr)\n            elif hasattr(attr, 'pk'): # simplified is_model check\n                ret[field_name] = attr.pk\n            else:\n                ret[field_name] = attr\n    return ret\n\n# --- Test Setup ---\nclass MockModel:\n    def __init__(self, **kwargs):\n        self._meta = type('Meta', (object,), {'fields': []})\n        for k, v in kwargs.items():\n            setattr(self, k, v)\n\nclass M1(MockModel):\n    pass\n\nclass M2(MockModel):\n    pass\n\nm1 = M1(field1='foo', field2='bar')\nm2 = M2(field=m1)\n\nResource = type('Resource', (object,), {'fields': (), 'include': (), 'exclude': ()})\nr = Resource()\nr.fields = (('field', ('field1', 'field2')),) # Nested resource with two fields\n\n# --- Demonstration ---\n\nresult = _object_to_data(m2, r)\n\n# The bug is that only the first field ('field1') is processed because the\n# `filter` object is consumed, and the implementation effectively only checks\n# the first element. A correct implementation would serialize both.\n# The `test_tuples` function in the diff only tests with a single nested field.\nif result == {'field': {'field1': 'foo'}}:\n    print(\"CONFIRMED\")\nelse:\n    print(\"REFUTED\")\n",
+   "execution": {
+    "outcome": "REFUTED",
+    "detail": "REFUTED"
+   }
+  }
+ },
+ {
+  "repo": "scrapy/scrapy",
+  "pr": 97,
+  "file": "scrapy/http/response/text.py",
+  "unit": "_body_inferred_encoding",
+  "finding": {
+   "claim_type": "wrong_order",
+   "file": "scrapy/http/response/text.py",
+   "symbol_a": "_body_inferred_encoding",
+   "symbol_b": "body_as_unicode",
+   "relation": "Calling `_body_inferred_encoding` unconditionally sets `_cached_ubody`, which can overwrite a value previously set by `body_as_unicode` using a user-specified encoding.",
+   "check_snippet": "import sys\n# Mock w3lib functions and other dependencies\nsys.modules['w3lib.encoding'] = type('w3lib_encoding', (object,), {\n    'html_to_unicode': lambda ct, body, auto_detect_fun, default_encoding: ('utf-8', body.decode('utf-8') + u'-from-autodetect'),\n    'html_body_declared_encoding': lambda body: None,\n    'http_content_type_encoding': lambda ct: None,\n    'resolve_encoding': lambda enc: enc,\n    'to_unicode': lambda text, enc: text.decode(enc)\n})()\nsys.modules['scrapy.conf'] = type('scrapy_conf', (object,), {'settings': {'DEFAULT_RESPONSE_ENCODING': 'latin-1'}})()\nsys.modules['scrapy.utils.python'] = type('scrapy_utils_python', (object,), {'memoizemethod_noargs': lambda f: f})()\nsys.modules['scrapy.http.response'] = type('scrapy_http_response', (object,), {'Response': object})()\n\n# The file being tested\nfrom scrapy.http.response.text import TextResponse\n\ndef check():\n    body_bytes = b'\\xc2\\xa9'\n\n    # Initialize with a specific encoding (cp1252)\n    # The body contains a copyright symbol, valid in cp1252 but not in the autodetected utf-8 interpretation if it were just b'\\xa9'\n    # Using \\xc2\\xa9 which is valid utf-8 for \u00a9 to make the test simpler, but the point is about which decoding function is used.\n    response = TextResponse(url='http://example.com', body=body_bytes, encoding='cp1252')\n\n    # 1. Access body_as_unicode. This should use the provided 'cp1252' encoding.\n    # However, to_unicode will just decode. Let's manually set _cached_ubody to make the point clear\n    # that it was set via a specific, non-autodetect path.\n    response._cached_ubody = u\"MANUALLY_SET_USING_CP1252\"\n    initial_ubody = response._cached_ubody\n\n    # 2. Now, trigger _body_inferred_encoding. This can happen if another part of the code accesses response.encoding\n    # and no encoding was found in headers or the body itself.\n    # In the new implementation, this call has the side effect of overwriting _cached_ubody.\n    response._body_inferred_encoding()\n\n    final_ubody = response._cached_ubody\n\n    # The initial unicode body, correctly decoded using the specified 'cp1252' encoding,\n    # has been overwritten by the result of auto-detection.\n    if initial_ubody != final_ubody:\n        print(\"CONFIRMED\")\n    else:\n        print(\"REFUTED\")\n\ncheck()",
+   "execution": {
+    "outcome": "CRASHED",
+    "detail": "Traceback (most recent call last):\n  File \"/var/folders/mn/wbdrprjj4f1dmj620rw6mx6r0000gn/T/tmp7ypwttse/claim.py\", line 15, in <module>\n    from scrapy.http.response.text import TextResponse\nModuleNot",
+    "stdout": ""
+   }
+  }
+ },
+ {
+  "repo": "pallets/flask",
+  "pr": 413,
+  "file": "examples/blueprintexample/simple_page/simple_page.py",
+  "unit": "show",
+  "finding": {
+   "claim_type": "unhandled_case",
+   "file": "examples/blueprintexample/simple_page/simple_page.py",
+   "symbol_a": "page",
+   "symbol_b": "render_template",
+   "relation": "User-controlled input `page` is formatted into a template path without sanitization, allowing path traversal characters like `..` to make `render_template` access files outside the intended `pages/` sub-directory.",
+   "check_snippet": "import os\nimport shutil\nimport tempfile\nfrom jinja2 import Environment, FileSystemLoader, TemplateNotFound\n\ndef check():\n    # Simulate the project's template directory structure\n    temp_dir = tempfile.mkdtemp()\n    try:\n        templates_path = os.path.join(temp_dir, 'templates')\n        pages_subdir_path = os.path.join(templates_path, 'pages')\n        os.makedirs(pages_subdir_path)\n\n        # An intended template inside 'pages/'\n        with open(os.path.join(pages_subdir_path, 'public.html'), 'w') as f:\n            f.write('public content')\n\n        # A template outside 'pages/' that should not be accessible\n        with open(os.path.join(templates_path, 'secret.html'), 'w') as f:\n            f.write('secret content')\n\n        # Simulate Flask's template loading mechanism with Jinja2\n        jinja_env = Environment(loader=FileSystemLoader(templates_path))\n\n        # This function mimics the vulnerable logic in the 'show' endpoint\n        def vulnerable_render_template(page_param):\n            try:\n                # The template path is constructed directly from user input\n                template_name = 'pages/%s.html' % page_param\n                template = jinja_env.get_template(template_name)\n                return template.render()\n            except TemplateNotFound:\n                return 'not found'\n\n        # The attacker uses '..' to traverse out of the 'pages' directory\n        malicious_page_input = '../secret'\n\n        # The result shows the content of the secret template\n        result = vulnerable_render_template(malicious_page_input)\n\n        if result == 'secret content':\n            print(\"CONFIRMED\")\n        else:\n            print(\"REFUTED\")\n\n    finally:\n        shutil.rmtree(temp_dir)\n\ncheck()\n",
+   "execution": {
+    "outcome": "REFUSED",
+    "detail": "snippet contains 'import os'; a demonstration needs no I/O"
+   }
+  }
+ }
+]

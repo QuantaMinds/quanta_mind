@@ -109,14 +109,16 @@ reading on the one or two functions history says changes come back to, nothing a
 cold ones. Structural claims the model makes are checked by a parser before publication. And
 every pull request carries a line saying what could not be analysed and why.
 
-Four properties follow, and each is measured or verified rather than asserted:
+Four properties follow. **Two are now measured out-of-sample, one is billed, one is verified —
+and a fifth that this document used to claim has been measured and withdrawn.** See
+`docs/product/evidence-ledger.md` for the full accounting, including what failed.
 
 | | |
 |---|---|
 | **Quiet** | Fires on 10–12% of changes, held steady across repositories differing 80× in velocity |
 | **Honest** | Reports its own blind spots — verified as unavailable to all seven competitors |
-| **Right about where to look** | Names the function a later fix returns to, +22 points above its rate on non-repairs, p = 0.015 |
-| **Cheaper** — *not yet measured* | Inference on a fraction of the diff instead of all of it. The 2× figure later in this document is arithmetic, not a measurement |
+| **Right about where to look** | **Replicated out-of-sample.** Ranking the changed files by prior touch count and reading the top three misses **1.21%** of the changes a later fix returns to, against **3.12%** for an alphabetical ordering — on **six repositories the method was never developed against**, n = 2,400, McNemar **p < 0.000001**, positive in **6 of 6**. The original eight gave **1.44% vs 3.31%**. The two lifts differ by **0.05 points** |
+| **Cheaper** — *billed, not estimated* | **$0.119 per pull request** on real diffs through Vertex, against a $0.140 derived estimate — but the estimate was right by luck: input is 5.2% of the bill and **thinking is 91.3%** |
 
 ---
 
@@ -438,6 +440,14 @@ estimate.
 
 ## What is still unproven
 
+**The full ledger is `docs/product/evidence-ledger.md`** — every measurement run, against the
+claim it carries, and the rows where argument is currently covering for a gap. Its summary:
+**the ranking rests on two datasets and the review was measured and failed its own
+pre-registered bar** — 66.7% and 74.2% of findings wrong under two blind raters. The asymmetry
+is structural: the ranker is model-free and could be checked against seven years of history,
+while the review did not exist until a model ran. The paragraphs below are the sharpest cases;
+the ledger is the list.
+
 **Whether a reviewer shown the routing line before the defect exists catches anything they
 would otherwise miss.** Every number above is retrospective. This is a field measurement, and
 no amount of history substitutes for it.
@@ -694,17 +704,35 @@ so we can promise the thing they just withdrew: unlimited reviews at a flat seat
 
 | | **Free** | **Team** | **Business** | **Enterprise** |
 |---|---|---|---|---|
-| Price | $0 | **$19**/dev/mo annual | **$39**/dev/mo annual | **$55**/dev/mo, $2.5K/mo floor |
+| Price | $0 | **$19**/dev/mo annual · $24 monthly | **$39**/dev/mo annual · $49 monthly | **$55**/dev/mo, $2.5K/mo floor |
 | Buyer | anyone | team lead | Director or VP Engineering | procurement and security |
 | What is being bought | the proof | the reviewer | the report | the contract |
+| Bought with | nothing | credit card | light purchase order | MSA, DPA, security review |
 | Ranking, coverage line, retrospective | ✓ | ✓ | ✓ | ✓ |
+| **Coverage line names every skipped unit** | ✓ | ✓ | ✓ | ✓ |
 | Model findings in the pull request | — | ✓ unlimited | ✓ unlimited | ✓ unlimited |
+| **Review depth** | none | **3 units** | **5 units** | 5 units |
 | Cross-repository aggregation, quarterly audit, SSO | — | — | ✓ | ✓ |
 | Verifier drop-rate telemetry | — | — | ✓ | ✓ |
 | **Bring your own key** — allowlisted model | — | — | **✓** | ✓ |
 | **Bring your own model** — uncertified or self-hosted | — | — | — | **✓** |
 | Self-hosting, audit logs, residency, SLA | — | — | — | ✓ |
 | Token budget | none — no model runs | fair use per repository | higher per repository | unlimited on their key |
+| **Our cost of goods** | **$0** | ~$28/repo/month | ~$41/repo/month | $0 — their key |
+
+**Review depth is a tier lever because it is measured, and it is the most honest upsell available
+to us.** Three units miss at most 8.84% of the changes where a defect exists; five units miss at
+most 3.50%. Both figures are paired, McNemar p < 0.0001. The sentence a competitor cannot say
+back is *"we tell you what we skipped, and on higher tiers we skip less."*
+
+**Do not print those two percentages on a pricing page.** They belong in a conversation, where
+they are the strongest thing we can offer. Printed, they detach from the coverage line that makes
+them survivable, and they disclose the budget. The page says *deeper review*.
+
+**And the margin improves at the deeper tier**, which is why depth sits at Business rather than
+being sold as an add-on: twenty developers across four repositories is $380 of revenue against
+$112 of cost at three units (71%), or $780 against $164 at five (79%). Paying more buys less
+silence and costs us proportionally less.
 
 **The quarterly coverage audit is a separate line, $8,000–15,000 per engagement**, sold to an
 engineering leader out of a different budget than seats. It is plausibly the larger business.
@@ -1065,7 +1093,7 @@ a programming-language result.
 
 ## 6.7 Measurement defects found and corrected
 
-Six instrumentation failures occurred during this work. All produced plausible numbers. None
+Eight instrumentation findings came out of this work. All produced plausible numbers. None
 was detectable from the output alone. They are recorded because a document that never reports
 its own errors gives a reader no way to calibrate the rest of it.
 
@@ -1108,6 +1136,29 @@ raises rather than returning, and the harness prints a per-repository skip ledge
 and **refuses to report at all** if any read failed — which is what caught the airflow defect
 above. Ask what a check prints when the thing it checks is broken; the honest answer here was
 *the same table*.
+
+**A control beaten by fourteen points, by a policy that was catastrophically worse.** This is
+the quantitative version of the revert lesson above, and it is the more useful half.
+
+Testing allocation policies, a score-gap stopping rule beat its alphabetical control by **+14.3
+points — the widest margin of any arm measured** — while missing **17.76%** of events against
+1.44% for the incumbent. It is the worst policy tested and it has the best lift.
+
+**The mechanism: it reads about two units instead of three, so it selects a small, hard
+population where alphabetical does terribly.** Both numbers move together. Neither says the
+policy is good.
+
+**The rule, and it generalises past this project: a control establishes that a result is not
+noise. It says nothing about whether the policy is good. Both require the absolute number.**
+Every lift figure in this document should be read beside its absolute, and a lift quoted alone
+is uninterpretable in a direction that flatters.
+
+**A split that reproduced its own pooled figure.** Partitioning the corpus into train and
+holdout, the function-level arm scored 128 misses on one side and 46 on the other — **174/1,969
+= 8.84%, landing exactly on the pre-split pooled value.** Nothing forced that. It is the same
+class of assertion as the bin-sum check: against a quantity known from elsewhere, not internal
+consistency. **Adopted as a rule — any future split must reproduce the pre-split pooled figure,
+and a mismatch means the partition is doing something.**
 
 **A guard firing correctly.** A wrapper timeout later killed a run mid-stream and the new
 exit-code assertion refused to report from the partial read.

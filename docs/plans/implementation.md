@@ -438,6 +438,223 @@ allocation time would take the coverage line's content away, and it would also b
 evaluation — a candidate ranker that would have chosen a cold unit needs that unit to exist in
 the record to be credited for it.
 
+### Pre-specified before running: the hybrid, and what it is not
+
+**The buried result in the matched-coverage run is that FILES WON.** Top-3 files reads about 4.9
+function-equivalents and misses 1.22%; top-5 functions reads 5 and misses 3.50%. **Read the same
+amount of code either way and file-level allocation misses less than half as often.**
+
+That sits against `QUANTAMIND.md` "The ranking itself", where global function ranking scores 75.0% top-1 against 58.9% for
+any-function-in-the-top-file. **Functions order better. Files cover better.**
+
+**The likely mechanism is locality, and it is already measured** in `QUANTAMIND.md` "Signals tested and rejected": 5 of 11 SELF, 6 of 11 MIXED,
+**0 of 11 COMPANION** — every breakage required re-editing a file the change had already touched.
+Defects cluster inside files. A file is a bundle, so reading one captures the target *and its
+neighbours*; reading a function captures the target only, and pointing one function off yields
+nothing.
+
+**So the hybrid worth testing is not a union.** A union of top-3 files and top-3 functions would
+miss only d = 17 events = 0.86% — but that is ~8 function-equivalents of budget against 5, which
+is the same confound the matched-coverage run just removed. **The union's real ceiling is the c
+cell: 7 events, 0.36 points.**
+
+**The hybrid is: rank by function, allocate by file.** Use the global function ranking to choose
+the target — the part functions are better at — then read the *enclosing file* rather than the
+function alone — the part files are better at.
+
+**This is not the nested strategy that scored 54.2%.** That ranked the top file *first* and then
+picked a function inside it, discarding better candidates elsewhere in the diff. **This is the
+inverse: rank globally across all functions, then expand.** Nothing measured argues against it.
+
+**The expansion rule, fixed now:**
+
+| | Rule |
+|---|---|
+| **Expansion** | the enclosing file of each of the top-N ranked functions, deduplicated |
+| **Hit** | the expanded file set intersects the file-level target set |
+| **Budgets reported** | N = 1, 2, 3, so the cost is visible rather than hidden |
+| **The comparison that decides it** | **N = 3 expanded against top-3 files** — same file count, same rough token cost. Does function ordering pick better files than file ranking does? |
+
+**And a cheaper variant in the same run:** expand to the *changed hunks* in that file rather than
+the whole file, which captures most of the locality at a fraction of the input tokens.
+
+**On cost, the objection is weaker than it looks.** In the illustrative table, output including
+thinking is $0.050 of $0.075 and input on the ranked unit is $0.015. Tripling the input is
+$0.030, not a doubling of the bill.
+
+### Pre-specified: the changed-hunks variant uses a different target, and that is the trap
+
+**Reading the changed hunks of a file is not reading the file.** So the hit criterion changes
+with it, and getting this wrong would make the variant look better than it is by comparing it
+against an easier target.
+
+| variant | what is read | correct target |
+|---|---|---|
+| top-N functions | N symbols | **symbol** target — did the fix return to one of them |
+| top-N → changed hunks in their files | every changed symbol in those files | **symbol** target |
+| top-N → whole files | the files entire | **file** target |
+
+**So the hunks variant is compared against the FUNCTION arms, not against the whole-file arm.**
+The whole-file number (2.03%) was measured against the file target and **is not comparable** to
+what follows.
+
+**And mean units read is reported alongside**, because the confound this whole section exists to
+remove is comparing policies at unequal budgets.
+
+### The signature of a tuned-on-noise result, now seen twice
+
+**V2 and V6 produced the same shape**, and having two instances makes it nameable:
+
+| | train | holdout | paired |
+|---|---|---|---|
+| V2 | better than V0 (1.01% vs 1.44%) | **worse** (1.56% vs 0.69%) | b=4, **c=10**, p=0.18 |
+| V6 | better than V0 (1.15% vs 1.44%) | **identical** (0.69%) | b=2, **c=6**, p=0.29 |
+
+**Both times: a train-set advantage the paired test could not see, with the discordant cells
+favouring the incumbent.** `c > b` means the challenger *lost* more of the events where the two
+disagreed — so whatever produced the train advantage was not the head-to-head comparison.
+
+**That is what a tuned-on-noise result looks like from the inside**, and it is visible without a
+holdout. **When the aggregate favours a challenger and the discordant cells favour the incumbent,
+believe the cells.**
+
+### Pre-specified: recency weighting, the last cheap test
+
+**Orthogonal to everything else** — it changes the score, not the unit or the budget. If it works
+it *improves* V0 rather than competing with it, which is why it is worth one more draw on the
+holdout.
+
+| | Rule, fixed now |
+|---|---|
+| Score | exponential decay: each prior touch contributes `0.5 ** (age_days / HALF_LIFE)` |
+| **Half-life** | **90 days**, one parameter, chosen before seeing any result |
+| Unit | files, so it competes against V0 directly |
+| Budget | top-3, matched to V0 |
+| Control | alphabetical, same units, same k |
+| Holdout | the same two clones, unchanged |
+
+**And this is the last variant run against these 8.** Six have now been tested against a
+two-clone, 578-event holdout. It can catch a reversal and cannot certify a winner, and further
+variants draw down a resource that is nearly spent. **After this, the random-5 draw is the
+binding constraint on every number in the table.**
+
+### Five pre-specified variants — RUN, with controls and a holdout. None beats file top-3.
+
+**Not a sweep.** 1,969 paired events on 8 repositories carries about five comparisons before
+multiplicity eats the result, and this project has already recorded ten metadata signals where
+nothing survived Bonferroni. Five variants, each with its non-informative control, Bonferroni α = 0.01.
+
+**Holdout fixed before anything ran:** clones sorted by name, indices 2 and 5 — `OpenPipe_ART`
+and `browser-use_browser-use`. Everything fitted on the other six, winner checked once on those.
+
+| arm | train miss | control | hold miss | control | units |
+|---|---|---|---|---|---|
+| **V0 file top-3** | **1.44%** | 3.31% | **0.69%** | 4.15% | **3.00** |
+| V6 recency-weighted files, 90-day half-life | 1.15% | 3.31% | **0.69%** | 4.15% | 3.00 |
+| V5 union of file-3 and function-1 | 1.22% | 3.09% | 0.69% | 4.15% | 4.00 |
+| V2 file ranked by summed touched-function history | 1.01% | 3.31% | 1.56% | 4.15% | 3.00 |
+| V1 function top-3 | 9.20% | 16.61% | 7.96% | 14.01% | 3.00 |
+| V3 score-gap stopping | 17.76% | 32.06% | 16.26% | 28.55% | ~2.0 |
+
+**V6, recency weighting, is a clean null — and its holdout paired test is the most decisive
+number here: b=0, c=0.** Not "no significant difference": **zero events where flat counting and
+90-day exponential decay disagreed on the outcome at all.** On train it is nominally better,
+1.15% against 1.44%, at b=2, c=6, p=0.29 — the same shape as V2, an advantage the paired test
+cannot see.
+
+**But "same outcome" is not "same decision", and checking the difference changed the
+explanation.** The natural reading of b=0, c=0 is that the top three are so far ahead that
+reweighting cannot reorder them. **That is false.** Comparing the chosen sets directly:
+
+| | same top-3 set | same order | different outcome |
+|---|---|---|---|
+| train | 90.5% | 76.1% | 6 of 1,391 |
+| **holdout** | **94.5%** | **82.5%** | **0 of 578** |
+
+**Recency changed the chosen set on 32 holdout events and the order on 101 — and not one of them
+changed whether the defect was covered.** The ranking is not unshakeable; it is reordered on
+about one event in six, and the reordering is irrelevant.
+
+**So the finding is narrower and more useful than "reweighting is inert".** The signal is
+concentrated in the top one or two units, and **the third slot is close to outcome-irrelevant at
+the margin** — the file swapped in and the file swapped out are almost always both non-targets.
+
+**That also bounds what it implies about other reweightings.** It does *not* say every monotone
+transform of the same counts will be inert; it says transforms that only move the margin will
+be. A reweighting that changed *rank 1* would still matter, and this result says nothing about
+one that did.
+
+**The score axis is closed for recency**, and that was the last cheap test available.
+
+**V2 is not supported, and the paired test says so before the holdout does.** It follows
+directly from the hybrid post-mortem — keep the aggregation, drop history for functions the
+change never touched.
+
+**Lead with the paired result: b=4, c=10, McNemar p=0.18 against a 0.0125 threshold. Fourteen
+discordant events in total. Whatever V2 did, this corpus cannot see it.** And the direction is
+the tell — **c > b means V2 LOST more discordant events than it won on the pooled data**, so its
+train-set advantage came from somewhere other than the paired comparison, most likely a handful
+of events where both arms were close.
+
+The holdout reversal — train 1.01% against V0's 1.44%, holdout 1.56% against 0.69%, **both arms
+moving in opposite directions** — is corroborating evidence for a conclusion the paired test had
+already reached on its own.
+
+**V3 is decisively rejected.** Score-gap stopping reads about two units and misses 16–18%. It
+beats its control by the widest margin of any arm, +14 points — **which is the clearest
+demonstration in this corpus that beating the control is necessary and not sufficient.** A
+policy can be far better than alphabetical and still be a bad policy.
+
+**V5 buys nothing.** The union ties V0 on holdout at 0.69% and costs a fourth unit.
+
+**V0 survives everything**, at the lowest budget, on both halves.
+
+**Two checks passed.** Every arm beats its alphabetical control, on both halves. And V1 across
+the split is 128 + 46 = **174/1,969 = 8.84%**, reproducing the pooled figure from the earlier run
+exactly — an independent confirmation the split did not disturb the population.
+
+### The hybrid — RUN, and it does not work
+
+**Rank by function, expand to the enclosing file.** Same paired events, n=1,969.
+
+| policy | files read | miss | 95% CI |
+|---|---|---|---|
+| **top-3 files** | 3 | **1.22%** | 0.82–1.81% |
+| top-3 functions → their files | ≤3 | **2.03%** | 1.50–2.75% |
+| top-5 functions | — | 3.50% | 2.78–4.41% |
+| top-2 functions → their files | ≤2 | 4.37% | |
+| top-1 function → its file | 1 | 12.09% | |
+
+**At the same file count, function ordering picks WORSE files than file ranking does** — 2.03%
+against 1.22%, intervals barely touching. The hybrid is rejected.
+
+**It does beat pure function allocation** (2.03% against 3.50%), so expanding to the enclosing
+file recovers most of what the function unit gives up. **It just never catches plain file
+ranking.**
+
+**The likely reason, and it inverts the intuition that motivated the test.** A file's touch count
+is roughly a *sum* over its functions, so file ranking **aggregates** signal across the whole
+file. Taking the top function and expanding **discards** the rest of that file's history and then
+reads the file anyway. Summing beats taking the maximum — which is the same arithmetic that made
+the reverse discordant cell exist in the first place, pointing the other way this time.
+
+**So the ordering result and the allocation result are about different questions and both hold.**
+Global function ranking is better at *naming the unit a fix returns to* (75.0% vs 58.9% top-1).
+File ranking is better at *choosing what to read*. Nothing reconciles those into a hybrid that
+wins; they are answers to two questions and the allocator only asks the second.
+
+**This is no longer a live question. It is a finding the plan has not absorbed.** Six independent
+variants, each against its control, on both halves of a pre-declared split, all point one way:
+**allocate at file level.** The plan specifies ranking *and reading* functions, and the reading
+half is wrong on every measurement taken.
+
+**What survives of the function unit is routing** — naming which unit a fix returns to, where
+global function ranking scores 75.0% top-1 against 58.9%. That is a different question from what
+to read, and the allocator only asks the second.
+
+**The honest remaining uncertainty is not which is better on this corpus.** It is whether this
+corpus generalises — the random-5 draw, and nothing else.
+
 ### The first run was wrong, and the diagnostic is why we know
 
 The first attempt reported +7.41 points on a **broken symbol index**, and the ratio m/k = 1.17
@@ -812,24 +1029,92 @@ waiting for a date.
 The git path is the one we control and the one the research validated. **Datadog is the faster
 signal and we consume rather than rebuild it** — see the integrations section.
 
-## Before routing inference through Vertex, three things to confirm
+## Routing inference through Vertex — checked, 2026-08-14
 
-Claude runs on Vertex AI, so model spend could land on a GCP bill and against GCP credits.
-**Three checks before any plan depends on that**, and none is a formality:
+**Gemini only.** The project is `quantamind-oss`, billing is enabled, `aiplatform.googleapis.com`
+is on, and `gemini-2.5-pro`, `gemini-2.5-flash` and `gemini-2.5-flash-lite` all answered live.
+Claude on Vertex was probed at the same time: `claude-sonnet-4-5` is offered in `us-east5` but
+returns `NOT_FOUND` for this project — a Model Garden subscription gate — and it will not be
+opened.
 
-1. **Do the credits apply to partner models?** Some GCP credit programmes exclude marketplace
-   and partner models. Ask the account representative about Claude on Vertex specifically.
-2. **Does prompt caching behave identically?** Same cache-read multiplier, same five-minute and
-   one-hour window economics. **The entire cost architecture rests on this**, and a difference is
-   not a rounding error.
+**That settles the first of the three checks by removing it.** The partner-model question was
+whether GCP credits apply to marketplace models. Gemini is first-party Google, billed as ordinary
+Vertex usage, so the credits apply on the same terms as any other Vertex spend. **The other two
+remain open and neither is a formality:**
+
+1. ~~Do the credits apply to partner models?~~ **Moot.** First-party model, ordinary Vertex
+   billing. This was the largest single risk to the $16,000-of-credits arithmetic and it is gone.
+2. **Does prompt caching behave identically?** Gemini's context caching is a *different
+   mechanism* from Anthropic's prefix caching — explicit cached-content objects with their own
+   minimum token count and TTL, not an automatic prefix match. **The entire cost architecture
+   rests on this**, the design in the render step was written against prefix semantics, and this
+   is now the top open question rather than a checkbox.
 3. **Is structured output the same?** The verification pillar requires findings to arrive as
    parseable structure. Free-text output makes adjudication impossible, so a gap here is not a
    degradation — it removes a layer.
 
-**And keep the label attached to any figure derived from it.** $0.140 per pull request is
-derived from a specification, and its shallow-call token sizes are assumed rather than observed.
-Any headline built on it — "$16,000 of credits is roughly 114,000 reviews" — inherits that, and
-should carry it.
+## C3 — the cost, billed rather than priced
+
+**68 requests over 23 merged pull requests, live against `gemini-2.5-pro` on Vertex, 2026-08-14.**
+The prompt is the one the architecture specifies: repository prefix, the funded function's full
+source, its file's diff, and the schema a finding must satisfy. Unit of record is the **request**,
+because aggregating three calls into one line is the defect that inverted this table's sign once.
+
+| | measured |
+|---|---|
+| mean per pull request | **$0.1193** |
+| median | $0.1247 |
+| p90 | $0.1310 |
+| max | $0.1452 |
+| the derived estimate it replaces | $0.140 — ratio **0.85×** |
+
+**The estimate was right in magnitude and wrong in structure.** It modelled a large prompt made
+cheap by caching. The bill has the opposite shape: **input 5.2%, thinking 91.3%, answer 3.5%.**
+The prompt is far smaller than assumed — 1,674 tokens mean, because one function and one diff is
+not much text — and thinking, which the estimate did not model at all, is nine tenths of the cost.
+Two errors that partly cancelled.
+
+**Which makes the consequence architectural rather than financial. Prompt caching would save 4.7%
+of this bill** — the whole of the "read, with the repository cached" design, optimising a term
+that a dial beside it dominates twenty to one. That verdict depends on prefix size, and the prefix
+measured here is a ~150-token stub rather than the conventions-and-signatures block specified:
+
+| cached prefix | input share of cost | caching saves |
+|---|---|---|
+| stub, as measured | 5.2% | **4.7%** |
+| 2,000 tokens | 10.7% | 9.6% |
+| 10,000 tokens | 27.6% | 24.8% |
+| 40,000 tokens | 57.6% | 51.9% |
+
+**Caching is worth building only if the prefix is deliberately made large, and nobody has decided
+that.** It cannot be inherited from the Anthropic-era plan where prefix caching was automatic.
+
+**And the headline is a parameter, not a property of the workload.** Thinking was capped at 4,096
+by the harness and **46% of requests pinned the cap**. The first run set no budget and observed a
+mean of 5,744, maximum 13,108 — **1.51×, or $0.183 per pull request**. The price of a review is
+currently set by a dial that has never been tuned against output quality.
+
+**Three things this run cannot say**, recorded beside the number so they travel with it:
+
+1. **No cached content was declared**, so this is the uncached figure. Given the table above that
+   matters less than it would have.
+2. **Nothing here evaluates whether a finding is any good.** 68 requests emitted 66 findings and
+   all 68 responses parsed as a JSON array, with 8 returning the empty array. Near-total schema
+   conformance is the *expected* outcome of forcing the schema — it says the schema works, not
+   that the findings are right. Published-and-wrong remains untested and needs hands.
+3. **Population**: 24 merged pull requests from the same 8 repositories, median 20-line units.
+   Whether that resembles a customer's diff is unestablished, exactly as with everything else
+   measured on these 8.
+
+**One defect found by running it.** The first attempt died at request 66 of 72 on a 401 — the
+`gcloud` token expires after about an hour and the serial run took fifty minutes — and wrote
+nothing. Worse, **11 of its 39 recorded answers were one token long** behind six to thirteen
+thousand thinking tokens: a `MAX_TOKENS` truncation that, reported without the finish reason,
+would have read as *"the model found nothing."* The reader now returns `finishReason` rather than
+letting a caller infer it, re-mints the token on a 401, and appends each row as it lands.
+
+**Any headline built on the old figure — "$16,000 of credits is roughly 114,000 reviews" — should
+be recomputed against $0.1193, and should carry the thinking-budget dial with it.**
 
 ## Which database runs, and when
 
@@ -1274,6 +1559,193 @@ a model we have already evaluated. Enterprise gets a model we have not.
    we have not evaluated: run the verifier against it on the corpus and record the drop rate by
    claim class. **We publish a coverage number under our name; publishing one for a model we
    never measured is the failure this product exists to prevent.**
+
+   **Two numbers, not one, because the failure is asymmetric.** A model producing fewer parseable
+   structural claims raises the drop rate **visibly**. A model producing claims that *pass the
+   parser while being semantically wrong* raises **nothing at all** — and the defects this
+   product exists for are semantic, which is why the verifier cannot judge them. The parser
+   confirms *"line 71 precedes line 88"* and publishes a finding whose reasoning is wrong.
+
+   | | What it measures | Visible? |
+   |---|---|---|
+   | **Drop rate by claim class** | what the verifier rejects | yes, automatically |
+   | **Published-and-wrong rate** | findings that passed verification and were judged incorrect | **only if measured** |
+
+   **The second decides the model, and price says nothing about it.**
+
+   **Get it cheaply by running both candidates on the same pull requests and adjudicating only
+   where they disagree.** Where they agree there is little to learn; the disagreements are a
+   small set worth human judgement, and concentrating effort there is the same logic as McNemar
+   using only discordant pairs.
+
+   **And this procedure applies to our own default, not only to a customer's model.**
+
+   ### Pre-specified now, before `infer/` exists, so early results cannot shape it
+
+   **The certification run cannot be improvised.** It needs the real prompt, the real schema and
+   the real verifier — a standalone two-model script would measure two models on an ad-hoc
+   prompt, not this reviewer, and the number would be discarded once the pipeline exists.
+   **Worse, the disagreement events are scarce**: hand-adjudication is expensive and there is
+   one clean read before the prompt starts being shaped by what was seen.
+
+   | | Fixed now |
+   |---|---|
+   | **Population** | 100 pull requests drawn from the 8 full-object clones, seeded, drawn before the run |
+   | **What counts as a disagreement** | **both models publish a finding on the same unit with incompatible claims.** One publishing while the other is silent is a *different* case — informative about coverage, not adjudicable head-to-head, and counted separately |
+   | **Adjudication** | blind to which model produced which finding |
+   | **Sample** | 100 adjudicable disagreements, or the whole set if fewer |
+   | **The decision rule** | **superseded — the provider question was decided by direction, not by measurement** |
+
+   **Gemini only. Decided 2026-08-14, and recorded as a decision rather than dressed up as a
+   result.** Claude on Vertex was probed the same day: `claude-sonnet-4-5` is offered in
+   `us-east5` but returns `NOT_FOUND` for this project, which is a Model Garden subscription
+   gate rather than an availability one. It will not be opened. Everything runs on Gemini.
+
+   **What that retires.** The Claude-versus-Gemini adjudication does not need running, and the
+   `$15 per repository per month` saving it was meant to arbitrate is no longer a live trade.
+   Two providers were also the only justification for keeping the render path provider-neutral
+   at cost to its clarity; that justification is gone, and the constraint should be dropped
+   deliberately rather than left standing as a cost nobody remembers paying for.
+
+   **What survives, because the arithmetic was about the instrument and not about Anthropic.**
+   The threshold was mismatched to its sample by an order of magnitude — the rule said *"within
+   2 percentage points"* while an exact binomial on adjudicated disagreements resolves this:
+
+   | adjudicated disagreements | smallest skew resolvable at p < 0.05 |
+   |---|---|
+   | 50 | 32 points |
+   | **100** | **22 points** |
+   | 200 | 15 points |
+   | 400 | 10 points |
+
+   **At n=100 the instrument resolves 22 points. It was being asked to adjudicate 2.** Any
+   future two-way model comparison inherits that table, and any rule written against it must
+   state the skew it can actually see.
+
+   **And there is still a live comparison, now within one provider: `gemini-2.5-pro` versus
+   `gemini-2.5-flash`.** Unlike the retired one it is runnable today — both answered on this
+   project — and it matters more, because the probe showed pro spending **204 thinking tokens
+   to answer a one-word prompt** against flash's 20, and thinking bills at the output rate. The
+   same rule applies with the same arithmetic: *pro is retained only if it wins ≥61 of 100
+   adjudicated disagreements, an exact-binomial rejection of 50/50 at p < 0.05.* If it finds
+   nothing, that is not evidence of equivalence — it is evidence this instrument cannot tell,
+   and the choice then falls to measured cost, which is now available rather than estimated.
+
+   **The reasoning behind wanting a tight threshold is kept**: a wrong published finding costs
+   more here than at a competitor, because what is sold is that the review can be trusted at its
+   edges. What does not survive is the pretence that 100 hand-adjudications measure it to two
+   points.
+
+   ### How much weight can drop rate carry? Measured on real reviews, and the instrument failed
+
+   **Fetched live: 1,213 inline review comments on `.py` files across eight public
+   repositories** — the closest public analogue to what this reviewer emits, attached to a file
+   and about specific code. Classified into *not a finding*, *structural*, *semantic*.
+
+   **The classifier is not trustworthy and the number it produced should not be quoted.** 56.5%
+   fell into the residual bucket, which means the patterns did not cover most of the content.
+   Reading the printed samples, every bucket contains obvious errors: *"Can you add type
+   annotation for the returns?"* was filed as not-a-finding because it ends in a question mark;
+   *"It creates it if it doesn't exist"* was filed structural on the phrase "doesn't exist";
+   *"i think the return type is a dictionary"* — a genuinely structural claim — landed in the
+   residual.
+
+   **The residual is not only a defect — it is the result.** A keyword classifier failing to
+   cover 56.5% of review content is evidence the content **is not keyword-shaped**. The samples
+   say the same from the other side: *"i think the return type is a dictionary"* is a structural
+   claim carried entirely by hedged natural language, with no token a pattern could key on.
+
+   **So the survivable statement is stronger than "structural claims are a minority". It is that
+   structural claims are not reliably identifiable from surface form at all.**
+
+   **And that is a design consequence, not a measurement gap.** Stage four can only adjudicate
+   the fields **the schema forces into structural shape** — not claims a model happens to make.
+   If `infer/schemas.py` requires `claim_type`, `file`, `line_a`, `line_b`, `relation`, then
+   **every finding is structurally checkable by construction**, and the surface form of natural
+   language stops mattering.
+
+   **Which replaces the question.** It is no longer *"what fraction of review claims are
+   checkable"* — it is **"what fraction of USEFUL findings can be expressed in that form without
+   distortion"**. That is answerable from the worked example and the schema, before any model
+   runs, and it is the question `infer/schemas.py` has to be designed against.
+
+   **So drop rate is a weak signal for choosing between models**, because it can only speak to
+   the minority of findings a parser can touch. **The hand-adjudicated published-and-wrong rate
+   is not one number of two — it is close to the whole test.**
+
+   **A trustworthy version needs a real classifier**, which means hand-labelling or a model from
+   another family — the instrument this project used before for exactly this reason, and cannot
+   use now because no key is configured. Recorded as unmeasured rather than approximated.
+
+   **It was re-run, and it found something bigger than the sampling bias.**
+
+   A uniform draw across each repository's full page range — fixed seed, 3,812 comments,
+   spanning 2019-03 to 2026-07 against the recent draw's narrow window — moved the structural
+   share by a mean of 12.5 points per repository and 61 points at the extreme. But the largest
+   mover, browser-use at 5.0% → 62.9%, was too large to be review-content drift, and inspecting
+   it showed why:
+
+   **A third of the inline review comments in this corpus are written by other AI review bots.**
+
+   | repository | comments | bot | share | principal bot authors |
+   |---|---|---|---|---|
+   | browser-use/browser-use | 636 | 585 | **92.0%** | cubic-dev-ai, cursor |
+   | Skyvern-AI/skyvern | 536 | 463 | **86.4%** | github-advanced-security, ellipsis-dev |
+   | cartography-cncf/cartography | 724 | 270 | 37.3% | cubic-dev-ai |
+   | vllm-project/vllm | 684 | 171 | 25.0% | gemini-code-assist, cursor |
+   | langchain-ai/langchain | 668 | 96 | 14.4% | open-swe, corridor-security |
+   | bespokelabsai/curator | 653 | 54 | 8.3% | cursor |
+   | apache/airflow | 583 | 0 | 0.0% | — |
+   | huggingface/transformers | 711 | 0 | 0.0% | — |
+   | **all** | **5,195** | **1,639** | **31.5%** | |
+
+   **The contamination pointed the same way as the thing being measured**, which is why it was
+   invisible: of comments that assert anything, **bot output is 52.9% structural against a
+   human's 5.9% — nine times the rate.** A templated `### Bug: … **Medium Severity**` block
+   matches structural patterns almost by construction. Neither earlier fetch stored the author,
+   so neither could subtract it. **Fourth instance of the same defect class: a machine artefact
+   wearing a corpus label.**
+
+   **On human comments only, the sampling objection survives but changes character.** Mean
+   absolute shift 12.5 points, maximum 61 — the scheme moves the answer a lot — but 6 of 8
+   repositories moved *down* and the sign test is p = 0.29. **Recency is a noise source, not a
+   directional bias**: it does not inflate or deflate the figure predictably, it makes any single
+   draw unreliable. Both affected numbers were already discarded, so nothing published moves.
+   The corrected reader is `research/phase0/corpus/fetch.py`.
+
+   **The bot detector was then given a known-answer test, and passed one it could have failed.**
+   It is a login-and-marker match; it is never shown a date. If it is really detecting AI
+   reviewers, its rate must collapse to zero before those tools existed:
+
+   | year | comments | bot share | human structural |
+   |---|---|---|---|
+   | 2019 | 234 | **0.0%** | 9.9% |
+   | 2020 | 301 | **0.0%** | 4.2% |
+   | 2023 | 573 | **0.0%** | 3.0% |
+   | 2024 | 468 | 8.1% | 4.3% |
+   | 2025 | 1,352 | 38.4% | 4.2% |
+   | 2026 | 2,267 | **47.7%** | 7.8% |
+
+   **Zero through 2023, then a monotone climb tracking the adoption curve of the tools by name.**
+   A detector matching something else — verbosity, templating, length — would not respect a
+   boundary it was never told about.
+
+   **And the same table answers the era question the sampling objection implied.** Only three
+   repositories predate 2022, so era is confounded with repository; comparing *within* repository
+   across the boundary: pre-2022 **6.7%** (25/374) against 2023+ **6.5%** (55/850), **p = 0.889**.
+   Airflow moved +5.9 points and transformers −5.3, in opposite directions. **The human
+   structural rate does not depend on the era**, which means the figure is not an artefact of the
+   AI-reviewer period or of the bot subtraction — it is what human review has looked like for
+   seven years.
+
+   **Two things are worth keeping.** The human structural rate lands at **5.9%** (132/2,241) —
+   computed on a seven-year window with bots removed, and pointing the same way as the discarded
+   figure: **structural claims are rare in human review, so a verifier that waits for a model to
+   volunteer one will mostly wait.** That is the argument for forcing structure through the
+   schema rather than detecting it in prose. And separately: **on repositories that have adopted
+   an AI reviewer, the AI writes most of the inline comments** — 92.0% and 86.4% at the top.
+   That is a statement about volume and nothing else. It is not evidence about quality and must
+   not be published as if it were.
 
 ### Gate
 

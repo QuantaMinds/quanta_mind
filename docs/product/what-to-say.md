@@ -150,13 +150,21 @@ deserves:
 
 | | What it does | Status |
 |---|---|---|
-| **Routing** | says which part of the change to read first | **Unproven.** Whether a reviewer shown it before the defect exists catches anything they otherwise would not is our largest open question |
-| **Coverage line** | says which parts could not be analysed | The thing we can stand behind |
+| **Routing** | says which part of the change to read first | **Measured, and replicated on repositories it was never built against** — 1.21% miss against an alphabetical control's 3.12%, n = 2,400, p < 0.000001, 6 of 6 repositories. **Still unproven:** whether a *reviewer shown it* catches anything they otherwise would not. Those are different claims and only the first is measured |
+| **Coverage line** | says which parts could not be analysed | A construction, not a measurement. It either works or it does not |
+| ~~**Findings**~~ | ~~what the model reports~~ | **MEASURED AND STOPPED.** 66.7% and 74.2% wrong under two blind raters, 3 of 66 correct by consensus. Not shipped, and nothing may imply otherwise |
 
 **Do not tell the "reviewer said nothing about the payment function" story as a coverage-line
 story.** In our own worked example that function is rank 1 and gets the deep read — the coverage
-line reports the *unresolved* region, not the analysed one. That story sells routing, and routing
-is the untested half.
+line reports the *unresolved* region, not the analysed one. **That story sells routing, and routing
+is now the half we can defend** — but tell it as routing, because told as coverage it is simply
+false about our own architecture.
+
+**And the sentence to say when routing comes up, because it is the only externally replicated
+number in the company:** *"We ranked the changed files by how often each has needed a follow-up
+fix, read the top three, and missed 1.21% of the changes a later fix came back to. Sorting the same
+files alphabetically missed 3.12%. That is on six repositories we had never touched, and it lands
+within a twentieth of a point of what we measured on the eight we developed it against."*
 
 Tell it about the unresolved region instead:
 

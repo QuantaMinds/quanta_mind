@@ -11,16 +11,16 @@
 # QuantaMind (`quantamind`)
 
 Every AI reviewer reads the whole diff at one depth. **We decide where to look first and only
-read hard there.** A model-free pass ranks the changed functions by how often each has needed a
-follow-up fix; that ranking decides where inference goes. A parser checks the model's claims
-before publication, and every review states what it could not analyse.
+read hard there.** A model-free pass ranks the changed files by how often each has needed a
+follow-up fix, and that ranking decides where inference goes.
 
-**The founding correlation test returned NULL** (RR 1.040 against a 1.5 stop threshold), killing
-the earlier product — unsoundness labels over MCP. **That architecture is not built and this one
-inherits none of it.** What justifies this one: the ranked function is the one a later fix
-returns to, +22 points above its rate elsewhere, replicated by an independent rater. Read
-`docs/product/QUANTAMIND.md` for why, `docs/plans/product-skeleton.md` before your first change, and
-treat `research/` as the evidence base, never as product code.
+**The founding correlation test returned NULL** (RR 1.040), killing the earlier product; **this one
+inherits none of it.** What justifies it is the only claim here that reproduced out-of-sample:
+**top-three-by-fix-history misses 1.21% of the changes a later fix returns to against alphabetical
+order's 3.12% — six repositories the method never saw, n = 2,400, p < 1e-6, 6 of 6 positive, 0.05
+points from the original eight.** The model-free half replicated; **the model's own findings are
+66.7–82.1% wrong and are not shipped.** Read `docs/product/QUANTAMIND.md` for why and
+`docs/product/evidence-ledger.md` for what failed; `research/` is evidence, never product code.
 
 ---
 
@@ -118,16 +118,14 @@ you remember to obey — the machine will stop you either way.
 
     **Ask what a check outputs when the thing it checks is broken. If the answer is "the
     same thing", it is not a check.** *Wrong logic*: `all(b >= a)` said True on a flat
-    gradient. *Unreachable*: `history_rewritten` sat in `scan()`, which runs only on
-    admitted records, so it never met its cases — zero across 515 attempts, identical to a
-    genuine null. **When a fix breaks a test, ask whether it *asserted* the old behaviour
-    or merely *relied* on it.** Two tests certified the corpus-for-GitHub substitution —
-    invert them. A control fixture carried `parent_sha=""` and scored 2/2 only because its
-    consumer re-resolved — rebuild it. The second is harder to see: the assertion is right,
-    and the data was constructible only while the bug lived. **Only a known-answer test
-    tells these from a real negative, and only sabotaging the WHOLE mechanism tests the
-    known-answer test** — sabotaging the entry point alone left one of ours green and
-    reading as coverage: this rule, found inside a sabotage. → **ADVISORY** — notice the verb.
+    gradient. *Unreachable*: `history_rewritten` sat in `scan()`, which runs only on admitted
+    records — zero across 515 attempts, identical to a genuine null. *Measuring a proxy*: an
+    anchor check read 98.1% while blind raters found the anchors still wrong. **When a fix
+    breaks a test, ask whether it *asserted* the old behaviour or merely *relied* on it** —
+    two tests certified the corpus-for-GitHub substitution, and a control fixture scored 2/2
+    only because its consumer re-resolved. **Only a known-answer test tells these from a real
+    negative, and only sabotaging the WHOLE mechanism tests it** — sabotaging the entry point
+    left one of ours green and reading as coverage. → **ADVISORY** — notice the verb.
 
 15. **A documented command must run, or carry `documented-command:unbuilt`.** `python -m`
     with no `__main__` ignores flags, writes nothing, exits 0 — the runbook's "Days 3–5" reported success and did nothing. → `scripts/guard/check_documented_commands.py`
@@ -157,6 +155,13 @@ you remember to obey — the machine will stop you either way.
 - **Fix root causes.** Do not suppress an error, do not add a fallback that fabricates
   data, do not widen a type to make mypy pass. If a resolver cannot resolve something,
   that is a *result*, not a failure — emit `Unresolved`.
+- **A corpus drawn from the present cannot answer a question about the future.** Twice — recent
+  pages measured activity phase; newly merged PRs gave 0.4 days of forward history against a
+  90-day rule. → `research/phase0/corpus_age.py`, which fails at fetch time
+- **On a failure or a null, investigate before you fix.** Classify every wrong case by *why*,
+  print the distribution, then make the suspected cause a mechanical check and cross-tabulate it
+  against the outcome — **a cause that does not separate outcomes is a story.** Three fixes moved
+  nothing (p = 0.53); one deep-dive found the mechanism. **Diagnosis or detector — say which.**
 - **Reference `file.py:42`, never paste code** into plans or PR descriptions.
 - **Scope investigations.** "Read the resolve layer" not "understand the codebase".
 - **When you disagree with a rule here, say so in the PR.** Do not silently work around it.
@@ -197,8 +202,9 @@ A change is done when all seven are true. Not six.
 - **Deterministic beats clever.** If a parser can answer it, a model must not.
 - **The residual is the product.** What we cannot resolve is not our failure to hide; it
   is the thing the customer is paying us to find.
-- **We do not build a better bug-finder.** The field is capped at 49–76% precision and we
-  share its ceiling. We own the allocation of attention and the honesty of the coverage
-  line — resist every temptation to compete on detection instead.
+- **We do not build a better bug-finder.** **Two corpora, four blind rater pools: 66.7%, 74.2%
+  and 82.1% of findings wrong, ZERO correct of 39 off-corpus.** Anchor repair, structured
+  context and a rejection filter each moved nothing. **Never quote rivals' 49–76% beside it** —
+  theirs is behavioural, ours is truth. → `docs/plans/adjudication-preregistration.md`
 - **Assume the next reader knows nothing.** Every file explains itself to someone who
   joined this morning.

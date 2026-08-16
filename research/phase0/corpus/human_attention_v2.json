@@ -1,0 +1,521 @@
+[
+ {
+  "repo": "scikit-learn/scikit-learn",
+  "pr": 92,
+  "n_files": 12,
+  "targets": [
+   "scikits/learn/datasets/twenty_newsgroups.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 11
+ },
+ {
+  "repo": "scikit-learn/scikit-learn",
+  "pr": 116,
+  "n_files": 14,
+  "targets": [
+   "scikits/learn/mixture/dpgmm.py",
+   "scikits/learn/mixture/gmm.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 10
+ },
+ {
+  "repo": "scikit-learn/scikit-learn",
+  "pr": 128,
+  "n_files": 10,
+  "targets": [
+   "examples/covariance/plot_lw_vs_oas.py",
+   "scikits/learn/covariance/__init__.py",
+   "scikits/learn/covariance/empirical_covariance_.py",
+   "scikits/learn/covariance/shrunk_covariance_.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "scikit-learn/scikit-learn",
+  "pr": 129,
+  "n_files": 19,
+  "targets": [
+   "scikits/learn/decomposition/pca.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 15
+ },
+ {
+  "repo": "scikit-learn/scikit-learn",
+  "pr": 193,
+  "n_files": 9,
+  "targets": [
+   "scikits/learn/preprocessing/__init__.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 2
+ },
+ {
+  "repo": "scikit-learn/scikit-learn",
+  "pr": 221,
+  "n_files": 13,
+  "targets": [
+   "sklearn/decomposition/dict_learning.py",
+   "sklearn/decomposition/sparse_pca.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 5
+ },
+ {
+  "repo": "scikit-learn/scikit-learn",
+  "pr": 277,
+  "n_files": 11,
+  "targets": [
+   "benchmarks/bench_plot_omp_lars.py",
+   "examples/linear_model/plot_omp.py",
+   "scikits/learn/linear_model/omp.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": true,
+  "rank_of_first": 6
+ },
+ {
+  "repo": "scikit-learn/scikit-learn",
+  "pr": 288,
+  "n_files": 25,
+  "targets": [
+   "scikits/learn/tree_model/optimisation/profile_tree.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 21
+ },
+ {
+  "repo": "scikit-learn/scikit-learn",
+  "pr": 293,
+  "n_files": 24,
+  "targets": [
+   "scikits/learn/datasets/__init__.py",
+   "scikits/learn/datasets/samples_generator.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 4
+ },
+ {
+  "repo": "scikit-learn/scikit-learn",
+  "pr": 317,
+  "n_files": 13,
+  "targets": [
+   "scikits/learn/linear_model/base.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": true,
+  "rank_of_first": 5
+ },
+ {
+  "repo": "scikit-learn/scikit-learn",
+  "pr": 364,
+  "n_files": 14,
+  "targets": [
+   "sklearn/metrics/cluster/unsupervised.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 14
+ },
+ {
+  "repo": "scikit-learn/scikit-learn",
+  "pr": 375,
+  "n_files": 9,
+  "targets": [
+   "sklearn/covariance/empirical_covariance_.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": false,
+  "rank_of_first": 3
+ },
+ {
+  "repo": "scikit-learn/scikit-learn",
+  "pr": 402,
+  "n_files": 9,
+  "targets": [
+   "sklearn/metrics/cluster/supervised.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 7
+ },
+ {
+  "repo": "scikit-learn/scikit-learn",
+  "pr": 417,
+  "n_files": 10,
+  "targets": [
+   "sklearn/multiclass.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": false,
+  "rank_of_first": 2
+ },
+ {
+  "repo": "pandas-dev/pandas",
+  "pr": 2005,
+  "n_files": 13,
+  "targets": [
+   "pandas/core/format.py",
+   "pandas/io/parsers.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": true,
+  "rank_of_first": 5
+ },
+ {
+  "repo": "pandas-dev/pandas",
+  "pr": 2819,
+  "n_files": 11,
+  "targets": [
+   "pandas/src/generate_code.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 9
+ },
+ {
+  "repo": "pandas-dev/pandas",
+  "pr": 2922,
+  "n_files": 9,
+  "targets": [
+   "pandas/core/indexing.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": true,
+  "rank_of_first": 7
+ },
+ {
+  "repo": "pandas-dev/pandas",
+  "pr": 3060,
+  "n_files": 13,
+  "targets": [
+   "pandas/tseries/index.py",
+   "pandas/tseries/tests/test_offsets.py",
+   "pandas/tseries/tests/test_timeseries.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": false,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "pandas-dev/pandas",
+  "pr": 3787,
+  "n_files": 11,
+  "targets": [
+   "pandas/core/common.py",
+   "pandas/core/generic.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "pandas-dev/pandas",
+  "pr": 4039,
+  "n_files": 24,
+  "targets": [
+   "pandas/core/index.py",
+   "pandas/tests/test_index.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": false,
+  "rank_of_first": 3
+ },
+ {
+  "repo": "pandas-dev/pandas",
+  "pr": 4092,
+  "n_files": 22,
+  "targets": [
+   "pandas/core/base.py",
+   "pandas/core/groupby.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": true,
+  "rank_of_first": 8
+ },
+ {
+  "repo": "pandas-dev/pandas",
+  "pr": 4419,
+  "n_files": 16,
+  "targets": [
+   "doc/sphinxext/comment_eater.py",
+   "doc/sphinxext/traitsdoc.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 4
+ },
+ {
+  "repo": "pandas-dev/pandas",
+  "pr": 4515,
+  "n_files": 10,
+  "targets": [
+   "pandas/core/indexing.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": true,
+  "rank_of_first": 7
+ },
+ {
+  "repo": "pandas-dev/pandas",
+  "pr": 4610,
+  "n_files": 21,
+  "targets": [
+   "pandas/core/index.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": false,
+  "rank_of_first": 3
+ },
+ {
+  "repo": "pandas-dev/pandas",
+  "pr": 4732,
+  "n_files": 16,
+  "targets": [
+   "pandas/core/frame.py",
+   "pandas/tests/test_frame.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 2
+ },
+ {
+  "repo": "pandas-dev/pandas",
+  "pr": 4822,
+  "n_files": 12,
+  "targets": [
+   "pandas/core/common.py",
+   "pandas/io/pytables.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "pandas-dev/pandas",
+  "pr": 4830,
+  "n_files": 12,
+  "targets": [
+   "pandas/core/groupby.py",
+   "pandas/core/internals.py",
+   "pandas/sparse/panel.py",
+   "pandas/sparse/series.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 2
+ },
+ {
+  "repo": "pandas-dev/pandas",
+  "pr": 4850,
+  "n_files": 15,
+  "targets": [
+   "pandas/core/index.py",
+   "pandas/core/indexing.py",
+   "pandas/tests/test_frame.py",
+   "pandas/tests/test_index.py",
+   "pandas/tests/test_indexing.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": false,
+  "rank_of_first": 2
+ },
+ {
+  "repo": "pandas-dev/pandas",
+  "pr": 4924,
+  "n_files": 9,
+  "targets": [
+   "pandas/computation/align.py",
+   "pandas/computation/expr.py",
+   "pandas/computation/ops.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": true,
+  "rank_of_first": 4
+ },
+ {
+  "repo": "ansible/ansible",
+  "pr": 11719,
+  "n_files": 9,
+  "targets": [
+   "lib/ansible/executor/module_common.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": true,
+  "rank_of_first": 6
+ },
+ {
+  "repo": "ansible/ansible",
+  "pr": 12226,
+  "n_files": 28,
+  "targets": [
+   "lib/ansible/plugins/cache/__init__.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 27
+ },
+ {
+  "repo": "ansible/ansible",
+  "pr": 12244,
+  "n_files": 9,
+  "targets": [
+   "contrib/inventory/apache-libcloud.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": true,
+  "rank_of_first": 9
+ },
+ {
+  "repo": "ansible/ansible",
+  "pr": 13691,
+  "n_files": 9,
+  "targets": [
+   "lib/ansible/plugins/callback/default.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 4
+ },
+ {
+  "repo": "ansible/ansible",
+  "pr": 15226,
+  "n_files": 13,
+  "targets": [
+   "lib/ansible/module_utils/basic.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "ansible/ansible",
+  "pr": 15246,
+  "n_files": 28,
+  "targets": [
+   "lib/ansible/executor/module_common.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": true,
+  "rank_of_first": 9
+ },
+ {
+  "repo": "scrapy/scrapy",
+  "pr": 426,
+  "n_files": 28,
+  "targets": [
+   "scrapy/selector/unified.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 21
+ },
+ {
+  "repo": "scrapy/scrapy",
+  "pr": 570,
+  "n_files": 10,
+  "targets": [
+   "scrapy/contrib/linkextractors/regex.py",
+   "scrapy/tests/test_contrib_exporter.py",
+   "scrapy/tests/test_contrib_linkextractors.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 2
+ },
+ {
+  "repo": "scrapy/scrapy",
+  "pr": 799,
+  "n_files": 21,
+  "targets": [
+   "scrapy/contrib/downloadermiddleware/cookies.py",
+   "scrapy/contrib/exporter/__init__.py",
+   "scrapy/tests/test_commands.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": true,
+  "rank_of_first": 4
+ },
+ {
+  "repo": "scrapy/scrapy",
+  "pr": 803,
+  "n_files": 18,
+  "targets": [
+   "scrapy/utils/iterators.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 6
+ },
+ {
+  "repo": "scrapy/scrapy",
+  "pr": 1149,
+  "n_files": 20,
+  "targets": [
+   "scrapy/core/downloader/handlers/__init__.py",
+   "scrapy/extensions/feedexport.py"
+  ],
+  "ranked_hit": false,
+  "alpha_hit": false,
+  "rank_of_first": 10
+ },
+ {
+  "repo": "scrapy/scrapy",
+  "pr": 1236,
+  "n_files": 11,
+  "targets": [
+   "scrapy/utils/log.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": false,
+  "rank_of_first": 1
+ },
+ {
+  "repo": "celery/celery",
+  "pr": 4443,
+  "n_files": 9,
+  "targets": [
+   "celery/backends/base.py",
+   "celery/backends/redis.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 3
+ },
+ {
+  "repo": "celery/celery",
+  "pr": 4709,
+  "n_files": 11,
+  "targets": [
+   "celery/app/base.py",
+   "celery/app/task.py",
+   "celery/result.py",
+   "t/integration/test_tasks.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 2
+ },
+ {
+  "repo": "celery/celery",
+  "pr": 5331,
+  "n_files": 28,
+  "targets": [
+   "celery/__init__.py"
+  ],
+  "ranked_hit": true,
+  "alpha_hit": true,
+  "rank_of_first": 3
+ }
+]
