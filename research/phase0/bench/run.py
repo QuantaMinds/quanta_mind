@@ -35,7 +35,17 @@ OUT = pathlib.Path(__file__).resolve().parent / "martian_comparison.json"
 
 
 def judge_arm(client: Client, prs: list[dict], cands: dict[str, list[str]], label: str) -> dict:
-    """Score one arm across all 50 pull requests. Prints progress; never hides an empty arm."""
+    """Score one arm across all 50 pull requests. Prints progress; never hides an empty arm.
+
+    Completed arms are cached to disk. A harness defect in a LATER arm should not cost a
+    twenty-minute recalibration of an EARLIER one -- but the cache is keyed by arm label only, so
+    delete `arm_*.json` whenever the judge prompt or the candidates change.
+    """
+    cache = pathlib.Path(__file__).resolve().parent / f"arm_{label.replace('/', '_')}.json"
+    if cache.exists():
+        done = json.loads(cache.read_text())
+        print(f"    {label}: cached  P={done['precision']:.1%} R={done['recall']:.1%}")
+        return done
     tp = fp = fn = errors = 0
     reviewed = 0
     t0 = time.time()
@@ -54,7 +64,7 @@ def judge_arm(client: Client, prs: list[dict], cands: dict[str, list[str]], labe
             el = time.time() - t0
             print(f"    {label}: {i}/{len(prs)}  P={p:.1%} R={r:.1%} F1={f:.1%}  ({el:.0f}s)")
     p, r, f = judge.score(tp, fp, fn)
-    return {
+    out = {
         "tp": tp,
         "fp": fp,
         "fn": fn,
@@ -64,6 +74,8 @@ def judge_arm(client: Client, prs: list[dict], cands: dict[str, list[str]], labe
         "recall": r,
         "f1": f,
     }
+    cache.write_text(json.dumps(out))
+    return out
 
 
 def main() -> int:

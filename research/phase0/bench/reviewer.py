@@ -48,14 +48,38 @@ class ReviewFailed(RuntimeError):
     """The model returned nothing parseable. Distinct from an empty, deliberate review."""
 
 
+def _salvage(text: str) -> str | None:
+    """Close a JSON array that the model was cut off mid-way through writing.
+
+    A MAX_TOKENS truncation leaves a well-formed prefix and no closing bracket. Discarding the
+    whole review would score the harness's ceiling as the reviewer's silence -- the defect class
+    this project has now found three times. The issues that DID arrive are real, so they are kept
+    and the truncation is reported separately by the caller via the finish reason.
+    """
+    start = text.find("[")
+    if start < 0:
+        return None
+    end = text.rfind("}")
+    if end < start:
+        return None
+    return text[start : end + 1] + "]"
+
+
 def _parse(text: str) -> list[str]:
     m = re.search(r"\[.*\]", text, re.S)
-    if not m:
-        raise ReviewFailed(f"no JSON array in reply: {text[:160]!r}")
+    raw = m.group(0) if m else _salvage(text)
+    if raw is None:
+        raise ReviewFailed(f"no JSON array and nothing salvageable: {text[:160]!r}")
     try:
-        arr = json.loads(m.group(0))
-    except json.JSONDecodeError as exc:
-        raise ReviewFailed(f"reply is not JSON: {exc}") from None
+        arr = json.loads(raw)
+    except json.JSONDecodeError:
+        salvaged = _salvage(text)
+        if salvaged is None or salvaged == raw:
+            raise ReviewFailed(f"reply is not JSON: {text[:160]!r}") from None
+        try:
+            arr = json.loads(salvaged)
+        except json.JSONDecodeError as exc:
+            raise ReviewFailed(f"reply is not JSON even salvaged: {exc}") from None
     out: list[str] = []
     for item in arr:
         s = str(item.get("issue") or "").strip() if isinstance(item, dict) else str(item).strip()
@@ -78,7 +102,7 @@ def review(client: object, title: str, diff: str) -> tuple[list[str], str]:
                 "parts": [{"text": PROMPT.format(max_issues=MAX_ISSUES, title=title, diff=diff)}],
             }
         ],
-        "generationConfig": {"temperature": 0.0, "maxOutputTokens": 8192},
+        "generationConfig": {"temperature": 0.0, "maxOutputTokens": 32768},
     }
     resp = client.generate(body)  # type: ignore[attr-defined]
     finish = str(resp.get("finish", "?"))

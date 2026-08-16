@@ -90,15 +90,21 @@ def diff(original_url: str) -> str:
     if path.exists() and path.stat().st_size > 0:
         return path.read_text()[:MAX_DIFF_CHARS]
 
-    repo, _, tail = original_url.replace("https://github.com/", "").partition("/pull/")
+    # Discourse's golden file identifies its changes by COMMIT, not by pull request -- all ten of
+    # its entries are /commit/<sha>. Splitting every URL on "/pull/" produced a nonsense endpoint
+    # and ten fetch failures that looked like the reviewer declining to review.
+    bare = original_url.replace("https://github.com/", "")
+    if "/pull/" in bare:
+        repo, _, tail = bare.partition("/pull/")
+        endpoint = f"repos/{repo}/pulls/{tail}"
+    elif "/commit/" in bare:
+        repo, _, tail = bare.partition("/commit/")
+        endpoint = f"repos/{repo}/commits/{tail}"
+    else:
+        raise FetchFailed(f"{original_url}: neither a pull request nor a commit URL")
+
     p = subprocess.run(
-        [
-            "gh",
-            "api",
-            f"repos/{repo}/pulls/{tail}",
-            "-H",
-            "Accept: application/vnd.github.v3.diff",
-        ],
+        ["gh", "api", endpoint, "-H", "Accept: application/vnd.github.v3.diff"],
         capture_output=True,
         timeout=180,
     )
