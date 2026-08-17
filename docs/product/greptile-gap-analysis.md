@@ -47,6 +47,52 @@ both sides of it.
 
 ---
 
+## Our honest placement: mid-table, not near the top
+
+**"At level with CodeRabbit" is true and it flatters us by omission.** CodeRabbit ranks **24th of
+49** on this benchmark. We scored marginally below it under our own judge (44.6% F1 against 45.6%),
+so **our placement is around 24th–25th.**
+
+| rank | tool | precision | F1 |
+|---|---|---|---|
+| 1 | qodo-extended-v2 | **67.9%** | 64.4% |
+| 2 | cubic-v2 | 62.4% | 62.4% |
+| 3 | augment | 60.7% | 61.5% |
+| 7 | **greptile-v4-1** | 53.3% | 52.4% |
+| **24** | **coderabbit** | 34.7% | 43.8% |
+
+**At least six tools beat Greptile, and Greptile beats us significantly.** Reporting "at level with
+CodeRabbit" without "and CodeRabbit is 24th" is the true-but-shaped sentence this project's
+publishing rules exist to stop.
+
+---
+
+## How the rivals' numbers were obtained — we never ran their products
+
+**We hold no subscription to Greptile or CodeRabbit and never invoked either.** Martian forked the
+50 pull requests, installed each paid tool on the forks, and checked the collected output into
+`github.com/withmartian/code-review-benchmark` (clone at commit `fbc5425`, 7 Aug 2026). We consumed
+that artefact and re-judged every arm with one judge.
+
+**Verified, not assumed:**
+
+| risk | check | result |
+|---|---|---|
+| our judge softer than theirs | calibrate on CodeRabbit before anything else | 37.8% vs 34.7% precision, 62.4% vs 59.5% recall |
+| judge prompt paraphrased | diff against `step3_judge_comments.py` | **character-for-character identical**, 598 chars |
+| we picked Greptile's weakest build | enumerate variants | used **v4-1, their best** — F1 52.4% against 42.5 / 41.8 / 40.4 |
+| duplicate candidates inflate rival FPs | count exact duplicates | **0 of 486** theirs, **0 of 194** ours |
+| our arm given an easier run | read the config | 1 call per PR, temperature 0, capped at 12 issues, **no repository access** — while their tools ran with full indexes, 40+ linters and per-review microVMs |
+
+**The setup favours them, not us.** CodeRabbit reviewed inside a microVM with the repository cloned
+and 40+ linters; Greptile had its semantic code graph and a multi-hop agent. **We sent one prompt
+containing a raw diff.**
+
+**And what we did not do:** the online layer. It requires posting comments on live pull requests in
+other people's repositories, so we did not run it and hold no position on that leaderboard.
+
+---
+
 ## The four cells
 
 | | issues | share |
