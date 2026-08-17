@@ -12,6 +12,8 @@ WHY:  Every other tool on this benchmark reviews a whole diff and is scored on t
       semantically. Asking for a line number we know to be wrong would add a field the judge
       ignores and let us pretend the defect was tested here. It was not.
 IMPORTS: stdlib only (json, re).
+NOTE: two prompts. `PROMPT` suppresses nits, `PROMPT_NITS` does not; `nits=True` selects the
+      second. The pair is the experiment, not a setting.
 CONSUMED BY: `run.py` in this package.
 """
 
@@ -29,6 +31,36 @@ API contract violations, data-handling mistakes.
 Do not report style, formatting, naming, test coverage or documentation unless the change is
 actually incorrect. Do not restate what the diff does. Do not speculate about code you cannot
 see in the diff.
+
+Report at most {max_issues} issues. If the change looks correct, return an empty list -- that is
+a valid and useful answer.
+
+Pull request title: {title}
+
+Unified diff:
+```
+{diff}
+```
+
+Respond with ONLY a JSON array of objects, each: {{"issue": "one sentence naming the specific
+defect and why it is wrong"}}"""
+
+# The same reviewer with the suppression removed. The strict prompt above bans exactly the
+# categories where the measured Greptile gap lives -- 21% deficit rate inside them against 2%
+# outside -- so this arm exists to test whether the gap is a configuration choice or a capability
+# difference. It is NOT a proposed product configuration: the filter Greptile credits for its own
+# quality (19% -> 55% address rate) exists to remove precisely these comments.
+# → `docs/product/greptile-gap-analysis.md`
+PROMPT_NITS = """You are reviewing a pull request. Report anything a careful reviewer would
+comment on before merging.
+
+Include logic errors, missing error handling, concurrency hazards, security problems, API
+contract violations and data-handling mistakes. ALSO include the smaller things: typos and
+misspellings, inconsistent or misleading naming, formatting and style problems, missing or wrong
+comments and documentation, missing test coverage, and suspicious-looking values or constants
+that may have been changed by mistake.
+
+Do not restate what the diff does. Do not speculate about code you cannot see in the diff.
 
 Report at most {max_issues} issues. If the change looks correct, return an empty list -- that is
 a valid and useful answer.
@@ -88,18 +120,19 @@ def _parse(text: str) -> list[str]:
     return out[:MAX_ISSUES]
 
 
-def review(client: object, title: str, diff: str) -> tuple[list[str], str]:
+def review(client: object, title: str, diff: str, nits: bool = False) -> tuple[list[str], str]:
     """(issues, finish reason). Raises rather than returning [] when the model did not answer.
 
     The finish reason is returned and never inferred: a MAX_TOKENS truncation and a deliberate
     empty review print the same thing downstream, and this project has already published a number
     that was really eleven truncations.
     """
+    tmpl = PROMPT_NITS if nits else PROMPT
     body = {
         "contents": [
             {
                 "role": "user",
-                "parts": [{"text": PROMPT.format(max_issues=MAX_ISSUES, title=title, diff=diff)}],
+                "parts": [{"text": tmpl.format(max_issues=MAX_ISSUES, title=title, diff=diff)}],
             }
         ],
         "generationConfig": {"temperature": 0.0, "maxOutputTokens": 32768},
