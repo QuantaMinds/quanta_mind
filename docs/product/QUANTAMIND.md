@@ -495,16 +495,23 @@ The underlying technique is old: mining version histories to guide software chan
 
 ## Differentiation
 
-| | CodeRabbit | Graphite | Greptile / Bugbot / Qodo | **QuantaMind** |
+| | CodeRabbit | Graphite | Greptile | **QuantaMind** |
 |---|---|---|---|---|
-| Question it answers | Is this change **wrong**? | Is this change **slow to ship**? | Is this change **wrong**? | Is this change **incomplete or risky, and where** |
-| Reads | whole diff, uniform depth | whole diff | whole diff | **the ranked function, deeply** |
-| Uses history | files that change together, as hidden context | codebase-aware model | no | **functions that come back, as the allocation decision** |
+| Question it answers | Is this change **wrong**? | Is this change **slow to ship**? | Is this change **wrong**? | **Where in this change should a human look first** |
+| Reads | whole diff + code graph, 40+ linters, microVM | whole diff | whole diff + semantic code graph, agentic multi-hop | **git history. No model reads the code** |
+| Uses history | files that change together, as hidden context | codebase-aware model | **yes — git history is a tool its v3 agent calls** | **fix history is the entire ranking** |
 | Says what it could not analyse | **no** | **no** | **no** | **yes, on every pull request** |
-| Checks its model's own claims | no | no | no | **yes, parser-verified before publication** |
+| Publishes model claims about correctness | yes | yes | yes | **none — we ship no findings** |
 | Fires on | nearly every change | nearly every change | nearly every change | **10–12%** |
-| Cost driver | tokens, scaling with lines read | tokens | tokens | **compute, plus inference only where ranked** |
-| Priced | per seat | per seat | per seat / credits | **per repository** |
+| Marginal cost per pull request | tokens, scaling with lines read | tokens | tokens | **~$0 — a git read and a SQLite query** |
+| Priced | per seat | per seat | per seat | **per repository** |
+
+**Three rows in this table were wrong until the benchmark run and are corrected above.** Greptile
+was listed as not using history; its v3 agent calls git history as a tool. We were listed as
+reading "the ranked function, deeply" and as publishing "parser-verified" claims; **`infer/` and
+`verify/` are not built and not planned**, so we read nothing with a model and publish no claims at
+all. A differentiation table that credits us with a capability we deleted is the drift this
+project's publishing rules exist to catch.
 
 **The cost-driver row is a claim about *structure*, not a measured saving, and it must not be
 read as one.** The arithmetic puts allocation at **1.25×** cheaper than uniform review at one
@@ -512,6 +519,61 @@ pass — and that figure is derived from a specification rather than observed on
 listed as unproven at the end of this document and gated in the build plan. **What is
 structural, and does not depend on that number, is that the ranking stage runs without
 inference at all.**
+
+## We entered their benchmark. This is what came back.
+
+**Every competitor comparison here was previously refused on the grounds that their precision is
+behavioural — did a developer change the code — and ours was truth.** That was correct about the
+public leaderboard and wrong as a permanent position. Martian's benchmark also has an **offline
+layer**: 50 pull requests, five repositories, human-verified issue lists, an open judge and an
+open pipeline. Both kinds of reviewer can be scored on it, so we ran ours through.
+
+→ `docs/plans/martian-comparison-preregistration.md`, bars fixed before the run.
+
+| arm | precision | 95% CI | recall | F1 |
+|---|---|---|---|---|
+| greptile-v4-1 | **56.5%** | 48.8–63.9% | 52.6% | **54.5%** |
+| coderabbit | 36.5% | 31.1–42.2% | **60.7%** | 45.6% |
+| **QuantaMind** | **43.6%** | 36.6–50.9% | 45.7% | 44.6% |
+
+**Read this the careful way.** We are **at level with CodeRabbit and behind Greptile.** The +7.2
+points over CodeRabbit is **not significant** (Fisher p = 0.145); Greptile's +12.9 over us **is**
+(p = 0.0228). And our arm was judged by its own model family — a blind out-of-family adjudication
+put our over-match rate at 15.0% against the rivals' 5.0%, which at the point estimate would move
+us to **37.1%**, level with CodeRabbit rather than above it.
+
+**The number that mattered most was the one about the industry, not us.** The precision figures
+the market quotes — Greptile 76.2%, CodeRabbit 49.2% — are from the **online** layer, which asks
+whether a developer changed the code. On the offline layer, against human-verified issues,
+**CodeRabbit is at 36.5%.** Our 65.2%-wrong figure had been compared against an assumed field
+floor near 49% correct for months. **The real comparison was never as bad as we told ourselves.**
+
+**And no tool of the 48 scored exceeds roughly 63% recall.** Nobody has solved this.
+
+## The experiment that decided our configuration
+
+The gap to Greptile is not architecture. **Two-thirds of it is Low-severity issues, and splitting
+the golden set by whether our own prompt banned the category gives a −21% deficit rate inside the
+ban against −2% outside.** So we removed the ban and re-ran.
+
+| arm | comments | precision | recall | F1 | gap to Greptile |
+|---|---|---|---|---|---|
+| strict | 194 | 43.6% | 45.7% | 44.6% | −9 |
+| **nits on** | **464** | **22.7%** | **57.8%** | **32.6%** | **+14** |
+
+**The gap did not close, it reversed — our recall passed Greptile's.** And the price:
+
+> **The 270 comments we added contained 21 real findings and 238 false ones. Marginal precision:
+> 8.1%.** Noise per pull request went from 2.0 to 6.8, against Greptile's 1.4.
+
+**Greptile leads this benchmark emitting one fifth of what that arm does.** They win on selection,
+not volume — and their own published quality programme is a filter that deletes comments
+resembling ones developers downvoted, taking their address rate from 19% to 55%.
+
+> **Benchmark position and product quality are opposed on this gold set, and the exchange rate is
+> 8.1%. Benchmark rank is therefore not a product target.**
+
+→ `docs/product/greptile-gap-analysis.md`
 
 ## Why they cannot kill this in one update
 
@@ -606,33 +668,69 @@ It compounds in the ordinary way: more repositories, better thresholds, better c
 service type, and eventually a defensible per-language answer to *"where does review time
 actually pay."*
 
+### Five: per-seat pricing forces volume, and volume is now priced at 8.1%
+
+**This is the one the benchmark measured, and it is a business-model constraint rather than an
+engineering one.**
+
+A reviewer sold **per seat** has to look present. A developer paying monthly for a bot that stays
+quiet on two changes in three cancels it, so the incumbent's incentive is to comment — and every
+one of them fires on nearly every change. **We measured what that costs on their own benchmark by
+doing it ourselves:** removing one sentence of suppression took us from 194 comments to 464, and
+**the 270 we added contained 21 real findings and 238 false ones.**
+
+**Marginal precision of visible presence: 8.1%.**
+
+They know it. Greptile's published quality programme is a vector filter that blocks a comment
+resembling three previously downvoted ones — **built specifically to delete the comments per-seat
+economics push them to emit**, and worth going from a 19% to a 55% address rate. **CodeRabbit ships
+288 comments across 50 pull requests where Greptile ships 161 and scores 20 points higher.**
+
+**Priced per repository, silence costs us nothing.** Firing on 10–12% of changes is a feature of
+the invoice rather than a threat to it. **That inversion is not something a competitor ships in an
+update; it is something they change by repricing, which breaks the model their revenue is built
+on.**
+
 ### Where we are genuinely exposed, stated plainly
 
 - **The ranking is not defensible.** A week of work for anyone who reads this description.
-- **CodeRabbit already scans co-change history.** Moving from file to function granularity and
-  surfacing it as a finding is incremental for them, not a rebuild.
+- **Greptile is better at review than we are, and it is significant.** 56.5% precision against our
+  43.6%, p = 0.0228, on a benchmark we chose to enter. If what the market wants is a reviewer, we
+  lose that contest on the evidence.
+- **CodeRabbit already scans co-change history**, and **Greptile's agent calls git history as a
+  tool.** The signal we rank on is already inside both products; what differs is what they do with
+  it. Surfacing it as an ordering is incremental for them, not a rebuild.
 - **They have 17,000 customers and we have none.** Distribution beats mechanism, and it beats it
   quickly.
 - **Our visible surface is a tenth of theirs.** Next to walkthroughs, diagrams and one-click
-  fixes, a coverage line and one finding looks thin until somebody measures the noise.
-- **We are not better at finding bugs.** Same model class, same precision ceiling. Nothing
-  measured here says otherwise, and claiming it in a room would be false.
+  fixes, a coverage line looks thin until somebody measures the noise.
+- **We are not better at finding bugs, and we no longer try.** `infer/` is not built. Nothing
+  measured here says we would win that contest, and claiming it in a room would be false.
 
-**The honest position: better on noise, honesty, targeting, verification and cost — not better
-at bug-finding.** The moat is not the ranking. It is that the incumbents cannot measure
-themselves, cannot afford to prove value on a prospect's own history, and cannot report coverage
-without first building a layer whose output embarrasses them.
+**The honest position: better on noise, honesty, targeting and cost — not better at bug-finding,
+and no longer competing on it.** The moat is not the ranking. **It is that the incumbents cannot
+measure themselves, cannot afford to prove value on a prospect's own history, cannot report
+coverage without building a layer whose output embarrasses them, and cannot go quiet without
+breaking the per-seat model they are priced on.**
 
 ## The investor question: "if you are not better at finding bugs, why should we invest?"
 
 The answer, in the order it should be given.
 
-### "You're right. We're not. Neither is anyone else — and that is the point."
+### "You're right. We're not. Neither is anyone else — and now we have run their benchmark to prove it."
 
-The independent benchmark puts the entire field between **49% and 76% precision**. We measured
-the market leader against real breakages. **That measurement is withdrawn** — its
-Wilson interval spans the comparison figure, so it distinguishes nothing. See the
-withdrawal near the top of this document.
+**We entered Martian's offline layer rather than asserting this.** Against human-verified issues on
+50 pull requests, scored by one judge: **Greptile 56.5%, us 43.6%, CodeRabbit 36.5%.** We are level
+with CodeRabbit and behind Greptile, and **no tool of the 48 scored exceeds roughly 63% recall.**
+
+**The 49–76% band the market quotes is the ONLINE layer** — did a developer change the code — and
+it is a different measurement on a different population. The same CodeRabbit that reports 49.2%
+there is at **36.5%** against verified issues. **The field is materially worse than its own
+marketing, and the benchmark's authors say their gold set is incomplete on top of that.**
+
+An earlier measurement of the market leader against real breakages **is withdrawn** — its Wilson
+interval spans the comparison figure, so it distinguishes nothing. See the withdrawal near the top
+of this document. **The benchmark run replaces it, and it was pre-registered.**
 
 ### The bottleneck was never detection. It is attention.
 
