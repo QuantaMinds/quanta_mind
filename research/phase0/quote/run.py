@@ -3,7 +3,8 @@
 WHAT: Reviews sixty merged pull requests from six untouched repositories, runs each finding through
       the model-free gate, and prints the raw quote-failure rate, the joint gate distribution, the
       yield, and the hunk-size stratification.
-WHY:  Bars are fixed in `docs/plans/quote-anchor-preregistration.md` and are not restated here as
+WHY:  Bars are fixed in the quote-anchor pre-registration under `docs/plans/preregistrations/`
+      and are not restated here as
       thresholds to be nudged. G2 -- the wrong-rate of published findings -- needs blind
       adjudication and is NOT computed here; this run produces the findings that get adjudicated.
 

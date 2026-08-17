@@ -10,7 +10,7 @@ that an LLM's capacity to discover new bugs is bounded by the analyzer's.
   triage_run.py  the model judges each alarm, one at a time
 
 Research only. The bar is unchanged: under 50% wrong among promoted alarms, blind adjudication,
-pre-registered in `docs/plans/triage-preregistration.md`.
+pre-registered in `docs/plans/preregistrations/triage-preregistration.md`.
 """
 
 from __future__ import annotations

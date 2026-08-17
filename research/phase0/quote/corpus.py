@@ -17,7 +17,8 @@ import json
 import pathlib
 import subprocess
 
-# Fixed in docs/plans/quote-anchor-preregistration.md before any run. Never edited to fit a result.
+# Fixed in the quote-anchor pre-registration before any run. Never edited to fit a result.
+# → docs/plans/preregistrations/quote-anchor-preregistration.md
 REPOS = (
     "apache/superset",
     "ray-project/ray",
@@ -26,7 +27,18 @@ REPOS = (
     "mitmproxy/mitmproxy",
     "PrefectHQ/prefect",
 )
+# Design nine. Six more repositories, none of the thirty-eight already burned. Fixed in
+# docs/plans/preregistrations/path-filter-preregistration.md before the run.
+REPOS_D9 = (
+    "dbt-labs/dbt-core",
+    "streamlit/streamlit",
+    "dagster-io/dagster",
+    "encode/httpx",
+    "huggingface/datasets",
+    "bokeh/bokeh",
+)
 PER_REPO = 10
+PER_REPO_D9 = 15
 MAX_DIFF_CHARS = 120_000
 CACHE = pathlib.Path(
     "/private/tmp/claude-501/-Users-dhanu-Documents-SaaS-quanta-mind/"
@@ -48,8 +60,8 @@ def _gh(args: list[str], accept: str | None = None) -> bytes:
     return p.stdout
 
 
-def pulls() -> list[dict[str, object]]:
-    """The pre-registered sample: PER_REPO merged pull requests from each repository.
+def pulls(repos: tuple[str, ...] = REPOS, per_repo: int = PER_REPO) -> list[dict[str, object]]:
+    """The pre-registered sample: `per_repo` merged pull requests from each repository.
 
     Sorted by GitHub's default (most recently updated) and filtered to merged. Recency is
     acceptable here BECAUSE nothing in this experiment looks forward -- adjudication asks whether a
@@ -57,11 +69,11 @@ def pulls() -> list[dict[str, object]]:
     two earlier corpora applies to outcome measurement, and this is not one.
     """
     out: list[dict[str, object]] = []
-    for repo in REPOS:
+    for repo in repos:
         raw = _gh([f"repos/{repo}/pulls?state=closed&per_page=40"])
         got = 0
         for pr in json.loads(raw):
-            if not pr.get("merged_at") or got >= PER_REPO:
+            if not pr.get("merged_at") or got >= per_repo:
                 continue
             if (pr.get("changed_files") or 0) > 40:
                 continue

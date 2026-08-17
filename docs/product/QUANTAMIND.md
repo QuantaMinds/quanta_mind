@@ -528,7 +528,7 @@ public leaderboard and wrong as a permanent position. Martian's benchmark also h
 layer**: 50 pull requests, five repositories, human-verified issue lists, an open judge and an
 open pipeline. Both kinds of reviewer can be scored on it, so we ran ours through.
 
-→ `docs/plans/martian-comparison-preregistration.md`, bars fixed before the run.
+→ `docs/plans/preregistrations/martian-comparison-preregistration.md`, bars fixed before the run.
 
 | arm | precision | 95% CI | recall | F1 |
 |---|---|---|---|---|

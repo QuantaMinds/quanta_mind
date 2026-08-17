@@ -151,7 +151,9 @@ def main() -> int:
     print(f"    McNemar exact p = {p:.5f}")
     print(f"    repositories where history beats control: {pos}/{nrep}")
 
-    print("\n  READING against docs/plans/defect-return-external-preregistration.md")
+    print(
+        "\n  READING against docs/plans/preregistrations/defect-return-external-preregistration.md"
+    )
     if n < MIN_EVENTS or (b + c) < MIN_DISCORDANT:
         print(
             f"    INCONCLUSIVE — needs >={MIN_EVENTS} events (have {n}) and "
