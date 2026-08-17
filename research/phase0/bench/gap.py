@@ -1,17 +1,17 @@
-"""Which specific issues does Greptile find that we miss, and what do they have in common?
+"""Which specific issues does a rival find that we miss, and what do they have in common?
 
 WHAT: Re-judges our arm and Greptile's against the same golden comments, keeping the per-issue
       detail the headline run discarded, and writes the four cells: caught by both, caught only by
       Greptile, caught only by us, missed by both.
-WHY:  The headline says Greptile beats us by 12.9 points, p = 0.0228. That is a score, not a
-      diagnosis. The hypothesis under test is that they index the whole repository and we read one
-      diff, so the gap should concentrate in issues whose evidence is NOT in the diff.
+WHY:  A leaderboard position is a score, not a diagnosis. The first hypothesis tested was that a
+      rival indexes the whole repository while we read one diff, so the gap should concentrate in
+      issues whose evidence is NOT in the diff.
 
       A CAUSE THAT DOES NOT SEPARATE OUTCOMES IS A STORY. So the gap set is cross-tabulated
       against a mechanical marker -- whether the golden comment names a symbol absent from the
       diff we were shown -- rather than read for a narrative.
 IMPORTS: stdlib only (json, pathlib, sys). Local: `corpus`, `judge`, and the Vertex `client`.
-CONSUMED BY: nobody -- it prints and writes gap_detail.json.
+CONSUMED BY: nobody -- it prints and writes gap_detail_<rival>.json.
 """
 
 from __future__ import annotations
@@ -28,9 +28,11 @@ from client import Client
 import corpus
 
 MODEL = "gemini-2.5-pro"
-OUT = pathlib.Path(__file__).resolve().parent / "gap_detail.json"
 OURS = pathlib.Path(__file__).resolve().parent / "martian_comparison.json"
-RIVAL = "greptile-v4-1"
+# Which rival to diff against. Defaults to greptile-v4-1, the tool named when this was written;
+# qodo-extended-v2 is the benchmark's actual leader and takes the same code path.
+RIVAL = sys.argv[1] if len(sys.argv) > 1 else "greptile-v4-1"
+OUT = pathlib.Path(__file__).resolve().parent / f"gap_detail_{RIVAL}.json"
 
 
 def main() -> int:
