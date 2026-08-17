@@ -148,6 +148,14 @@ real-world code review deployment."*
 - **Function size as a moderator** — `evidence-ledger.md` "The pooled pattern across all 207 adjudicated findings". Real at the extremes — 45.9% wrong
   at ≤10 lines against 89.3% above 80 — but not monotonic, and found by sweeping 207 findings, so
   it needs a fresh corpus and a bar fixed first.
+- **Complementarity with an incumbent reviewer** — `greptile-gap-analysis.md` "The union result —
+  parked, not claimed". On Martian's offline layer our arm and Greptile's overlap at only 43.7%
+  Jaccard, and between them cover 68.8% of the golden set against 52.0% for Greptile alone — above
+  the ~63% ceiling no single tool of 48 has passed. **The bar is not a benchmark score.** A
+  complementarity product publishes findings, so it must first clear the one the review half failed
+  seven times: **under 50% of published findings wrong, under adjudication that checks anchors** —
+  which this benchmark does not. And the union may be an artefact: the self-preference correction
+  already removes ~4 of our 29 unique catches.
 
 ---
 
