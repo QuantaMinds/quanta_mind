@@ -91,6 +91,14 @@ When someone asks for our benchmark:
   — this benchmark never checks whether a claim is anchored to the line it cites, which is where
   87.3% of ours fail. → `docs/product/greptile-gap-analysis.md`
 
+- **When two measurements of the reviewer disagree, the stricter one governs shipping.** Martian's
+  offline layer asks whether a comment matches a known issue; our adjudication asked whether the
+  claim is true of the code AND anchored to the line it cites. **43.6% there, 5.80% here. Both are
+  real and they answer different questions.** A comment naming a real defect while pointing at the
+  wrong line is worth nothing to the developer who opens the file and finds nothing — and the judge
+  that scored 43.6% never had to open the file. **The review half stays stopped on the 5.80%, and
+  no benchmark that does not check anchors can reopen it.**
+
 - **Never present benchmark position as a product goal.** Removing our nit suppression closed and
   reversed the Greptile gap while adding 238 false positives for 21 true ones — **a marginal
   precision of 8.1%**. This gold set and the product are opposed on nits, and Greptile's own
