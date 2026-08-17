@@ -248,3 +248,71 @@ so every arm's precision is understated and every arm's recall overstated.
 
 **The self-preference measurement is itself underpowered** at three events against one, p = 0.605.
 It is enough to downgrade a claim and not enough to quantify a correction.
+
+---
+
+# The nits arm — the gap closes, reverses, and costs everything
+
+**Same 50 pull requests, same judge, same golden comments. One change: the sentence forbidding
+style, formatting, naming, test coverage and documentation was removed from the prompt.**
+Predictions were committed in `run_nits.py` before the run.
+
+| arm | comments | TP | FP | precision | recall | F1 |
+|---|---|---|---|---|---|---|
+| strict (ours, before) | 194 | 79 | 102 | 43.6% | 45.7% | 44.6% |
+| **NITS ON (ours)** | **464** | **100** | **340** | **22.7%** | **57.8%** | **32.6%** |
+| greptile-v4-1 | 161 | 91 | 70 | 56.5% | 52.6% | 54.5% |
+
+**Four cells against Greptile: both 64, only THEM 22, only US 36, neither 51.**
+
+**NET GAP: +14, from −9. Union 70.5%.**
+
+## Against the pre-registered predictions
+
+| # | predicted | result |
+|---|---|---|
+| 1 | net gap closes to between −3 and +3 | **WRONG — +14.** It did not close, it reversed |
+| 2 | precision falls below 43.6% | **CONFIRMED — 22.7%** |
+| 3 | recall rises above 45.7% | **CONFIRMED — 57.8%** |
+| 4 | volume rises above 194 | **CONFIRMED — 464** |
+
+**Three of four. The miss is prediction 1, and it is a miss in the direction of a larger effect
+than I expected: turning nits on does not bring us level with Greptile, it puts us ahead of them
+on coverage.** Our recall of **57.8% now exceeds Greptile's 52.6%**, and we find 36 issues they
+miss against 22 we miss.
+
+**The mechanism is confirmed. The gap was configuration, not capability, and it was ours.**
+
+## And the price is the whole product
+
+**Turning the suppression off added 270 comments. 21 were real. 238 were noise.**
+
+> **MARGINAL PRECISION OF EVERY COMMENT WE ADDED: 8.1%**
+
+| arm | noise per PR | real findings per PR |
+|---|---|---|
+| greptile-v4-1 | **1.4** | 1.8 |
+| strict (ours) | 2.0 | 1.6 |
+| coderabbit | 3.7 | 2.1 |
+| **NITS ON (ours)** | **6.8** | 2.0 |
+
+**F1 fell from 44.6% to 32.6% — worse than the arm we started with, and the worst of any arm
+here.** Precision at 22.7% is below CodeRabbit's 36.5% and less than half Greptile's. Under the
+self-preference correction it is **19.3%**.
+
+**Greptile leads this benchmark while emitting one fifth of the comments the nits arm does.** They
+are not winning on volume; they are winning on selection. Turning nits on wins the coverage
+contest and loses the one that matters.
+
+## What this settles
+
+**The rule stated earlier now has its measurement.** Optimising for this gold set costs 238 false
+positives to gain 21 true ones — and Greptile's own published quality programme, the vector filter
+that took their address rate from 19% to 55%, exists to delete precisely those 238.
+
+> **Benchmark position and product quality are not merely uncorrelated here. They are opposed, and
+> the exchange rate is 8.1%.**
+
+**The strict arm is the better configuration and the measurement says so.** Nothing about the
+review half's status changes: it stopped at 5.80% correct under adjudication that checks anchors,
+and this benchmark does not check anchors.
