@@ -75,6 +75,36 @@ to put n where a wrong-rate means something.
 
 **H1 decides. H3 gates whether it may be read at all.**
 
+### H1 is an INTERVAL, not a point estimate — fixed before the number exists
+
+**A point estimate under 50% is not a pass unless the Wilson upper bound also clears 50%.**
+Otherwise the run is reported as **CANNOT DISTINGUISH**, which is neither a pass nor a fail.
+
+At the sample sizes in play:
+
+| n | wrong | rate | 95% Wilson | verdict |
+|---|---|---|---|---|
+| 70 | 14 | 20.0% | 12.3–30.8% | **PASS, clear** |
+| 70 | 21 | 30.0% | 20.5–41.5% | **PASS, clear** |
+| 70 | **26** | **37.1%** | 26.7–**48.9%** | **the last clean pass** |
+| 70 | 27 | 38.6% | 28.0–**50.3%** | **CANNOT DISTINGUISH** |
+| 70 | 32 | 45.7% | 34.6–57.3% | CANNOT DISTINGUISH |
+| 70 | 38 | 54.3% | 42.7–65.4% | CANNOT DISTINGUISH |
+
+**Note what this says about a 54% result: it is not a clean fail either.** At n = 70 nothing
+between roughly 37% and 63% separates from the bar. **The honest outcomes are "clearly under",
+"clearly over", or "this run cannot tell you" — and the third is the most likely one.**
+
+### A correction to how design eight's subgroup has been described
+
+I have twice called the 18.8% source-code subgroup too wide to decide anything. **The interval is
+6.6–43.0%, which does NOT cross 50%.** On width alone it would have passed.
+
+**The reason to distrust it is selection, not width.** It was found by slicing a failed run by a
+variable that was not pre-registered, after seeing the failure. That is the whole objection, and
+stating it as "the sample is too small" was imprecise in a way that made the objection sound
+weaker than it is.
+
 ---
 
 ## Predictions
