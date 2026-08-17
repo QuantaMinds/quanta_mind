@@ -18,7 +18,9 @@ import json
 import pathlib
 import sys
 
-ADJ = pathlib.Path(__file__).resolve().parent / "adj"
+# Design eight by default; pass "9" for the path-filtered run.
+WHICH = sys.argv[1] if len(sys.argv) > 1 else "8"
+ADJ = pathlib.Path(__file__).resolve().parent / ("adj9" if WHICH == "9" else "adj")
 WRONG_BAR = 0.50
 UNFALS_BAR = 0.25
 

@@ -28,11 +28,17 @@ import random
 import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
-RUN = HERE / "quote_run.json"
-ADJ = HERE / "adj"
-SEED = 20260818
+# Which run to adjudicate. Design eight by default; pass "9" for the path-filtered run.
+WHICH = sys.argv[1] if len(sys.argv) > 1 else "8"
+RUN = HERE / ("quote9_run.json" if WHICH == "9" else "quote_run.json")
+ADJ = HERE / ("adj9" if WHICH == "9" else "adj")
+SEED = 20260818 if WHICH == "8" else 20260819
 N_SABOTAGE = 8
 CONTEXT = 4
+# Hand adjudication has a practical ceiling. Fixed BEFORE design nine's count was known, and
+# chosen for rater capacity rather than for the result: a larger published set is sampled down
+# with a fixed seed, and the sampling is reported beside the wrong-rate.
+MAX_RATED = 70
 
 
 def context_for(repo: str, pr: int, quote: str) -> list[str]:
@@ -59,12 +65,13 @@ def main() -> int:
     pub = json.loads(RUN.read_text())["published"]
     rng = random.Random(SEED)
 
+    sampled = pub if len(pub) <= MAX_RATED else rng.sample(pub, MAX_RATED)
     items: list[dict[str, object]] = []
-    for p in pub:
+    for p in sampled:
         items.append({"kind": "real", **p})
 
     # Sabotage: a real quote, a real claim, deliberately from DIFFERENT pull requests.
-    pool = [p for p in pub if len({(q["repo"], q["pr"]) for q in pub}) > 1]
+    pool = [p for p in sampled if len({(q["repo"], q["pr"]) for q in sampled}) > 1]
     for _ in range(N_SABOTAGE):
         a, b = rng.sample(pool, 2)
         while (a["repo"], a["pr"]) == (b["repo"], b["pr"]):
@@ -123,6 +130,9 @@ def main() -> int:
     (ADJ / "chunk_0.md").write_text("\n".join(out))
     (ADJ / "KEY_DO_NOT_OPEN.json").write_text(json.dumps(key, indent=1))
     n_sab = sum(1 for k in key if k["kind"] == "SABOTAGE")
+    print(
+        f"  {len(pub)} published; {len(sampled)} sampled for rating (cap {MAX_RATED}, seed fixed)"
+    )
     print(f"  {len(items)} items written: {len(items) - n_sab} real, {n_sab} sabotaged controls")
     print(f"  {ADJ / 'chunk_0.md'}  ({len(out)} lines)")
     print(f"  key held separately in {ADJ / 'KEY_DO_NOT_OPEN.json'}")
