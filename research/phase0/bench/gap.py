@@ -28,11 +28,11 @@ from client import Client
 import corpus
 
 MODEL = "gemini-2.5-pro"
-OURS = pathlib.Path(__file__).resolve().parent / "martian_comparison.json"
+OURS = pathlib.Path(__file__).resolve().parent / "results" / "martian_comparison.json"
 # Which rival to diff against. Defaults to greptile-v4-1, the tool named when this was written;
 # qodo-extended-v2 is the benchmark's actual leader and takes the same code path.
 RIVAL = sys.argv[1] if len(sys.argv) > 1 else "greptile-v4-1"
-OUT = pathlib.Path(__file__).resolve().parent / f"gap_detail_{RIVAL}.json"
+OUT = pathlib.Path(__file__).resolve().parent / "results" / f"gap_detail_{RIVAL}.json"
 
 
 def main() -> int:

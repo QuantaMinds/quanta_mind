@@ -31,7 +31,7 @@ MODEL = "gemini-2.5-pro"
 RIVALS = ("coderabbit", "greptile-v4-1")  # calibration tool + the offline precision leader
 CALIBRATION_TOOL = "coderabbit"
 CALIBRATION_TOLERANCE = 0.10
-OUT = pathlib.Path(__file__).resolve().parent / "martian_comparison.json"
+OUT = pathlib.Path(__file__).resolve().parent / "results" / "martian_comparison.json"
 
 
 def judge_arm(client: Client, prs: list[dict], cands: dict[str, list[str]], label: str) -> dict:
@@ -41,7 +41,9 @@ def judge_arm(client: Client, prs: list[dict], cands: dict[str, list[str]], labe
     twenty-minute recalibration of an EARLIER one -- but the cache is keyed by arm label only, so
     delete `arm_*.json` whenever the judge prompt or the candidates change.
     """
-    cache = pathlib.Path(__file__).resolve().parent / f"arm_{label.replace('/', '_')}.json"
+    cache = (
+        pathlib.Path(__file__).resolve().parent / "results" / f"arm_{label.replace('/', '_')}.json"
+    )
     if cache.exists():
         done = json.loads(cache.read_text())
         print(f"    {label}: cached  P={done['precision']:.1%} R={done['recall']:.1%}")

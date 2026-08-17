@@ -26,7 +26,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 import corpus
 
-DETAIL = pathlib.Path(__file__).resolve().parent / "gap_detail.json"
+DETAIL = pathlib.Path(__file__).resolve().parent / "results" / "gap_detail.json"
 IDENT = re.compile(r"`([^`]{2,80})`")
 MIN_CELL = 10  # below this a percentage is decoration
 

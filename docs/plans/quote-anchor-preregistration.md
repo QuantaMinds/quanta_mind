@@ -151,3 +151,88 @@ bar fixed again, and the deterministic half is the roadmap either way.
 
 **And a near-miss is a fail.** 52% wrong is a fail. This project has adjusted a threshold after
 seeing a number exactly zero times, which is the only reason any of its figures are worth quoting.
+
+---
+
+# The result — **FAILED**. The anchor was fixed and the wrong-rate did not move.
+
+60 pull requests, six untouched repositories, 62 raw findings, 51 published, hand-adjudicated out
+of the Gemini family against the existing rubric. Artefacts: `research/phase0/quote/quote_run.json`,
+`adj/`.
+
+## The control first, because it decides whether anything else can be read
+
+**8 sabotaged findings — a real quote paired with a claim lifted from a different pull request —
+were mixed in unlabelled. The rater graded 8 of 8 WRONG. Catch rate 100%.** The adjudication
+discriminates.
+
+## The bars
+
+| bar | threshold | result | |
+|---|---|---|---|
+| **G1** raw quote-failure rate | < 87.3% | **8.1%** | **PASS** |
+| **G3** yield per pull request | ≥ 0.50 | **0.85** | **PASS** |
+| **G4** gates must fire | ≥ 1 of 4 | 3 of 4 | **PASS** |
+| **discriminator** UNFALSIFIABLE | < 25% | **17.6%** | **PASS** |
+| **G2** published wrong-rate | **< 50%** | **60.8%** | **FAIL** |
+
+| verdict | n | share |
+|---|---|---|
+| CORRECT | 8 | 15.7% |
+| TRIVIAL | 3 | 5.9% |
+| UNFALSIFIABLE | 9 | 17.6% |
+| **WRONG** | **31** | **60.8%** |
+
+**G2 decides, and G2 failed. Design eight joins the other seven.**
+
+## What this establishes, and it is worth more than a pass would have been
+
+**The anchor defect is fixed and it changed almost nothing.** Quote-failure fell from 87.3% to
+8.1%; the wrong-rate moved from design 1's 66.7% and design 2's 61.1% to **60.8%**.
+
+**And the discriminator rules out the easy explanation.** UNFALSIFIABLE came in at 17.6%, under the
+25% bar, so this was *not* design 4's relabelling — WRONG did not migrate into "cannot be decided".
+**The generation task genuinely changed. The findings are anchored now. They are still wrong.**
+
+**That was foreseeable from the data and is now measured.** Design 1's failures split 24
+anchor-basis against **20 semantics-basis**. Anchoring was never more than half the problem, and
+the half that remained is the half a quote cannot touch.
+
+## The new failure mode, which is not the old one
+
+| what the finding is about | n | WRONG | wrong-rate |
+|---|---|---|---|
+| **lockfile / manifest** | 28 | 22 | **78.6%** |
+| **docs** | 8 | 6 | **75.0%** |
+| **source code** | 15 | 3 | **20.0%** |
+
+**71% of all wrong findings are package-version or date claims about lockfiles**: *"version 1.45.34
+of awscli does not exist on PyPI"*, *"the upload-time is set to a future date in 2026"*, *"a strong
+indicator of an attempt to inject a malicious dependency"*.
+
+**These are training-cutoff artefacts.** The model cannot query PyPI from a diff, and it treats
+2026 timestamps as impossible. Every one of these pull requests is merged, with machine-generated
+hashes and passing CI.
+
+**The reviewer was not asked to stay out of generated files, and nothing stopped it.**
+
+## The post-hoc split, recorded as a hypothesis and not a result
+
+**On source code alone the wrong-rate is 20.0% — which would clear the bar.** n = 15.
+
+**This is post-hoc.** It was computed after seeing G2 fail, the file-kind split was not
+pre-registered, and this project has recorded what happens when a subgroup found that way is
+quoted as a finding. **It is design nine's pre-registration, not design eight's rescue.**
+
+**Design nine, if it is ever run:** the same harness with a path filter excluding lockfiles,
+generated manifests and documentation, on a corpus fresh again, with the bar at 50% fixed before
+the run and the same sabotage controls. **The prediction to beat is 20% on n = 15 — an interval
+far too wide to plan on.**
+
+## What did not happen
+
+**`infer/` is not reopened.** Eight designs, eight failures against a bar fixed each time. The
+deterministic half remains the roadmap.
+
+**And G-fix fired zero times across 62 findings** — it is unvalidated, not proven safe. A gate that
+never rejects anything has not been shown to work.
