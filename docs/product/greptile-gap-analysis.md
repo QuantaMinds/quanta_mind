@@ -255,6 +255,27 @@ and they answer different questions.**
 **87.3% of our claims fail the second condition, and this benchmark never tests it.** Different
 corpus too — Python functions against Java/Go/TypeScript/Ruby diffs — and a different task.
 
+**But the anchor failure does NOT account for the gap, and our own data says so.** Design 4
+relaxed the anchor requirement to ±10 lines and re-adjudicated the same corpus:
+
+| design | anchor rule | WRONG | UNFALSIFIABLE | CORRECT |
+|---|---|---|---|---|
+| 2 — line, hard | strict | 82.1% | 10.3% | **0.0%** |
+| 4 — window, hard | **±10 lines** | 66.7% | 20.5% | **2.6%** |
+
+**Removing the anchor requirement moved CORRECT by 2.6 points, not by 38.** It converted WRONG
+into UNFALSIFIABLE and never into CORRECT.
+
+**The larger difference is what each judge is permitted to do.** Ours opened the code and asked
+whether the claim was true of it. **Martian's compares two pieces of text and never opens the
+file** — so a comment is credited for resembling something a human flagged, true or not, and a
+genuinely true finding absent from the curated list scores as a false positive.
+
+**This strengthens the decision to stop rather than weakening it.** The optimistic reading — *the
+87.3% is an anchoring bug, repair the pointer and the reviewer works* — is precisely what designs
+2 through 5 tested: parser-snapped anchors (p = 0.53), symbols instead of lines (p = 0.644), a
+±10-line window (+2.6 points). **The pointer was never the problem. The claim was.**
+
 **Neither number corrects the other. What follows is narrower: 5.80% should never have been placed
 beside the industry's published figures**, because those are measured the lenient way and ours was
 measured the strict way. That comparison ran through this project's reasoning for months.
