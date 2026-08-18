@@ -9,7 +9,7 @@ WHY:  Gate 3c first reported a 7.4-point gap on m/k = 1.17 symbols per changed f
       which in Python is the class and never the indented method. The fix was git's python
       diff driver; the gap survived it.
 IMPORTS: stdlib only (collections, os, re, subprocess).
-CONSUMED BY: docs/plans/implementation.md, gate 3c.
+CONSUMED BY: docs/findings/ALLOCATION_EVIDENCE_2026-08.md, gate 3c.
 
 The gate 3c result rests on m/k = 1.17 symbols per changed file, which is low enough to be
 either a true property of these changes or a broken extractor. Those two produce the same

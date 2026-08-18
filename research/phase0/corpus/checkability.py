@@ -10,7 +10,7 @@ WHY:  It bounds what the verifier can ever catch, and it is a property of the SC
       structural claims are a small minority of real review content -- which is why the sample
       is printed rather than only the counts.
 IMPORTS: stdlib only (json, pathlib, random, re).
-CONSUMED BY: docs/plans/implementation.md, the model-certification design.
+CONSUMED BY: docs/plans/design/commercial-surface.md, the model-certification design.
 
 This bounds what the verifier can ever catch, and it is a property of the SCHEMA rather than
 of any model -- so it is measurable before infer/ exists, and it decides how much weight the

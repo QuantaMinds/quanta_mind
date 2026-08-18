@@ -9,7 +9,7 @@ WHY:  A sweep finds a winner by chance: this corpus carries about five compariso
       on train and reversing on holdout. The set-agreement counters exist because "same outcome"
       is not "same decision", and assuming it was would have recorded the wrong mechanism for V6.
 IMPORTS: stdlib (bisect, collections, json, math, os, sys), clone_census, symbol_history_read.
-CONSUMED BY: docs/plans/implementation.md, gate 3c.
+CONSUMED BY: docs/findings/ALLOCATION_EVIDENCE_2026-08.md, gate 3c.
 
 HOLDOUT: clones sorted by name, indices 2 and 5. CONTROL: the alphabetical pick over the same
 units at the same k -- the rule that killed the 12/12 revert result when its control also
