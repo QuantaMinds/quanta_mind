@@ -37,8 +37,19 @@ REPOS_D9 = (
     "huggingface/datasets",
     "bokeh/bokeh",
 )
+# Design ten. Six more, verified unused against the 48 burned. Fixed in
+# docs/plans/preregistrations/scoring-pass-preregistration.md before the run.
+REPOS_D10 = (
+    "pallets/quart",
+    "aio-libs/aiohttp",
+    "tiangolo/sqlmodel",
+    "pytest-dev/pytest-asyncio",
+    "python-attrs/attrs",
+    "psycopg/psycopg",
+)
 PER_REPO = 10
 PER_REPO_D9 = 15
+PER_REPO_D10 = 10
 MAX_DIFF_CHARS = 120_000
 CACHE = pathlib.Path(
     "/private/tmp/claude-501/-Users-dhanu-Documents-SaaS-quanta-mind/"
