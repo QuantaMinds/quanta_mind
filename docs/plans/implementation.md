@@ -21,7 +21,7 @@ evidence and it is not the commercial plan. Those were moved out so this reads a
 |---|---|---|
 | **the skeleton** | **DONE** | ten layers importable; `types/` holds the value objects; `serve/cli.py` runs |
 | **the reader** | **STARTED** | `ingest/history.py` built (PR #46). `ingest/diff.py` and `parse/` not begun |
-| **the store and the ranker** | **NEXT** | `store/` and `rank/` are empty |
+| **the store and the ranker** | **STARTED** | `store/schema.py` built. `store/touches.py` and all of `rank/` still empty |
 | **render and the free tier** | not begun | — |
 | **the retrospective** | not begun | — |
 | **serve** | not begun | `serve/cli.py` exists; no webhook |
@@ -39,7 +39,7 @@ three months stale.
 | layer | modules | files |
 |---|---|---|
 | `types/` | **5** | `change.py`, `ranking.py`, `review.py`, `settings.py`, `verdict.py` |
-| `store/` | **0** | — |
+| `store/` | **1** | `schema.py` |
 | `ingest/` | **1** | `history.py` |
 | `parse/` | **0** | — |
 | `rank/` | **0** | — |
@@ -53,9 +53,9 @@ three months stale.
 
 ### The exact next action
 
-**`store/schema.py`, then `store/touches.py`, then `rank/score.py`.** `ingest/history.py` already
-returns the `Touch` values `store/touches.py` indexes, and `rank/score.py` is a pure function over
-that index — which is why `rank/` may never import `ingest/`.
+**`store/touches.py`, then `rank/score.py`.** `store/schema.py` is built, and `ingest/history.py`
+already returns the `Touch` values `store/touches.py` indexes. `rank/score.py` is a pure function
+over that index — which is why `rank/` may never import `ingest/`.
 
 ---
 
@@ -193,8 +193,11 @@ be backfilled.
 
 ### Steps
 
-1. `store/schema.py` — the versioned SQLite schema and `SCHEMA_VERSION`. Changing it requires a
-   migration and a bump; there is no "delete it and re-index" in production.
+1. **DONE.** `store/schema.py` — the versioned SQLite schema and `SCHEMA_VERSION`. Changing it
+   requires a migration and a bump; there is no "delete it and re-index" in production. Built with
+   `open_store()` refusing a database written by another version rather than migrating in place,
+   and the three un-backfillable columns present from the first row: `shadow_pick`'s ranked list,
+   `request.cache_read_tokens`, and `outcome.rule_version` with `fix_subject`.
 2. `store/touches.py` — the touch index: write and query by `(path, timestamp)`. Bounded strictly
    by the parent commit — **no data from after the change may enter the ranking of that change.**
 3. `rank/score.py` — the 365-day prior-touch count. **One function, no I/O**, testable without a
