@@ -76,7 +76,7 @@ def main(argv: list[str]) -> int:
         return 0
     print("[plan-state] the plan's state block does not match src/quantamind/.")
     print("  A layer gained or lost a module and the plan still says otherwise.")
-    print("  Run: uv run python scripts/guard/check_plan_state.py . --write")
+    print("  Run: uv run python scripts/guard/records/check_plan_state.py . --write")
     for line in want.split("\n"):
         if line.startswith("| `") and line not in have:
             print(f"    should read: {line}")

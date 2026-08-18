@@ -415,6 +415,41 @@ runs here" stays falsifiable. → `docs/product/review-half-record.md`
 
 ### `store/`
 
+#### `store/touches.py` — the index, and the half-open window that is the whole product
+
+`index()` writes `Touch` values, `counts()` returns prior-touch counts per path over
+**`[as_of - window, as_of)`**. The exclusive upper bound is the product: a ranking that can see the
+commit it is ranking is a lookup, not a prediction, and the error is invisible downstream — every
+score rises by one and the ordering often survives.
+
+**`as_of` is required and has no default.** A default would be the present; every caller that
+forgot it would rank against today's history and produce numbers indistinguishable from correct
+ones.
+
+**`index()` replaces rather than appends.** Git history for a path is a fact, not an event stream:
+a repository ingested twice would double every count *evenly* — an error that moves no ordering,
+passes every ordering test, and corrupts the percentile that decides whether we fire.
+
+#### `rank/score.py` — the policy with the p-value, kept pure
+
+`order()`, `discriminate()`, `top()`, `rendered()`. No I/O, so it is comparable to
+`research/phase0/external/defect_return.py` without a repository — which is what the ranker stage's
+ordering-identity gate demands. `rank/` may not import `ingest/` or `store/`; it receives the counts.
+
+`discriminate()` returns the three-case split as a **value**, because a ranking over an all-zero
+score set is alphabetical order wearing a ranking's clothes, and that slice misses most — 4.46%
+against 1.21% overall.
+
+**Live-verified against real repositories**, `tests/live/test_ranker_matches_research.py`: 900
+sampled (commit, changed-files) cases across three repositories, **zero score mismatches and zero
+ordering mismatches** against the research implementation. Two sabotages are caught — an inclusive
+window gives 900 of 900 score mismatches and erases the no-history case; dropping the tie-break
+gives 105 ordering mismatches.
+
+**The tie-break test feeds SHUFFLED paths.** The first version of that live check passed against a
+deliberately broken tie-break, because it fed paths already alphabetical and Python's sort is
+stable. A test whose input is already in the answer's order is not testing the key it thinks it is.
+
 #### `store/schema.py` — the versioned schema, and the gate that refuses a store it would corrupt
 
 `SCHEMA_VERSION`, the DDL, `create()`, and `open_store()` which opens an existing database **only**

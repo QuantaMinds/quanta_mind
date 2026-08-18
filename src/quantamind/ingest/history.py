@@ -22,15 +22,19 @@ WHY:  This is the input the whole product rests on. The ranking is a count of pr
       **AN EMPTY HISTORY IS A VALUE, NOT AN ERROR.** A repository with no commits touching the
       paths asked for returns `[]`, and `rank/` treats that as the no-history case that misses at
       4.46%. "We failed to read" and "there is nothing here" must never be the same value.
-IMPORTS: types (Repo). Nothing to its right in the layer order.
-CONSUMED BY: store, for the touch index; rank consumes the index, never this module.
+IMPORTS: types (Touch). Nothing to its right in the layer order.
+CONSUMED BY: store.touches, for the index; rank consumes the index, never this module.
+
+      `Touch` MOVED to `types/history.py`: `store/` sits left of `ingest/` and must be able to
+      name what it indexes, so the shared value object belongs to the leftmost layer.
 """
 
 from __future__ import annotations
 
 import subprocess
-from dataclasses import dataclass
 from pathlib import Path
+
+from quantamind.types.touch import Touch
 
 # Declared, not defaulted. A full history read on a large repository is minutes, not the 30s
 # house default, and a timeout that fires mid-read is indistinguishable from a short history.
@@ -40,25 +44,6 @@ PROBE_TIMEOUT_S = 30
 # sequence here: an actual NUL cannot be passed in argv, and execve rejects the call.
 NUL_FORMAT = "%x00"
 NUL = "\x00"
-
-
-@dataclass(frozen=True, slots=True)
-class Touch:
-    """One file, touched by one commit, at one time.
-
-    `path` is repository-relative and as git spelled it. `committed_at` is a Unix timestamp in
-    UTC, because the 365-day ranking window is arithmetic on instants and a local time zone would
-    move the window under the reader.
-    """
-
-    path: str
-    committed_at: int
-
-    def __post_init__(self) -> None:
-        if not self.path:
-            raise ValueError("Touch.path is empty; a touch with no file cannot be counted")
-        if self.committed_at <= 0:
-            raise ValueError(f"Touch.committed_at must be positive, got {self.committed_at}")
 
 
 class HistoryReadFailed(RuntimeError):
