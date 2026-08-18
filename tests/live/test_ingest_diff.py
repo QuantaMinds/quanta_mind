@@ -6,10 +6,16 @@ WHY:  The seam this module owns is WHICH COMMIT bounds the ranking window. Getti
       not raise anywhere — it would produce a ranking against the wrong instant, which looks
       identical to a correct one.
 
-      These hit the network, which is unusual for `tests/unit`. A stubbed client would assert that
-      our parser parses our own fixture, and the failure modes here are GitHub's response shapes.
+      **These read GitHub, so they live in `tests/live/`.** They were written into `tests/unit/`
+      first, with a docstring noting that hitting the network there was "unusual" — which was
+      noticing the problem and shipping it anyway. CI has no `gh` credentials and failed with
+      `exited 4: set the GH_TOKEN environment variable`, four tests down, on a suite that passed
+      locally only because this machine is logged in.
+
+      A stubbed client would assert that our parser parses our own fixture, and the failure modes
+      here are GitHub's response shapes.
 IMPORTS: quantamind.ingest.diff.
-CONSUMED BY: `just check`.
+CONSUMED BY: `just verify` via `test-live`.
 """
 
 from __future__ import annotations
