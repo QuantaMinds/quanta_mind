@@ -148,3 +148,31 @@ tested in our seven designs — **quote-derived anchoring** — and that the fiv
 run all attacked the pointer rather than removing it.
 
 **If the review half is ever restarted, this is the design to pre-register first.**
+
+---
+
+## Both mechanisms were built and measured. This is what came back.
+
+Written before the run: this document proposed expansion and the conventions file as the two
+cheapest things Qodo does that we did not. **Both were built, sabotage-tested, and run against 80
+merged pull requests from six repositories verified unused**, three arms, blind adjudication, bars
+fixed in advance, **10 of 10 sabotaged controls caught**.
+
+| | bar | result |
+|---|---|---|
+| expansion removes the "did not follow shown code" failure | ≥ 15 point fall | 73.3% → **18.8%** — **PASS** |
+| expansion lowers the wrong-rate | ≤ 30% | **59.3%** [40.7, 75.5] — **FAIL** |
+| a rules file makes convention-policing worse | ≤ +10 points | **−12.6 points** — **PASS**, but the gain is UNFALSIFIABLE absorbing claims (+4) rather than CORRECT (+1) |
+| neither starves the reviewer | ≥ 0.30/PR | 0.41 / 0.40 / 0.46 — **PASS** |
+
+**Expansion did exactly what this document predicted, and that is H1 passing — not a failure.**
+The overall rate not moving is a separate fact with a separate cause. The mechanism is
+visible: two claims of an infinite loop in falcon's URI decoder died because the
+`for pos in range(...)` header that refutes them sits ten lines above the hunk. What this document
+did not predict is what took over — **CI-config findings are 66.7% wrong and 23 of 24 of those are
+claims a diff cannot settle.** Every one checked against GitHub was false.
+
+**So the gap to Qodo is not the two mechanisms.** It is that a diff-scoped reviewer should not be
+reviewing files whose defects are undecidable from a diff. Full result in
+`docs/product/expansion-conventions-result.md`; every number recomputed by
+`research/phase0/claims/verify.py`.

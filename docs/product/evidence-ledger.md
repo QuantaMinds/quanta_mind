@@ -20,7 +20,7 @@ gate.**
 
 **The threshold was 50% wrong, committed before a single finding was read. Both readings clear it,
 and every disagreement between them made the result worse rather than better.** The reading is:
-stop building the review half in this configuration. `docs/plans/preregistrations/adjudication-preregistration.md`
+stop building the review half in this configuration. `docs/plans/preregistrations/reviewer/adjudication-preregistration.md`
 carries the protocol, the verdicts and the disagreements.
 
 ---
@@ -305,6 +305,47 @@ could ship tomorrow with a straight face, and each was killed here by a control 
 has no reason to run.
 
 ---
+
+## 2a. Expansion removed its failure class; a second class dominates the total
+
+Design thirteen, pre-registered in
+`docs/plans/preregistrations/reviewer/expansion-conventions-preregistration.md`, added the two
+mechanisms Qodo ships and this project discarded. Six unused repositories, 80 reviewable pull
+requests, three arms, blind adjudication, **10 of 10 sabotaged controls caught.**
+
+| claim | what was measured | verdict |
+|---|---|---|
+| Expansion removes the "did not follow shown code" failure | 73.3% → **18.8%** of wrong findings | **HOLDS** (H1, bar ≥15 points, got 54.6) |
+| Expansion lowers the overall wrong-rate | 51.7% → **59.3%** [40.7, 75.5], bar ≤30% | **FAILS** (H2) |
+| A rules file makes convention-policing worse | arm C **12.6 points better**, not worse | **THE HARM DID NOT APPEAR** (H3) |
+| …and that gain is accuracy | **it is not** — WRONG −2 but UNFALSIFIABLE +4, CORRECT +1; CORRECT-rate 6.9 → 7.4 → 10.0% with overlapping intervals | **HEDGING, NOT ACCURACY** |
+| Either mechanism starves the reviewer | yield 0.41 / 0.40 / 0.46, bar ≥0.30 | **HOLDS** (H4) |
+
+**H1 and H2 are different lessons and must not be collapsed.** Expansion did the one thing it was
+built to do; the total did not move because **CI-config findings are 66.7% wrong [50.3, 79.8] and
+23 of those 24 are EXTERNAL** — undecidable from a diff by construction. **Every one checked
+against GitHub was false.** The "future" dates read Aug 14–17 2026 against a run on **Aug 18 2026**
+— three days in the past, which is a model with no notion of the present rather than a stale
+training cutoff, and no path filter ends it.
+
+**Excluding CI config is the third application of the decidability rule, not a discovery.**
+Lockfiles, manifests and docs went first. `.github/` was kept deliberately at ~25% CORRECT; the
+evidence turned over, not the principle.
+
+Off CI config the wrong-rate runs 52.2 → 38.5 → 28.6%, but that is **post-hoc with intervals that
+overlap almost completely at n = 13 and n = 14** — consistent with the mechanisms working and
+equally consistent with noise.
+
+**The correct-rate is the binding number and it is worse than the wrong-rate.** Off CI config,
+every arm produced **exactly one correct finding across 80 pull requests** — 0.013 per pull
+request, one useful comment per 77. And CI config's correct-rate (11.1%) is HIGHER than everything
+else's (6.0%), so excluding it removes **57% of the correct findings against 53% of the wrong** — a
+worse trade than random. A path filter cannot fix a model that rarely says anything correct.
+
+**This does not count toward replication.** The rater designed the run. Arm labels were blind and
+every planted control was caught, but designer bias is unguarded — **four designs now owe an
+independent grader.** Design 11's arm R cleared yield at 0.40/PR but is unadjudicated, so the
+**replication count stays at two**; arm E failed yield at 0.22/PR before adjudication ran.
 
 ## 3. What no measurement touches
 

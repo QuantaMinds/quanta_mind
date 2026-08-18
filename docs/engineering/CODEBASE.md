@@ -276,6 +276,50 @@ turns a corrupt input into a plausible measurement.
 and the resolver's answer are **different commits**, and asserts that premise separately —
 without it every assertion there would pass under either behaviour.
 
+#### `research/phase0/quote/expand.py` — the function the hunk is in, for free
+
+Git writes the enclosing declaration into every hunk header — `@@ -266,17 +269,12 @@ def
+get_dumper(self, obj: Any, format: PyFormat) -> abc.Dumper:` — and the reviewer discarded it, so
+the model saw `+ if order.refunded:` with three lines of context and no idea what function it was
+in. `expand()` walks back up to `MAX_BACK` lines for the line git named and starts the hunk there.
+
+**The invariant is that expansion must not move an ADDED line.** `gate.py` derives every finding's
+anchor from where an added line sits, so a rewrite that shifted those numbers would corrupt every
+anchor while every gate still reported success. `live_expand.py` asserts it per pull request over
+real diffs, and `run13.py` aborts the run on a single shift. It held on 211 hunks at every look-back
+from 5 to 60, and on all 453 hunks of design thirteen's corpus.
+
+`MAX_BACK = 20` came from a coverage sweep on already-burned repositories — 40.3 / 55.5 / 62.1 /
+73.9% expanded at 5 / 10 / 20 / 60. Coverage, never a wrong-rate, and never on the corpus the effect
+is measured on. Qodo ships 10.
+
+#### `research/phase0/quote/conventions.py` — the repository's own rules, and the stub problem
+
+Picks the first of the conventions filenames listed in `conventions.CANDIDATES` that a repository
+actually ships, and trims it
+to `MAX_LINES` for the prompt, so a finding can cite the house rule it breaks.
+
+**Three of the first six repositories sampled shipped a POINTER, not rules** — pluggy's `AGENTS.md`
+is "See @CLAUDE.md", sanic's and trio's `CONTRIBUTING.md` are a bare URL, at 62, 72 and 98
+characters against 1,095–6,101 for real ones. The first selector accepted all three, which would
+have made the arm a silent no-op on half the corpus while reporting that the rules were sent.
+`MIN_CHARS = 400` rejects them and selection skips a stub to the next candidate.
+
+Selection is by priority among usable files, **not by length**: falcon ships a 6.1k `AGENTS.md` of
+coding rules beside a 14.8k `CONTRIBUTING.md` that is mostly how to sign a CLA.
+
+`select()` returning None is a RESULT — roughly two in three repositories have no usable rules file
+— and the run reports how many, so the arm is never averaged over repositories where it could not
+act.
+
+#### `research/phase0/quote/check_expand.py` — and what each sabotage breaks
+
+Known-answer checks for both modules, then five sabotages that must turn them red: the backwards
+search (`MAX_BACK = 0`), the candidate list, the stub cut, and the line cap. Each breaks the whole
+mechanism rather than its entry point — an earlier sabotage of `G-fix` broke `_norm` in a way that
+preserved the equality under test, stayed green against a broken mechanism, and was read as
+coverage.
+
 #### `research/phase0/src/phase0/attrition.py` — why rows left, counted
 
 Split out of `extract_prs.py`, which exported a record type, an attrition type and a

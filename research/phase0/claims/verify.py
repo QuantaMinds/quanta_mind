@@ -19,6 +19,7 @@ import pathlib
 import statistics
 from math import erfc, sqrt
 
+import checks_design13
 from stats import chance, kappa, mcnemar, wilson
 
 R = pathlib.Path(__file__).parent.parent / "results"
@@ -185,5 +186,8 @@ check("mean $ per pull request", round(sum(per.values()) / len(per), 4), 0.1193,
 th = sum(r["thoughts"] for r in cost) * OUT / 1e6
 tot = sum(r["prompt"] for r in cost) * IN / 1e6 + th + sum(r["out"] for r in cost) * OUT / 1e6
 check("thinking share of bill %", round(th / tot * 100, 1), 91.3, 0.1)
+
+print("\n  K. DESIGN 13 — enclosing-function expansion and the conventions file")
+checks_design13.run(check)
 
 print(f"\n  {PASS} passed, {FAIL} failed")

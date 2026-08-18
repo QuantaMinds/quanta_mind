@@ -21,7 +21,9 @@ import pathlib
 import sys
 from math import comb
 
-HERE = pathlib.Path(__file__).resolve().parent
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+
+HERE = pathlib.Path(__file__).resolve().parent.parent
 ADJ = HERE / "adj10"
 RUN = HERE / "quote10_run.json"
 WRONG_BAR = 0.50

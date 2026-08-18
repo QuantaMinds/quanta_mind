@@ -6,7 +6,7 @@ WHAT: Judges CodeRabbit's checked-in candidates with our Gemini judge and compar
 WHY:  A different judge model makes every number a comparison between judges unless it is shown
       not to. P0 is checked and printed FIRST, so a miscalibrated judge cannot be discovered after
       the headline is already known and then explained away.
-      → `docs/plans/preregistrations/martian-comparison-preregistration.md`
+      → `docs/plans/preregistrations/reviewer/martian-comparison-preregistration.md`
 IMPORTS: stdlib only (json, pathlib, sys, time). Local: `corpus`, `judge`, `reviewer`, and the
       Vertex `client`.
 CONSUMED BY: nobody -- it prints and writes martian_comparison.json.

@@ -10,7 +10,7 @@ WHY:  Design eight failed at 60.8% wrong, and 18 of its 18 lockfile findings wer
 
       ONE THING CHANGES. Same prompt, same gate, same rubric, same sabotage controls. If the
       wrong-rate moves, the filter is why.
-      → `docs/plans/preregistrations/path-filter-preregistration.md`
+      → `docs/plans/preregistrations/reviewer/path-filter-preregistration.md`
 IMPORTS: stdlib only (collections, json, pathlib, sys). Local: `corpus`, `gate`, `paths`,
       `reviewer`, and the Vertex `client`.
 CONSUMED BY: nobody -- it prints and writes quote9_run.json.
@@ -23,7 +23,8 @@ import json
 import pathlib
 import sys
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "vertex"))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent.parent / "vertex"))
 
 import gate
 import paths
@@ -33,7 +34,7 @@ from client import Client
 import corpus
 
 MODEL = "gemini-2.5-pro"
-OUT = pathlib.Path(__file__).resolve().parent / "results" / "quote9_run.json"
+OUT = pathlib.Path(__file__).resolve().parent.parent / "results" / "quote9_run.json"
 YIELD_BAR = 0.30  # H4, lowered from design eight's 0.50 and argued for in the pre-registration
 MIN_FINDINGS = 25  # H5: below this the run is UNDERPOWERED, not a pass or a fail
 

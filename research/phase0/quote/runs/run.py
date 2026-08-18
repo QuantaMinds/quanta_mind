@@ -23,7 +23,8 @@ import pathlib
 import statistics
 import sys
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "vertex"))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent.parent / "vertex"))
 
 import gate
 import reviewer
@@ -32,7 +33,7 @@ from client import Client
 import corpus
 
 MODEL = "gemini-2.5-pro"
-OUT = pathlib.Path(__file__).resolve().parent / "results" / "quote_run.json"
+OUT = pathlib.Path(__file__).resolve().parent.parent / "results" / "quote_run.json"
 BASELINE_ANCHOR_FAILURE = 0.873  # the measured line-citing defect rate this must beat (bar G1)
 
 

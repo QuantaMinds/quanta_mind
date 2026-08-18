@@ -143,7 +143,7 @@ real-world code review deployment."*
   ranker's.
 
 **Open hypotheses, pre-registered for whenever the review half is picked up as a separate project:**
-- **Model confusion as a defect locator** — `preregistrations/future-fix-preregistration.md` "The inversion the data supports, and the one it does not". Needs ~80 confused units against a 50.5%
+- **Model confusion as a defect locator** — `preregistrations/ranker/future-fix-preregistration.md` "The inversion the data supports, and the one it does not". Needs ~80 confused units against a 50.5%
   base ≈ 3× the current aged corpus. **Must beat the ranker, which is free.**
 - **Function size as a moderator** — `evidence-ledger.md` "The pooled pattern across all 207 adjudicated findings". Real at the extremes — 45.9% wrong
   at ≤10 lines against 89.3% above 80 — but not monotonic, and found by sweeping 207 findings, so
@@ -167,8 +167,9 @@ real-world code review deployment."*
 | per-design verdicts | `results/{adjudication,enriched,fresh,symbol,window,execution_*}_verdicts.json` |
 | the aged corpus scored against git | `results/future_fix_scored.json` |
 | ranker replication, three samples | `results/defect_return_{external,third}.json`, `discriminability_*.json` |
-| pre-registrations, one per design | `docs/plans/*-preregistration.md` |
-| **every number recomputed from its artefact** | `research/phase0/claims/verify.py` — **51 checks, 51 passing** |
+| pre-registrations, one per design | `docs/plans/preregistrations/{ranker,reviewer}/` |
+| design thirteen: expansion, conventions | `research/phase0/quote/results/quote13_run.json`, `quote/adj13/` |
+| **every number recomputed from its artefact** | `research/phase0/claims/verify.py` — **108 checks, 108 passing** |
 
 **Run `python3 verify.py` from `research/phase0/claims/` before quoting any figure in this
 document.** This project has shipped a wrong number three ways — a cost table that priced one call

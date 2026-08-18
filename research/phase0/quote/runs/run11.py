@@ -26,7 +26,8 @@ import json
 import pathlib
 import sys
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "vertex"))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent.parent / "vertex"))
 
 import gate
 import paths
@@ -36,7 +37,7 @@ from client import Client
 import corpus
 
 MODEL = "gemini-2.5-pro"
-OUT = pathlib.Path(__file__).resolve().parent / "results" / "quote11_run.json"
+OUT = pathlib.Path(__file__).resolve().parent.parent / "results" / "quote11_run.json"
 
 
 def run_arm(client: Client, prs: list[dict], evidence: bool, label: str) -> dict[str, object]:

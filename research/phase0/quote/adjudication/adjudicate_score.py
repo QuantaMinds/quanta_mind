@@ -18,6 +18,8 @@ import json
 import pathlib
 import sys
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+
 # Design eight by default; pass "9" for the path-filtered run.
 WHICH = sys.argv[1] if len(sys.argv) > 1 else "8"
 ADJ = pathlib.Path(__file__).resolve().parent / ("adj9" if WHICH == "9" else "adj")

@@ -47,7 +47,7 @@ For each defect return three fields:
 Do not give line numbers. The quote is how the finding is located.
 
 Report at most {max_findings}. If the change looks correct, return [] -- that is a valid answer.
-
+{rules_block}
 Pull request: {title}
 
 ```diff
@@ -112,15 +112,18 @@ def _parse(text: str) -> list[dict[str, str]]:
 
 
 def review(
-    client: object, title: str, diff: str, evidence: bool = False
+    client: object, title: str, diff: str, evidence: bool = False, rules: str = ""
 ) -> tuple[list[dict[str, str]], str]:
     """(findings, finish reason). Raises rather than returning [] when the model did not answer.
 
-    `evidence=False` is design nine VERBATIM -- the prompt never mentions a second quote. That
+    `rules` is the repository's own conventions block, empty by default. `evidence=False` with
+    `rules=""` is design nine VERBATIM -- the prompt never mentions a second quote. That
     matters: an arm carrying the evidence requirement is a NEW configuration and cannot be quoted
     as a replication of design nine, which is exactly the mistake this parameter exists to stop.
     """
     rule, keys = EVIDENCE_ON if evidence else EVIDENCE_OFF
+    # rules="" must leave the prompt BYTE-IDENTICAL to design nine's. `check_prompt.py` asserts it.
+    rules_block = f"\n{rules}" if rules.strip() else ""
     body = {
         "contents": [
             {
@@ -133,6 +136,7 @@ def review(
                             diff=diff,
                             evidence_rule=rule,
                             keys=keys,
+                            rules_block=rules_block,
                         )
                     }
                 ],

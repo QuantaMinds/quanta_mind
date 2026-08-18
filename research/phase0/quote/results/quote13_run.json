@@ -1,0 +1,3377 @@
+{
+ "results": [
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 1
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "src/_cffi_src/openssl/x509_vfy.py",
+      "line": 104,
+      "claim": "The `X509_V_FLAG_EXTENDED_CRL_SUPPORT` constant is not available in all supported versions of OpenSSL/LibreSSL, so adding it unconditionally will cause compilation to fail on older versions or LibreSSL.",
+      "quote": "static const long X509_V_FLAG_EXTENDED_CRL_SUPPORT;",
+      "fix": "#if defined(X509_V_FLAG_EXTENDED_CRL_SUPPORT)\nstatic const long X509_V_FLAG_EXTENDED_CRL_SUPPORT;\n#endif",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "pyca/cryptography",
+      "pr": 15473,
+      "arm": "C",
+      "url": "https://github.com/pyca/cryptography/pull/15473"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pyca/cryptography",
+   "pr": 15473,
+   "url": "https://github.com/pyca/cryptography/pull/15473"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pyca/cryptography",
+   "pr": 15469,
+   "url": "https://github.com/pyca/cryptography/pull/15469"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 2
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pyca/cryptography",
+   "pr": 15471,
+   "url": "https://github.com/pyca/cryptography/pull/15471"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pyca/cryptography",
+   "pr": 15468,
+   "url": "https://github.com/pyca/cryptography/pull/15468"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pyca/cryptography",
+   "pr": 15467,
+   "url": "https://github.com/pyca/cryptography/pull/15467"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pyca/cryptography",
+   "pr": 15466,
+   "url": "https://github.com/pyca/cryptography/pull/15466"
+  },
+  {
+   "raw": {
+    "A": 2,
+    "B": 0,
+    "C": 2
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/ci.yml",
+      "line": 51,
+      "claim": "The date in the comment is in the future, which is a data error as it incorrectly documents when the commit was chosen.",
+      "quote": "          # Latest commit on the BoringSSL main branch, as of Aug 17, 2026.",
+      "fix": "          # Latest commit on the BoringSSL main branch, as of Aug 17, 2024.",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 5,
+      "repo": "pyca/cryptography",
+      "pr": 15470,
+      "arm": "C",
+      "url": "https://github.com/pyca/cryptography/pull/15470"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/ci.yml",
+      "line": 55,
+      "claim": "The date in the comment is in the future, which is a data error as it incorrectly documents when the commit was chosen.",
+      "quote": "          # Latest commit on the OpenSSL master branch, as of Aug 17, 2026.",
+      "fix": "          # Latest commit on the OpenSSL master branch, as of Aug 17, 2024.",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 5,
+      "repo": "pyca/cryptography",
+      "pr": 15470,
+      "arm": "C",
+      "url": "https://github.com/pyca/cryptography/pull/15470"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pyca/cryptography",
+   "pr": 15470,
+   "url": "https://github.com/pyca/cryptography/pull/15470"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pyca/cryptography",
+   "pr": 15465,
+   "url": "https://github.com/pyca/cryptography/pull/15465"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pyca/cryptography",
+   "pr": 15462,
+   "url": "https://github.com/pyca/cryptography/pull/15462"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pyca/cryptography",
+   "pr": 15460,
+   "url": "https://github.com/pyca/cryptography/pull/15460"
+  },
+  {
+   "raw": {
+    "A": 1,
+    "B": 1,
+    "C": 1
+   },
+   "published": {
+    "A": [],
+    "B": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/ci.yml",
+      "line": 417,
+      "claim": "The year in the comment is `2026`, but the corresponding commit was made in 2023, making the comment factually incorrect and misleading.",
+      "quote": "# Latest commit on the scapy master branch, as of Aug 15, 2026.",
+      "fix": "# Latest commit on the scapy master branch, as of Aug 15, 2023.",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 2,
+      "repo": "pyca/cryptography",
+      "pr": 15456,
+      "arm": "B",
+      "url": "https://github.com/pyca/cryptography/pull/15456"
+     }
+    ],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/ci.yml",
+      "line": 417,
+      "claim": "The comment refers to a date in the future (2026), which is a logical error as it's meant to document when the commit was pinned.",
+      "quote": "            # Latest commit on the scapy master branch, as of Aug 15, 2026.",
+      "fix": "            # Latest commit on the scapy master branch, as of Aug 15, 2024.",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 2,
+      "repo": "pyca/cryptography",
+      "pr": 15456,
+      "arm": "C",
+      "url": "https://github.com/pyca/cryptography/pull/15456"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pyca/cryptography",
+   "pr": 15456,
+   "url": "https://github.com/pyca/cryptography/pull/15456"
+  },
+  {
+   "raw": {
+    "A": 1,
+    "B": 1,
+    "C": 1
+   },
+   "published": {
+    "A": [],
+    "B": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/ci.yml",
+      "line": 55,
+      "claim": "The date in the comment refers to a future year, which is a logical error as the comment is meant to record when the commit hash was fetched.",
+      "quote": "          # Latest commit on the OpenSSL master branch, as of Aug 16, 2026.",
+      "fix": "          # Latest commit on the OpenSSL master branch, as of Aug 16, 2024.",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 2,
+      "repo": "pyca/cryptography",
+      "pr": 15459,
+      "arm": "B",
+      "url": "https://github.com/pyca/cryptography/pull/15459"
+     }
+    ],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pyca/cryptography",
+   "pr": 15459,
+   "url": "https://github.com/pyca/cryptography/pull/15459"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "falconry/falcon",
+   "pr": 2705,
+   "url": "https://github.com/falconry/falcon/pull/2705"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 2
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pyca/cryptography",
+   "pr": 15455,
+   "url": "https://github.com/pyca/cryptography/pull/15455"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "falconry/falcon",
+   "pr": 2698,
+   "url": "https://github.com/falconry/falcon/pull/2698"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "falconry/falcon",
+   "pr": 2703,
+   "url": "https://github.com/falconry/falcon/pull/2703"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "falconry/falcon",
+   "pr": 2696,
+   "url": "https://github.com/falconry/falcon/pull/2696"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 1
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "tests/test_utils.py",
+      "line": 369,
+      "claim": "The test logic accepts both the incorrect GraalPy-specific result and the correct standard result, which prevents the test from detecting when the GraalPy bug is fixed or if it regresses later.",
+      "quote": "expected = (\n            {'', ''} if sys.implementation.name == 'graalpy' else {''}\n        )",
+      "fix": "expected = {''}",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 9,
+      "repo": "falconry/falcon",
+      "pr": 2704,
+      "arm": "C",
+      "url": "https://github.com/falconry/falcon/pull/2704"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "falconry/falcon",
+   "pr": 2704,
+   "url": "https://github.com/falconry/falcon/pull/2704"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "falconry/falcon",
+   "pr": 2683,
+   "url": "https://github.com/falconry/falcon/pull/2683"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "falconry/falcon",
+   "pr": 2681,
+   "url": "https://github.com/falconry/falcon/pull/2681"
+  },
+  {
+   "raw": {
+    "A": 1,
+    "B": 5,
+    "C": 5
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "falconry/falcon",
+   "pr": 2684,
+   "url": "https://github.com/falconry/falcon/pull/2684"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "falconry/falcon",
+   "pr": 2673,
+   "url": "https://github.com/falconry/falcon/pull/2673"
+  },
+  {
+   "raw": {
+    "A": 1,
+    "B": 1,
+    "C": 1
+   },
+   "published": {
+    "A": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/test-wheels.yaml",
+      "line": 21,
+      "claim": "This change replaces the wheel test for Python 3.14 on `manylinux_aarch64` with one for 3.15, which inadvertently removes test coverage for a supported platform and Python version combination.",
+      "quote": "          - build: \"cp315-manylinux_aarch64\"",
+      "fix": "          - build: \"cp314-manylinux_aarch64\"",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "falconry/falcon",
+      "pr": 2697,
+      "arm": "A",
+      "url": "https://github.com/falconry/falcon/pull/2697"
+     }
+    ],
+    "B": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/test-wheels.yaml",
+      "line": 21,
+      "claim": "This change replaces the `cp314-manylinux_aarch64` test build instead of adding a new one for `cp315`, which results in a loss of test coverage for Python 3.14 on this platform while other emulated platforms retain it.",
+      "quote": "build: \"cp315-manylinux_aarch64\"",
+      "fix": "build: \"cp314-manylinux_aarch64\"",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "falconry/falcon",
+      "pr": 2697,
+      "arm": "B",
+      "url": "https://github.com/falconry/falcon/pull/2697"
+     }
+    ],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/test-wheels.yaml",
+      "line": 21,
+      "claim": "This change incorrectly replaces the emulated wheel test for Python 3.14 on aarch64 instead of adding a new test for Python 3.15, thereby dropping test coverage for a supported Python version.",
+      "quote": "          - build: \"cp315-manylinux_aarch64\"",
+      "fix": "          - build: \"cp314-manylinux_aarch64\"\n            os: ubuntu-24.04-arm\n          - build: \"cp315-manylinux_aarch64\"",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "falconry/falcon",
+      "pr": 2697,
+      "arm": "C",
+      "url": "https://github.com/falconry/falcon/pull/2697"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "falconry/falcon",
+   "pr": 2697,
+   "url": "https://github.com/falconry/falcon/pull/2697"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "falconry/falcon",
+   "pr": 2666,
+   "url": "https://github.com/falconry/falcon/pull/2666"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pytest-dev/pluggy",
+   "pr": 721,
+   "url": "https://github.com/pytest-dev/pluggy/pull/721"
+  },
+  {
+   "raw": {
+    "A": 1,
+    "B": 2,
+    "C": 1
+   },
+   "published": {
+    "A": [],
+    "B": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "falcon/request.py",
+      "line": 651,
+      "claim": "Using 'replace' as the error handler for UTF-8 decoding causes data loss for invalid byte sequences, whereas PEP 3333 recommends 'surrogateescape' for path decoding.",
+      "quote": "root_path = root_path.encode('iso-8859-1').decode('utf-8', 'replace')",
+      "fix": "root_path = root_path.encode('iso-8859-1').decode('utf-8', 'surrogateescape')",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 4,
+      "repo": "falconry/falcon",
+      "pr": 2682,
+      "arm": "B",
+      "url": "https://github.com/falconry/falcon/pull/2682"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": "tests/test_request_attrs.py",
+      "line": 64,
+      "claim": "The call to `.encode()` uses the system's default string encoding which is not guaranteed to be UTF-8, making the test brittle.",
+      "quote": "script_name = '/caf\u00e9'.encode().decode('iso-8859-1')",
+      "fix": "script_name = '/caf\u00e9'.encode('utf-8').decode('iso-8859-1')",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 11,
+      "repo": "falconry/falcon",
+      "pr": 2682,
+      "arm": "B",
+      "url": "https://github.com/falconry/falcon/pull/2682"
+     }
+    ],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "falconry/falcon",
+   "pr": 2682,
+   "url": "https://github.com/falconry/falcon/pull/2682"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pytest-dev/pluggy",
+   "pr": 719,
+   "url": "https://github.com/pytest-dev/pluggy/pull/719"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 1,
+    "C": 1
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pytest-dev/pluggy",
+   "pr": 718,
+   "url": "https://github.com/pytest-dev/pluggy/pull/718"
+  },
+  {
+   "raw": {
+    "A": 1,
+    "B": 1,
+    "C": 1
+   },
+   "published": {
+    "A": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "falcon/cyutil/uri.pyx",
+      "line": 92,
+      "claim": "The logic in this block causes an infinite loop when `unquote_plus` is false because it fails to copy the literal `+` character and advance the source pointer.",
+      "quote": "if data[pos] == b'+':",
+      "fix": "            if data[pos] == b'+':\n                if unquote_plus:\n                    result[dst_start] = b' '\n                else:\n                    result[dst_start] = b'+'\n                dst_start += 1\n                src_start += 1\n                continue",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 8,
+      "repo": "falconry/falcon",
+      "pr": 2672,
+      "arm": "A",
+      "url": "https://github.com/falconry/falcon/pull/2672"
+     }
+    ],
+    "B": [],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "falcon/cyutil/uri.pyx",
+      "line": 96,
+      "claim": "This conditional block is incomplete; when `unquote_plus` is false, it causes an infinite loop by failing to process the `+` character or advance the source pointer.",
+      "quote": "if unquote_plus:",
+      "fix": "                if unquote_plus:\n                    result[dst_start] = b' '\n                    dst_start += 1\n                    src_start += 1\n                else:\n                    result[dst_start] = b'+'\n                    dst_start += 1\n                    src_start += 1",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 8,
+      "repo": "falconry/falcon",
+      "pr": 2672,
+      "arm": "C",
+      "url": "https://github.com/falconry/falcon/pull/2672"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "falconry/falcon",
+   "pr": 2672,
+   "url": "https://github.com/falconry/falcon/pull/2672"
+  },
+  {
+   "raw": {
+    "A": 1,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/downstream.yml",
+      "line": 50,
+      "claim": "The version comment `# v9.0.0` is incorrect, as the commit hash `c771a70e6277c0a99b617c7a806ffedaca235ff9` corresponds to version `v0.1.23` of the `astral-sh/setup-uv` action.",
+      "quote": "      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0",
+      "fix": "      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v0.1.23",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "pytest-dev/pluggy",
+      "pr": 717,
+      "arm": "A",
+      "url": "https://github.com/pytest-dev/pluggy/pull/717"
+     }
+    ],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pytest-dev/pluggy",
+   "pr": 717,
+   "url": "https://github.com/pytest-dev/pluggy/pull/717"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pytest-dev/pluggy",
+   "pr": 713,
+   "url": "https://github.com/pytest-dev/pluggy/pull/713"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pytest-dev/pluggy",
+   "pr": 714,
+   "url": "https://github.com/pytest-dev/pluggy/pull/714"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pytest-dev/pluggy",
+   "pr": 700,
+   "url": "https://github.com/pytest-dev/pluggy/pull/700"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pytest-dev/pluggy",
+   "pr": 699,
+   "url": "https://github.com/pytest-dev/pluggy/pull/699"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 2
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/deploy.yml",
+      "line": 19,
+      "claim": "The version comment is incorrect as `actions/checkout` has no `v7.0.1` release, which misleads developers and can break automated dependency updates.",
+      "quote": "      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1",
+      "fix": "      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.7",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "pytest-dev/pluggy",
+      "pr": 712,
+      "arm": "C",
+      "url": "https://github.com/pytest-dev/pluggy/pull/712"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/deploy.yml",
+      "line": 19,
+      "claim": "The version comment is incorrect as `actions/checkout` has no `v7.0.1` release, which misleads developers and can break automated dependency updates.",
+      "quote": "    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1",
+      "fix": "    - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.7",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "pytest-dev/pluggy",
+      "pr": 712,
+      "arm": "C",
+      "url": "https://github.com/pytest-dev/pluggy/pull/712"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pytest-dev/pluggy",
+   "pr": 712,
+   "url": "https://github.com/pytest-dev/pluggy/pull/712"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 2,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".pre-commit-config.yaml",
+      "line": 3,
+      "claim": "The `rev` `v0.15.21` is invalid because this tag does not exist in the `astral-sh/ruff-pre-commit` repository, which will cause pre-commit hook installation to fail.",
+      "quote": "rev: \"v0.15.21\"",
+      "fix": "rev: \"v0.4.4\"",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "pytest-dev/pluggy",
+      "pr": 698,
+      "arm": "B",
+      "url": "https://github.com/pytest-dev/pluggy/pull/698"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".pre-commit-config.yaml",
+      "line": 46,
+      "claim": "The `rev` `v2.3.0` is invalid because this tag does not exist in the `pre-commit/mirrors-mypy` repository, which will cause pre-commit hook installation to fail.",
+      "quote": "rev: v2.3.0",
+      "fix": "rev: v1.9.0",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "pytest-dev/pluggy",
+      "pr": 698,
+      "arm": "B",
+      "url": "https://github.com/pytest-dev/pluggy/pull/698"
+     }
+    ],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pytest-dev/pluggy",
+   "pr": 698,
+   "url": "https://github.com/pytest-dev/pluggy/pull/698"
+  },
+  {
+   "raw": {
+    "A": 2,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pytest-dev/pluggy",
+   "pr": 711,
+   "url": "https://github.com/pytest-dev/pluggy/pull/711"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pytest-dev/pluggy",
+   "pr": 696,
+   "url": "https://github.com/pytest-dev/pluggy/pull/696"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pytest-dev/pluggy",
+   "pr": 697,
+   "url": "https://github.com/pytest-dev/pluggy/pull/697"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pytest-dev/pluggy",
+   "pr": 693,
+   "url": "https://github.com/pytest-dev/pluggy/pull/693"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "jazzband/pip-tools",
+   "pr": 2455,
+   "url": "https://github.com/jazzband/pip-tools/pull/2455"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 1,
+    "C": 1
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "piptools/scripts/compile.py",
+      "line": 207,
+      "claim": "The `coverage.py` tool does not support version-specific pragmas for branch coverage, so this pragma will not prevent a branch coverage miss on newer Python versions where this condition is always false.",
+      "quote": "):  # pragma: <=3.9 cover",
+      "fix": "): # pragma: no branch",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 6,
+      "repo": "jazzband/pip-tools",
+      "pr": 2461,
+      "arm": "C",
+      "url": "https://github.com/jazzband/pip-tools/pull/2461"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "jazzband/pip-tools",
+   "pr": 2461,
+   "url": "https://github.com/jazzband/pip-tools/pull/2461"
+  },
+  {
+   "raw": {
+    "A": 4,
+    "B": 4,
+    "C": 2
+   },
+   "published": {
+    "A": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/deploy.yml",
+      "line": 19,
+      "claim": "This is a security vulnerability, as the commit hash `9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0` and version `v7.0.0` do not exist in the official `actions/checkout` repository and likely point to malicious code.",
+      "quote": "      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0",
+      "fix": "      - uses: actions/checkout@v4",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "pytest-dev/pluggy",
+      "pr": 692,
+      "arm": "A",
+      "url": "https://github.com/pytest-dev/pluggy/pull/692"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/deploy.yml",
+      "line": 19,
+      "claim": "This is a security vulnerability, as the commit hash `9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0` and version `v7.0.0` do not exist in the official `actions/checkout` repository and likely point to malicious code.",
+      "quote": "      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0",
+      "fix": "      - uses: actions/checkout@v4",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "pytest-dev/pluggy",
+      "pr": 692,
+      "arm": "A",
+      "url": "https://github.com/pytest-dev/pluggy/pull/692"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/deploy.yml",
+      "line": 19,
+      "claim": "This is a security vulnerability, as the commit hash `9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0` and version `v7.0.0` do not exist in the official `actions/checkout` repository and likely point to malicious code.",
+      "quote": "      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0",
+      "fix": "      - uses: actions/checkout@v4",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "pytest-dev/pluggy",
+      "pr": 692,
+      "arm": "A",
+      "url": "https://github.com/pytest-dev/pluggy/pull/692"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/deploy.yml",
+      "line": 19,
+      "claim": "This is a security vulnerability, as the commit hash `9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0` and version `v7.0.0` do not exist in the official `actions/checkout` repository and likely point to malicious code.",
+      "quote": "    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0",
+      "fix": "    - uses: actions/checkout@v4",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "pytest-dev/pluggy",
+      "pr": 692,
+      "arm": "A",
+      "url": "https://github.com/pytest-dev/pluggy/pull/692"
+     }
+    ],
+    "B": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/deploy.yml",
+      "line": 19,
+      "claim": "This change pins the action to a commit hash that does not exist in the official `actions/checkout` repository, posing a significant security risk.",
+      "quote": "      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0",
+      "fix": "      - uses: actions/checkout@v4",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "pytest-dev/pluggy",
+      "pr": 692,
+      "arm": "B",
+      "url": "https://github.com/pytest-dev/pluggy/pull/692"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/deploy.yml",
+      "line": 19,
+      "claim": "This change pins the action to a commit hash that does not exist in the official `actions/checkout` repository, posing a significant security risk.",
+      "quote": "      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0",
+      "fix": "      - uses: actions/checkout@v4",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "pytest-dev/pluggy",
+      "pr": 692,
+      "arm": "B",
+      "url": "https://github.com/pytest-dev/pluggy/pull/692"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/deploy.yml",
+      "line": 19,
+      "claim": "This change pins the action to a commit hash that does not exist in the official `actions/checkout` repository, posing a significant security risk.",
+      "quote": "      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0",
+      "fix": "      - uses: actions/checkout@v4",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "pytest-dev/pluggy",
+      "pr": 692,
+      "arm": "B",
+      "url": "https://github.com/pytest-dev/pluggy/pull/692"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/deploy.yml",
+      "line": 19,
+      "claim": "This change pins the action to a commit hash that does not exist in the official `actions/checkout` repository, posing a significant security risk.",
+      "quote": "    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0",
+      "fix": "    - uses: actions/checkout@v4",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "pytest-dev/pluggy",
+      "pr": 692,
+      "arm": "B",
+      "url": "https://github.com/pytest-dev/pluggy/pull/692"
+     }
+    ],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/deploy.yml",
+      "line": 19,
+      "claim": "This change downgrades `actions/checkout` from `v4.1.2` (the previous commit hash) to `v4.0.0` (the new commit hash), which is a logic error that may re-introduce bugs or remove features.",
+      "quote": "      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0",
+      "fix": "      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.7",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "pytest-dev/pluggy",
+      "pr": 692,
+      "arm": "C",
+      "url": "https://github.com/pytest-dev/pluggy/pull/692"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/deploy.yml",
+      "line": 19,
+      "claim": "This change downgrades `actions/checkout` from `v4.1.2` (the previous commit hash) to `v4.0.0` (the new commit hash), which is a logic error that may re-introduce bugs or remove features.",
+      "quote": "    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0",
+      "fix": "    - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.7",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "pytest-dev/pluggy",
+      "pr": 692,
+      "arm": "C",
+      "url": "https://github.com/pytest-dev/pluggy/pull/692"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "pytest-dev/pluggy",
+   "pr": 692,
+   "url": "https://github.com/pytest-dev/pluggy/pull/692"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 1
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "tests/unit/scripts/test_options.py",
+      "line": 24,
+      "claim": "This assertion is fragile because it assumes the help text for the `--help` option is the last part of the output, which is not guaranteed if other options are present.",
+      "quote": "assert result.stdout.rstrip().endswith(\"Show this message and exit.\")",
+      "fix": "assert \"--help\" in result.stdout and \"Show this message and exit.\" in result.stdout",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 42,
+      "repo": "jazzband/pip-tools",
+      "pr": 2457,
+      "arm": "C",
+      "url": "https://github.com/jazzband/pip-tools/pull/2457"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "jazzband/pip-tools",
+   "pr": 2457,
+   "url": "https://github.com/jazzband/pip-tools/pull/2457"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "jazzband/pip-tools",
+   "pr": 2445,
+   "url": "https://github.com/jazzband/pip-tools/pull/2445"
+  },
+  {
+   "raw": {
+    "A": 3,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "tests/conftest.py",
+      "line": 124,
+      "claim": "The property is type-hinted to return a `PipSession`, but returning a generic `mock.Mock()` instance creates a type mismatch that will likely be flagged by a static type checker.",
+      "quote": "return mock.Mock()",
+      "fix": "return _t.cast(PipSession, mock.Mock())",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 6,
+      "repo": "jazzband/pip-tools",
+      "pr": 2444,
+      "arm": "A",
+      "url": "https://github.com/jazzband/pip-tools/pull/2444"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": "tests/conftest.py",
+      "line": 124,
+      "claim": "The property is type-hinted to return a `PackageFinder`, but returning a generic `mock.Mock()` instance creates a type mismatch that will likely be flagged by a static type checker.",
+      "quote": "return mock.Mock()",
+      "fix": "return _t.cast(PackageFinder, mock.Mock())",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 6,
+      "repo": "jazzband/pip-tools",
+      "pr": 2444,
+      "arm": "A",
+      "url": "https://github.com/jazzband/pip-tools/pull/2444"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": "tests/conftest.py",
+      "line": 124,
+      "claim": "The property is type-hinted to return an `InstallCommand`, but returning a generic `mock.Mock()` instance creates a type mismatch that will likely be flagged by a static type checker.",
+      "quote": "return mock.Mock()",
+      "fix": "return _t.cast(InstallCommand, mock.Mock())",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 6,
+      "repo": "jazzband/pip-tools",
+      "pr": 2444,
+      "arm": "A",
+      "url": "https://github.com/jazzband/pip-tools/pull/2444"
+     }
+    ],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "jazzband/pip-tools",
+   "pr": 2444,
+   "url": "https://github.com/jazzband/pip-tools/pull/2444"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 1
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "tests/test_utils.py",
+      "line": 766,
+      "claim": "The test does not verify that existing keys in `default_map` are preserved when loading from a config file, so it would incorrectly pass if the implementation replaces the entire map instead of updating it.",
+      "quote": "ctx.default_map = {\"verbose\": False}",
+      "fix": "ctx.default_map = {\"verbose\": False, \"dry-run\": True}",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 18,
+      "repo": "jazzband/pip-tools",
+      "pr": 2454,
+      "arm": "C",
+      "url": "https://github.com/jazzband/pip-tools/pull/2454"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "jazzband/pip-tools",
+   "pr": 2454,
+   "url": "https://github.com/jazzband/pip-tools/pull/2454"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 1,
+    "C": 1
+   },
+   "published": {
+    "A": [],
+    "B": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".pre-commit-config.yaml",
+      "line": 8,
+      "claim": "The specified revision '9.0.0b2' is not a valid git reference in the isort repository, which will cause the pre-commit hook to fail during installation.",
+      "quote": "    rev: 9.0.0b2",
+      "fix": "    rev: 5.13.2",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "jazzband/pip-tools",
+      "pr": 2447,
+      "arm": "B",
+      "url": "https://github.com/jazzband/pip-tools/pull/2447"
+     }
+    ],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".pre-commit-config.yaml",
+      "line": 8,
+      "claim": "The `isort` dependency is only partially updated, as another `isort` configuration in the same file is left unchanged at the old version `9.0.0b1`.",
+      "quote": "rev: 9.0.0b2",
+      "fix": "rev: 9.0.0b1",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "jazzband/pip-tools",
+      "pr": 2447,
+      "arm": "C",
+      "url": "https://github.com/jazzband/pip-tools/pull/2447"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "jazzband/pip-tools",
+   "pr": 2447,
+   "url": "https://github.com/jazzband/pip-tools/pull/2447"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "jazzband/pip-tools",
+   "pr": 2430,
+   "url": "https://github.com/jazzband/pip-tools/pull/2430"
+  },
+  {
+   "raw": {
+    "A": 1,
+    "B": 1,
+    "C": 1
+   },
+   "published": {
+    "A": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "piptools/sync.py",
+      "line": 40,
+      "claim": "This logic for determining development packages is an incorrect simplification of pip's internal logic, as it wrongly includes \"wheel\" for Python versions older than 3.10.",
+      "quote": "_DEV_PKGS |= {\"setuptools\", \"distribute\", \"wheel\"}",
+      "fix": "_DEV_PKGS |= {\"setuptools\", \"distribute\"} | ({\"wheel\"} if sys.version_info >= (3, 10) else set())",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 14,
+      "repo": "jazzband/pip-tools",
+      "pr": 2438,
+      "arm": "A",
+      "url": "https://github.com/jazzband/pip-tools/pull/2438"
+     }
+    ],
+    "B": [],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "piptools/_internal/_pip_api/command_methods.py",
+      "line": 64,
+      "claim": "The `make_requirement_preparer_from_command` function accepts a `download_dir` argument but fails to pass it to the wrapped `command.make_requirement_preparer` method.",
+      "quote": "build_tracker=build_tracker,",
+      "fix": "        build_tracker=build_tracker,\n        download_dir=download_dir,",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 66,
+      "repo": "jazzband/pip-tools",
+      "pr": 2438,
+      "arm": "C",
+      "url": "https://github.com/jazzband/pip-tools/pull/2438"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "jazzband/pip-tools",
+   "pr": 2438,
+   "url": "https://github.com/jazzband/pip-tools/pull/2438"
+  },
+  {
+   "raw": {
+    "A": 2,
+    "B": 2,
+    "C": 2
+   },
+   "published": {
+    "A": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/ISSUE_TEMPLATE/bug-report.yaml",
+      "line": 36,
+      "claim": "The steps to reproduce a bug are essential for maintainers to investigate and fix it, so this field should be mandatory.",
+      "quote": "required: false",
+      "fix": "required: true",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 50,
+      "repo": "jazzband/pip-tools",
+      "pr": 2425,
+      "arm": "A",
+      "url": "https://github.com/jazzband/pip-tools/pull/2425"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/ISSUE_TEMPLATE/bug-report.yaml",
+      "line": 36,
+      "claim": "The environment details are crucial for reproducing and debugging an issue, so this field should be mandatory.",
+      "quote": "required: false",
+      "fix": "required: true",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 50,
+      "repo": "jazzband/pip-tools",
+      "pr": 2425,
+      "arm": "A",
+      "url": "https://github.com/jazzband/pip-tools/pull/2425"
+     }
+    ],
+    "B": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/ISSUE_TEMPLATE/bug-report.yaml",
+      "line": 36,
+      "claim": "The steps to reproduce a bug are essential for maintainers to investigate and fix it, so this field should be mandatory.",
+      "quote": "required: false",
+      "fix": "required: true",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 50,
+      "repo": "jazzband/pip-tools",
+      "pr": 2425,
+      "arm": "B",
+      "url": "https://github.com/jazzband/pip-tools/pull/2425"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/ISSUE_TEMPLATE/bug-report.yaml",
+      "line": 36,
+      "claim": "The environment details are crucial for reproducing and debugging an issue, so this field should be mandatory.",
+      "quote": "required: false",
+      "fix": "required: true",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 50,
+      "repo": "jazzband/pip-tools",
+      "pr": 2425,
+      "arm": "B",
+      "url": "https://github.com/jazzband/pip-tools/pull/2425"
+     }
+    ],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/ISSUE_TEMPLATE/bug-report.yaml",
+      "line": 36,
+      "claim": "The steps to reproduce a bug are essential for maintainers to investigate and fix it, so this field should be mandatory.",
+      "quote": "required: false",
+      "fix": "required: true",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 50,
+      "repo": "jazzband/pip-tools",
+      "pr": 2425,
+      "arm": "C",
+      "url": "https://github.com/jazzband/pip-tools/pull/2425"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/ISSUE_TEMPLATE/bug-report.yaml",
+      "line": 36,
+      "claim": "The environment versions are critical for debugging as many issues are environment-specific, so this field should be mandatory.",
+      "quote": "required: false",
+      "fix": "required: true",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 50,
+      "repo": "jazzband/pip-tools",
+      "pr": 2425,
+      "arm": "C",
+      "url": "https://github.com/jazzband/pip-tools/pull/2425"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "jazzband/pip-tools",
+   "pr": 2425,
+   "url": "https://github.com/jazzband/pip-tools/pull/2425"
+  },
+  {
+   "raw": {
+    "A": 3,
+    "B": 1,
+    "C": 1
+   },
+   "published": {
+    "A": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "piptools/repositories/pypi.py",
+      "line": 537,
+      "claim": "This condition is too broad because it incorrectly matches any URL where a path segment ends with \"/simple/\", such as \".../not-so-simple/\", leading to a malformed URL.",
+      "quote": "if url.endswith(\"/simple/\"):",
+      "fix": "if url.endswith(\"/simple/\") and url.split('/')[-2] == 'simple':",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 20,
+      "repo": "jazzband/pip-tools",
+      "pr": 2429,
+      "arm": "A",
+      "url": "https://github.com/jazzband/pip-tools/pull/2429"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": "piptools/repositories/pypi.py",
+      "line": 538,
+      "claim": "This removes the trailing slash from the base URL, which fails the test case that expects a trailing slash.",
+      "quote": "return url.removesuffix(\"simple/\")",
+      "fix": "return url.removesuffix(\"simple/\") + \"/\"",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 20,
+      "repo": "jazzband/pip-tools",
+      "pr": 2429,
+      "arm": "A",
+      "url": "https://github.com/jazzband/pip-tools/pull/2429"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": "piptools/repositories/pypi.py",
+      "line": 539,
+      "claim": "This condition is too broad because it incorrectly matches any URL where a path segment ends with \"/simple\", such as \".../not-so-simple\", leading to a malformed URL.",
+      "quote": "elif url.endswith(\"/simple\"):",
+      "fix": "elif url.endswith(\"/simple\") and url.split('/')[-1] == 'simple':",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 20,
+      "repo": "jazzband/pip-tools",
+      "pr": 2429,
+      "arm": "A",
+      "url": "https://github.com/jazzband/pip-tools/pull/2429"
+     }
+    ],
+    "B": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "piptools/repositories/pypi.py",
+      "line": 538,
+      "claim": "A URL with a path that does not end in a slash will be mishandled by `urllib.parse.urljoin`, causing part of the path to be lost.",
+      "quote": "return url",
+      "fix": "    return url if url.endswith(\"/\") else url + \"/\"",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 20,
+      "repo": "jazzband/pip-tools",
+      "pr": 2429,
+      "arm": "B",
+      "url": "https://github.com/jazzband/pip-tools/pull/2429"
+     }
+    ],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "piptools/repositories/pypi.py",
+      "line": 538,
+      "claim": "The function does not ensure that a base URL with a path component ends with a trailing slash, causing `urllib.parse.urljoin` to incorrectly replace the last path segment instead of appending to it.",
+      "quote": "return url",
+      "fix": "return url if url.endswith(\"/\") else url + \"/\"",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 20,
+      "repo": "jazzband/pip-tools",
+      "pr": 2429,
+      "arm": "C",
+      "url": "https://github.com/jazzband/pip-tools/pull/2429"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "jazzband/pip-tools",
+   "pr": 2429,
+   "url": "https://github.com/jazzband/pip-tools/pull/2429"
+  },
+  {
+   "raw": {
+    "A": 7,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "tests/test_cli_compile.py",
+      "line": 257,
+      "claim": "The `open` function is called on a `Path` object, but the `proj_dir` object from `tmpdir.mkdir` was a `py.path.local` object which does not support the `/` operator for path joining.",
+      "quote": "with open(proj_dir / \"setup.py\", \"w\") as package:",
+      "fix": "    with open(str(proj_dir / \"setup.py\"), \"w\") as package:",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 4,
+      "repo": "jazzband/pip-tools",
+      "pr": 2446,
+      "arm": "A",
+      "url": "https://github.com/jazzband/pip-tools/pull/2446"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": "tests/test_repository_pypi.py",
+      "line": 106,
+      "claim": "The `path_to_url` function expects a string path, but `tmp_path` is a `pathlib.Path` object, which needs to be converted to a string before being passed.",
+      "quote": "link = Link(path_to_url(str(tmp_path)))",
+      "fix": "    link = Link(path_to_url(os.fspath(tmp_path)))",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 2,
+      "repo": "jazzband/pip-tools",
+      "pr": 2446,
+      "arm": "A",
+      "url": "https://github.com/jazzband/pip-tools/pull/2446"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": "tests/test_repository_pypi.py",
+      "line": 349,
+      "claim": "The `tmpdir` fixture was removed from the function signature, but it was likely used by other fixtures or setup code within the test, and its removal could lead to failures.",
+      "quote": "def test_get_project__returns_data(from_line, monkeypatch, pypi_repository):",
+      "fix": "def test_get_project__returns_data(from_line, tmpdir, monkeypatch, pypi_repository):",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "jazzband/pip-tools",
+      "pr": 2446,
+      "arm": "A",
+      "url": "https://github.com/jazzband/pip-tools/pull/2446"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": "tests/test_repository_pypi.py",
+      "line": 372,
+      "claim": "The `tmpdir` fixture was removed from the function signature, but it was likely used by other fixtures or setup code within the test, and its removal could lead to failures.",
+      "quote": "def test_get_project__handles_http_error(from_line, monkeypatch, pypi_repository):",
+      "fix": "def test_get_project__handles_http_error(from_line, tmpdir, monkeypatch, pypi_repository):",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "jazzband/pip-tools",
+      "pr": 2446,
+      "arm": "A",
+      "url": "https://github.com/jazzband/pip-tools/pull/2446"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": "tests/test_repository_pypi.py",
+      "line": 411,
+      "claim": "The `tmpdir` fixture was removed from the function signature, but it was likely used by other fixtures or setup code within the test, and its removal could lead to failures.",
+      "quote": "def test_get_project__handles_404(from_line, monkeypatch, pypi_repository):",
+      "fix": "def test_get_project__handles_404(from_line, tmpdir, monkeypatch, pypi_repository):",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "jazzband/pip-tools",
+      "pr": 2446,
+      "arm": "A",
+      "url": "https://github.com/jazzband/pip-tools/pull/2446"
+     }
+    ],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "jazzband/pip-tools",
+   "pr": 2446,
+   "url": "https://github.com/jazzband/pip-tools/pull/2446"
+  },
+  {
+   "raw": {
+    "A": 3,
+    "B": 3,
+    "C": 0
+   },
+   "published": {
+    "A": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "tests/test_program_search.py",
+      "line": 159,
+      "claim": "The test assertion hardcodes the expected timeout value, making the test brittle if the `BASE_TIMEOUT` constant changes.",
+      "quote": "assert compute_timeout(Path(\"cmake\")) == 5",
+      "fix": "assert compute_timeout(Path(\"cmake\")) == BASE_TIMEOUT",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 46,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1535,
+      "arm": "A",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1535"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": "tests/test_program_search.py",
+      "line": 179,
+      "claim": "The test assertion hardcodes the expected timeout value, making the test brittle if the `BASE_TIMEOUT` constant changes.",
+      "quote": "assert compute_timeout(Path(\"cmake\")) == 10",
+      "fix": "assert compute_timeout(Path(\"cmake\")) == BASE_TIMEOUT * 2",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 46,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1535,
+      "arm": "A",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1535"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": "tests/test_program_search.py",
+      "line": 190,
+      "claim": "The test assertion hardcodes the expected timeout value, making the test brittle if the `BASE_TIMEOUT` constant changes.",
+      "quote": "assert compute_timeout(Path(\"cmake\")) == 20",
+      "fix": "assert compute_timeout(Path(\"cmake\")) == BASE_TIMEOUT * 4",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 46,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1535,
+      "arm": "A",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1535"
+     }
+    ],
+    "B": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "tests/test_program_search.py",
+      "line": 159,
+      "claim": "The test assertion uses a hardcoded value, making it brittle to changes in the `BASE_TIMEOUT` constant.",
+      "quote": "assert compute_timeout(Path(\"cmake\")) == 5",
+      "fix": "assert compute_timeout(Path(\"cmake\")) == BASE_TIMEOUT",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 46,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1535,
+      "arm": "B",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1535"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": "tests/test_program_search.py",
+      "line": 179,
+      "claim": "The test assertion uses a hardcoded value, making it brittle to changes in the `BASE_TIMEOUT` constant.",
+      "quote": "assert compute_timeout(Path(\"cmake\")) == 10",
+      "fix": "assert compute_timeout(Path(\"cmake\")) == BASE_TIMEOUT * 2",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 46,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1535,
+      "arm": "B",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1535"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": "tests/test_program_search.py",
+      "line": 190,
+      "claim": "The test assertion uses a hardcoded value, making it brittle to changes in the `BASE_TIMEOUT` constant.",
+      "quote": "assert compute_timeout(Path(\"cmake\")) == 20",
+      "fix": "assert compute_timeout(Path(\"cmake\")) == BASE_TIMEOUT * 4",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 46,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1535,
+      "arm": "B",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1535"
+     }
+    ],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1535,
+   "url": "https://github.com/scikit-build/scikit-build-core/pull/1535"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1533,
+   "url": "https://github.com/scikit-build/scikit-build-core/pull/1533"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 3
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/cd.yml",
+      "line": 28,
+      "claim": "The action `hynek/build-and-inspect-python-package` was renamed to `hynek/build-and-inspect` in v3, but the workflow uses the old name with a commit hash from the new repository, which will fail.",
+      "quote": "      - uses: hynek/build-and-inspect-python-package@2abe76da66d0a6a4a227101f9348ee855797cfa5 # v3.0.1",
+      "fix": "      - uses: hynek/build-and-inspect@2abe76da66d0a6a4a227101f9348ee855797cfa5 # v3.0.1",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1534,
+      "arm": "C",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1534"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/cd.yml",
+      "line": 28,
+      "claim": "The action `hynek/build-and-inspect-python-package` was renamed to `hynek/build-and-inspect` in v3, but the workflow uses the old name with a commit hash from the new repository, which will fail.",
+      "quote": "      - uses: hynek/build-and-inspect-python-package@2abe76da66d0a6a4a227101f9348ee855797cfa5 # v3.0.1",
+      "fix": "      - uses: hynek/build-and-inspect@2abe76da66d0a6a4a227101f9348ee855797cfa5 # v3.0.1",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1534,
+      "arm": "C",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1534"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/cd.yml",
+      "line": 28,
+      "claim": "The action `hynek/build-and-inspect-python-package` was renamed to `hynek/build-and-inspect` in v3, but the workflow uses the old name with a commit hash from the new repository, which will fail.",
+      "quote": "      - uses: hynek/build-and-inspect-python-package@2abe76da66d0a6a4a227101f9348ee855797cfa5 # v3.0.1",
+      "fix": "      - uses: hynek/build-and-inspect@2abe76da66d0a6a4a227101f9348ee855797cfa5 # v3.0.1",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1534,
+      "arm": "C",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1534"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1534,
+   "url": "https://github.com/scikit-build/scikit-build-core/pull/1534"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1529,
+   "url": "https://github.com/scikit-build/scikit-build-core/pull/1529"
+  },
+  {
+   "raw": {
+    "A": 1,
+    "B": 1,
+    "C": 1
+   },
+   "published": {
+    "A": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "docs/conf.py",
+      "line": 97,
+      "claim": "The Sphinx extension name is invalid as it contains a file extension `.txt`, which will cause an import error when Sphinx tries to load it as a Python module.",
+      "quote": "\"sphinx_llm.txt\",",
+      "fix": "\"sphinx_llm\",",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1523,
+      "arm": "A",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1523"
+     }
+    ],
+    "B": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "docs/conf.py",
+      "line": 97,
+      "claim": "The Sphinx extension name is invalid because it includes a file extension `.txt`, which will cause an import error as it is not a valid Python module name.",
+      "quote": "    \"sphinx_llm.txt\",",
+      "fix": "    \"sphinx_llm\",",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1523,
+      "arm": "B",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1523"
+     }
+    ],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "docs/conf.py",
+      "line": 97,
+      "claim": "The Sphinx extension name \"sphinx_llm.txt\" is invalid because it is not a valid Python module name, which will cause an ImportError during the documentation build.",
+      "quote": "\"sphinx_llm.txt\",",
+      "fix": "\"sphinx_llm\",",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1523,
+      "arm": "C",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1523"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1523,
+   "url": "https://github.com/scikit-build/scikit-build-core/pull/1523"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 1,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "src/scikit_build_core/builder/builder.py",
+      "line": 432,
+      "claim": "This condition fails to detect free-threaded builds where `sysconfig.get_config_var(\"Py_GIL_DISABLED\")` is 't', because the `gil_disabled` variable only checks for '1'.",
+      "quote": "if gil_disabled and self.config.cmake.version >= Version(\"3.30\"):",
+      "fix": "if sysconfig.get_config_var(\"Py_GIL_DISABLED\") and self.config.cmake.version >= Version(\"3.30\"):",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 4,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1532,
+      "arm": "B",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1532"
+     }
+    ],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1532,
+   "url": "https://github.com/scikit-build/scikit-build-core/pull/1532"
+  },
+  {
+   "raw": {
+    "A": 1,
+    "B": 1,
+    "C": 1
+   },
+   "published": {
+    "A": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "src/scikit_build_core/file_api/reply.py",
+      "line": 57,
+      "claim": "Accessing the last element of the sorted list of files will raise an `IndexError` if no files matching `index-*` are found, which is an unhandled exception.",
+      "quote": "index_file = sorted(self.base_dir.glob(\"index-*\"))[-1]  # noqa: FURB192",
+      "fix": "        files = sorted(self.base_dir.glob(\"index-*\"))\n        if not files:\n            raise FileNotFoundError(\"No index file found in CMAKE_PREFIX_PATH\")\n        index_file = files[-1]",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 2,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1528,
+      "arm": "A",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1528"
+     }
+    ],
+    "B": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "src/scikit_build_core/file_api/reply.py",
+      "line": 57,
+      "claim": "The code will raise an `IndexError` if no index files are found, because it accesses the last element of a potentially empty list without checking if it is empty.",
+      "quote": "index_file = sorted(self.base_dir.glob(\"index-*\"))[-1]  # noqa: FURB192",
+      "fix": "try:\n    index_file = sorted(self.base_dir.glob(\"index-*\"))[-1]\nexcept IndexError as e:\n    raise FileNotFoundError(\"No index file found in reply directory\") from e",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 2,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1528,
+      "arm": "B",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1528"
+     }
+    ],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "src/scikit_build_core/file_api/reply.py",
+      "line": 57,
+      "claim": "The code will raise an unhandled `IndexError` if `self.base_dir.glob(\"index-*\")` finds no files, which can happen if the CMake configuration fails.",
+      "quote": "index_file = sorted(self.base_dir.glob(\"index-*\"))[-1]  # noqa: FURB192",
+      "fix": "        indexes = sorted(self.base_dir.glob(\"index-*\"))\n        if not indexes:\n            raise FileNotFoundError(f\"No CMake file API index found in {self.base_dir}\")\n        index_file = indexes[-1]",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 2,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1528,
+      "arm": "C",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1528"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1528,
+   "url": "https://github.com/scikit-build/scikit-build-core/pull/1528"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 1
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1517,
+   "url": "https://github.com/scikit-build/scikit-build-core/pull/1517"
+  },
+  {
+   "raw": {
+    "A": 2,
+    "B": 3,
+    "C": 5
+   },
+   "published": {
+    "A": [],
+    "B": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/cd.yml",
+      "line": 23,
+      "claim": "The specified commit hash for the `actions/checkout` action does not exist in the public repository, which will cause the workflow to fail.",
+      "quote": "      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1",
+      "fix": "      - uses: actions/checkout@v4",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1527,
+      "arm": "B",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1527"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/ci.yml",
+      "line": 86,
+      "claim": "The specified commit hash for the `actions/setup-python` action does not exist in the public repository, which will cause the workflow to fail.",
+      "quote": "      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0",
+      "fix": "      - uses: actions/setup-python@v5",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 3,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1527,
+      "arm": "B",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1527"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/ci.yml",
+      "line": 89,
+      "claim": "The specified commit hash for the `astral-sh/setup-uv` action does not exist in the public repository, which will cause the workflow to fail.",
+      "quote": "      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0",
+      "fix": "      - uses: astral-sh/setup-uv@v0.2",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 3,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1527,
+      "arm": "B",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1527"
+     }
+    ],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/ci.yml",
+      "line": 89,
+      "claim": "The astral-sh/setup-uv@v9 action introduces a breaking change by no longer adding the 'uv' binary to the system PATH, which will cause the subsequent 'uv tool install' command to fail.",
+      "quote": "      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0",
+      "fix": "      - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 3,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1527,
+      "arm": "C",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1527"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/ci.yml",
+      "line": 89,
+      "claim": "The astral-sh/setup-uv@v9 action introduces a breaking change by no longer adding the 'uv' binary to the system PATH, which will cause the subsequent 'uv sync' command to fail.",
+      "quote": "      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0",
+      "fix": "      - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 3,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1527,
+      "arm": "C",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1527"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/ci.yml",
+      "line": 89,
+      "claim": "The astral-sh/setup-uv@v9 action introduces a breaking change by no longer adding the 'uv' binary to the system PATH, which will cause the subsequent 'uv sync' command to fail.",
+      "quote": "      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0",
+      "fix": "      - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 3,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1527,
+      "arm": "C",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1527"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/ci.yml",
+      "line": 89,
+      "claim": "The astral-sh/setup-uv@v9 action no longer adds 'uv' to the PATH, so the subsequent 'wntrblm/nox' action will not detect it and will fall back to a different virtualenv backend.",
+      "quote": "      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0",
+      "fix": "      - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 3,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1527,
+      "arm": "C",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1527"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/ci.yml",
+      "line": 89,
+      "claim": "The astral-sh/setup-uv@v9 action introduces a breaking change by no longer adding the 'uv' binary to the system PATH, which will cause subsequent 'uv tool install' commands to fail.",
+      "quote": "      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0",
+      "fix": "      - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 3,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1527,
+      "arm": "C",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1527"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1527,
+   "url": "https://github.com/scikit-build/scikit-build-core/pull/1527"
+  },
+  {
+   "raw": {
+    "A": 2,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "src/scikit_build_core/file_api/_cattrs_converter.py",
+      "line": 77,
+      "claim": "The dictionary update incorrectly gives precedence to fields from the reference object (`with_path`) over those from the JSON file (`raw`), but the file's content should be authoritative in case of conflicts.",
+      "quote": "raw.update(with_path)",
+      "fix": "raw = {**with_path, **raw}",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 3,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1521,
+      "arm": "A",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1521"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": "src/scikit_build_core/file_api/reply.py",
+      "line": 76,
+      "claim": "The dictionary merge incorrectly gives precedence to fields from the reference object (`data`) over those from the JSON file (`file_data`), but the file's content should be authoritative in case of conflicts.",
+      "quote": "data = {**file_data, **data}",
+      "fix": "data = {**data, **file_data}",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 7,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1521,
+      "arm": "A",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1521"
+     }
+    ],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1521,
+   "url": "https://github.com/scikit-build/scikit-build-core/pull/1521"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1520,
+   "url": "https://github.com/scikit-build/scikit-build-core/pull/1520"
+  },
+  {
+   "raw": {
+    "A": 1,
+    "B": 1,
+    "C": 1
+   },
+   "published": {
+    "A": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "src/scikit_build_core/program_search.py",
+      "line": 119,
+      "claim": "This change hardcodes the candidate program names, which breaks a test that relies on monkeypatching a global variable to test a wider range of program names.",
+      "quote": "candidates = (\"cmake\", \"cmake3\")",
+      "fix": "candidates = CANDIDATES",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1515,
+      "arm": "A",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1515"
+     }
+    ],
+    "B": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "tests/test_program_search.py",
+      "line": 113,
+      "claim": "The test incorrectly asserts that a program with an unknown version is selected as \"best\" over a program with a known version.",
+      "quote": "assert best_none.path.name == \"cmake\"",
+      "fix": "    assert best_none.path.name == \"cmake3\"",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1515,
+      "arm": "B",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1515"
+     }
+    ],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "tests/test_program_search.py",
+      "line": 113,
+      "claim": "This test assertion is incorrect because it validates that a broken CMake executable (one from which a version could not be parsed) is preferred over a working one when no version is specified.",
+      "quote": "assert best_none.path.name == \"cmake\"",
+      "fix": "    assert best_none.path.name == \"cmake3\"",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "scikit-build/scikit-build-core",
+      "pr": 1515,
+      "arm": "C",
+      "url": "https://github.com/scikit-build/scikit-build-core/pull/1515"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1515,
+   "url": "https://github.com/scikit-build/scikit-build-core/pull/1515"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1516,
+   "url": "https://github.com/scikit-build/scikit-build-core/pull/1516"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 1
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "aws/aws-cli",
+   "pr": 10547,
+   "url": "https://github.com/aws/aws-cli/pull/10547"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 1
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "requirements/download-deps/portable-exe-lock.txt",
+      "line": 87,
+      "claim": "The `packaging` dependency is updated to version 26.3 in `portable-exe-lock.txt` and `portable-exe-win-lock.txt`, but remains at an older version in other lock files, creating an inconsistency that could lead to environment-specific bugs.",
+      "quote": "packaging==26.3 \\",
+      "fix": "packaging==26.2 \\\n    --hash=sha256:5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e \\\n    --hash=sha256:ff452ff5a3e828ce110190feff1178bb1f2ea2281fa2075aadb987c2fb221661",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 3,
+      "repo": "aws/aws-cli",
+      "pr": 10548,
+      "arm": "C",
+      "url": "https://github.com/aws/aws-cli/pull/10548"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "aws/aws-cli",
+   "pr": 10548,
+   "url": "https://github.com/aws/aws-cli/pull/10548"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "aws/aws-cli",
+   "pr": 10542,
+   "url": "https://github.com/aws/aws-cli/pull/10542"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "aws/aws-cli",
+   "pr": 10541,
+   "url": "https://github.com/aws/aws-cli/pull/10541"
+  },
+  {
+   "raw": {
+    "A": 1,
+    "B": 0,
+    "C": 1
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/stale_community_prs.yml",
+      "line": 12,
+      "claim": "This upgrade to `actions/stale` v11 is incomplete because it does not update the action's input parameters to use the new API, instead relying on deprecated parameters that will be removed in a future version.",
+      "quote": "      - uses: actions/stale@4391f3da665fdf50b6810c1a66712fb9ba21aa93",
+      "fix": "      - uses: actions/stale@1e223db275d687790206a7acac4d1a11bd6fe629",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "aws/aws-cli",
+      "pr": 10540,
+      "arm": "C",
+      "url": "https://github.com/aws/aws-cli/pull/10540"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "aws/aws-cli",
+   "pr": 10540,
+   "url": "https://github.com/aws/aws-cli/pull/10540"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "aws/aws-cli",
+   "pr": 10521,
+   "url": "https://github.com/aws/aws-cli/pull/10521"
+  },
+  {
+   "raw": {
+    "A": 1,
+    "B": 1,
+    "C": 3
+   },
+   "published": {
+    "A": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "awscli/customizations/codeartifact/login.py",
+      "line": 553,
+      "claim": "This file creation is not atomic due to the lack of `O_EXCL`, and it is part of a time-of-check-to-time-of-use (TOCTOU) race condition that can lead to data loss through file truncation if run concurrently.",
+      "quote": "os.open(npmrc_path, os.O_WRONLY | os.O_CREAT, 0o600), 'w'",
+      "fix": "os.open(npmrc_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), 'w'",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 63,
+      "repo": "aws/aws-cli",
+      "pr": 10535,
+      "arm": "A",
+      "url": "https://github.com/aws/aws-cli/pull/10535"
+     }
+    ],
+    "B": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "awscli/customizations/codeartifact/login.py",
+      "line": 553,
+      "claim": "This file creation is not atomic and is subject to a time-of-check-to-time-of-use (TOCTOU) race condition that can lead to data loss by truncating a file created by another process.",
+      "quote": "os.open(npmrc_path, os.O_WRONLY | os.O_CREAT, 0o600), 'w'",
+      "fix": "os.open(npmrc_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), 'w'",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 63,
+      "repo": "aws/aws-cli",
+      "pr": 10535,
+      "arm": "B",
+      "url": "https://github.com/aws/aws-cli/pull/10535"
+     }
+    ],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "awscli/customizations/codeartifact/login.py",
+      "line": 467,
+      "claim": "The repository path from the URL is used directly to build the configuration key, but if it lacks a trailing slash, `npm` may not find the token when it normalizes the registry URL by adding one.",
+      "quote": "            auth_token_key = f'//{repo_uri.netloc}{repo_uri.path}:_authToken'",
+      "fix": "            path = repo_uri.path if repo_uri.path.endswith('/') else f'{repo_uri.path}/'\n            auth_token_key = f'//{repo_uri.netloc}{path}:_authToken'",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 8,
+      "repo": "aws/aws-cli",
+      "pr": 10535,
+      "arm": "C",
+      "url": "https://github.com/aws/aws-cli/pull/10535"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": "awscli/customizations/codeartifact/login.py",
+      "line": 561,
+      "claim": "If the `.npmrc` file is empty, this line of code will prepend an unnecessary leading newline before the new entry.",
+      "quote": "            return contents + '\\n' + new_entry + '\\n'",
+      "fix": "            return (contents + '\\n' if contents else '') + new_entry + '\\n'",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 63,
+      "repo": "aws/aws-cli",
+      "pr": 10535,
+      "arm": "C",
+      "url": "https://github.com/aws/aws-cli/pull/10535"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "aws/aws-cli",
+   "pr": 10535,
+   "url": "https://github.com/aws/aws-cli/pull/10535"
+  },
+  {
+   "raw": {
+    "A": 2,
+    "B": 1,
+    "C": 1
+   },
+   "published": {
+    "A": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "awscli/customizations/codeartifact/login.py",
+      "line": 520,
+      "claim": "The exception handler does not close the file descriptor `fd` if `os.fdopen` fails, causing a resource leak.",
+      "quote": "except BaseException:",
+      "fix": "The containing `try...except` block needs to be restructured to ensure the file descriptor is always closed on failure.",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 60,
+      "repo": "aws/aws-cli",
+      "pr": 10534,
+      "arm": "A",
+      "url": "https://github.com/aws/aws-cli/pull/10534"
+     }
+    ],
+    "B": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "awscli/customizations/codeartifact/login.py",
+      "line": 540,
+      "claim": "Creating the file without the `O_EXCL` flag after an existence check constitutes a TOCTOU race condition, which can be exploited via a symlink attack to create or overwrite a file at an arbitrary location.",
+      "quote": "with os.fdopen(os.open(npmrc_path,\n                               os.O_WRONLY | os.O_CREAT, 0o600), 'w') as f:",
+      "fix": "        with os.fdopen(os.open(npmrc_path,\n                               os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), 'w') as f:",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 60,
+      "repo": "aws/aws-cli",
+      "pr": 10534,
+      "arm": "B",
+      "url": "https://github.com/aws/aws-cli/pull/10534"
+     }
+    ],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "aws/aws-cli",
+   "pr": 10534,
+   "url": "https://github.com/aws/aws-cli/pull/10534"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "aws/aws-cli",
+   "pr": 10520,
+   "url": "https://github.com/aws/aws-cli/pull/10520"
+  },
+  {
+   "raw": {
+    "A": 1,
+    "B": 1,
+    "C": 1
+   },
+   "published": {
+    "A": [],
+    "B": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": "awscli/telemetry.py",
+      "line": 317,
+      "claim": "This line will raise an unhandled ValueError if the environment variable is set to a value that cannot be parsed as a boolean, causing the CLI to crash.",
+      "quote": "return ensure_boolean(env.get(_SESSION_ID_DISABLED_ENV_VAR, 'false'))",
+      "fix": "return env.get(_SESSION_ID_DISABLED_ENV_VAR, 'false').lower() == 'true'",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 11,
+      "repo": "aws/aws-cli",
+      "pr": 10519,
+      "arm": "B",
+      "url": "https://github.com/aws/aws-cli/pull/10519"
+     }
+    ],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "aws/aws-cli",
+   "pr": 10519,
+   "url": "https://github.com/aws/aws-cli/pull/10519"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 0
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "aws/aws-cli",
+   "pr": 10503,
+   "url": "https://github.com/aws/aws-cli/pull/10503"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 3,
+    "C": 3
+   },
+   "published": {
+    "A": [],
+    "B": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/run-bundle-test.yml",
+      "line": 27,
+      "claim": "The specified commit hash for `actions/setup-python` does not exist in the official repository, which will cause the workflow to fail.",
+      "quote": "      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0",
+      "fix": "      uses: actions/setup-python@v5",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "aws/aws-cli",
+      "pr": 10511,
+      "arm": "B",
+      "url": "https://github.com/aws/aws-cli/pull/10511"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/run-bundle-test.yml",
+      "line": 27,
+      "claim": "The specified commit hash for `actions/setup-python` does not exist in the official repository, which will cause the workflow to fail.",
+      "quote": "      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+      "fix": "      uses: actions/setup-python@v5",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "aws/aws-cli",
+      "pr": 10511,
+      "arm": "B",
+      "url": "https://github.com/aws/aws-cli/pull/10511"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/run-bundle-test.yml",
+      "line": 27,
+      "claim": "The specified commit hash for `actions/setup-python` does not exist in the official repository, which will cause the workflow to fail.",
+      "quote": "        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0",
+      "fix": "        uses: actions/setup-python@v5",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "aws/aws-cli",
+      "pr": 10511,
+      "arm": "B",
+      "url": "https://github.com/aws/aws-cli/pull/10511"
+     }
+    ],
+    "C": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/run-bundle-test.yml",
+      "line": 27,
+      "claim": "The version comment is incorrect, as this hash corresponds to v5.0.0 of `actions/setup-python`, not v7.0.0.",
+      "quote": "      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0",
+      "fix": "      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v5.0.0",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "aws/aws-cli",
+      "pr": 10511,
+      "arm": "C",
+      "url": "https://github.com/aws/aws-cli/pull/10511"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/run-bundle-test.yml",
+      "line": 27,
+      "claim": "The version comment is incorrect, as this hash corresponds to v5.0.0 of `actions/setup-python`, not v7.0.0.",
+      "quote": "      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0",
+      "fix": "      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v5.0.0",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "aws/aws-cli",
+      "pr": 10511,
+      "arm": "C",
+      "url": "https://github.com/aws/aws-cli/pull/10511"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/run-bundle-test.yml",
+      "line": 27,
+      "claim": "The version comment is incorrect, as this hash corresponds to v5.0.0 of `actions/setup-python`, not v7.0.0.",
+      "quote": "        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0",
+      "fix": "        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v5.0.0",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "aws/aws-cli",
+      "pr": 10511,
+      "arm": "C",
+      "url": "https://github.com/aws/aws-cli/pull/10511"
+     }
+    ]
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "aws/aws-cli",
+   "pr": 10511,
+   "url": "https://github.com/aws/aws-cli/pull/10511"
+  },
+  {
+   "raw": {
+    "A": 2,
+    "B": 1,
+    "C": 2
+   },
+   "published": {
+    "A": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/sphinx-check.yml",
+      "line": 13,
+      "claim": "The comment is incorrect, as the commit hash `5fda3b95a4ea91299a34e894583c3862153e4b97` corresponds to version `v5.0.0` of `actions/setup-python`, not `v7.0.0`.",
+      "quote": "    - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # version 7.0.0",
+      "fix": "    - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # version 5.0.0",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "aws/aws-cli",
+      "pr": 10510,
+      "arm": "A",
+      "url": "https://github.com/aws/aws-cli/pull/10510"
+     },
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/sphinx-check.yml",
+      "line": 13,
+      "claim": "The comment is incorrect, as the commit hash `5fda3b95a4ea91299a34e894583c3862153e4b97` corresponds to version `v5.0.0` of `actions/setup-python`, not `v7.0.0`.",
+      "quote": "    - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # version 7.0.0",
+      "fix": "    - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # version 5.0.0",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "aws/aws-cli",
+      "pr": 10510,
+      "arm": "A",
+      "url": "https://github.com/aws/aws-cli/pull/10510"
+     }
+    ],
+    "B": [
+     {
+      "ok": true,
+      "failed": [],
+      "path": ".github/workflows/sphinx-check.yml",
+      "line": 13,
+      "claim": "The commit hash `5fda3b95a4ea91299a34e894583c3862153e4b97` corresponds to `actions/setup-python@v5.0.0`, but the comment incorrectly states it is `version 7.0.0`, a version that does not exist.",
+      "quote": "    - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # version 7.0.0",
+      "fix": "    - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v5.0.0",
+      "unseen": [],
+      "evidence": "",
+      "cites_evidence": false,
+      "hunk_size": 1,
+      "repo": "aws/aws-cli",
+      "pr": 10510,
+      "arm": "B",
+      "url": "https://github.com/aws/aws-cli/pull/10510"
+     }
+    ],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "aws/aws-cli",
+   "pr": 10510,
+   "url": "https://github.com/aws/aws-cli/pull/10510"
+  },
+  {
+   "raw": {
+    "A": 0,
+    "B": 0,
+    "C": 1
+   },
+   "published": {
+    "A": [],
+    "B": [],
+    "C": []
+   },
+   "failed": {},
+   "finish_A": "STOP",
+   "finish_B": "STOP",
+   "finish_C": "STOP",
+   "repo": "aws/aws-cli",
+   "pr": 10501,
+   "url": "https://github.com/aws/aws-cli/pull/10501"
+  }
+ ],
+ "rules_sent": {
+  "pyca/cryptography": {
+   "file": "AGENTS.md",
+   "lines_total": 20,
+   "lines_sent": 20,
+   "chars_sent": 1095,
+   "truncated": false,
+   "sha256": "190f4240f9e9f899"
+  },
+  "falconry/falcon": {
+   "file": "AGENTS.md",
+   "lines_total": 117,
+   "lines_sent": 117,
+   "chars_sent": 6101,
+   "truncated": false,
+   "sha256": "637847f7449dcc06"
+  },
+  "pytest-dev/pluggy": {
+   "file": "CLAUDE.md",
+   "lines_total": 52,
+   "lines_sent": 52,
+   "chars_sent": 2043,
+   "truncated": false,
+   "sha256": "73395c396e4bb642"
+  },
+  "jazzband/pip-tools": {
+   "file": "CONTRIBUTING.md",
+   "lines_total": 123,
+   "lines_sent": 123,
+   "chars_sent": 4807,
+   "truncated": false,
+   "sha256": "a34c9b7394b891fe"
+  },
+  "scikit-build/scikit-build-core": {
+   "file": "AGENTS.md",
+   "lines_total": 230,
+   "lines_sent": 230,
+   "chars_sent": 10868,
+   "truncated": false,
+   "sha256": "7cd40ffe435ef5a9"
+  },
+  "aws/aws-cli": {
+   "file": "CONTRIBUTING.md",
+   "lines_total": 129,
+   "lines_sent": 129,
+   "chars_sent": 7920,
+   "truncated": false,
+   "sha256": "695f70e462f85d61"
+  }
+ },
+ "expand": {
+  "hunks": 453,
+  "expanded": 230,
+  "no_header": 116,
+  "no_file": 0,
+  "not_found": 107
+ },
+ "prs": 80
+}

@@ -118,6 +118,7 @@ and a fifth that this document used to claim has been measured and withdrawn.** 
 | **Quiet** | Fires on 10–12% of changes, held steady across repositories differing 80× in velocity |
 | **Honest** | Reports its own blind spots — verified as unavailable to all seven competitors |
 | **Right about where to look** | **Replicated out-of-sample.** Ranking the changed files by prior touch count and reading the top three misses **1.21%** of the changes a later fix returns to, against **3.12%** for an alphabetical ordering — on **six repositories the method was never developed against**, n = 2,400, McNemar **p < 0.000001**, positive in **6 of 6**. The original eight gave **1.44% vs 3.31%**. The two lifts differ by **0.05 points** |
+| **Honest about what cannot be decided** | A claim needing a fact outside the diff is labelled, not published. The label separates at Fisher **p = 0.0007** — and it is why **`infer/` ships nothing**: two corpora and four blind rater pools put our own findings **66.7–82.1% wrong** |
 | **Cheaper** — *billed, not estimated* | **$0.119 per pull request** on real diffs through Vertex, against a $0.140 derived estimate — but the estimate was right by luck: input is 5.2% of the bill and **thinking is 91.3%** |
 
 ---
@@ -505,6 +506,7 @@ The underlying technique is old: mining version histories to guide software chan
 | Fires on | nearly every change | nearly every change | nearly every change | **10–12%** |
 | Marginal cost per pull request | tokens, scaling with lines read | tokens | tokens | **~$0 — a git read and a SQLite query** |
 | Priced | per seat | per seat | per seat | **per repository** |
+| Separates *undecidable* from *clean* | **no** | **no** | **no** | **yes — measured, `p = 0.0007`** |
 
 **Three rows in this table were wrong until the benchmark run and are corrected above.** Greptile
 was listed as not using history; its v3 agent calls git history as a tool. We were listed as
@@ -512,6 +514,19 @@ reading "the ranked function, deeply" and as publishing "parser-verified" claims
 `verify/` are not built and not planned**, so we read nothing with a model and publish no claims at
 all. A differentiation table that credits us with a capability we deleted is the drift this
 project's publishing rules exist to catch.
+
+**The last row is the newest axis, and it is the one the reviewer-half work bought.** A finding
+whose truth depends on a fact the diff cannot supply — whether a commit hash exists, whether a tag
+was released, what today's date is — is not a finding a diff-scoped reviewer can make. **We can
+label those; nobody else does.** The label separates: findings the model itself called "decidable
+from the diff" were **0 of 14 wrong**, against **9 of 15 wrong** for "needs a deeper look", Fisher
+**p = 0.0007**. And the same principle, applied to file kinds rather than single findings, is what
+explains the reviewer half's failure: **CI-config findings are 66.7% wrong and 23 of 24 of those
+are undecidable by construction.**
+
+**This is a differentiator precisely because it is not a better bug-finder.** Every rival ships the
+claim that their findings are right. Ours is that we can tell you which of ours cannot be checked —
+and that is the residual the customer is paying to see.
 
 **The cost-driver row is a claim about *structure*, not a measured saving, and it must not be
 read as one.** The arithmetic puts allocation at **1.25×** cheaper than uniform review at one
@@ -528,7 +543,7 @@ public leaderboard and wrong as a permanent position. Martian's benchmark also h
 layer**: 50 pull requests, five repositories, human-verified issue lists, an open judge and an
 open pipeline. Both kinds of reviewer can be scored on it, so we ran ours through.
 
-→ `docs/plans/preregistrations/martian-comparison-preregistration.md`, bars fixed before the run.
+→ `docs/plans/preregistrations/reviewer/martian-comparison-preregistration.md`, bars fixed before the run.
 
 | arm | precision | 95% CI | recall | F1 |
 |---|---|---|---|---|
@@ -1365,6 +1380,90 @@ not the product.
 the plan, and the one that no further engineering resolves.
 
 ---
+
+## 6.9 The two mechanisms taken from Qodo, and what each one bought
+
+Qodo leads Martian's offline layer at **67.9% precision** across 49 tools and does two cheap things
+this project did not. Both were built, sabotage-tested, and run against **80 merged pull requests
+from six repositories verified unused**, three arms, blind adjudication, bars fixed in advance,
+**10 of 10 sabotaged controls caught**.
+
+### Expansion removed the failure class it was built for
+
+Git writes the enclosing declaration into every hunk header — `@@ -266,17 +269,12 @@ def
+get_dumper(self, obj: Any, format: PyFormat) -> abc.Dumper:` — and we discarded it, so the model
+saw `+ if order.refunded:` with three lines of context and no idea what function it was in.
+
+**Wrong findings caused by not following code that was shown fell from 73.3% to 18.8% — a 54.6
+point move**, against a 15-point bar. **The mechanism is visible in individual findings:** two
+claims that falcon's URI decoder held an infinite loop died once the model could see ten lines
+further back, where `for pos in range(...)` sits — a range loop advances every iteration, so the
+`continue` it objected to cannot spin.
+
+Expansion fired on **50.8% of 453 real hunks** and **moved an added line zero times across 664
+hunks** — the invariant that decides everything, because every anchor we publish derives from where
+an added line sits.
+
+| pre-registered bar | | result | |
+|---|---|---|---|
+| **H1** wrong findings that failed to follow shown code | ≥ 15 point fall | 73.3% → **18.8%** | **PASS** |
+| **H2** wrong-rate with expansion | ≤ 30% | **59.3%** [40.7, 75.5] | **FAIL** |
+| **H3** conventions file makes convention-policing worse | ≤ +10 points | **−12.6 points** | **PASS** |
+| **H4** yield | ≥ 0.30/PR | 0.41 / 0.40 / 0.46 | **PASS** |
+
+### The overall rate did not move because a second class dominates — a different fact
+
+Cross-tabulating cause against file kind separates them completely.
+
+| file kind | n | wrong | rate | causes |
+|---|---|---|---|---|
+| **CI config** (`.github/`, `*.yml`) | 36 | 24 | **66.7%** [50.3, 79.8] | **EXTERNAL 23**, TRACE 1 |
+| tests | 20 | 10 | 50.0% | TRACE 8, EXTERNAL 2 |
+| source code | 29 | 11 | 37.9% | TRACE 8, EXTERNAL 3 |
+
+**Every EXTERNAL claim checked against GitHub was false.** `actions/setup-python@5fda3b95` is
+tagged exactly `v7.0.0`; `actions/checkout` `v7.0.1`, `astral-sh/setup-uv` `v9.0.0`,
+`pre-commit/mirrors-mypy` `v2.3.0` and `PyCQA/isort` `9.0.0b2` all exist;
+`hynek/build-and-inspect-python-package` was never renamed.
+
+**The dates it called "in the future" read Aug 14–17 2026, against a run on Aug 18 2026 — three
+days in the PAST.** That is not a training-cutoff artefact. It is a model with no reliable notion
+of the present, and it will recur wherever dates appear. It also partly retires the registry-lookup
+arm before it is built: an API lookup answers *does this tag exist* and never answers *what is
+today*, while excluding the file kind is free and covers both.
+
+**This is the third application of the decidability rule, not a new discovery.** Lockfiles,
+manifests and documentation were already excluded on it. `.github/` was kept **deliberately and on
+evidence** — it produced CORRECT findings at roughly one in four when the filter was written. It is
+now 66.7% wrong at n = 36. The principle did not change; the evidence did.
+
+### H3 inverted, and the reason is not the good news it looks like
+
+| arm | n | CORRECT | WRONG | UNFALSIFIABLE | TRIVIAL |
+|---|---|---|---|---|---|
+| A | 29 | 2 | 15 | 4 | 8 |
+| B | 27 | 2 | 16 | 4 | 5 |
+| C | 30 | **3** | **14** | **8** | 5 |
+
+From B to C, WRONG fell by 2 while **UNFALSIFIABLE rose by 4 and CORRECT rose by 1**. The
+CORRECT-rate barely moves — **6.9% → 7.4% → 10.0%**, intervals overlapping almost entirely. **The
+conventions file made the model more cautious, not more accurate**, and the CORRECT-rate is quoted
+beside the wrong-rate every time for that reason.
+
+### The off-CI subgroup is not the headline
+
+Off CI config the wrong-rate runs 52.2% → 38.5% → **28.6%** across the arms. **Post-hoc, not
+pre-registered, and the Wilson intervals — [33.0, 70.8], [17.7, 64.5], [11.7, 54.6] — overlap
+almost completely.** A clean monotone ordering across three arms is exactly what noise looks like
+at n = 13 and n = 14. It is the next pre-registration, not a result.
+
+### What this does not license
+
+The rater designed the run, so **none of it counts toward replication** — four designs now owe an
+independent grader. Design 11's arm R, the clean design-nine replication, **cleared its yield bar
+at 0.40/PR but is unadjudicated, so the replication count stays at two**; arm E failed yield at
+0.22/PR before adjudication ran. **`infer/` stays closed.**
+
 
 # Appendix — verification of every external claim
 

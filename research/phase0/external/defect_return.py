@@ -152,7 +152,8 @@ def main() -> int:
     print(f"    repositories where history beats control: {pos}/{nrep}")
 
     print(
-        "\n  READING against docs/plans/preregistrations/defect-return-external-preregistration.md"
+        "\n  READING against docs/plans/preregistrations/ranker/"
+        "defect-return-external-preregistration.md"
     )
     if n < MIN_EVENTS or (b + c) < MIN_DISCORDANT:
         print(

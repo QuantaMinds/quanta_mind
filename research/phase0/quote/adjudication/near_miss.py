@@ -22,14 +22,14 @@ import pathlib
 import re
 import sys
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-
 import gate
 import paths
 
 import corpus
 
-RUN = pathlib.Path(__file__).resolve().parent / "results" / "quote11_run.json"
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+
+RUN = pathlib.Path(__file__).resolve().parent.parent / "results" / "quote11_run.json"
 
 
 def squash(s: str) -> str:

@@ -1,0 +1,777 @@
+{
+ "strata": {
+  "<=3": {
+   "prs": 35,
+   "findings": 10,
+   "in_top3": 10,
+   "flat": 21
+  },
+  ">=4": {
+   "prs": 8,
+   "findings": 1,
+   "in_top3": 1,
+   "flat": 0
+  }
+ },
+ "rows": [
+  {
+   "repo": "pyca/cryptography",
+   "pr": 15473,
+   "files": 1,
+   "stratum": "<=3",
+   "top3": [
+    "src/_cffi_src/openssl/x509_vfy.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "src/_cffi_src/openssl/x509_vfy.py": 1
+   }
+  },
+  {
+   "repo": "falconry/falcon",
+   "pr": 2705,
+   "files": 1,
+   "stratum": "<=3",
+   "top3": [
+    "falcon/typing.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "falcon/typing.py": 2
+   }
+  },
+  {
+   "repo": "falconry/falcon",
+   "pr": 2698,
+   "files": 2,
+   "stratum": "<=3",
+   "top3": [
+    "examples/things.py",
+    "examples/things_asgi.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "examples/things.py": 0,
+    "examples/things_asgi.py": 0
+   }
+  },
+  {
+   "repo": "falconry/falcon",
+   "pr": 2703,
+   "files": 1,
+   "stratum": "<=3",
+   "top3": [
+    "falcon/typing.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "falcon/typing.py": 1
+   }
+  },
+  {
+   "repo": "falconry/falcon",
+   "pr": 2704,
+   "files": 1,
+   "stratum": "<=3",
+   "top3": [
+    "tests/test_utils.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "tests/test_utils.py": 9
+   }
+  },
+  {
+   "repo": "falconry/falcon",
+   "pr": 2683,
+   "files": 3,
+   "stratum": "<=3",
+   "top3": [
+    "tests/test_custom_router.py",
+    "tests/test_error_handlers.py",
+    "tests/test_sinks.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "tests/test_custom_router.py": 1,
+    "tests/test_error_handlers.py": 1,
+    "tests/test_sinks.py": 0
+   }
+  },
+  {
+   "repo": "falconry/falcon",
+   "pr": 2681,
+   "files": 2,
+   "stratum": "<=3",
+   "top3": [
+    "falcon/app.py",
+    "falcon/routing/compiled.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "falcon/app.py": 11,
+    "falcon/routing/compiled.py": 3
+   }
+  },
+  {
+   "repo": "falconry/falcon",
+   "pr": 2684,
+   "files": 1,
+   "stratum": "<=3",
+   "top3": [
+    "falcon/redirects.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "falcon/redirects.py": 1
+   }
+  },
+  {
+   "repo": "falconry/falcon",
+   "pr": 2673,
+   "files": 2,
+   "stratum": "<=3",
+   "top3": [
+    "falcon/responders.py",
+    "tests/test_http_method_routing.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "falcon/responders.py": 1,
+    "tests/test_http_method_routing.py": 2
+   }
+  },
+  {
+   "repo": "falconry/falcon",
+   "pr": 2666,
+   "files": 1,
+   "stratum": "<=3",
+   "top3": [
+    "falcon/version.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "falcon/version.py": 16
+   }
+  },
+  {
+   "repo": "pytest-dev/pluggy",
+   "pr": 721,
+   "files": 1,
+   "stratum": "<=3",
+   "top3": [
+    "testing/test_details.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "testing/test_details.py": 6
+   }
+  },
+  {
+   "repo": "falconry/falcon",
+   "pr": 2682,
+   "files": 2,
+   "stratum": "<=3",
+   "top3": [
+    "falcon/request.py",
+    "tests/test_request_attrs.py"
+   ],
+   "finding_files": [
+    "falcon/request.py",
+    "tests/test_request_attrs.py"
+   ],
+   "hit": [
+    "falcon/request.py",
+    "tests/test_request_attrs.py"
+   ],
+   "scores": {
+    "falcon/request.py": 13,
+    "tests/test_request_attrs.py": 3
+   }
+  },
+  {
+   "repo": "pytest-dev/pluggy",
+   "pr": 718,
+   "files": 2,
+   "stratum": "<=3",
+   "top3": [
+    "testing/test_details.py",
+    "testing/test_hookcaller.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "testing/test_details.py": 1,
+    "testing/test_hookcaller.py": 4
+   }
+  },
+  {
+   "repo": "falconry/falcon",
+   "pr": 2672,
+   "files": 1,
+   "stratum": "<=3",
+   "top3": [
+    "tests/test_utils.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "tests/test_utils.py": 10
+   }
+  },
+  {
+   "repo": "pytest-dev/pluggy",
+   "pr": 714,
+   "files": 13,
+   "stratum": ">=4",
+   "top3": [
+    "downstream/run_downstream.py",
+    "src/pluggy/_callers.py",
+    "src/pluggy/_hooks.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "docs/conf.py": 1,
+    "downstream/run_downstream.py": 8,
+    "src/pluggy/__init__.py": 0,
+    "src/pluggy/_callers.py": 5,
+    "src/pluggy/_hooks.py": 11,
+    "src/pluggy/_manager.py": 4,
+    "src/pluggy/_result.py": 2,
+    "testing/benchmark.py": 2,
+    "testing/test_details.py": 2,
+    "testing/test_multicall.py": 1,
+    "testing/test_pluginmanager.py": 3,
+    "testing/test_result.py": 0,
+    "testing/test_warnings.py": 2
+   }
+  },
+  {
+   "repo": "jazzband/pip-tools",
+   "pr": 2461,
+   "files": 1,
+   "stratum": "<=3",
+   "top3": [
+    "piptools/scripts/compile.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "piptools/scripts/compile.py": 17
+   }
+  },
+  {
+   "repo": "jazzband/pip-tools",
+   "pr": 2457,
+   "files": 1,
+   "stratum": "<=3",
+   "top3": [
+    "tests/unit/scripts/test_options.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "tests/unit/scripts/test_options.py": 0
+   }
+  },
+  {
+   "repo": "jazzband/pip-tools",
+   "pr": 2445,
+   "files": 2,
+   "stratum": "<=3",
+   "top3": [
+    "piptools/repositories/local.py",
+    "piptools/sync.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "piptools/repositories/local.py": 6,
+    "piptools/sync.py": 4
+   }
+  },
+  {
+   "repo": "jazzband/pip-tools",
+   "pr": 2444,
+   "files": 1,
+   "stratum": "<=3",
+   "top3": [
+    "tests/conftest.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "tests/conftest.py": 10
+   }
+  },
+  {
+   "repo": "jazzband/pip-tools",
+   "pr": 2454,
+   "files": 1,
+   "stratum": "<=3",
+   "top3": [
+    "tests/test_utils.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "tests/test_utils.py": 4
+   }
+  },
+  {
+   "repo": "jazzband/pip-tools",
+   "pr": 2438,
+   "files": 14,
+   "stratum": ">=4",
+   "top3": [
+    "piptools/_compat/pip_compat.py",
+    "piptools/scripts/compile.py",
+    "tests/test_cli_compile.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "piptools/_compat/__init__.py": 1,
+    "piptools/_compat/pip_compat.py": 9,
+    "piptools/_internal/_pip_api/__init__.py": 3,
+    "piptools/_internal/_pip_api/command_methods.py": 0,
+    "piptools/_internal/_pip_api/package_finder.py": 2,
+    "piptools/repositories/pypi.py": 9,
+    "piptools/resolver.py": 8,
+    "piptools/scripts/compile.py": 16,
+    "piptools/sync.py": 5,
+    "piptools/writer.py": 8,
+    "tests/test_cli_compile.py": 28,
+    "tests/test_repository_pypi.py": 2,
+    "tests/test_writer.py": 1,
+    "tests/unit/_internal/pip_api/test_package_finder.py": 1
+   }
+  },
+  {
+   "repo": "jazzband/pip-tools",
+   "pr": 2429,
+   "files": 2,
+   "stratum": "<=3",
+   "top3": [
+    "piptools/repositories/pypi.py",
+    "tests/unit/repositories/test_pypi_repository.py"
+   ],
+   "finding_files": [
+    "piptools/repositories/pypi.py"
+   ],
+   "hit": [
+    "piptools/repositories/pypi.py"
+   ],
+   "scores": {
+    "piptools/repositories/pypi.py": 8,
+    "tests/unit/repositories/test_pypi_repository.py": 1
+   }
+  },
+  {
+   "repo": "jazzband/pip-tools",
+   "pr": 2446,
+   "files": 7,
+   "stratum": ">=4",
+   "top3": [
+    "tests/conftest.py",
+    "tests/test_cli_compile.py",
+    "tests/test_utils.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "tests/conftest.py": 10,
+    "tests/test_cache.py": 0,
+    "tests/test_cli_compile.py": 26,
+    "tests/test_cli_sync.py": 2,
+    "tests/test_repository_pypi.py": 1,
+    "tests/test_utils.py": 3,
+    "tests/test_writer.py": 0
+   }
+  },
+  {
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1535,
+   "files": 2,
+   "stratum": "<=3",
+   "top3": [
+    "src/scikit_build_core/program_search.py",
+    "tests/test_program_search.py"
+   ],
+   "finding_files": [
+    "tests/test_program_search.py"
+   ],
+   "hit": [
+    "tests/test_program_search.py"
+   ],
+   "scores": {
+    "src/scikit_build_core/program_search.py": 7,
+    "tests/test_program_search.py": 4
+   }
+  },
+  {
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1533,
+   "files": 2,
+   "stratum": "<=3",
+   "top3": [
+    "src/scikit_build_core/builder/builder.py",
+    "tests/test_builder.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "src/scikit_build_core/builder/builder.py": 23,
+    "tests/test_builder.py": 21
+   }
+  },
+  {
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1529,
+   "files": 2,
+   "stratum": "<=3",
+   "top3": [
+    "tests/test_pyproject_abi3.py",
+    "tests/test_setuptools_abi3.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "tests/test_pyproject_abi3.py": 2,
+    "tests/test_setuptools_abi3.py": 4
+   }
+  },
+  {
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1523,
+   "files": 1,
+   "stratum": "<=3",
+   "top3": [
+    "docs/conf.py"
+   ],
+   "finding_files": [
+    "docs/conf.py"
+   ],
+   "hit": [
+    "docs/conf.py"
+   ],
+   "scores": {
+    "docs/conf.py": 16
+   }
+  },
+  {
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1532,
+   "files": 2,
+   "stratum": "<=3",
+   "top3": [
+    "src/scikit_build_core/builder/builder.py",
+    "tests/test_builder.py"
+   ],
+   "finding_files": [
+    "src/scikit_build_core/builder/builder.py"
+   ],
+   "hit": [
+    "src/scikit_build_core/builder/builder.py"
+   ],
+   "scores": {
+    "src/scikit_build_core/builder/builder.py": 23,
+    "tests/test_builder.py": 21
+   }
+  },
+  {
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1528,
+   "files": 4,
+   "stratum": ">=4",
+   "top3": [
+    "src/scikit_build_core/_logging.py",
+    "src/scikit_build_core/file_api/reply.py",
+    "tests/test_cmake_config.py"
+   ],
+   "finding_files": [
+    "src/scikit_build_core/file_api/reply.py"
+   ],
+   "hit": [
+    "src/scikit_build_core/file_api/reply.py"
+   ],
+   "scores": {
+    "src/scikit_build_core/_logging.py": 4,
+    "src/scikit_build_core/_shutil.py": 3,
+    "src/scikit_build_core/file_api/reply.py": 10,
+    "tests/test_cmake_config.py": 6
+   }
+  },
+  {
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1517,
+   "files": 1,
+   "stratum": "<=3",
+   "top3": [
+    "src/scikit_build_core/cmake.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "src/scikit_build_core/cmake.py": 11
+   }
+  },
+  {
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1521,
+   "files": 7,
+   "stratum": ">=4",
+   "top3": [
+    "src/scikit_build_core/file_api/_cattrs_converter.py",
+    "src/scikit_build_core/file_api/model/codemodel.py",
+    "src/scikit_build_core/file_api/reply.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "src/scikit_build_core/file_api/_cattrs_converter.py": 4,
+    "src/scikit_build_core/file_api/model/cmakefiles.py": 1,
+    "src/scikit_build_core/file_api/model/codemodel.py": 3,
+    "src/scikit_build_core/file_api/model/directory.py": 2,
+    "src/scikit_build_core/file_api/model/toolchains.py": 2,
+    "src/scikit_build_core/file_api/reply.py": 7,
+    "tests/test_fileapi.py": 2
+   }
+  },
+  {
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1520,
+   "files": 4,
+   "stratum": ">=4",
+   "top3": [
+    "src/scikit_build_core/file_api/_cattrs_converter.py",
+    "src/scikit_build_core/file_api/model/directory.py",
+    "src/scikit_build_core/file_api/reply.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "src/scikit_build_core/file_api/_cattrs_converter.py": 4,
+    "src/scikit_build_core/file_api/model/directory.py": 2,
+    "src/scikit_build_core/file_api/reply.py": 7,
+    "tests/test_fileapi.py": 2
+   }
+  },
+  {
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1515,
+   "files": 2,
+   "stratum": "<=3",
+   "top3": [
+    "src/scikit_build_core/program_search.py",
+    "tests/test_program_search.py"
+   ],
+   "finding_files": [
+    "tests/test_program_search.py"
+   ],
+   "hit": [
+    "tests/test_program_search.py"
+   ],
+   "scores": {
+    "src/scikit_build_core/program_search.py": 6,
+    "tests/test_program_search.py": 3
+   }
+  },
+  {
+   "repo": "scikit-build/scikit-build-core",
+   "pr": 1516,
+   "files": 6,
+   "stratum": ">=4",
+   "top3": [
+    "src/scikit_build_core/cmake.py",
+    "src/scikit_build_core/settings/skbuild_model.py",
+    "tests/test_skbuild_settings.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "src/scikit_build_core/build/common_wheel_helpers.py": 8,
+    "src/scikit_build_core/cmake.py": 13,
+    "src/scikit_build_core/settings/skbuild_model.py": 29,
+    "tests/test_cmake_config.py": 5,
+    "tests/test_simplest_c.py": 2,
+    "tests/test_skbuild_settings.py": 16
+   }
+  },
+  {
+   "repo": "aws/aws-cli",
+   "pr": 10547,
+   "files": 6,
+   "stratum": ">=4",
+   "top3": [
+    "tests/functional/botocore/docs/test_alias.py",
+    "tests/functional/botocore/docs/test_ec2.py",
+    "tests/integration/test_cli.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "tests/functional/autoprompt/test_doc.py": 0,
+    "tests/functional/botocore/docs/test_alias.py": 1,
+    "tests/functional/botocore/docs/test_ec2.py": 1,
+    "tests/functional/botocore/test_endpoint_rulesets.py": 1,
+    "tests/functional/docs/test_help_output.py": 0,
+    "tests/integration/test_cli.py": 3
+   }
+  },
+  {
+   "repo": "aws/aws-cli",
+   "pr": 10542,
+   "files": 1,
+   "stratum": "<=3",
+   "top3": [
+    "tests/unit/botocore/response_parsing/test_response_parsing.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "tests/unit/botocore/response_parsing/test_response_parsing.py": 1
+   }
+  },
+  {
+   "repo": "aws/aws-cli",
+   "pr": 10541,
+   "files": 2,
+   "stratum": "<=3",
+   "top3": [
+    "awscli/customizations/update.py",
+    "tests/unit/customizations/test_update.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "awscli/customizations/update.py": 0,
+    "tests/unit/customizations/test_update.py": 0
+   }
+  },
+  {
+   "repo": "aws/aws-cli",
+   "pr": 10521,
+   "files": 2,
+   "stratum": "<=3",
+   "top3": [
+    "awscli/customizations/sessionmanager.py",
+    "tests/unit/customizations/test_sessionmanager.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "awscli/customizations/sessionmanager.py": 0,
+    "tests/unit/customizations/test_sessionmanager.py": 0
+   }
+  },
+  {
+   "repo": "aws/aws-cli",
+   "pr": 10535,
+   "files": 3,
+   "stratum": "<=3",
+   "top3": [
+    "awscli/customizations/codeartifact/login.py",
+    "tests/functional/codeartifact/test_codeartifact_login.py",
+    "tests/unit/customizations/codeartifact/test_adapter_login.py"
+   ],
+   "finding_files": [
+    "awscli/customizations/codeartifact/login.py"
+   ],
+   "hit": [
+    "awscli/customizations/codeartifact/login.py"
+   ],
+   "scores": {
+    "awscli/customizations/codeartifact/login.py": 1,
+    "tests/functional/codeartifact/test_codeartifact_login.py": 0,
+    "tests/unit/customizations/codeartifact/test_adapter_login.py": 1
+   }
+  },
+  {
+   "repo": "aws/aws-cli",
+   "pr": 10534,
+   "files": 3,
+   "stratum": "<=3",
+   "top3": [
+    "awscli/customizations/codeartifact/login.py",
+    "tests/functional/codeartifact/test_codeartifact_login.py",
+    "tests/unit/customizations/codeartifact/test_adapter_login.py"
+   ],
+   "finding_files": [
+    "awscli/customizations/codeartifact/login.py"
+   ],
+   "hit": [
+    "awscli/customizations/codeartifact/login.py"
+   ],
+   "scores": {
+    "awscli/customizations/codeartifact/login.py": 1,
+    "tests/functional/codeartifact/test_codeartifact_login.py": 0,
+    "tests/unit/customizations/codeartifact/test_adapter_login.py": 1
+   }
+  },
+  {
+   "repo": "aws/aws-cli",
+   "pr": 10520,
+   "files": 2,
+   "stratum": "<=3",
+   "top3": [
+    "awscli/customizations/sessionmanager.py",
+    "tests/unit/customizations/test_sessionmanager.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "awscli/customizations/sessionmanager.py": 0,
+    "tests/unit/customizations/test_sessionmanager.py": 0
+   }
+  },
+  {
+   "repo": "aws/aws-cli",
+   "pr": 10519,
+   "files": 2,
+   "stratum": "<=3",
+   "top3": [
+    "awscli/telemetry.py",
+    "tests/functional/test_telemetry.py"
+   ],
+   "finding_files": [
+    "awscli/telemetry.py"
+   ],
+   "hit": [
+    "awscli/telemetry.py"
+   ],
+   "scores": {
+    "awscli/telemetry.py": 0,
+    "tests/functional/test_telemetry.py": 0
+   }
+  },
+  {
+   "repo": "aws/aws-cli",
+   "pr": 10503,
+   "files": 2,
+   "stratum": "<=3",
+   "top3": [
+    "awscli/customizations/sso/resolve.py",
+    "tests/unit/customizations/sso/test_resolve.py"
+   ],
+   "finding_files": [],
+   "hit": [],
+   "scores": {
+    "awscli/customizations/sso/resolve.py": 0,
+    "tests/unit/customizations/sso/test_resolve.py": 0
+   }
+  }
+ ]
+}

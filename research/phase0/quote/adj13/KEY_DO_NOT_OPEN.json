@@ -1,0 +1,866 @@
+[
+ {
+  "item": 1,
+  "kind": "real",
+  "arm": "B",
+  "repo": "jazzband/pip-tools",
+  "pr": 2429,
+  "path": "piptools/repositories/pypi.py",
+  "line": 538
+ },
+ {
+  "item": 2,
+  "kind": "real",
+  "arm": "C",
+  "repo": "aws/aws-cli",
+  "pr": 10535,
+  "path": "awscli/customizations/codeartifact/login.py",
+  "line": 561
+ },
+ {
+  "item": 3,
+  "kind": "SABOTAGE",
+  "arm": "-",
+  "repo": "pytest-dev/pluggy",
+  "pr": 698,
+  "path": ".pre-commit-config.yaml",
+  "line": 46
+ },
+ {
+  "item": 4,
+  "kind": "real",
+  "arm": "B",
+  "repo": "aws/aws-cli",
+  "pr": 10511,
+  "path": ".github/workflows/run-bundle-test.yml",
+  "line": 27
+ },
+ {
+  "item": 5,
+  "kind": "real",
+  "arm": "B",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1535,
+  "path": "tests/test_program_search.py",
+  "line": 190
+ },
+ {
+  "item": 6,
+  "kind": "real",
+  "arm": "A",
+  "repo": "jazzband/pip-tools",
+  "pr": 2429,
+  "path": "piptools/repositories/pypi.py",
+  "line": 538
+ },
+ {
+  "item": 7,
+  "kind": "real",
+  "arm": "A",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1523,
+  "path": "docs/conf.py",
+  "line": 97
+ },
+ {
+  "item": 8,
+  "kind": "real",
+  "arm": "C",
+  "repo": "pytest-dev/pluggy",
+  "pr": 712,
+  "path": ".github/workflows/deploy.yml",
+  "line": 19
+ },
+ {
+  "item": 9,
+  "kind": "real",
+  "arm": "B",
+  "repo": "aws/aws-cli",
+  "pr": 10535,
+  "path": "awscli/customizations/codeartifact/login.py",
+  "line": 553
+ },
+ {
+  "item": 10,
+  "kind": "real",
+  "arm": "A",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1515,
+  "path": "src/scikit_build_core/program_search.py",
+  "line": 119
+ },
+ {
+  "item": 11,
+  "kind": "real",
+  "arm": "B",
+  "repo": "pytest-dev/pluggy",
+  "pr": 692,
+  "path": ".github/workflows/deploy.yml",
+  "line": 19
+ },
+ {
+  "item": 12,
+  "kind": "real",
+  "arm": "A",
+  "repo": "falconry/falcon",
+  "pr": 2697,
+  "path": ".github/workflows/test-wheels.yaml",
+  "line": 21
+ },
+ {
+  "item": 13,
+  "kind": "SABOTAGE",
+  "arm": "-",
+  "repo": "falconry/falcon",
+  "pr": 2704,
+  "path": "tests/test_utils.py",
+  "line": 369
+ },
+ {
+  "item": 14,
+  "kind": "real",
+  "arm": "C",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1527,
+  "path": ".github/workflows/ci.yml",
+  "line": 89
+ },
+ {
+  "item": 15,
+  "kind": "real",
+  "arm": "C",
+  "repo": "jazzband/pip-tools",
+  "pr": 2461,
+  "path": "piptools/scripts/compile.py",
+  "line": 207
+ },
+ {
+  "item": 16,
+  "kind": "real",
+  "arm": "B",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1523,
+  "path": "docs/conf.py",
+  "line": 97
+ },
+ {
+  "item": 17,
+  "kind": "real",
+  "arm": "B",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1527,
+  "path": ".github/workflows/ci.yml",
+  "line": 86
+ },
+ {
+  "item": 18,
+  "kind": "real",
+  "arm": "A",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1535,
+  "path": "tests/test_program_search.py",
+  "line": 190
+ },
+ {
+  "item": 19,
+  "kind": "real",
+  "arm": "A",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1535,
+  "path": "tests/test_program_search.py",
+  "line": 179
+ },
+ {
+  "item": 20,
+  "kind": "real",
+  "arm": "C",
+  "repo": "falconry/falcon",
+  "pr": 2704,
+  "path": "tests/test_utils.py",
+  "line": 369
+ },
+ {
+  "item": 21,
+  "kind": "real",
+  "arm": "B",
+  "repo": "pyca/cryptography",
+  "pr": 15459,
+  "path": ".github/workflows/ci.yml",
+  "line": 55
+ },
+ {
+  "item": 22,
+  "kind": "real",
+  "arm": "C",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1515,
+  "path": "tests/test_program_search.py",
+  "line": 113
+ },
+ {
+  "item": 23,
+  "kind": "real",
+  "arm": "C",
+  "repo": "jazzband/pip-tools",
+  "pr": 2429,
+  "path": "piptools/repositories/pypi.py",
+  "line": 538
+ },
+ {
+  "item": 24,
+  "kind": "SABOTAGE",
+  "arm": "-",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1528,
+  "path": "src/scikit_build_core/file_api/reply.py",
+  "line": 57
+ },
+ {
+  "item": 25,
+  "kind": "real",
+  "arm": "C",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1527,
+  "path": ".github/workflows/ci.yml",
+  "line": 89
+ },
+ {
+  "item": 26,
+  "kind": "real",
+  "arm": "C",
+  "repo": "pyca/cryptography",
+  "pr": 15473,
+  "path": "src/_cffi_src/openssl/x509_vfy.py",
+  "line": 104
+ },
+ {
+  "item": 27,
+  "kind": "real",
+  "arm": "C",
+  "repo": "jazzband/pip-tools",
+  "pr": 2438,
+  "path": "piptools/_internal/_pip_api/command_methods.py",
+  "line": 64
+ },
+ {
+  "item": 28,
+  "kind": "real",
+  "arm": "A",
+  "repo": "aws/aws-cli",
+  "pr": 10510,
+  "path": ".github/workflows/sphinx-check.yml",
+  "line": 13
+ },
+ {
+  "item": 29,
+  "kind": "real",
+  "arm": "C",
+  "repo": "pyca/cryptography",
+  "pr": 15470,
+  "path": ".github/workflows/ci.yml",
+  "line": 51
+ },
+ {
+  "item": 30,
+  "kind": "real",
+  "arm": "C",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1528,
+  "path": "src/scikit_build_core/file_api/reply.py",
+  "line": 57
+ },
+ {
+  "item": 31,
+  "kind": "real",
+  "arm": "A",
+  "repo": "jazzband/pip-tools",
+  "pr": 2425,
+  "path": ".github/ISSUE_TEMPLATE/bug-report.yaml",
+  "line": 36
+ },
+ {
+  "item": 32,
+  "kind": "real",
+  "arm": "C",
+  "repo": "jazzband/pip-tools",
+  "pr": 2425,
+  "path": ".github/ISSUE_TEMPLATE/bug-report.yaml",
+  "line": 36
+ },
+ {
+  "item": 33,
+  "kind": "real",
+  "arm": "A",
+  "repo": "jazzband/pip-tools",
+  "pr": 2429,
+  "path": "piptools/repositories/pypi.py",
+  "line": 539
+ },
+ {
+  "item": 34,
+  "kind": "real",
+  "arm": "C",
+  "repo": "pyca/cryptography",
+  "pr": 15470,
+  "path": ".github/workflows/ci.yml",
+  "line": 55
+ },
+ {
+  "item": 35,
+  "kind": "real",
+  "arm": "C",
+  "repo": "pytest-dev/pluggy",
+  "pr": 692,
+  "path": ".github/workflows/deploy.yml",
+  "line": 19
+ },
+ {
+  "item": 36,
+  "kind": "real",
+  "arm": "A",
+  "repo": "aws/aws-cli",
+  "pr": 10534,
+  "path": "awscli/customizations/codeartifact/login.py",
+  "line": 520
+ },
+ {
+  "item": 37,
+  "kind": "real",
+  "arm": "B",
+  "repo": "falconry/falcon",
+  "pr": 2682,
+  "path": "falcon/request.py",
+  "line": 651
+ },
+ {
+  "item": 38,
+  "kind": "real",
+  "arm": "B",
+  "repo": "pyca/cryptography",
+  "pr": 15456,
+  "path": ".github/workflows/ci.yml",
+  "line": 417
+ },
+ {
+  "item": 39,
+  "kind": "real",
+  "arm": "B",
+  "repo": "aws/aws-cli",
+  "pr": 10519,
+  "path": "awscli/telemetry.py",
+  "line": 317
+ },
+ {
+  "item": 40,
+  "kind": "real",
+  "arm": "B",
+  "repo": "jazzband/pip-tools",
+  "pr": 2425,
+  "path": ".github/ISSUE_TEMPLATE/bug-report.yaml",
+  "line": 36
+ },
+ {
+  "item": 41,
+  "kind": "SABOTAGE",
+  "arm": "-",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1521,
+  "path": "src/scikit_build_core/file_api/_cattrs_converter.py",
+  "line": 77
+ },
+ {
+  "item": 42,
+  "kind": "real",
+  "arm": "A",
+  "repo": "jazzband/pip-tools",
+  "pr": 2446,
+  "path": "tests/test_repository_pypi.py",
+  "line": 349
+ },
+ {
+  "item": 43,
+  "kind": "real",
+  "arm": "A",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1528,
+  "path": "src/scikit_build_core/file_api/reply.py",
+  "line": 57
+ },
+ {
+  "item": 44,
+  "kind": "real",
+  "arm": "B",
+  "repo": "falconry/falcon",
+  "pr": 2697,
+  "path": ".github/workflows/test-wheels.yaml",
+  "line": 21
+ },
+ {
+  "item": 45,
+  "kind": "real",
+  "arm": "C",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1534,
+  "path": ".github/workflows/cd.yml",
+  "line": 28
+ },
+ {
+  "item": 46,
+  "kind": "real",
+  "arm": "A",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1521,
+  "path": "src/scikit_build_core/file_api/reply.py",
+  "line": 76
+ },
+ {
+  "item": 47,
+  "kind": "real",
+  "arm": "A",
+  "repo": "jazzband/pip-tools",
+  "pr": 2444,
+  "path": "tests/conftest.py",
+  "line": 124
+ },
+ {
+  "item": 48,
+  "kind": "real",
+  "arm": "A",
+  "repo": "jazzband/pip-tools",
+  "pr": 2446,
+  "path": "tests/test_repository_pypi.py",
+  "line": 411
+ },
+ {
+  "item": 49,
+  "kind": "real",
+  "arm": "C",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1523,
+  "path": "docs/conf.py",
+  "line": 97
+ },
+ {
+  "item": 50,
+  "kind": "real",
+  "arm": "C",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1527,
+  "path": ".github/workflows/ci.yml",
+  "line": 89
+ },
+ {
+  "item": 51,
+  "kind": "real",
+  "arm": "C",
+  "repo": "aws/aws-cli",
+  "pr": 10535,
+  "path": "awscli/customizations/codeartifact/login.py",
+  "line": 467
+ },
+ {
+  "item": 52,
+  "kind": "real",
+  "arm": "C",
+  "repo": "falconry/falcon",
+  "pr": 2697,
+  "path": ".github/workflows/test-wheels.yaml",
+  "line": 21
+ },
+ {
+  "item": 53,
+  "kind": "real",
+  "arm": "B",
+  "repo": "pytest-dev/pluggy",
+  "pr": 698,
+  "path": ".pre-commit-config.yaml",
+  "line": 46
+ },
+ {
+  "item": 54,
+  "kind": "real",
+  "arm": "C",
+  "repo": "jazzband/pip-tools",
+  "pr": 2454,
+  "path": "tests/test_utils.py",
+  "line": 766
+ },
+ {
+  "item": 55,
+  "kind": "real",
+  "arm": "B",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1527,
+  "path": ".github/workflows/cd.yml",
+  "line": 23
+ },
+ {
+  "item": 56,
+  "kind": "real",
+  "arm": "B",
+  "repo": "aws/aws-cli",
+  "pr": 10510,
+  "path": ".github/workflows/sphinx-check.yml",
+  "line": 13
+ },
+ {
+  "item": 57,
+  "kind": "real",
+  "arm": "B",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1528,
+  "path": "src/scikit_build_core/file_api/reply.py",
+  "line": 57
+ },
+ {
+  "item": 58,
+  "kind": "real",
+  "arm": "B",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1532,
+  "path": "src/scikit_build_core/builder/builder.py",
+  "line": 432
+ },
+ {
+  "item": 59,
+  "kind": "real",
+  "arm": "A",
+  "repo": "falconry/falcon",
+  "pr": 2672,
+  "path": "falcon/cyutil/uri.pyx",
+  "line": 92
+ },
+ {
+  "item": 60,
+  "kind": "real",
+  "arm": "C",
+  "repo": "aws/aws-cli",
+  "pr": 10511,
+  "path": ".github/workflows/run-bundle-test.yml",
+  "line": 27
+ },
+ {
+  "item": 61,
+  "kind": "real",
+  "arm": "A",
+  "repo": "jazzband/pip-tools",
+  "pr": 2446,
+  "path": "tests/test_repository_pypi.py",
+  "line": 372
+ },
+ {
+  "item": 62,
+  "kind": "real",
+  "arm": "B",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1535,
+  "path": "tests/test_program_search.py",
+  "line": 179
+ },
+ {
+  "item": 63,
+  "kind": "real",
+  "arm": "B",
+  "repo": "jazzband/pip-tools",
+  "pr": 2447,
+  "path": ".pre-commit-config.yaml",
+  "line": 8
+ },
+ {
+  "item": 64,
+  "kind": "real",
+  "arm": "A",
+  "repo": "pytest-dev/pluggy",
+  "pr": 717,
+  "path": ".github/workflows/downstream.yml",
+  "line": 50
+ },
+ {
+  "item": 65,
+  "kind": "real",
+  "arm": "A",
+  "repo": "jazzband/pip-tools",
+  "pr": 2444,
+  "path": "tests/conftest.py",
+  "line": 124
+ },
+ {
+  "item": 66,
+  "kind": "real",
+  "arm": "B",
+  "repo": "pytest-dev/pluggy",
+  "pr": 698,
+  "path": ".pre-commit-config.yaml",
+  "line": 3
+ },
+ {
+  "item": 67,
+  "kind": "real",
+  "arm": "C",
+  "repo": "falconry/falcon",
+  "pr": 2672,
+  "path": "falcon/cyutil/uri.pyx",
+  "line": 96
+ },
+ {
+  "item": 68,
+  "kind": "real",
+  "arm": "B",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1515,
+  "path": "tests/test_program_search.py",
+  "line": 113
+ },
+ {
+  "item": 69,
+  "kind": "SABOTAGE",
+  "arm": "-",
+  "repo": "aws/aws-cli",
+  "pr": 10519,
+  "path": "awscli/telemetry.py",
+  "line": 317
+ },
+ {
+  "item": 70,
+  "kind": "real",
+  "arm": "A",
+  "repo": "jazzband/pip-tools",
+  "pr": 2444,
+  "path": "tests/conftest.py",
+  "line": 124
+ },
+ {
+  "item": 71,
+  "kind": "SABOTAGE",
+  "arm": "-",
+  "repo": "aws/aws-cli",
+  "pr": 10511,
+  "path": ".github/workflows/run-bundle-test.yml",
+  "line": 27
+ },
+ {
+  "item": 72,
+  "kind": "real",
+  "arm": "B",
+  "repo": "aws/aws-cli",
+  "pr": 10534,
+  "path": "awscli/customizations/codeartifact/login.py",
+  "line": 540
+ },
+ {
+  "item": 73,
+  "kind": "SABOTAGE",
+  "arm": "-",
+  "repo": "falconry/falcon",
+  "pr": 2672,
+  "path": "falcon/cyutil/uri.pyx",
+  "line": 96
+ },
+ {
+  "item": 74,
+  "kind": "real",
+  "arm": "C",
+  "repo": "jazzband/pip-tools",
+  "pr": 2457,
+  "path": "tests/unit/scripts/test_options.py",
+  "line": 24
+ },
+ {
+  "item": 75,
+  "kind": "real",
+  "arm": "C",
+  "repo": "aws/aws-cli",
+  "pr": 10540,
+  "path": ".github/workflows/stale_community_prs.yml",
+  "line": 12
+ },
+ {
+  "item": 76,
+  "kind": "real",
+  "arm": "A",
+  "repo": "jazzband/pip-tools",
+  "pr": 2446,
+  "path": "tests/test_repository_pypi.py",
+  "line": 106
+ },
+ {
+  "item": 77,
+  "kind": "real",
+  "arm": "C",
+  "repo": "jazzband/pip-tools",
+  "pr": 2425,
+  "path": ".github/ISSUE_TEMPLATE/bug-report.yaml",
+  "line": 36
+ },
+ {
+  "item": 78,
+  "kind": "real",
+  "arm": "B",
+  "repo": "jazzband/pip-tools",
+  "pr": 2425,
+  "path": ".github/ISSUE_TEMPLATE/bug-report.yaml",
+  "line": 36
+ },
+ {
+  "item": 79,
+  "kind": "real",
+  "arm": "A",
+  "repo": "aws/aws-cli",
+  "pr": 10535,
+  "path": "awscli/customizations/codeartifact/login.py",
+  "line": 553
+ },
+ {
+  "item": 80,
+  "kind": "real",
+  "arm": "A",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1521,
+  "path": "src/scikit_build_core/file_api/_cattrs_converter.py",
+  "line": 77
+ },
+ {
+  "item": 81,
+  "kind": "real",
+  "arm": "A",
+  "repo": "jazzband/pip-tools",
+  "pr": 2429,
+  "path": "piptools/repositories/pypi.py",
+  "line": 537
+ },
+ {
+  "item": 82,
+  "kind": "SABOTAGE",
+  "arm": "-",
+  "repo": "jazzband/pip-tools",
+  "pr": 2425,
+  "path": ".github/ISSUE_TEMPLATE/bug-report.yaml",
+  "line": 36
+ },
+ {
+  "item": 83,
+  "kind": "real",
+  "arm": "C",
+  "repo": "aws/aws-cli",
+  "pr": 10548,
+  "path": "requirements/download-deps/portable-exe-lock.txt",
+  "line": 87
+ },
+ {
+  "item": 84,
+  "kind": "real",
+  "arm": "B",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1535,
+  "path": "tests/test_program_search.py",
+  "line": 159
+ },
+ {
+  "item": 85,
+  "kind": "real",
+  "arm": "A",
+  "repo": "pytest-dev/pluggy",
+  "pr": 692,
+  "path": ".github/workflows/deploy.yml",
+  "line": 19
+ },
+ {
+  "item": 86,
+  "kind": "real",
+  "arm": "B",
+  "repo": "falconry/falcon",
+  "pr": 2682,
+  "path": "tests/test_request_attrs.py",
+  "line": 64
+ },
+ {
+  "item": 87,
+  "kind": "real",
+  "arm": "A",
+  "repo": "jazzband/pip-tools",
+  "pr": 2438,
+  "path": "piptools/sync.py",
+  "line": 40
+ },
+ {
+  "item": 88,
+  "kind": "real",
+  "arm": "A",
+  "repo": "jazzband/pip-tools",
+  "pr": 2425,
+  "path": ".github/ISSUE_TEMPLATE/bug-report.yaml",
+  "line": 36
+ },
+ {
+  "item": 89,
+  "kind": "SABOTAGE",
+  "arm": "-",
+  "repo": "falconry/falcon",
+  "pr": 2682,
+  "path": "tests/test_request_attrs.py",
+  "line": 64
+ },
+ {
+  "item": 90,
+  "kind": "real",
+  "arm": "A",
+  "repo": "jazzband/pip-tools",
+  "pr": 2446,
+  "path": "tests/test_cli_compile.py",
+  "line": 257
+ },
+ {
+  "item": 91,
+  "kind": "real",
+  "arm": "B",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1527,
+  "path": ".github/workflows/ci.yml",
+  "line": 89
+ },
+ {
+  "item": 92,
+  "kind": "SABOTAGE",
+  "arm": "-",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1535,
+  "path": "tests/test_program_search.py",
+  "line": 159
+ },
+ {
+  "item": 93,
+  "kind": "real",
+  "arm": "C",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1527,
+  "path": ".github/workflows/ci.yml",
+  "line": 89
+ },
+ {
+  "item": 94,
+  "kind": "real",
+  "arm": "C",
+  "repo": "jazzband/pip-tools",
+  "pr": 2447,
+  "path": ".pre-commit-config.yaml",
+  "line": 8
+ },
+ {
+  "item": 95,
+  "kind": "real",
+  "arm": "C",
+  "repo": "pyca/cryptography",
+  "pr": 15456,
+  "path": ".github/workflows/ci.yml",
+  "line": 417
+ },
+ {
+  "item": 96,
+  "kind": "real",
+  "arm": "A",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1535,
+  "path": "tests/test_program_search.py",
+  "line": 159
+ }
+]
