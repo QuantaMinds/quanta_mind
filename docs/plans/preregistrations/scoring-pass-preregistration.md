@@ -86,6 +86,29 @@ prediction that follows from the code from one that reaches outside it.** That i
 | **B — treatment** | A **plus the two lexical markers above, applied as a gate**. Free, deterministic, no model call |
 | **C — comparison** | A **plus a model-judged decidability gate**, asking whether the claim can be settled from the diff alone |
 
+| **D — added before any design-ten result was seen** | A minus any finding that predicts a test, build or CI failure. **Every pull request in the corpus is merged**, so such a claim is false by a fact we already hold |
+| **E — registered, not run here** | A minus any finding whose claim is settled by a REGISTRY LOOKUP: does this version exist on PyPI, is this commit hash in that repository |
+
+**Arm D rests on a fact, not on a fitted pattern — and that is what separates it from arm B.**
+The lexical marker was written by reading the fifteen findings it was scored against. **Arm D's
+rule is derived from a property of the corpus that was true before any finding existed:
+`corpus.pulls()` admits only merged pull requests, so a claim that one of their tests fails is
+false without needing to look at the test.** Same free cost, different epistemic standing.
+
+**Arm E is the right architecture for the other half and is not implemented here.** "Does version
+1.45.34 exist on PyPI" is answerable by an HTTP GET and by nothing else — not by a prompt rule, not
+by more repository history, not by a model. **If a lookup can answer it, a model must not**, which
+is the same rule that made the gate a string search rather than a model call. It is registered so
+that building it later is a pre-registered step rather than a reaction to a result.
+
+**What is NOT being added: a prompt rule.** "Only claim what is visible in the diff" asks the model
+to police a boundary it cannot perceive — when it says a version does not exist it believes that is
+a fact about code. The record is against it: design nine's prompt already banned nits and style
+still came in at 0–0 against Qodo; design eight's quote requirement was obeyed by **abstaining**
+rather than by anchoring better; our rejection filter moved nothing at p = 0.53; and Greptile
+published the same null independently. **A prompt rule is the weakest instrument available and is
+predicted to underperform the free regex.**
+
 **B before C on purpose.** A regex that catches 93% at a cost of 7% — *on the data that produced
 it* — must be tested on fresh data before paying for a model call that does the same job. This
 project's rule is that if a parser can answer it, a model must not. **C exists to measure whether
@@ -154,7 +177,12 @@ deduplication.
 3. **B's yield falls below A's** and J4 is B's bar most at risk.
 4. **Numbered lines and surplus generation change nothing measurable.** We already never ask for a
    line number, so numbering has nothing to attach to.
-5. **The gate will over-reject.** Some true findings do depend on outside knowledge and will be
+5. **Arm D removes 30–60% of A's wrong findings at a cost of under 10% of its correct ones**, and
+   is the highest ratio of the four arms because its rule is entailed rather than fitted.
+6. **Arm D and arm B overlap heavily but not completely** — B's "predicts a runtime failure" marker
+   catches most of what D catches, plus some non-test cases. **If D is a strict subset of B, D adds
+   nothing and should be dropped.**
+7. **The gate will over-reject.** Some true findings do depend on outside knowledge and will be
    caught. **If B's CORRECT count falls as much as its WRONG count, the gate is a volume control
    rather than a precision filter, and that is a fail however the wrong-rate reads.**
 
