@@ -42,7 +42,7 @@ three months stale.
 | `store/` | **2** | `schema.py`, `touches.py` |
 | `ingest/` | **2** | `commits.py`, `history.py` |
 | `parse/` | **0** | — |
-| `rank/` | **1** | `score.py` |
+| `rank/` | **2** | `order.py`, `score.py` |
 | `allocate/` | **0** | — |
 | `infer/` | **0** | — |
 | `verify/` | **0** | — |
@@ -53,9 +53,12 @@ three months stale.
 
 ### The exact next action
 
-**`rank/order.py`, then `rank/discriminate.py`** — the budget, the `Allocation` labels and the
-percentile threshold. The counting half is done and live-verified: `store/touches.py` reproduces
-`defect_return.py`'s scores and orderings exactly on 900 real cases from three repositories.
+**`render/coverage_line.py`, then `render/comment.py`** — the ranker stage's remaining gate is 2c,
+which needs a rendered line per case, and there is no `render/` layer yet. `rank/discriminate.py`
+was not needed as a separate module: the three-case split is `score.discriminate()`.
+
+The ranker itself is built and replay-verified: **gate 2a passes with zero ordering mismatches over
+853 admissible events**, and the ranker beats alphabetical **5.04% to 10.08%**.
 
 ---
 
@@ -206,9 +209,10 @@ be backfilled.
 3. **DONE.** `rank/score.py` — `order()`, `discriminate()`, `top()` and `rendered()`. Pure, no
    I/O. `Touch` moved to `types/history.py` during this step: `store/` sits LEFT of `ingest/`, so a
    value object shared by both belongs to the leftmost layer.
-4. `rank/order.py` — `(-score, path)`, the budget of three, and the `Allocation` labels. The
-   percentile threshold lives here: absolute thresholds fired at 11% on one repository and 53% on
-   another, while percentiles self-calibrate to 10–12% across an 80× velocity range.
+4. **DONE.** `rank/order.py` — the budget of three, the `Allocation` labels and the firing
+   percentile. Ranks FILES: `Site(path, line=0)` is what declares that, since function-level
+   top-three misses 8.84% against the file's 1.22%. Does not re-order — the sequence comes from
+   `score.order()` untouched, because gate 2a compares it element by element.
 5. `rank/discriminate.py` — the three-case split from the ranker plan. A `Ranking` that does not
    distinguish *ordered by history* from *no history to order by* claims a capability it did not
    exercise.

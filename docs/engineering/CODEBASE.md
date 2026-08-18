@@ -469,6 +469,29 @@ ones.
 a repository ingested twice would double every count *evenly* — an error that moves no ordering,
 passes every ordering test, and corrupts the percentile that decides whether we fire.
 
+#### `rank/order.py` — the budget, the labels, and whether we speak at all
+
+`score.py` decides the ORDER, which is the half with the p-value. This decides how much of that
+order gets funded and whether we open our mouth — two different failures: a wrong order misses
+defects, a wrong threshold buries the customer or goes silent for a month.
+
+**The firing rule is a percentile, not an absolute score.** An absolute threshold fired on 11% of
+one repository and 53% of another; percentiles self-calibrate to 10-12% across an 80x velocity
+range. **It does not fire on the no-history case** — with every file at zero the ordering is
+alphabetical, and firing would present `sort(filenames)` as a judgement about risk.
+
+**It ranks FILES, and `Site(path, line=0)` is what declares that** — zero means the whole file.
+Function-level top-three misses 8.84% against the file's 1.22%, so a site naming a line would claim
+a resolution the ranking does not have.
+
+**It does not re-order.** The sequence comes from `score.order()` untouched, because gate 2a
+compares it against the research ranker element by element.
+
+**Known weakness, stated in the module:** the percentile is computed against the change's own
+scores, which on a two-file change is nearly meaningless. A repository-wide distribution would be
+better and needs the store to carry one, so `fires()` takes the threshold as an argument rather
+than assuming it.
+
 #### `rank/score.py` — the policy with the p-value, kept pure
 
 `order()`, `discriminate()`, `top()`, `rendered()`. No I/O, so it is comparable to
