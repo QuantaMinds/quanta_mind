@@ -1,0 +1,282 @@
+[
+ {
+  "item": 1,
+  "kind": "real",
+  "repo": "aio-libs/aiohttp",
+  "pr": 13468,
+  "idx": 7
+ },
+ {
+  "item": 2,
+  "kind": "real",
+  "repo": "python-attrs/attrs",
+  "pr": 1597,
+  "idx": 20
+ },
+ {
+  "item": 3,
+  "kind": "real",
+  "repo": "python-attrs/attrs",
+  "pr": 1601,
+  "idx": 16
+ },
+ {
+  "item": 4,
+  "kind": "real",
+  "repo": "aio-libs/aiohttp",
+  "pr": 13461,
+  "idx": 11
+ },
+ {
+  "item": 5,
+  "kind": "real",
+  "repo": "psycopg/psycopg",
+  "pr": 1329,
+  "idx": 28
+ },
+ {
+  "item": 6,
+  "kind": "real",
+  "repo": "tiangolo/sqlmodel",
+  "pr": 2069,
+  "idx": 14
+ },
+ {
+  "item": 7,
+  "kind": "real",
+  "repo": "psycopg/psycopg",
+  "pr": 1369,
+  "idx": 24
+ },
+ {
+  "item": 8,
+  "kind": "real",
+  "repo": "python-attrs/attrs",
+  "pr": 1597,
+  "idx": 22
+ },
+ {
+  "item": 9,
+  "kind": "real",
+  "repo": "python-attrs/attrs",
+  "pr": 1600,
+  "idx": 17
+ },
+ {
+  "item": 10,
+  "kind": "real",
+  "repo": "psycopg/psycopg",
+  "pr": 1321,
+  "idx": 31
+ },
+ {
+  "item": 11,
+  "kind": "real",
+  "repo": "python-attrs/attrs",
+  "pr": 1608,
+  "idx": 15
+ },
+ {
+  "item": 12,
+  "kind": "real",
+  "repo": "aio-libs/aiohttp",
+  "pr": 13460,
+  "idx": 12
+ },
+ {
+  "item": 13,
+  "kind": "real",
+  "repo": "pallets/quart",
+  "pr": 433,
+  "idx": 4
+ },
+ {
+  "item": 14,
+  "kind": "real",
+  "repo": "pallets/quart",
+  "pr": 472,
+  "idx": 0
+ },
+ {
+  "item": 15,
+  "kind": "real",
+  "repo": "psycopg/psycopg",
+  "pr": 1326,
+  "idx": 30
+ },
+ {
+  "item": 16,
+  "kind": "SABOTAGE",
+  "repo": "psycopg/psycopg",
+  "pr": 1365,
+  "idx": -1
+ },
+ {
+  "item": 17,
+  "kind": "SABOTAGE",
+  "repo": "psycopg/psycopg",
+  "pr": 1321,
+  "idx": -1
+ },
+ {
+  "item": 18,
+  "kind": "real",
+  "repo": "pallets/quart",
+  "pr": 432,
+  "idx": 6
+ },
+ {
+  "item": 19,
+  "kind": "real",
+  "repo": "pallets/quart",
+  "pr": 433,
+  "idx": 5
+ },
+ {
+  "item": 20,
+  "kind": "real",
+  "repo": "tiangolo/sqlmodel",
+  "pr": 2069,
+  "idx": 13
+ },
+ {
+  "item": 21,
+  "kind": "real",
+  "repo": "aio-libs/aiohttp",
+  "pr": 13465,
+  "idx": 8
+ },
+ {
+  "item": 22,
+  "kind": "real",
+  "repo": "aio-libs/aiohttp",
+  "pr": 13461,
+  "idx": 10
+ },
+ {
+  "item": 23,
+  "kind": "real",
+  "repo": "pallets/quart",
+  "pr": 452,
+  "idx": 1
+ },
+ {
+  "item": 24,
+  "kind": "real",
+  "repo": "python-attrs/attrs",
+  "pr": 1597,
+  "idx": 21
+ },
+ {
+  "item": 25,
+  "kind": "real",
+  "repo": "psycopg/psycopg",
+  "pr": 1374,
+  "idx": 23
+ },
+ {
+  "item": 26,
+  "kind": "SABOTAGE",
+  "repo": "psycopg/psycopg",
+  "pr": 1344,
+  "idx": -1
+ },
+ {
+  "item": 27,
+  "kind": "real",
+  "repo": "aio-libs/aiohttp",
+  "pr": 13464,
+  "idx": 9
+ },
+ {
+  "item": 28,
+  "kind": "real",
+  "repo": "psycopg/psycopg",
+  "pr": 1365,
+  "idx": 25
+ },
+ {
+  "item": 29,
+  "kind": "SABOTAGE",
+  "repo": "psycopg/psycopg",
+  "pr": 1369,
+  "idx": -1
+ },
+ {
+  "item": 30,
+  "kind": "SABOTAGE",
+  "repo": "pallets/quart",
+  "pr": 433,
+  "idx": -1
+ },
+ {
+  "item": 31,
+  "kind": "real",
+  "repo": "psycopg/psycopg",
+  "pr": 1329,
+  "idx": 29
+ },
+ {
+  "item": 32,
+  "kind": "real",
+  "repo": "pallets/quart",
+  "pr": 433,
+  "idx": 3
+ },
+ {
+  "item": 33,
+  "kind": "real",
+  "repo": "python-attrs/attrs",
+  "pr": 1600,
+  "idx": 18
+ },
+ {
+  "item": 34,
+  "kind": "SABOTAGE",
+  "repo": "psycopg/psycopg",
+  "pr": 1369,
+  "idx": -1
+ },
+ {
+  "item": 35,
+  "kind": "real",
+  "repo": "psycopg/psycopg",
+  "pr": 1344,
+  "idx": 27
+ },
+ {
+  "item": 36,
+  "kind": "SABOTAGE",
+  "repo": "psycopg/psycopg",
+  "pr": 1344,
+  "idx": -1
+ },
+ {
+  "item": 37,
+  "kind": "real",
+  "repo": "python-attrs/attrs",
+  "pr": 1597,
+  "idx": 19
+ },
+ {
+  "item": 38,
+  "kind": "SABOTAGE",
+  "repo": "psycopg/psycopg",
+  "pr": 1326,
+  "idx": -1
+ },
+ {
+  "item": 39,
+  "kind": "real",
+  "repo": "pallets/quart",
+  "pr": 436,
+  "idx": 2
+ },
+ {
+  "item": 40,
+  "kind": "real",
+  "repo": "psycopg/psycopg",
+  "pr": 1344,
+  "idx": 26
+ }
+]

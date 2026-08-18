@@ -297,3 +297,76 @@ and must not be described as the same one.**
 
 **A near-miss is a fail.** B at 30% against A at 34% with p = 0.4 fails J1 and will be reported as
 failing.
+
+---
+
+# The result — design nine REPLICATED, and the dynamic gate beat the fitted one
+
+60 pull requests from six untouched repositories. 32 findings in arm A, 29 unique. All rated blind,
+without arm labels, because B and C are index subsets of A.
+
+## J3 first — 8 of 8 sabotaged controls graded WRONG. The rater discriminates.
+
+## The three arms
+
+| arm | n | CORRECT | WRONG | wrong-rate | 95% Wilson |
+|---|---|---|---|---|---|
+| **A — design nine** | 29 | 10 | 9 | **31.0%** | 17.3–49.2% |
+| B — + lexical marker | 19 | 7 | 2 | 10.5% | 2.9–31.4% |
+| **C — + model gate** | 14 | 9 | **0** | **0.0%** | 0.0–21.5% |
+
+| bar | result | |
+|---|---|---|
+| **J2 replication** — arm A < 50%, upper bound clearing | **31.0%, Wilson 17.3–49.2%** against design nine's 34.9%, 22.4–49.8% | **CLEAN PASS** |
+| J1 — B beats A, p < 0.05 | 10.5% vs 31.0%, **Fisher p = 0.1611** | **FAIL — direction only** |
+| J1 — C beats A, p < 0.05 | 0.0% vs 31.0%, **Fisher p = 0.0204** | **PASS** |
+| J4 yield ≥ 0.30 | A 0.53, B 0.33, **C 0.25** | **C FAILS** |
+| J5 ≥ 25 unique | A 29, **B 19, C 14** | **B and C UNDERPOWERED** |
+
+**DESIGN NINE REPLICATED.** 34.9% then, 31.0% now, on repositories that did not shape it, with the
+bar fixed beforehand. That is the result everything else was conditional on.
+
+## The objection to hand-fitted markers was correct
+
+**It was put to me that thirty findings from six repositories cannot produce a filter that
+transfers, and that the mechanism must be dynamic. The run supports that.**
+
+**The fitted regex (B) did not reach significance. The dynamic gate (C) did.** I had recorded
+before the run that my prior had moved toward C; it moved for the right reason.
+
+## Prediction 5 was wrong, and wrong in the direction that matters
+
+I predicted the gate would over-reject — that CORRECT would fall as much as WRONG, making it a
+volume control rather than a precision filter.
+
+| | A | B | C |
+|---|---|---|---|
+| CORRECT share | 34.5% | 36.8% | **64.3%** |
+
+**Arm C nearly doubled the correct share while removing every wrong finding.** It dropped 9 of 9
+WRONG, 4 of 8 UNFALSIFIABLE, and only 1 of 10 CORRECT. **The chance of a random 15-of-29 drop
+capturing all nine wrong findings is p = 0.0005.**
+
+## What stops this being a result about the reviewer
+
+**THE GATE AND THE RATER MAY SHARE A RULE.** I graded the external-existence claims WRONG because I
+believe them false — `actions/checkout@v7` exists, OpenSSL 3.5.7 exists, mypy 2.1.0 exists. **The
+gate drops them because they are not decidable from the diff.** Those are different questions with
+correlated answers, and the agreement is therefore partly structural rather than evidential.
+
+**It is not wholly structural** — the gate also dropped half the UNFALSIFIABLE findings and kept 9
+of 10 CORRECT, which a rule merely tracking mine would not do. **But the size of the effect cannot
+be trusted until a rater who did not design the gate reproduces it.**
+
+**And arm C is not shippable as configured: it fails J4 on yield and is below J5's floor.** Zero
+wrong of fourteen carries a 0–21.5% interval. **The mechanism is validated; the configuration is
+not.**
+
+## Predictions, scored
+
+| # | predicted | result |
+|---|---|---|
+| 1 | arm A replicates 25–50% | **RIGHT — 31.0%** |
+| 2 | B beats A in direction but not significantly | **RIGHT — p = 0.1611** |
+| 3 | B's yield falls, J4 most at risk for B | **half — B passed at 0.33, C failed at 0.25** |
+| 5 | the gate over-rejects, CORRECT falls with WRONG | **WRONG — both are precision filters** |
