@@ -85,7 +85,7 @@ you remember to obey — the machine will stop you either way.
    → `scripts/guard/check_branch_name.py` + `scripts/guard/hooks/hook_pre_edit.py` + branch protection
 
 10. **Docs move with code.** A PR that changes behaviour and does not touch
-    `docs/engineering/CODEBASE.md` fails CI. → `scripts/guard/check_docs_sync.py`
+    `docs/engineering/CODEBASE.md` fails CI. → `scripts/guard/records/check_docs_sync.py`
 
 11. **Research dependencies stay out of the product.** `research/` is a separate uv
     project on a different interpreter. Nothing in `src/` or `scripts/` may import
@@ -98,7 +98,7 @@ you remember to obey — the machine will stop you either way.
     insert one heading and every citation points elsewhere, no test fails, and the sentence
     still reads correctly. Eight were dangling when this rule was written. Below: one of
     each banned form, the marker suppressing the guard so the rule can show what it bans —
-    counted and printed every run, not an escape hatch. → `scripts/guard/check_no_vague_refs.py`
+    counted and printed every run, not an escape hatch. → `scripts/guard/records/check_no_vague_refs.py`
 
     ```
     §7's gate  →  `PHASE0_RUNBOOK.md` “The 20-PR hand-labelling gate”  no-vague-refs:allow
@@ -128,7 +128,7 @@ you remember to obey — the machine will stop you either way.
     left one of ours green and reading as coverage. → **ADVISORY** — notice the verb.
 
 15. **A documented command must run, or carry `documented-command:unbuilt`.** `python -m`
-    with no `__main__` ignores flags, writes nothing, exits 0 — the runbook's "Days 3–5" reported success and did nothing. → `scripts/guard/check_documented_commands.py`
+    with no `__main__` ignores flags, writes nothing, exits 0 — the runbook's "Days 3–5" reported success and did nothing. → `scripts/guard/records/check_documented_commands.py`
 
 ---
 

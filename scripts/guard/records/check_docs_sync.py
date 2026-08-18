@@ -21,9 +21,14 @@ NOTE: check 2 needs full history. The workflow sets fetch-depth: 0 -- without it
 
 from __future__ import annotations
 
+import pathlib
 import subprocess
 import sys
 from pathlib import Path
+
+# Running a guard as a script puts only ITS directory on sys.path[0]. This one lives one level
+# down, so the parent is added explicitly -- the same reason `citations/` does it.
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
 from discovery import Violation, is_excluded, report
 

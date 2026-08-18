@@ -31,9 +31,14 @@ CONSUMED BY: `just guards`; CI.
 from __future__ import annotations
 
 import ast
+import pathlib
 import re
 import sys
 from pathlib import Path
+
+# Running a guard as a script puts only ITS directory on sys.path[0]. This one lives one level
+# down, so the parent is added explicitly -- the same reason `citations/` does it.
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
 from discovery import Violation, project_root, report
 

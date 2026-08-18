@@ -56,7 +56,7 @@ jobs:
         run: python scripts/guard/check_no_research_imports.py .
 
       - name: Docs move with code
-        run: python scripts/guard/check_docs_sync.py .
+        run: python scripts/guard/records/check_docs_sync.py .
 
       - name: Branch name
         if: github.event_name == 'pull_request'

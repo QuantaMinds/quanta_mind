@@ -28,9 +28,14 @@ CONSUMED BY: `just guards`; scripts/guard/hook_post_edit.py; CI.
 
 from __future__ import annotations
 
+import pathlib
 import re
 import sys
 from pathlib import Path
+
+# Running a guard as a script puts only ITS directory on sys.path[0]. This one lives one level
+# down, so the parent is added explicitly -- the same reason `citations/` does it.
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
 from discovery import iter_text_files, project_root
 
@@ -55,9 +60,14 @@ PHASE_NAMES = {
     "6": "the PR comment and free tier",
 }
 
-# This file necessarily contains the patterns it bans.
+# This file necessarily contains the patterns it bans. Derived from __file__ rather than written
+# out, because the literal path went stale the moment this guard moved into `records/` -- and the
+# symptom was the guard reporting fifteen violations against its own docstring.
 EXEMPT = {
-    "scripts/guard/check_no_vague_refs.py",
+    str(pathlib.Path(__file__).resolve().relative_to(pathlib.Path.cwd()))
+    if pathlib.Path(__file__).resolve().is_relative_to(pathlib.Path.cwd())
+    else "scripts/guard/records/check_no_vague_refs.py",
+    "scripts/guard/records/check_no_vague_refs.py",
     "tests/unit/test_no_vague_refs.py",
 }
 

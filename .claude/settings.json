@@ -100,16 +100,16 @@
     "no edits to vendored source": "hook:PreToolUse",
     "golden files reviewed, not regenerated": "hook:PreToolUse (ask) + ci:verify-data",
 
-    "docs updated with code": "guard:check_docs_sync",
+    "docs updated with code": "guard:records/check_docs_sync",
     "AGENTS.md under 200 lines": "guard:check_agents_md",
     "every rule names a mechanism": "guard:check_agents_md",
     "enforcement map resolves": "guard:check_enforcement_map",
     "no orphan guards": "guard:check_enforcement_map",
     "research deps stay out of the product": "guard:check_no_research_imports",
-    "references name things, not numbers": "guard:check_no_vague_refs",
+    "references name things, not numbers": "guard:records/check_no_vague_refs",
     "no duplicate or orphan modules": "guard:check_module_identity",
     "no --filter on a git clone (A31)": "guard:check_no_partial_clone",
-    "a withdrawn amendment names its enforcer": "guard:check_withdrawn_amendments",
+    "a withdrawn amendment names its enforcer": "guard:records/check_withdrawn_amendments",
     "a cited document or line exists": "guard:citations/resolve",
     "a dated external figure is re-checked on its cadence": "guard:citations/freshness",
 
@@ -119,7 +119,7 @@
     "a validation tool consumes the artefact under test, never rebuilds it": "ADVISORY -- docs/CORRECTIONS.md entry 3; no guard distinguishes a legitimate constructor from a drifting reconstruction",
     "one public concern per module": "ADVISORY -- human review in PR",
     "plan before editing resolve/ or label/": "ADVISORY -- human review in PR",
-    "documented commands must be runnable": "guard:check_documented_commands",
+    "documented commands must be runnable": "guard:records/check_documented_commands",
     "session record written at Stop": "hook:Stop (informational)"
   }
 }
