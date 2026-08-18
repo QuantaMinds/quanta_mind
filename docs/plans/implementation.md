@@ -40,7 +40,7 @@ three months stale.
 |---|---|---|
 | `types/` | **7** | `change.py`, `commit.py`, `ranking.py`, `review.py`, `settings.py`, `touch.py`, `verdict.py` |
 | `store/` | **3** | `drift.py`, `schema.py`, `touches.py` |
-| `ingest/` | **2** | `commits.py`, `history.py` |
+| `ingest/` | **3** | `commits.py`, `diff.py`, `history.py` |
 | `parse/` | **0** | — |
 | `rank/` | **2** | `order.py`, `score.py` |
 | `allocate/` | **0** | — |
@@ -53,9 +53,12 @@ three months stale.
 
 ### The exact next action
 
-**`ingest/diff.py`** — the pull request's changed paths. It is the last hand-fetched piece: the
-live tests currently get changed files from `gh` directly, so the product cannot yet rank a pull
-request end to end without help.
+**`parse/languages.py` and `parse/units.py`** — the ranker stage is closed apart from gate 2b, and
+the reader stage still has no parsing. Until it does, the coverage line cannot name an unresolved
+construct from a real diff, only the files it did not read.
+
+The pipeline now runs end to end through product code alone: `ingest/diff.py` supplies the changed
+paths and the bounding commit, so the live tests no longer hand-fetch anything.
 
 The ranker stage's gates now stand at **2a MET** (zero ordering mismatches over 853 admissible
 events), **2a′ MET** (5.04% against alphabetical's 10.08%), **2c MET**, and **2b UNMET** — it needs
@@ -136,7 +139,11 @@ test asserting the guard finds a non-zero number of files.
    Built with: shallow and blob-filtered clones refused up front; a repository with no commits
    returning `[]`, detected via `rev-parse --verify HEAD` rather than by matching git's wording;
    merge commits excluded so they cannot swamp the counts.
-2. `ingest/diff.py` — the pull request's changed paths and hunks, with file and line ranges.
+2. **DONE.** `ingest/diff.py` — the pull request's changed paths and the commit that bounds the
+   ranking window. **The base, never the head**: ranking against the head would count the pull
+   request's own commits as prior history, so a branch would raise its own score. A base absent
+   from the clone is refused, not guessed — a ranking against the wrong instant looks identical to
+   a correct one. Hunks and line ranges are not built; nothing needs them until `parse/`.
 3. `ingest/github_pulls.py` — pull request metadata. **Timeout 30s, declared.**
 4. `ingest/github_comments.py` — post one comment, idempotently, keyed on head SHA.
 5. `parse/languages.py` — which languages we parse and to what depth. **Public, and printed in the

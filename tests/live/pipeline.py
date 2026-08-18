@@ -25,6 +25,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from quantamind.ingest.diff import DiffReadFailed, base_commit, changed_files
 from quantamind.ingest.history import read_touches
 from quantamind.rank.order import rank
 from quantamind.store import schema
@@ -109,29 +110,20 @@ def ranked_pulls(clones: dict[str, Path], skips: Skips) -> Iterator[Ranked]:
 
         for pull in pulls:
             number = int(str(pull["number"]))
-            base_sha = str(pull["base"]["sha"])  # type: ignore[index]
-            changed = sorted(
-                {
-                    str(f["filename"])
-                    for f in gh([f"repos/{repo}/pulls/{number}/files?per_page=100"])
-                    if str(f["filename"]).endswith(".py")
-                }
-            )
+            # THROUGH THE PRODUCT, not by hand. ingest/diff.py owns both reads, and the seam it
+            # covers is which commit bounds the window -- the base, never the head.
+            changed = changed_files(repo, number)
             if not changed:
                 skips.record("no python files changed")
                 continue
-            shown = subprocess.run(
-                ["git", "-C", str(clone), "show", "-s", "--format=%ct", base_sha],
-                capture_output=True,
-                text=True,
-                timeout=60,
-            )
-            if shown.returncode != 0:
+            try:
+                base = base_commit(repo, number, clone)
+            except DiffReadFailed:
                 # A fork, or a branch force-pushed since. Not a pipeline failure, but a coverage
                 # hole, so it is counted rather than passed over.
                 skips.record(f"{repo}: base commit not in clone")
                 continue
-            as_of = int(shown.stdout.strip().split("\n")[-1])
+            as_of = base.committed_at
             scores = dict(touch_store.counts(conn, repo_id, changed, as_of=as_of))
             yield Ranked(
                 repo=repo,
