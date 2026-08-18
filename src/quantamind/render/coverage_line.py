@@ -61,7 +61,17 @@ def coverage_line(ranking: Ranking, unresolved: Sequence[Unresolved] = ()) -> st
     unread = [p for p in all_paths if p not in set(funded)]
     total = len(all_paths)
 
-    if ranking.discrimination is Discrimination.NO_HISTORY:
+    if total == 1 and ranking.discrimination is not Discrimination.NO_HISTORY:
+        # A single file is not a failed ranking. Real output said "All 1 file(s) have the same
+        # prior-fix history, so the ranking could not separate them and the order below is
+        # alphabetical" -- there is nothing to separate, and the sentence reads as a malfunction.
+        unit = ranking.units[0]
+        head = (
+            f"This change touches one file, `{unit.unit.qualified_name}`, which a later fix has "
+            f"returned to {int(unit.score.value)} time(s) in the year before it. There is nothing "
+            f"to rank."
+        )
+    elif ranking.discrimination is Discrimination.NO_HISTORY:
         head = (
             f"**No file in this change has prior history in this repository**, so nothing was "
             f"ranked and nothing was prioritised. All {total} file(s) are unread by us: "

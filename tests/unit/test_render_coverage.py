@@ -134,3 +134,19 @@ def test_the_rendering_matches_the_reviewed_golden_file() -> None:
         f"the rendered coverage lines changed. This is what the customer reads — diff {GOLDEN}, "
         "confirm the new wording is what you meant, then update it deliberately"
     )
+
+
+def test_a_single_file_change_is_not_described_as_a_failed_ranking() -> None:
+    """Real output: "All 1 file(s) have the same prior-fix history ... could not separate"."""
+    line = coverage_line(rank({"src/only.py": 11}))
+    assert "could not separate" not in line, f"there is nothing to separate: {line}"
+    assert "one file" in line and "`src/only.py`" in line
+    assert "nothing to rank" in line
+
+
+def test_a_single_file_comment_omits_the_equally_worth_reading_note() -> None:
+    body = comment(rank({"src/only.py": 11}))
+    assert body is not None
+    assert "equally worth reading" not in body, (
+        "that note reads as a malfunction when there is only one file"
+    )

@@ -41,7 +41,7 @@ three months stale.
 | `types/` | **7** | `change.py`, `commit.py`, `ranking.py`, `review.py`, `settings.py`, `touch.py`, `verdict.py` |
 | `store/` | **3** | `drift.py`, `schema.py`, `touches.py` |
 | `ingest/` | **3** | `commits.py`, `diff.py`, `history.py` |
-| `parse/` | **0** | — |
+| `parse/` | **2** | `languages.py`, `units.py` |
 | `rank/` | **2** | `order.py`, `score.py` |
 | `allocate/` | **0** | — |
 | `infer/` | **0** | — |
@@ -53,9 +53,9 @@ three months stale.
 
 ### The exact next action
 
-**`parse/languages.py` and `parse/units.py`** — the ranker stage is closed apart from gate 2b, and
-the reader stage still has no parsing. Until it does, the coverage line cannot name an unresolved
-construct from a real diff, only the files it did not read.
+**`ingest/github_comments.py`** — posting the comment idempotently, keyed on head SHA. It is the
+last piece of the reader stage, and the only one between a rendered comment and a pull request that
+actually receives it.
 
 The pipeline now runs end to end through product code alone: `ingest/diff.py` supplies the changed
 paths and the bounding commit, so the live tests no longer hand-fetch anything.

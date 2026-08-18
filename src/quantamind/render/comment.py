@@ -11,6 +11,9 @@ WHY:  **The coverage line is first and that is not a style choice.** A reader wh
       is 0.013-0.037 per pull request. The comment therefore says where to look and what we could
       not see, and asserts nothing about whether the code is right.
 
+      **A single-file change gets no "treat them as equally worth reading" note.** Real output
+      carried it on a one-file scrapy change, where it reads as a malfunction rather than a caveat.
+
       **A comment that says nothing is not posted.** `fired=False` returns None rather than a
       cheerful "nothing to report", which would be a claim we did not earn and would train readers
       to ignore the ones that matter.
@@ -54,7 +57,7 @@ def comment(ranking: Ranking, unresolved: Sequence[Unresolved] = ()) -> str | No
             )
         lines.append("")
 
-    if ranking.discrimination is Discrimination.FLAT_NONZERO:
+    if ranking.discrimination is Discrimination.FLAT_NONZERO and len(ranking.units) > 1:
         lines.append(
             "_Every file here has been fixed the same number of times, so the order above is "
             "alphabetical and carries no signal. Treat them as equally worth reading._"
