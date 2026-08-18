@@ -132,6 +132,46 @@ pattern than arm B, but fitted all the same.
 rather than from reading the findings, but the property must now be *measured per pull request*
 rather than assumed. That is a lookup, which puts D in the same architectural family as arm E.
 
+### The one unsafe verdict, traced to the implementation — and it holds
+
+**Item 32 was the only verdict where a failing job plausibly covered the file.** Reading the code
+rather than the CI status settles it. `tests/tools/backport/test_interactive.py`:
+
+```python
+checkpoint = MagicMock()
+cases = [("s", "saved"), ("q", "discarded")]
+for action, expected in cases:            # runs twice
+    ... run_plan_session(MagicMock(), state, checkpoint)
+checkpoint.assert_called_once()
+```
+
+The model saw a two-iteration loop and one `assert_called_once` and called it broken.
+`tools/backport/interactive.py`, **in the same diff**:
+
+```python
+case "s":
+    if checkpoint is not None:
+        checkpoint(state)     # called
+    return "saved"
+case "q":
+    return "discarded"        # not called
+```
+
+**Called exactly once across two iterations. The test passes and the claim is false.**
+
+**Three routes to that verdict, and only one of them is sound:**
+
+| route | verdict | status |
+|---|---|---|
+| merge status | WRONG | **unreliable — half the sample merged with failing checks** |
+| failing-job name | inconclusive | the job was Python 3.14 on Windows, unrelated to this test |
+| **reading the implementation** | **WRONG** | **proven** |
+
+**This weakens arm D further than the CI check did.** The claim was decidable from the diff the
+model was given — both the test and the implementation were in it. **No lookup was needed; the
+model simply did not trace it.** A rule that suppresses such claims by merge status suppresses the
+right answer for the wrong reason.
+
 **Effect on design nine's headline:** at most two of fifteen WRONG verdicts are unsafe, moving
 34.9% to 32.6% or 30.2%. **Both still clear the bar, so the result stands** — but the adjudication
 carried an assumption it should not have, and that is recorded rather than quietly corrected.
