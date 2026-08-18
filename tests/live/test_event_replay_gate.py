@@ -82,6 +82,9 @@ def test_the_replayed_ranker_matches_research_and_lands_in_its_interval(
     clones: dict[str, Path],
 ) -> None:
     events = order_mismatches = hits = alpha_hits = 0
+    # Counted, not silent: these three skips ARE the event definition, and if one of them
+    # started rejecting everything the run would still 'pass' on a smaller corpus.
+    rejected: collections.Counter[str] = collections.Counter()
     per_repo: dict[str, tuple[int, int]] = {}
 
     for repo, clone in clones.items():
@@ -110,6 +113,7 @@ def test_the_replayed_ranker_matches_research_and_lands_in_its_interval(
         for i, commit in enumerate(commits):
             files = set(commit.paths)
             if not (2 <= len(files) <= MAX_FILES):
+                rejected["file count outside 2..12"] += 1
                 continue
             target: set[str] = set()
             for later in commits[i + 1 :]:
@@ -119,13 +123,17 @@ def test_the_replayed_ranker_matches_research_and_lands_in_its_interval(
                 if any(w in later.subject for w in FIXWORDS):
                     target |= later.paths & files
             if not target:
+                rejected["no later fix returned to it"] += 1
                 continue
 
             produced = touch_store.counts(conn, repo_id, sorted(files), as_of=commit.committed_at)
             expected = {f: _research_prior(index, f, commit.committed_at) for f in files}
             assert dict(produced) == expected, f"{repo}: scores diverged at {commit.committed_at}"
             if len(set(expected.values())) == 1:
-                continue  # nothing for a ranking to distinguish — the research drops these too
+                # Nothing for a ranking to distinguish. The research drops these too, and keeping
+                # them would inflate both arms identically.
+                rejected["flat scores"] += 1
+                continue
 
             events += 1
             repo_events += 1
@@ -141,7 +149,10 @@ def test_the_replayed_ranker_matches_research_and_lands_in_its_interval(
         per_repo[repo] = (repo_events, repo_hits)
         conn.close()
 
-    assert events >= MIN_EVENTS, f"only {events} admissible events — too few to hold to an interval"
+    print(f"  rejected by the event definition: {dict(rejected)}")
+    assert events >= MIN_EVENTS, (
+        f"only {events} admissible events (rejected: {dict(rejected)}) — too few to hold to a bar"
+    )
     # Gate 2a — ordering identity.
     assert order_mismatches == 0, f"{order_mismatches} of {events} orderings differ from research"
     # Gate 2b — the miss rate the research measured.

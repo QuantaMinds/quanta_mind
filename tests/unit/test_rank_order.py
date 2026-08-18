@@ -78,3 +78,11 @@ def test_the_order_is_score_orders_order_untouched() -> None:
 
     scores = {"z.py": 3, "a.py": 3, "m.py": 9}
     assert [u.unit.qualified_name for u in rank(scores).units] == score_order(scores)
+
+
+def test_an_empty_score_set_raises_rather_than_publishing_an_empty_ranking() -> None:
+    """An empty Ranking renders as a clean review, so a failed diff fetch must not produce one."""
+    from quantamind.rank.order import NothingToRank
+
+    with pytest.raises(NothingToRank):
+        rank({})

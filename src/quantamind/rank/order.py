@@ -81,6 +81,17 @@ def fires(scores: Mapping[str, int], threshold: float = DEFAULT_THRESHOLD) -> bo
     return max(scores.values(), default=0) > 0
 
 
+class NothingToRank(ValueError):
+    """`rank()` was called with no scores at all.
+
+    Raised rather than returning an empty `Ranking`, because an empty ranking is a PUBLISHED
+    artefact: it renders into a comment that says we looked and found nothing worth ordering. A
+    caller whose diff fetch returned nothing would produce exactly that comment, and the customer
+    could not tell the two apart. "This change touched no rankable files" is a decision the caller
+    must record deliberately, not a value it can fall into.
+    """
+
+
 def rank(
     scores: Mapping[str, int],
     *,
@@ -89,6 +100,11 @@ def rank(
     language: Language = Language.PYTHON,
 ) -> Ranking:
     """Every changed path, ordered and labelled. Cold units included by design."""
+    if not scores:
+        raise NothingToRank(
+            "rank() received no scores. If the change genuinely touched no rankable files, "
+            "record that deliberately; an empty ranking publishes as a clean review"
+        )
     if budget < 0:
         raise ValueError(f"budget cannot be negative, got {budget}")
     ordered = order(scores)

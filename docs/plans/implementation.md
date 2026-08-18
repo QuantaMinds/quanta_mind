@@ -39,7 +39,7 @@ three months stale.
 | layer | modules | files |
 |---|---|---|
 | `types/` | **7** | `change.py`, `commit.py`, `ranking.py`, `review.py`, `settings.py`, `touch.py`, `verdict.py` |
-| `store/` | **2** | `schema.py`, `touches.py` |
+| `store/` | **3** | `drift.py`, `schema.py`, `touches.py` |
 | `ingest/` | **2** | `commits.py`, `history.py` |
 | `parse/` | **0** | — |
 | `rank/` | **2** | `order.py`, `score.py` |

@@ -105,3 +105,28 @@ def test_reopening_an_applied_store_is_not_an_error(tmp_path: Path) -> None:
     schema.open_store(path).close()
     conn = schema.open_store(path)
     assert schema.version(conn) == schema.SCHEMA_VERSION, "reopening must be idempotent"
+
+
+def test_a_store_whose_tables_drifted_is_refused_even_when_the_version_matches(
+    tmp_path: Path,
+) -> None:
+    """IF NOT EXISTS is silent about a wrong table, and the version is bumped by hand."""
+    from quantamind.store import drift
+
+    path = tmp_path / "drifted.db"
+    stale = sqlite3.connect(path)
+    stale.execute("CREATE TABLE touch (repo_id INTEGER, path TEXT)")  # committed_at missing
+    stale.execute(f"PRAGMA user_version = {schema.SCHEMA_VERSION}")
+    stale.commit()
+    stale.close()
+    with pytest.raises(drift.SchemaDrift) as caught:
+        schema.open_store(path)
+    assert "touch differs" in str(caught.value) or "missing" in str(caught.value)
+
+
+def test_a_healthy_store_reports_no_drift(tmp_path: Path) -> None:
+    from quantamind.store import drift
+
+    conn = schema.open_store(tmp_path / "s.db")
+    assert drift.differences(conn) == [], "a store this build just created cannot have drifted"
+    assert len(drift.fingerprint()) == 16

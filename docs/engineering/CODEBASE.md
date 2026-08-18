@@ -454,6 +454,20 @@ defect: `httpx` events touch 5.3 files on average against `pip-tools`' 3.4, and 
 57% of the first against 88% of the second. **80% of httpx's misses are files that had prior
 history and lost anyway**, so it is the budget meeting larger changes, not the no-history class.
 
+#### `store/drift.py` — because the version number cannot detect drift
+
+`CREATE TABLE IF NOT EXISTS` is silent about a table that already exists with the **wrong shape**,
+and `SCHEMA_VERSION` is bumped by hand. Together they let a store open cleanly while missing a
+column: `version()` reports a match, `create()` changes nothing, and the first wrong answer arrives
+later as data.
+
+Demonstrated before the fix: a database whose `touch` table lacked `committed_at`, stamped
+`user_version = 1`, opened without complaint. It now raises `SchemaDrift` naming what differs.
+
+**The expected shape is derived, not written down** — this build's DDL is applied to a throwaway
+in-memory database and `sqlite_master` read back, because a second hand-maintained copy of the
+schema is a second thing to forget to update, which is the failure being caught.
+
 #### `store/touches.py` — the index, and the half-open window that is the whole product
 
 `index()` writes `Touch` values, `counts()` returns prior-touch counts per path over

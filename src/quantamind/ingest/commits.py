@@ -96,7 +96,17 @@ def assert_readable(repo_dir: Path) -> None:
     filtered = _git(
         repo_dir, ["config", "--get", "remote.origin.partialclonefilter"], PROBE_TIMEOUT_S
     )
-    # exit 1 with no output is git's "key not set", which is the healthy case.
+    # git config exits 0 when the key is set, 1 when it is absent, and 2 or more on a real error
+    # -- an unreadable or malformed config file. Treating every non-zero exit as "absent" would
+    # read a broken clone as a healthy one, which is the failure this whole function exists to
+    # prevent, so only exit 1 is the quiet case.
+    if filtered.returncode not in (0, 1):
+        raise HistoryReadFailed(
+            repo_dir,
+            ["config", "--get", "remote.origin.partialclonefilter"],
+            f"exit {filtered.returncode} reading git config, so whether this is a partial clone "
+            f"is UNKNOWN: {filtered.stderr.decode('utf-8', 'replace').strip()[:160]}",
+        )
     if filtered.returncode == 0 and filtered.stdout.strip():
         raise HistoryReadFailed(
             repo_dir,
