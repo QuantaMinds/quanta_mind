@@ -37,6 +37,22 @@ def squash(s: str) -> str:
     return re.sub(r"[^A-Za-z0-9_]", "", s).lower()
 
 
+def ellipsis_match(ev: str, added: list) -> bool:
+    """Would this match if `...` were allowed, as Qodo's own instruction permits?
+
+    Their `existing_code` field says "Include only complete code lines. Use ellipsis (...) for
+    brevity if needed", so their anchor is NOT a strict verbatim match and ours is. A field that
+    would match under their rule and fails under ours is neither absent evidence nor a matching
+    bug -- it is our gate being stricter than the design it was copied from.
+    """
+    if "..." not in ev and "\u2026" not in ev:
+        return False
+    parts = [squash(x) for x in re.split(r"\.\.\.|\u2026", ev) if squash(x)]
+    if not parts:
+        return False
+    return any(all(pt in squash(t) for pt in parts) for _p, _l, t, _h in added)
+
+
 def classify(ev: str, diff: str, added: list) -> str:
     if not ev.strip():
         return "empty"
@@ -44,6 +60,8 @@ def classify(ev: str, diff: str, added: list) -> str:
         return "SAME"
     if gate.locate(ev, added) is not None:
         return "matched (gate should not have fired)"
+    if ellipsis_match(ev, added):
+        return "would match if ELLIPSIS allowed (Qodo permits it, we do not)"
     sq = squash(ev)
     if len(sq) < 6:
         return "too short to match"

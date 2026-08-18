@@ -77,3 +77,84 @@ and the rater never sees an arm label.
 
 **Prediction 3 is the honest one: this design's gate is checkable for presence and not for
 relevance, and that gap is where I expect it to fail.**
+
+---
+
+## The reading for each near-miss bucket, fixed before the data lands
+
+**Four buckets, and they license different conclusions. Deciding after seeing which one dominates
+would be a post-hoc adjustment, so the readings are written here first.**
+
+| bucket | what it means | what it licenses |
+|---|---|---|
+| **absent from the diff entirely** | the model cited text that is nowhere | **the gate is working.** 62% is a fact about the model's grounding |
+| **near miss in an added line** | whitespace, paraphrase, a span across a hunk boundary | **the gate is too strict on matching.** 62% is a fact about `locate()`, and the fix is a looser match, not a different rule |
+| **present in the diff but NOT an added line** | **the model quoted CONTEXT — an unchanged line it can see** | **the RULE is wrong, not the model** |
+| SAME / empty | the claim rests on the quoted line, or the model declined | neither |
+
+### The third bucket is the one that changes the design, and the argument is a priori
+
+**`G-quote` requires an added line and that is correct** — a finding about code the pull request
+did not introduce is a finding about the existing codebase, which is not what a diff-scoped
+reviewer was asked for.
+
+**`G-evidence` requiring an added line does not follow from that.** A defect introduced by an added
+line is frequently only demonstrable against surrounding unchanged code. *"This new early return
+skips the ledger write below"* needs the write, and the write is context. **The evidence for a
+defect in new code is very often old code.**
+
+**So the loosening is licensed by the argument rather than by the number**, and it is stated now:
+**`G-evidence` should accept evidence from ANY line of the diff — added, removed or context —
+while `G-quote` continues to require an added line.** The measured bucket size tells us what the
+strict rule cost, not whether to change it.
+
+**The counterfactual is computable from the saved raw findings** — every rejection carries its
+cited text, and re-locating against all diff lines needs no model call and no re-run. **Its
+wrong-rate still needs adjudication**, because a looser gate publishes a superset of arm E and the
+extra findings have never been graded.
+
+**Design twelve is the loosened rule on a fresh corpus.** This run measures the strict one as
+built.
+
+---
+
+## The reading for each near-miss bucket, fixed before the data lands
+
+| bucket | means | licenses |
+|---|---|---|
+| **absent from the diff entirely** | the model cited text that is nowhere | **the gate is working.** The rejection rate is a fact about the model's grounding |
+| **near miss in an added line** | whitespace, a paraphrase, a span across a hunk boundary | **the matching is too strict.** The fix is a looser `locate()`, not a different rule |
+| **present in the diff but NOT an added line** | the model quoted CONTEXT — an unchanged line it can see | **see the calibrated threshold below** |
+| SAME / empty | the claim rests on the quoted line, or the model declined | neither |
+
+### The context bucket has a MEASURED threshold, not an argued one
+
+**I was going to license loosening `G-evidence` to accept context lines on the argument that a
+defect in new code is usually only demonstrable against surrounding old code. That argument is not
+supported by our own data.**
+
+Across designs nine and ten, 26 CORRECT findings; of the 17 that name any identifier:
+
+| | share |
+|---|---|
+| every named identifier is in an **added** line | **88%** |
+| some named identifier is found **only in context** | **12%** |
+
+**So genuinely correct findings almost never need context to establish themselves.** 12% is the
+rate to beat, not "very often".
+
+**The pre-registered reading:**
+
+- **context bucket at or below ~12%** — the model is reaching for context at the same rate correct
+  findings actually need it. **The rule is defensible; loosening buys little.**
+- **context bucket far above ~12%** — the model is citing context it does not need. **That is a
+  grounding failure, not a rule problem, and loosening would admit exactly the findings that reach
+  for support they cannot use.**
+
+**Either way the loosening is NOT pre-licensed.** If it is ever made, it is design twelve on a
+fresh corpus with the bar fixed again.
+
+**The proxy is weak and that is stated:** backticked identifiers cover only 17 of 26 correct
+findings, the other 9 naming nothing at all. **It measures where a claim's named symbols live, not
+where its evidence lives**, and a stronger test would need findings labelled by hand for what
+established them.

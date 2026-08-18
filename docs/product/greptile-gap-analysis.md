@@ -242,6 +242,31 @@ runs on fresh forks, so it cannot be helping them here** — their offline numbe
 findings from nits, and an LLM rating its own severity was near random. We measured the same two
 nulls — a rejection filter that moved nothing and a length gate at p = 0.281.
 
+### CORRECTION — SWR-Bench contradicts the general form of that claim
+
+**This document cites SWR-Bench as external corroboration, and SWR-Bench concludes the opposite of
+"prompt engineering failed."** It attributes PR-Review's leading position to *more sophisticated
+prompt engineering whose refinements significantly reduce false positives*, and states that
+**refined prompt engineering is currently the most effective strategy for improving automated code
+review**, while agent-based approaches need further research.
+
+**Both findings can stand, because they are different scopes:**
+
+| | scope | result |
+|---|---|---|
+| ours, Greptile's | ONE intervention, WITHIN one system, on separating nits from findings | null |
+| SWR-Bench | whole pipelines, ACROSS five published systems | prompt engineering is the strongest lever |
+
+**"Prompt engineering cannot separate nits from findings" is what we measured. "Prompt engineering
+does not improve code review" is what this document implied, and it is not supported.** The
+over-general form is withdrawn.
+
+**And it cuts against our own design ordering.** Design ten's arm C is an agent-style model gate and
+it beat the fitted regex; SWR-Bench reports agent approaches UNDERPERFORMING prompt-engineered
+single-turn ones across published systems. **Our result is one comparison at n = 14, theirs is five
+systems over 1,000 pull requests.** Ours does not overturn theirs, and design eleven — which is a
+prompt change — should be read in that light rather than as a long shot.
+
 ---
 
 ## The 43.6% here against 5.80% under our own adjudication
