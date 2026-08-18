@@ -105,3 +105,32 @@ def test_an_empty_diff_conserves_trivially_and_claims_nothing() -> None:
     parsed = units_in("")
     assert (parsed.hunks, parsed.units, parsed.unresolved) == (0, (), ())
     assert parsed.conserved()
+
+
+MIXED_DIFF = (
+    PY_DIFF
+    + """diff --git a/docs/intro.rst b/docs/intro.rst
+--- a/docs/intro.rst
++++ b/docs/intro.rst
+@@ -1,3 +1,4 @@ Installation
+ text
++more text
+"""
+)
+
+
+def test_out_of_scope_files_are_not_reported_as_parse_failures() -> None:
+    """Real output said "19 constructs could not be parsed", naming .rst and .toml files."""
+    everything = units_in(MIXED_DIFF)
+    assert everything.hunks == 3, "without a scope every hunk is parsed"
+    assert any(u.reason is Reason.LANGUAGE_UNSUPPORTED for u in everything.unresolved), (
+        "the .rst hunk is unsupported when it is in scope"
+    )
+
+    scoped = units_in(MIXED_DIFF, scope={"pkg/pay.py"})
+    assert scoped.hunks == 2, "the .rst hunk was never going to be read; it is not a hunk we saw"
+    assert scoped.unresolved == (), (
+        "a file we do not review is not a parse failure — 'we do not review this' and 'we tried "
+        f"and could not' are different facts: {scoped.unresolved}"
+    )
+    assert scoped.conserved()

@@ -127,7 +127,9 @@ def ranked_pulls(clones: dict[str, Path], skips: Skips) -> Iterator[Ranked]:
                 continue
             as_of = base.committed_at
             # PARSE: the hunks, so the coverage line can name what could not be read.
-            parsed = units_in(unified_diff(repo, number))
+            # SCOPE: the files we are going to rank. Without it the parser reports docs and
+            # config as failures we never had.
+            parsed = units_in(unified_diff(repo, number), scope=set(changed))
             scores = dict(touch_store.counts(conn, repo_id, changed, as_of=as_of))
             yield Ranked(
                 repo=repo,

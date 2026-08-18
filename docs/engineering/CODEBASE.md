@@ -681,8 +681,16 @@ change. So the resolution rate is asserted beside it. Sabotage proves the pair i
 the naming pass leaves conservation **passing** and resolution failing; dropping the unresolved
 records fails conservation. Neither test catches both.
 
+**`scope` is what the caller intends to review, and out-of-scope hunks are not parsed at all.**
+Without it a scrapy pull request told the customer *"19 constructs could not be parsed"*, naming
+`install.rst`, `commands.rst` and `pyproject.toml` — documentation and configuration we never
+intended to read, rendered as a parse FAILURE. It also depressed the resolution rate from 91% to
+52% by counting hunks that were never in scope. **"We do not review this" and "we tried and could
+not" are different facts**, and only the second belongs in the unresolved list. Found by running
+the pipeline over untouched repositories and reading the comment a maintainer would get.
+
 **The pass is git's funcname hunk header** — free, deterministic, already computed. It resolved
-**91% of 95 real hunks** across nine pull requests. A header carrying no identifier is
+**92% of 93 real hunks** across nine pull requests. A header carrying no identifier is
 `UNPARSEABLE_SYNTAX`; an unsupported language is `LANGUAGE_UNSUPPORTED` against the FILE rather
 than repeated per hunk. Nothing is guessed from surrounding lines.
 
@@ -721,6 +729,12 @@ convincing if the ranker had never run.
 **It names files, never only counts.** "1 file not read" is unfalsifiable; ``not read:
 `src/pay/ledger.py` `` can be checked against the diff by the person reading it. A test renders two
 fixtures with different unresolved sets and requires the lines to differ.
+
+**A single-file change is not described as a failed ranking.** Real output read *"All 1 file(s)
+have the same prior-fix history, so the ranking could not separate them and the order below is
+alphabetical"* — there is nothing to separate, and the sentence reads as a malfunction. It now says
+the file, its prior-fix count, and that there is nothing to rank; the comment drops the
+"equally worth reading" note too.
 
 **A no-history change says so in its first clause** and tells the reader to read the files
 themselves, because that slice misses most — 4.46% against 1.21%.

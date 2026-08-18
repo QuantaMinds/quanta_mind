@@ -16,9 +16,17 @@ WHY:  **Conservation is the contract: `len(units) + len(unresolved) == hunks`.**
       `pyproject.toml` does not depend on. Hunks the header cannot name are
       `Reason.UNPARSEABLE_SYNTAX`, not silently dropped and not guessed at from surrounding lines.
 
-      **An unsupported language is `Reason.LANGUAGE_UNSUPPORTED` on the FILE**, one record rather
-      than one per hunk: the fact is about the file, and repeating it per hunk would inflate the
-      unresolved count into something nobody reads.
+      **`scope` is what the caller intends to review, and hunks outside it are not parsed at all.**
+      Without it, a scrapy pull request reported *"19 constructs could not be parsed"* naming
+      `install.rst`, `commands.rst` and `pyproject.toml` — documentation and configuration we never
+      intended to read, rendered to the customer as a parse FAILURE. It also dropped the resolution
+      rate from 91% to 52% by counting hunks that were never in scope. **"We do not review this"
+      and "we tried and could not" are different facts**, and only the second belongs in the
+      unresolved list.
+
+      **An unsupported language inside scope is `Reason.LANGUAGE_UNSUPPORTED` on the FILE**, one
+      record per hunk because conservation demands every hunk be accounted for — the caller
+      deduplicates for display.
 IMPORTS: types (ChangedUnit, Language, Site, Unresolved), parse.languages. Nothing to its right.
 CONSUMED BY: render.coverage_line, which names what could not be read.
 """
@@ -26,6 +34,7 @@ CONSUMED BY: render.coverage_line, which names what could not be read.
 from __future__ import annotations
 
 import re
+from collections.abc import Collection
 from dataclasses import dataclass
 
 from quantamind.parse.languages import Depth, depth_of, language_of
@@ -58,8 +67,14 @@ def _declaration(header: str) -> str:
     return text if text and NAMED.search(text) else ""
 
 
-def units_in(diff: str) -> Parsed:
-    """Every hunk of `diff`, resolved to a unit or recorded as unresolved.
+def units_in(diff: str, scope: Collection[str] | None = None) -> Parsed:
+    """Every in-scope hunk of `diff`, resolved to a unit or recorded as unresolved.
+
+    `scope` is the set of paths the caller intends to review — normally what `ingest.diff`
+    returned. Hunks for other files are skipped entirely and do not count toward `hunks`: they
+    were never going to be read, and calling them unresolved reports a failure we did not have.
+    Passing `None` parses everything, which is the right default only when the caller has already
+    narrowed the diff.
 
     The unit's `site` carries the hunk's first added line, and its `qualified_name` is the
     declaration git named. Nothing here guesses: a header without an identifier is unresolved.
@@ -68,7 +83,6 @@ def units_in(diff: str) -> Parsed:
     unresolved: list[Unresolved] = []
     hunks = 0
     path = ""
-    unsupported_seen: set[str] = set()
 
     for line in diff.split("\n"):
         header = FILE_HEADER.match(line)
@@ -78,6 +92,8 @@ def units_in(diff: str) -> Parsed:
         match = HUNK.match(line)
         if not match or not path:
             continue
+        if scope is not None and path not in scope:
+            continue  # never in scope; not a parse failure
 
         hunks += 1
         start = int(match.group(1))
@@ -90,7 +106,6 @@ def units_in(diff: str) -> Parsed:
             unresolved.append(
                 Unresolved(site=site, reason=Reason.LANGUAGE_UNSUPPORTED, construct=Construct.FILE)
             )
-            unsupported_seen.add(path)
             continue
 
         declaration = _declaration(match.group(2))
