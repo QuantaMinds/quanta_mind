@@ -21,7 +21,7 @@ evidence and it is not the commercial plan. Those were moved out so this reads a
 |---|---|---|
 | **the skeleton** | **DONE** | ten layers importable; `types/` holds the value objects; `serve/cli.py` runs |
 | **the reader** | **STARTED** | `ingest/history.py` built (PR #46). `ingest/diff.py` and `parse/` not begun |
-| **the store and the ranker** | **STARTED** | `store/schema.py` built. `store/touches.py` and all of `rank/` still empty |
+| **the store and the ranker** | **STARTED** | `store/schema.py`, `store/touches.py` and `rank/score.py` built and live-verified against real repositories. `rank/order.py` and `rank/discriminate.py` still to come |
 | **render and the free tier** | not begun | — |
 | **the retrospective** | not begun | — |
 | **serve** | not begun | `serve/cli.py` exists; no webhook |
@@ -38,11 +38,11 @@ three months stale.
 
 | layer | modules | files |
 |---|---|---|
-| `types/` | **5** | `change.py`, `ranking.py`, `review.py`, `settings.py`, `verdict.py` |
-| `store/` | **1** | `schema.py` |
+| `types/` | **6** | `change.py`, `ranking.py`, `review.py`, `settings.py`, `touch.py`, `verdict.py` |
+| `store/` | **2** | `schema.py`, `touches.py` |
 | `ingest/` | **1** | `history.py` |
 | `parse/` | **0** | — |
-| `rank/` | **0** | — |
+| `rank/` | **1** | `score.py` |
 | `allocate/` | **0** | — |
 | `infer/` | **0** | — |
 | `verify/` | **0** | — |
@@ -53,9 +53,9 @@ three months stale.
 
 ### The exact next action
 
-**`store/touches.py`, then `rank/score.py`.** `store/schema.py` is built, and `ingest/history.py`
-already returns the `Touch` values `store/touches.py` indexes. `rank/score.py` is a pure function
-over that index — which is why `rank/` may never import `ingest/`.
+**`rank/order.py`, then `rank/discriminate.py`** — the budget, the `Allocation` labels and the
+percentile threshold. The counting half is done and live-verified: `store/touches.py` reproduces
+`defect_return.py`'s scores and orderings exactly on 900 real cases from three repositories.
 
 ---
 
@@ -198,10 +198,14 @@ be backfilled.
    `open_store()` refusing a database written by another version rather than migrating in place,
    and the three un-backfillable columns present from the first row: `shadow_pick`'s ranked list,
    `request.cache_read_tokens`, and `outcome.rule_version` with `fix_subject`.
-2. `store/touches.py` — the touch index: write and query by `(path, timestamp)`. Bounded strictly
-   by the parent commit — **no data from after the change may enter the ranking of that change.**
-3. `rank/score.py` — the 365-day prior-touch count. **One function, no I/O**, testable without a
-   repository.
+2. **DONE.** `store/touches.py` — the touch index. Bounded strictly by the parent commit; the
+   window is half-open, `[as_of - window, as_of)`, and `as_of` is required with no default because
+   a default would silently be the present. Re-indexing replaces rather than appends, since a
+   repository ingested twice would double every count evenly — an error that moves no ordering and
+   corrupts the percentile.
+3. **DONE.** `rank/score.py` — `order()`, `discriminate()`, `top()` and `rendered()`. Pure, no
+   I/O. `Touch` moved to `types/history.py` during this step: `store/` sits LEFT of `ingest/`, so a
+   value object shared by both belongs to the leftmost layer.
 4. `rank/order.py` — `(-score, path)`, the budget of three, and the `Allocation` labels. The
    percentile threshold lives here: absolute thresholds fired at 11% on one repository and 53% on
    another, while percentiles self-calibrate to 10–12% across an 80× velocity range.
