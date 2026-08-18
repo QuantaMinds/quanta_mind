@@ -424,6 +424,37 @@ labels arrive weeks after the review they belong to.
 **Must not:** ignore a subprocess exit code. That defect voided four measurements and
 reproduced once since.
 
+#### `ingest/history.py` — the first product module, and what it refuses
+
+`read_touches(repo_dir, pathspec)` returns one `Touch(path, committed_at)` per (file, commit) pair
+from `git log --no-merges --name-only`. It is the input the ranking is a count over, so a read that
+silently returns half the commits produces a confident ranking of the wrong files.
+
+**The exit code is checked before the output is parsed**, because a truncated stream parses
+perfectly. **A shallow or blob-filtered clone is refused up front rather than repaired** — against
+a promisor remote `--name-only` fetches trees lazily and the read is not deterministic until the
+object store is warm, and `git fetch --refetch` did not fix the one clone that failed this way.
+
+Three values that must never collapse into each other, and do not:
+- **`[]`** — the history is genuinely empty, including a repository with no commits at all, which
+  is detected structurally via `rev-parse --verify HEAD` rather than by matching git's wording.
+- **`HistoryReadFailed`** — the read did not complete. Carries the repository, the command and the
+  reason; never a bare message.
+- **a short list** — impossible by construction, which is the point of the module.
+
+Merge commits are excluded: a merge touches every file of both sides and would swamp the counts
+with changes nobody made.
+
+**Tested against real git repositories built per case** — normal, shallow clone, blob-filtered
+clone, no commits, merge history — not against mocked subprocess output. **The exit-code check has
+a known-answer test:** deleting the check whole turns `test_a_git_failure_mid_read_raises_instead_
+of_returning_a_short_list` red. Removing only the `raise` would sabotage the entry point, not the
+mechanism.
+
+**One defect the tests caught during the build:** the record separator was an actual NUL byte in
+the format string, which `execve` rejects — argv cannot contain one. It is now git's own `%x00`
+escape, a two-character sequence that git expands to NUL in its output.
+
 ### `parse/`
 **Owns:** changed units, signatures, references, and the language table.
 **Must not:** return nothing for something it failed to resolve. It emits `Unresolved`, which

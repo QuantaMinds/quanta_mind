@@ -6,9 +6,13 @@ only there, and state what we could not analyse.**
 A model-free pass ranks the changed functions and decides where inference goes. A parser checks
 the model's structural claims before publication. Every review ends with its coverage.
 
-**Status: no product code yet.** `src/quantamind/` holds the package root and nothing else. The
-evidence exists, the plan exists, the layers are empty. Start at
-`docs/plans/implementation.md`.
+**Status: the first product modules exist; most layers are still empty.** `types/` holds the value
+objects and `ingest/history.py` reads git history with its exit code asserted — the defect that
+voided four measurements. `store/`, `parse/`, `rank/`, `allocate/`, `render/` are empty.
+
+**Start at `docs/plans/implementation.md`, section "Where this is now".** It carries a
+machine-checked table of what is built, kept honest by `scripts/guard/check_plan_state.py`, and it
+names the exact next module.
 
 ---
 

@@ -9,7 +9,7 @@ WHY:  Top-1 says whether the spend is well aimed; only top-3 says whether alloca
       disagreements carry information.
 IMPORTS: stdlib (bisect, collections, json, os, subprocess, sys), symbol_history_read,
       gate3c_report.
-CONSUMED BY: docs/plans/implementation.md, gate 3c.
+CONSUMED BY: docs/findings/ALLOCATION_EVIDENCE_2026-08.md, gate 3c.
 
 Every rule here -- the discordance criterion, the matched-coverage budget, the hybrid's
 expansion -- was pre-specified in the plan before the run. Two assertions guard the read: the
