@@ -144,6 +144,32 @@ the same — WRONG −2, UNFALSIFIABLE +4, CORRECT +1. The decidability gate doe
 **Several mechanisms move findings toward "cannot be decided" rather than toward "correct."** That
 is honest output and worth having. It is not a reviewer.
 
+## The last untried mechanism, retired on this run's own data
+
+Multi-review aggregation — review each pull request several times, keep what recurs — was the one
+remaining technique with a published effect size. Design thirteen's three arms are a proxy for
+independent runs, matched on `(repo, pr, path, line)`.
+
+| aggregation rule | CORRECT kept | per PR |
+|---|---|---|
+| union of all three | 5 | 0.062 |
+| **single best arm** | **3** | **0.037** |
+| keep if in ≥2 of 3 | 1 | **0.013** |
+| unanimous only | 1 | 0.013 |
+
+**Four of the five correct findings came from exactly one arm.** Aggregation by recurrence lands
+*below* a single run, discarding four of five. And **wrong findings recur across arms at 37% while
+correct ones recur at 20%** — recurrence is anti-correlated with being right, so an aggregator
+keeping what repeats preferentially keeps the wrong findings.
+
+**It is a precision instrument against a recall problem.** The reviewer also runs at
+`temperature: 0.0`, so five runs of one configuration are five identical outputs — aggregation
+would require abandoning determinism, which is the one property this project is least willing to
+trade. Retired.
+
+*Caveat: three configurations are not three samples of one, so the true effect is milder than this
+table. Not milder enough to change the conclusion.*
+
 ## What this does not license
 
 - **The rater designed the experiment.** Arm labels were blind and all ten planted controls were

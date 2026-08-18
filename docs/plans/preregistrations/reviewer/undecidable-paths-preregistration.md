@@ -150,17 +150,44 @@ corpus is a scarce resource — **38 repositories are spent.** Running an exclus
 confirm arithmetic we can already do is a poor use of one.
 
 **So design 14 should not run as an exclusion-only test.** It runs only paired with a mechanism
-that could raise H0, and the one remaining candidate with a published effect size is **multi-review
-aggregation** — reviewing each pull request several times independently and keeping only findings
-that recur. It is orthogonal to gating and to context, and it targets the correct-rate rather than
-the wrong-rate.
+that could raise H0 — and the last remaining candidate has now been measured on design thirteen's
+own data and does not.
 
-**And it has a testable tension with our own result, which is pre-registered here as the thing that
-would kill it.** Design thirteen's dominant failure was TRACE — the model failing to follow code it
-had already been shown. **Independent runs may repeat the same trace error rather than disagreeing
-about it**, in which case aggregation reinforces the error instead of filtering it.
-**Prediction: TRACE-caused findings recur across independent runs at a HIGHER rate than EXTERNAL
-ones.** If they do, aggregation cannot fix the class that matters and this half is finished.
+### Multi-review aggregation, retired on measurement rather than argument
+
+**This document previously claimed aggregation "targets the correct-rate rather than the
+wrong-rate". That was wrong and is withdrawn.** Aggregation keeps findings that recur across
+independent runs. It is a filter: it can only remove. Against a correct-rate of 0.013–0.037 per
+pull request, the problem is not that correct findings are diluted by noise — it is that there are
+almost none to keep.
+
+Design thirteen's three arms are a **proxy for independent runs** — three configurations over the
+same 80 pull requests, matched on `(repo, pr, path, line)`.
+
+| aggregation rule | CORRECT kept | per PR |
+|---|---|---|
+| union of all three | 5 | 0.062 |
+| **single best arm** | **3** | **0.037** |
+| keep if in ≥ 2 of 3 | 1 | **0.013** |
+| keep only unanimous | 1 | 0.013 |
+
+**Four of the five correct findings were produced by exactly one arm.** Aggregation by recurrence
+does not cap the correct-rate at the single-run figure — **it lands below it**, discarding four of
+five. And recurrence points the wrong way: **wrong findings recur across arms at 37%, correct
+findings at 20%.** An aggregator keeping what repeats preferentially keeps the wrong ones.
+
+**The proxy's limit, stated:** these are three different configurations, not three samples of one.
+Different configurations should disagree more than identical ones, so the true effect is milder
+than this table. It is not milder enough to matter, and there is a harder blocker below.
+
+**And the reviewer runs at `temperature: 0.0`.** Five runs of one configuration are five identical
+outputs. Aggregation requires abandoning determinism first, in a project whose stated principle is
+that deterministic beats clever. **The technique is a precision instrument against a recall
+problem, it costs the one property we are not willing to trade, and it is retired.**
+
+The TRACE prediction that would have tested it is kept as a record of what was going to be asked:
+design thirteen's dominant failure was the model not following code it already had, and
+independent runs would likely repeat that error rather than disagree about it.
 
 ## The pattern these mechanisms keep showing
 

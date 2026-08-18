@@ -135,3 +135,31 @@ def run(check: Callable[..., None]) -> None:
         ci_c / all_c > ci_w / all_w,
         True,
     )
+
+    # --- aggregation: would keeping what recurs across runs help? ---
+    def _ident(k: dict) -> tuple:
+        return (k["repo"], k["pr"], k["path"], k["line"])
+
+    seen_by: dict[tuple, set] = collections.defaultdict(set)
+    verdicts: dict[tuple, set] = collections.defaultdict(set)
+    for i, k in key.items():
+        if k["kind"] == "real":
+            seen_by[_ident(k)].add(k["arm"])
+            verdicts[_ident(k)].add(_bucket(i))
+    corr = {t: a for t, a in seen_by.items() if "CORRECT" in verdicts[t]}
+    wrong = {t: a for t, a in seen_by.items() if "WRONG" in verdicts[t]}
+    check("distinct CORRECT findings across arms", len(corr), 5, 0)
+    check("CORRECT found by exactly one arm", sum(1 for a in corr.values() if len(a) == 1), 4, 0)
+    check(
+        "CORRECT kept by a >=2-of-3 aggregator", sum(1 for a in corr.values() if len(a) >= 2), 1, 0
+    )
+    check(
+        "aggregation keeps FEWER correct than the best single arm",
+        sum(1 for a in corr.values() if len(a) >= 2) < 3,
+        True,
+    )
+    rc = sum(1 for a in corr.values() if len(a) >= 2) / len(corr)
+    rw = sum(1 for a in wrong.values() if len(a) >= 2) / len(wrong)
+    check("CORRECT recurrence rate %", round(rc * 100, 0), 20, 1)
+    check("WRONG recurrence rate %", round(rw * 100, 0), 37, 1)
+    check("wrong findings recur MORE often than correct ones", rw > rc, True)
