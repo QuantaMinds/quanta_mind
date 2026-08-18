@@ -686,6 +686,21 @@ not a dependency** — `pyproject.toml` declares `dependencies = []`. `AGENTS.md
 The table is public and prints in the coverage line, because a silently skipped language is
 indistinguishable from one we read and found nothing in.
 
+#### Every failure path, and the two that return by design
+
+`tests/unit/test_failures_are_loud.py` triggers each layer's refusals and requires two things of
+every one: that it **raises rather than returning a plausible value**, and that the message names
+the call site or the reason. Seventeen paths were walked; fifteen raised.
+
+**Two return, and both are asserted to.** `render.comment` returns None below the threshold, because
+silence is a decision the caller records. `parse.units` returns zero hunks for an empty diff,
+because a change with nothing in it is a real answer.
+
+**The third was a genuine silent failure and is now loud.** A diff carrying hunk headers but no
+`+++ b/<path>` line returned zero hunks with conservation satisfied *vacuously* — a patch we could
+not parse read as a change containing nothing, and the coverage line was computed over an empty
+list. It raises `MalformedDiff` now.
+
 #### `parse/units.py` — conservation, and the thing conservation cannot see
 
 `units_in()` returns `(units, unresolved)` with the contract **`len(units) + len(unresolved) ==
