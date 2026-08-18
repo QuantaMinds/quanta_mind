@@ -202,9 +202,9 @@ A change is done when all seven are true. Not six.
 - **Deterministic beats clever.** If a parser can answer it, a model must not.
 - **The residual is the product.** What we cannot resolve is not our failure to hide; it
   is the thing the customer is paying us to find.
-- **We do not build a better bug-finder.** **Two corpora, four blind rater pools: 66.7%, 74.2%
-  and 82.1% of findings wrong, ZERO correct of 39 off-corpus.** Anchor repair, structured
-  context and a rejection filter each moved nothing. **Never quote rivals' 49–76% beside it** —
-  theirs is behavioural, ours is truth. → `docs/plans/preregistrations/reviewer/adjudication-preregistration.md`
+- **We do not build a better bug-finder.** **Four blind pools, two corpora: 66.7%, 74.2%, 82.1%
+  wrong, ZERO correct of 39 off-corpus.** Anchor repair, structured context, a rejection filter and
+  hunk expansion moved nothing; **CI-config findings are 66.7% wrong, 23 of 24 undecidable from a
+  diff.** **Never quote rivals' 49–76%** — theirs is behavioural, ours is truth. → `docs/plans/preregistrations/reviewer/adjudication-preregistration.md`
 - **Assume the next reader knows nothing.** Every file explains itself to someone who
   joined this morning.

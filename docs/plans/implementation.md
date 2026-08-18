@@ -26,6 +26,9 @@ is how a build order silently stops matching the document describing it.
 | Pass count | **one** at rank 1, three-request ceiling, specified in the build plan |
 | Ranking evidence | top-1 **86.2%**, top-3 **95.4%** vs an 89.4% null on ≥4-file changes, cold-miss **4.6%**, 7,493 events, 25 repositories |
 | Cost ceiling | **$0.140** per pull request, **$28** per repository per month at 200 pull requests |
+| Ranking, out-of-sample | top-three misses **1.21%** of changes a later fix returns to vs **3.12%** alphabetical — **six repositories the method never saw**, n = 2,400, McNemar **p < 1e-6**, 6 of 6 positive, **0.05 points** from the original eight |
+| Reviewer half | **CLOSED on evidence.** Two corpora, four blind rater pools: **66.7%, 74.2%, 82.1% wrong**, **zero correct of 39** off-corpus. Anchor repair, structured context, a rejection filter and enclosing-function expansion each moved the headline **nothing** |
+| Where the model IS allowed | the decidability label only. "Decidable from the diff" was **0/14 wrong** against **9/15** for "needs a deeper look", Fisher **p = 0.0007** |
 
 **Nothing under `src/quantamind/` exists except the package root.** Every stage below starts
 from an empty layer.
@@ -852,6 +855,23 @@ beyond it. Not a convention — a refusal.
 ---
 
 # Stage — Allocate, infer, verify
+
+> **THIS STAGE IS NOT SCHEDULED. It is written so that the conditions to open it are fixed in
+> advance rather than argued for later.** `infer/` and `verify/` are not built and not planned.
+> Opening them requires the published-findings bar — under 50% wrong on unique findings — to hold
+> **twice**, at least once with a rater who did not design the experiment. It has never held once.
+>
+> **What design thirteen changed is the roadmap, not the schedule.** Enclosing-function expansion
+> removed the failure class it targeted (wrong-because-it-did-not-follow-shown-code fell from
+> **73.3% to 18.8%** of wrong findings) and the headline did not move, because a second class
+> dominates: **findings about CI-config files are 66.7% wrong and 23 of 24 of those are
+> undecidable from a diff by construction.** Every such claim checked against GitHub was false.
+>
+> **So the next thing to test is not a better prompt.** It is a pre-registered path filter that
+> refuses file kinds whose defects a diff cannot settle. That follows from the decidability
+> principle this plan already holds, and it must be pre-registered and run on a fresh corpus —
+> the off-CI wrong-rates seen so far (52.2% → 38.5% → 28.6% across arms) are a **post-hoc
+> subgroup**, and a rule read off the data it is scored on has no error rate.
 
 **`verify` ships in the same change as `infer`, never after it.** A reviewer publishing
 unchecked model claims for even one release is the failure this product exists to prevent.

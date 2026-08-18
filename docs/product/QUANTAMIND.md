@@ -118,6 +118,7 @@ and a fifth that this document used to claim has been measured and withdrawn.** 
 | **Quiet** | Fires on 10–12% of changes, held steady across repositories differing 80× in velocity |
 | **Honest** | Reports its own blind spots — verified as unavailable to all seven competitors |
 | **Right about where to look** | **Replicated out-of-sample.** Ranking the changed files by prior touch count and reading the top three misses **1.21%** of the changes a later fix returns to, against **3.12%** for an alphabetical ordering — on **six repositories the method was never developed against**, n = 2,400, McNemar **p < 0.000001**, positive in **6 of 6**. The original eight gave **1.44% vs 3.31%**. The two lifts differ by **0.05 points** |
+| **Honest about what cannot be decided** | A claim needing a fact outside the diff is labelled, not published. The label separates at Fisher **p = 0.0007** — and it is why **`infer/` ships nothing**: two corpora and four blind rater pools put our own findings **66.7–82.1% wrong** |
 | **Cheaper** — *billed, not estimated* | **$0.119 per pull request** on real diffs through Vertex, against a $0.140 derived estimate — but the estimate was right by luck: input is 5.2% of the bill and **thinking is 91.3%** |
 
 ---
@@ -505,6 +506,7 @@ The underlying technique is old: mining version histories to guide software chan
 | Fires on | nearly every change | nearly every change | nearly every change | **10–12%** |
 | Marginal cost per pull request | tokens, scaling with lines read | tokens | tokens | **~$0 — a git read and a SQLite query** |
 | Priced | per seat | per seat | per seat | **per repository** |
+| Separates *undecidable* from *clean* | **no** | **no** | **no** | **yes — measured, `p = 0.0007`** |
 
 **Three rows in this table were wrong until the benchmark run and are corrected above.** Greptile
 was listed as not using history; its v3 agent calls git history as a tool. We were listed as
@@ -512,6 +514,19 @@ reading "the ranked function, deeply" and as publishing "parser-verified" claims
 `verify/` are not built and not planned**, so we read nothing with a model and publish no claims at
 all. A differentiation table that credits us with a capability we deleted is the drift this
 project's publishing rules exist to catch.
+
+**The last row is the newest axis, and it is the one the reviewer-half work bought.** A finding
+whose truth depends on a fact the diff cannot supply — whether a commit hash exists, whether a tag
+was released, what today's date is — is not a finding a diff-scoped reviewer can make. **We can
+label those; nobody else does.** The label separates: findings the model itself called "decidable
+from the diff" were **0 of 14 wrong**, against **9 of 15 wrong** for "needs a deeper look", Fisher
+**p = 0.0007**. And the same principle, applied to file kinds rather than single findings, is what
+explains the reviewer half's failure: **CI-config findings are 66.7% wrong and 23 of 24 of those
+are undecidable by construction.**
+
+**This is a differentiator precisely because it is not a better bug-finder.** Every rival ships the
+claim that their findings are right. Ours is that we can tell you which of ours cannot be checked —
+and that is the residual the customer is paying to see.
 
 **The cost-driver row is a claim about *structure*, not a measured saving, and it must not be
 read as one.** The arithmetic puts allocation at **1.25×** cheaper than uniform review at one
@@ -1366,6 +1381,68 @@ the plan, and the one that no further engineering resolves.
 
 ---
 
+## 6.9 The two mechanisms taken from Qodo, and what each one bought
+
+Qodo leads Martian's offline layer at **67.9% precision** across 49 tools and does two cheap things
+this project did not. Both were built, sabotage-tested, and run against **80 merged pull requests
+from six repositories verified unused**, three arms, blind adjudication, bars fixed in advance.
+
+**Expansion.** Git writes the enclosing declaration into every hunk header — `@@ -266,17 +269,12 @@
+def get_dumper(self, obj: Any, format: PyFormat) -> abc.Dumper:` — and we discarded it, so the model
+saw `+ if order.refunded:` with three lines of context and no idea what function it was in.
+`expand.py` walks back to that declaration. It fired on **50.8% of 453 real hunks** and **moved an
+added line zero times across 664 hunks** — the invariant that decides everything, because every
+anchor we publish is derived from where an added line sits.
+
+**The conventions file.** The repository's own `AGENTS.md` or `CLAUDE.md`, so a finding can cite the
+house rule it breaks instead of a generic notion of good code.
+
+| pre-registered bar | | result | |
+|---|---|---|---|
+| **H1** share of wrong findings caused by not following code that WAS shown | ≥ 15 point fall | 73.3% → **18.8%** | **PASS** |
+| **H2** wrong-rate with expansion | ≤ 30% | **59.3%** [40.7, 75.5] | **FAIL** |
+| **H3** conventions file makes convention-policing worse | ≤ +10 points | **−12.6 points** — it helped | **PASS** |
+| **H4** yield | ≥ 0.30 findings/PR | 0.41 / 0.40 / 0.46 | **PASS** |
+
+**10 of 10 sabotaged controls caught.** Arm labels were held in a key the rater never opened.
+
+**Expansion did exactly the one thing it was built for and the headline did not move.** Two claims
+of an infinite loop in falcon's URI decoder died because the `for pos in range(...)` header that
+refutes them sits ten lines above the hunk. But a second failure class had already taken over.
+
+### The finding that changes the roadmap: some files are undecidable from a diff
+
+Cross-tabulating the cause of each wrong finding against the kind of file it is about separates it
+completely.
+
+| file kind | n | wrong | rate | causes |
+|---|---|---|---|---|
+| **CI config** (`.github/`, `*.yml`) | 36 | 24 | **66.7%** [50.3, 79.8] | **EXTERNAL 23**, TRACE 1 |
+| tests | 20 | 10 | 50.0% | TRACE 8, EXTERNAL 2 |
+| source code | 29 | 11 | 37.9% | TRACE 8, EXTERNAL 3 |
+
+Every one of those EXTERNAL claims has the same shape: *this commit hash does not exist*, *this tag
+was never released*, *this date is in the future*. **Every single one checked against GitHub was
+false.** `actions/setup-python@5fda3b95` is tagged exactly `v7.0.0`; `actions/checkout` `v7.0.1`,
+`astral-sh/setup-uv` `v9.0.0`, `pre-commit/mirrors-mypy` `v2.3.0` and `PyCQA/isort` `9.0.0b2` all
+exist; `hynek/build-and-inspect-python-package` was never renamed; and the "future" dates read
+Aug 14–17 2026 against a run on Aug 18 2026.
+
+**A diff cannot settle any of them, and the reviewer is diff-scoped.** That is not a tuning problem.
+It is the decidability principle this project already holds, applied to a file kind the path filter
+still admits. Off CI config the wrong-rate falls monotonically across the arms — 52.2% → 38.5% →
+**28.6%** — but that is a **post-hoc subgroup and not a passed bar**, and it is recorded as the next
+pre-registration rather than a result.
+
+Selecting the conventions file needed one non-obvious fix. **Three of the first six repositories
+sampled ship a 62–98 character POINTER rather than rules** — pluggy's `AGENTS.md` is "See
+@CLAUDE.md", sanic's and trio's `CONTRIBUTING.md` are a bare URL. Accepting those would have made
+the arm a silent no-op on half the corpus while reporting that the rules had been sent.
+
+**None of this opens `infer/`.** The rater designed the run, so it does not count toward the
+replication standard, and the wrong-rate remains far above anything shippable.
+
+
 # Appendix — verification of every external claim
 
 **Every vendor figure carries the date it was read, and a re-check date.** This document now
@@ -1416,35 +1493,3 @@ a reader no way to calibrate the rest of it.
    need the omission.
 4. **"$10,000+ per engineer per year"** — rounded up. The underlying figure is ~$9,600 at a
    $150K salary. Corrected.
-
-## Two mechanisms taken from Qodo, and what each one actually bought
-
-Qodo leads Martian's offline layer at 67.9% precision and does two cheap things we did not.
-
-**Expansion.** Git writes the enclosing declaration into every hunk header — `@@ -266,17 +269,12 @@
-def get_dumper(self, obj: Any, format: PyFormat) -> abc.Dumper:` — and we threw it away, so the
-model saw `+ if order.refunded:` with three lines of context and no idea what function it was in.
-`research/phase0/quote/expand.py` walks back to that declaration. It fired on 50.8% of 453 real
-hunks, and **moved an added line zero times** across 664 hunks — the invariant that matters,
-because every anchor we publish is derived from where an added line sits.
-
-**It removed the failure class it was built for.** Wrong findings caused by not following code that
-was shown fell from **73.3% to 18.8%** of all wrong findings. Two claims of an infinite loop in
-falcon's URI decoder died because the `for pos in range(...)` header that refutes them sits ten
-lines above the hunk.
-
-**It did not lower the wrong-rate**, because a second class had already taken over: **CI-config
-findings are 66.7% wrong, and 23 of 24 of those are claims a diff cannot settle** — that a commit
-hash does not exist, that a tag was never released, that a date is in the future. Checked against
-GitHub, **every one was false.** `actions/setup-python@5fda3b95` is tagged exactly `v7.0.0`.
-
-**The conventions file.** The repository's own `AGENTS.md` or `CLAUDE.md`. The pre-registered fear
-was that a style document would buy convention-policing dressed as defect-finding. **It did not** —
-that arm came out 12.6 points better, not worse. Selecting the file needed one non-obvious fix:
-three of the first six repositories sampled ship a 62–98 character POINTER rather than rules, and
-accepting those would have made the arm a silent no-op on half the corpus while reporting success.
-
-**None of this opens `infer/`.** The rater designed the run, so it does not count toward the
-replication standard, and the wrong-rate is still far above anything shippable. What it changes is
-the roadmap: the next thing to test is not a better prompt, it is **not reviewing files whose
-defects are undecidable from a diff.** Full result in `docs/product/expansion-conventions-result.md`.
