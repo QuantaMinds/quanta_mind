@@ -89,11 +89,52 @@ prediction that follows from the code from one that reaches outside it.** That i
 | **D — added before any design-ten result was seen** | A minus any finding that predicts a test, build or CI failure. **Every pull request in the corpus is merged**, so such a claim is false by a fact we already hold |
 | **E — registered, not run here** | A minus any finding whose claim is settled by a REGISTRY LOOKUP: does this version exist on PyPI, is this commit hash in that repository |
 
-**Arm D rests on a fact, not on a fitted pattern — and that is what separates it from arm B.**
-The lexical marker was written by reading the fifteen findings it was scored against. **Arm D's
-rule is derived from a property of the corpus that was true before any finding existed:
-`corpus.pulls()` admits only merged pull requests, so a claim that one of their tests fails is
-false without needing to look at the test.** Same free cost, different epistemic standing.
+### CORRECTED BEFORE RUNNING — arm D's premise was checked and it is false
+
+**I wrote that "merged" entails "tests passed". It does not.** Six design-nine pull requests were
+queried against the GitHub check-runs API:
+
+| pull request | checks |
+|---|---|
+| bokeh#15342, #15346 | all success |
+| bokeh#15348 | success, 2 skipped |
+| **bokeh#15337** | **2 failures** |
+| **bokeh#15353** | **1 failure** |
+| **huggingface/datasets#8363** | **3 failures, 8 cancelled** |
+
+**Half the sample merged with failing checks.** Maintainers merge over flaky jobs, unrelated
+failures and admin overrides. **A rule resting on merge status alone is an approximation, not an
+entailment, and calling it entailed was wrong.**
+
+**The rule is therefore narrowed twice:**
+
+**One — it must read the actual check runs, not the merge flag**, and it must ask whether the
+failing job plausibly covers the file the finding is about. Of four flagged design-nine verdicts,
+three had failures in unrelated jobs (`Analyze (javascript)` on a Python test, `Test Log Schema` on
+a postgres action, a Python job against a TypeScript test) and **one — item 32 — had a Python
+unit-test job failing against a Python test file, which makes that verdict genuinely unsafe.**
+
+**Two — it blocks PREDICTIONS OF OUTCOME, never CRITICISMS OF QUALITY.** These are blocked:
+
+> *"this assertion will fail"* · *"will cause a syntax error when run"* · *"the mock is called
+> twice so this will fail"*
+
+**These are not, and must not be:**
+
+> *"this test passes but does not check what it claims"* · *"this assertion is too weak"* ·
+> *"this test does not cover the error path"*
+
+**Merge status and CI status say nothing about either of the second group.** A rule that blocks
+anything mentioning tests would kill real findings and would itself be fitted — to a different
+pattern than arm B, but fitted all the same.
+
+**What survives of D's advantage over B:** its rule is still derived from a property of the corpus
+rather than from reading the findings, but the property must now be *measured per pull request*
+rather than assumed. That is a lookup, which puts D in the same architectural family as arm E.
+
+**Effect on design nine's headline:** at most two of fifteen WRONG verdicts are unsafe, moving
+34.9% to 32.6% or 30.2%. **Both still clear the bar, so the result stands** — but the adjudication
+carried an assumption it should not have, and that is recorded rather than quietly corrected.
 
 **Arm E is the right architecture for the other half and is not implemented here.** "Does version
 1.45.34 exist on PyPI" is answerable by an HTTP GET and by nothing else — not by a prompt rule, not
@@ -108,6 +149,24 @@ still came in at 0–0 against Qodo; design eight's quote requirement was obeyed
 rather than by anchoring better; our rejection filter moved nothing at p = 0.53; and Greptile
 published the same null independently. **A prompt rule is the weakest instrument available and is
 predicted to underperform the free regex.**
+
+### On whether a hand-written marker can generalise at all
+
+**The objection is that thirty findings from six repositories cannot produce a filter that
+transfers, and that the mechanism should be dynamic rather than a fixed pattern.** That objection
+is already the experiment: **arm C is the dynamic version.** It asks the semantic question — can
+this claim be settled from the diff — instead of matching the phrasing that happened to express it.
+
+**So design ten is a direct test of the objection, not a bet against it:**
+
+- **B holds on fresh data** → the phrasing is a serviceable proxy for the semantics
+- **B fails and C holds** → the objection is correct and the filter must be dynamic
+- **both fail** → neither instrument reaches the failure mode
+
+**I no longer expect B to win.** The ordering below was written when I expected the cheap
+instrument to suffice; the argument that phrasing is model-specific and corpus-specific is a good
+one, and it moves my prior toward C. **The ordering stays because the test is worth running either
+way, but the expectation is recorded as changed.**
 
 **B before C on purpose.** A regex that catches 93% at a cost of 7% — *on the data that produced
 it* — must be tested on fresh data before paying for a model call that does the same job. This
