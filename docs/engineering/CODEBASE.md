@@ -415,6 +415,23 @@ runs here" stays falsifiable. → `docs/product/review-half-record.md`
 
 ### `store/`
 
+#### `ingest/github_comments.py` — one comment per head SHA, and the half that is untested
+
+**The key is the head SHA, not the pull request number.** A pull request lives for weeks and its
+head moves; keying on the number would comment once and go silent for every later push. The marker
+is an HTML comment — invisible in rendered markdown, and unambiguous to match on, where a
+human-readable footer would eventually be edited and the key would silently stop matching.
+
+**The decision is a pure function and the I/O is thin.** `already_posted()` takes the list GitHub
+returns and gives a bool, so the half that can double-post is tested exhaustively with no network
+and no stub — including a malformed comment, which must not be able to *suppress* a post.
+
+**`post()` has never posted.** Its argv shape is confirmed accepted by `gh` (it reaches the API and
+fails on the repository, not on a flag), and the read path is verified against real threads. But it
+writes into a repository under a real identity — `gh api user` here is a person, not a bot — and no
+test in this suite posts to a repository we do not own. **A green suite does not mean this module
+has ever written a comment**, and it needs one hand-run against a repository we own.
+
 #### `ingest/diff.py` — the changed paths, and the commit that bounds the window
 
 `changed_files()` returns the paths a pull request touches; `base_commit()` returns the commit it
