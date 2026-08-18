@@ -20,7 +20,7 @@ gate.**
 
 **The threshold was 50% wrong, committed before a single finding was read. Both readings clear it,
 and every disagreement between them made the result worse rather than better.** The reading is:
-stop building the review half in this configuration. `docs/plans/preregistrations/adjudication-preregistration.md`
+stop building the review half in this configuration. `docs/plans/preregistrations/reviewer/adjudication-preregistration.md`
 carries the protocol, the verdicts and the disagreements.
 
 ---
@@ -305,6 +305,31 @@ could ship tomorrow with a straight face, and each was killed here by a control 
 has no reason to run.
 
 ---
+
+## 2a. Expansion fixed the failure it targeted and did not move the headline
+
+Design thirteen, pre-registered in
+`docs/plans/preregistrations/reviewer/expansion-conventions-preregistration.md`, added the two
+mechanisms Qodo ships and this project discarded: expanding each hunk back to the function git
+already names in the hunk header, and feeding the repository's own rules file. Six unused
+repositories, 80 reviewable pull requests, three arms, blind adjudication, **10 of 10 sabotaged
+controls caught.**
+
+| claim | what was measured | verdict |
+|---|---|---|
+| Expansion removes the "did not follow shown code" failure | TRACE+ABSENT share of wrong findings, 73.3% → **18.8%** | **HOLDS** (H1, bar ≥15 points, got 54.6) |
+| Expansion lowers the wrong-rate | 51.7% → **59.3%** [40.7, 75.5], bar was ≤30% | **FAILS** (H2) |
+| A rules file makes convention-policing worse | arm C is **12.6 points better**, not worse | **THE HARM DID NOT APPEAR** (H3) |
+| Either mechanism starves the reviewer | yield 0.41 / 0.40 / 0.46 per pull request, bar ≥0.30 | **HOLDS** (H4) |
+
+**Why the headline did not move, mechanically.** Findings about CI-config files are **66.7% wrong
+[50.3, 79.8], and 23 of those 24 are EXTERNAL** — *this hash does not exist*, *this tag was never
+released*, *this date is in the future*. **Every one checked against GitHub was false**, and no
+diff can settle any of them. Off CI config the wrong-rate falls monotonically across the arms
+(52.2% → 38.5% → 28.6%), but that is a **post-hoc subgroup, not a passed bar.**
+
+**This does not count toward replication.** The rater designed the run. Arm labels were blind and
+every planted control was caught, but designer bias is unguarded.
 
 ## 3. What no measurement touches
 

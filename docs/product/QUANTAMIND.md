@@ -528,7 +528,7 @@ public leaderboard and wrong as a permanent position. Martian's benchmark also h
 layer**: 50 pull requests, five repositories, human-verified issue lists, an open judge and an
 open pipeline. Both kinds of reviewer can be scored on it, so we ran ours through.
 
-→ `docs/plans/preregistrations/martian-comparison-preregistration.md`, bars fixed before the run.
+→ `docs/plans/preregistrations/reviewer/martian-comparison-preregistration.md`, bars fixed before the run.
 
 | arm | precision | 95% CI | recall | F1 |
 |---|---|---|---|---|
@@ -1416,3 +1416,35 @@ a reader no way to calibrate the rest of it.
    need the omission.
 4. **"$10,000+ per engineer per year"** — rounded up. The underlying figure is ~$9,600 at a
    $150K salary. Corrected.
+
+## Two mechanisms taken from Qodo, and what each one actually bought
+
+Qodo leads Martian's offline layer at 67.9% precision and does two cheap things we did not.
+
+**Expansion.** Git writes the enclosing declaration into every hunk header — `@@ -266,17 +269,12 @@
+def get_dumper(self, obj: Any, format: PyFormat) -> abc.Dumper:` — and we threw it away, so the
+model saw `+ if order.refunded:` with three lines of context and no idea what function it was in.
+`research/phase0/quote/expand.py` walks back to that declaration. It fired on 50.8% of 453 real
+hunks, and **moved an added line zero times** across 664 hunks — the invariant that matters,
+because every anchor we publish is derived from where an added line sits.
+
+**It removed the failure class it was built for.** Wrong findings caused by not following code that
+was shown fell from **73.3% to 18.8%** of all wrong findings. Two claims of an infinite loop in
+falcon's URI decoder died because the `for pos in range(...)` header that refutes them sits ten
+lines above the hunk.
+
+**It did not lower the wrong-rate**, because a second class had already taken over: **CI-config
+findings are 66.7% wrong, and 23 of 24 of those are claims a diff cannot settle** — that a commit
+hash does not exist, that a tag was never released, that a date is in the future. Checked against
+GitHub, **every one was false.** `actions/setup-python@5fda3b95` is tagged exactly `v7.0.0`.
+
+**The conventions file.** The repository's own `AGENTS.md` or `CLAUDE.md`. The pre-registered fear
+was that a style document would buy convention-policing dressed as defect-finding. **It did not** —
+that arm came out 12.6 points better, not worse. Selecting the file needed one non-obvious fix:
+three of the first six repositories sampled ship a 62–98 character POINTER rather than rules, and
+accepting those would have made the arm a silent no-op on half the corpus while reporting success.
+
+**None of this opens `infer/`.** The rater designed the run, so it does not count toward the
+replication standard, and the wrong-rate is still far above anything shippable. What it changes is
+the roadmap: the next thing to test is not a better prompt, it is **not reviewing files whose
+defects are undecidable from a diff.** Full result in `docs/product/expansion-conventions-result.md`.

@@ -18,7 +18,7 @@ import pathlib
 import subprocess
 
 # Fixed in the quote-anchor pre-registration before any run. Never edited to fit a result.
-# → docs/plans/preregistrations/quote-anchor-preregistration.md
+# → docs/plans/preregistrations/reviewer/quote-anchor-preregistration.md
 REPOS = (
     "apache/superset",
     "ray-project/ray",
@@ -28,7 +28,7 @@ REPOS = (
     "PrefectHQ/prefect",
 )
 # Design nine. Six more repositories, none of the thirty-eight already burned. Fixed in
-# docs/plans/preregistrations/path-filter-preregistration.md before the run.
+# docs/plans/preregistrations/reviewer/path-filter-preregistration.md before the run.
 REPOS_D9 = (
     "dbt-labs/dbt-core",
     "streamlit/streamlit",
@@ -38,7 +38,7 @@ REPOS_D9 = (
     "bokeh/bokeh",
 )
 # Design ten. Six more, verified unused against the 48 burned. Fixed in
-# docs/plans/preregistrations/scoring-pass-preregistration.md before the run.
+# docs/plans/preregistrations/reviewer/scoring-pass-preregistration.md before the run.
 REPOS_D10 = (
     "pallets/quart",
     "aio-libs/aiohttp",
@@ -56,9 +56,21 @@ REPOS_D11 = (
     "agronholm/anyio",
     "marshmallow-code/marshmallow",
 )
+# Design thirteen. Six more, each verified absent from every file under research/ before selection,
+# each carrying a conventions file. Fixed in
+# docs/plans/preregistrations/reviewer/expansion-conventions-preregistration.md before the run.
+REPOS_D13 = (
+    "pyca/cryptography",
+    "falconry/falcon",
+    "pytest-dev/pluggy",
+    "jazzband/pip-tools",
+    "scikit-build/scikit-build-core",
+    "aws/aws-cli",
+)
 PER_REPO = 10
 PER_REPO_D9 = 15
 PER_REPO_D10 = 10
+PER_REPO_D13 = 15
 MAX_DIFF_CHARS = 120_000
 CACHE = pathlib.Path(
     "/private/tmp/claude-501/-Users-dhanu-Documents-SaaS-quanta-mind/"
@@ -124,3 +136,47 @@ def diff(repo: str, number: int) -> str:
         raise FetchFailed(f"{repo}#{number}: empty diff at exit 0")
     path.write_text(text)
     return text[:MAX_DIFF_CHARS]
+
+
+def base_sha(repo: str, number: int) -> str:
+    """The commit the pull request was diffed AGAINST.
+
+    `expand.py` walks the ORIGINAL file, so the base is the correct ref. Reading the head would
+    silently misalign every expansion by whatever the pull request itself changed.
+    """
+    obj = json.loads(_gh([f"repos/{repo}/pulls/{number}"]))
+    sha = str((obj.get("base") or {}).get("sha") or "")
+    if not sha:
+        raise FetchFailed(f"{repo}#{number}: no base sha at exit 0")
+    return sha
+
+
+def blob(repo: str, ref: str, path: str) -> list[str] | None:
+    """A file's lines at `ref`, or None when it is absent, binary or too large.
+
+    None is returned for a MISSING file and raised for a broken read, because "this pull request
+    adds the file" and "GitHub refused us" are different facts and must not share a value.
+    """
+    cmd = [
+        "gh",
+        "api",
+        f"repos/{repo}/contents/{path}?ref={ref}",
+        "-H",
+        "Accept: application/vnd.github.raw",
+    ]
+    p = subprocess.run(cmd, capture_output=True, timeout=120)
+    if p.returncode != 0:
+        err = p.stderr.decode("utf-8", "replace")
+        if "404" in err or "Not Found" in err:
+            return None
+        raise FetchFailed(f"contents {repo}:{path}@{ref[:8]} exited {p.returncode}: {err[:160]!r}")
+    try:
+        return p.stdout.decode("utf-8").split("\n")
+    except UnicodeDecodeError:
+        return None
+
+
+def root_names(repo: str, ref: str) -> list[str]:
+    """Filenames at the repository root at `ref`. Used to find the conventions file."""
+    raw = _gh([f"repos/{repo}/contents?ref={ref}"])
+    return [str(e.get("name") or "") for e in json.loads(raw) if e.get("type") == "file"]

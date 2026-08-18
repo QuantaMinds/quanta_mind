@@ -27,7 +27,7 @@ import pathlib
 import random
 import sys
 
-HERE = pathlib.Path(__file__).resolve().parent
+HERE = pathlib.Path(__file__).resolve().parent.parent
 # Which run to adjudicate. Design eight by default; pass "9" for the path-filtered run.
 WHICH = sys.argv[1] if len(sys.argv) > 1 else "8"
 RUN = HERE / {"10": "quote10_run.json", "9": "quote9_run.json"}.get(WHICH, "quote_run.json")

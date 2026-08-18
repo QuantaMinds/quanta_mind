@@ -11,7 +11,8 @@ WHY:  The prompt below is copied verbatim from their pipeline rather than paraph
       OUR JUDGE MODEL IS NOT THEIRS. They score with Claude and GPT-5.2; we hold Vertex
       credentials and neither of those. So the same Gemini judge is applied to every arm, ours
       included, and calibrated against their published numbers before anything is concluded --
-      see the P0 bar in `docs/plans/preregistrations/martian-comparison-preregistration.md`.
+      see the P0 bar in
+      `docs/plans/preregistrations/reviewer/martian-comparison-preregistration.md`.
 IMPORTS: stdlib only (concurrent.futures, json, re, time, urllib.error). Local: the
       Vertex `client`.
 CONSUMED BY: `run.py` in this package.
