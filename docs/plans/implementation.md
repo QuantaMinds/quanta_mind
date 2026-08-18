@@ -46,19 +46,20 @@ three months stale.
 | `allocate/` | **0** | — |
 | `infer/` | **0** | — |
 | `verify/` | **0** | — |
-| `render/` | **0** | — |
+| `render/` | **2** | `comment.py`, `coverage_line.py` |
 | `serve/` | **1** | `cli.py` |
 
 <!-- plan-state:end -->
 
 ### The exact next action
 
-**`render/coverage_line.py`, then `render/comment.py`** — the ranker stage's remaining gate is 2c,
-which needs a rendered line per case, and there is no `render/` layer yet. `rank/discriminate.py`
-was not needed as a separate module: the three-case split is `score.discriminate()`.
+**`ingest/diff.py`** — the pull request's changed paths. It is the last hand-fetched piece: the
+live tests currently get changed files from `gh` directly, so the product cannot yet rank a pull
+request end to end without help.
 
-The ranker itself is built and replay-verified: **gate 2a passes with zero ordering mismatches over
-853 admissible events**, and the ranker beats alphabetical **5.04% to 10.08%**.
+The ranker stage's gates now stand at **2a MET** (zero ordering mismatches over 853 admissible
+events), **2a′ MET** (5.04% against alphabetical's 10.08%), **2c MET**, and **2b UNMET** — it needs
+the research's own pinned repositories and must not be claimed on substitutes.
 
 ---
 
@@ -242,7 +243,7 @@ same events as `research/phase0/external/defect_return.py`.
 | **2a** | **ordering identity** | `rank/`'s ordering matches `defect_return.py`'s **exactly**. Not "similar" — the same list. A reimplementation that reorders anything has changed the policy, and the policy is what has the p-value |
 | **2b** | **miss rate in interval** — **NOT MET** | top-3 miss on **the research's own pinned repositories** falls inside **0.82–1.81%**. Those repositories are not wired up, and the interval must not be applied to substitutes: it describes sampling error on the corpus it was measured on. Replayed on four other repositories the miss ran **1.54% to 17.86%** per repository — real variation, not a defect, since gate 2a passes on the same events |
 | **2a′** | **beats the control** — **MET** | replayed over **853 admissible events** from four repositories, ranker miss **5.04%** against alphabetical **10.08%**. A gate the null also passes is measuring the corpus |
-| **2c** | **all three cases reachable** | a discriminating change, a flat-history change and a no-history change each appear in the golden file with a different rendered line. **A case that never appears in a fixture is a case nothing tests** |
+| **2c** | **all three cases reachable** — **MET** | all three render materially different lines against a reviewed golden file (`tests/unit/golden/coverage_lines.md`). Live, `ordered` and `no_history` both occur and their lines differ; **`flat_nonzero` did not occur in 40 pull requests across five repositories** and is covered by the fixture alone, which the live run prints rather than passing over |
 
 **2a does not wait on the others and it is the one that can end the project. It PASSES**: zero
 ordering mismatches over 853 replayed events, with the event definition — 2–12 files, a

@@ -639,6 +639,45 @@ on 1,000 pull requests, so this is an unsolved problem rather than a local defec
 → `docs/product/review-half-record.md`
 
 ### `render/`
+
+#### `render/coverage_line.py` — the residual, stated first
+
+`coverage_line()` says what was ranked, what was read, what was **not**, and why. It differs
+materially per case, and that is gate 2c: a line reading the same whatever happened would be equally
+convincing if the ranker had never run.
+
+**It names files, never only counts.** "1 file not read" is unfalsifiable; ``not read:
+`src/pay/ledger.py` `` can be checked against the diff by the person reading it. A test renders two
+fixtures with different unresolved sets and requires the lines to differ.
+
+**A no-history change says so in its first clause** and tells the reader to read the files
+themselves, because that slice misses most — 4.46% against 1.21%.
+
+**An empty ranking raises `NothingToReport`** rather than producing a bland sentence, which would
+be the false reassurance the line exists to prevent.
+
+#### `render/comment.py` — coverage above the table, and no claims
+
+The coverage line is **first**, and that is not style: a reader who sees the list before the
+coverage weighs it against nothing. A test asserts the ordering and a sabotage that moves the table
+above it turns red.
+
+**`fired=False` returns None, not a cheerful "nothing to report".** Silence is a decision the
+caller records; a reassuring sentence would be a claim we did not earn and would train readers to
+ignore the comments that matter.
+
+**The comment asserts nothing about correctness**, and a test greps the body for `bug`,
+`vulnerabilit`, `incorrect` and `you should fix` to keep it that way — `infer/` is closed on
+evidence and we publish no findings.
+
+#### Gate 2c — met, with one case the wild did not supply
+
+All three cases render differently against `tests/unit/golden/coverage_lines.md`. Live,
+**`ordered` and `no_history` both occur and their lines differ**; **`flat_nonzero` did not occur in
+40 pull requests across five repositories**, so it is covered by the fixture alone. The live run
+prints which cases it did not see rather than passing over them, because "we never saw it" and "it
+works" are different facts.
+
 **Owns:** the comment body, the coverage line, the digest, the report.
 **Must not:** state or imply that a piece of code is wrong. It reports where fix history
 concentrates and what was not read. Every line it prints is derived from git or from a counter.
