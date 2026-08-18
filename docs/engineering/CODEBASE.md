@@ -654,6 +654,38 @@ the format string, which `execve` rejects — argv cannot contain one. It is now
 escape, a two-character sequence that git expands to NUL in its output.
 
 ### `parse/`
+
+#### `parse/languages.py` — what we read, and how far, as two separate facts
+
+`language_of()` maps a path to a `Language`; `depth_of()` says how far we can actually read it.
+**They are separate because they diverge**: we recognise a `.go` file and cannot read a function in
+it beyond the header git names. Claiming Go support because the enum has a member would be exactly
+the drift the publishing rules exist to catch.
+
+**No language reaches `EXACT`.** That is what a tree-sitter pass would buy, and **tree-sitter is
+not a dependency** — `pyproject.toml` declares `dependencies = []`. `AGENTS.md` asserted it was
+"PINNED IN `pyproject.toml`"; it never was, and that line is now corrected.
+
+The table is public and prints in the coverage line, because a silently skipped language is
+indistinguishable from one we read and found nothing in.
+
+#### `parse/units.py` — conservation, and the thing conservation cannot see
+
+`units_in()` returns `(units, unresolved)` with the contract **`len(units) + len(unresolved) ==
+hunks`**. A hunk in neither list has vanished, and a coverage line computed over a list something
+fell out of is a specific, checkable, false claim about what we read.
+
+**Conservation is necessary and not sufficient.** A parser resolving *nothing* satisfies it
+perfectly — every hunk unresolved, nothing lost, and a coverage line reporting we read none of the
+change. So the resolution rate is asserted beside it. Sabotage proves the pair is needed: breaking
+the naming pass leaves conservation **passing** and resolution failing; dropping the unresolved
+records fails conservation. Neither test catches both.
+
+**The pass is git's funcname hunk header** — free, deterministic, already computed. It resolved
+**91% of 95 real hunks** across nine pull requests. A header carrying no identifier is
+`UNPARSEABLE_SYNTAX`; an unsupported language is `LANGUAGE_UNSUPPORTED` against the FILE rather
+than repeated per hunk. Nothing is guessed from surrounding lines.
+
 **Owns:** changed units, signatures, references, and the language table.
 **Must not:** return nothing for something it failed to resolve. It emits `Unresolved`, which
 is what gives the coverage line its content.

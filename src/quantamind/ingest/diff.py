@@ -108,6 +108,39 @@ def changed_files(repo: str, number: int, suffix: str = ".py") -> list[str]:
     return sorted(set(out))
 
 
+def unified_diff(repo: str, number: int) -> str:
+    """The pull request's patch, for `parse/` to read hunk headers out of.
+
+    Raises rather than returning an empty string: `git log -p` on a blob-filtered clone exits
+    non-zero AND emits a truncated patch, and the same shape of failure through the API would
+    otherwise read as a change that touched nothing.
+    """
+    done = subprocess.run(
+        [
+            "gh",
+            "api",
+            f"repos/{repo}/pulls/{number}",
+            "-H",
+            "Accept: application/vnd.github.v3.diff",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=API_TIMEOUT_S,
+    )
+    if done.returncode != 0:
+        raise DiffReadFailed(
+            repo, number, f"patch read exited {done.returncode}: {done.stderr.strip()[:160]}"
+        )
+    if not done.stdout.strip():
+        raise DiffReadFailed(
+            repo,
+            number,
+            "the patch was empty at exit 0, which a real change "
+            "never is — treat this as a failed read, not a no-op",
+        )
+    return done.stdout
+
+
 def base_commit(repo: str, number: int, clone: Path) -> Base:
     """The commit the pull request was opened against, resolved in `clone`.
 

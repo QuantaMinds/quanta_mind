@@ -170,10 +170,10 @@ you remember to obey — the machine will stop you either way.
 
 ## Operational notes
 
-- `tests/live/fixtures/repos/` contains pinned git submodules. They are large. `just check`
-  skips them; `just verify` needs them. Run `just fixtures` once after cloning.
-- tree-sitter is PINNED IN `pyproject.toml`, not vendored — there is no `vendor/`. The pin
-  is what matters: a grammar change silently alters parse trees.
+- `just verify` clones a real repository into `.verify-clone` itself; it needs no submodules and
+  no setup. It runs today — it was gated on the dead correlation test until this was written.
+- **tree-sitter is NOT a dependency.** `pyproject.toml` declares `dependencies = []`. This line
+  claimed it was pinned there; it never was. `parse/` reads git's funcname header and nothing else.
 - The SQLite schema is versioned. Changing `store/schema.py` requires a migration and a bump
   to `SCHEMA_VERSION`. There is no "just delete it and re-index" fallback in prod.
 - **`git log -p` exits non-zero on a blob-filtered clone** and emits a truncated patch stream.

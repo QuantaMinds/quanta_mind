@@ -25,8 +25,9 @@ from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from quantamind.ingest.diff import DiffReadFailed, base_commit, changed_files
+from quantamind.ingest.diff import DiffReadFailed, base_commit, changed_files, unified_diff
 from quantamind.ingest.history import read_touches
+from quantamind.parse.units import Parsed, units_in
 from quantamind.rank.order import rank
 from quantamind.store import schema
 from quantamind.store import touches as touch_store
@@ -52,6 +53,7 @@ class Ranked:
     conn: sqlite3.Connection
     repo_id: int
     touches: list[Touch]
+    parsed: Parsed
 
 
 @dataclass
@@ -124,6 +126,8 @@ def ranked_pulls(clones: dict[str, Path], skips: Skips) -> Iterator[Ranked]:
                 skips.record(f"{repo}: base commit not in clone")
                 continue
             as_of = base.committed_at
+            # PARSE: the hunks, so the coverage line can name what could not be read.
+            parsed = units_in(unified_diff(repo, number))
             scores = dict(touch_store.counts(conn, repo_id, changed, as_of=as_of))
             yield Ranked(
                 repo=repo,
@@ -135,5 +139,6 @@ def ranked_pulls(clones: dict[str, Path], skips: Skips) -> Iterator[Ranked]:
                 conn=conn,
                 repo_id=repo_id,
                 touches=touches,
+                parsed=parsed,
             )
         # The connection is deliberately left open: the caller may rebuild indexes from it.

@@ -79,3 +79,43 @@ def test_the_coverage_line_is_computed_from_each_change_and_differs_by_case(
         f"the two cases that dominate real repositories did not both occur: {dict(seen)} — the "
         "corpus has stopped exercising the pipeline"
     )
+
+
+def test_parsing_conserves_every_hunk_and_reaches_the_coverage_line(
+    clones: dict[str, Path],
+) -> None:
+    """Conservation on real diffs, plus the resolution rate conservation alone cannot see."""
+    skips = Skips()
+    checked = hunks = units = unresolved = 0
+
+    for case in ranked_pulls(clones, skips):
+        where = f"{case.repo}#{case.number}"
+        assert case.parsed.conserved(), (
+            f"{where}: {case.parsed.hunks} hunks produced {len(case.parsed.units)} units and "
+            f"{len(case.parsed.unresolved)} unresolved — a hunk vanished, so the coverage line "
+            "would be computed over a list something fell out of"
+        )
+        checked += 1
+        hunks += case.parsed.hunks
+        units += len(case.parsed.units)
+        unresolved += len(case.parsed.unresolved)
+
+        # The unresolved records must reach what the customer reads.
+        if case.parsed.unresolved:
+            line = coverage_line(case.ranking, case.parsed.unresolved)
+            assert "could not be parsed" in line, (
+                f"{where}: {len(case.parsed.unresolved)} unresolved records never reached the "
+                f"coverage line. line={line!r}"
+            )
+
+    print(
+        f"\n  parsed {hunks} hunks across {checked} pull requests: "
+        f"{units} resolved, {unresolved} unresolved ({units / max(hunks, 1):.0%} resolved)"
+    )
+    assert checked >= 8, f"only {checked} pull requests parsed"
+    assert hunks > 0, "no hunks were parsed at all; the patch read is returning nothing"
+    # A parser that resolved nothing would conserve perfectly and report that we read none of it.
+    assert units > 0, (
+        f"{hunks} hunks and not one resolved to a declaration — conservation holds and the parser "
+        "is doing nothing, which is the failure conservation alone cannot see"
+    )
