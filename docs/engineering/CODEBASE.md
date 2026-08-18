@@ -426,11 +426,18 @@ human-readable footer would eventually be edited and the key would silently stop
 returns and gives a bool, so the half that can double-post is tested exhaustively with no network
 and no stub — including a malformed comment, which must not be able to *suppress* a post.
 
-**`post()` has never posted.** Its argv shape is confirmed accepted by `gh` (it reaches the API and
-fails on the repository, not on a flag), and the read path is verified against real threads. But it
-writes into a repository under a real identity — `gh api user` here is a person, not a bot — and no
-test in this suite posts to a repository we do not own. **A green suite does not mean this module
-has ever written a comment**, and it needs one hand-run against a repository we own.
+**`post()` has now posted, once, by hand.** Against a merged pull request on our own private
+repository, with the comments deleted afterwards:
+
+| call | returned | effect |
+|---|---|---|
+| `post(head=A)` | `True` | comment created |
+| `post(head=A)` again | `False` | nothing created — idempotent on the same head |
+| `post(head=B)` | `True` | comment created — the head moved, so we speak again |
+
+Two comments existed, both markers matched, and the marker rendered invisibly on GitHub. **No test
+in this suite posts**, because it writes under a real identity — `gh api user` here is a person,
+not a bot — so this row is the evidence, not a green suite.
 
 #### `ingest/diff.py` — the changed paths, and the commit that bounds the window
 

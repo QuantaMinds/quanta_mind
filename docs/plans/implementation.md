@@ -56,10 +56,9 @@ three months stale.
 **`serve/webhook_github.py`** — the reader stage is otherwise complete. Every layer from git to a
 rendered comment now exists; nothing yet listens for a pull request.
 
-**One gap to close first: `post()` has never posted.** Its argv shape is confirmed to be accepted
-by `gh`, and the idempotency decision is exhaustively tested, but no comment has ever been written
-by this code. That needs one hand-run against a repository we own before `serve/` can be trusted to
-call it.
+**The posting gap is closed.** `post()` has written a real comment, refused a duplicate on the same
+head, and posted again when the head moved — by hand, against our own repository, comments deleted
+afterwards. `serve/` can call it.
 
 The pipeline now runs end to end through product code alone: `ingest/diff.py` supplies the changed
 paths and the bounding commit, so the live tests no longer hand-fetch anything.
@@ -149,12 +148,13 @@ test asserting the guard finds a non-zero number of files.
    from the clone is refused, not guessed — a ranking against the wrong instant looks identical to
    a correct one. Hunks and line ranges are not built; nothing needs them until `parse/`.
 3. `ingest/github_pulls.py` — pull request metadata. **Timeout 30s, declared.**
-4. **DONE, read path verified live; write path NOT.** `ingest/github_comments.py` — one comment
+4. **DONE, both paths verified.** `ingest/github_comments.py` — one comment
    per head SHA. The key is the head SHA rather than the pull request number: a pull request lives
    for weeks and its head moves, so keying on the number would comment once and go silent for every
    later push. **The decision is a pure function** so the half that can double-post is the half
-   tested exhaustively. `post()` writes into a repository under a real identity and **no test in
-   this suite calls it against a repository we do not own** — see the gap below.
+   tested exhaustively. `post()` writes under a real identity so **no test calls it**; it was
+   exercised by hand against our own repository — True, then False on the same head, then True on a
+   new head — and the comments deleted.
 5. `parse/languages.py` — which languages we parse and to what depth. **Public, and printed in the
    coverage line.**
 6. `parse/units.py` — map hunks to the functions they touch. Two passes: git's funcname diff

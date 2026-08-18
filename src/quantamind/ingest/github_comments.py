@@ -14,10 +14,15 @@ WHY:  **A reviewer that comments twice on the same commit is a reviewer people m
       returns a bool, so idempotency is tested against real payload shapes with no network and no
       stub. Everything that could double-post lives in the part that can be tested exhaustively.
 
-      **`post()` writes into someone else's repository under a real identity.** It refuses rather
-      than duplicating, it never edits a comment it did not write, and nothing in this project's
-      test suite calls it against a repository we do not own — the write path is exercised by hand,
-      and that is stated in `docs/engineering/CODEBASE.md` rather than implied to be covered.
+      **`post()` writes into someone else's repository under a real identity**, so nothing in this
+      project's test suite calls it against a repository we do not own.
+
+      **The write path HAS been exercised**, by hand, against a merged pull request on our own
+      private repository, and the comments were deleted afterwards. Three calls: a first post
+      returned True and created the comment; a second with the same head SHA returned False and
+      created nothing; a third with a different SHA returned True, because the head had moved. Two
+      comments existed, both markers matched, and the marker rendered invisibly. Recorded here
+      because a test suite that never posts cannot say any of that.
 IMPORTS: nothing from this project. Shells out to `gh`, like every other read in this layer.
 CONSUMED BY: serve, once a webhook exists.
 """
