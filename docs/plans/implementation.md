@@ -38,9 +38,9 @@ three months stale.
 
 | layer | modules | files |
 |---|---|---|
-| `types/` | **6** | `change.py`, `ranking.py`, `review.py`, `settings.py`, `touch.py`, `verdict.py` |
+| `types/` | **7** | `change.py`, `commit.py`, `ranking.py`, `review.py`, `settings.py`, `touch.py`, `verdict.py` |
 | `store/` | **2** | `schema.py`, `touches.py` |
-| `ingest/` | **1** | `history.py` |
+| `ingest/` | **2** | `commits.py`, `history.py` |
 | `parse/` | **0** | — |
 | `rank/` | **1** | `score.py` |
 | `allocate/` | **0** | — |
@@ -236,10 +236,20 @@ same events as `research/phase0/external/defect_return.py`.
 | | gate | passes when |
 |---|---|---|
 | **2a** | **ordering identity** | `rank/`'s ordering matches `defect_return.py`'s **exactly**. Not "similar" — the same list. A reimplementation that reorders anything has changed the policy, and the policy is what has the p-value |
-| **2b** | **miss rate in interval** | top-3 miss on the pinned repositories falls inside **0.82–1.81%**, the file-level 95% Wilson interval. Outside it in *either* direction, the reimplementation differs from what was measured |
+| **2b** | **miss rate in interval** — **NOT MET** | top-3 miss on **the research's own pinned repositories** falls inside **0.82–1.81%**. Those repositories are not wired up, and the interval must not be applied to substitutes: it describes sampling error on the corpus it was measured on. Replayed on four other repositories the miss ran **1.54% to 17.86%** per repository — real variation, not a defect, since gate 2a passes on the same events |
+| **2a′** | **beats the control** — **MET** | replayed over **853 admissible events** from four repositories, ranker miss **5.04%** against alphabetical **10.08%**. A gate the null also passes is measuring the corpus |
 | **2c** | **all three cases reachable** | a discriminating change, a flat-history change and a no-history change each appear in the golden file with a different rendered line. **A case that never appears in a fixture is a case nothing tests** |
 
-**2a does not wait on the others and it is the one that can end the project.**
+**2a does not wait on the others and it is the one that can end the project. It PASSES**: zero
+ordering mismatches over 853 replayed events, with the event definition — 2–12 files, a
+case-sensitive fix-subject within ninety days, the flat-score skip, the 400-event cap — copied from
+`defect_return.py` rather than chosen.
+
+**Why the miss rate varies so much between repositories, mechanically.** `httpx` events touch 5.3
+files on average against `pip-tools`' 3.4, and top three covers 57% of a 5.3-file change against
+88% of a 3.4-file one. **80% of httpx's misses are files that HAD prior history and lost anyway**,
+so this is not the no-history class — it is the budget meeting larger changes. It is the large-PR
+triage result arriving from a third direction.
 
 **Known-answer test:** break `rank/score.py` to return a constant. Gates 2a and 2b must both fail.
 Breaking only `rank/order.py`'s tie-break would sabotage the entry point — the mechanism is the

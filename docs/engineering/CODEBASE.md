@@ -415,6 +415,45 @@ runs here" stays falsifiable. → `docs/product/review-half-record.md`
 
 ### `store/`
 
+#### `ingest/commits.py` — the only place the product runs `git log`
+
+`read_commits()` returns one `Commit(committed_at, subject, paths)` per non-merge commit, **oldest
+first**, and `assert_readable()` refuses a shallow or blob-filtered clone. Three defences live here
+because all three failures have happened before:
+
+- **The exit code is checked before the output is parsed.** A damaged clone emits a plausible,
+  truncated stream *and* exits non-zero; ignoring the code voided four measurements.
+- **Bytes are decoded with `errors="replace"`, never `text=True`.** Real subjects and filenames
+  carry non-UTF-8 bytes, and `text=True` raises `UnicodeDecodeError` from inside subprocess — an
+  unhandled crash rather than a typed failure. `ingest/history.py` shipped with that defect and it
+  was found while building the replay gate.
+- **`core.commitGraph=false`.** A graph file naming a tip absent from the object database makes git
+  exit 128 on a clone that looks fine; `git fetch --refetch` did not fix the one that failed this
+  way.
+
+**`%x00`/`%x01` are git's escapes and stay two-character sequences in argv.** An actual NUL cannot
+be passed to `execve`. This module reintroduced the bug `history.py` had already been fixed for,
+and the same tests caught it the same way twice.
+
+`ingest/history.py` is now a derivation over this module rather than a second `git log`, so there
+is one decode policy and one place the exit code can be forgotten.
+
+#### The ranker's replay gate — `tests/live/test_event_replay_gate.py`
+
+Replays the research event definition — 2–12 files, a **case-sensitive** fix-subject within ninety
+days, the flat-score skip, the 400-event cap, every parameter copied from `defect_return.py` — and
+holds the product to it.
+
+**Gate 2a passes: zero ordering mismatches over 853 admissible events** from four repositories.
+**The ranker beats the control: 5.04% miss against alphabetical's 10.08%.**
+
+**Gate 2b is NOT met and is not claimed.** The research's 1.22% [0.82, 1.81] describes sampling
+error on *its* corpus; applying it to substitute repositories is a category error. Replayed
+elsewhere the miss ran **1.54% to 17.86%** per repository — and the cause is mechanical, not a
+defect: `httpx` events touch 5.3 files on average against `pip-tools`' 3.4, and top-three covers
+57% of the first against 88% of the second. **80% of httpx's misses are files that had prior
+history and lost anyway**, so it is the budget meeting larger changes, not the no-history class.
+
 #### `store/touches.py` — the index, and the half-open window that is the whole product
 
 `index()` writes `Touch` values, `counts()` returns prior-touch counts per path over
