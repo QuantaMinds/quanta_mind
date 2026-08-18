@@ -30,9 +30,9 @@ import sys
 HERE = pathlib.Path(__file__).resolve().parent
 # Which run to adjudicate. Design eight by default; pass "9" for the path-filtered run.
 WHICH = sys.argv[1] if len(sys.argv) > 1 else "8"
-RUN = HERE / ("quote9_run.json" if WHICH == "9" else "quote_run.json")
-ADJ = HERE / ("adj9" if WHICH == "9" else "adj")
-SEED = 20260818 if WHICH == "8" else 20260819
+RUN = HERE / {"10": "quote10_run.json", "9": "quote9_run.json"}.get(WHICH, "quote_run.json")
+ADJ = HERE / {"10": "adj10", "9": "adj9"}.get(WHICH, "adj")
+SEED = {"8": 20260818, "9": 20260819, "10": 20260820}.get(WHICH, 20260818)
 N_SABOTAGE = 8
 CONTEXT = 4
 # Hand adjudication has a practical ceiling. Fixed BEFORE design nine's count was known, and
@@ -62,7 +62,12 @@ def context_for(repo: str, pr: int, quote: str) -> list[str]:
 
 
 def main() -> int:
-    pub = json.loads(RUN.read_text())["published"]
+    blob = json.loads(RUN.read_text())
+    # Design ten stores arm A under a different key: B and C are index subsets of it, so only A
+    # is rated and all three arms are scored from the one verdict file.
+    pub = blob.get("published") or blob["arm_a"]
+    for n, f in enumerate(pub):
+        f["idx"] = n  # carried so arm membership can be joined after rating
     rng = random.Random(SEED)
 
     sampled = pub if len(pub) <= MAX_RATED else rng.sample(pub, MAX_RATED)
@@ -112,7 +117,15 @@ def main() -> int:
     ]
     key = []
     for n, it in enumerate(items, 1):
-        key.append({"item": n, "kind": it["kind"], "repo": it["repo"], "pr": it["pr"]})
+        key.append(
+            {
+                "item": n,
+                "kind": it["kind"],
+                "repo": it["repo"],
+                "pr": it["pr"],
+                "idx": it.get("idx", -1),
+            }
+        )
         ctx = context_for(str(it["repo"]), int(str(it["pr"])), str(it["quote"]))
         out.append(f"## {n}")
         out.append("")
