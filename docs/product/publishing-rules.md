@@ -73,10 +73,37 @@ When someone asks for our benchmark:
   read"* finishes it as *"…so what they did read, they got right."* **Whenever the coverage line
   is stated externally, that inference has to be closed off in the same breath**, because it is
   the one a customer will make unprompted and it is the one the evidence contradicts.
-- **Never quote a competitor's precision beside one of our own numbers.** Martian's precision is
-  *behavioural* — did the developer make the change — and our adjudication measured whether a claim
-  is *true and anchored*. They are different quantities, and the comparison was made internally
-  before it was caught. Their band is quotable **about them**, never as a backdrop for us.
+- **Never quote a competitor's ONLINE precision beside one of our own numbers.** Martian's
+  leaderboard precision is *behavioural* — did the developer make the change — and our adjudication
+  measured whether a claim is *true and anchored*. They are different quantities, and the
+  comparison was made internally before it was caught. That band is quotable **about them**, never
+  as a backdrop for us.
+
+  **AMENDED — the offline layer is comparable and we have entered it.** Martian's offline layer
+  scores every tool against the same 50 pull requests and the same human-verified issue lists. We
+  ran our reviewer through it, calibrated our judge against theirs first, and may quote those
+  figures side by side: **Greptile 56.5%, ours 43.6%, CodeRabbit 36.5%.** Three conditions attach
+  and all three must travel with the numbers. **One:** offline and online figures must never appear
+  in the same table — 36.5% and 49.2% are the same tool on different layers and different dates.
+  **Two:** our arm was judged by its own model family and a blind out-of-family check put our
+  over-match rate at 15.0% against 5.0%, so the honest reading is *at level with CodeRabbit, behind
+  Greptile* and never *better than CodeRabbit*. **Three:** none of it says our findings are correct
+  — this benchmark never checks whether a claim is anchored to the line it cites, which is where
+  87.3% of ours fail. → `docs/product/greptile-gap-analysis.md`
+
+- **When two measurements of the reviewer disagree, the stricter one governs shipping.** Martian's
+  offline layer asks whether a comment matches a known issue; our adjudication asked whether the
+  claim is true of the code AND anchored to the line it cites. **43.6% there, 5.80% here. Both are
+  real and they answer different questions.** A comment naming a real defect while pointing at the
+  wrong line is worth nothing to the developer who opens the file and finds nothing — and the judge
+  that scored 43.6% never had to open the file. **The review half stays stopped on the 5.80%, and
+  no benchmark that does not check anchors can reopen it.**
+
+- **Never present benchmark position as a product goal.** Removing our nit suppression closed and
+  reversed the Greptile gap while adding 238 false positives for 21 true ones — **a marginal
+  precision of 8.1%**. This gold set and the product are opposed on nits, and Greptile's own
+  quality filter exists to delete what it rewards. A better rank bought this way is a worse
+  product, and the exchange rate is measured.
 - **Concede only what is true, and detection is not one of the true things.** Honesty is not
   agreeing with whatever the market assumes. A page saying *"use them if you want the most bugs
   found"* hands over the one contest nobody has won, on no evidence, and turns us into the lite

@@ -20,7 +20,7 @@ gate.**
 
 **The threshold was 50% wrong, committed before a single finding was read. Both readings clear it,
 and every disagreement between them made the result worse rather than better.** The reading is:
-stop building the review half in this configuration. `docs/plans/adjudication-preregistration.md`
+stop building the review half in this configuration. `docs/plans/preregistrations/adjudication-preregistration.md`
 carries the protocol, the verdicts and the disagreements.
 
 ---

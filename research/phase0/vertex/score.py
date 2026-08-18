@@ -6,7 +6,8 @@ WHAT: Reads the per-finding verdicts and prints the bucket counts with Wilson in
 WHY:  The verdicts were assigned by a human reading each finding against its diff, which cannot
       be re-derived. What CAN be re-derived is every number computed from them, so the arithmetic
       is separated from the judgement and a second rater can substitute their own verdict file
-      and get the same report. The thresholds are in `docs/plans/adjudication-preregistration.md`
+      and get the same report. The thresholds are in the adjudication pre-registration under
+      `docs/plans/preregistrations/`
       and were committed before any finding was read.
 IMPORTS: stdlib only (collections, json, math).
 CONSUMED BY: nobody -- it prints.
