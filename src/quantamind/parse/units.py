@@ -48,6 +48,16 @@ FILE_HEADER = re.compile(r"^\+\+\+ b/(.*)$")
 NAMED = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 
 
+class MalformedDiff(ValueError):
+    """The diff carried hunks but no file they belong to.
+
+    Raised rather than returning zero hunks, because zero hunks reads as "a change containing
+    nothing": conservation is satisfied vacuously, the coverage line is computed over an empty
+    list, and the review reports that it looked and found nothing to look at. A patch we cannot
+    parse and a patch with nothing in it must not be the same value.
+    """
+
+
 @dataclass(frozen=True, slots=True)
 class Parsed:
     """What one diff yielded. Both lists together account for every hunk."""
@@ -83,6 +93,7 @@ def units_in(diff: str, scope: Collection[str] | None = None) -> Parsed:
     unresolved: list[Unresolved] = []
     hunks = 0
     path = ""
+    saw_hunk_marker = False
 
     for line in diff.split("\n"):
         header = FILE_HEADER.match(line)
@@ -90,7 +101,10 @@ def units_in(diff: str, scope: Collection[str] | None = None) -> Parsed:
             path = header.group(1).strip()
             continue
         match = HUNK.match(line)
-        if not match or not path:
+        if not match:
+            continue
+        saw_hunk_marker = True
+        if not path:
             continue
         if scope is not None and path not in scope:
             continue  # never in scope; not a parse failure
@@ -119,4 +133,10 @@ def units_in(diff: str, scope: Collection[str] | None = None) -> Parsed:
 
         units.append(ChangedUnit(site=site, qualified_name=declaration, language=language))
 
+    if saw_hunk_marker and hunks == 0 and scope is None:
+        raise MalformedDiff(
+            "the diff contains hunk headers but no `+++ b/<path>` line naming the file they "
+            "belong to. Returning zero hunks would report this as a change containing nothing, "
+            "and conservation would hold vacuously over an empty list"
+        )
     return Parsed(units=tuple(units), unresolved=tuple(unresolved), hunks=hunks)
