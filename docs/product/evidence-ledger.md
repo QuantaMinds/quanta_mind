@@ -306,30 +306,40 @@ has no reason to run.
 
 ---
 
-## 2a. Expansion fixed the failure it targeted and did not move the headline
+## 2a. Expansion removed its failure class; a second class dominates the total
 
 Design thirteen, pre-registered in
 `docs/plans/preregistrations/reviewer/expansion-conventions-preregistration.md`, added the two
-mechanisms Qodo ships and this project discarded: expanding each hunk back to the function git
-already names in the hunk header, and feeding the repository's own rules file. Six unused
-repositories, 80 reviewable pull requests, three arms, blind adjudication, **10 of 10 sabotaged
-controls caught.**
+mechanisms Qodo ships and this project discarded. Six unused repositories, 80 reviewable pull
+requests, three arms, blind adjudication, **10 of 10 sabotaged controls caught.**
 
 | claim | what was measured | verdict |
 |---|---|---|
-| Expansion removes the "did not follow shown code" failure | TRACE+ABSENT share of wrong findings, 73.3% → **18.8%** | **HOLDS** (H1, bar ≥15 points, got 54.6) |
-| Expansion lowers the wrong-rate | 51.7% → **59.3%** [40.7, 75.5], bar was ≤30% | **FAILS** (H2) |
-| A rules file makes convention-policing worse | arm C is **12.6 points better**, not worse | **THE HARM DID NOT APPEAR** (H3) |
-| Either mechanism starves the reviewer | yield 0.41 / 0.40 / 0.46 per pull request, bar ≥0.30 | **HOLDS** (H4) |
+| Expansion removes the "did not follow shown code" failure | 73.3% → **18.8%** of wrong findings | **HOLDS** (H1, bar ≥15 points, got 54.6) |
+| Expansion lowers the overall wrong-rate | 51.7% → **59.3%** [40.7, 75.5], bar ≤30% | **FAILS** (H2) |
+| A rules file makes convention-policing worse | arm C **12.6 points better**, not worse | **THE HARM DID NOT APPEAR** (H3) |
+| …and that gain is accuracy | **it is not** — WRONG −2 but UNFALSIFIABLE +4, CORRECT +1; CORRECT-rate 6.9 → 7.4 → 10.0% with overlapping intervals | **HEDGING, NOT ACCURACY** |
+| Either mechanism starves the reviewer | yield 0.41 / 0.40 / 0.46, bar ≥0.30 | **HOLDS** (H4) |
 
-**Why the headline did not move, mechanically.** Findings about CI-config files are **66.7% wrong
-[50.3, 79.8], and 23 of those 24 are EXTERNAL** — *this hash does not exist*, *this tag was never
-released*, *this date is in the future*. **Every one checked against GitHub was false**, and no
-diff can settle any of them. Off CI config the wrong-rate falls monotonically across the arms
-(52.2% → 38.5% → 28.6%), but that is a **post-hoc subgroup, not a passed bar.**
+**H1 and H2 are different lessons and must not be collapsed.** Expansion did the one thing it was
+built to do; the total did not move because **CI-config findings are 66.7% wrong [50.3, 79.8] and
+23 of those 24 are EXTERNAL** — undecidable from a diff by construction. **Every one checked
+against GitHub was false.** The "future" dates read Aug 14–17 2026 against a run on **Aug 18 2026**
+— three days in the past, which is a model with no notion of the present rather than a stale
+training cutoff, and no path filter ends it.
+
+**Excluding CI config is the third application of the decidability rule, not a discovery.**
+Lockfiles, manifests and docs went first. `.github/` was kept deliberately at ~25% CORRECT; the
+evidence turned over, not the principle.
+
+Off CI config the wrong-rate runs 52.2 → 38.5 → 28.6%, but that is **post-hoc with intervals that
+overlap almost completely at n = 13 and n = 14** — consistent with the mechanisms working and
+equally consistent with noise.
 
 **This does not count toward replication.** The rater designed the run. Arm labels were blind and
-every planted control was caught, but designer bias is unguarded.
+every planted control was caught, but designer bias is unguarded — **four designs now owe an
+independent grader.** Design 11's arm R cleared yield at 0.40/PR but is unadjudicated, so the
+**replication count stays at two**; arm E failed yield at 0.22/PR before adjudication ran.
 
 ## 3. What no measurement touches
 

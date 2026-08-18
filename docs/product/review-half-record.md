@@ -169,7 +169,7 @@ real-world code review deployment."*
 | ranker replication, three samples | `results/defect_return_{external,third}.json`, `discriminability_*.json` |
 | pre-registrations, one per design | `docs/plans/preregistrations/{ranker,reviewer}/` |
 | design thirteen: expansion, conventions | `research/phase0/quote/results/quote13_run.json`, `quote/adj13/` |
-| **every number recomputed from its artefact** | `research/phase0/claims/verify.py` — **76 checks, 76 passing** |
+| **every number recomputed from its artefact** | `research/phase0/claims/verify.py` — **90 checks, 90 passing** |
 
 **Run `python3 verify.py` from `research/phase0/claims/` before quoting any figure in this
 document.** This project has shipped a wrong number three ways — a cost table that priced one call

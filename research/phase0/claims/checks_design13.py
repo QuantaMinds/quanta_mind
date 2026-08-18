@@ -72,3 +72,33 @@ def run(check: Callable[..., None]) -> None:
     for arm, want in (("A", 0.41), ("B", 0.40), ("C", 0.46)):
         pub = sum(len(r["published"].get(arm, [])) for r in run13["results"])
         check(f"arm {arm} yield per pull request", round(pub / run13["prs"], 2), want, 0.01)
+
+    # --- bucket composition: is arm C's gain accuracy, or hedging? ---
+    for arm, want_c, want_u in (("A", 2, 4), ("B", 2, 4), ("C", 3, 8)):
+        idx = arms[arm]
+        check(f"arm {arm} CORRECT count", sum(_bucket(i) == "CORRECT" for i in idx), want_c, 0)
+        check(
+            f"arm {arm} UNFALSIFIABLE count",
+            sum(_bucket(i) == "UNFALSIFIABLE" for i in idx),
+            want_u,
+            0,
+        )
+    for arm, want in (("A", 6.9), ("B", 7.4), ("C", 10.0)):
+        idx = arms[arm]
+        c = sum(_bucket(i) == "CORRECT" for i in idx)
+        check(f"arm {arm} CORRECT-rate %", round(c / len(idx) * 100, 1), want, 0.1)
+
+    # --- design eleven: which arm cleared its own yield bar ---
+    d11 = json.loads((Q / "results" / "quote11_run.json").read_text())
+    n11 = d11["n_prs"]
+    check("design 11 pull requests", n11, 58, 0)
+    for arm, want in (("arm_r", 0.40), ("arm_e", 0.22)):
+        check(
+            f"design 11 {arm} yield per PR", round(len(d11[arm]["published"]) / n11, 2), want, 0.01
+        )
+    check(
+        "design 11 arm R clears the 0.30 yield bar",
+        len(d11["arm_r"]["published"]) / n11 >= 0.30,
+        True,
+    )
+    check("design 11 arm E fails it", len(d11["arm_e"]["published"]) / n11 < 0.30, True)

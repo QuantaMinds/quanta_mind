@@ -162,10 +162,11 @@ fixed in advance, **10 of 10 sabotaged controls caught**.
 |---|---|---|
 | expansion removes the "did not follow shown code" failure | ≥ 15 point fall | 73.3% → **18.8%** — **PASS** |
 | expansion lowers the wrong-rate | ≤ 30% | **59.3%** [40.7, 75.5] — **FAIL** |
-| a rules file makes convention-policing worse | ≤ +10 points | **−12.6 points**, it helped — **PASS** |
+| a rules file makes convention-policing worse | ≤ +10 points | **−12.6 points** — **PASS**, but the gain is UNFALSIFIABLE absorbing claims (+4) rather than CORRECT (+1) |
 | neither starves the reviewer | ≥ 0.30/PR | 0.41 / 0.40 / 0.46 — **PASS** |
 
-**Expansion did exactly what this document predicted and it was not enough.** The mechanism is
+**Expansion did exactly what this document predicted, and that is H1 passing — not a failure.**
+The overall rate not moving is a separate fact with a separate cause. The mechanism is
 visible: two claims of an infinite loop in falcon's URI decoder died because the
 `for pos in range(...)` header that refutes them sits ten lines above the hunk. What this document
 did not predict is what took over — **CI-config findings are 66.7% wrong and 23 of 24 of those are

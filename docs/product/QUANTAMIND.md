@@ -1385,35 +1385,35 @@ the plan, and the one that no further engineering resolves.
 
 Qodo leads Martian's offline layer at **67.9% precision** across 49 tools and does two cheap things
 this project did not. Both were built, sabotage-tested, and run against **80 merged pull requests
-from six repositories verified unused**, three arms, blind adjudication, bars fixed in advance.
+from six repositories verified unused**, three arms, blind adjudication, bars fixed in advance,
+**10 of 10 sabotaged controls caught**.
 
-**Expansion.** Git writes the enclosing declaration into every hunk header — `@@ -266,17 +269,12 @@
-def get_dumper(self, obj: Any, format: PyFormat) -> abc.Dumper:` — and we discarded it, so the model
+### Expansion removed the failure class it was built for
+
+Git writes the enclosing declaration into every hunk header — `@@ -266,17 +269,12 @@ def
+get_dumper(self, obj: Any, format: PyFormat) -> abc.Dumper:` — and we discarded it, so the model
 saw `+ if order.refunded:` with three lines of context and no idea what function it was in.
-`expand.py` walks back to that declaration. It fired on **50.8% of 453 real hunks** and **moved an
-added line zero times across 664 hunks** — the invariant that decides everything, because every
-anchor we publish is derived from where an added line sits.
 
-**The conventions file.** The repository's own `AGENTS.md` or `CLAUDE.md`, so a finding can cite the
-house rule it breaks instead of a generic notion of good code.
+**Wrong findings caused by not following code that was shown fell from 73.3% to 18.8% — a 54.6
+point move**, against a 15-point bar. **The mechanism is visible in individual findings:** two
+claims that falcon's URI decoder held an infinite loop died once the model could see ten lines
+further back, where `for pos in range(...)` sits — a range loop advances every iteration, so the
+`continue` it objected to cannot spin.
+
+Expansion fired on **50.8% of 453 real hunks** and **moved an added line zero times across 664
+hunks** — the invariant that decides everything, because every anchor we publish derives from where
+an added line sits.
 
 | pre-registered bar | | result | |
 |---|---|---|---|
-| **H1** share of wrong findings caused by not following code that WAS shown | ≥ 15 point fall | 73.3% → **18.8%** | **PASS** |
+| **H1** wrong findings that failed to follow shown code | ≥ 15 point fall | 73.3% → **18.8%** | **PASS** |
 | **H2** wrong-rate with expansion | ≤ 30% | **59.3%** [40.7, 75.5] | **FAIL** |
-| **H3** conventions file makes convention-policing worse | ≤ +10 points | **−12.6 points** — it helped | **PASS** |
-| **H4** yield | ≥ 0.30 findings/PR | 0.41 / 0.40 / 0.46 | **PASS** |
+| **H3** conventions file makes convention-policing worse | ≤ +10 points | **−12.6 points** | **PASS** |
+| **H4** yield | ≥ 0.30/PR | 0.41 / 0.40 / 0.46 | **PASS** |
 
-**10 of 10 sabotaged controls caught.** Arm labels were held in a key the rater never opened.
+### The overall rate did not move because a second class dominates — a different fact
 
-**Expansion did exactly the one thing it was built for and the headline did not move.** Two claims
-of an infinite loop in falcon's URI decoder died because the `for pos in range(...)` header that
-refutes them sits ten lines above the hunk. But a second failure class had already taken over.
-
-### The finding that changes the roadmap: some files are undecidable from a diff
-
-Cross-tabulating the cause of each wrong finding against the kind of file it is about separates it
-completely.
+Cross-tabulating cause against file kind separates them completely.
 
 | file kind | n | wrong | rate | causes |
 |---|---|---|---|---|
@@ -1421,26 +1421,48 @@ completely.
 | tests | 20 | 10 | 50.0% | TRACE 8, EXTERNAL 2 |
 | source code | 29 | 11 | 37.9% | TRACE 8, EXTERNAL 3 |
 
-Every one of those EXTERNAL claims has the same shape: *this commit hash does not exist*, *this tag
-was never released*, *this date is in the future*. **Every single one checked against GitHub was
-false.** `actions/setup-python@5fda3b95` is tagged exactly `v7.0.0`; `actions/checkout` `v7.0.1`,
-`astral-sh/setup-uv` `v9.0.0`, `pre-commit/mirrors-mypy` `v2.3.0` and `PyCQA/isort` `9.0.0b2` all
-exist; `hynek/build-and-inspect-python-package` was never renamed; and the "future" dates read
-Aug 14–17 2026 against a run on Aug 18 2026.
+**Every EXTERNAL claim checked against GitHub was false.** `actions/setup-python@5fda3b95` is
+tagged exactly `v7.0.0`; `actions/checkout` `v7.0.1`, `astral-sh/setup-uv` `v9.0.0`,
+`pre-commit/mirrors-mypy` `v2.3.0` and `PyCQA/isort` `9.0.0b2` all exist;
+`hynek/build-and-inspect-python-package` was never renamed.
 
-**A diff cannot settle any of them, and the reviewer is diff-scoped.** That is not a tuning problem.
-It is the decidability principle this project already holds, applied to a file kind the path filter
-still admits. Off CI config the wrong-rate falls monotonically across the arms — 52.2% → 38.5% →
-**28.6%** — but that is a **post-hoc subgroup and not a passed bar**, and it is recorded as the next
-pre-registration rather than a result.
+**The dates it called "in the future" read Aug 14–17 2026, against a run on Aug 18 2026 — three
+days in the PAST.** That is not a training-cutoff artefact. It is a model with no reliable notion
+of the present, and it will recur wherever dates appear. It also partly retires the registry-lookup
+arm before it is built: an API lookup answers *does this tag exist* and never answers *what is
+today*, while excluding the file kind is free and covers both.
 
-Selecting the conventions file needed one non-obvious fix. **Three of the first six repositories
-sampled ship a 62–98 character POINTER rather than rules** — pluggy's `AGENTS.md` is "See
-@CLAUDE.md", sanic's and trio's `CONTRIBUTING.md` are a bare URL. Accepting those would have made
-the arm a silent no-op on half the corpus while reporting that the rules had been sent.
+**This is the third application of the decidability rule, not a new discovery.** Lockfiles,
+manifests and documentation were already excluded on it. `.github/` was kept **deliberately and on
+evidence** — it produced CORRECT findings at roughly one in four when the filter was written. It is
+now 66.7% wrong at n = 36. The principle did not change; the evidence did.
 
-**None of this opens `infer/`.** The rater designed the run, so it does not count toward the
-replication standard, and the wrong-rate remains far above anything shippable.
+### H3 inverted, and the reason is not the good news it looks like
+
+| arm | n | CORRECT | WRONG | UNFALSIFIABLE | TRIVIAL |
+|---|---|---|---|---|---|
+| A | 29 | 2 | 15 | 4 | 8 |
+| B | 27 | 2 | 16 | 4 | 5 |
+| C | 30 | **3** | **14** | **8** | 5 |
+
+From B to C, WRONG fell by 2 while **UNFALSIFIABLE rose by 4 and CORRECT rose by 1**. The
+CORRECT-rate barely moves — **6.9% → 7.4% → 10.0%**, intervals overlapping almost entirely. **The
+conventions file made the model more cautious, not more accurate**, and the CORRECT-rate is quoted
+beside the wrong-rate every time for that reason.
+
+### The off-CI subgroup is not the headline
+
+Off CI config the wrong-rate runs 52.2% → 38.5% → **28.6%** across the arms. **Post-hoc, not
+pre-registered, and the Wilson intervals — [33.0, 70.8], [17.7, 64.5], [11.7, 54.6] — overlap
+almost completely.** A clean monotone ordering across three arms is exactly what noise looks like
+at n = 13 and n = 14. It is the next pre-registration, not a result.
+
+### What this does not license
+
+The rater designed the run, so **none of it counts toward replication** — four designs now owe an
+independent grader. Design 11's arm R, the clean design-nine replication, **cleared its yield bar
+at 0.40/PR but is unadjudicated, so the replication count stays at two**; arm E failed yield at
+0.22/PR before adjudication ran. **`infer/` stays closed.**
 
 
 # Appendix — verification of every external claim
