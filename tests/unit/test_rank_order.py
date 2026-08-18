@@ -86,3 +86,71 @@ def test_an_empty_score_set_raises_rather_than_publishing_an_empty_ranking() -> 
 
     with pytest.raises(NothingToRank):
         rank({})
+
+
+def test_a_no_history_change_funds_nothing_and_fabricates_no_order() -> None:
+    """Every score ties at zero, so `(-score, path)` falls back to path — alphabetical, not risk."""
+    from quantamind.types.ranking import Allocation, Discrimination
+
+    ranking = rank({"src/pay/refund.py": 0, "src/pay/__init__.py": 0, "tests/t.py": 0})
+    assert ranking.discrimination is Discrimination.NO_HISTORY
+    assert ranking.ranked() is False
+    assert ranking.fired is False
+    assert ranking.funded() == (), "an alphabetical top-3 must not be published as a ranking"
+    assert all(u.allocation is Allocation.COLD for u in ranking.units)
+    assert len(ranking.units) == 3, "the files are still carried for the coverage line"
+
+
+def test_a_ranked_change_still_funds_the_budget() -> None:
+    from quantamind.types.ranking import Discrimination
+
+    ranking = rank({"a.py": 9, "b.py": 4, "c.py": 1, "d.py": 0})
+    assert ranking.discrimination is Discrimination.ORDERED
+    assert ranking.ranked() is True
+    assert [u.unit.qualified_name for u in ranking.funded()] == ["a.py", "b.py", "c.py"]
+
+
+def test_flat_nonzero_history_still_ranks_because_history_exists() -> None:
+    from quantamind.types.ranking import Discrimination
+
+    ranking = rank({"a.py": 3, "b.py": 3})
+    assert ranking.discrimination is Discrimination.FLAT_NONZERO
+    assert ranking.ranked() is True, "flat is not the same as absent; the files have been touched"
+
+
+def test_funded_is_empty_on_a_no_history_ranking_even_if_the_labels_say_otherwise() -> None:
+    """Two mechanisms stop a fabricated top-3, and each needs its own test.
+
+    `rank()` labels every unit COLD when nothing was ranked, AND `Ranking.funded()` returns nothing
+    when `ranked()` is False. Sabotaging either one alone left the suite green, because the other
+    still produced the right answer — so this exercises the second directly, by handing `Ranking` a
+    NO_HISTORY discrimination with funded-looking labels.
+    """
+    from quantamind.types.change import ChangedUnit, Language
+    from quantamind.types.ranking import (
+        Allocation,
+        Discrimination,
+        RankedUnit,
+        Ranking,
+        Score,
+    )
+    from quantamind.types.verdict import Site
+
+    def unit(name: str, rank_: int, allocation: Allocation) -> RankedUnit:
+        return RankedUnit(
+            unit=ChangedUnit(
+                site=Site(path=name, line=0), qualified_name=name, language=Language.PYTHON
+            ),
+            rank=rank_,
+            score=Score(value=0.0, percentile=1.0),
+            allocation=allocation,
+        )
+
+    ranking = Ranking(
+        units=(unit("a.py", 1, Allocation.DEEP), unit("b.py", 2, Allocation.SHALLOW)),
+        fired=False,
+        discrimination=Discrimination.NO_HISTORY,
+    )
+    assert ranking.funded() == (), (
+        "the discrimination must override the labels, not agree with them"
+    )

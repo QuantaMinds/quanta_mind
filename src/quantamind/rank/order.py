@@ -37,9 +37,9 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from quantamind.rank.score import Discrimination, discriminate, order
+from quantamind.rank.score import discriminate, order
 from quantamind.types.change import ChangedUnit, Language
-from quantamind.types.ranking import Allocation, RankedUnit, Ranking, Score
+from quantamind.types.ranking import Allocation, Discrimination, RankedUnit, Ranking, Score
 from quantamind.types.verdict import Site
 
 # The budget the research measured: ranks 1-3 are funded. Top-3 file-level misses 1.22% of the
@@ -109,9 +109,14 @@ def rank(
         raise ValueError(f"budget cannot be negative, got {budget}")
     ordered = order(scores)
     pcts = percentiles(scores)
+    split = discriminate(scores)
     units: list[RankedUnit] = []
     for position, path in enumerate(ordered, start=1):
-        if position <= DEEP_RANKS:
+        if split is Discrimination.NO_HISTORY:
+            # Nothing was ranked, so no position was chosen. Labelling the alphabetically-first
+            # file DEEP would be inventing a decision -- and this is the slice that misses most.
+            allocation = Allocation.COLD
+        elif position <= DEEP_RANKS:
             allocation = Allocation.DEEP
         elif position <= budget:
             allocation = Allocation.SHALLOW
@@ -130,5 +135,8 @@ def rank(
             )
         )
     return Ranking(
-        units=tuple(units), fired=fires(scores, threshold), threshold_percentile=threshold
+        units=tuple(units),
+        fired=fires(scores, threshold),
+        threshold_percentile=threshold,
+        discrimination=split,
     )

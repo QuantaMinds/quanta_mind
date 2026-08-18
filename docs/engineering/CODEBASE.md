@@ -483,6 +483,26 @@ ones.
 a repository ingested twice would double every count *evenly* — an error that moves no ordering,
 passes every ordering test, and corrupts the percentile that decides whether we fire.
 
+#### What happens when a change has no history
+
+**Nothing is funded, and no order is published.** Every score ties at zero, so `(-score, path)`
+falls back to `path` — `__init__.py` would outrank the new module the change is actually about.
+
+`Ranking` carries a `discrimination` field for this reason: a consumer reading positions off a
+ranking that never ranked anything is the failure the field exists to prevent. `funded()` returns
+`()` and every unit is labelled COLD, **but the units are all still carried**, because they are the
+coverage line's content — the answer to "what did you not look at" is the product.
+
+**This is the slice that misses most** — 4.46% against 1.21% overall, 3.3x worse — so it is also
+where a fabricated ordering does the most damage, and where the open policy question sits: whether
+this slice should instead be read in full precisely because it cannot be ranked. That is an
+`allocate/` decision and `allocate/` is not built.
+
+**Two mechanisms enforce it and each is tested separately.** `rank()` labels everything COLD, and
+`Ranking.funded()` returns nothing when `ranked()` is False. Sabotaging either one alone left the
+suite green — the other still produced the right answer — so there is a test that hands `Ranking` a
+NO_HISTORY discrimination with funded-looking labels and requires the discrimination to win.
+
 #### `rank/order.py` — the budget, the labels, and whether we speak at all
 
 `score.py` decides the ORDER, which is the half with the p-value. This decides how much of that
