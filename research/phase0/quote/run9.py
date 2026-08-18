@@ -33,7 +33,7 @@ from client import Client
 import corpus
 
 MODEL = "gemini-2.5-pro"
-OUT = pathlib.Path(__file__).resolve().parent / "quote9_run.json"
+OUT = pathlib.Path(__file__).resolve().parent / "results" / "quote9_run.json"
 YIELD_BAR = 0.30  # H4, lowered from design eight's 0.50 and argued for in the pre-registration
 MIN_FINDINGS = 25  # H5: below this the run is UNDERPOWERED, not a pass or a fail
 

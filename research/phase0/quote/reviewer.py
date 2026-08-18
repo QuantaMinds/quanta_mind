@@ -43,10 +43,7 @@ For each defect return three fields:
 - "claim": one sentence naming the defect and why it is wrong.
 - "fix": the corrected code that should replace the quoted line.
 
-- "evidence": a SECOND exact quote from the diff which, together with "quote", is what makes
-  the claim true. If you cannot find one in the diff, you do not have grounds for the claim --
-  drop it. Write "SAME" only when the claim rests entirely on the quoted line itself.
-
+{evidence_rule}
 Do not give line numbers. The quote is how the finding is located.
 
 Report at most {max_findings}. If the change looks correct, return [] -- that is a valid answer.
@@ -57,7 +54,18 @@ Pull request: {title}
 {diff}
 ```
 
-Respond with ONLY a JSON array of objects, each with keys "quote", "claim", "evidence", "fix"."""
+Respond with ONLY a JSON array of objects, each with keys "quote", "claim", {keys}"fix"."""
+
+# Design 9 verbatim: no evidence field in the prompt and none demanded.
+EVIDENCE_OFF = ("", "")
+# Design 11: the second quote, and its key in the required output.
+EVIDENCE_ON = (
+    """- "evidence": a SECOND exact quote from the diff which, together with "quote", is what makes
+  the claim true. If you cannot find one in the diff, you do not have grounds for the claim --
+  drop it. Write "SAME" only when the claim rests entirely on the quoted line itself.
+""",
+    '"evidence", ',
+)
 
 
 class ReviewFailed(RuntimeError):
@@ -103,14 +111,30 @@ def _parse(text: str) -> list[dict[str, str]]:
     return out[:MAX_FINDINGS]
 
 
-def review(client: object, title: str, diff: str) -> tuple[list[dict[str, str]], str]:
-    """(findings, finish reason). Raises rather than returning [] when the model did not answer."""
+def review(
+    client: object, title: str, diff: str, evidence: bool = False
+) -> tuple[list[dict[str, str]], str]:
+    """(findings, finish reason). Raises rather than returning [] when the model did not answer.
+
+    `evidence=False` is design nine VERBATIM -- the prompt never mentions a second quote. That
+    matters: an arm carrying the evidence requirement is a NEW configuration and cannot be quoted
+    as a replication of design nine, which is exactly the mistake this parameter exists to stop.
+    """
+    rule, keys = EVIDENCE_ON if evidence else EVIDENCE_OFF
     body = {
         "contents": [
             {
                 "role": "user",
                 "parts": [
-                    {"text": PROMPT.format(max_findings=MAX_FINDINGS, title=title, diff=diff)}
+                    {
+                        "text": PROMPT.format(
+                            max_findings=MAX_FINDINGS,
+                            title=title,
+                            diff=diff,
+                            evidence_rule=rule,
+                            keys=keys,
+                        )
+                    }
                 ],
             }
         ],

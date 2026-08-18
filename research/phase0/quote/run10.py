@@ -37,7 +37,7 @@ from client import Client
 import corpus
 
 MODEL = "gemini-2.5-pro"
-OUT = pathlib.Path(__file__).resolve().parent / "quote10_run.json"
+OUT = pathlib.Path(__file__).resolve().parent / "results" / "quote10_run.json"
 GATE_WORKERS = 8
 
 

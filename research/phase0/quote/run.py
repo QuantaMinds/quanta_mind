@@ -32,7 +32,7 @@ from client import Client
 import corpus
 
 MODEL = "gemini-2.5-pro"
-OUT = pathlib.Path(__file__).resolve().parent / "quote_run.json"
+OUT = pathlib.Path(__file__).resolve().parent / "results" / "quote_run.json"
 BASELINE_ANCHOR_FAILURE = 0.873  # the measured line-citing defect rate this must beat (bar G1)
 
 
