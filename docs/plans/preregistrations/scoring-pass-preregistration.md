@@ -84,7 +84,7 @@ prediction that follows from the code from one that reaches outside it.** That i
 |---|---|
 | **A — control** | design nine exactly. **This is also the replication of design nine on fresh repositories.** |
 | **B — treatment** | A **plus the two lexical markers above, applied as a gate**. Free, deterministic, no model call |
-| **C — comparison** | A **plus a model-judged decidability gate**, asking whether the claim can be settled from the diff alone |
+| **C — comparison** | A **plus a model-judged decidability gate**, asking whether the claim can be decidable from the diff alone |
 
 | **D — added before any design-ten result was seen** | A minus any finding that predicts a test, build or CI failure. **Every pull request in the corpus is merged**, so such a claim is false by a fact we already hold |
 | **E — registered, not run here** | A minus any finding whose claim is settled by a REGISTRY LOOKUP: does this version exist on PyPI, is this commit hash in that repository |
@@ -195,7 +195,7 @@ predicted to underperform the free regex.**
 **The objection is that thirty findings from six repositories cannot produce a filter that
 transfers, and that the mechanism should be dynamic rather than a fixed pattern.** That objection
 is already the experiment: **arm C is the dynamic version.** It asks the semantic question — can
-this claim be settled from the diff — instead of matching the phrasing that happened to express it.
+this claim be decidable from the diff — instead of matching the phrasing that happened to express it.
 
 **So design ten is a direct test of the objection, not a bet against it:**
 

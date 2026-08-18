@@ -575,6 +575,67 @@ resembling ones developers downvoted, taking their address rate from 19% to 55%.
 
 → `docs/product/greptile-gap-analysis.md`
 
+## Should the product be a mandatory gate? The data says no — and it says why
+
+**Checked against GitHub, not assumed.** Six merged pull requests from the design-nine corpus,
+queried through the check-runs API:
+
+| pull request | checks at merge |
+|---|---|
+| bokeh#15342, #15346, #15348 | green |
+| **bokeh#15337** | **2 failures** |
+| **bokeh#15353** | **1 failure** |
+| **huggingface/datasets#8363** | **3 failures, 8 cancelled** |
+
+**Half of them merged over a red build.** Branch protection overridden, a flaky job waved through,
+an unrelated failure shipped anyway. **"Merged" is not a fact about correctness. It is an
+assumption about how teams use GitHub, and it is wrong half the time.**
+
+### What that implies about being a gate
+
+**A team that overrides its own CI will override ours.** A blocking check on top of checks they
+already bypass is not a safety mechanism; it is another thing to click through, and it converts the
+product into the noise it was built to reduce.
+
+**So gate on the measured thing and never on the unmeasured one:**
+
+| gate on | evidence | verdict |
+|---|---|---|
+| **routing** — "this change lands in the top risk band; it needs a human read" | ranker, 1.53% against 2.97%, **p = 1.3 × 10⁻¹⁴**, 20 repositories | **defensible as a gate** |
+| **correctness** — "this change contains a bug" | 30–35% of published findings wrong | **never a gate** |
+
+**The first is a claim about where attention should go and it is measured. The second is a claim
+about whether code is wrong and it is not.** Blocking a merge on the second would be selling a
+certainty nobody in this industry has — QA teams exist and production still breaks.
+
+### The four labels, and the one word that must not drift
+
+| label | meaning | evidence |
+|---|---|---|
+| **"look here first"** | this file has needed fixes before | ranker, p = 1.3 × 10⁻¹⁴ |
+| **"decidable from the diff"** | **nothing external is involved.** NOT "this is correct" | the gate |
+| **"needs a deeper look"** | depends on a registry, a test run, or a file we were not shown | the gate |
+| **"we did not read these"** | honest coverage | `CoverageLine` |
+
+**The rejected findings are the product, not the waste.** A finding the gate drops is not "wrong",
+it is **"we cannot verify this from what we saw"** — which is a true and useful thing to tell a
+developer, and nobody else says it.
+
+**"Decidable from the diff" must never become "settled by the diff".** A claim can involve nothing
+external and still be false, because the model failed to trace its own input — measured directly:
+on `bokeh#15337` both the test and the implementation it depended on were in the diff, and the
+model still got it backwards. **Decidability is a statement about the input, never about the
+answer.**
+
+### And the label is not calibrated yet
+
+**We have the label. We do not have the calibration.** Saying "merge with confidence" requires
+showing that when we say it, things do not break. The chain runs: we rank the risky file
+(**measured**) → the reviewer reads it (**unmeasured**) → they find the defect (**unmeasured**) →
+it never reaches production (**unmeasured**). **Only the first link has evidence.**
+
+**That is thirty days with a real team, not another experiment.**
+
 ## Why they cannot kill this in one update
 
 **Start with what they can copy, because the argument is worthless without it.**

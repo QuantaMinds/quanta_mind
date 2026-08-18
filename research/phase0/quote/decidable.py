@@ -1,4 +1,4 @@
-"""Ask whether a claim can be settled from the diff alone, and drop it when it cannot.
+"""Ask whether a claim can be decidable from the diff alone, and drop it when it cannot.
 
 WHAT: `judge_one()` sends a surviving finding and its diff to the model and returns YES/NO plus the
       stated dependency. `keyword_flag()` is the free mechanical approximation, run alongside for
