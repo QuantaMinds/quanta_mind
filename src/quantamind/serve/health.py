@@ -9,6 +9,12 @@ WHY:  **A health check that reports the process is running tells you what the re
       version mismatch and schema drift are caught. A liveness probe that skipped those would
       report healthy on a database this build cannot safely write to, which is the exact state a
       deploy produces.
+
+      **It checks the store EXISTS before opening it, and that is not pedantry.** `open_store`
+      creates a missing database, so the first version of this probe reported `ok=True` for a path
+      that did not exist — a deploy pointed at the wrong directory would have created an empty
+      store, answered healthy, and served rankings computed over no history at all. Found by a test
+      asserting the failure, not by the probe.
 IMPORTS: store (schema, drift), types (Settings). Rightmost layer.
 CONSUMED BY: the HTTP binding, and any orchestrator that needs a readiness signal.
 """
@@ -40,6 +46,12 @@ def health(database_path: str) -> Health:
     a verdict. Every failure becomes `ok=False` with the reason.
     """
     path = Path(database_path)
+    if not path.exists():
+        return Health(
+            False,
+            f"no store at {path}. Opening would CREATE an empty one and answer healthy, so this "
+            "refuses instead: a process pointed at the wrong path must not look like a working one",
+        )
     try:
         conn = schema.open_store(path)
     except schema.SchemaVersionMismatch as exc:

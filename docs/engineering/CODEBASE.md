@@ -693,7 +693,18 @@ not a dependency** — `pyproject.toml` declares `dependencies = []`. `AGENTS.md
 The table is public and prints in the coverage line, because a silently skipped language is
 indistinguishable from one we read and found nothing in.
 
-#### Every failure path, and the two that return by design
+#### Every failure path, and the ten that return by design
+
+**27 paths triggered: 17 raise, 10 return a value, and every returned value carries its reason.**
+A signature rejection is a *response* to hostile input rather than an exception — the HTTP layer
+turns it into a 401 — and a health probe that raised would hand an orchestrator a stack trace where
+it needed a verdict. What must never happen is a returned value with nothing in it, and that is
+what `test_failures_are_loud.py` asserts.
+
+The three webhook rejection kinds stay distinct — no signature, malformed, bad — because *"someone
+is probing us"* and *"our own secret is misconfigured"* need different responses from an operator.
+
+#### Earlier note: every failure path, and the two that return by design
 
 `tests/unit/test_failures_are_loud.py` triggers each layer's refusals and requires two things of
 every one: that it **raises rather than returning a plausible value**, and that the message names
@@ -827,6 +838,14 @@ draft are normal traffic; an endpoint that errors on them fills a log nobody rea
 **One property no test can see:** the comparison is constant-time, and replacing `compare_digest`
 with `==` leaves every test passing — verified by doing it. Only this note and code review protect
 it.
+
+#### `serve/health.py` — it opens the store, but first checks it EXISTS
+
+`open_store()` creates a missing database, so the first version of this probe answered `ok=True`
+for a path that did not exist. **A deploy pointed at the wrong directory would have created an
+empty store, reported healthy, and served rankings computed over no history at all** — the probe
+manufacturing the healthy state it was asked to detect. Found by a test asserting the failure, not
+by the probe.
 
 #### `serve/health.py` — it opens the store, because that is what breaks
 

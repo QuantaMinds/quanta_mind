@@ -6,6 +6,12 @@ WHY:  A pipeline is only as honest as its quietest layer. Individually each modu
       refusals; nothing tested that the SET of them is complete, and the two that were merely
       returning a value were found by triggering all seventeen and reading the table.
 
+      **Ten paths return a value rather than raising, and every one carries its reason.** A
+      signature rejection is a RESPONSE to hostile input, not an exception — the HTTP layer turns
+      it into a 401 — and a health probe that raised would give an orchestrator a stack trace where
+      it needed a verdict. What must never happen is a returned value with nothing in it, so that
+      is what is asserted.
+
       **Two paths return by design and are asserted to.** `render.comment` returns None below the
       threshold, because silence is a decision the caller records. `parse.units` returns zero hunks
       for an empty diff, because a change with nothing in it is a real answer — but a diff with
@@ -127,3 +133,59 @@ def test_the_two_paths_that_return_by_design_still_do() -> None:
     """Silence is a decision the caller records, and an empty diff is a real answer."""
     assert comment(rank({"a.py": 0, "b.py": 0})) is None
     assert units_in("").hunks == 0
+
+
+def test_a_rejected_delivery_says_which_kind_of_wrong_it_was() -> None:
+    """ "Someone is probing us" and "our own secret is misconfigured" need different responses."""
+    from quantamind.serve.webhook_github import Rejected, sign, verify
+
+    secret, body = "s", b'{"action":"opened"}'
+    seen = {
+        verify(secret, body, None),
+        verify(secret, body, "sha256=nope"),
+        verify(secret, body, sign("someone-else", body)),
+    }
+    assert seen == {Rejected.NO_SIGNATURE, Rejected.MALFORMED_SIGNATURE, Rejected.BAD_SIGNATURE}, (
+        f"the three rejection kinds collapsed into {seen}; an operator cannot tell a probe from a "
+        "misconfiguration"
+    )
+    for rejection in seen:
+        assert rejection.value.strip(), "a rejection with no reason is the same as a silent drop"
+
+
+def test_a_missing_webhook_secret_raises_rather_than_accepting_the_delivery() -> None:
+    from quantamind.serve.webhook_github import MisconfiguredSecret, sign, verify
+
+    body = b"{}"
+    with pytest.raises(MisconfiguredSecret) as caught:
+        verify("", body, sign("s", body))
+    assert "unverified" in str(caught.value), (
+        "accepting when no secret is set turns the endpoint into an open command channel"
+    )
+
+
+def test_an_ignored_delivery_names_what_was_dropped() -> None:
+    from quantamind.serve.webhook_github import Ignore, interpret
+
+    for event, body, fragment in (
+        ("ping", b"{}", "ping"),
+        ("pull_request", b"not json", "not JSON"),
+    ):
+        got = interpret(event, body)
+        assert isinstance(got, Ignore) and fragment in got.reason, (
+            f"{event!r} with {body!r} gave {got!r}; an ignore that does not name the cause is a "
+            "silent drop wearing a type"
+        )
+
+
+def test_health_returns_a_verdict_with_its_reason_and_never_raises(tmp_path: Path) -> None:
+    """An orchestrator needs a yes or no. A stack trace is neither."""
+    from quantamind.serve.health import health
+
+    missing = health(str(tmp_path / "absent.db"))
+    junk = tmp_path / "junk.db"
+    junk.write_bytes(b"not sqlite at all")
+    unreadable = health(str(junk))
+    for verdict in (missing, unreadable):
+        assert verdict.ok is False
+        assert verdict.detail.strip(), "a failing probe with no detail cannot be acted on"

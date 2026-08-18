@@ -64,3 +64,14 @@ def test_health_never_raises_because_an_orchestrator_needs_a_verdict(tmp_path: P
     got = health(str(unreachable))
     assert got.ok is False and got.detail, "a failure must carry its reason"
     assert "FAILING" in got.render()
+
+
+def test_a_missing_store_is_not_healthy_and_is_not_created(tmp_path: Path) -> None:
+    """open_store() CREATES a missing database, so the first version of this probe answered ok=True
+    for a path that did not exist — a deploy pointed at the wrong directory would have made an
+    empty store, reported healthy, and served rankings computed over no history at all."""
+    absent = tmp_path / "absent.db"
+    got = health(str(absent))
+    assert got.ok is False, "a store that does not exist cannot be healthy"
+    assert not absent.exists(), "the probe must not CREATE the thing it is checking for"
+    assert "wrong path" in got.detail or "no store" in got.detail
