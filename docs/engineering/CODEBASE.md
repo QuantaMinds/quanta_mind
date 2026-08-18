@@ -532,6 +532,26 @@ Demonstrated before the fix: a database whose `touch` table lacked `committed_at
 in-memory database and `sqlite_master` read back, because a second hand-maintained copy of the
 schema is a second thing to forget to update, which is the failure being caught.
 
+#### The prior-touch count, cross-checked against git itself
+
+Gate 2a proves we reproduce the RESEARCH ranker. It cannot prove the research index is what git
+would say — both come from the same `--name-only` read, so a shared misreading would agree with
+itself. `tests/live/test_counts_match_git.py` asks git a different question and requires the same
+answer. **25 live files, exact agreement.**
+
+Two properties surfaced doing it, both real and neither a bug:
+
+**The oracle must be `--full-history`.** Plain `git log -- <path>` applies history simplification,
+omitting commits whose content matched a parent — it reported 6 where our index had 7 for
+`src/flask/ctx.py`. Our index is every commit that touched the file, which is what a touch *count*
+means. The first version of that test failed the product for being right.
+
+**Deleted files undercount, unreachably.** Under a wildcard pathspec `git log --name-only` does not
+report the commit that deletes a file, so our index is one short for such paths — three of fifty in
+an unrestricted sample, every one absent from HEAD. **A file that no longer exists cannot appear in
+a future pull request**, so it can never be ranked. The research index has the identical property,
+by the identical invocation.
+
 #### `store/touches.py` — the index, and the half-open window that is the whole product
 
 `index()` writes `Touch` values, `counts()` returns prior-touch counts per path over

@@ -14,6 +14,11 @@ WHY:  **A reviewer that comments twice on the same commit is a reviewer people m
       returns a bool, so idempotency is tested against real payload shapes with no network and no
       stub. Everything that could double-post lives in the part that can be tested exhaustively.
 
+      **A truncated read RAISES rather than deciding on partial data.** `existing()` stopped at
+      the pagination cap and returned what it had, so a thread longer than the cap would not
+      contain our marker as far as we could see, and we would post a duplicate — the module's own
+      limit causing the failure it exists to prevent.
+
       **`post()` writes into someone else's repository under a real identity**, so nothing in this
       project's test suite calls it against a repository we do not own.
 
@@ -96,8 +101,14 @@ def existing(repo: str, number: int) -> list[dict[str, Any]]:
             raise CommentFailed(repo, number, f"comments page {page} was {type(got).__name__}")
         out.extend(got)
         if len(got) < PER_PAGE:
-            break
-    return out
+            return out
+    raise CommentFailed(
+        repo,
+        number,
+        f"more than {MAX_PAGES * PER_PAGE} comments; refusing to decide idempotency on a "
+        "truncated thread. Returning what we had would mean not finding our own marker and "
+        "posting a DUPLICATE -- the failure this module exists to prevent, caused by its own limit",
+    )
 
 
 def post(repo: str, number: int, head_sha: str, body: str) -> bool:
