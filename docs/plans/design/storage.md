@@ -44,7 +44,11 @@ We reconsider only if a query needs traversal deeper than two hops, which none c
 repo            id, host, name, clone_filter, first_seen, languages_parsed
 review          id, repo_id, pr_number, head_sha, created_at,
                 fire_decision, coverage_pct, request_count, tokens_in,
-                tokens_out, cost_cents, latency_ms, tier
+                tokens_out, latency_ms, tier
+                -- CORRECTED: this listing carried `cost_cents`, which the rule three
+                -- sections below explicitly forbids. `store/schema.py` omits it and
+                -- derives cost from the `request` table's token counts. The listing was
+                -- the stale half; the reasoned rule is the one that survived.
 ranked_unit     review_id, unit_path, unit_name, rank, score,
                 percentile, allocation          -- deep | shallow | cold
                 -- EVERY changed unit, including cold ones. Not the funded subset.

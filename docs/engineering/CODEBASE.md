@@ -414,6 +414,33 @@ therefore never fire, which is an unreachable check reading exactly like a passi
 runs here" stays falsifiable. → `docs/product/review-half-record.md`
 
 ### `store/`
+
+#### `store/schema.py` — the versioned schema, and the gate that refuses a store it would corrupt
+
+`SCHEMA_VERSION`, the DDL, `create()`, and `open_store()` which opens an existing database **only**
+when its version matches. A mismatch raises `SchemaVersionMismatch` rather than migrating in place:
+the outcome history is the asset, there is no delete-and-reindex path in production, and a store
+opened under the wrong assumptions produces rankings wrong in ways nothing downstream can see.
+
+**Three columns exist from the first row because append-only cannot backfill them.**
+`shadow_pick` stores a ranked LIST with score and percentile — top-3 recall for a candidate ranker
+cannot be computed from a top-1 record, and the firing threshold cannot be re-derived without the
+percentile. `request` stores `cache_read_tokens`, so a persistent zero (an invalidator in the
+cached prefix) is visible as data rather than as a test that passed once. `outcome` carries
+`rule_version` and `fix_subject`, because the attribution rule has already been corrected once and
+changed 67.9% of verdicts.
+
+**`ranked_unit` holds every changed unit including cold ones** — cold rows are the coverage line's
+content and shadow evaluation's denominator.
+
+**No column stores cost in cents, and a test enforces it.** Prices change and token counts do not;
+cents cannot separate a cache read from fresh input. `docs/plans/design/storage.md` listed a
+`cost_cents` column three sections above the rule forbidding it — the listing was corrected, not
+the rule.
+
+**`finding` and `claim` exist and nothing writes to them.** `infer/` is closed on evidence; adding
+a table later is a migration, so they are created now and left empty.
+
 **Owns:** persistence — versioned schema, migrations, one repository module per aggregate,
 per-repository spend.
 **Must not:** hold a delete-and-reindex path. The outcome history is the asset, and outcome
