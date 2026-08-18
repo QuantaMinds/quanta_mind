@@ -808,6 +808,33 @@ works" are different facts.
 concentrates and what was not read. Every line it prints is derived from git or from a counter.
 
 ### `serve/`
+
+#### `serve/webhook_github.py` — the only untrusted input the product accepts
+
+Everything else comes from git or a repository we were pointed at; this arrives from the network
+from anyone who finds the URL. So both dangerous decisions are **pure functions over bytes**:
+`verify()` authenticates, `interpret()` decides whether the delivery is ours to act on.
+
+**An absent secret RAISES.** "No secret configured, so accept everything" turns the endpoint into
+an open command channel, and it reads as working perfectly in every test that supplies a secret.
+
+**Rejection reasons are distinct values** — no signature, malformed signature, bad signature —
+because "someone is probing us" and "our own secret is misconfigured" need different responses.
+
+**`interpret()` returns `Ignore` with a reason rather than raising.** A ping, a label change and a
+draft are normal traffic; an endpoint that errors on them fills a log nobody reads.
+
+**One property no test can see:** the comparison is constant-time, and replacing `compare_digest`
+with `==` leaves every test passing — verified by doing it. Only this note and code review protect
+it.
+
+#### `serve/health.py` — it opens the store, because that is what breaks
+
+A probe reporting the process is alive tells you what the request already told you. This opens the
+store through `schema.open_store`, so **version mismatch and schema drift** — the state a deploy
+produces, invisible to a file check — fail the probe. It never raises: an orchestrator needs a
+verdict, not a stack trace.
+
 **Owns:** the HTTP webhook, the CLI, health, configuration, and the contracts at the edge.
 **Must not:** let the two adapters diverge. What a customer verifies with the CLI must be what
 the App runs.
