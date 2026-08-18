@@ -79,6 +79,29 @@ three months stale.
 
 <!-- plan-state:end -->
 
+### How far this document is safe to follow
+
+**Everything up to and including "Stage — The ranker" is current and audited.** Names, statuses and
+figures were checked line by line against the filesystem and against
+`docs/plans/feat-rank-fix-history.md`.
+
+**From "Stage — Allocate, infer, verify" onward, this plan describes a product that publishes model
+findings, and that configuration is closed on evidence.** The reviewer half produces **0.013–0.037
+correct findings per pull request** — one useful comment per 27 to 77 — across nine designs. So the
+sections below are **specifications held in reserve, not a queue to work through**:
+
+| section | what it assumes that is not true |
+|---|---|
+| Stage — Allocate, infer, verify | that `infer/` runs at all |
+| Memory: what we store — the `finding` and `claim` tables | that findings exist to store. **The tables are still worth creating**: the schema is versioned and append-only, and adding them later is a migration |
+| Retention, and the tracking counters | metrics defined over published findings — "reaction rate on published findings", "findings published per review" — measure nothing while none are published |
+| Free tier to revenue, and the tier table | sells "findings" as a paid capability. **Do not quote that table to a customer** until the published-findings bar has held twice |
+
+**None of this is deleted, because the evidence could turn** — the bar for opening `infer/` is
+written in that stage and is unchanged. It is marked so that a reader arriving cold builds the
+ranker rather than the reviewer, which is the mistake this project is most likely to repeat.
+
+
 ### The exact next action
 
 **`store/schema.py` and `store/touches.py`**, then `rank/score.py`. Layer order is
@@ -1039,6 +1062,11 @@ attacker-controlled JSON, and its happy path looks identical.
 
 # Memory: what we store, and why it is not a graph
 
+> **The `finding` and `claim` tables below assume a reviewer that publishes. It does not — see
+> "How far this document is safe to follow". Create the tables anyway: the schema is versioned and
+> append-only, so adding them after the fact is a migration. Do not build anything that WRITES to
+> them.**
+
 The question this section answers: **when the product is wrong, how do we find out, and how do
 we improve it?**
 
@@ -1429,6 +1457,9 @@ the second is not a check.
 
 # Tracking: what we count and what we refuse to
 
+> **Every counter defined over published findings measures nothing today, because none are
+> published.** The ranking and coverage counters are live and are the ones that matter now.
+
 ### The one number
 
 **Weekly active repositories with at least one acted-on finding.**
@@ -1473,6 +1504,9 @@ developer causes it.** That is the fastest way to be uninstalled, and it deserve
 ---
 
 # Free tier to revenue
+
+> **The tier table sells findings as a paid capability and we do not ship them.** Do not quote it
+> to a customer until the published-findings bar has held twice, once with an independent rater.
 
 ### The path
 
