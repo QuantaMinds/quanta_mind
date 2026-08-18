@@ -38,6 +38,8 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
+from quantamind.store import drift
+
 # Bump on ANY change to the DDL below, and write a migration. There is no in-place edit.
 SCHEMA_VERSION = 1
 
@@ -148,4 +150,9 @@ def open_store(path: Path) -> sqlite3.Connection:
     if found != SCHEMA_VERSION:
         conn.close()
         raise SchemaVersionMismatch(path, found, SCHEMA_VERSION)
+    # The version matching is not evidence the tables match: it is a number a human maintains.
+    differences = drift.differences(conn)
+    if differences:
+        conn.close()
+        raise drift.SchemaDrift(path, differences)
     return conn

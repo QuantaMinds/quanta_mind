@@ -38,24 +38,28 @@ three months stale.
 
 | layer | modules | files |
 |---|---|---|
-| `types/` | **6** | `change.py`, `ranking.py`, `review.py`, `settings.py`, `touch.py`, `verdict.py` |
-| `store/` | **2** | `schema.py`, `touches.py` |
-| `ingest/` | **1** | `history.py` |
+| `types/` | **7** | `change.py`, `commit.py`, `ranking.py`, `review.py`, `settings.py`, `touch.py`, `verdict.py` |
+| `store/` | **3** | `drift.py`, `schema.py`, `touches.py` |
+| `ingest/` | **2** | `commits.py`, `history.py` |
 | `parse/` | **0** | — |
-| `rank/` | **1** | `score.py` |
+| `rank/` | **2** | `order.py`, `score.py` |
 | `allocate/` | **0** | — |
 | `infer/` | **0** | — |
 | `verify/` | **0** | — |
-| `render/` | **0** | — |
+| `render/` | **2** | `comment.py`, `coverage_line.py` |
 | `serve/` | **1** | `cli.py` |
 
 <!-- plan-state:end -->
 
 ### The exact next action
 
-**`rank/order.py`, then `rank/discriminate.py`** — the budget, the `Allocation` labels and the
-percentile threshold. The counting half is done and live-verified: `store/touches.py` reproduces
-`defect_return.py`'s scores and orderings exactly on 900 real cases from three repositories.
+**`ingest/diff.py`** — the pull request's changed paths. It is the last hand-fetched piece: the
+live tests currently get changed files from `gh` directly, so the product cannot yet rank a pull
+request end to end without help.
+
+The ranker stage's gates now stand at **2a MET** (zero ordering mismatches over 853 admissible
+events), **2a′ MET** (5.04% against alphabetical's 10.08%), **2c MET**, and **2b UNMET** — it needs
+the research's own pinned repositories and must not be claimed on substitutes.
 
 ---
 
@@ -206,9 +210,10 @@ be backfilled.
 3. **DONE.** `rank/score.py` — `order()`, `discriminate()`, `top()` and `rendered()`. Pure, no
    I/O. `Touch` moved to `types/history.py` during this step: `store/` sits LEFT of `ingest/`, so a
    value object shared by both belongs to the leftmost layer.
-4. `rank/order.py` — `(-score, path)`, the budget of three, and the `Allocation` labels. The
-   percentile threshold lives here: absolute thresholds fired at 11% on one repository and 53% on
-   another, while percentiles self-calibrate to 10–12% across an 80× velocity range.
+4. **DONE.** `rank/order.py` — the budget of three, the `Allocation` labels and the firing
+   percentile. Ranks FILES: `Site(path, line=0)` is what declares that, since function-level
+   top-three misses 8.84% against the file's 1.22%. Does not re-order — the sequence comes from
+   `score.order()` untouched, because gate 2a compares it element by element.
 5. `rank/discriminate.py` — the three-case split from the ranker plan. A `Ranking` that does not
    distinguish *ordered by history* from *no history to order by* claims a capability it did not
    exercise.
@@ -236,10 +241,20 @@ same events as `research/phase0/external/defect_return.py`.
 | | gate | passes when |
 |---|---|---|
 | **2a** | **ordering identity** | `rank/`'s ordering matches `defect_return.py`'s **exactly**. Not "similar" — the same list. A reimplementation that reorders anything has changed the policy, and the policy is what has the p-value |
-| **2b** | **miss rate in interval** | top-3 miss on the pinned repositories falls inside **0.82–1.81%**, the file-level 95% Wilson interval. Outside it in *either* direction, the reimplementation differs from what was measured |
-| **2c** | **all three cases reachable** | a discriminating change, a flat-history change and a no-history change each appear in the golden file with a different rendered line. **A case that never appears in a fixture is a case nothing tests** |
+| **2b** | **miss rate in interval** — **NOT MET** | top-3 miss on **the research's own pinned repositories** falls inside **0.82–1.81%**. Those repositories are not wired up, and the interval must not be applied to substitutes: it describes sampling error on the corpus it was measured on. Replayed on four other repositories the miss ran **1.54% to 17.86%** per repository — real variation, not a defect, since gate 2a passes on the same events |
+| **2a′** | **beats the control** — **MET** | replayed over **853 admissible events** from four repositories, ranker miss **5.04%** against alphabetical **10.08%**. A gate the null also passes is measuring the corpus |
+| **2c** | **all three cases reachable** — **MET** | all three render materially different lines against a reviewed golden file (`tests/unit/golden/coverage_lines.md`). Live, `ordered` and `no_history` both occur and their lines differ; **`flat_nonzero` did not occur in 40 pull requests across five repositories** and is covered by the fixture alone, which the live run prints rather than passing over |
 
-**2a does not wait on the others and it is the one that can end the project.**
+**2a does not wait on the others and it is the one that can end the project. It PASSES**: zero
+ordering mismatches over 853 replayed events, with the event definition — 2–12 files, a
+case-sensitive fix-subject within ninety days, the flat-score skip, the 400-event cap — copied from
+`defect_return.py` rather than chosen.
+
+**Why the miss rate varies so much between repositories, mechanically.** `httpx` events touch 5.3
+files on average against `pip-tools`' 3.4, and top three covers 57% of a 5.3-file change against
+88% of a 3.4-file one. **80% of httpx's misses are files that HAD prior history and lost anyway**,
+so this is not the no-history class — it is the budget meeting larger changes. It is the large-PR
+triage result arriving from a third direction.
 
 **Known-answer test:** break `rank/score.py` to return a constant. Gates 2a and 2b must both fail.
 Breaking only `rank/order.py`'s tie-break would sabotage the entry point — the mechanism is the

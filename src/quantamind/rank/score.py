@@ -16,27 +16,15 @@ WHY:  **This is the policy with the p-value**, and it is a pure function so it c
       against 1.21% overall.** A `Ranking` that cannot distinguish *ordered by history* from *no
       history to order by* claims a capability it did not exercise, so the case is a returned value
       rather than a comment.
-IMPORTS: nothing. Pure functions over plain data.
+IMPORTS: types (Discrimination). Pure functions over plain data otherwise.
 CONSUMED BY: allocate, render, and the live comparison against the research ranker.
 """
 
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from enum import Enum
 
-
-class Discrimination(Enum):
-    """What the scores allowed the ranking to do."""
-
-    ORDERED = "ordered"
-    """Scores differ: the ranking is by history."""
-
-    FLAT_NONZERO = "flat_nonzero"
-    """Every file has the same non-zero count. History exists and does not separate them."""
-
-    NO_HISTORY = "no_history"
-    """Every file scores zero. There is nothing to rank, and the order is alphabetical."""
+from quantamind.types.ranking import Discrimination
 
 
 def order(scores: Mapping[str, int]) -> list[str]:

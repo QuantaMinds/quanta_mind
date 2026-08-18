@@ -17,6 +17,28 @@ from enum import Enum
 from quantamind.types.change import ChangedUnit
 
 
+class Discrimination(Enum):
+    """What the scores allowed the ranking to do — and it is a FIELD, not a comment.
+
+    A `Ranking` over an all-zero score set is alphabetical order wearing a ranking's clothes: every
+    file ties, so `(-score, path)` falls back to `path`, and `__init__.py` outranks the new module
+    the change is actually about. Carrying this on the value means a consumer cannot read positions
+    off a ranking that never ranked anything.
+
+    **This is the slice that misses most** — 4.46% against 1.21% overall, 3.3x worse — so it is the
+    one where a fabricated ordering does the most damage.
+    """
+
+    ORDERED = "ordered"
+    """Scores differ: the ranking is by history."""
+
+    FLAT_NONZERO = "flat_nonzero"
+    """Every file has the same non-zero count. History exists and does not separate them."""
+
+    NO_HISTORY = "no_history"
+    """Every file scores zero. Nothing was ranked; any order shown is alphabetical."""
+
+
 class Allocation(Enum):
     """How much attention a unit gets. COLD is a decision, not an oversight.
 
@@ -73,6 +95,7 @@ class Ranking:
     units: tuple[RankedUnit, ...] = field(default_factory=tuple)
     fired: bool = False
     threshold_percentile: float = 0.9
+    discrimination: Discrimination = Discrimination.ORDERED
 
     def __post_init__(self) -> None:
         ranks = [ranked.rank for ranked in self.units]
@@ -81,6 +104,10 @@ class Ranking:
         if len(set(ranks)) != len(ranks):
             raise ValueError("Ranking.units contains a duplicate rank")
 
+    def ranked(self) -> bool:
+        """Whether the positions below mean anything at all."""
+        return self.discrimination is not Discrimination.NO_HISTORY
+
     def funded(self) -> tuple[RankedUnit, ...]:
         """The units the review asks a reader to look at first. Everything else is cold, by design.
 
@@ -88,6 +115,12 @@ class Ranking:
         because the ranking is the measured half: 1.53% of changes a later fix returns to are
         missed at a three-unit budget, against 2.97% ordering the same units alphabetically.
         """
+        if not self.ranked():
+            # Funding is a claim that these units were CHOSEN. With every score at zero nothing was
+            # chosen, and returning the alphabetical first three would publish sort(filenames) as a
+            # judgement about risk. The units are still carried -- see `units` -- and the coverage
+            # line is where their existence is reported.
+            return ()
         return tuple(u for u in self.units if u.allocation is not Allocation.COLD)
 
     def cold(self) -> tuple[RankedUnit, ...]:

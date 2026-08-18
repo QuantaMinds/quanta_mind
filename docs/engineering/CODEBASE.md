@@ -415,6 +415,59 @@ runs here" stays falsifiable. → `docs/product/review-half-record.md`
 
 ### `store/`
 
+#### `ingest/commits.py` — the only place the product runs `git log`
+
+`read_commits()` returns one `Commit(committed_at, subject, paths)` per non-merge commit, **oldest
+first**, and `assert_readable()` refuses a shallow or blob-filtered clone. Three defences live here
+because all three failures have happened before:
+
+- **The exit code is checked before the output is parsed.** A damaged clone emits a plausible,
+  truncated stream *and* exits non-zero; ignoring the code voided four measurements.
+- **Bytes are decoded with `errors="replace"`, never `text=True`.** Real subjects and filenames
+  carry non-UTF-8 bytes, and `text=True` raises `UnicodeDecodeError` from inside subprocess — an
+  unhandled crash rather than a typed failure. `ingest/history.py` shipped with that defect and it
+  was found while building the replay gate.
+- **`core.commitGraph=false`.** A graph file naming a tip absent from the object database makes git
+  exit 128 on a clone that looks fine; `git fetch --refetch` did not fix the one that failed this
+  way.
+
+**`%x00`/`%x01` are git's escapes and stay two-character sequences in argv.** An actual NUL cannot
+be passed to `execve`. This module reintroduced the bug `history.py` had already been fixed for,
+and the same tests caught it the same way twice.
+
+`ingest/history.py` is now a derivation over this module rather than a second `git log`, so there
+is one decode policy and one place the exit code can be forgotten.
+
+#### The ranker's replay gate — `tests/live/test_event_replay_gate.py`
+
+Replays the research event definition — 2–12 files, a **case-sensitive** fix-subject within ninety
+days, the flat-score skip, the 400-event cap, every parameter copied from `defect_return.py` — and
+holds the product to it.
+
+**Gate 2a passes: zero ordering mismatches over 853 admissible events** from four repositories.
+**The ranker beats the control: 5.04% miss against alphabetical's 10.08%.**
+
+**Gate 2b is NOT met and is not claimed.** The research's 1.22% [0.82, 1.81] describes sampling
+error on *its* corpus; applying it to substitute repositories is a category error. Replayed
+elsewhere the miss ran **1.54% to 17.86%** per repository — and the cause is mechanical, not a
+defect: `httpx` events touch 5.3 files on average against `pip-tools`' 3.4, and top-three covers
+57% of the first against 88% of the second. **80% of httpx's misses are files that had prior
+history and lost anyway**, so it is the budget meeting larger changes, not the no-history class.
+
+#### `store/drift.py` — because the version number cannot detect drift
+
+`CREATE TABLE IF NOT EXISTS` is silent about a table that already exists with the **wrong shape**,
+and `SCHEMA_VERSION` is bumped by hand. Together they let a store open cleanly while missing a
+column: `version()` reports a match, `create()` changes nothing, and the first wrong answer arrives
+later as data.
+
+Demonstrated before the fix: a database whose `touch` table lacked `committed_at`, stamped
+`user_version = 1`, opened without complaint. It now raises `SchemaDrift` naming what differs.
+
+**The expected shape is derived, not written down** — this build's DDL is applied to a throwaway
+in-memory database and `sqlite_master` read back, because a second hand-maintained copy of the
+schema is a second thing to forget to update, which is the failure being caught.
+
 #### `store/touches.py` — the index, and the half-open window that is the whole product
 
 `index()` writes `Touch` values, `counts()` returns prior-touch counts per path over
@@ -429,6 +482,49 @@ ones.
 **`index()` replaces rather than appends.** Git history for a path is a fact, not an event stream:
 a repository ingested twice would double every count *evenly* — an error that moves no ordering,
 passes every ordering test, and corrupts the percentile that decides whether we fire.
+
+#### What happens when a change has no history
+
+**Nothing is funded, and no order is published.** Every score ties at zero, so `(-score, path)`
+falls back to `path` — `__init__.py` would outrank the new module the change is actually about.
+
+`Ranking` carries a `discrimination` field for this reason: a consumer reading positions off a
+ranking that never ranked anything is the failure the field exists to prevent. `funded()` returns
+`()` and every unit is labelled COLD, **but the units are all still carried**, because they are the
+coverage line's content — the answer to "what did you not look at" is the product.
+
+**This is the slice that misses most** — 4.46% against 1.21% overall, 3.3x worse — so it is also
+where a fabricated ordering does the most damage, and where the open policy question sits: whether
+this slice should instead be read in full precisely because it cannot be ranked. That is an
+`allocate/` decision and `allocate/` is not built.
+
+**Two mechanisms enforce it and each is tested separately.** `rank()` labels everything COLD, and
+`Ranking.funded()` returns nothing when `ranked()` is False. Sabotaging either one alone left the
+suite green — the other still produced the right answer — so there is a test that hands `Ranking` a
+NO_HISTORY discrimination with funded-looking labels and requires the discrimination to win.
+
+#### `rank/order.py` — the budget, the labels, and whether we speak at all
+
+`score.py` decides the ORDER, which is the half with the p-value. This decides how much of that
+order gets funded and whether we open our mouth — two different failures: a wrong order misses
+defects, a wrong threshold buries the customer or goes silent for a month.
+
+**The firing rule is a percentile, not an absolute score.** An absolute threshold fired on 11% of
+one repository and 53% of another; percentiles self-calibrate to 10-12% across an 80x velocity
+range. **It does not fire on the no-history case** — with every file at zero the ordering is
+alphabetical, and firing would present `sort(filenames)` as a judgement about risk.
+
+**It ranks FILES, and `Site(path, line=0)` is what declares that** — zero means the whole file.
+Function-level top-three misses 8.84% against the file's 1.22%, so a site naming a line would claim
+a resolution the ranking does not have.
+
+**It does not re-order.** The sequence comes from `score.order()` untouched, because gate 2a
+compares it against the research ranker element by element.
+
+**Known weakness, stated in the module:** the percentile is computed against the change's own
+scores, which on a two-file change is nearly meaningless. A repository-wide distribution would be
+better and needs the store to carry one, so `fires()` takes the threshold as an argument rather
+than assuming it.
 
 #### `rank/score.py` — the policy with the p-value, kept pure
 
@@ -543,6 +639,45 @@ on 1,000 pull requests, so this is an unsolved problem rather than a local defec
 → `docs/product/review-half-record.md`
 
 ### `render/`
+
+#### `render/coverage_line.py` — the residual, stated first
+
+`coverage_line()` says what was ranked, what was read, what was **not**, and why. It differs
+materially per case, and that is gate 2c: a line reading the same whatever happened would be equally
+convincing if the ranker had never run.
+
+**It names files, never only counts.** "1 file not read" is unfalsifiable; ``not read:
+`src/pay/ledger.py` `` can be checked against the diff by the person reading it. A test renders two
+fixtures with different unresolved sets and requires the lines to differ.
+
+**A no-history change says so in its first clause** and tells the reader to read the files
+themselves, because that slice misses most — 4.46% against 1.21%.
+
+**An empty ranking raises `NothingToReport`** rather than producing a bland sentence, which would
+be the false reassurance the line exists to prevent.
+
+#### `render/comment.py` — coverage above the table, and no claims
+
+The coverage line is **first**, and that is not style: a reader who sees the list before the
+coverage weighs it against nothing. A test asserts the ordering and a sabotage that moves the table
+above it turns red.
+
+**`fired=False` returns None, not a cheerful "nothing to report".** Silence is a decision the
+caller records; a reassuring sentence would be a claim we did not earn and would train readers to
+ignore the comments that matter.
+
+**The comment asserts nothing about correctness**, and a test greps the body for `bug`,
+`vulnerabilit`, `incorrect` and `you should fix` to keep it that way — `infer/` is closed on
+evidence and we publish no findings.
+
+#### Gate 2c — met, with one case the wild did not supply
+
+All three cases render differently against `tests/unit/golden/coverage_lines.md`. Live,
+**`ordered` and `no_history` both occur and their lines differ**; **`flat_nonzero` did not occur in
+40 pull requests across five repositories**, so it is covered by the fixture alone. The live run
+prints which cases it did not see rather than passing over them, because "we never saw it" and "it
+works" are different facts.
+
 **Owns:** the comment body, the coverage line, the digest, the report.
 **Must not:** state or imply that a piece of code is wrong. It reports where fix history
 concentrates and what was not read. Every line it prints is derived from git or from a counter.
