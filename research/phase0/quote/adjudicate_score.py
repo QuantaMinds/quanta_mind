@@ -71,7 +71,7 @@ def main() -> int:
     print("      design 1  66.7% / 74.2% wrong      design 2  61.1%")
     print("      design 3  82.1%   design 4  66.7%  design 5  77.8%   design 6b  52.4%")
     verdict = "PASS" if wrong < WRONG_BAR and unfals < UNFALS_BAR else "FAIL"
-    print(f"\n  DESIGN EIGHT: {verdict}")
+    print(f"\n  DESIGN {WHICH}: {verdict}")
     return 0
 
 
