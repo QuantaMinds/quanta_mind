@@ -102,3 +102,36 @@ def run(check: Callable[..., None]) -> None:
         True,
     )
     check("design 11 arm E fails it", len(d11["arm_e"]["published"]) / n11 < 0.30, True)
+
+    # --- the binding number: correct findings per pull request, and what excluding CI costs ---
+    def _ci(path: str) -> bool:
+        return path.startswith(".github/") or path.endswith((".yml", ".yaml"))
+
+    real = [
+        (k["arm"], _ci(str(k["path"])), _bucket(i)) for i, k in key.items() if k["kind"] == "real"
+    ]
+    for arm, want_all, want_off in (("A", 2, 1), ("B", 2, 1), ("C", 3, 1)):
+        allc = sum(1 for r in real if r[0] == arm and r[2] == "CORRECT")
+        offc = sum(1 for r in real if r[0] == arm and not r[1] and r[2] == "CORRECT")
+        check(f"arm {arm} CORRECT findings, all files", allc, want_all, 0)
+        check(f"arm {arm} CORRECT findings off CI config", offc, want_off, 0)
+    ci_c = sum(1 for r in real if r[1] and r[2] == "CORRECT")
+    ci_w = sum(1 for r in real if r[1] and r[2] == "WRONG")
+    all_c = sum(1 for r in real if r[2] == "CORRECT")
+    all_w = sum(1 for r in real if r[2] == "WRONG")
+    check(
+        "CI config CORRECT-rate %", round(ci_c / sum(1 for r in real if r[1]) * 100, 1), 11.1, 0.1
+    )
+    check(
+        "off-CI CORRECT-rate %",
+        round((all_c - ci_c) / sum(1 for r in real if not r[1]) * 100, 1),
+        6.0,
+        0.1,
+    )
+    check("share of CORRECT lost by excluding CI %", round(ci_c / all_c * 100, 0), 57, 1)
+    check("share of WRONG lost by excluding CI %", round(ci_w / all_w * 100, 0), 53, 1)
+    check(
+        "excluding CI costs proportionally MORE correct than wrong",
+        ci_c / all_c > ci_w / all_w,
+        True,
+    )

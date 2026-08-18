@@ -93,3 +93,96 @@ Four designs now owe an independent grader.
   same hedging happens here, the wrong-rate falls without the reviewer becoming more useful, and
   **H1 would pass for a reason nobody should be happy about.** The CORRECT-rate is therefore
   reported beside it every time, never on its own.
+
+---
+
+# AMENDMENT, before any model call: the exclusion trades the wrong way
+
+Recomputing design thirteen's adjudication by file kind AND bucket — not just by wrongness —
+inverts this design's premise. It is recorded here rather than quietly fixed, because the original
+bars above would have passed while the reviewer got less useful.
+
+**CI config has a HIGHER correct-rate than everything else.**
+
+| slice | n | CORRECT | correct-rate | wrong-rate |
+|---|---|---|---|---|
+| CI config | 36 | 4 | **11.1%** [4.4, 25.3] | 66.7% |
+| everything else | 50 | 3 | **6.0%** [2.1, 16.2] | 42.0% |
+
+**Excluding CI config removes 24 of 45 wrong findings (53%) and 4 of 7 correct ones (57%).** It
+takes out a larger share of the correct findings than of the wrong ones, and a larger share of the
+correct findings than of the corpus (42%). The intervals overlap, so this is not a significant
+reversal — but there is **no evidence the exclusion improves the correct-rate, and the point
+estimate goes the wrong way.**
+
+**Off CI config, every arm produced exactly ONE correct finding across 80 pull requests.**
+
+| arm | CORRECT, all files | per PR | CORRECT off-CI | per PR |
+|---|---|---|---|---|
+| A | 2 | 0.025 | 1 | **0.013** |
+| B | 2 | 0.025 | 1 | **0.013** |
+| C | 3 | 0.037 | 1 | **0.013** |
+
+**That is one useful comment per 77 pull requests.** Design thirteen's data therefore predicts H1
+passes — off-CI pooled wrong-rate is already 42.0%, and arms B and C sit at 38.5% and 28.6% — while
+the reviewer produces almost nothing. **H1 passing on its own would be arithmetic on a shrinking
+denominator, and this document would report an improvement that no maintainer would feel.**
+
+## Revised bars: the correct-rate is a BAR, not a note
+
+**H0 (new, primary, and it gates every other result).** **Correct findings per pull request ≥ 0.10**
+— one useful comment per ten pull requests, against design thirteen's best arm at 0.037 and its
+best off-CI arm at 0.013. This metric is chosen because **it cannot be improved by removing wrong
+findings.** Excluding a file kind can only lower it.
+
+**H1 is demoted to secondary** and may no longer be reported alone. A pass on H1 with a fail on H0
+is written up as **the exclusion working exactly as predicted and not producing a reviewer.**
+
+**H5 (kill condition).** If H0 fails and the correct-per-pull-request figure has not risen above
+design thirteen's, **no further path-filter design is warranted.** Filters move the ratio; the
+binding constraint is that the model rarely says anything correct. Three filters have now been
+tried on this half.
+
+## What this implies about running design 14 at all
+
+Design thirteen's data already predicts most of design 14's outcome, and a fresh six-repository
+corpus is a scarce resource — **38 repositories are spent.** Running an exclusion-only design to
+confirm arithmetic we can already do is a poor use of one.
+
+**So design 14 should not run as an exclusion-only test.** It runs only paired with a mechanism
+that could raise H0, and the one remaining candidate with a published effect size is **multi-review
+aggregation** — reviewing each pull request several times independently and keeping only findings
+that recur. It is orthogonal to gating and to context, and it targets the correct-rate rather than
+the wrong-rate.
+
+**And it has a testable tension with our own result, which is pre-registered here as the thing that
+would kill it.** Design thirteen's dominant failure was TRACE — the model failing to follow code it
+had already been shown. **Independent runs may repeat the same trace error rather than disagreeing
+about it**, in which case aggregation reinforces the error instead of filtering it.
+**Prediction: TRACE-caused findings recur across independent runs at a HIGHER rate than EXTERNAL
+ones.** If they do, aggregation cannot fix the class that matters and this half is finished.
+
+## The pattern these mechanisms keep showing
+
+Named because it has now happened three times. The ±10-line window converted WRONG into
+UNFALSIFIABLE. The conventions file did the same — WRONG −2, UNFALSIFIABLE +4, CORRECT +1. The
+decidability gate did it by construction. **Several mechanisms move findings toward "cannot be
+decided" rather than toward "correct."** That is honest output and it is worth having, but a
+reviewer that reliably says "I cannot tell" is not a reviewer.
+
+## External corroboration, with its caveat
+
+Two published results reported by the reviewer of this work and **not independently verified here**:
+
+- **AACR-Bench** (200 pull requests, 50 projects, 10 languages) reports that context retrieval is
+  not universally beneficial and that naive retrieval can degrade strong models — an effect named
+  *Contextual Backwardness*. **That is design thirteen's H1/H2 split described from outside**, which
+  makes our result less likely to be a local artefact.
+- Agent-based methods there show high precision (Claude-4.5-Sonnet 39.90%) with low recall
+  (10.10%). **That is arm C's shape**, suggesting the yield failure is a property of gated-agent
+  architectures rather than our configuration.
+
+**The caveat belongs beside any citation of it:** AACR-Bench's ground truth is 391 real review
+comments augmented with 1,114 LLM-generated ones, verified by senior engineers. Machine-generated
+then human-checked is not the same object as a human-authored gold set, and this project does not
+quote a number without saying what produced it.

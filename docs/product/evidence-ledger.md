@@ -336,6 +336,12 @@ Off CI config the wrong-rate runs 52.2 → 38.5 → 28.6%, but that is **post-ho
 overlap almost completely at n = 13 and n = 14** — consistent with the mechanisms working and
 equally consistent with noise.
 
+**The correct-rate is the binding number and it is worse than the wrong-rate.** Off CI config,
+every arm produced **exactly one correct finding across 80 pull requests** — 0.013 per pull
+request, one useful comment per 77. And CI config's correct-rate (11.1%) is HIGHER than everything
+else's (6.0%), so excluding it removes **57% of the correct findings against 53% of the wrong** — a
+worse trade than random. A path filter cannot fix a model that rarely says anything correct.
+
 **This does not count toward replication.** The rater designed the run. Arm labels were blind and
 every planted control was caught, but designer bias is unguarded — **four designs now owe an
 independent grader.** Design 11's arm R cleared yield at 0.40/PR but is unadjudicated, so the

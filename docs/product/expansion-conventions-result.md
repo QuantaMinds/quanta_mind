@@ -119,6 +119,31 @@ published anchor derives from where an added line sits. It held across **664 rea
 look-back from 5 to 60**, five sabotages each broke the whole mechanism rather than its entry
 point, and `run13.py` aborts on a single shift.
 
+## The binding number is the CORRECT-rate, and it is worse than the wrong-rate
+
+| arm | CORRECT, all files | per PR | CORRECT off-CI | per PR |
+|---|---|---|---|---|
+| A | 2 | 0.025 | 1 | **0.013** |
+| B | 2 | 0.025 | 1 | **0.013** |
+| C | 3 | 0.037 | 1 | **0.013** |
+
+**Off CI config, every arm produced exactly one correct finding across 80 pull requests — one
+useful comment per 77.** The wrong-rate has been the headline all along; this is the more damning
+number, and it is immune to the denominator games a path filter can play.
+
+**And CI config has a HIGHER correct-rate (11.1%) than everything else (6.0%).** Excluding it
+removes 53% of the wrong findings and **57% of the correct ones** — a worse trade than removing
+findings at random. The intervals overlap so the reversal is not significant, but there is no
+evidence the exclusion raises the correct-rate and the point estimate goes the wrong way. Design
+14 is amended accordingly: correct-findings-per-pull-request becomes a **bar**, not a note.
+
+## The pattern: these mechanisms buy caution, not accuracy
+
+Three times now. The ±10-line window converted WRONG into UNFALSIFIABLE. The conventions file did
+the same — WRONG −2, UNFALSIFIABLE +4, CORRECT +1. The decidability gate does it by construction.
+**Several mechanisms move findings toward "cannot be decided" rather than toward "correct."** That
+is honest output and worth having. It is not a reviewer.
+
 ## What this does not license
 
 - **The rater designed the experiment.** Arm labels were blind and all ten planted controls were
