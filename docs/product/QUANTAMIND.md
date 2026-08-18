@@ -627,6 +627,28 @@ on `bokeh#15337` both the test and the implementation it depended on were in the
 model still got it backwards. **Decidability is a statement about the input, never about the
 answer.**
 
+### The label separates, and this is the measurement
+
+**Design ten's findings, split by the label the product would print:**
+
+| label | n | WRONG | rate | 95% CI |
+|---|---|---|---|---|
+| **"decidable from the diff"** | 14 | **0** | **0.0%** | 0.0–21.5% |
+| **"needs a deeper look"** | 15 | **9** | **60.0%** | 35.7–80.2% |
+
+**Fisher exact p = 0.0007.**
+
+**This is the only number from the review-half work that is about the PRODUCT rather than about a
+benchmark.** Eleven designs chased a wrong-rate; what they produced instead is a label that sorts
+findings into two piles a developer can act on differently.
+
+**Three things it does NOT say.** The intervals are wide at n = 29. The rater graded WRONG using
+reasoning correlated with the gate's rule, so the separation is partly structural. And nothing here
+shows that acting on the label prevents anything — that is the pilot.
+
+**What it does say:** we can print *"we cannot verify this from what we saw"* and have it mean
+something measurable. **No competitor prints that sentence at all.**
+
 ### And the label is not calibrated yet
 
 **We have the label. We do not have the calibration.** Saying "merge with confidence" requires
