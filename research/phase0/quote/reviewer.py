@@ -43,6 +43,10 @@ For each defect return three fields:
 - "claim": one sentence naming the defect and why it is wrong.
 - "fix": the corrected code that should replace the quoted line.
 
+- "evidence": a SECOND exact quote from the diff which, together with "quote", is what makes
+  the claim true. If you cannot find one in the diff, you do not have grounds for the claim --
+  drop it. Write "SAME" only when the claim rests entirely on the quoted line itself.
+
 Do not give line numbers. The quote is how the finding is located.
 
 Report at most {max_findings}. If the change looks correct, return [] -- that is a valid answer.
@@ -53,7 +57,7 @@ Pull request: {title}
 {diff}
 ```
 
-Respond with ONLY a JSON array of objects, each with keys "quote", "claim", "fix"."""
+Respond with ONLY a JSON array of objects, each with keys "quote", "claim", "evidence", "fix"."""
 
 
 class ReviewFailed(RuntimeError):
@@ -92,6 +96,7 @@ def _parse(text: str) -> list[dict[str, str]]:
             {
                 "quote": str(item.get("quote") or ""),
                 "claim": str(item.get("claim") or ""),
+                "evidence": str(item.get("evidence") or ""),
                 "fix": str(item.get("fix") or ""),
             }
         )

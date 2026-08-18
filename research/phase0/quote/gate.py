@@ -137,6 +137,16 @@ def check(
     if NIT.search(claim):
         failed.append("G-nit")
 
+    # G-evidence: the second quote must be findable too. A claim resting on a chain the model
+    # never verified is the 38% of failures the decidability gate cannot reach -- 21% where the
+    # supporting code WAS in the diff and it did not look, 17% where it was not there at all.
+    # Presence is checkable by string search; RELEVANCE is not, and that gap is pre-registered
+    # as where this is expected to fail.
+    evidence = str(finding.get("evidence") or "")
+    cites = evidence.strip() and evidence.strip().upper() != "SAME"
+    if cites and locate(evidence, added) is None:
+        failed.append("G-evidence")
+
     return {
         "ok": not failed,
         "failed": failed,
@@ -146,5 +156,7 @@ def check(
         "quote": quote,
         "fix": fix,
         "unseen": unseen,
+        "evidence": evidence,
+        "cites_evidence": bool(cites),
         "hunk_size": sizes.get(hunk, 0),
     }

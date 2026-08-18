@@ -47,6 +47,15 @@ REPOS_D10 = (
     "python-attrs/attrs",
     "psycopg/psycopg",
 )
+# Design eleven. Six more, verified unused against the 54 burned.
+REPOS_D11 = (
+    "encode/starlette",
+    "Textualize/rich",
+    "redis/redis-py",
+    "tox-dev/tox",
+    "agronholm/anyio",
+    "marshmallow-code/marshmallow",
+)
 PER_REPO = 10
 PER_REPO_D9 = 15
 PER_REPO_D10 = 10
