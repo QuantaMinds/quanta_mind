@@ -938,6 +938,32 @@ When you add or move a module:
 5. Run `just check`. There is no `just docs-sync` — this file is written, not generated. documented-command:unbuilt
 
 
+## The retrospective
+
+`uv run quantamind retrospective <clone>` replays the ranker over a repository's own history and
+reports what it would have said. It needs a clone and nothing else — no App, no token, no webhook,
+nothing leaving the machine — which is the point: a sceptic runs it before granting access.
+
+**It reports against exact hypergeometric chance, not only alphabetical.** `rank/baseline.py`
+carries the formula, copied from `research/phase0/claims/stats.py`. The preregistration retired
+alphabetical as a sole control: its strength depends on directory layout, and in `home-assistant`
+it beat chance by +1.75 because `components/<name>/__init__.py` sorts first and is also the
+churn-heavy file. Measured again on `pallets/click`, unprompted: alphabetical sits +1.89 above
+chance there.
+
+**It stratifies by file count, because the pooled number oversells by construction.** A budget of
+three reads a three-file change entirely, so no arm can miss. That is 62–87% of events on every
+corpus measured, and the pooled figure is diluted about threefold: on the pinned six, 1.05% against
+chance's 2.76% pooled, versus 3.14% against 8.21% where a ranking decides anything.
+
+**The bound is `as_of=event.at` over `[at − 365d, at)`, half-open.** A retrospective that leaks
+looks brilliant and no customer can audit it.
+`tests/unit/layers/test_retrospective_bound.py` builds a repository whose verdict flips if the
+bound is removed — one event, hits 0 honest against 1 leaked — and asserts both directions.
+
+**`rank/events.py` is the single definition of an admissible event.** It was written out twice in
+test files before this module existed and the copies drifted; the third copy would have been the
+one a customer reads.
 ## The firing rule, and a knob that governs nothing
 
 `rank.order.fires()` returns False when every changed file scores zero, and True otherwise. That

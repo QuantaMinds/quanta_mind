@@ -56,9 +56,27 @@ class Allocation(Enum):
 class Score:
     """A unit's rank input, with the percentile that decides whether we speak at all.
 
-    Both numbers are kept. The raw value is what ordering uses; the percentile is what the
-    firing rule uses, because an absolute threshold fired on 11% of one repository and 53%
-    of another -- the same rule an order of magnitude apart in volume.
+    Both numbers are kept. The raw value is what ordering uses.
+
+    **THE PERCENTILE IS NOT USED BY ANY FIRING RULE, AND THIS DOCSTRING USED TO SAY IT WAS.**
+    `rank.order.fires()` decides on `max(scores) > 0`; `Settings.threshold_percentile` is read
+    from the environment, validated and printed by `quantamind config`, and governs nothing.
+
+    The justification given here was "an absolute threshold fired on 11% of one repository and
+    53% of another -- the same rule an order of magnitude apart in volume". **No artefact in this
+    repository computes a firing rate**, and no research script mentions one: the allocation
+    variants tested WHICH units to read, and V3's score-gap stopping was a budget rule that lost
+    to V0. Replayed on the pinned corpus, an absolute threshold on the top file's score fires at
+    94.5-99.8% (top>=1) through 48.8-94.5% (top>=10) -- a spread of 1.1x to 1.9x, never an order
+    of magnitude, and never near 11%.
+
+    **That is not proof the sentence was invented.** The measurement above is over admissible
+    EVENTS, and whatever produced 11%/53% may have been over all pull requests, where changes
+    with no history at all would drag both rates down. The claim is left in place, marked, rather
+    than deleted: an earlier edit deleted the 4.61% figure for looking unsourced and it was
+    sourced -- `degenerate_rate.json` produces it exactly. **Removing a citation on a failed grep
+    is the same defect as inventing one.** Someone should find the artefact or run the
+    measurement; until then neither the sentence nor its deletion is supported.
     """
 
     value: float

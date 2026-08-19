@@ -17,9 +17,14 @@ from __future__ import annotations
 
 import argparse
 from collections.abc import Sequence
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from quantamind import __version__
 from quantamind.types.settings import Settings, SettingsError, load
+
+# Large enough that no real history reaches it; not None, so the type stays one thing.
+UNCAPPED = 10**9
 
 # Commands named in AGENTS.md that have no implementation behind them yet. They parse and
 # exit non-zero with the stage that will deliver them, rather than exiting 0 having done
@@ -27,7 +32,6 @@ from quantamind.types.settings import Settings, SettingsError, load
 # work it never did.
 UNBUILT: dict[str, str] = {
     "review": "the reader, ranker and render stages",
-    "retrospective": "the retrospective stage",
     "serve": "the serve stage",
 }
 
@@ -41,6 +45,11 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command")
 
     subparsers.add_parser("config", help="print the resolved configuration and exit")
+    walk = subparsers.add_parser(
+        "retrospective", help="replay the ranker over a clone's own history and report"
+    )
+    walk.add_argument("clone", type=Path, help="path to a full clone; nothing is sent anywhere")
+    walk.add_argument("--repo", default="local/clone", help="owner/name, for the report heading")
     for name, stage in UNBUILT.items():
         subparsers.add_parser(name, help=f"NOT BUILT — arrives with {stage}")
     return parser
@@ -61,6 +70,28 @@ def render_config(settings: Settings) -> str:
     return "\n".join(lines)
 
 
+def _retrospective(clone: Path, repo: str) -> int:
+    """Replay one clone and print the report. The index is scratch and is thrown away.
+
+    Imported here rather than at module scope so `quantamind config` and `--version` do not pay
+    for the ranker, and so a broken layer below cannot stop the CLI reporting its own version.
+    """
+    from quantamind.render.replay_report import report
+    from quantamind.serve.retrospective import replay
+
+    if not (clone / ".git").exists():
+        print(f"{clone} is not a git clone; a retrospective reads history and nothing else")
+        return 1
+    with TemporaryDirectory() as scratch:
+        # NO CAP. `MAX_EVENTS` exists so one large repository cannot dominate a POOLED
+        # cross-repository figure; a retrospective pools nothing, so capping here would discard
+        # the customer's own history and then report it as short of the floor. scrapy has 1,447
+        # admissible events and the capped run announced "132 short of 500".
+        outcome = replay(clone, repo, Path(scratch) / "index.db", cap=UNCAPPED)
+    print(report([outcome]))
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Entry point. Returns an exit code rather than calling sys.exit, so tests can assert it."""
     parser = build_parser()
@@ -77,6 +108,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             "See docs/plans/implementation.md for the stage and its gate."
         )
         return 2
+
+    if args.command == "retrospective":
+        return _retrospective(args.clone, args.repo)
 
     try:
         settings = load()
