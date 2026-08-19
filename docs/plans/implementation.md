@@ -47,13 +47,22 @@ three months stale.
 | `infer/` | **0** | — |
 | `verify/` | **0** | — |
 | `render/` | **2** | `comment.py`, `coverage_line.py` |
-| `serve/` | **1** | `cli.py` |
+| `serve/` | **3** | `cli.py`, `health.py`, `webhook_github.py` |
 
 <!-- plan-state:end -->
 
 ### The exact next action
 
-**`serve/webhook_github.py`** — the reader stage is otherwise complete. Every layer from git to a
+**The HTTP binding, and gate 2b.** Everything from a webhook payload to a posted comment now
+exists as decisions; nothing yet listens on a socket. That is a dependency choice — stdlib
+`http.server` or a framework — and it is the first thing in this project that would add a runtime
+dependency.
+
+**One property is unprotected and it is written down rather than assumed.** The signature
+comparison is constant-time; replacing `compare_digest` with `==` leaves every test passing.
+Verified by doing it.
+
+The reader stage is otherwise complete. Every layer from git to a
 rendered comment now exists; nothing yet listens for a pull request.
 
 **The posting gap is closed.** `post()` has written a real comment, refused a duplicate on the same
@@ -361,8 +370,15 @@ number it produces is the one shown to prospects, and no customer can audit the 
 
 ### Steps
 
-1. `serve/webhook_github.py` — verify the signature, enqueue, return 200 fast.
-2. `serve/health.py` — liveness that fails when the store is unreachable.
+1. **DONE (decisions only).** `serve/webhook_github.py` — `verify()` authenticates a delivery,
+   `interpret()` decides whether it is ours to act on. **An absent secret RAISES rather than
+   skipping verification**, which is how an endpoint becomes an open command channel while every
+   test that supplies a secret passes. **No HTTP binding yet**: `pyproject.toml` declares
+   `dependencies = []`, so the socket layer is a separate decision about whether to take a
+   framework or use stdlib.
+2. **DONE.** `serve/health.py` — it OPENS the store rather than pinging it, because version
+   mismatch and schema drift are what a deploy produces and both are invisible to a file check.
+   It never raises: an orchestrator needs a verdict, not a stack trace.
 
 ### Gate
 

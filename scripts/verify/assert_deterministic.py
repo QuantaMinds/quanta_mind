@@ -10,6 +10,16 @@ WHY:  A ranking that changes between two runs over identical input is a ranking 
       rows.
 
       **A pack with no rows passes vacuously, so an empty run is a failure**, not a pass.
+
+      **Wall-clock columns are excluded BY NAME, and the names are printed every run.** `repo`
+      records `first_seen` from the clock, so two builds a second apart differ and no golden pack
+      could ever match one. Excluding it silently would hide that; excluding it by name means the
+      exclusion list cannot grow without someone reading it. Everything the ranking depends on —
+      every row of `touch` — is compared.
+
+      **This check passed for a week by luck.** Both builds finished inside the same second, so the
+      timestamps agreed and the digests matched. It only failed once a slower run crossed a second
+      boundary. A check that passes because the machine was fast is not a check.
 IMPORTS: stdlib only (argparse, hashlib, pathlib, sqlite3, subprocess, sys).
 CONSUMED BY: `just verify-determinism`.
 """
@@ -23,9 +33,13 @@ import sqlite3
 import subprocess
 import sys
 
+# Columns written from the clock rather than from the repository. Named, not pattern-matched, so
+# the list cannot grow without a human adding a line here.
+VOLATILE: dict[str, set[str]] = {"repo": {"first_seen"}}
+
 
 def content_digest(pack: pathlib.Path) -> tuple[str, int]:
-    """(digest over every row of every table, total row count)."""
+    """(digest over every row of every table, total row count), excluding wall-clock columns."""
     conn = sqlite3.connect(pack)
     tables = sorted(
         str(r[0])

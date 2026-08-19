@@ -532,6 +532,26 @@ Demonstrated before the fix: a database whose `touch` table lacked `committed_at
 in-memory database and `sqlite_master` read back, because a second hand-maintained copy of the
 schema is a second thing to forget to update, which is the failure being caught.
 
+#### The prior-touch count, cross-checked against git itself
+
+Gate 2a proves we reproduce the RESEARCH ranker. It cannot prove the research index is what git
+would say — both come from the same `--name-only` read, so a shared misreading would agree with
+itself. `tests/live/test_counts_match_git.py` asks git a different question and requires the same
+answer. **25 live files, exact agreement.**
+
+Two properties surfaced doing it, both real and neither a bug:
+
+**The oracle must be `--full-history`.** Plain `git log -- <path>` applies history simplification,
+omitting commits whose content matched a parent — it reported 6 where our index had 7 for
+`src/flask/ctx.py`. Our index is every commit that touched the file, which is what a touch *count*
+means. The first version of that test failed the product for being right.
+
+**Deleted files undercount, unreachably.** Under a wildcard pathspec `git log --name-only` does not
+report the commit that deletes a file, so our index is one short for such paths — three of fifty in
+an unrestricted sample, every one absent from HEAD. **A file that no longer exists cannot appear in
+a future pull request**, so it can never be ranked. The research index has the identical property,
+by the identical invocation.
+
 #### `store/touches.py` — the index, and the half-open window that is the whole product
 
 `index()` writes `Touch` values, `counts()` returns prior-touch counts per path over
@@ -693,7 +713,18 @@ not a dependency** — `pyproject.toml` declares `dependencies = []`. `AGENTS.md
 The table is public and prints in the coverage line, because a silently skipped language is
 indistinguishable from one we read and found nothing in.
 
-#### Every failure path, and the two that return by design
+#### Every failure path, and the ten that return by design
+
+**27 paths triggered: 17 raise, 10 return a value, and every returned value carries its reason.**
+A signature rejection is a *response* to hostile input rather than an exception — the HTTP layer
+turns it into a 401 — and a health probe that raised would hand an orchestrator a stack trace where
+it needed a verdict. What must never happen is a returned value with nothing in it, and that is
+what `test_failures_are_loud.py` asserts.
+
+The three webhook rejection kinds stay distinct — no signature, malformed, bad — because *"someone
+is probing us"* and *"our own secret is misconfigured"* need different responses from an operator.
+
+#### Earlier note: every failure path, and the two that return by design
 
 `tests/unit/test_failures_are_loud.py` triggers each layer's refusals and requires two things of
 every one: that it **raises rather than returning a plausible value**, and that the message names
@@ -808,6 +839,41 @@ works" are different facts.
 concentrates and what was not read. Every line it prints is derived from git or from a counter.
 
 ### `serve/`
+
+#### `serve/webhook_github.py` — the only untrusted input the product accepts
+
+Everything else comes from git or a repository we were pointed at; this arrives from the network
+from anyone who finds the URL. So both dangerous decisions are **pure functions over bytes**:
+`verify()` authenticates, `interpret()` decides whether the delivery is ours to act on.
+
+**An absent secret RAISES.** "No secret configured, so accept everything" turns the endpoint into
+an open command channel, and it reads as working perfectly in every test that supplies a secret.
+
+**Rejection reasons are distinct values** — no signature, malformed signature, bad signature —
+because "someone is probing us" and "our own secret is misconfigured" need different responses.
+
+**`interpret()` returns `Ignore` with a reason rather than raising.** A ping, a label change and a
+draft are normal traffic; an endpoint that errors on them fills a log nobody reads.
+
+**One property no test can see:** the comparison is constant-time, and replacing `compare_digest`
+with `==` leaves every test passing — verified by doing it. Only this note and code review protect
+it.
+
+#### `serve/health.py` — it opens the store, but first checks it EXISTS
+
+`open_store()` creates a missing database, so the first version of this probe answered `ok=True`
+for a path that did not exist. **A deploy pointed at the wrong directory would have created an
+empty store, reported healthy, and served rankings computed over no history at all** — the probe
+manufacturing the healthy state it was asked to detect. Found by a test asserting the failure, not
+by the probe.
+
+#### `serve/health.py` — it opens the store, because that is what breaks
+
+A probe reporting the process is alive tells you what the request already told you. This opens the
+store through `schema.open_store`, so **version mismatch and schema drift** — the state a deploy
+produces, invisible to a file check — fail the probe. It never raises: an orchestrator needs a
+verdict, not a stack trace.
+
 **Owns:** the HTTP webhook, the CLI, health, configuration, and the contracts at the edge.
 **Must not:** let the two adapters diverge. What a customer verifies with the CLI must be what
 the App runs.
