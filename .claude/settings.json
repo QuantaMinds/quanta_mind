@@ -98,6 +98,7 @@
     "no orphan guards": "guard:check_enforcement_map",
     "research deps stay out of the product": "guard:check_no_research_imports",
     "references name things, not numbers": "guard:records/check_no_vague_refs",
+    "a decided term never carries the rejected value": "guard:records/check_decided_vocabulary",
     "no duplicate or orphan modules": "guard:check_module_identity",
     "no --filter on a git clone (A31)": "guard:check_no_partial_clone",
     "every subprocess declares a timeout": "guard:check_subprocess_timeouts",

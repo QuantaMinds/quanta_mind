@@ -64,9 +64,13 @@ worthless. It is a claim that **a third of what lands in the reviewer's queue is
 reading time**, which at sixty pull requests a week is the difference between a queue that gets
 read and one that does not.
 
-The field's precision, measured by an independent benchmark on real pull requests, spans
-roughly **49% to 76%** — the top tool converts about three comments in four into an actual code
-change, the market leader about one in two. One vendor
+The field's precision on **the benchmark's ONLINE layer** — did a developer change the code —
+spans roughly **49% to 76%**: the top tool converts about three comments in four into an actual
+code change, the market leader about one in two. **That is a behavioural measure, not a truth
+measure, and `publishing-rules.md` bars it from standing beside our own numbers.** It is quoted
+here to describe the market's own claims about itself, and nothing below compares to it. On the
+benchmark's *offline* layer, scored against human-verified issues, the same market leader is at
+**36.5%**. One vendor
 keeps its noise low by commenting rarely, and publishes a **sub-3% false-positive rate** — a
 measure of how often it is wrong, not of how much it finds.
 
@@ -173,8 +177,9 @@ and a fifth that this document used to claim has been measured and withdrawn.** 
   │                the model, on those files only,            │
   │                returning structured findings              │
   ├──────────────────────────────────────────────────────────┤
-  │ 4. VERIFY      the parser checks every structural claim   │
-  │                confirmed → publish · contradicted → drop  │
+  │ 4. VERIFY      NOT BUILT — `verify/` is an __init__.py    │
+  │                the parser would check every structural    │
+  │                claim: confirmed → publish, else drop      │
   ├──────────────────────────────────────────────────────────┤
   │ 5. SAY         one comment, or silence                    │
   │                plus the coverage line, always             │
@@ -194,12 +199,16 @@ rights, no customer model key.
 It reads the repository's history once and builds a single index: for every **file**, how often
 changing it has required a follow-up, and which files those follow-ups touched.
 
-**Then it runs the pipeline backwards over your merged pull requests and hands you the answer
-before you have committed to anything** — how many of your changes came back, how many we would
-have commented on, and on how many of those we would have named the **file** the fix returned
-to. Your repository, your number, in the install — `uv run quantamind retrospective <clone>`,
-which needs a clone and nothing else. A reviewer that runs a model over every diff
-cannot open that way: replaying 340 pull requests costs it 340 pull requests of inference.
+**The same pipeline runs backwards over your merged pull requests and hands you the answer BEFORE
+you install anything** — how many of your changes came back, how many we would have commented on,
+and on how many of those we would have named the **file** the fix returned to.
+
+**That is a different motion from the install, and the distinction matters.** The retrospective is
+`uv run quantamind retrospective <clone>`: a clone on your own machine, no App, no token, no code
+leaving it. The install above is the App watching new pull requests. **You can have the number
+without granting anything**, which is the point — a reviewer that runs a model over every diff
+cannot open that way, because replaying 340 pull requests costs it 340 pull requests of
+inference.
 
 ## What ramps is breadth, not time
 
@@ -229,7 +238,7 @@ refunds/service.py    _build_refund_payload()
 notifications/mail.py send_refund_email()
 ```
 
-> **STEPS 1 AND 2 ARE BUILT. STEPS 3 TO 7 DESCRIBE A PIPELINE THAT DOES NOT RUN.** `infer/` and
+> **STEPS 1 TO 4 ARE BUILT. STEPS 5 TO 7 DESCRIBE A PIPELINE THAT DOES NOT RUN.** `infer/` and
 > `verify/` contain an `__init__.py` each and `quantamind review` exits 2, so the model call, the
 > structural verification and the published finding below are a record of what was designed and
 > measured — not of what happens when a pull request opens. Each step says which it is. What runs
@@ -314,7 +323,7 @@ Here `process_refund` at 34 touches is in this service's top decile. **We speak.
   ceiling                           →  three requests. A limit, not a target.
 ```
 
-The model receives the ranked function and its immediate context, not the whole diff.
+The model would receive the ranked **file** and its immediate context, not the whole diff.
 
 **One pass at rank 1, and the number matters more than it looks.** This read *multi-pass* until
 the arithmetic was checked: at one pass allocation is 1.25× cheaper than reading everything, at
@@ -334,7 +343,7 @@ any byte change invalidates everything after it. That maps onto this product exa
 | Position | Content | Changes |
 |---|---|---|
 | Prefix — cached | repository conventions, resolved signatures, index summary | per repository |
-| Suffix — uncached | this diff and the ranked function | per request |
+| Suffix — uncached | this diff and the ranked file | per request |
 
 Two rules the implementation cannot break, because both fail silently: **nothing volatile in the
 prefix** (a timestamp there makes every request a cache miss with no error), and **tools and
@@ -464,7 +473,7 @@ calls**, and every call pays its own cache read at one tenth.
 | | Tokens | Cost |
 |---|---|---|
 | Deep call — prefix cache read | 20,000 at one tenth | $0.010 |
-| Deep call — ranked function and neighbours | 3,000 | $0.015 |
+| Deep call — ranked file and neighbours | 3,000 | $0.015 |
 | Deep call — output including reasoning, `xhigh` | 2,000 | $0.050 |
 | Two shallow calls — prefix cache read, once each | 2 × 20,000 at one tenth | $0.020 |
 | Two shallow calls — the function, low effort | 2 × 1,500 in | $0.015 |
@@ -618,7 +627,7 @@ evidence, and no customers yet.
 | Publishes model claims about correctness | yes | yes | yes | **none — we ship no findings** |
 | Fires on | nearly every change | nearly every change | nearly every change | **10–12%** |
 | Marginal cost per pull request | tokens, scaling with lines read | tokens | tokens | **~$0 — a git read and a SQLite query** |
-| Priced | per seat | per seat | per seat | **per seat — see below** |
+| Priced | per seat | per seat | per seat | **per repository** |
 | Separates *undecidable* from *clean* | **no** | **no** | **no** | **yes — measured, `p = 0.0007`** |
 
 **Three rows in this table were wrong until the benchmark run and are corrected above.** Greptile
@@ -1093,7 +1102,13 @@ withholding a number at the lower tier, the lower tier's data cannot support one
 against per-unit inference cost, and both are retired.** Depth is not a tier lever, the row is
 struck through above, and there is no per-unit cost to improve on. What replaces it is simpler:
 **four repositories cost four clones and four indexes whichever tier they sit on**, so the margin
-difference between tiers is the price, not the cost.
+difference between tiers is entirely the price.
+
+**Which means the margin is WORSE at Business, not better** — $10 per repository against Team's
+$12, on identical cost. That is ordinary volume pricing and it is the opposite of what the retired
+paragraph claimed, so it is said here rather than left for someone to derive: **the higher tier
+buys pooling and an org-wide report at a lower unit price, and we take a thinner margin per
+repository to get more of them.**
 
 **The quarterly coverage audit is a separate line, $8,000–15,000 per engagement**, sold to an
 engineering leader out of a different budget than seats. It is plausibly the larger business.
@@ -1114,8 +1129,13 @@ report — which is why SSO becomes mandatory there and not before. Enterprise i
 buying a contract: it runs where legal permits, with a number we will defend to their auditor.
 **A tier whose only distinction is a bigger quota is anchoring, not a tier.**
 
-**Bring your own *key* at Business; bring your own *model* at Enterprise.** The line is one
-sentence — *we have certified that model, or we have not.* An allowlisted model costs us nothing
+> **NOT SELLABLE TODAY, AND THE TABLE ROW SAYS SO.** `infer/` ships nothing, so there is no model
+> call to bring a key for. The paragraph is kept as the shape the tiers would take if the reviewer
+> reopened; it is not a feature anyone can buy, and a reader quoting this passage would be quoting
+> a plan rather than a product.
+
+~~**Bring your own *key* at Business; bring your own *model* at Enterprise.**~~ The line would be
+one sentence — *we have certified that model, or we have not.* An allowlisted model costs us nothing
 because the evaluation is already amortised across every customer. An uncertified model means
 publishing a coverage number under our name for a configuration we never measured, which is the
 one failure this product cannot survive, so it requires a per-model evaluation run and therefore
@@ -1269,11 +1289,6 @@ unseen repositories. The nested strategy — top file, then top function inside 
 **54.2%, below its own 61.0% null** in the table further up this section, which is part of why
 functions were not chosen.
 
-> **This paragraph and the subsection below it were written when the plan was to allocate over
-> functions.** They said the run "does not validate the allocation policy" and that the
-> function-level figure was "unmeasured" — the second contradicted by the subsection immediately
-> below, which is titled *measured* and is.
-
 **The operational number is the pooled row, not the ≥4 row** — and this is the ONE operational
 number, now that the function-level arm is documented as the road not taken rather than as "the
 number the product has". Production sees every change, and
@@ -1288,6 +1303,11 @@ that describes the policy's cost is the pooled one:
 
 At 200 pull requests a month that is **3.5 changes, and between 3.0 and 4.2**, where the defect
 unit would receive no model call and produce no error.
+
+> **This paragraph and the subsection below it were written when the plan was to allocate over
+> functions.** They said the run "does not validate the allocation policy" and that the
+> function-level figure was "unmeasured" — the second contradicted by the subsection immediately
+> below, which is titled *measured* and is.
 
 ## The function-level figure, measured — this is the arm we did NOT ship
 
