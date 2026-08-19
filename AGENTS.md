@@ -170,8 +170,8 @@ you remember to obey — the machine will stop you either way.
 
 ## Operational notes
 
-- `just verify` clones a real repository into `.verify-clone` itself; it needs no submodules and
-  no setup. It runs today — it was gated on the dead correlation test until this was written.
+- `just verify` clones `.verify-clone` itself and needs no setup. **Gate 2b is separate**: `just
+  fixtures` (~1.3 GB, commits pinned in `tests/fixtures/pinned.json`) then `just gate-2b`.
 - **tree-sitter is NOT a dependency.** `pyproject.toml` declares `dependencies = []`. This line
   claimed it was pinned there; it never was. `parse/` reads git's funcname header and nothing else.
 - The SQLite schema is versioned. Changing `store/schema.py` requires a migration and a bump

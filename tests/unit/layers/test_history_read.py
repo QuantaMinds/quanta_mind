@@ -141,3 +141,43 @@ def test_a_git_failure_mid_read_raises_instead_of_returning_a_short_list(tmp_pat
     with pytest.raises(HistoryReadFailed) as caught:
         read_touches(d, pathspec=":(bogus)")
     assert "exit" in str(caught.value), f"the exit code must be reported: {caught.value}"
+
+
+def test_a_commit_on_a_merged_side_branch_is_still_counted(tmp_path: Path) -> None:
+    """A pathspec turns on history simplification, which drops commits that DID touch the path.
+
+    When a merge's tree matches one parent, git follows only that parent and discards the other
+    side entirely — non-merge commits included. The fixture below makes both sides reach the same
+    content, which is the condition that triggers it. Found by gate 2b: on the pinned corpus the
+    reader lost 3 to 151 commits per repository, and 23 of 430 for one celery file.
+    """
+    d = tmp_path / "merged"
+    d.mkdir()
+    _run(d, "init", "-q", "-b", "main")
+    (d / "a.py").write_text("1")
+    _run(d, "add", "a.py")
+    _run(d, "commit", "-q", "-m", "base")
+
+    _run(d, "checkout", "-q", "-b", "side")
+    (d / "a.py").write_text("2")
+    _run(d, "commit", "-q", "-am", "side change")
+
+    _run(d, "checkout", "-q", "main")
+    (d / "a.py").write_text("2")
+    _run(d, "commit", "-q", "-am", "main change")
+    _run(d, "merge", "-q", "--no-edit", "side")
+
+    # The fixture is only meaningful if simplification really drops the side commit here, so that
+    # is asserted rather than assumed: without it this test would pass against the old reader.
+    simplified = subprocess.run(
+        ["git", "log", "--no-merges", "--format=%s", "--", "*.py"],
+        cwd=d,
+        env=GIT_ENV,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    ).stdout.split()
+    assert "side" not in simplified, f"fixture does not exercise simplification: {simplified}"
+
+    subjects = len([t for t in read_touches(d, pathspec="*.py") if t.path == "a.py"])
+    assert subjects == 3, f"expected base, side and main touches of a.py, counted {subjects}"

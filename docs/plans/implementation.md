@@ -53,10 +53,15 @@ three months stale.
 
 ### The exact next action
 
-**The HTTP binding, and gate 2b.** Everything from a webhook payload to a posted comment now
-exists as decisions; nothing yet listens on a socket. That is a dependency choice — stdlib
-`http.server` or a framework — and it is the first thing in this project that would add a runtime
-dependency.
+**The retrospective, then the HTTP binding.** Gate 2b is met, so the ranker now provably runs
+the policy that has the p-value, which is the precondition for showing anyone a number. The
+retrospective needs only a clone and turns our result on our six repositories into the prospect's
+result on theirs; the binding needs a deployment, a GitHub App and an install before it delivers a
+coverage line with no findings in it. Distribution is the weakest point in this company and the
+retrospective is the only bottom-up motion — see `docs/product/QUANTAMIND.md`.
+
+Nothing yet listens on a socket. That is a dependency choice — stdlib `http.server` or a framework
+— and it is the first thing in this project that would add a runtime dependency.
 
 **One property is unprotected and it is written down rather than assumed.** The signature
 comparison is constant-time; replacing `compare_digest` with `==` leaves every test passing.
@@ -72,9 +77,18 @@ afterwards. `serve/` can call it.
 The pipeline now runs end to end through product code alone: `ingest/diff.py` supplies the changed
 paths and the bounding commit, so the live tests no longer hand-fetch anything.
 
-The ranker stage's gates now stand at **2a MET** (zero ordering mismatches over 853 admissible
-events), **2a′ MET** (5.04% against alphabetical's 10.08%), **2c MET**, and **2b UNMET** — it needs
-the research's own pinned repositories and must not be claimed on substitutes.
+**The ranker stage's gates are all four MET.** **2a** (zero ordering mismatches), **2a′**
+(3.37% against alphabetical's 6.40% over 1,188 events), **2c**, and now **2b** — the product
+reproduces `defect_return_external.json` event for event on all six pinned repositories, 2,400
+events, miss **1.21%** against **3.12%**.
+
+**Gate 2b failed on its first honest run and found a live defect in `ingest/commits.py`.** A
+pathspec turns on git's history simplification, which drops commits that really did touch the
+path; the reader lost 3 to 151 commits per repository, and 23 of 430 for one celery file. The
+score IS the touch count, so those were ranking errors. `--full-history` fixes it, and
+`test_counts_match_git.py` had been using that flag as its ORACLE all along — the oracle was
+right and the reader was wrong, and the test passed anyway because its repositories have flatter
+histories than the pinned six.
 
 ---
 
@@ -266,14 +280,17 @@ same events as `research/phase0/external/defect_return.py`.
 | | gate | passes when |
 |---|---|---|
 | **2a** | **ordering identity** | `rank/`'s ordering matches `defect_return.py`'s **exactly**. Not "similar" — the same list. A reimplementation that reorders anything has changed the policy, and the policy is what has the p-value |
-| **2b** | **miss rate in interval** — **NOT MET** | top-3 miss on **the research's own pinned repositories** falls inside **0.82–1.81%**. Those repositories are not wired up, and the interval must not be applied to substitutes: it describes sampling error on the corpus it was measured on. Replayed on four other repositories the miss ran **1.54% to 17.86%** per repository — real variation, not a defect, since gate 2a passes on the same events |
-| **2a′** | **beats the control** — **MET** | replayed over **853 admissible events** from four repositories, ranker miss **5.04%** against alphabetical **10.08%**. A gate the null also passes is measuring the corpus |
+| **2b** | **reproduces the research corpus** — **MET** | the product's (hit, alpha_hit) vector is IDENTICAL, event for event, to `research/phase0/external/defect_return_external.json` on all six pinned repositories: 2,400 events, miss **1.21%** against alphabetical **3.12%**. **This gate was written as "miss inside 0.82–1.81%" and that interval was the wrong one** — it is Wilson on 24/1969, the ORIGINAL EIGHT the ranker was developed against. The fresh six have their own interval, [0.84%, 1.73%] on 29/2400, and pairing one population with the other's interval is the category error the gate itself warned about. Equality is also strictly stronger: once the events match, the miss rate is 1.21% by construction, where an interval admitting 0.84–1.73% would pass a product that had drifted. Run with `just gate-2b` after `just fixtures`
+
+| **2a′** | **beats the control** — **MET** | replayed over **1,188 admissible events** from four repositories, ranker miss **3.37%** against alphabetical **6.40%**. A gate the null also passes is measuring the corpus |
 | **2c** | **all three cases reachable** — **MET** | all three render materially different lines against a reviewed golden file (`tests/unit/golden/coverage_lines.md`). Live, `ordered` and `no_history` both occur and their lines differ; **`flat_nonzero` did not occur in 40 pull requests across five repositories** and is covered by the fixture alone, which the live run prints rather than passing over |
 
 **2a does not wait on the others and it is the one that can end the project. It PASSES**: zero
-ordering mismatches over 853 replayed events, with the event definition — 2–12 files, a
-case-sensitive fix-subject within ninety days, the flat-score skip, the 400-event cap — copied from
-`defect_return.py` rather than chosen.
+ordering mismatches over 1,188 replayed events, with the event definition — 2–12 files, a
+fix-subject within ninety days matched CASE-INSENSITIVELY, the flat-score skip, the 400-event cap
+— copied from `defect_return.py` rather than chosen. The case rule was wrong until gate 2b was
+built: `commit_stream.py` lowercases the subject before the research ever matches it, and the
+replay carried a comment asserting the opposite where nothing could check it.
 
 **Why the miss rate varies so much between repositories, mechanically.** `httpx` events touch 5.3
 files on average against `pip-tools`' 3.4, and top three covers 57% of a 5.3-file change against

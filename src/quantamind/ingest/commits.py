@@ -128,7 +128,15 @@ def read_commits(repo_dir: Path, pathspec: str | None = None) -> list[Commit]:
 
     args = ["log", "--reverse", "--no-merges", "--name-only", f"--format={REC_FMT}%ct{FIELD_FMT}%s"]
     if pathspec:
-        args += ["--", pathspec]
+        # --full-history, because a pathspec turns on history simplification and that DROPS
+        # commits which really did touch the path: when a merge is TREESAME to one parent git
+        # follows only that parent and discards the other side, non-merge commits included.
+        # Measured on the pinned corpus it lost 3 to 151 commits per repository, and 23 of 430
+        # for `celery/__init__.py` alone. The score IS the touch count, so those are ranking
+        # errors, not bookkeeping ones. `tests/live/test_counts_match_git.py` already used
+        # --full-history as its ORACLE and passed, because its repositories have flatter
+        # histories than these -- the oracle was right and the reader was wrong.
+        args += ["--full-history", "--", pathspec]
     result = _git(repo_dir, args, HISTORY_TIMEOUT_S)
     if result.returncode != 0:
         raise HistoryReadFailed(
