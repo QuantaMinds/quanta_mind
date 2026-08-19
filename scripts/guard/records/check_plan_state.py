@@ -37,6 +37,16 @@ LAYERS = (
     "render",
     "serve",
 )
+# Empty ON PURPOSE, closed on evidence, with conditions recorded under "What would reopen the
+# reserved layers". **An empty row and a reserved row look identical in a table of counts**, and
+# three separate summaries in one session read these as pending work -- one of them recommending
+# `allocate/` be deleted. The block is regenerated from the filesystem, so the distinction has to
+# be printed BY the generator or it cannot survive in it.
+RESERVED = {
+    "allocate": "reserve — opens only with `infer/`",
+    "infer": "reserve — needs G2 under 50% wrong, twice, once independently graded",
+    "verify": "reserve — ships with `infer/`, never after",
+}
 
 
 def render(root: pathlib.Path) -> str:
@@ -48,6 +58,8 @@ def render(root: pathlib.Path) -> str:
             sorted(p.stem for p in d.glob("*.py") if p.name != "__init__.py") if d.is_dir() else []
         )
         names = ", ".join(f"`{m}.py`" for m in mods) if mods else "—"
+        if not mods and layer in RESERVED:
+            names = f"**{RESERVED[layer]}**"
         rows.append(f"| `{layer}/` | **{len(mods)}** | {names} |")
     rows += ["", f"{END}"]
     return "\n".join(rows)
