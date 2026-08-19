@@ -94,6 +94,16 @@ def coverage_line(ranking: Ranking, unresolved: Sequence[Unresolved] = ()) -> st
         )
         head += f" Not read: {_names(unread)}." if unread else " Nothing was left unread."
 
+    # Only news when the ranking DID separate things. A flat-history change has already said its
+    # order is alphabetical, and repeating it reads as a stutter rather than a disclosure.
+    tied = ranking.boundary_tie() if ranking.discrimination is Discrimination.ORDERED else ()
+    if tied:
+        names = _names([u.unit.qualified_name for u in tied])
+        head += (
+            f" **The budget cut through a tie**: {names} scored the same as the last file we read, "
+            f"and which of them we read was decided alphabetically, not by history."
+        )
+
     if not ranking.fired:
         head += " **This change is below the threshold to comment on**, so no ranking is claimed."
 

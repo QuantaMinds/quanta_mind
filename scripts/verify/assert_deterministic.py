@@ -33,9 +33,9 @@ import sqlite3
 import subprocess
 import sys
 
-# Columns written from the clock rather than from the repository. Named, not pattern-matched, so
-# the list cannot grow without a human adding a line here.
-VOLATILE: dict[str, set[str]] = {"repo": {"first_seen"}}
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+
+from volatile import VOLATILE, rendered
 
 
 def content_digest(pack: pathlib.Path) -> tuple[str, int]:
@@ -49,8 +49,13 @@ def content_digest(pack: pathlib.Path) -> tuple[str, int]:
     hasher = hashlib.sha256()
     rows = 0
     for table in tables:
-        hasher.update(f"\x00TABLE {table}".encode())
-        for row in conn.execute(f"SELECT * FROM {table}"):
+        columns = [str(r[1]) for r in conn.execute(f"PRAGMA table_info({table})")]
+        keep = [c for c in columns if c not in VOLATILE.get(table, set())]
+        if not keep:
+            continue
+        cols = ", ".join(f'"{c}"' for c in keep)
+        hasher.update(f"\x00TABLE {table}({cols})".encode())
+        for row in conn.execute(f"SELECT {cols} FROM {table}"):
             hasher.update(repr(row).encode())
             rows += 1
     conn.close()
@@ -88,6 +93,25 @@ def main(argv: list[str]) -> int:
             return 1
         seen.append(content_digest(args.out))
 
+    # KNOWN-ANSWER TEST ON OURSELVES, every run. The exclusion has silently stopped applying
+    # TWICE -- once when a reformat dropped the code, once when ruff removed the import as unused
+    # -- and both times this check went on reporting "ok" because both builds happened to land in
+    # the same second. Mutating a volatile column and requiring the digest NOT to move proves the
+    # exclusion is live, rather than trusting that it is.
+    probe = content_digest(args.out)
+    with sqlite3.connect(args.out) as mutate:
+        for table, columns in VOLATILE.items():
+            for column in columns:
+                mutate.execute(f"UPDATE {table} SET {column} = 424242")
+    if content_digest(args.out) != probe:
+        print(
+            "[determinism] the wall-clock exclusion is NOT being applied: changing "
+            f"{rendered()} moved the digest. This check would then be comparing clock "
+            "readings, which is how it passed for a week while measuring nothing.",
+            file=sys.stderr,
+        )
+        return 1
+
     digests = {d for d, _ in seen}
     rows = seen[0][1]
     if rows == 0:
@@ -104,6 +128,8 @@ def main(argv: list[str]) -> int:
         print("  A ranking that changes between runs is one nobody can audit.", file=sys.stderr)
         return 1
     print(f"[determinism] ok — {args.runs} runs, {rows:,} rows, one digest {seen[0][0]}")
+    print(f"[determinism] excluded as wall-clock, not data: {rendered()}")
+    print("[determinism] exclusion proven live: mutating those columns did not move the digest")
     return 0
 
 

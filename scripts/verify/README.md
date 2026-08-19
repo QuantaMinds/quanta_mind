@@ -21,7 +21,9 @@ is written from the clock. Two builds a second apart differ. It passed anyway �
 finishing inside the same second** — and only failed once a slower run crossed a boundary.
 
 Wall-clock columns are now excluded **by name** and the names are printed on every run, so the
-exclusion cannot grow without someone reading it. Everything the ranking depends on — every row of
+exclusion cannot grow without someone reading it. The list lives in `scripts/verify/volatile.py`
+and is shared: `verify-data` will need exactly the same exclusions, and two copies of a list that
+must agree is the drift pattern in miniature. Everything the ranking depends on — every row of
 `touch` — is still compared.
 
 **This is also why `verify-data` cannot simply be switched on.** A golden pack would never match a

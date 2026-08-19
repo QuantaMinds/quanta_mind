@@ -104,6 +104,23 @@ class Ranking:
         if len(set(ranks)) != len(ranks):
             raise ValueError("Ranking.units contains a duplicate rank")
 
+    def boundary_tie(self) -> tuple[RankedUnit, ...]:
+        """Units that scored the same as the last funded one but fell outside the budget.
+
+        A tie at the budget edge is `no_history` in miniature: the ranking has no information
+        separating them, so which one got read was decided by `(-score, path)` falling back to
+        PATH -- the alphabetical rule used as the non-informative control. Serving control-quality
+        output under the product's name without saying so is what typed coverage exists to prevent.
+
+        Not a `Discrimination` member, because it is orthogonal: an ORDERED ranking can still have
+        a tie at its edge, and collapsing the two would lose which happened.
+        """
+        funded = self.funded()
+        if not funded or len(funded) >= len(self.units):
+            return ()
+        edge = funded[-1].score.value
+        return tuple(u for u in self.units[len(funded) :] if u.score.value == edge)
+
     def ranked(self) -> bool:
         """Whether the positions below mean anything at all."""
         return self.discrimination is not Discrimination.NO_HISTORY

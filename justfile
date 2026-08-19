@@ -55,6 +55,7 @@ guards:
     uv run python scripts/guard/records/check_docs_sync.py .
     uv run python scripts/guard/records/check_documented_commands.py .
     uv run python scripts/guard/check_no_partial_clone.py .
+    uv run python scripts/guard/check_constant_time_compare.py .
     uv run python scripts/guard/records/check_burned_corpora.py .
     uv run python scripts/guard/records/check_plan_state.py .
     uv run python scripts/guard/records/check_withdrawn_amendments.py .

@@ -150,3 +150,26 @@ def test_a_single_file_comment_omits_the_equally_worth_reading_note() -> None:
     assert "equally worth reading" not in body, (
         "that note reads as a malfunction when there is only one file"
     )
+
+
+def test_a_tie_at_the_budget_edge_is_disclosed() -> None:
+    """The file we read was picked by the alphabetical rule used as the non-informative control.
+    Serving control-quality output under the product's name without saying so is what typed
+    coverage exists to prevent — and it happened in 1 of 6 multi-file pull requests sampled."""
+    line = coverage_line(rank({"a.py": 48, "b.py": 21, "c.py": 14, "d.py": 14}))
+    assert "cut through a tie" in line, f"the arbitrary boundary was not disclosed: {line}"
+    assert "`d.py`" in line, "the tied file that went unread must be named"
+    assert "alphabetically" in line, "the reader must be told HOW it was decided"
+
+
+def test_a_tie_that_is_not_at_the_edge_is_not_announced() -> None:
+    """Ranks 1 and 2 tying costs the reader nothing: both are read."""
+    line = coverage_line(rank({"a.py": 9, "b.py": 9, "c.py": 4, "d.py": 0}))
+    assert "cut through a tie" not in line, f"nothing was cut: {line}"
+
+
+def test_a_flat_history_change_does_not_say_it_twice() -> None:
+    """It has already declared its order alphabetical; repeating it reads as a stutter."""
+    line = coverage_line(rank({"a.py": 3, "b.py": 3, "c.py": 3, "d.py": 3}))
+    assert "could not separate them" in line
+    assert line.count("alphabetical") == 1, f"the disclosure is doubled: {line}"
