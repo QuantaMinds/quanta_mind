@@ -155,20 +155,39 @@ def test_chance_matches_hand_computed_values() -> None:
         chance_hit(2, 3, 3)
 
 
-def test_an_out_of_order_history_fails_loudly_instead_of_admitting_nothing() -> None:
-    """The window scan breaks at the first commit past ninety days, so order is a precondition.
-
-    Reversed, the old code admitted zero events and reported a clean run — the same output as a
-    repository whose fixes are genuinely rare. This is the assertion that tells them apart.
-    """
-    from quantamind.rank.events import UnorderedHistory, admissible
+def test_a_history_that_runs_backwards_end_to_end_refuses_to_measure() -> None:
+    """Reversed, the scan admits almost nothing — the same output as a repo with rare fixes."""
+    from quantamind.rank.events import ReversedHistory, admissible
     from quantamind.types.commit import Commit
 
     backwards = [
         Commit(committed_at=2_000, subject="later", paths=frozenset({"a.py", "b.py"})),
         Commit(committed_at=1_000, subject="fix earlier", paths=frozenset({"a.py", "b.py"})),
     ]
-    with pytest.raises(UnorderedHistory) as caught:
+    with pytest.raises(ReversedHistory) as caught:
         list(admissible(backwards))
-    assert "before its predecessor" in str(caught.value)
-    assert caught.value.position == 1
+    assert "newest-first" in str(caught.value)
+
+
+def test_a_locally_out_of_order_commit_is_counted_not_raised() -> None:
+    """Every real repository has these. Raising would make us stricter than the validated policy.
+
+    `defect_return.py` breaks out of the ninety-day scan at the first commit past the window and
+    truncates on exactly the same inversions, so the product must too or gate 2b stops holding.
+    Measured on the pinned corpus: 1 to 64 inversions per repository, worst a 56-day jump.
+    """
+    from quantamind.rank.events import OUT_OF_ORDER, Rejections, admissible
+    from quantamind.types.commit import Commit
+
+    dipped = [
+        Commit(committed_at=1_000, subject="first", paths=frozenset({"a.py", "b.py"})),
+        Commit(committed_at=900, subject="clock went backwards", paths=frozenset({"a.py"})),
+        Commit(committed_at=2_000, subject="fix it", paths=frozenset({"a.py", "b.py"})),
+    ]
+    rejections = Rejections()
+    list(admissible(dipped, rejections))
+
+    assert rejections.counts[OUT_OF_ORDER] == 1, (
+        f"the inversion was not counted: {dict(rejections.counts)} — it would be absorbed into "
+        f"a smaller target set with nothing saying so"
+    )

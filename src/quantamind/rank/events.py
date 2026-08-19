@@ -50,17 +50,19 @@ TOO_FEW_FILES = "file count outside 2..12"
 NO_RETURN = "no later fix returned to it"
 
 
-class UnorderedHistory(ValueError):
-    """Commits are not oldest-first, so the ninety-day window cannot be walked by breaking out."""
+OUT_OF_ORDER = "commit stamped before its predecessor"
 
-    def __init__(self, position: int, earlier: Commit, later: Commit) -> None:
+
+class ReversedHistory(ValueError):
+    """The history runs newest-first. Nothing can be measured from it and nothing is guessed."""
+
+    def __init__(self, first: int, last: int) -> None:
         super().__init__(
-            f"commit {position} is stamped {later.committed_at}, before its predecessor "
-            f"{earlier.committed_at} ({earlier.committed_at - later.committed_at}s earlier). "
-            f"The window scan stops at the first commit past ninety days, so a history that goes "
-            f"backwards truncates it and reports too few events rather than failing."
+            f"history ends at {last}, before it begins at {first}: it is newest-first. The "
+            f"ninety-day scan walks forward and would admit almost nothing, which reads exactly "
+            f"like a repository whose fixes are rare. `read_commits` passes --reverse; a caller "
+            f"that sorted afterwards has undone it."
         )
-        self.position = position
 
 
 @dataclass(frozen=True, slots=True)
@@ -120,21 +122,36 @@ def admissible(
 ) -> Iterator[Event]:
     """Yield each admissible event, oldest first, at most `cap` of them.
 
-    Raises `UnorderedHistory` unless `commits` is oldest-first. `read_commits` passes `--reverse`
-    but does NOT verify the result, and this docstring used to claim that it did -- a statement
-    about another module's behaviour, written where nothing could check it.
+    `read_commits` passes `--reverse` but does NOT verify the result, and this docstring once
+    claimed that it did -- a statement about another module's behaviour, written where nothing
+    could check it.
 
-    **The check is not defensive padding.** `returns_to()` BREAKS out of the ninety-day scan at
-    the first commit past the window, which is only sound if timestamps rise. A rebase, a
-    cherry-pick or clock skew on one commit truncates the search silently, and the result is
-    fewer admissible events -- indistinguishable from a repository whose fixes are genuinely
-    rare. Reversed entirely, it admits nothing at all and reads as a clean run.
+    **REAL HISTORIES ARE NOT MONOTONIC AND THAT IS NOT AN ERROR.** `--reverse` orders by graph
+    traversal, so author and committer dates run backwards across merges, rebases and clock skew.
+    Every repository in the pinned corpus does it: 1 to 64 inversions each, 0.01% to 0.20% of
+    commits, the worst a 56-day jump in scrapy.
+
+    `returns_to()` BREAKS out of the ninety-day scan at the first commit past the window, so an
+    inversion truncates that scan early and the event is admitted with a smaller target set.
+    **`defect_return.py` does exactly the same** -- `if ts2 - ts > WINDOW: break` -- so this is
+    the validated policy's own behaviour, and raising here would make the product stricter than
+    the measurement gate 2b holds it to. It is COUNTED instead, under `OUT_OF_ORDER`, so the
+    retrospective prints it rather than absorbing it.
+
+    A history that is backwards END TO END is a different thing: that is a caller who re-sorted,
+    it can measure nothing, and it raises `ReversedHistory`.
 
     The cap is the research's: without it the largest repository dominates a pooled figure.
     """
-    for position in range(1, len(commits)):
-        if commits[position].committed_at < commits[position - 1].committed_at:
-            raise UnorderedHistory(position, commits[position - 1], commits[position])
+    # GLOBALLY backwards is a caller error and stops everything. LOCALLY backwards is git, and
+    # it is counted instead -- see the docstring. Measured on the pinned corpus: 1 to 64
+    # inversions per repository, 0.01% to 0.20% of commits, worst jump 56 days.
+    if len(commits) > 1 and commits[-1].committed_at < commits[0].committed_at:
+        raise ReversedHistory(commits[0].committed_at, commits[-1].committed_at)
+    if rejections is not None:
+        for position in range(1, len(commits)):
+            if commits[position].committed_at < commits[position - 1].committed_at:
+                rejections.record(OUT_OF_ORDER)
     yielded = 0
     for position, commit in enumerate(commits):
         if not MIN_FILES <= len(commit.paths) <= MAX_FILES:
