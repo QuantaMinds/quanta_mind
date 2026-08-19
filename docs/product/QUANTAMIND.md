@@ -50,7 +50,9 @@ by generating more text into a queue that is already unreadable. Adding volume t
 problem does not help, and the only way to shorten a queue is to take things out of it.
 
 **QuantaMind is quiet on purpose.** It comments on about one change in ten, and when it does it
-names the one function worth reading first.
+names the **file** worth reading first — and says which files it did not read. The unit is the
+file everywhere allocation happens; a function name appears in the routing sentence only, to give
+a human a place to start inside the file we ranked.
 
 ## The problem with reviewers as they exist today
 
@@ -62,9 +64,13 @@ worthless. It is a claim that **a third of what lands in the reviewer's queue is
 reading time**, which at sixty pull requests a week is the difference between a queue that gets
 read and one that does not.
 
-The field's precision, measured by an independent benchmark on real pull requests, spans
-roughly **49% to 76%** — the top tool converts about three comments in four into an actual code
-change, the market leader about one in two. One vendor
+The field's precision on **the benchmark's ONLINE layer** — did a developer change the code —
+spans roughly **49% to 76%**: the top tool converts about three comments in four into an actual
+code change, the market leader about one in two. **That is a behavioural measure, not a truth
+measure, and `publishing-rules.md` bars it from standing beside our own numbers.** It is quoted
+here to describe the market's own claims about itself, and nothing below compares to it. On the
+benchmark's *offline* layer, scored against human-verified issues, the same market leader is at
+**36.5%**. One vendor
 keeps its noise low by commenting rarely, and publishes a **sub-3% false-positive rate** — a
 measure of how often it is wrong, not of how much it finds.
 
@@ -109,11 +115,24 @@ this section was reaching for.
 
 ## What we do differently
 
-A free pass that runs no model ranks the functions a change touches by how often each has
-needed a follow-up fix before. **That ranking then decides where inference is spent** — deep
-reading on the one or two functions history says changes come back to, nothing at all on the
-cold ones. Structural claims the model makes are checked by a parser before publication. And
-every pull request carries a line saying what could not be analysed and why.
+A free pass that runs no model ranks the **files** a change touches by how often each has needed
+a follow-up fix before, and publishes that ranking with a line saying what was not analysed and
+why. **That is the whole shipped product.**
+
+**FILES, NOT FUNCTIONS, AND THE DIFFERENCE IS THE RESULT.** At a three-unit budget, file-level
+ranking misses **1.22%** of the changes a later fix returns to; function-level misses **8.84%** on
+the same events, and **+2.29 points** even at matched coverage. The file arm is the one that
+replicated out-of-sample. `rank/order.py` emits `Site(path, line=0)` — the zero is what says the
+unit is the whole file — and earlier drafts of this document described the arm that measured
+worse. **Functions appear in one place only: the routing line's prose, which names a function to
+say where to start reading. Allocation is file-level everywhere.**
+
+**NO MODEL READS THE CODE, AND NOTHING IS PUBLISHED ABOUT CORRECTNESS.** `infer/` and `verify/`
+contain an `__init__.py` and nothing else; `quantamind review` exits 2. Two corpora and four blind
+rater pools put our own findings **66.7–82.1% wrong** at **0.013–0.037 correct findings per pull
+request**, so the reviewer half was closed rather than shipped. Sections 2 and 3 below describe
+that half in full because the measurement is the asset — **every one of them is marked NOT BUILT,
+and none of it is behind a paywall in the pricing section.**
 
 Four properties follow. **Two are now measured out-of-sample, one is billed, one is verified —
 and a fifth that this document used to claim has been measured and withdrawn.** See
@@ -121,9 +140,9 @@ and a fifth that this document used to claim has been measured and withdrawn.** 
 
 | | |
 |---|---|
-| **Quiet** | Fires on 10–12% of changes, held steady across repositories differing 80× in velocity |
+| **Quiet** | Fires on 10–12% of changes across repositories differing 80× in velocity. **Close to definitional rather than discovered** — a percentile threshold fires on a fixed share of its own distribution by construction. The evidence that it is doing work is the CONTRAST: an absolute threshold fired on 11% of one repository and 53% of another |
 | **Honest** | Reports its own blind spots — verified as unavailable to all seven competitors |
-| **Right about where to look** | **Replicated out-of-sample.** Ranking the changed files by prior touch count and reading the top three misses **1.21%** of the changes a later fix returns to, against **3.12%** for an alphabetical ordering — on **six repositories the method was never developed against**, n = 2,400, McNemar **p < 0.000001**, positive in **6 of 6**. The original eight gave **1.44% vs 3.31%**. The two lifts differ by **0.05 points** |
+| **Right about where to look** | **Replicated out-of-sample.** Ranking the changed files by prior touch count and reading the top three misses **1.21%** of the changes a later fix returns to, against **3.12%** for an alphabetical ordering — on **six repositories the method was never developed against**, n = 2,400, McNemar **p < 0.000001**, positive in **6 of 6**. The original eight gave **1.44% vs 3.31%**. The two lifts differ by **0.05 points**. **Leave scrapy out and the lift is +0.90 rather than +1.92** — `publishing-rules.md` requires the smaller number wherever one figure is quoted, because a caveat does not travel with a number into someone else's deck |
 | **Honest about what cannot be decided** | A claim needing a fact outside the diff is labelled, not published. The label separates at Fisher **p = 0.0007** — and it is why **`infer/` ships nothing**: two corpora and four blind rater pools put our own findings **66.7–82.1% wrong** |
 | **Cheaper** — *billed, not estimated* | **$0.119 per pull request** on real diffs through Vertex, against a $0.140 derived estimate — but the estimate was right by luck: input is 5.2% of the bill and **thinking is 91.3%** |
 
@@ -131,46 +150,65 @@ and a fifth that this document used to claim has been measured and withdrawn.** 
 
 # 2. How it works
 
+> **STAGES 3 AND 4 — READ and VERIFY — ARE NOT BUILT AND ARE NOT ON THE ROADMAP.** They are drawn
+> here because the measurement that closed them is the asset, and a diagram that quietly omitted
+> them would leave the reader wondering whether we had tried. We tried, across nine designs; the
+> findings were 66.7–82.1% wrong and `infer/` ships nothing. **What runs in production is RANK,
+> ALLOCATE and the coverage line.** `quantamind review` exits 2.
+
 ```
   a pull request opens
         │
   ┌─────▼───────────────────────────────────────────────────┐
   │ 1. RANK        no model, no key, ~zero marginal cost     │
-  │                every changed function, by how often it   │
-  │                has been touched in the prior year        │
+  │     BUILT      every changed FILE, by how often it has    │
+  │                been touched in the prior year             │
+  │                (file-level: function-level missed 8.84%   │
+  │                 against the file arm's 1.22%)             │
   ├──────────────────────────────────────────────────────────┤
   │ 2. ALLOCATE    the ranking decides the inference budget   │
-  │                rank 1  → deep read, high effort           │
+  │     BUILT      rank 1  → deep read, high effort           │
   │                rank 2–3 → shallow read                    │
   │                cold    → no model call at all             │
+  │                (labels are emitted; nothing consumes them │
+  │                 downstream, because stage 3 is closed)    │
   ├──────────────────────────────────────────────────────────┤
-  │ 3. READ        the model, on those functions only,        │
+  │ 3. READ        NOT BUILT — closed on evidence             │
+  │                the model, on those files only,            │
   │                returning structured findings              │
   ├──────────────────────────────────────────────────────────┤
-  │ 4. VERIFY      the parser checks every structural claim   │
-  │                confirmed → publish · contradicted → drop  │
+  │ 4. VERIFY      NOT BUILT — `verify/` is an __init__.py    │
+  │                the parser would check every structural    │
+  │                claim: confirmed → publish, else drop      │
   ├──────────────────────────────────────────────────────────┤
   │ 5. SAY         one comment, or silence                    │
   │                plus the coverage line, always             │
   └──────────────────────────────────────────────────────────┘
 ```
 
-The deterministic layer that allocates the budget is the same layer that adjudicates the
-model's output. That is what makes the verification step cheap.
+**That symmetry was the design, and stage 4 is not built, so it is an argument rather than a
+property today.** The deterministic layer that allocates the budget *would be* the same layer that
+adjudicates the model's output, which is what would make verification cheap. Nothing adjudicates
+anything at present: `verify/` contains an `__init__.py`.
 
 ## The day you install it
 
 **Twenty minutes.** One GitHub App, read-only on code, write-only on a comment. No merge
 rights, no customer model key.
 
-It reads the repository's history once and builds a single index: for every function, how often
-changing it has required a follow-up, and which functions those follow-ups touched.
+It reads the repository's history once and builds a single index: for every **file**, how often
+changing it has required a follow-up, and which files those follow-ups touched.
 
-**Then it runs the pipeline backwards over your merged pull requests and hands you the answer
-before you have committed to anything** — how many of your changes came back, how many we would
-have commented on, and on how many of those we would have named the function the fix returned
-to. Your repository, your number, in the install. A reviewer that runs a model over every diff
-cannot open that way: replaying 340 pull requests costs it 340 pull requests of inference.
+**The same pipeline runs backwards over your merged pull requests and hands you the answer BEFORE
+you install anything** — how many of your changes came back, how many we would have commented on,
+and on how many of those we would have named the **file** the fix returned to.
+
+**That is a different motion from the install, and the distinction matters.** The retrospective is
+`uv run quantamind retrospective <clone>`: a clone on your own machine, no App, no token, no code
+leaving it. The install above is the App watching new pull requests. **You can have the number
+without granting anything**, which is the point — a reviewer that runs a model over every diff
+cannot open that way, because replaying 340 pull requests costs it 340 pull requests of
+inference.
 
 ## What ramps is breadth, not time
 
@@ -178,8 +216,8 @@ It comments from day one, narrowly, and widens only on evidence:
 
 | Tier | Fires when | Volume |
 |---|---|---|
-| Start | the top-ranked function is in this repository's top decile of prior touch counts | 10–12% |
-| Widen | top two ranked functions | untested |
+| Start | the top-ranked **file** is in this repository's top decile of prior touch counts | 10–12% |
+| Widen | top two ranked **files** | untested |
 
 Widening requires **two signals moving together**: the acceptance rate of findings climbing,
 **and** the post-merge defect rate flat or falling. One without the other is a red flag —
@@ -200,7 +238,13 @@ refunds/service.py    _build_refund_payload()
 notifications/mail.py send_refund_email()
 ```
 
-### Step 1 — extract the changed units
+> **STEPS 1 TO 4 ARE BUILT. STEPS 5 TO 7 DESCRIBE A PIPELINE THAT DOES NOT RUN.** `infer/` and
+> `verify/` contain an `__init__.py` each and `quantamind review` exits 2, so the model call, the
+> structural verification and the published finding below are a record of what was designed and
+> measured — not of what happens when a pull request opens. Each step says which it is. What runs
+> in production is the ranking, the allocation labels and the coverage line.
+
+### Step 1 — extract the changed units — **BUILT**
 
 We do **not** diff whole files. We read the diff at zero context and take the function each
 hunk sits in:
@@ -218,7 +262,15 @@ $ git diff -U0 <base>..<head> -- '*.py'
 Git's hunk headers name the enclosing function directly. A parser gives the same answer more
 precisely, and is what handles languages whose hunk headers are unreliable.
 
-**Why functions and not files or lines.** This is measured, not preferred:
+**Why functions and not files or lines.** This is measured, not preferred — **and it was
+superseded by a later measurement that this document now follows.** The argument below is about
+which unit *localises a defect*; the decision that governs the product is about which unit *ranks
+best at a three-unit budget*, and there file-level wins: **1.22% miss against function-level's
+8.84%** on identical events, **+2.29 points** even at matched coverage, and the file arm is the
+one that replicated out-of-sample on six unseen repositories. `rank/order.py` emits
+`Site(path, line=0)`. **Both measurements are real and they answer different questions; the
+second is the one the allocator obeys.** The bullets are kept because the symbol-level lift they
+report is what makes the *routing sentence* name a function inside the ranked file:
 
 - **Files are too coarse.** Of 1,316 follow-up fixes we examined, **989 touched only the same
   file at different lines** — that is continued development, not a repair. File-level signal
@@ -231,7 +283,7 @@ precisely, and is what handles languages whose hunk headers are unreliable.
 Measured across four repositories, ranking lift over a random pick: **symbol +46, +36, +28,
 +17 points. File overlap erratic (+50 to −1). Line overlap dead (+7 to −5).**
 
-### Step 2 — build the ranking index, bounded by the past
+### Step 2 — build the ranking index, bounded by the past — **BUILT**
 
 For each changed unit, count the commits that touched it in the **year before this pull
 request** — and nothing after:
@@ -250,7 +302,7 @@ future-leaking run must move the score, or the harness is measuring lookahead ra
 history. On our corpus, leaking the future moved the top-1 rate from 50.0% to 37.5%, confirming
 the bound is load-bearing.
 
-### Step 3 — decide whether to speak, using a percentile
+### Step 3 — decide whether to speak, using a percentile — **BUILT**
 
 **An absolute threshold does not transfer between repositories.** "Twelve prior touches" is rare
 in a slow repository and unremarkable in a fast one; the same rule fired on 11% of one
@@ -262,7 +314,7 @@ velocity, this holds the comment rate at **10–12% everywhere**.
 
 Here `process_refund` at 34 touches is in this service's top decile. **We speak.**
 
-### Step 4 — allocate the inference budget
+### Step 4 — allocate the inference budget — **BUILT — labels only, nothing consumes them**
 
 ```
   process_refund            rank 1  →  deep read, xhigh effort, ONE pass
@@ -271,7 +323,7 @@ Here `process_refund` at 34 touches is in this service's top decile. **We speak.
   ceiling                           →  three requests. A limit, not a target.
 ```
 
-The model receives the ranked function and its immediate context, not the whole diff.
+The model would receive the ranked **file** and its immediate context, not the whole diff.
 
 **One pass at rank 1, and the number matters more than it looks.** This read *multi-pass* until
 the arithmetic was checked: at one pass allocation is 1.25× cheaper than reading everything, at
@@ -283,7 +335,7 @@ whose entire claim is that it needs no model. The ceiling is enforced and **obse
 review records its actual request count and token spend, because a ceiling never hit and a
 ceiling never wired up otherwise print the same thing.
 
-### Step 5 — read, with the repository cached
+### Step 5 — read, with the repository cached — **NOT BUILT**
 
 Prompt caching is a **prefix match**: the render order is tools, then system, then messages, and
 any byte change invalidates everything after it. That maps onto this product exactly:
@@ -291,7 +343,7 @@ any byte change invalidates everything after it. That maps onto this product exa
 | Position | Content | Changes |
 |---|---|---|
 | Prefix — cached | repository conventions, resolved signatures, index summary | per repository |
-| Suffix — uncached | this diff and the ranked function | per request |
+| Suffix — uncached | this diff and the ranked file | per request |
 
 Two rules the implementation cannot break, because both fail silently: **nothing volatile in the
 prefix** (a timestamp there makes every request a cache miss with no error), and **tools and
@@ -300,7 +352,7 @@ model frozen for a conversation** (both render at the very front).
 Findings come back as **structured JSON against a schema**, never prose — the verification step
 can only check a claim it can parse.
 
-### Step 6 — verify the model's structural claims
+### Step 6 — verify the model's structural claims — **NOT BUILT**
 
 The model returns:
 
@@ -329,7 +381,7 @@ a live drop-rate counter: claims received and claims dropped, by claim class, pe
 rate that falls to zero and stays there is either a flawless model or a dead verifier, and those
 two must never look the same on the wire.
 
-### Step 7 — emit, with the coverage line first
+### Step 7 — emit, with the coverage line first — **NOT BUILT as written — the coverage line ships, the finding does not**
 
 ```
 QuantaMind
@@ -421,7 +473,7 @@ calls**, and every call pays its own cache read at one tenth.
 | | Tokens | Cost |
 |---|---|---|
 | Deep call — prefix cache read | 20,000 at one tenth | $0.010 |
-| Deep call — ranked function and neighbours | 3,000 | $0.015 |
+| Deep call — ranked file and neighbours | 3,000 | $0.015 |
 | Deep call — output including reasoning, `xhigh` | 2,000 | $0.050 |
 | Two shallow calls — prefix cache read, once each | 2 × 20,000 at one tenth | $0.020 |
 | Two shallow calls — the function, low effort | 2 × 1,500 in | $0.015 |
@@ -432,16 +484,22 @@ Reading the whole diff at uniform depth costs roughly **$0.175**, so this is a *
 — not the 2× an earlier single-call version of this table implied, and not the 1.5× the
 two-call version implied.
 
-**Two things could erase it, and both are open.** The allocator specifies rank 1 as
-*multi-pass*; a second pass re-sends the first pass's output as input and pays another cache
-read, roughly $0.085, which takes the total to **$0.225 — worse than reading everything.** And
+**One thing could erase it, and one is settled.** ~~The allocator specifies rank 1 as
+*multi-pass*~~ — **it does not, and step 4 above is the decision: ONE pass.** A second pass
+re-sends the first pass's output as input and pays another cache read, roughly $0.085, taking the
+total to **$0.225 — worse than reading everything**, which is precisely why the single pass was
+chosen. This paragraph described the abandoned option as though it were current, two sections
+after the section that abandoned it. What remains open is that
 half of the remaining saving is the assumption that the model writes 2,000 output tokens
 instead of 4,000, which is unsourced and pushed the wrong way by `xhigh`, since reasoning bills
 as output. **Allocation is argued as an input-side saving; the arithmetic is currently carried
 by an output ratio that may point the other way.**
 
-At 200 pull requests a month this is **$28 of inference per repository** single-pass, $45
-multi-pass. **Treat the whole range as unverified rather than any point in it as a floor.** The
+**This whole table prices the CLOSED reviewer and is not what anyone pays.** At 200 pull requests
+a month it would be **$28 of inference per repository** at the single pass the
+allocator actually specifies. **Treat it as a derived ceiling rather than a floor** — and note
+that a real run has since billed **$0.119 per pull request** against this table's $0.140, so the
+derived figure is an over-estimate, not a boundary that has been tested from below. The
 free tier runs no model at all and costs only compute — that part is structural, not an
 estimate.
 
@@ -473,6 +531,12 @@ and non-repairs when it measurably does not.
 ---
 
 # 4. The competition, and why they cannot simply copy this
+
+> **THE SIX HERE ARE NOT THE SIX IN THE TABLE BELOW.** This list covers CodeRabbit, Graphite,
+> Greptile, Bugbot, Qodo and CodeScene — chosen for what they *do*. The category table further
+> down covers CodeRabbit, Greptile, Graphite, Macroscope, Qodo and Aikido — chosen for what their
+> output *asserts*. Four overlap. Neither set is "the competition"; each answers a different
+> question, and reading them as one list produces a competitor count that is wrong either way.
 
 ## What each of them actually does
 
@@ -593,6 +657,20 @@ listed as unproven at the end of this document and gated in the build plan. **Wh
 structural, and does not depend on that number, is that the ranking stage runs without
 inference at all.**
 
+> **THIS ROW AND THE PRICING TABLE NOW AGREE, AND THEY DID NOT BEFORE.** The pricing table charged
+> **$19–55 per developer per month** while this row claimed per-repository pricing as a
+> differentiator. The row was right about where our costs sit; the table had not caught up.
+>
+> **The swing that made it urgent is gone with it.** The old arithmetic ran from 85% margin at 400
+> pull requests a month to 26% at 2,000, because revenue tracked seats while cost tracked
+> pull-request volume through inference. **The shipped product runs no inference**, so a
+> repository that doubles its merge rate costs us the same `git log` it cost before. Revenue and
+> cost now sit on the same axis.
+>
+> **Verified against the market:** no competitor prices per repository — CodeRabbit per developer,
+> Greptile per seat plus per review, Qodo per user — because all of them pay per token. It is
+> available to us precisely because we do not.
+
 ## We entered their benchmark. This is what came back.
 
 **Every competitor comparison here was previously refused on the grounds that their precision is
@@ -621,7 +699,14 @@ whether a developer changed the code. On the offline layer, against human-verifi
 **CodeRabbit is at 36.5%.** Our 65.2%-wrong figure had been compared against an assumed field
 floor near 49% correct for months. **The real comparison was never as bad as we told ourselves.**
 
-**And no tool of the 48 scored exceeds roughly 63% recall.** Nobody has solved this.
+**And no tool of the 48 exceeds roughly 63% recall.** Nobody has solved this.
+
+**On 48 against 49:** Martian's leaderboard lists **49 tools**; **48** of them carry the
+evaluations this comparison is computed from, per
+`docs/plans/preregistrations/reviewer/martian-comparison-preregistration.md` — "48 tools, 50 pull
+requests, two judges". The leaderboard count is the one to use when naming Qodo's position; the
+scored count is the one to use for any statement about what tools achieved. **They are two
+denominators, not a disagreement.**
 
 ## The experiment that decided our configuration
 
@@ -877,7 +962,8 @@ The answer, in the order it should be given.
 
 **We entered Martian's offline layer rather than asserting this.** Against human-verified issues on
 50 pull requests, scored by one judge: **Greptile 56.5%, us 43.6%, CodeRabbit 36.5%.** We are level
-with CodeRabbit and behind Greptile, and **no tool of the 48 scored exceeds roughly 63% recall.**
+with CodeRabbit and behind Greptile, and **no tool of the 48 scored exceeds roughly 63% recall**
+(48 scored of the 49 listed — see the note above).
 
 **The 49–76% band the market quotes is the ONLINE layer** — did a developer change the code — and
 it is a different measurement on a different population. The same CodeRabbit that reports 49.2%
@@ -945,76 +1031,135 @@ thirds wrong."**
 
 ## What we charge, and why the tiers split where they do
 
-**The cost floor is measured, not assumed: $0.140 per pull request across three capped
-requests, so about $28 of inference per repository per month at 200 pull requests.** The free
-tier runs no model and costs only compute — that is structural, not an estimate.
+> **THIS SECTION PRICED A PRODUCT WE DO NOT SELL, AND THAT IS WHY IT CONTRADICTED THE
+> DIFFERENTIATION TABLE.** Every figure below used to rest on $0.140 of inference per pull
+> request. **The shipped product runs no inference at all** — `quantamind config` prints
+> `runs a model on a review: False`, and `infer/` contains an `__init__.py`. A per-seat price
+> defending a per-token cost was defending a cost we do not incur.
 
-**The market is moving the wrong way for everyone else, and that is the pricing story.**
-CodeRabbit charges $24–48 per developer per month. Greptile moved to **$1 per review beyond 50**
-in March 2026; Cursor's Bugbot moved to roughly **$1–1.50 per run** in May 2026. Two of the
-best-funded reviewers abandoned flat pricing within four months of each other, which is what
-happens when cost of goods scales with lines read. **Ours scales with a capped request count**,
-so we can promise the thing they just withdrew: unlimited reviews at a flat seat price.
+**What the shipped product actually costs is a clone and an index, per repository.** Measured:
+`pallets/flask` is **15 MB of history and a 393 KB index** holding 4,281 touches. A run is one
+`git log` and a handful of SQLite queries — CPU seconds, no network, no tokens. **Cost scales
+with the number of repositories and the size of their history. It does not scale with pull-request
+volume, team size, or lines read.**
+
+**So the price is per repository, and the differentiation table is now telling the truth.** It
+claimed per-repository pricing as a differentiator against per-seat incumbents while the pricing
+table charged per developer; the claim was right about where our costs sit and the table had not
+caught up.
+
+**Verified against the market, August 2026:** CodeRabbit is about **$24 per developer per month**
+annually, Greptile **$30 per seat with 50 reviews included** and per-review charges beyond it,
+Qodo **$30 per user** (Qodo Merge free self-hosted, or $19 per seat). **None of them price per
+repository**, because all of them pay per token and tokens track reviews. We do not, so we can
+price the axis our costs actually sit on — and it is the axis a customer can predict, because
+they know how many repositories they have and cannot know how many pull requests next quarter
+brings.
+
+**This is a smaller number than a per-seat line would produce, and that is correct.** Twenty
+developers on four repositories pay four repository fees, not twenty seats. We ship a ranker and
+a coverage line, not a reviewer; charging reviewer prices for it would be the overclaim this whole
+document exists to avoid.
 
 | | **Free** | **Team** | **Business** | **Enterprise** |
 |---|---|---|---|---|
-| Price | $0 | **$19**/dev/mo annual · $24 monthly | **$39**/dev/mo annual · $49 monthly | **$55**/dev/mo, $2.5K/mo floor |
+| Price | $0 | **$12**/repo/mo annual · $15 monthly | **$10**/repo/mo annual, **10 repo minimum** | from **$2.5K**/mo, unlimited repositories |
+| | | | *At exactly 10 repositories Business is $100 against Team's $120 for a superset — Team is dominated from 10 up, deliberately. The minimum is the crossover, and it is set where pooling starts being worth buying.* | |
+| **Priced on** | — | **repository** | **repository** | contract |
+| Seats | unlimited | **unlimited** | **unlimited** | unlimited |
 | Buyer | anyone | team lead | Director or VP Engineering | procurement and security |
-| What is being bought | the proof | the reviewer | the report | the contract |
+| What is being bought | the proof | **the routing** | **the org-wide report** | the contract |
 | Bought with | nothing | credit card | light purchase order | MSA, DPA, security review |
 | Ranking, coverage line, retrospective | ✓ | ✓ | ✓ | ✓ |
 | **Coverage line names every skipped unit** | ✓ | ✓ | ✓ | ✓ |
-| Model findings in the pull request | — | ✓ unlimited | ✓ unlimited | ✓ unlimited |
-| **Review depth** | none | **3 units** | **5 units** | 5 units |
+| ~~Model findings in the pull request~~ | **NOT BUILT — closed on evidence, sold by nobody here** |||| 
+| ~~Review depth~~ | **NOT BUILT.** It was the tier lever in an earlier draft, and it cannot be: it prices a capability `infer/` does not contain |||| 
+| **Pooled retrospective across repositories** | single repo | single repo | **✓ org-wide** | ✓ org-wide |
 | Cross-repository aggregation, quarterly audit, SSO | — | — | ✓ | ✓ |
 | Verifier drop-rate telemetry | — | — | ✓ | ✓ |
-| **Bring your own key** — allowlisted model | — | — | **✓** | ✓ |
-| **Bring your own model** — uncertified or self-hosted | — | — | — | **✓** |
+| ~~Bring your own key~~ / ~~Bring your own model~~ | **NOT SELLABLE while `infer/` ships nothing — there is no model call to bring a key for.** Kept as the shape the Enterprise tier would take if the reviewer reopened ||||
 | Self-hosting, audit logs, residency, SLA | — | — | — | ✓ |
-| Token budget | none — no model runs | fair use per repository | higher per repository | unlimited on their key |
-| **Our cost of goods** | **$0** | ~$28/repo/month | ~$41/repo/month | $0 — their key |
+| ~~Token budget~~ | **No model runs at any tier. There is no token budget to sell.** ||||
+| **Our cost of goods** | storage + CPU | **a clone and an index per repository** — 15 MB and 393 KB for flask, CPU seconds per run |||
 
-**Review depth is a tier lever because it is measured, and it is the most honest upsell available
-to us.** Three units miss at most 8.84% of the changes where a defect exists; five units miss at
-most 3.50%. Both figures are paired, McNemar p < 0.0001. The sentence a competitor cannot say
-back is *"we tell you what we skipped, and on higher tiers we skip less."*
+> **THE TIER LEVER IN THIS TABLE WAS REVIEW DEPTH, AND IT PRICED SOMETHING THAT DOES NOT EXIST.**
+> Three units against five is a real measurement — 8.84% against 3.50%, paired, McNemar
+> p < 0.0001 — but both are *function-level* figures for a *model reading code*, and `infer/`
+> ships nothing. Selling depth would have been selling the half this document elsewhere says is
+> closed at 0.013–0.037 correct findings per pull request.
 
-**Do not print those two percentages on a pricing page.** They belong in a conversation, where
-they are the strongest thing we can offer. Printed, they detach from the coverage line that makes
-them survivable, and they disclose the budget. The page says *deeper review*.
+**The lever that survives is POOLING, and it is the one a customer actually hits.** A single
+repository rarely reaches the pre-registered floors — measured on repositories nobody had seen,
+`requests` gave 551 events, `fastapi` 257 and `click` 414, all three INCONCLUSIVE against floors
+of 500 events and 20 discordant pairs. Pooled across the three: 1,222 events, p < 1e-5,
+**+14.79 points against chance** on the informative stratum, 3 of 3 positive. **The org-wide
+answer is the one that exists, and a single repository often cannot be given one.**
 
-**And the margin improves at the deeper tier**, which is why depth sits at Business rather than
-being sold as an add-on: twenty developers across four repositories is $380 of revenue against
-$112 of cost at three units (71%), or $780 against $164 at five (79%). Paying more buys less
-silence and costs us proportionally less.
+That is an honest upsell because the constraint is arithmetic rather than artificial: we are not
+withholding a number at the lower tier, the lower tier's data cannot support one.
+
+~~**And the margin improves at the deeper tier**~~ — **that arithmetic priced per-seat revenue
+against per-unit inference cost, and both are retired.** Depth is not a tier lever, the row is
+struck through above, and there is no per-unit cost to improve on. What replaces it is simpler:
+**four repositories cost four clones and four indexes whichever tier they sit on**, so the margin
+difference between tiers is entirely the price.
+
+**Which means the margin is WORSE at Business, not better** — $10 per repository against Team's
+$12, on identical cost. That is ordinary volume pricing and it is the opposite of what the retired
+paragraph claimed, so it is said here rather than left for someone to derive: **the higher tier
+buys pooling and an org-wide report at a lower unit price, and we take a thinner margin per
+repository to get more of them.**
 
 **The quarterly coverage audit is a separate line, $8,000–15,000 per engagement**, sold to an
 engineering leader out of a different budget than seats. It is plausibly the larger business.
 
+**SEATS ARE UNLIMITED AT EVERY TIER, INCLUDING FREE, AND THAT IS NOT GENEROSITY.** A seat costs
+us nothing: the ranking is computed once per repository and read by everyone. Charging per seat
+would mean charging for a resource we do not consume, and it is the reason every competitor's
+price rises when a team grows while their cost does not.
+
+**The margin no longer swings with volume, because the thing that swung it is gone.** The old
+arithmetic went from 85% at 400 pull requests a month to 26% at 2,000 — driven entirely by
+per-pull-request inference. A repository that doubles its merge rate now costs us the same
+`git log` it cost before. **Revenue and cost sit on the same axis for the first time.**
+
 **The tiers split by who signs, not by how much you get.** Team is a credit card and a team
-lead buying a reviewer. Business is a light purchase order and a director buying an org-wide
+lead buying routing for their repositories. Business is a light purchase order and a director buying an org-wide
 report — which is why SSO becomes mandatory there and not before. Enterprise is procurement
 buying a contract: it runs where legal permits, with a number we will defend to their auditor.
 **A tier whose only distinction is a bigger quota is anchoring, not a tier.**
 
-**Bring your own *key* at Business; bring your own *model* at Enterprise.** The line is one
-sentence — *we have certified that model, or we have not.* An allowlisted model costs us nothing
+> **NOT SELLABLE TODAY, AND THE TABLE ROW SAYS SO.** `infer/` ships nothing, so there is no model
+> call to bring a key for. The paragraph is kept as the shape the tiers would take if the reviewer
+> reopened; it is not a feature anyone can buy, and a reader quoting this passage would be quoting
+> a plan rather than a product.
+
+~~**Bring your own *key* at Business; bring your own *model* at Enterprise.**~~ The line would be
+one sentence — *we have certified that model, or we have not.* An allowlisted model costs us nothing
 because the evaluation is already amortised across every customer. An uncertified model means
 publishing a coverage number under our name for a configuration we never measured, which is the
 one failure this product cannot survive, so it requires a per-model evaluation run and therefore
-a contract. **Neither reduces the seat price**: bring-your-own-key is bought for compliance
-rather than cost, it widens our support surface across Bedrock, Vertex and Azure, and its real
-saving appears only at high volume — where it is spent buying back the unlimited-reviews promise
-rather than discounting the seat.
+a contract. **Neither reduces the repository price**, and both are moot until `infer/` ships: there is no
+model call to bring a key for. They are kept here as the shape the Enterprise tier would take if
+the reviewer ever reopened, and bring-your-own-key would be bought for compliance rather than
+cost even then.
 
-**Where this is fragile, stated plainly.** At twenty developers, four repositories and 400 pull
-requests a month, cost of goods is $56 against $380 of revenue — **85% gross margin**. At 2,000
-pull requests a month it is $280 against $380, or **26%**. The per-repository budget ceiling is
-therefore load-bearing for the business model and not merely for the token bill. And **$28 per
-repository is a ceiling derived from a specification rather than a measurement** — the request
-count is bounded by construction, but the token sizes inside those three requests, the shallow
-ones especially, are still assumed. Re-derive it in the first week of real traffic before any of
-these numbers reaches a pricing page.
+**~~Where this is fragile~~ — the fragility was a property of the reviewer, and it left with it.**
+The arithmetic here ran from **85% gross margin** at 400 pull requests a month to **26%** at
+2,000, on twenty developers and four repositories. Every dollar of that swing was inference:
+revenue tracked seats, cost tracked pull requests. **The shipped product runs no inference**, so
+the same four repositories cost the same whether they merge 400 changes a month or 2,000, and the
+price is now charged on repositories too.
+
+**What is fragile instead, and it is a different shape.** Cost tracks repository SIZE — a clone
+and an index. `pallets/flask` is 15 MB and a 393 KB index; a monorepo with fifteen years of
+history is not, and a per-repository price flat across both is a per-repository price that loses
+money on the largest customer. **That is the number to re-derive in the first week of real
+traffic**, and it is a storage question rather than a token one.
+
+**And the old ceiling should not be quoted at all.** "$28 per repository" was derived from a
+specification for three model requests that no longer run. It is not a floor, a ceiling, or a
+measurement of anything we ship.
 
 # 5. Slack and Datadog
 
@@ -1136,16 +1281,17 @@ change touching three files or fewer "in the top 3" is **true by construction**:
 refuses to publish a table at all if a history read did not complete, which is how the airflow
 defect recorded further below was caught rather than absorbed.
 
-**This run ranks FILES, and the allocator ranks FUNCTIONS. It does not validate the allocation
-policy.** The harness reads history with `--name-only`, so every unit above is a file. The budget
-is spent on ranked *functions*, globally — and the nested strategy of taking the top file and then
-the top function inside it scored **54.2%, below its own 61.0% null**, in the table further up
-this section. **A file-level top-3 therefore bounds a policy we do not operate.** The
-function-level figure is unmeasured, it is the stage-three gate in the build plan, and until that
-gate runs the honest reading of this table is *"the file-level analogue of the policy loses 4.6%
-of localisable defects"*, not *"our allocator loses 4.6%."*
+**This run ranks FILES, and so does the allocator, so it validates exactly the policy we operate.**
+The harness reads history with `--name-only`, every unit above is a file, and `rank/order.py`
+emits `Site(path, line=0)` — the zero says the unit is the whole file. The file-level table
+therefore describes the shipped policy, and it is the arm that replicated out-of-sample on six
+unseen repositories. The nested strategy — top file, then top function inside it — scored
+**54.2%, below its own 61.0% null** in the table further up this section, which is part of why
+functions were not chosen.
 
-**The operational number is the pooled row, not the ≥4 row.** Production sees every change, and
+**The operational number is the pooled row, not the ≥4 row** — and this is the ONE operational
+number, now that the function-level arm is documented as the road not taken rather than as "the
+number the product has". Production sees every change, and
 61.4% of them touch three files or fewer where a three-unit budget is not binding. So the figure
 that describes the policy's cost is the pooled one:
 
@@ -1158,11 +1304,17 @@ that describes the policy's cost is the pooled one:
 At 200 pull requests a month that is **3.5 changes, and between 3.0 and 4.2**, where the defect
 unit would receive no model call and produce no error.
 
-## The function-level figure, measured — this is the number the product has
+> **This paragraph and the subsection below it were written when the plan was to allocate over
+> functions.** They said the run "does not validate the allocation policy" and that the
+> function-level figure was "unmeasured" — the second contradicted by the subsection immediately
+> below, which is titled *measured* and is.
 
-**The table above ranks FILES. The allocator ranks FUNCTIONS**, so the figure that describes the
-shipping policy is this one, measured paired on identical events across the 8 clones with
-complete objects.
+## The function-level figure, measured — this is the arm we did NOT ship
+
+**The table above ranks FILES, and so does the allocator.** This figure is kept because it is the
+measurement that decided the unit, not because it describes the product: paired on identical
+events across the 8 clones with complete objects, function-level loses to file-level by enough
+that the choice was not close.
 
 | arm | top-3 miss | 95% CI |
 |---|---|---|
@@ -1428,11 +1580,19 @@ repositories produced figures the ranking had not earned.
 otherwise miss.** Every measurement above is retrospective. This is a field question — one month
 of shadow mode on three repositories — and no quantity of history substitutes for it.
 
-**Whether allocation actually reduces token cost** against uniform review of the same diffs. The
-2× figure is arithmetic, not measurement.
+**~~Whether allocation actually reduces token cost~~ — PARTLY ANSWERED, and the figure moved.**
+A real run through Vertex billed **$0.119 per pull request** against the $0.140 the table derived.
+The saving against uniform reading is **1.25×**, not the 2× this row used to quote — an earlier
+single-call version of the table implied 2×, a two-call version implied 1.5×. What is still open
+is the multi-pass case, which the allocator specifies for rank 1 and which the arithmetic puts at
+**$0.225, worse than reading everything.**
 
-**Whether the productionised ranker reproduces these numbers.** If it does not, the research is
-not the product.
+**~~Whether the productionised ranker reproduces these numbers~~ — ANSWERED. Gate 2b is met on
+`main`.** `rank/` reproduces `research/phase0/external/defect_return_external.json` **event for
+event** across the six pinned repositories: 2,400 events, miss **1.21%** against alphabetical's
+**3.12%**, zero ordering mismatches. `just gate-2b` re-proves it on every run, and
+`just verify-pack-vs-git` recomputes every stored row from git per path rather than trusting our
+own read. **The research is the product, and it is checked rather than asserted.**
 
 **Whether anyone will pay an independent party to measure their AI tooling.** The largest risk in
 the plan, and the one that no further engineering resolves.
@@ -1441,7 +1601,15 @@ the plan, and the one that no further engineering resolves.
 
 ## 6.9 The two mechanisms taken from Qodo, and what each one bought
 
-Qodo leads Martian's offline layer at **67.9% precision** across 49 tools and does two cheap things
+> **THE 67.9% HERE IS NOT THE 67.9% ELSEWHERE IN THIS DOCUMENT.** This one is Qodo's *precision*
+> on Martian's offline layer — a behavioural measure of their output. The other, under "The
+> corrected attribution rule",
+> is the share of file-overlap attribution *verdicts* that blame a change sharing no symbol with
+> the fix. Two unrelated quantities that happen to share two digits, and a reader meeting both
+> will assume a relationship. `publishing-rules.md` bars mixing their behavioural numbers with
+> ours at all; this is the same hazard arriving by coincidence rather than by argument.
+
+Qodo leads Martian's offline layer at **67.9% precision** across **49 tools on the leaderboard** and does two cheap things
 this project did not. Both were built, sabotage-tested, and run against **80 merged pull requests
 from six repositories verified unused**, three arms, blind adjudication, bars fixed in advance,
 **10 of 10 sabotaged controls caught**.
@@ -1571,5 +1739,7 @@ a reader no way to calibrate the rest of it.
    quality improvements and 3% security-critical findings. Both halves now appear, because a
    competitor or investor will find the second half in ten minutes and the argument does not
    need the omission.
-4. **"$10,000+ per engineer per year"** — rounded up. The underlying figure is ~$9,600 at a
-   $150K salary. Corrected.
+4. ~~**"$10,000+ per engineer per year"** — rounded up. The underlying figure is ~$9,600 at a
+   $150K salary.~~ **This correction is itself superseded and is kept only as a record of the
+   process.** "What QuantaMind is" now carries **$28,000–$42,000**, derived differently. An appendix that documents
+   a correction to a number nobody quotes any more reads as current guidance; it is not.
