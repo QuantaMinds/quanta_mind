@@ -103,22 +103,38 @@ def materialise(manifest: Path, dest_root: Path) -> list[tuple[str, str, bool]]:
     out: list[tuple[str, str, bool]] = []
 
     for repo in spec["repos"]:
-        name, sha, url = repo["name"], repo["sha"], repo["url"]
-        dest = dest_root / name
-        if _head_of(dest) == sha:
-            out.append((name, sha, False))
-            continue
-        if not dest.exists():
-            # No --filter: see the module docstring. --no-checkout is the whole history with no
-            # working tree, which is everything `git log --name-only` reads.
-            done = _git(["clone", "--no-checkout", "-q", url, str(dest)], CLONE_TIMEOUT_S)
-            if done.returncode != 0:
-                raise FixtureCloneFailed(
-                    name, f"clone exited {done.returncode}: {done.stderr[:200]!r}"
-                )
-        _pin_head(dest, name, sha)
-        out.append((name, sha, True))
+        out.append(pin(repo["name"], repo["sha"], repo["url"], dest_root / repo["name"]))
     return out
+
+
+def pin(name: str, sha: str, url: str, dest: Path, checkout: bool = False) -> tuple[str, str, bool]:
+    """(name, sha, freshly_cloned) for ONE repository, verified to be at its commit.
+
+    Public because `scripts/verify/build_pack.py` needs the same thing for a different corpus, and
+    two implementations of "clone at a commit and check it landed" is the drift pattern this
+    project keeps finding: one of them acquires the verification and the other does not.
+
+    **`checkout` writes the working tree, and the source-leak check needs it.** Gate 2b reads only
+    `git log`, so its clones carry no files at all; `assert_no_source_in_pack.py` searches the
+    repository's actual SOURCE for stored values, and against a bare tree it would find nothing
+    and report a clean run -- a check whose subject is absent passes for the wrong reason.
+    """
+    if _head_of(dest) == sha and (not checkout or (dest / "README.md").exists()):
+        return (name, sha, False)
+    if not dest.exists():
+        # No --filter: see the module docstring. --no-checkout is the whole history with no
+        # working tree, which is everything `git log --name-only` reads.
+        done = _git(["clone", "--no-checkout", "-q", url, str(dest)], CLONE_TIMEOUT_S)
+        if done.returncode != 0:
+            raise FixtureCloneFailed(name, f"clone exited {done.returncode}: {done.stderr[:200]!r}")
+    _pin_head(dest, name, sha)
+    if checkout:
+        done = _git(["-C", str(dest), "reset", "--hard", "--quiet", sha], CLONE_TIMEOUT_S)
+        if done.returncode != 0:
+            raise FixtureCloneFailed(
+                name, f"could not write the working tree: {done.stderr[:200]!r}"
+            )
+    return (name, sha, True)
 
 
 def main() -> int:

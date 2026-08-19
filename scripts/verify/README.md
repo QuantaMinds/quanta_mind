@@ -10,6 +10,7 @@ gave was wrong.
 | `build_pack.py` | (used by the two below) | clones a real repository and builds a pack through the product's own code path |
 | `assert_no_source_in_pack.py` | `just verify-no-source-leak` | ARCHITECTURE.md invariant 6 — no stored value over 40 chars appears in any source file |
 | `assert_deterministic.py` | `just verify-determinism` | invariant 5 — indexing the same history three times produces one pack digest |
+| `assert_pack_matches_git.py` | `just verify-pack-vs-git` | every pack row recomputed from git, per path, on all 261 paths |
 
 Both are known-answer tested: planting a real line from `logging.py` into the pack makes the
 source-leak check name the table, the column and the file it came from.
@@ -48,3 +49,36 @@ it killed the earlier product, and this one inherits none of it. The gate stayed
 
 **A green `just check` still says nothing about whether the data is right.** That distinction is
 `docs/engineering/VALIDATION.md`'s subject and it survives this change intact.
+
+
+## Why there is no golden pack, and what replaced it
+
+`verify-data` used to be the plan: commit a pack, have a human review it, diff against it. Two
+things killed that shape.
+
+**The corpus was not pinned.** `build_pack.py` cloned `pallets/flask` at HEAD into a gitignored
+directory, and flask's `main` moved on 2026-08-16. A golden committed today could never have
+matched a build next week. That is fixed — `pinned_clone.json` names tag 3.1.3 and the pin is
+verified after cloning — but it means the golden was impossible, not merely unwritten.
+
+**A human signature is not a receipt.** `research/phase0/claims/verify.py` recomputes 56 numbers
+from stored artefacts and asserts nothing from memory or from a document, because this project
+shipped a kappa of 0.66 reported as 0.92 and **an anchor check that read 98.1% while blind raters
+found the anchors wrong**. That number was signed and wrong. The literature calls the failure mode
+snapshot fatigue: the diff stops being read and the baseline gets accepted to make the build green.
+
+So `assert_pack_matches_git.py` **recomputes** instead. Every path, asked of git per path rather
+than through the single `--name-only` read `ingest` uses, so a shared misreading cannot make both
+agree. It re-derives on every run and cannot decay.
+
+**A shortfall is excused only by a verified deletion.** A wildcard read does not report the commit
+that deletes a file, so the pack runs short there — checked against `--diff-filter=D` per
+timestamp rather than taken on trust. 100 of 261 paths are short and every one is a real deletion.
+`src/flask/app.py` is the instructive case: renamed into `sansio/`, later re-created as a shim, so
+it sits in HEAD **with a deletion in its history**. "Present in HEAD" is not "never deleted", and
+assuming it was cost this check two false disagreements on its first run.
+
+**What a recomputation cannot see** is the serialised form — schema shape, row ordering, path
+encoding. A byte-level golden would catch those, and if one is ever added it should be REGENERATED
+BY THIS CHECK rather than reviewed: its authority then comes from the recomputation, and a wrong
+number fails here before it can become golden.

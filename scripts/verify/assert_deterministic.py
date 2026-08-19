@@ -29,6 +29,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import pathlib
+import shutil
 import sqlite3
 import subprocess
 import sys
@@ -107,12 +108,22 @@ def main(argv: list[str]) -> int:
     # -- and both times this check went on reporting "ok" because both builds happened to land in
     # the same second. Mutating a volatile column and requiring the digest NOT to move proves the
     # exclusion is live, rather than trusting that it is.
+    #
+    # ON A COPY. This mutated `args.out` in place and never restored it, so the pack left on disk
+    # after `just verify` was NOT the pack `build_pack` produced -- every wall-clock column read
+    # 424242. Nothing downstream broke, but only because `verify-pack-vs-git` happens to run
+    # first and reads only `touch`; a reordered recipe would have handed the next verifier a pack
+    # this one had quietly edited.
     probe = content_digest(args.out)
-    with sqlite3.connect(args.out) as mutate:
+    scratch = args.out.with_suffix(".mutated.db")
+    shutil.copy(args.out, scratch)
+    with sqlite3.connect(scratch) as mutate:
         for table, columns in VOLATILE.items():
             for column in columns:
                 mutate.execute(f"UPDATE {table} SET {column} = 424242")
-    if content_digest(args.out) != probe:
+    moved = content_digest(scratch) != probe
+    scratch.unlink()
+    if moved:
         print(
             "[determinism] the wall-clock exclusion is NOT being applied: changing "
             f"{rendered()} moved the digest. This check would then be comparing clock "

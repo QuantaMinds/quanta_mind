@@ -111,11 +111,12 @@ check-branch:
 # by long enough to make the project's own definition of done unsatisfiable by anyone.
 
 # Everything in `check`, plus real runs against real repositories. Target: under 10 minutes.
-verify: check test-live verify-no-source-leak verify-determinism
+verify: check test-live verify-no-source-leak verify-pack-vs-git verify-determinism
     @echo ""
     @echo "✅ verify passed — the pipeline ran against real repositories and the pack holds no source."
-    @echo "   NOT covered: golden-pack comparison. There is no reviewed pack to diff against yet;"
-    @echo "   see scripts/verify/README.md. Do not quote this as 'the data is verified'."
+    @echo "   Every pack row was recomputed from git per path, so this is not a self-comparison."
+    @echo "   NOT covered: the SERIALISED form -- schema shape, row ordering, path encoding --"
+    @echo "   which a byte-level golden would catch and a recomputation looks straight past."
 
 # Runs the full pipeline against real repositories. No mocks, by guard rule.
 test-live:
@@ -132,6 +133,13 @@ verify-no-source-leak:
     uv run python scripts/verify/build_pack.py --out .verify-pack.db --clone .verify-clone
     uv run python scripts/verify/assert_no_source_in_pack.py --pack .verify-pack.db --repo .verify-clone
 
+
+# Recomputes every row of the pack from git, per path, and requires the same answer. This is the
+# research's model -- `claims/verify.py` recomputes rather than citing -- applied to the pack, and
+# it is what a golden pack would otherwise be trusted to have established once.
+verify-pack-vs-git:
+    uv run python scripts/verify/build_pack.py --out .verify-pack.db --clone .verify-clone
+    uv run python scripts/verify/assert_pack_matches_git.py --pack .verify-pack.db --clone .verify-clone
 
 # Diffs a produced pack against a reviewed golden pack. NOT part of `verify`, because there is no
 # golden pack yet -- and a recipe that silently passed would be worse than one that says so.
