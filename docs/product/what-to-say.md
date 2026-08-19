@@ -9,6 +9,19 @@ it are what to reach for **if** they push, not a script to recite.
 
 ---
 
+## The one line, if there is time for nothing else
+
+> **We decide where to look first in a large change, and we tell you what we did not look at.**
+
+If they ask what makes that different: **every other tool in this category tells you what is
+wrong. We do not — we measured that and it does not work.** Then stop. The numbers behind it are in
+`QUANTAMIND.md` and most of them do not belong in print; `publishing-rules.md` says which.
+
+**Do not say "autonomous senior engineer."** Nine designs and four blind rater pools put the best
+configuration at roughly one useful comment per forty pull requests. It is the one claim in this
+category the evidence here directly contradicts, and it is the claim a sceptical engineer will test
+first.
+
 ## Read this before the first meeting
 
 **Nothing is built yet.** `src/quantamind/` holds a package root and nothing else. The coverage
