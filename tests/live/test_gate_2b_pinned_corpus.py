@@ -4,26 +4,22 @@ WHAT: Replays the event definition through the PRODUCT path — `read_commits` �
       `touches.counts` → `rank.order` — over the pinned corpus in `tests/fixtures/pinned.json`,
       and asserts the per-repository (hit, alpha_hit) vectors are IDENTICAL, event for event, to
       `research/phase0/external/defect_return_external.json`.
-WHY:  Gate 2a asserts the product ORDERS a set of files the way the research does. That is
-      necessary and not sufficient, and the gap is the event set: a reimplementation can order
-      every event correctly while admitting different EVENTS, and then report a different miss
-      rate from a corpus that is no longer the one with the p-value. Gate 2a never caught this,
-      because it built both the product's ranking and its own `expected` oracle from the SAME
-      `read_commits` output — so the commit stream itself had never been checked against the
-      research's.
+WHY:  Gate 2a asserts the product ORDERS files the way the research does. Necessary, not
+      sufficient: a reimplementation can order every event correctly while admitting different
+      EVENTS, then report a miss rate from a corpus that no longer has the p-value. Gate 2a could
+      not catch that — it built the ranking and its own `expected` oracle from the SAME
+      `read_commits` output, so the commit stream was never checked against the research's.
 
-      **EQUALITY, NOT AN INTERVAL.** The plan asked for "top-3 miss inside 0.82-1.81%". That
-      interval is Wilson on 24/1969 — the ORIGINAL EIGHT repositories the ranker was developed
-      against. The pinned six are a different corpus with a different interval, [0.84%, 1.73%] on
-      29/2400, and holding one population to the other's interval is the category error
-      `test_event_replay_gate.py` already warns about, one level up. It is also far too weak:
-      once the events match, the miss rate is 1.21% by construction, not by luck, so an interval
-      that admits anything from 0.84% to 1.73% would pass a product that had drifted. Equality
-      against the artefact is the check the interval was standing in for.
+      **EQUALITY, NOT AN INTERVAL.** The plan asked for "top-3 miss inside 0.82-1.81%", which is
+      Wilson on 24/1969 — the ORIGINAL EIGHT the ranker was developed against. The pinned six have
+      their own interval, [0.84%, 1.73%] on 29/2400, and holding one population to the other's is
+      the category error `test_event_replay_gate.py` warns about, one level up. It is also too
+      weak: once the events match, 1.21% follows by construction, where an interval admitting
+      0.84-1.73% would pass a product that had drifted.
 
       **THE FIX-WORD MATCH IS CASE-INSENSITIVE**, because `commit_stream.py` lowercases the
-      subject before `defect_return.py` sees it. `test_event_replay_gate.py` claimed in a comment
-      to match the research by testing the raw subject; it did the opposite, admitting fewer.
+      subject first. `test_event_replay_gate.py` claimed in a comment to match the research by
+      testing the raw subject; it did the opposite, admitting fewer events.
 IMPORTS: quantamind.ingest.commits, quantamind.store.{schema,touches}, quantamind.rank.score,
          quantamind.types.touch.
 CONSUMED BY: `just gate-2b`.
@@ -92,7 +88,9 @@ def _research_prior(index: dict[str, list[int]], path: str, as_of: int) -> int:
     return bisect.bisect_left(stamps, as_of) - bisect.bisect_left(stamps, as_of - YEAR)
 
 
-def _replay(clone: Path, name: str, repo: str) -> tuple[list[tuple[bool, bool]], int]:
+def _replay(
+    clone: Path, name: str, repo: str, scratch: Path
+) -> tuple[list[tuple[bool, bool]], int]:
     """([(hit, alpha_hit)] through the product path, order mismatches) for one repository."""
     commits = read_commits(clone, pathspec="*.py")
     assert len(commits) > 100, f"{name}: {len(commits)} commits — the read looks truncated"
@@ -104,7 +102,10 @@ def _replay(clone: Path, name: str, repo: str) -> tuple[list[tuple[bool, bool]],
     for stamps in index.values():
         stamps.sort()
 
-    conn = schema.open_store(clone / "gate2b-index.db")
+    # Throwaway dir, NOT the clone: an index left inside the fixture survived between runs, and
+    # when SCHEMA_VERSION went to 2 the gate died on a stale v1 store. The store was right; this
+    # test was not hermetic.
+    conn = schema.open_store(scratch / f"{name}.db")
     repo_id = touch_store.ensure_repo(conn, "github.com", repo)
     touch_store.index(
         conn,
@@ -146,7 +147,7 @@ def _replay(clone: Path, name: str, repo: str) -> tuple[list[tuple[bool, bool]],
     return rows, mismatches
 
 
-def test_the_product_reproduces_the_research_on_its_own_pinned_corpus() -> None:
+def test_the_product_reproduces_the_research_on_its_own_pinned_corpus(tmp_path: Path) -> None:
     spec = json.loads(MANIFEST.read_text())
     baseline = _baseline()
     names = [r["name"] for r in spec["repos"]]
@@ -174,7 +175,7 @@ def test_the_product_reproduces_the_research_on_its_own_pinned_corpus() -> None:
             f"{name} is at {landed.stdout.decode().strip()[:12]}, pinned at {sha[:12]} — "
             f"re-run `just fixtures`"
         )
-        rows, mismatches = _replay(clone, name, repo["repo"])
+        rows, mismatches = _replay(clone, name, repo["repo"], tmp_path)
         want = baseline[name]
         total_mismatches += mismatches
         if rows != want:
