@@ -83,3 +83,4 @@ research/phase0/claims/future_fix_scored.json
 research/phase0/quote/clones13/
 .verify-pack.db
 .verify-clone/
+tests/fixtures/repos/

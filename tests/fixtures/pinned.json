@@ -1,0 +1,42 @@
+{
+  "why": "The six repositories that produced the only claim this company rests on: top-three by fix history misses 1.21% of the changes a later fix returns to, against alphabetical's 3.12%, n=2400, McNemar p<1e-6, 6 of 6 positive. Recorded here because the commit each was measured at was previously written down NOWHERE -- the run read a scratchpad path under /private/tmp belonging to a session that has since ended, and the result artefact stores only hit/alpha_hit booleans, so neither the code nor the data named the corpus. These SHAs were verified by re-running defect_return.py against the surviving clones and reproducing all 2400 events exactly.",
+  "produces": "research/phase0/external/defect_return_external.json",
+  "repos": [
+    {
+      "name": "ansible_ansible",
+      "repo": "ansible/ansible",
+      "sha": "9cf16a4aca7898481c257f1e17ad28d0b67b1f85",
+      "url": "https://github.com/ansible/ansible.git"
+    },
+    {
+      "name": "celery_celery",
+      "repo": "celery/celery",
+      "sha": "1fcbf6fa4fb3ebd38ac80d3ee0a53b079b1e9d18",
+      "url": "https://github.com/celery/celery.git"
+    },
+    {
+      "name": "django_django",
+      "repo": "django/django",
+      "sha": "3436cf9bce84bb1f6877ad96819637366b27b719",
+      "url": "https://github.com/django/django.git"
+    },
+    {
+      "name": "pandas-dev_pandas",
+      "repo": "pandas-dev/pandas",
+      "sha": "a3cbd3804cb17c32dfb7c81698257d9287ff6d91",
+      "url": "https://github.com/pandas-dev/pandas.git"
+    },
+    {
+      "name": "scikit-learn_scikit-learn",
+      "repo": "scikit-learn/scikit-learn",
+      "sha": "59f6f35ad7ab187422b9e315cf92196256db8b4f",
+      "url": "https://github.com/scikit-learn/scikit-learn.git"
+    },
+    {
+      "name": "scrapy_scrapy",
+      "repo": "scrapy/scrapy",
+      "sha": "06af687662112027b4482d31e2714a3cf280a91f",
+      "url": "https://github.com/scrapy/scrapy.git"
+    }
+  ]
+}

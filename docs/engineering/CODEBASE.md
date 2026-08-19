@@ -541,10 +541,23 @@ answer. **25 live files, exact agreement.**
 
 Two properties surfaced doing it, both real and neither a bug:
 
-**The oracle must be `--full-history`.** Plain `git log -- <path>` applies history simplification,
-omitting commits whose content matched a parent — it reported 6 where our index had 7 for
-`src/flask/ctx.py`. Our index is every commit that touched the file, which is what a touch *count*
-means. The first version of that test failed the product for being right.
+**The oracle must be `--full-history` — and so must the reader.** Plain `git log -- <path>`
+applies history simplification, omitting commits whose content matched a parent — it reported 6
+where our index had 7 for `src/flask/ctx.py`. Our index is every commit that touched the file,
+which is what a touch *count* means. The first version of that test failed the product for being
+right.
+
+**`ingest/commits.py` was then wrong in the same way for months, and this test did not catch it.**
+The reader passed a pathspec without `--full-history`, so it dropped commits on merged side
+branches: when a merge is TREESAME to one parent git follows only that parent and discards the
+other side, non-merge commits included. On the pinned corpus that lost 3 to 151 commits per
+repository and 23 of 430 for `celery/__init__.py`. **The score IS the touch count, so those were
+ranking errors, not bookkeeping ones.** This test kept passing because its repositories —
+`flask`, `pytest`, `flake8`, `poetry`, `uvicorn`, `textual` — have flatter histories than
+`ansible`, `celery` and `scikit-learn`; the oracle was right, the reader was wrong, and only a
+corpus with real branching separated them. Found by gate 2b, whose first honest run failed.
+`tests/unit/layers/test_history_read.py` now builds the merge that triggers it and asserts the
+simplified walk really does drop the commit, so the fixture cannot quietly stop exercising it.
 
 **Deleted files undercount, unreachably.** Under a wildcard pathspec `git log --name-only` does not
 report the commit that deletes a file, so our index is one short for such paths — three of fifty in

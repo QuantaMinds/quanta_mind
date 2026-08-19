@@ -44,13 +44,16 @@ YEAR = 365 * 86400
 WINDOW = 90 * 86400
 FIXWORDS = ("fix", "bug", "revert", "hotfix", "regression", "broken")
 MAX_FILES, MAX_EVENTS, BUDGET = 12, 400, 3
-# The research reported top-3 miss of 1.22% with a 95% Wilson interval of [0.82%, 1.81%] on ITS
-# corpus of 1,969 events. **That interval is NOT asserted here, and gate 2b is NOT met by this
-# test.** An interval describes sampling error on the population it was measured on; holding a
-# different set of repositories to it is a category error, and it was mine when this file was first
-# written. Measured on four other repositories the miss ran 1.54% to 17.86% per repository -- see
-# the size stratification below for why. Gate 2b needs the research's own pinned repositories, and
-# until they are wired up the plan records it as unmet rather than as passed on a substitute.
+# 1.22% with a 95% Wilson interval of [0.82%, 1.81%] is the ORIGINAL EIGHT repositories the ranker
+# was developed against, n = 1,969. It is NOT the out-of-sample result: the fresh six the company
+# quotes are 1.21% on n = 2,400, whose own interval is [0.84%, 1.73%]. The two were conflated here,
+# and the plan's gate 2b inherited the conflation -- it asked for the pinned six to land inside the
+# development corpus's interval. **Neither interval is asserted here.** An interval describes
+# sampling error on the population it was measured on, and holding a different set of repositories
+# to it is a category error. Measured on the four repositories below the miss ran 1.54% to 17.86%
+# per repository -- see the size stratification. Gate 2b is now its own test against the pinned
+# corpus, and it asserts EQUALITY with the research's events rather than membership in an interval:
+# see `test_gate_2b_pinned_corpus.py`.
 RESEARCH_MISS, RESEARCH_LOW, RESEARCH_HIGH = 0.0122, 0.0082, 0.0181
 REPOS = ("pytest-dev/pluggy", "jazzband/pip-tools", "falconry/falcon", "encode/httpx")
 MIN_EVENTS = 200
@@ -119,8 +122,12 @@ def test_the_replayed_ranker_matches_research_and_lands_in_its_interval(
             for later in commits[i + 1 :]:
                 if later.committed_at - commit.committed_at > WINDOW:
                     break
-                # Case-SENSITIVE, matching the research: it tests the raw `%s` subject.
-                if any(w in later.subject for w in FIXWORDS):
+                # Case-INSENSITIVE. `commit_stream.py` lowercases the subject before
+                # `defect_return.py` matches against it, so the research admits "Fix parser"
+                # and this once did not. The comment here previously asserted the opposite and
+                # was wrong for as long as it stood: a claim about another module's behaviour,
+                # written where nothing could check it.
+                if any(w in later.subject.lower() for w in FIXWORDS):
                     target |= later.paths & files
             if not target:
                 rejected["no later fix returned to it"] += 1

@@ -81,4 +81,7 @@ exclude = ["^vendor/", "^research/"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "--strict-markers --strict-config"
+markers = [
+    "pinned_corpus: needs the pinned research corpus materialised by `just fixtures`",
+]
 xfail_strict = true
