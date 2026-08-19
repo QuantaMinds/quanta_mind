@@ -1,18 +1,24 @@
 # QuantaMind
 
+> **QuantaMind — Focus: model-free triage of where to look first in a large change, ranked by which
+> files a later fix has returned to, with a published coverage line naming what was not analysed.**
+
 Every AI reviewer reads the whole diff at one depth. **We decide where to look first, read hard
-only there, and state what we could not analyse.**
+only there, and state what we could not analyse.** Every other tool in the category tells you what
+is *wrong*; we do not, because we measured that half and it did not survive.
 
-A model-free pass ranks the changed functions and decides where inference goes. A parser checks
-the model's structural claims before publication. Every review ends with its coverage.
+A model-free pass ranks the changed files by how often a later fix has returned to them, and that
+ranking decides where attention goes. **No model reads the code and no claims are published** —
+`infer/` and `verify/` are closed on evidence. Every review ends with its coverage line.
 
-**Status: the first product modules exist; most layers are still empty.** `types/` holds the value
-objects and `ingest/history.py` reads git history with its exit code asserted — the defect that
-voided four measurements. `store/`, `parse/`, `rank/`, `allocate/`, `render/` are empty.
+**Status: seven of ten layers built.** The chain from git history to a rendered comment runs end
+to end and is verified against real repositories. `allocate/`, `infer/` and `verify/` are empty
+**because they are closed on evidence**, not merely unwritten.
 
-**Start at `docs/plans/implementation.md`, section "Where this is now".** It carries a
-machine-checked table of what is built, kept honest by `scripts/guard/check_plan_state.py`, and it
-names the exact next module.
+**No count of modules appears here on purpose.** The one that used to said five layers were empty
+when four of them were not. **Start at `docs/plans/implementation.md`, section "Where this is
+now"** — it carries a table regenerated from the filesystem and kept honest by
+`scripts/guard/records/check_plan_state.py`, which fails the build when the two disagree.
 
 ---
 
