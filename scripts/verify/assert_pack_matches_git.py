@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import argparse
 import collections
+import json
 import pathlib
 import sys as _sys
 
@@ -47,6 +48,7 @@ _sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 import shutil
 import sqlite3
+import subprocess
 import sys
 
 from git_oracle import deletions, timestamps
@@ -123,11 +125,34 @@ def self_test(pack: pathlib.Path, clone: pathlib.Path) -> None:
         )
 
 
+def _assert_paired(clone: pathlib.Path) -> None:
+    """The clone must be at the pinned commit, or this compares two different histories.
+
+    Nothing in a pack records which commit produced it, so `--pack X --clone Y` is trusted
+    pairing. A clone at a LATER commit makes the pack look short everywhere, which reads as data
+    corruption rather than as the operator having passed the wrong directory.
+    """
+    manifest = pathlib.Path(__file__).resolve().parent / "pinned_clone.json"
+    want = json.loads(manifest.read_text())["sha"]
+    done = subprocess.run(
+        ["git", "-C", str(clone), "rev-parse", "HEAD"], capture_output=True, timeout=60
+    )
+    got = done.stdout.decode("utf-8", "replace").strip()
+    if done.returncode != 0 or got != want:
+        raise SystemExit(
+            f"[pack-vs-git] {clone} is at {got[:12] or '?'}, but the corpus is pinned at "
+            f"{want[:12]}. Comparing a pack against a different history reports every difference "
+            f"as data corruption. Run `just verify-pack-vs-git`, which builds and checks together."
+        )
+
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pack", required=True, type=pathlib.Path)
     parser.add_argument("--clone", required=True, type=pathlib.Path)
     args = parser.parse_args(argv[1:])
+
+    _assert_paired(args.clone)
 
     self_test(args.pack, args.clone)
     checked, excused, complaints = compare(args.pack, args.clone)
