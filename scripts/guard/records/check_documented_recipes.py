@@ -28,6 +28,7 @@ from __future__ import annotations
 import ast
 import re
 import sys
+from collections.abc import Iterator, Sequence
 from pathlib import Path
 
 # Running a guard as a script puts only ITS directory on sys.path[0]. This one lives one level
@@ -57,6 +58,23 @@ RECIPE_DEF = re.compile(r"^([a-z][a-z0-9-]*)\s*(?:[A-Za-z0-9_= \"'.]*)?:", re.MU
 # blocklist that goes stale silently, which is the defect class this guard exists to catch.
 FENCE = re.compile(r"^\s*```")
 BACKTICKED = re.compile(r"`([^`]+)`")
+
+
+def _finds(pattern: re.Pattern[str], spans: Sequence[str]) -> Iterator[re.Match[str]]:
+    """Matches inside EACH span separately, never across the gap between two of them.
+
+    The first version joined the spans with a space and scanned once, which SYNTHESISED commands
+    that no span contained. A sentence mentioning `quantamind` and `just` and
+    `docs/engineering/CLI.md` became "quantamind just docs/engineering/CLI.md", out of which this
+    guard read a subcommand `quantamind just` and a recipe `just docs` -- two invocations nobody
+    had written, both reported as violations against correct prose.
+
+    It failed loudly, which is the right direction for a guard to fail in, but it fails on text
+    that is fine: any line with two adjacent code spans can manufacture a phantom command. The
+    join was never needed -- a command lives inside ONE span or it is not a command.
+    """
+    for span in spans:
+        yield from pattern.finditer(span)
 
 
 def _recipes(root: Path) -> set[str]:
@@ -123,8 +141,8 @@ def main() -> int:
             if FENCE.match(line):
                 fenced = not fenced
                 continue
-            code = line if fenced else " ".join(BACKTICKED.findall(line))
-            for match in JUST_CALL.finditer(code):
+            spans = [line] if fenced else BACKTICKED.findall(line)
+            for match in _finds(JUST_CALL, spans):
                 name = match.group("recipe")
                 checked += 1
                 if UNBUILT in line:
@@ -138,7 +156,7 @@ def main() -> int:
                             f"`just {name}` names no recipe in the justfile",
                         )
                     )
-            for match in QM_CALL.finditer(code):
+            for match in _finds(QM_CALL, spans):
                 name = match.group("command")
                 checked += 1
                 if UNBUILT in line:
