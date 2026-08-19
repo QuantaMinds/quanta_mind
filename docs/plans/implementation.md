@@ -38,16 +38,16 @@ three months stale.
 
 | layer | modules | files |
 |---|---|---|
-| `types/` | **7** | `change.py`, `commit.py`, `ranking.py`, `review.py`, `settings.py`, `touch.py`, `verdict.py` |
+| `types/` | **8** | `change.py`, `commit.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `settings.py`, `touch.py`, `verdict.py` |
 | `store/` | **4** | `deliveries.py`, `drift.py`, `schema.py`, `touches.py` |
 | `ingest/` | **4** | `commits.py`, `diff.py`, `github_comments.py`, `history.py` |
 | `parse/` | **2** | `languages.py`, `units.py` |
-| `rank/` | **2** | `order.py`, `score.py` |
+| `rank/` | **4** | `baseline.py`, `events.py`, `order.py`, `score.py` |
 | `allocate/` | **0** | — |
 | `infer/` | **0** | — |
 | `verify/` | **0** | — |
-| `render/` | **2** | `comment.py`, `coverage_line.py` |
-| `serve/` | **3** | `cli.py`, `health.py`, `webhook_github.py` |
+| `render/` | **3** | `comment.py`, `coverage_line.py`, `replay_report.py` |
+| `serve/` | **4** | `cli.py`, `health.py`, `retrospective.py`, `webhook_github.py` |
 
 <!-- plan-state:end -->
 
