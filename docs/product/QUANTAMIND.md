@@ -467,7 +467,8 @@ instead of 4,000, which is unsourced and pushed the wrong way by `xhigh`, since 
 as output. **Allocation is argued as an input-side saving; the arithmetic is currently carried
 by an output ratio that may point the other way.**
 
-At 200 pull requests a month this is **$28 of inference per repository** at the single pass the
+**This whole table prices the CLOSED reviewer and is not what anyone pays.** At 200 pull requests
+a month it would be **$28 of inference per repository** at the single pass the
 allocator actually specifies. **Treat it as a derived ceiling rather than a floor** — and note
 that a real run has since billed **$0.119 per pull request** against this table's $0.140, so the
 derived figure is an over-estimate, not a boundary that has been tested from below. The
@@ -628,20 +629,19 @@ listed as unproven at the end of this document and gated in the build plan. **Wh
 structural, and does not depend on that number, is that the ranking stage runs without
 inference at all.**
 
-> **THE ROW ABOVE USED TO READ "per repository", AND THE PRICING SECTION HAS NEVER MATCHED IT.**
-> the pricing table under "What it costs to run" charges **$19–55 per developer per month**. Per-repository pricing was a stated
-> differentiator against per-seat incumbents and was never implemented, so the table claimed a
-> difference that does not exist.
+> **THIS ROW AND THE PRICING TABLE NOW AGREE, AND THEY DID NOT BEFORE.** The pricing table charged
+> **$19–55 per developer per month** while this row claimed per-repository pricing as a
+> differentiator. The row was right about where our costs sit; the table had not caught up.
 >
-> **It is not cosmetic, and the fragility paragraph is the proof.** At 400 pull requests a month
-> the margin is 85%; at 2,000 it is 26%. That swing exists because **revenue tracks seats while
-> cost tracks repositories and pull-request volume** — the two are not coupled, so a customer who
-> doubles their merge rate without hiring halves our margin. A per-repository or per-review line
-> would couple them.
+> **The swing that made it urgent is gone with it.** The old arithmetic ran from 85% margin at 400
+> pull requests a month to 26% at 2,000, because revenue tracked seats while cost tracked
+> pull-request volume through inference. **The shipped product runs no inference**, so a
+> repository that doubles its merge rate costs us the same `git log` it cost before. Revenue and
+> cost now sit on the same axis.
 >
-> **This is recorded as an open commercial decision, not resolved here.** Changing it is a pricing
-> call with go-to-market consequences, and inventing one in a document would be worse than naming
-> the contradiction.
+> **Verified against the market:** no competitor prices per repository — CodeRabbit per developer,
+> Greptile per seat plus per review, Qodo per user — because all of them pay per token. It is
+> available to us precisely because we do not.
 
 ## We entered their benchmark. This is what came back.
 
@@ -997,20 +997,41 @@ thirds wrong."**
 
 ## What we charge, and why the tiers split where they do
 
-**The cost floor is measured, not assumed: $0.140 per pull request across three capped
-requests, so about $28 of inference per repository per month at 200 pull requests.** The free
-tier runs no model and costs only compute — that is structural, not an estimate.
+> **THIS SECTION PRICED A PRODUCT WE DO NOT SELL, AND THAT IS WHY IT CONTRADICTED THE
+> DIFFERENTIATION TABLE.** Every figure below used to rest on $0.140 of inference per pull
+> request. **The shipped product runs no inference at all** — `quantamind config` prints
+> `runs a model on a review: False`, and `infer/` contains an `__init__.py`. A per-seat price
+> defending a per-token cost was defending a cost we do not incur.
 
-**The market is moving the wrong way for everyone else, and that is the pricing story.**
-CodeRabbit charges $24–48 per developer per month. Greptile moved to **$1 per review beyond 50**
-in March 2026; Cursor's Bugbot moved to roughly **$1–1.50 per run** in May 2026. Two of the
-best-funded reviewers abandoned flat pricing within four months of each other, which is what
-happens when cost of goods scales with lines read. **Ours scales with a capped request count**,
-so we can promise the thing they just withdrew: unlimited reviews at a flat seat price.
+**What the shipped product actually costs is a clone and an index, per repository.** Measured:
+`pallets/flask` is **15 MB of history and a 393 KB index** holding 4,281 touches. A run is one
+`git log` and a handful of SQLite queries — CPU seconds, no network, no tokens. **Cost scales
+with the number of repositories and the size of their history. It does not scale with pull-request
+volume, team size, or lines read.**
+
+**So the price is per repository, and the differentiation table is now telling the truth.** It
+claimed per-repository pricing as a differentiator against per-seat incumbents while the pricing
+table charged per developer; the claim was right about where our costs sit and the table had not
+caught up.
+
+**Verified against the market, August 2026:** CodeRabbit is about **$24 per developer per month**
+annually, Greptile **$30 per seat with 50 reviews included** and per-review charges beyond it,
+Qodo **$30 per user** (Qodo Merge free self-hosted, or $19 per seat). **None of them price per
+repository**, because all of them pay per token and tokens track reviews. We do not, so we can
+price the axis our costs actually sit on — and it is the axis a customer can predict, because
+they know how many repositories they have and cannot know how many pull requests next quarter
+brings.
+
+**This is a smaller number than a per-seat line would produce, and that is correct.** Twenty
+developers on four repositories pay four repository fees, not twenty seats. We ship a ranker and
+a coverage line, not a reviewer; charging reviewer prices for it would be the overclaim this whole
+document exists to avoid.
 
 | | **Free** | **Team** | **Business** | **Enterprise** |
 |---|---|---|---|---|
-| Price | $0 | **$19**/dev/mo annual · $24 monthly | **$39**/dev/mo annual · $49 monthly | **$55**/dev/mo, $2.5K/mo floor |
+| Price | $0 | **$12**/repo/mo annual · $15 monthly | **$10**/repo/mo annual, 10 repo minimum | from **$2.5K**/mo, unlimited repositories |
+| **Priced on** | — | **repository** | **repository** | contract |
+| Seats | unlimited | **unlimited** | **unlimited** | unlimited |
 | Buyer | anyone | team lead | Director or VP Engineering | procurement and security |
 | What is being bought | the proof | the reviewer | the report | the contract |
 | Bought with | nothing | credit card | light purchase order | MSA, DPA, security review |
@@ -1024,8 +1045,8 @@ so we can promise the thing they just withdrew: unlimited reviews at a flat seat
 | **Bring your own key** — allowlisted model | — | — | **✓** | ✓ |
 | **Bring your own model** — uncertified or self-hosted | — | — | — | **✓** |
 | Self-hosting, audit logs, residency, SLA | — | — | — | ✓ |
-| Token budget | none — no model runs | fair use per repository | higher per repository | unlimited on their key |
-| **Our cost of goods** | **$0** | ~$28/repo/month | ~$41/repo/month | $0 — their key |
+| ~~Token budget~~ | **No model runs at any tier. There is no token budget to sell.** ||||
+| **Our cost of goods** | storage + CPU | **a clone and an index per repository** — 15 MB and 393 KB for flask, CPU seconds per run |||
 
 > **THE TIER LEVER IN THIS TABLE WAS REVIEW DEPTH, AND IT PRICED SOMETHING THAT DOES NOT EXIST.**
 > Three units against five is a real measurement — 8.84% against 3.50%, paired, McNemar
@@ -1051,6 +1072,16 @@ silence and costs us proportionally less.
 **The quarterly coverage audit is a separate line, $8,000–15,000 per engagement**, sold to an
 engineering leader out of a different budget than seats. It is plausibly the larger business.
 
+**SEATS ARE UNLIMITED AT EVERY TIER, INCLUDING FREE, AND THAT IS NOT GENEROSITY.** A seat costs
+us nothing: the ranking is computed once per repository and read by everyone. Charging per seat
+would mean charging for a resource we do not consume, and it is the reason every competitor's
+price rises when a team grows while their cost does not.
+
+**The margin no longer swings with volume, because the thing that swung it is gone.** The old
+arithmetic went from 85% at 400 pull requests a month to 26% at 2,000 — driven entirely by
+per-pull-request inference. A repository that doubles its merge rate now costs us the same
+`git log` it cost before. **Revenue and cost sit on the same axis for the first time.**
+
 **The tiers split by who signs, not by how much you get.** Team is a credit card and a team
 lead buying a reviewer. Business is a light purchase order and a director buying an org-wide
 report — which is why SSO becomes mandatory there and not before. Enterprise is procurement
@@ -1062,19 +1093,27 @@ sentence — *we have certified that model, or we have not.* An allowlisted mode
 because the evaluation is already amortised across every customer. An uncertified model means
 publishing a coverage number under our name for a configuration we never measured, which is the
 one failure this product cannot survive, so it requires a per-model evaluation run and therefore
-a contract. **Neither reduces the seat price**: bring-your-own-key is bought for compliance
-rather than cost, it widens our support surface across Bedrock, Vertex and Azure, and its real
-saving appears only at high volume — where it is spent buying back the unlimited-reviews promise
-rather than discounting the seat.
+a contract. **Neither reduces the repository price**, and both are moot until `infer/` ships: there is no
+model call to bring a key for. They are kept here as the shape the Enterprise tier would take if
+the reviewer ever reopened, and bring-your-own-key would be bought for compliance rather than
+cost even then.
 
-**Where this is fragile, stated plainly.** At twenty developers, four repositories and 400 pull
-requests a month, cost of goods is $56 against $380 of revenue — **85% gross margin**. At 2,000
-pull requests a month it is $280 against $380, or **26%**. The per-repository budget ceiling is
-therefore load-bearing for the business model and not merely for the token bill. And **$28 per
-repository is a ceiling derived from a specification rather than a measurement** — the request
-count is bounded by construction, but the token sizes inside those three requests, the shallow
-ones especially, are still assumed. Re-derive it in the first week of real traffic before any of
-these numbers reaches a pricing page.
+**~~Where this is fragile~~ — the fragility was a property of the reviewer, and it left with it.**
+The arithmetic here ran from **85% gross margin** at 400 pull requests a month to **26%** at
+2,000, on twenty developers and four repositories. Every dollar of that swing was inference:
+revenue tracked seats, cost tracked pull requests. **The shipped product runs no inference**, so
+the same four repositories cost the same whether they merge 400 changes a month or 2,000, and the
+price is now charged on repositories too.
+
+**What is fragile instead, and it is a different shape.** Cost tracks repository SIZE — a clone
+and an index. `pallets/flask` is 15 MB and a 393 KB index; a monorepo with fifteen years of
+history is not, and a per-repository price flat across both is a per-repository price that loses
+money on the largest customer. **That is the number to re-derive in the first week of real
+traffic**, and it is a storage question rather than a token one.
+
+**And the old ceiling should not be quoted at all.** "$28 per repository" was derived from a
+specification for three model requests that no longer run. It is not a floor, a ceiling, or a
+measurement of anything we ship.
 
 # 5. Slack and Datadog
 
