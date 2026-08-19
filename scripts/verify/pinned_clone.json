@@ -1,0 +1,7 @@
+{
+  "why": "The corpus `build_pack.py` builds a pack from. It was cloned at HEAD into a gitignored directory, so the pack differed between machines and between weeks, and a golden pack could never have matched one. Pinned to a TAG rather than a branch tip because a tag is not force-pushed: pallets/flask main moved on 2026-08-16.",
+  "repo": "pallets/flask",
+  "ref": "3.1.3",
+  "sha": "22d924701a6ae2e4cd01e9a15bbaf3946094af65",
+  "url": "https://github.com/pallets/flask.git"
+}
