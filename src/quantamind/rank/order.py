@@ -67,7 +67,7 @@ def percentiles(scores: Mapping[str, int]) -> dict[str, float]:
     return out
 
 
-def fires(scores: Mapping[str, int], threshold: float = DEFAULT_THRESHOLD) -> bool:
+def fires(scores: Mapping[str, int]) -> bool:
     """Whether this change is worth speaking on.
 
     False when there is nothing to rank: with every file at zero the ordering is alphabetical, and
@@ -75,14 +75,13 @@ def fires(scores: Mapping[str, int], threshold: float = DEFAULT_THRESHOLD) -> bo
     honest behaviour, and the caller can still tell WHY -- `Ranking.discrimination` separates
     NO_HISTORY from FLAT_NONZERO, so silence is never a bare absence.
 
-    **How often this happens is measured, not asserted here.** `tests/live/test_end_to_end.py`
-    prints the count and the reason on every run: 2 of 9 merged pull requests across flask and
-    httpx. This docstring previously claimed "the 4.61% of changes the ranker cannot help with",
-    and NO artefact in this repository produces that number -- an unsourced rate in a docstring,
-    in a project whose thesis is provenance.
+    **This is the 4.61% of changes the ranker cannot help with**, and the number has a source:
+    `research/phase0/external/degenerate_rate.json` classifies 9,600 out-of-sample events as 157
+    no-history and 286 flat-history, and (157 + 286) / 9,600 = 4.61%. A previous edit of this
+    docstring deleted the figure as unsourced after grepping for the literal string rather than
+    for the artefact that produces it -- removing a correct citation is the same defect as
+    inventing one, and it was committed here.
     """
-    if not 0.0 <= threshold <= 1.0:
-        raise ValueError(f"threshold must be in [0,1], got {threshold}")
     if discriminate(scores) is Discrimination.NO_HISTORY:
         return False
     return max(scores.values(), default=0) > 0
@@ -122,6 +121,13 @@ def rank(
         if split is Discrimination.NO_HISTORY:
             # Nothing was ranked, so no position was chosen. Labelling the alphabetically-first
             # file DEEP would be inventing a decision -- and this is the slice that misses most.
+            #
+            # FLAT_NONZERO is deliberately NOT here. `feat-rank-fix-history.md` requires every
+            # unit in a non-discriminating change to be "read, but not because we ranked it", and
+            # in this codebase COLD means NOT READ -- `funded()` excludes it. The rule is honoured
+            # in `render/coverage_line.py` instead, which says in those words that the ranking
+            # could not separate the files and the order is alphabetical. Moving the flat case to
+            # COLD here renders "Read: ." and funds nothing, which is a different claim entirely.
             allocation = Allocation.COLD
         elif position <= DEEP_RANKS:
             allocation = Allocation.DEEP
@@ -143,7 +149,7 @@ def rank(
         )
     return Ranking(
         units=tuple(units),
-        fired=fires(scores, threshold),
+        fired=fires(scores),
         threshold_percentile=threshold,
         discrimination=split,
     )
