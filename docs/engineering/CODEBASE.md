@@ -1015,3 +1015,25 @@ say so.
 list, a file-count bound or a ninety-day window of its own. Both gate tests now build their events
 through it and still reproduce their numbers exactly — gate 2b at 2,400 events and 1.21%/3.12%,
 gate 2a at 1,188 events and 3.37%/6.40% — which is what proves the extraction faithful.
+
+
+## The cap counts survivors, and it is applied in `serve/`, not `rank/`
+
+`research/phase0/external/defect_return.py` appends an event and only THEN checks
+`len(events) >= 400`, so its cap counts events that **survived the flat-score skip**.
+`rank/events.admissible()` cannot evaluate that skip — it needs scores, which need the store,
+which `rank/` may not reach — so the cap is deliberately **not** its default.
+
+- `admissible(limit=None)` yields everything; `limit` counts **admissions**
+- `SURVIVOR_CAP = 400` is named for the population it counts, and lives in `rank/events.py`
+- it is applied in `serve/retrospective.py`, after the skip it counts past
+
+**Capping admissions instead loses events unevenly**, because each repository has its own
+flat-score rate: pandas 397 of 400, ansible 392, celery 391, django 370, scrapy 368,
+scikit-learn 360 — pooled 2,278 against 2,400. That is not a uniform 5% shrink; the shortfall runs
+from 0.75% to 10%, so **it reweights the repositories inside a pooled figure** and stops earlier in
+history (five weeks earlier on scrapy). Gate 2b would fail against the checked-in artefact for a
+reason having nothing to do with the event definition.
+
+`tests/unit/layers/test_event_cap_population.py` pins the distinction: on a history whose first
+admissible event is flat-scored, `limit=2` yields one survivor while an uncapped walk yields two.
