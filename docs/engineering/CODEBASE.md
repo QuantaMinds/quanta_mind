@@ -964,3 +964,28 @@ bound is removed — one event, hits 0 honest against 1 leaked — and asserts b
 **`rank/events.py` is the single definition of an admissible event.** It was written out twice in
 test files before this module existed and the copies drifted; the third copy would have been the
 one a customer reads.
+## The firing rule, and a knob that governs nothing
+
+`rank.order.fires()` returns False when every changed file scores zero, and True otherwise. That
+is the whole rule: `max(scores) > 0`.
+
+**It is not a percentile rule, and the codebase used to imply that it was.** `fires()` accepted a
+`threshold`, validated it, and never consulted it; `Settings.threshold_percentile` is still read
+from the environment, validated, printed by `quantamind config` and stored on `Ranking`, and
+**governs nothing** — setting it to 0.1 or 0.99 changes no output. The parameter is gone from
+`fires()`; the setting is left in place because removing a documented surface is a separate
+decision from removing dead code.
+
+**No research supports a percentile firing rule.** `allocation_variants.py` tested V0–V6 for which
+units to READ; V3's score-gap stopping was a budget rule and lost to V0. Nothing measured a firing
+threshold. The justification once given in `types/ranking.py` — an absolute threshold firing on 11%
+of one repository and 53% of another — has no artefact behind it, and replayed on the pinned corpus
+an absolute threshold fires at 94.5–99.8% (top≥1) through 48.8–94.5% (top≥10), spreads of 1.1× to
+1.9×. It is marked in place rather than deleted: that measurement is over admissible events and the
+original may have been over all pull requests, and this project has already deleted one correct
+citation (`4.61%`, which `degenerate_rate.json` produces exactly) after a failed grep.
+
+**How often the ranker stays silent is measured:** 157 no-history and 286 flat-history events out
+of 9,600 in `degenerate_rate.json`, so 4.61%. In both degenerate classes the ranker scores
+identically to the alphabetical control, which is why `render/coverage_line.py` says the ordering
+is alphabetical rather than presenting it as a ranking.
