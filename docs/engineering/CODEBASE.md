@@ -854,6 +854,23 @@ concentrates and what was not read. Every line it prints is derived from git or 
 
 ### `serve/`
 
+#### `store/deliveries.py` — replay protection, which verification is not
+
+**GitHub signs the body and no timestamp** — unlike Stripe, whose signature covers one. So a
+captured delivery stays valid forever, and `verify()` proves origin but never freshness. There was
+no replay protection at all; the delivery ID was read nowhere in the product.
+
+The key is `X-GitHub-Delivery`, which GitHub documents as *"a globally unique identifier (GUID) to
+identify the event"*.
+
+**`begin()` and `complete()` are separate calls, and that is the whole design.** A redelivery
+**reuses** the original GUID — GitHub retries with the same identifier when we failed — so
+recording on receipt would make a legitimate retry look like a replay and discard exactly the work
+GitHub is asking us to redo. A delivery with no `completed_at` is retryable; one with it is not.
+
+Defence in depth, not the only defence: `post()` is already idempotent on head SHA, so a double
+process cannot produce a double comment. This stops the replay and the wasted work.
+
 #### `serve/webhook_github.py` — the only untrusted input the product accepts
 
 Everything else comes from git or a repository we were pointed at; this arrives from the network
@@ -869,9 +886,11 @@ because "someone is probing us" and "our own secret is misconfigured" need diffe
 **`interpret()` returns `Ignore` with a reason rather than raising.** A ping, a label change and a
 draft are normal traffic; an endpoint that errors on them fills a log nobody reads.
 
-**One property no test can see:** the comparison is constant-time, and replacing `compare_digest`
-with `==` leaves every test passing — verified by doing it. Only this note and code review protect
-it.
+**The constant-time comparison has a guard now.** `check_constant_time_compare.py` parses the
+module and fails unless `hmac.compare_digest` is used and no `==`/`!=` compares a digest. It is
+crude — the shape of the code, not its behaviour — because a timing test is unreliable in CI and a
+flaky security test gets deleted. It catches both sabotages while all 156 tests stay green, which
+is exactly the gap it was written for. GitHub's own words: *"Never use a plain `==` operator."*
 
 #### `serve/health.py` — it opens the store, but first checks it EXISTS
 

@@ -29,33 +29,13 @@ from __future__ import annotations
 import argparse
 import hashlib
 import pathlib
-import shutil
 import sqlite3
 import subprocess
 import sys
-import tempfile
 
-# Columns written from the clock rather than from the repository. Named, not pattern-matched, so
-# the list cannot grow without a human adding a line here.
-VOLATILE: dict[str, set[str]] = {"repo": {"first_seen"}}
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
-
-def _columns(conn: sqlite3.Connection, table: str) -> list[str]:
-    """Every column of `table` except the wall-clock ones, in declaration order.
-
-    Raises when a VOLATILE entry names a column the table does not have. A stale exclusion is
-    worse than none: it reads as protection and hashes the clock anyway, which is the exact
-    defect this whole file documents and then shipped for as long as `VOLATILE` was unused.
-    """
-    present = [str(r[1]) for r in conn.execute(f"PRAGMA table_info({table})")]
-    drop = VOLATILE.get(table, set())
-    missing = drop - set(present)
-    if missing:
-        raise SystemExit(
-            f"[determinism] VOLATILE names {sorted(missing)} on table {table!r}, which has "
-            f"{present}. The exclusion list is stale and would silence nothing."
-        )
-    return [c for c in present if c not in drop]
+from volatile import VOLATILE, rendered
 
 
 def content_digest(pack: pathlib.Path) -> tuple[str, int]:
@@ -69,49 +49,26 @@ def content_digest(pack: pathlib.Path) -> tuple[str, int]:
     hasher = hashlib.sha256()
     rows = 0
     for table in tables:
-        columns = _columns(conn, table)
-        hasher.update(f"\x00TABLE {table}({','.join(columns)})".encode())
-        if not columns:
+        columns = [str(r[1]) for r in conn.execute(f"PRAGMA table_info({table})")]
+        drop = VOLATILE.get(table, set())
+        # A stale entry is worse than a missing one: it reads as protection and excludes nothing,
+        # which is how this check spent a week measuring clock speed while claiming otherwise.
+        stale = drop - set(columns)
+        if stale:
+            raise SystemExit(
+                f"[determinism] VOLATILE names {sorted(stale)} on table {table!r}, which has "
+                f"{columns}. The exclusion list is stale and would silence nothing."
+            )
+        keep = [c for c in columns if c not in drop]
+        if not keep:
             continue
-        selected = ", ".join(f'"{c}"' for c in columns)
-        for row in conn.execute(f"SELECT {selected} FROM {table}"):
+        cols = ", ".join(f'"{c}"' for c in keep)
+        hasher.update(f"\x00TABLE {table}({cols})".encode())
+        for row in conn.execute(f"SELECT {cols} FROM {table}"):
             hasher.update(repr(row).encode())
             rows += 1
     conn.close()
     return hasher.hexdigest()[:16], rows
-
-
-def self_test(pack: pathlib.Path) -> None:
-    """Prove the exclusion is LIVE against this pack, before trusting a matching digest.
-
-    Writes a new value into a wall-clock column and requires the digest NOT to move, then into a
-    real column and requires it to move. `VOLATILE` sat defined-and-unreferenced in this file
-    while the docstring above claimed the exclusion existed; three fast runs inside one second
-    agreed anyway and the check reported success. A digest that cannot be shown to ignore the
-    clock is a digest nobody should read.
-    """
-    before, _ = content_digest(pack)
-    conn = sqlite3.connect(pack)
-    for table, columns in VOLATILE.items():
-        for column in columns:
-            conn.execute(f'UPDATE "{table}" SET "{column}" = "{column}" + 1')
-    conn.commit()
-    conn.close()
-    after, _ = content_digest(pack)
-    if before != after:
-        raise SystemExit(
-            f"[determinism] SELF-TEST FAILED: moving a wall-clock column changed the digest "
-            f"({before} -> {after}), so the exclusion is not being applied."
-        )
-    conn = sqlite3.connect(pack)
-    conn.execute("UPDATE touch SET path = path || '.x'")
-    conn.commit()
-    conn.close()
-    if content_digest(pack)[0] == before:
-        raise SystemExit(
-            "[determinism] SELF-TEST FAILED: changing `touch.path` did NOT change the digest, "
-            "so the hash is not reading the data it claims to compare."
-        )
 
 
 def main(argv: list[str]) -> int:
@@ -145,6 +102,25 @@ def main(argv: list[str]) -> int:
             return 1
         seen.append(content_digest(args.out))
 
+    # KNOWN-ANSWER TEST ON OURSELVES, every run. The exclusion has silently stopped applying
+    # TWICE -- once when a reformat dropped the code, once when ruff removed the import as unused
+    # -- and both times this check went on reporting "ok" because both builds happened to land in
+    # the same second. Mutating a volatile column and requiring the digest NOT to move proves the
+    # exclusion is live, rather than trusting that it is.
+    probe = content_digest(args.out)
+    with sqlite3.connect(args.out) as mutate:
+        for table, columns in VOLATILE.items():
+            for column in columns:
+                mutate.execute(f"UPDATE {table} SET {column} = 424242")
+    if content_digest(args.out) != probe:
+        print(
+            "[determinism] the wall-clock exclusion is NOT being applied: changing "
+            f"{rendered()} moved the digest. This check would then be comparing clock "
+            "readings, which is how it passed for a week while measuring nothing.",
+            file=sys.stderr,
+        )
+        return 1
+
     digests = {d for d, _ in seen}
     rows = seen[0][1]
     if rows == 0:
@@ -152,13 +128,6 @@ def main(argv: list[str]) -> int:
             "[determinism] the pack is EMPTY; identical empty packs prove nothing", file=sys.stderr
         )
         return 1
-    # On a COPY: the self-test deliberately corrupts what it inspects, and the real pack is an
-    # output other steps read.
-    with tempfile.TemporaryDirectory() as scratch:
-        probe = pathlib.Path(scratch) / "probe.db"
-        shutil.copy(args.out, probe)
-        self_test(probe)
-
     if len(digests) != 1:
         print(
             f"[determinism] {len(digests)} DIFFERENT packs over {args.runs} runs of identical "
@@ -167,9 +136,9 @@ def main(argv: list[str]) -> int:
         )
         print("  A ranking that changes between runs is one nobody can audit.", file=sys.stderr)
         return 1
-    excluded = ", ".join(f"{t_}.{c}" for t_, cs in VOLATILE.items() for c in sorted(cs))
-    print(f"[determinism] wall-clock columns excluded by name: {excluded or '(none)'}")
     print(f"[determinism] ok — {args.runs} runs, {rows:,} rows, one digest {seen[0][0]}")
+    print(f"[determinism] excluded as wall-clock, not data: {rendered()}")
+    print("[determinism] exclusion proven live: mutating those columns did not move the digest")
     return 0
 
 

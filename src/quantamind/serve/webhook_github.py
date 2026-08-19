@@ -17,6 +17,14 @@ WHY:  **This is the only untrusted input the product accepts.** Everything else 
       but real forgery path, and the only things protecting it are this sentence and code review.
       It is written down because a property nothing checks is a property that erodes.
 
+      **VERIFICATION IS NOT REPLAY PROTECTION, and GitHub does not close that gap for us.** Its
+      signature covers the body and nothing else — there is no timestamp in it, unlike Stripe's —
+      so a captured delivery stays valid forever. `verify()` proves the bytes came from GitHub; it
+      cannot prove they are arriving for the first time. That is `store.deliveries`' job, keyed on
+      the `X-GitHub-Delivery` GUID, and the caller must use it: this module deliberately does not,
+      because the store is to its LEFT and a webhook decision that opened a database would not be a
+      pure function.
+
       **A signature we cannot parse is a rejection, never a pass.** Missing header, wrong prefix,
       odd length, non-hex — each is a distinct reason, returned rather than collapsed into False,
       because "someone is probing us" and "our own secret is misconfigured" need different
@@ -35,6 +43,7 @@ from enum import Enum
 from typing import Any
 
 SIGNATURE_HEADER = "X-Hub-Signature-256"
+DELIVERY_HEADER = "X-GitHub-Delivery"
 EVENT_HEADER = "X-GitHub-Event"
 PREFIX = "sha256="
 DIGEST_HEX_LEN = 64

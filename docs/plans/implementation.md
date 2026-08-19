@@ -39,7 +39,7 @@ three months stale.
 | layer | modules | files |
 |---|---|---|
 | `types/` | **7** | `change.py`, `commit.py`, `ranking.py`, `review.py`, `settings.py`, `touch.py`, `verdict.py` |
-| `store/` | **3** | `drift.py`, `schema.py`, `touches.py` |
+| `store/` | **4** | `deliveries.py`, `drift.py`, `schema.py`, `touches.py` |
 | `ingest/` | **4** | `commits.py`, `diff.py`, `github_comments.py`, `history.py` |
 | `parse/` | **2** | `languages.py`, `units.py` |
 | `rank/` | **2** | `order.py`, `score.py` |
@@ -63,9 +63,15 @@ retrospective is the only bottom-up motion — see `docs/product/QUANTAMIND.md`.
 Nothing yet listens on a socket. That is a dependency choice — stdlib `http.server` or a framework
 — and it is the first thing in this project that would add a runtime dependency.
 
-**One property is unprotected and it is written down rather than assumed.** The signature
-comparison is constant-time; replacing `compare_digest` with `==` leaves every test passing.
-Verified by doing it.
+**The constant-time comparison now has a guard.** `check_constant_time_compare.py` parses the
+module and fails unless `hmac.compare_digest` is used and no `==`/`!=` compares a digest. Crude —
+it checks the shape of the code, not its behaviour — but a timing test is unreliable in CI and a
+flaky security test gets deleted. GitHub's own words: *"Never use a plain `==` operator."*
+
+**Replay protection exists now, and it did not before.** GitHub signs the body and no timestamp, so
+a captured delivery stays valid forever; `store/deliveries.py` keys on `X-GitHub-Delivery`.
+A redelivery REUSES that GUID, so `begin()`/`complete()` are separate: an unfinished attempt is
+retryable, a finished one is not.
 
 The reader stage is otherwise complete. Every layer from git to a
 rendered comment now exists; nothing yet listens for a pull request.

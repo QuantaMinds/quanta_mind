@@ -41,7 +41,7 @@ from pathlib import Path
 from quantamind.store import drift
 
 # Bump on ANY change to the DDL below, and write a migration. There is no in-place edit.
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 # `finding` and `claim` exist because adding a table later is a migration, and the schema is
 # append-only. NOTHING WRITES TO THEM: `infer/` is closed on evidence and publishes no findings.
@@ -96,6 +96,13 @@ TABLES: tuple[str, ...] = (
         cache_read_tokens INTEGER NOT NULL DEFAULT 0,
         cache_creation_tokens INTEGER NOT NULL DEFAULT 0,
         latency_ms INTEGER, stop_reason TEXT, UNIQUE (review_id, ordinal))""",
+    # Webhook deliveries we have seen, keyed by GitHub's X-GitHub-Delivery GUID.
+    # `completed_at` NULL means we started and did not finish: GitHub redelivers on failure and
+    # REUSES the same GUID, so an unfinished attempt must be retryable while a finished one must
+    # not be replayable.
+    """CREATE TABLE IF NOT EXISTS delivery (
+        delivery_id TEXT PRIMARY KEY, event TEXT NOT NULL, started_at INTEGER NOT NULL,
+        completed_at INTEGER)""",
     # The touch index the ranker counts over. Written by store.touches from ingest.history.
     """CREATE TABLE IF NOT EXISTS touch (
         repo_id INTEGER NOT NULL REFERENCES repo(id), path TEXT NOT NULL,
