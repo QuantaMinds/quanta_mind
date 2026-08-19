@@ -48,7 +48,9 @@ def build_parser() -> argparse.ArgumentParser:
     walk = subparsers.add_parser(
         "retrospective", help="replay the ranker over a clone's own history and report"
     )
-    walk.add_argument("clone", type=Path, help="path to a full clone; nothing is sent anywhere")
+    walk.add_argument(
+        "clone", type=Path, nargs="+", help="one or more full clones; nothing is sent anywhere"
+    )
     walk.add_argument("--repo", default="local/clone", help="owner/name, for the report heading")
     for name, stage in UNBUILT.items():
         subparsers.add_parser(name, help=f"NOT BUILT — arrives with {stage}")
@@ -70,7 +72,7 @@ def render_config(settings: Settings) -> str:
     return "\n".join(lines)
 
 
-def _retrospective(clone: Path, repo: str) -> int:
+def _retrospective(clones: list[Path], repo: str) -> int:
     """Replay one clone and print the report. The index is scratch and is thrown away.
 
     Imported here rather than at module scope so `quantamind config` and `--version` do not pay
@@ -78,17 +80,23 @@ def _retrospective(clone: Path, repo: str) -> int:
     """
     from quantamind.render.replay_report import report
     from quantamind.serve.retrospective import replay
+    from quantamind.types.pooled_outcome import pool
 
-    if not (clone / ".git").exists():
-        print(f"{clone} is not a git clone; a retrospective reads history and nothing else")
-        return 1
+    for clone in clones:
+        if not (clone / ".git").exists():
+            print(f"{clone} is not a git clone; a retrospective reads history and nothing else")
+            return 1
+    outcomes = []
     with TemporaryDirectory() as scratch:
-        # NO CAP. `MAX_EVENTS` exists so one large repository cannot dominate a POOLED
-        # cross-repository figure; a retrospective pools nothing, so capping here would discard
-        # the customer's own history and then report it as short of the floor. scrapy has 1,447
-        # admissible events and the capped run announced "132 short of 500".
-        outcome = replay(clone, repo, Path(scratch) / "index.db", cap=UNCAPPED)
-    print(report([outcome]))
+        for index, clone in enumerate(clones):
+            # NO CAP. `MAX_EVENTS` stops one large repository dominating a pooled figure in the
+            # RESEARCH, where the six were compared to each other. Here the customer's own history
+            # is the answer, and capping would discard it and then report it short of the floor:
+            # scrapy has 1,447 events and the capped run announced "132 short of 500".
+            # owner/name is what store.touches requires; a colon or a bare directory is rejected.
+            name = repo if len(clones) == 1 else f"{repo}/{clone.name}"
+            outcomes.append(replay(clone, name, Path(scratch) / f"{index}.db", cap=UNCAPPED))
+    print(report(outcomes, pool(outcomes) if len(outcomes) > 1 else None))
     return 0
 
 

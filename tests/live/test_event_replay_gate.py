@@ -35,15 +35,16 @@ from pathlib import Path
 import pytest
 
 from quantamind.ingest.commits import read_commits
+from quantamind.rank.events import Rejections, admissible
 from quantamind.rank.score import order
 from quantamind.store import schema
 from quantamind.store import touches as touch_store
 
-# Copied from defect_return.py. Not chosen here.
+# The event definition is IMPORTED from `rank/events.py`, never restated here. This file and
+# `test_gate_2b_pinned_corpus.py` each carried their own copy, and they DRIFTED: this one matched
+# fix-words case-sensitively under a comment claiming that is what the research does.
 YEAR = 365 * 86400
-WINDOW = 90 * 86400
-FIXWORDS = ("fix", "bug", "revert", "hotfix", "regression", "broken")
-MAX_FILES, MAX_EVENTS, BUDGET = 12, 400, 3
+MAX_EVENTS, BUDGET = 400, 3
 # 1.22% with a 95% Wilson interval of [0.82%, 1.81%] is the ORIGINAL EIGHT repositories the ranker
 # was developed against, n = 1,969. It is NOT the out-of-sample result: the fresh six the company
 # quotes are 1.21% on n = 2,400, whose own interval is [0.84%, 1.73%]. The two were conflated here,
@@ -113,29 +114,16 @@ def test_the_replayed_ranker_matches_research_and_lands_in_its_interval(
         )
 
         repo_events = repo_hits = 0
-        for i, commit in enumerate(commits):
-            files = set(commit.paths)
-            if not (2 <= len(files) <= MAX_FILES):
-                rejected["file count outside 2..12"] += 1
-                continue
-            target: set[str] = set()
-            for later in commits[i + 1 :]:
-                if later.committed_at - commit.committed_at > WINDOW:
-                    break
-                # Case-INSENSITIVE. `commit_stream.py` lowercases the subject before
-                # `defect_return.py` matches against it, so the research admits "Fix parser"
-                # and this once did not. The comment here previously asserted the opposite and
-                # was wrong for as long as it stood: a claim about another module's behaviour,
-                # written where nothing could check it.
-                if any(w in later.subject.lower() for w in FIXWORDS):
-                    target |= later.paths & files
-            if not target:
-                rejected["no later fix returned to it"] += 1
-                continue
+        counter = Rejections()
+        # UNCAPPED: `defect_return.py` caps events that SURVIVED the flat-score skip, so the cap
+        # is applied to `repo_events` below, not to admission.
+        for event in admissible(commits, counter, cap=10**9):
+            files = set(event.paths)
+            target = set(event.target)
 
-            produced = touch_store.counts(conn, repo_id, sorted(files), as_of=commit.committed_at)
-            expected = {f: _research_prior(index, f, commit.committed_at) for f in files}
-            assert dict(produced) == expected, f"{repo}: scores diverged at {commit.committed_at}"
+            produced = touch_store.counts(conn, repo_id, sorted(files), as_of=event.at)
+            expected = {f: _research_prior(index, f, event.at) for f in files}
+            assert dict(produced) == expected, f"{repo}: scores diverged at {event.at}"
             if len(set(expected.values())) == 1:
                 # Nothing for a ranking to distinguish. The research drops these too, and keeping
                 # them would inflate both arms identically.
@@ -153,6 +141,7 @@ def test_the_replayed_ranker_matches_research_and_lands_in_its_interval(
             alpha_hits += bool(set(sorted(files)[:BUDGET]) & target)
             if repo_events >= MAX_EVENTS:
                 break  # the research caps per repository; without it the largest one dominates
+        rejected.update(counter.counts)
         per_repo[repo] = (repo_events, repo_hits)
         conn.close()
 

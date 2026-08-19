@@ -989,3 +989,29 @@ citation (`4.61%`, which `degenerate_rate.json` produces exactly) after a failed
 of 9,600 in `degenerate_rate.json`, so 4.61%. In both degenerate classes the ranker scores
 identically to the alphabetical control, which is why `render/coverage_line.py` says the ordering
 is alphabetical rather than presenting it as a ranking.
+
+
+## Pooling, and why a single repository usually cannot answer
+
+`uv run quantamind retrospective <clone> [<clone> ...]` pools when given more than one.
+
+**A single repository rarely reaches the pre-registered floors.** Measured: requests 551 events,
+fastapi 257, click 414 — all three INCONCLUSIVE against floors of 500 events and 20 discordant
+pairs. The pinned six are unusually large (1,447 to 16,538 events), which made the floors look
+comfortable when they are not.
+
+**Pooling is not a new unit — it is the validated one.** The published figure is itself pooled,
+n = 2,400 across six repositories, and the pre-registration's CONFIRMED rule is "control beaten,
+McNemar p < 0.05, and ≥ 4 of 6 repositories individually positive". Pooled across those same three
+repositories: 1,222 events, 38 discordant pairs, p < 1e-5, **+14.79 points against chance on the
+informative stratum, 3 of 3 positive.**
+
+**The positivity count ships beside the pooled rate and is never omitted**, because a pooled win
+carried by one repository is an artifact and that count is the only thing in the report that can
+say so.
+
+**The event definition is imported, never restated.** `rank/events.py` is the single copy;
+`tests/unit/test_event_definition_is_not_restated.py` asserts no gate test declares a fix-word
+list, a file-count bound or a ninety-day window of its own. Both gate tests now build their events
+through it and still reproduce their numbers exactly — gate 2b at 2,400 events and 1.21%/3.12%,
+gate 2a at 1,188 events and 3.37%/6.40% — which is what proves the extraction faithful.

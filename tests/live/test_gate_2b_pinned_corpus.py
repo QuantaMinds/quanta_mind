@@ -36,16 +36,17 @@ from pathlib import Path
 import pytest
 
 from quantamind.ingest.commits import read_commits
+from quantamind.rank.events import admissible
 from quantamind.rank.score import order
 from quantamind.store import schema
 from quantamind.store import touches as touch_store
 from quantamind.types.touch import Touch
 
-# Copied from defect_return.py. Not chosen here.
+# The event definition is IMPORTED, never restated: two copies of it lived in this directory and
+# drifted on case-sensitivity. `rank/events.py` is the one definition; this file proves the
+# extraction is faithful by still reproducing the artefact event for event.
 YEAR = 365 * 86400
-WINDOW = 90 * 86400
-FIXWORDS = ("fix", "bug", "revert", "hotfix", "regression", "broken")
-MAX_FILES, MAX_EVENTS, BUDGET = 12, 400, 3
+MAX_EVENTS, BUDGET = 400, 3
 
 ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / "tests/fixtures/pinned.json"
@@ -115,23 +116,14 @@ def _replay(
 
     rows: list[tuple[bool, bool]] = []
     mismatches = 0
-    for i, commit in enumerate(commits):
-        files = set(commit.paths)
-        if not (2 <= len(files) <= MAX_FILES):
-            continue
-        target: set[str] = set()
-        for later in commits[i + 1 :]:
-            if later.committed_at - commit.committed_at > WINDOW:
-                break
-            # Lowercased, because `commit_stream.py` lowercases before the research matches.
-            if any(w in later.subject.lower() for w in FIXWORDS):
-                target |= later.paths & files
-        if not target:
-            continue
-
-        produced = touch_store.counts(conn, repo_id, sorted(files), as_of=commit.committed_at)
-        expected = {f: _research_prior(index, f, commit.committed_at) for f in files}
-        assert dict(produced) == expected, f"{name}: scores diverged at {commit.committed_at}"
+    # UNCAPPED here, capped on ROWS below: `defect_return.py` appends an event and then checks
+    # `len(events) >= 400`, so its cap counts events that SURVIVED the flat-score skip. Passing
+    # cap=400 to admissible() would count them before the skip and yield ~2,278 instead of 2,400.
+    for event in admissible(commits, cap=10**9):
+        files = set(event.paths)
+        produced = touch_store.counts(conn, repo_id, sorted(files), as_of=event.at)
+        expected = {f: _research_prior(index, f, event.at) for f in files}
+        assert dict(produced) == expected, f"{name}: scores diverged at {event.at}"
         if len(set(expected.values())) == 1:
             continue  # nothing for a ranking to distinguish; the research drops these too
 
@@ -139,7 +131,10 @@ def _replay(
         if ranked != sorted(sorted(files), key=lambda f: (-expected[f], f)):
             mismatches += 1
         rows.append(
-            (bool(set(ranked[:BUDGET]) & target), bool(set(sorted(files)[:BUDGET]) & target))
+            (
+                bool(set(ranked[:BUDGET]) & event.target),
+                bool(set(sorted(files)[:BUDGET]) & event.target),
+            )
         )
         if len(rows) >= MAX_EVENTS:
             break  # the research caps per repository; without it the largest one dominates

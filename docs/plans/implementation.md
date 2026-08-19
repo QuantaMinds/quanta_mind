@@ -38,7 +38,7 @@ three months stale.
 
 | layer | modules | files |
 |---|---|---|
-| `types/` | **8** | `change.py`, `commit.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `settings.py`, `touch.py`, `verdict.py` |
+| `types/` | **9** | `change.py`, `commit.py`, `pooled_outcome.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `settings.py`, `touch.py`, `verdict.py` |
 | `store/` | **4** | `deliveries.py`, `drift.py`, `schema.py`, `touches.py` |
 | `ingest/` | **4** | `commits.py`, `diff.py`, `github_comments.py`, `history.py` |
 | `parse/` | **2** | `languages.py`, `units.py` |
