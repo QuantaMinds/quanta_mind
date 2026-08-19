@@ -39,6 +39,7 @@ from discovery import Violation, project_root, report
 DOC_ROOTS = (
     "docs/findings",
     "docs/engineering/CODEBASE.md",
+    "docs/engineering/CLI.md",
     "README.md",
     "AGENTS.md",
     "CONTRIBUTING.md",
