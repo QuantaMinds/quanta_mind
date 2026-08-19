@@ -105,6 +105,7 @@
     "a cited document or line exists": "guard:citations/resolve",
     "a dated external figure is re-checked on its cadence": "guard:citations/freshness",
     "no source text in pack": "ci:verify-no-source-leak (invariant 6)",
+    "pack rows recomputed from git, not reviewed once": "ci:verify-pack-vs-git",
     "deterministic re-index": "ci:verify-determinism (invariant 5)",
     "a validation tool consumes the artefact under test, never rebuilds it": "ADVISORY -- docs/CORRECTIONS.md entry 3; no guard distinguishes a legitimate constructor from a drifting reconstruction",
     "one public concern per module": "ADVISORY -- human review in PR",
