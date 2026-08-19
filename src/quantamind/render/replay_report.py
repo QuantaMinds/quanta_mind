@@ -30,6 +30,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
+from quantamind.types.pooled_outcome import Pooled
 from quantamind.types.replay_outcome import Outcome, Stratum
 
 # What gate 2b re-proves, quoted as a separate measurement and never combined with a run below.
@@ -95,7 +96,33 @@ def _block(outcome: Outcome) -> list[str]:
     return lines
 
 
-def report(outcomes: Sequence[Outcome]) -> str:
+def _pooled_block(pooled: Pooled) -> list[str]:
+    """The pooled measurement, with positivity beside it because a one-repo win is an artifact."""
+    lines = [
+        "",
+        f"POOLED across {pooled.repositories} repositories",
+        "=" * (18 + len(str(pooled.repositories))),
+    ]
+    refusal = pooled.inconclusive()
+    if refusal:
+        lines.append(f"  INCONCLUSIVE — {refusal}.")
+    lines.append(_row(pooled.whole))
+    lines.append(_row(pooled.informative))
+    lines.append(_row(pooled.degenerate))
+    lines.append(
+        f"  discordant pairs: ranker {pooled.b}, control {pooled.c}; "
+        f"exact McNemar p = {pooled.p_value():.5f}"
+    )
+    lines.append(
+        f"  repositories where the ranker beat chance on the informative stratum: "
+        f"{pooled.positive} of {pooled.repositories}. **A pooled win carried by one repository "
+        f"is an artifact**, and this count is what says so — the pre-registration's rule is "
+        f"control beaten, p < 0.05, AND a majority of repositories individually positive."
+    )
+    return lines
+
+
+def report(outcomes: Sequence[Outcome], pooled: Pooled | None = None) -> str:
     """The whole retrospective, provenance first.
 
     Raises on an empty sequence rather than printing a header over nothing: a report with no
@@ -107,5 +134,13 @@ def report(outcomes: Sequence[Outcome]) -> str:
     lines = ["", PUBLISHED, "", PROVENANCE, ""]
     for outcome in outcomes:
         lines.extend(_block(outcome))
+        lines.append("")
+    if pooled is not None:
+        if pooled.repositories < 2:
+            raise ValueError(
+                f"pooled block over {pooled.repositories} repository: pooling one repository is "
+                f"the same number wearing a word that implies several"
+            )
+        lines.extend(_pooled_block(pooled))
         lines.append("")
     return "\n".join(lines)
