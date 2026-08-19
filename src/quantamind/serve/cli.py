@@ -23,9 +23,6 @@ from tempfile import TemporaryDirectory
 from quantamind import __version__
 from quantamind.types.settings import Settings, SettingsError, load
 
-# Large enough that no real history reaches it; not None, so the type stays one thing.
-UNCAPPED = 10**9
-
 # Commands named in AGENTS.md that have no implementation behind them yet. They parse and
 # exit non-zero with the stage that will deliver them, rather than exiting 0 having done
 # nothing -- a documented command that silently succeeds is how a runbook comes to report
@@ -89,13 +86,13 @@ def _retrospective(clones: list[Path], repo: str) -> int:
     outcomes = []
     with TemporaryDirectory() as scratch:
         for index, clone in enumerate(clones):
-            # NO CAP. `MAX_EVENTS` stops one large repository dominating a pooled figure in the
+            # NO CAP. `SURVIVOR_CAP` stops one large repository dominating a pooled figure in the
             # RESEARCH, where the six were compared to each other. Here the customer's own history
             # is the answer, and capping would discard it and then report it short of the floor:
             # scrapy has 1,447 events and the capped run announced "132 short of 500".
             # owner/name is what store.touches requires; a colon or a bare directory is rejected.
             name = repo if len(clones) == 1 else f"{repo}/{clone.name}"
-            outcomes.append(replay(clone, name, Path(scratch) / f"{index}.db", cap=UNCAPPED))
+            outcomes.append(replay(clone, name, Path(scratch) / f"{index}.db"))
     print(report(outcomes, pool(outcomes) if len(outcomes) > 1 else None))
     return 0
 

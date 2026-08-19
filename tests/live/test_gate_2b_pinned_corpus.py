@@ -116,10 +116,9 @@ def _replay(
 
     rows: list[tuple[bool, bool]] = []
     mismatches = 0
-    # UNCAPPED here, capped on ROWS below: `defect_return.py` appends an event and then checks
-    # `len(events) >= 400`, so its cap counts events that SURVIVED the flat-score skip. Passing
-    # cap=400 to admissible() would count them before the skip and yield ~2,278 instead of 2,400.
-    for event in admissible(commits, cap=10**9):
+    # `admissible()` yields everything; the 400 is applied to ROWS below, because the research's
+    # cap counts events that SURVIVED the flat-score skip. See `rank/events.SURVIVOR_CAP`.
+    for event in admissible(commits):
         files = set(event.paths)
         produced = touch_store.counts(conn, repo_id, sorted(files), as_of=event.at)
         expected = {f: _research_prior(index, f, event.at) for f in files}

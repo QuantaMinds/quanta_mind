@@ -42,7 +42,12 @@ from quantamind.types.replay_outcome import MIN_DISCORDANT, MIN_EVENTS  # noqa: 
 WINDOW_SECONDS = 90 * 86400
 FIXWORDS = ("fix", "bug", "revert", "hotfix", "regression", "broken")
 MIN_FILES, MAX_FILES = 2, 12
-MAX_EVENTS = 400
+# 400 is the research's cap and it counts SURVIVORS of the flat-score skip, not admissions --
+# `defect_return.py` appends an event and only then checks `len(events) >= 400`. The skip needs
+# SCORES, which need the store, which `rank/events.py` may not reach. **So this cap cannot be
+# applied here and is deliberately not this function's default.** It lives here as the number the
+# scorer should use, and `serve/retrospective.py` is where it is applied.
+SURVIVOR_CAP = 400
 # The pre-registered floors live in `types/retrospective.py`, imported rather than restated: two
 # copies of a number that must agree is the drift this module exists to stop.
 
@@ -118,7 +123,7 @@ def returns_to(commits: Sequence[Commit], index: int) -> frozenset[str]:
 
 
 def admissible(
-    commits: Sequence[Commit], rejections: Rejections | None = None, cap: int = MAX_EVENTS
+    commits: Sequence[Commit], rejections: Rejections | None = None, limit: int | None = None
 ) -> Iterator[Event]:
     """Yield each admissible event, oldest first, at most `cap` of them.
 
@@ -141,7 +146,18 @@ def admissible(
     A history that is backwards END TO END is a different thing: that is a caller who re-sorted,
     it can measure nothing, and it raises `ReversedHistory`.
 
-    The cap is the research's: without it the largest repository dominates a pooled figure.
+    **`limit` COUNTS ADMISSIONS AND IS NOT THE RESEARCH'S CAP.** It defaults to None -- yield
+    everything -- because the research's 400 counts events that SURVIVED the flat-score skip, and
+    that skip cannot be evaluated here: it needs scores, which need the store, which this layer
+    may not reach. Capping admissions instead loses events unevenly, because each repository has
+    its own flat-score rate:
+
+        ansible 392 of 400   celery 391   django 370   pandas 397   scikit-learn 360   scrapy 368
+
+    Pooled that is 2,278 against 2,400, and the shortfall runs from 0.75% (pandas) to 10%
+    (scikit-learn). **It does not merely shrink the sample, it REWEIGHTS the repositories inside a
+    pooled figure**, and it stops earlier in history -- five weeks earlier on scrapy. Gate 2b would
+    fail against the checked-in artefact for a reason having nothing to do with the definition.
     """
     # GLOBALLY backwards is a caller error and stops everything. LOCALLY backwards is git, and
     # it is counted instead -- see the docstring. Measured on the pinned corpus: 1 to 64
@@ -165,5 +181,5 @@ def admissible(
             continue
         yield Event(at=commit.committed_at, paths=frozenset(commit.paths), target=target)
         yielded += 1
-        if yielded >= cap:
+        if limit is not None and yielded >= limit:
             return
