@@ -115,9 +115,9 @@ def test_the_replayed_ranker_matches_research_and_lands_in_its_interval(
 
         repo_events = repo_hits = 0
         counter = Rejections()
-        # UNCAPPED: `defect_return.py` caps events that SURVIVED the flat-score skip, so the cap
-        # is applied to `repo_events` below, not to admission.
-        for event in admissible(commits, counter, cap=10**9):
+        # `admissible()` yields everything; the cap is applied to `repo_events` below, because
+        # the research's 400 counts survivors of the flat-score skip, not admissions.
+        for event in admissible(commits, counter):
             files = set(event.paths)
             target = set(event.target)
 

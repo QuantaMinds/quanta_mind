@@ -45,7 +45,7 @@ def clone(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 
 def test_a_real_repository_replays_with_the_arithmetic_intact(clone: Path, tmp_path: Path) -> None:
-    outcome = replay(clone, REPO, tmp_path / "index.db", cap=10**9)
+    outcome = replay(clone, REPO, tmp_path / "index.db", cap=None)
 
     assert outcome.whole.events > 50, (
         f"only {outcome.whole.events} events (rejected: {outcome.rejected}) — too few to have "

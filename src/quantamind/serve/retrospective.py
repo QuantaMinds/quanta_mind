@@ -36,7 +36,7 @@ from pathlib import Path
 
 from quantamind.ingest.commits import read_commits
 from quantamind.rank.baseline import chance_hit
-from quantamind.rank.events import MAX_EVENTS, Rejections, admissible
+from quantamind.rank.events import Rejections, admissible
 from quantamind.rank.order import BUDGET
 from quantamind.rank.score import discriminate, order
 from quantamind.store import schema
@@ -73,7 +73,7 @@ class _Tally:
         )
 
 
-def replay(clone: Path, repo: str, store_path: Path, cap: int = MAX_EVENTS) -> Outcome:
+def replay(clone: Path, repo: str, store_path: Path, cap: int | None = None) -> Outcome:
     """Rank every admissible event in `clone` against history strictly before it.
 
     `store_path` is the caller's to choose and to throw away. The index is a derived artefact of
@@ -98,7 +98,7 @@ def replay(clone: Path, repo: str, store_path: Path, cap: int = MAX_EVENTS) -> O
         discordant: collections.Counter[str] = collections.Counter()
         flat = 0
 
-        for event in admissible(commits, rejections, cap=cap):
+        for event in admissible(commits, rejections):
             paths = sorted(event.paths)
             # THE BOUND. Half-open on `event.at`, so the change cannot see itself.
             scores = dict(touch_store.counts(conn, repo_id, paths, as_of=event.at))
@@ -115,6 +115,10 @@ def replay(clone: Path, repo: str, store_path: Path, cap: int = MAX_EVENTS) -> O
             (small if len(event.paths) <= DEGENERATE_AT else large).add(hit, alpha, chance)
             if hit != alpha:
                 discordant["ranker" if hit else "control"] += 1
+            # THE CAP COUNTS SURVIVORS, applied here and not in `admissible()`, because the skip
+            # above is what it counts past. See `rank/events.SURVIVOR_CAP`.
+            if cap is not None and whole.n >= cap:
+                break
     finally:
         conn.close()
 
