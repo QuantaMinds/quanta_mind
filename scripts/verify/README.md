@@ -14,6 +14,19 @@ gave was wrong.
 Both are known-answer tested: planting a real line from `logging.py` into the pack makes the
 source-leak check name the table, the column and the file it came from.
 
+## One check that passed by luck for a week
+
+`assert_deterministic.py` compared every column of every table, including `repo.first_seen`, which
+is written from the clock. Two builds a second apart differ. It passed anyway — **both runs kept
+finishing inside the same second** — and only failed once a slower run crossed a boundary.
+
+Wall-clock columns are now excluded **by name** and the names are printed on every run, so the
+exclusion cannot grow without someone reading it. Everything the ranking depends on — every row of
+`touch` — is still compared.
+
+**This is also why `verify-data` cannot simply be switched on.** A golden pack would never match a
+build containing a wall-clock column, so the golden has to be defined over the same exclusions.
+
 ## What does not run, and why
 
 `just verify-data` diffs a produced pack against a **reviewed golden** pack. `store/` now produces
