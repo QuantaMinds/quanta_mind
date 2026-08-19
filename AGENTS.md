@@ -28,8 +28,8 @@ points from the original eight.** The model-free half replicated; **the model's 
 
 ```bash
 uv sync --all-extras            # install
-uv run quantamind review <pr>   # run one review locally, no posting
-uv run quantamind serve         # the webhook service on 127.0.0.1:7331
+uv run quantamind review <pr>   # NOT BUILT, exits 2  documented-command:unbuilt
+uv run quantamind serve         # NOT BUILT, exits 2  documented-command:unbuilt
 just check                      # ruff + mypy + guards + unit tests  (run before every commit)
 just verify                     # check + live data verification      (run before every PR)
 uv run pytest tests/unit -x     # fast loop, ~10s
@@ -143,7 +143,7 @@ you remember to obey — the machine will stop you either way.
 - Errors carry the call site: `raise ResolveError(site=site, reason=...)`, never bare
   `raise ValueError("failed")`.
 - No bare `except:`. No `except Exception: pass`. Ever.
-- Timeouts on every subprocess and every I/O call. Default 30s, declared explicitly.
+- Timeouts on every subprocess call. 30s default, explicit. → `check_subprocess_timeouts.py`
 
 ---
 
@@ -170,8 +170,8 @@ you remember to obey — the machine will stop you either way.
 
 ## Operational notes
 
-- `just verify` clones a real repository into `.verify-clone` itself; it needs no submodules and
-  no setup. It runs today — it was gated on the dead correlation test until this was written.
+- `just verify` clones `.verify-clone` itself and needs no setup. **Gate 2b is separate**: `just
+  fixtures` (~1.3 GB, commits pinned in `tests/fixtures/pinned.json`) then `just gate-2b`.
 - **tree-sitter is NOT a dependency.** `pyproject.toml` declares `dependencies = []`. This line
   claimed it was pinned there; it never was. `parse/` reads git's funcname header and nothing else.
 - The SQLite schema is versioned. Changing `store/schema.py` requires a migration and a bump

@@ -54,8 +54,10 @@ guards:
     uv run python scripts/guard/check_module_identity.py .
     uv run python scripts/guard/records/check_docs_sync.py .
     uv run python scripts/guard/records/check_documented_commands.py .
+    uv run python scripts/guard/records/check_documented_recipes.py .
     uv run python scripts/guard/check_no_partial_clone.py .
     uv run python scripts/guard/check_constant_time_compare.py .
+    uv run python scripts/guard/check_subprocess_timeouts.py .
     uv run python scripts/guard/records/check_burned_corpora.py .
     uv run python scripts/guard/records/check_plan_state.py .
     uv run python scripts/guard/records/check_withdrawn_amendments.py .
@@ -117,7 +119,12 @@ verify: check test-live verify-no-source-leak verify-determinism
 
 # Runs the full pipeline against real repositories. No mocks, by guard rule.
 test-live:
-    uv run pytest tests/live -x --timeout=900
+    uv run pytest tests/live -x --timeout=900 -m "not pinned_corpus"
+
+# Gate 2b. Needs `just fixtures` first (~1.3 GB of bare clones). Kept out of `just verify`
+# so the default path does not require the corpus; the plan records its status from a real run.
+gate-2b:
+    uv run pytest tests/live/test_gate_2b_pinned_corpus.py -m pinned_corpus -x --timeout=3600 -s
 
 # Proves — does not assert — that no source text made it into the pack.
 # ARCHITECTURE.md invariant 6, and a contractual claim we make to customers.
@@ -154,9 +161,10 @@ verify-determinism:
 # ---------------------------------------------------------------- setup
 
 # Fetch the pinned real repositories used by live tests. Large; run once.
+# Clone the six repositories that produced the ranker's validated result, at the exact
+# commits it was measured at. Needed by gate 2b only; `just check` does not touch them.
 fixtures:
-    git submodule update --init --recursive tests/fixtures/repos
-    @echo "Fixtures ready. 'just verify' will now run."
+    uv run python scripts/fixtures/clone_pinned.py
 
 install:
     uv sync --all-extras

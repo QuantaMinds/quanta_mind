@@ -33,8 +33,13 @@ just check            # must be green before you change anything
 `CLAUDE.md` is committed and contains `@AGENTS.md`, so there is no symlink step — the old
 `ln -sf` needed Developer Mode on Windows and failed silently without it.
 
-`just fixtures` pulls the pinned repositories for live tests. It is not needed yet:
-`tests/live/` has no tests before the call-site census layer.
+`just fixtures` clones the six repositories that produced the ranker's validated result, at the
+exact commits it was measured at (`tests/fixtures/pinned.json`). It costs roughly 1.3 GB of bare
+clones and is needed only by `just gate-2b`; `just check` and `just verify` do not touch it.
+
+Until this was written the recipe ran `git submodule update --init tests/fixtures/repos` against a
+repository with no `.gitmodules` and no submodules registered. It exited 1 on every invocation,
+and this file said it was "not needed yet", so nobody ran it and nobody noticed.
 
 Then read, in this order: `ARCHITECTURE.md` → `docs/PROJECT_CONTEXT.md` →
 `docs/VALIDATION.md`. Skip `docs/BUILD_PLAN.md` unless you are picking up a phase.

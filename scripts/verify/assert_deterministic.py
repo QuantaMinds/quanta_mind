@@ -50,7 +50,16 @@ def content_digest(pack: pathlib.Path) -> tuple[str, int]:
     rows = 0
     for table in tables:
         columns = [str(r[1]) for r in conn.execute(f"PRAGMA table_info({table})")]
-        keep = [c for c in columns if c not in VOLATILE.get(table, set())]
+        drop = VOLATILE.get(table, set())
+        # A stale entry is worse than a missing one: it reads as protection and excludes nothing,
+        # which is how this check spent a week measuring clock speed while claiming otherwise.
+        stale = drop - set(columns)
+        if stale:
+            raise SystemExit(
+                f"[determinism] VOLATILE names {sorted(stale)} on table {table!r}, which has "
+                f"{columns}. The exclusion list is stale and would silence nothing."
+            )
+        keep = [c for c in columns if c not in drop]
         if not keep:
             continue
         cols = ", ".join(f'"{c}"' for c in keep)

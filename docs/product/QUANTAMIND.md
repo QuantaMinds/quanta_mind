@@ -16,6 +16,12 @@ Nothing described here is shipped. Where a claim is unproven it says so.
 
 # 1. What QuantaMind is
 
+> **QuantaMind — Focus: model-free triage of where to look first in a large change, ranked by which
+> files a later fix has returned to, with a published coverage line naming what was not analysed.**
+
+That is the one-line thesis, in the form the category states its own. **Every other line in that
+category ends in "…and reviews your code." Ours does not, and that is the entire bet.**
+
 **Every AI code reviewer reads the whole diff at the same depth. QuantaMind decides where to
 look first, and only reads hard there.**
 
@@ -493,6 +499,58 @@ before they reach the pull request.
 **CodeScene** — file-level change coupling as an analysis dashboard, not a pull-request comment.
 The underlying technique is old: mining version histories to guide software changes dates to
 2004.
+
+## What the category sells, and what we sell instead
+
+Six tools, one sentence each, in their own framing:
+
+| | what it sells | what its output asserts |
+|---|---|---|
+| **CodeRabbit** | line-by-line feedback with deep repository context | *this line is wrong* |
+| **Greptile** | codebase-wide review with architectural awareness | *this change is wrong architecturally* |
+| **Graphite** | stacked pull requests, workflow speed, AI review | *ship faster — also, this is wrong* |
+| **Macroscope** | high-signal, low-noise automated review | *this is wrong, and we mean it* |
+| **Qodo** | quality-first generation with test/review verification | *this is wrong, here is a test* |
+| **Aikido** | developer-first application security guardrails | *this is insecure* |
+| **QuantaMind** | **where to look, and what we could not see** | ***nothing about correctness*** |
+
+**We measured the thing all six sell.** Two corpora, four blind rater pools: **66.7%, 74.2% and
+82.1% of findings wrong, zero correct of 39 off-corpus, 0.013–0.037 correct findings per pull
+request.** Nine designs; anchor repair, structured context, a rejection filter, hunk expansion and
+a conventions file each moved the headline nothing.
+
+**That is not a claim we are better at it.** On Martian's offline layer we are **level with
+CodeRabbit and behind Greptile**. It is a claim about the category — and we are the only ones who
+ran the experiment and then **stopped shipping the half that failed.**
+
+**These figures are internal.** `docs/product/publishing-rules.md` governs the public form: our
+own precision, recall and miss rate do not go on a page, and a competitor's ONLINE precision is
+never a backdrop for one of our numbers. The offline-layer comparison above is permitted because we
+entered that layer and it measures the same quantity — that exception is written into the rules,
+not assumed here.
+
+### Where this survives, and where it does not
+
+**The ranker is not the moat.** Counting prior fixes per file is a couple of hundred lines; any
+platform could ship it in a sprint. What cannot be retrofitted is **typed silence**: every layer
+emits `Unresolved(site, reason, construct)` rather than nothing, so the coverage line is a
+computation and not a claim. A tool that did not do that from its first row cannot state what it
+missed, because it does not know.
+
+**Distribution is where this is weakest, and it is not close.** There are no customers. The only
+bottom-up motion available is the retrospective — it runs against a clone, needs no install and no
+permissions, and shows what the ranking would have said on closed history. It is unbuilt.
+
+**Noise is the strongest ground.** We fire on **10–12% of changes** and publish **zero findings**.
+But Macroscope positions on low noise too, so the distinction is narrower than it sounds: theirs is
+low-noise *claims*, ours is *no claims*.
+
+**And the pitch this evidence forbids** is "an autonomous senior engineer". The best configuration
+across nine designs produced **one useful comment per 27 to 77 pull requests**. Any strategy that
+requires that capability is a strategy this project has already measured and failed. What is left
+is smaller and duller: **be the layer that decides where attention goes and admits its blind
+spots** — one replicated result at p < 1e-6 on six unseen repositories, one half closed on
+evidence, and no customers yet.
 
 ## Differentiation
 

@@ -17,6 +17,7 @@ CONSUMED BY: `just verify`.
 
 from __future__ import annotations
 
+import collections
 from pathlib import Path
 
 import pytest
@@ -37,11 +38,18 @@ def test_the_whole_pipeline_ranks_real_pull_requests_without_leaking(
 ) -> None:
     skips = Skips()
     ranked = fired = silent = 0
+    # WHY each silence, not just how many. "6 silent" is the same number whether the ranker
+    # honestly had no history to work with or the store came back empty because the window was
+    # wrong -- and those need opposite responses. `discrimination` already carries the reason;
+    # collapsing it to a bool at the reporting step threw it away.
+    quiet: collections.Counter[str] = collections.Counter()
 
     for case in ranked_pulls(clones, skips):
         ranked += 1
         fired += case.ranking.fired
         silent += not case.ranking.fired
+        if not case.ranking.fired:
+            quiet[case.ranking.discrimination.name] += 1
         where = f"{case.repo}#{case.number}"
 
         names = [u.unit.qualified_name for u in case.ranking.units]
@@ -82,7 +90,7 @@ def test_the_whole_pipeline_ranks_real_pull_requests_without_leaking(
             f"bounding: with-future={case.scores} without-future={dict(rebuilt)}"
         )
 
-    print(f"\n  ranked {ranked} pull requests: {fired} fired, {silent} silent")
+    print(f"\n  ranked {ranked} pull requests: {fired} fired, {silent} silent {dict(quiet)}")
     print(f"  skipped {skips.total}: {dict(skips.counts)}")
     assert ranked >= 8, (
         f"only {ranked} pull requests ranked and {skips.total} skipped ({dict(skips.counts)}) — "
