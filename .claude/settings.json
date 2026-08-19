@@ -22,7 +22,6 @@
     "      which is which. A map that overstates its own power is the thing it exists",
     "      to prevent."
   ],
-
   "permissions": {
     "deny": [
       "Bash(git push --force*)",
@@ -40,7 +39,6 @@
       "Write(./research/phase0/results/**)"
     ]
   },
-
   "hooks": {
     "PreToolUse": [
       {
@@ -54,7 +52,6 @@
         ]
       }
     ],
-
     "PostToolUse": [
       {
         "matcher": "Write|Edit",
@@ -67,7 +64,6 @@
         ]
       }
     ],
-
     "Stop": [
       {
         "hooks": [
@@ -80,26 +76,21 @@
       }
     ]
   },
-
   "$enforcement_map": {
     "$comment": "Every rule in AGENTS.md maps to exactly one enforcement mechanism. A rule with no mechanism is advisory and must be tagged as such in AGENTS.md. Machine-checked in both directions by scripts/guard/check_enforcement_map.py: every guard:/ci:/hook: token below must resolve to a real guard file, justfile recipe, workflow job or registered hook event, and every file in scripts/guard/ must be invoked by something.",
-
     "200-line file cap": "hook:PostToolUse (advisory) + ci:guards (blocking)",
     "15-file directory cap": "hook:PostToolUse (advisory) + ci:guards (blocking)",
     "layer import direction": "hook:PostToolUse (advisory) + ci:guards (blocking)",
     "module docstring required": "hook:PostToolUse (advisory) + ci:guards (blocking)",
     "banned name tokens": "hook:PostToolUse (advisory) + ci:guards (blocking)",
-
     "no unlabeled edges": "ci:test-property (invariant 1)",
     "typed silence, never a bare absence": "ci:test-property (invariant 3)",
     "green test != verified data": "ci:verify-data + guard:check_assert_quality",
     "live tests must not mock": "guard:check_assert_quality",
-
     "no direct commits to main": "hook:PreToolUse + branch protection",
     "branch naming": "guard:check_branch_name",
     "no edits to vendored source": "hook:PreToolUse",
     "golden files reviewed, not regenerated": "hook:PreToolUse (ask) + ci:verify-data",
-
     "docs updated with code": "guard:records/check_docs_sync",
     "AGENTS.md under 200 lines": "guard:check_agents_md",
     "every rule names a mechanism": "guard:check_agents_md",
@@ -109,17 +100,16 @@
     "references name things, not numbers": "guard:records/check_no_vague_refs",
     "no duplicate or orphan modules": "guard:check_module_identity",
     "no --filter on a git clone (A31)": "guard:check_no_partial_clone",
+    "every subprocess declares a timeout": "guard:check_subprocess_timeouts",
     "a withdrawn amendment names its enforcer": "guard:records/check_withdrawn_amendments",
     "a cited document or line exists": "guard:citations/resolve",
     "a dated external figure is re-checked on its cadence": "guard:citations/freshness",
-
     "no source text in pack": "ci:verify-no-source-leak (invariant 6)",
     "deterministic re-index": "ci:verify-determinism (invariant 5)",
-
     "a validation tool consumes the artefact under test, never rebuilds it": "ADVISORY -- docs/CORRECTIONS.md entry 3; no guard distinguishes a legitimate constructor from a drifting reconstruction",
     "one public concern per module": "ADVISORY -- human review in PR",
     "plan before editing resolve/ or label/": "ADVISORY -- human review in PR",
-    "documented commands must be runnable": "guard:records/check_documented_commands",
+    "documented commands must be runnable": "guard:records/check_documented_commands + guard:records/check_documented_recipes",
     "session record written at Stop": "hook:Stop (informational)"
   }
 }

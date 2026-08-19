@@ -71,8 +71,15 @@ def fires(scores: Mapping[str, int], threshold: float = DEFAULT_THRESHOLD) -> bo
     """Whether this change is worth speaking on.
 
     False when there is nothing to rank: with every file at zero the ordering is alphabetical, and
-    speaking would present `sort(filenames)` as a judgement about risk. **This is the 4.61% of
-    changes the ranker cannot help with**, and staying quiet on them is the honest behaviour.
+    speaking would present `sort(filenames)` as a judgement about risk. Staying quiet is the
+    honest behaviour, and the caller can still tell WHY -- `Ranking.discrimination` separates
+    NO_HISTORY from FLAT_NONZERO, so silence is never a bare absence.
+
+    **How often this happens is measured, not asserted here.** `tests/live/test_end_to_end.py`
+    prints the count and the reason on every run: 2 of 9 merged pull requests across flask and
+    httpx. This docstring previously claimed "the 4.61% of changes the ranker cannot help with",
+    and NO artefact in this repository produces that number -- an unsourced rate in a docstring,
+    in a project whose thesis is provenance.
     """
     if not 0.0 <= threshold <= 1.0:
         raise ValueError(f"threshold must be in [0,1], got {threshold}")

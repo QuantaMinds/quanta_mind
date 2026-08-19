@@ -37,7 +37,7 @@ from quantamind.types.touch import Touch
 # One repository in active development and one in a quiet period, deliberately: the quiet one is
 # where the ranker must stay silent, and a corpus of only busy repositories never exercises that.
 REPOS = ("pallets/flask", "encode/httpx")
-MAX_PRS = 12
+MAX_PRS = 24  # raised when the ancestry skip cut the surviving corpus below the floor
 
 
 @dataclass(frozen=True)
@@ -106,7 +106,7 @@ def ranked_pulls(clones: dict[str, Path], skips: Skips) -> Iterator[Ranked]:
         assert touch_store.index(conn, repo_id, touches) == len(touches)
 
         pulls = [
-            p for p in gh([f"repos/{repo}/pulls?state=closed&per_page=40"]) if p.get("merged_at")
+            p for p in gh([f"repos/{repo}/pulls?state=closed&per_page=100"]) if p.get("merged_at")
         ][:MAX_PRS]
         assert pulls, f"{repo}: no merged pull requests returned by the API"
 
@@ -124,6 +124,21 @@ def ranked_pulls(clones: dict[str, Path], skips: Skips) -> Iterator[Ranked]:
                 # A fork, or a branch force-pushed since. Not a pipeline failure, but a coverage
                 # hole, so it is counted rather than passed over.
                 skips.record(f"{repo}: base commit not in clone")
+                continue
+            # The index above was read from HEAD. A pull request based on another branch is
+            # scored against history that never contained its files, and every path comes back
+            # zero -- which the ranker correctly reports as NO_HISTORY. That is a HARNESS
+            # failure wearing a corpus label: four httpx pull requests targeting `v1` made the
+            # end-to-end run read "6 silent", which looks like a fact about the firing rate and
+            # is a fact about which branch we indexed. Presence in the clone is not enough; the
+            # base must be REACHABLE from the indexed head.
+            reachable = subprocess.run(
+                ["git", "-C", str(clone), "merge-base", "--is-ancestor", base.sha, "HEAD"],
+                capture_output=True,
+                timeout=60,
+            )
+            if reachable.returncode != 0:
+                skips.record(f"{repo}: base is not an ancestor of the indexed HEAD")
                 continue
             as_of = base.committed_at
             # PARSE: the hunks, so the coverage line can name what could not be read.
