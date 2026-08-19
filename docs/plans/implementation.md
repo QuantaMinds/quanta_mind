@@ -221,9 +221,10 @@ previous sabotage here disabled only the entry point and left the suite green.
 
 ### What could silently fail
 
-- **A renamed file reads as new.** `--name-only` reports the new path, so history before the rename
-  is invisible and the file lands in the no-history class that misses at 4.46%. `git log --follow`
-  is per-path and does not compose with `--name-only`. **Not solved.**
+- **A renamed file reads as new — MEASURED, and deliberately not solved.** `--name-only` reports
+  the new path, so history before the rename is invisible and the file lands in the no-history
+  class. `git log --follow` is per-path and does not compose with `--name-only`. **The size is now
+  known and it is the reason this stays open**: see "The renamed-file blind spot, sized".
 - **A blobless clone.** 27 of 35 clones in the research corpus are `blob:none`; a cold read fetches
   trees over the network, and a network failure looks like a small repository. `history.py` refuses
   these outright — `ingest/diff.py` must make the same choice, not a different one.
@@ -453,7 +454,8 @@ model claims for even one release is the failure this product exists to prevent.
   technical risk; measured at the ranker stage's gates; no mitigation beyond measuring it early.
 - **Whether anyone pays for it.** No customers. The market data says review latency is the
   bottleneck; it does not say we fix it.
-- **The renamed-file blind spot**, which lands in the class that misses most.
+- ~~**The renamed-file blind spot**, which lands in the class that misses most.~~ **Sized. It is a
+  real mechanism worth 0.17 points, and the fix costs the p-value — see below.**
 - **Whether the coverage line is worth anything to a human**, as opposed to being defensible. That
   needs a user, not a test.
 
@@ -511,3 +513,57 @@ keeping what recurs lands below a single run, and wrong findings recur more ofte
 correct ones (20%).
 
 **Not a stronger model alone**, without a pre-registration fixing the bar before the run.
+
+---
+
+# The renamed-file blind spot, sized
+
+**The plan called this unresolved for months and never put a number on it.** It has one now,
+measured on the pinned corpus through the product's own path.
+
+## The mechanism is real and it separates the outcomes
+
+| outcome | n | with a rename-blinded target |
+|---|---|---|
+| **MISS** | 29 | **4 — 13.8%**, Wilson [5.5%, 30.6%] |
+| hit | 2,371 | 24 — 1.0%, Wilson [0.7%, 1.5%] |
+
+**13.6× enrichment, Fisher exact two-sided p = 2.9 × 10⁻⁴**, intervals disjoint. `AGENTS.md`
+requires a suspected cause be cross-tabulated against the outcome because **a cause that does not
+separate outcomes is a story** — this one separates.
+
+A *rename-blinded target* is a file a later fix returned to, which scored zero prior touches at
+`as_of`, and whose path was created by a rename at or before that event. The ranker had seen the
+file; it could not recognise it.
+
+## And the size is the other half of the finding
+
+**Solving it entirely moves the headline from 1.21% to 1.04% — 0.17 points, on four events.**
+
+It is also concentrated rather than general: scikit-learn 3 of 12 misses, scrapy 1 of 9, and
+**zero in the other four repositories**.
+
+**The seductive number is the wrong one.** Across the corpus, **16.8% of zero-history file-slots
+are rename-blinded** — one in six, and 21–26% in ansible, scikit-learn and scrapy. That sounds
+large and is nearly harmless: **most rename-blinded files are never the file a fix returns to.**
+The blind spot is common; it bites rarely.
+
+## Why it stays open
+
+The fix is available in one pass — `git log -M --diff-filter=R --name-status` alongside the
+existing `--name-only` read — and folding those pairs into the index would let a renamed path
+inherit its predecessor's touches.
+
+**That changes the touch counts, and the touch counts are what carry the p-value.** Gate 2b would
+stop reproducing `defect_return_external.json` exactly, by design rather than by defect, and the
+change would need its own pre-registration against a fresh corpus. **Paying that to recover 0.17
+points on n = 4 is the wrong trade**, and this entry exists so the next person does not re-derive
+the question before reaching the same answer.
+
+## What would change the answer
+
+**A customer whose repository renames heavily.** scrapy and scikit-learn are that shape, and there
+the blind spot is worth more than the pooled figure suggests. The retrospective already computes
+everything needed to say so per repository — if a prospect's run shows a high rename-blinded share,
+that is the trigger to reopen this, and it is a measurement they would be handing us rather than
+one we would have to fund.
