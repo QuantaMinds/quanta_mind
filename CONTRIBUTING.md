@@ -198,3 +198,7 @@ Rules live in three places and each has a cost:
 
 Default to a hook. `AGENTS.md` is capped at 200 lines and the cap is enforced. If you want
 to add a line there, you must either delete a line or justify the trade in the PR.
+
+Every command this project ships — the product's and the development recipes alike — is
+documented in `docs/engineering/CLI.md`: syntax, arguments, exit codes, and what a healthy
+run prints.
