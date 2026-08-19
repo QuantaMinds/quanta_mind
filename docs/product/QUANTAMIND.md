@@ -50,7 +50,9 @@ by generating more text into a queue that is already unreadable. Adding volume t
 problem does not help, and the only way to shorten a queue is to take things out of it.
 
 **QuantaMind is quiet on purpose.** It comments on about one change in ten, and when it does it
-names the one function worth reading first.
+names the **file** worth reading first — and says which files it did not read. The unit is the
+file everywhere allocation happens; a function name appears in the routing sentence only, to give
+a human a place to start inside the file we ranked.
 
 ## The problem with reviewers as they exist today
 
@@ -179,21 +181,24 @@ and a fifth that this document used to claim has been measured and withdrawn.** 
   └──────────────────────────────────────────────────────────┘
 ```
 
-The deterministic layer that allocates the budget is the same layer that adjudicates the
-model's output. That is what makes the verification step cheap.
+**That symmetry was the design, and stage 4 is not built, so it is an argument rather than a
+property today.** The deterministic layer that allocates the budget *would be* the same layer that
+adjudicates the model's output, which is what would make verification cheap. Nothing adjudicates
+anything at present: `verify/` contains an `__init__.py`.
 
 ## The day you install it
 
 **Twenty minutes.** One GitHub App, read-only on code, write-only on a comment. No merge
 rights, no customer model key.
 
-It reads the repository's history once and builds a single index: for every function, how often
-changing it has required a follow-up, and which functions those follow-ups touched.
+It reads the repository's history once and builds a single index: for every **file**, how often
+changing it has required a follow-up, and which files those follow-ups touched.
 
 **Then it runs the pipeline backwards over your merged pull requests and hands you the answer
 before you have committed to anything** — how many of your changes came back, how many we would
-have commented on, and on how many of those we would have named the function the fix returned
-to. Your repository, your number, in the install. A reviewer that runs a model over every diff
+have commented on, and on how many of those we would have named the **file** the fix returned
+to. Your repository, your number, in the install — `uv run quantamind retrospective <clone>`,
+which needs a clone and nothing else. A reviewer that runs a model over every diff
 cannot open that way: replaying 340 pull requests costs it 340 pull requests of inference.
 
 ## What ramps is breadth, not time
@@ -202,8 +207,8 @@ It comments from day one, narrowly, and widens only on evidence:
 
 | Tier | Fires when | Volume |
 |---|---|---|
-| Start | the top-ranked function is in this repository's top decile of prior touch counts | 10–12% |
-| Widen | top two ranked functions | untested |
+| Start | the top-ranked **file** is in this repository's top decile of prior touch counts | 10–12% |
+| Widen | top two ranked **files** | untested |
 
 Widening requires **two signals moving together**: the acceptance rate of findings climbing,
 **and** the post-merge defect rate flat or falling. One without the other is a red flag —
@@ -224,7 +229,13 @@ refunds/service.py    _build_refund_payload()
 notifications/mail.py send_refund_email()
 ```
 
-### Step 1 — extract the changed units
+> **STEPS 1 AND 2 ARE BUILT. STEPS 3 TO 7 DESCRIBE A PIPELINE THAT DOES NOT RUN.** `infer/` and
+> `verify/` contain an `__init__.py` each and `quantamind review` exits 2, so the model call, the
+> structural verification and the published finding below are a record of what was designed and
+> measured — not of what happens when a pull request opens. Each step says which it is. What runs
+> in production is the ranking, the allocation labels and the coverage line.
+
+### Step 1 — extract the changed units — **BUILT**
 
 We do **not** diff whole files. We read the diff at zero context and take the function each
 hunk sits in:
@@ -242,7 +253,15 @@ $ git diff -U0 <base>..<head> -- '*.py'
 Git's hunk headers name the enclosing function directly. A parser gives the same answer more
 precisely, and is what handles languages whose hunk headers are unreliable.
 
-**Why functions and not files or lines.** This is measured, not preferred:
+**Why functions and not files or lines.** This is measured, not preferred — **and it was
+superseded by a later measurement that this document now follows.** The argument below is about
+which unit *localises a defect*; the decision that governs the product is about which unit *ranks
+best at a three-unit budget*, and there file-level wins: **1.22% miss against function-level's
+8.84%** on identical events, **+2.29 points** even at matched coverage, and the file arm is the
+one that replicated out-of-sample on six unseen repositories. `rank/order.py` emits
+`Site(path, line=0)`. **Both measurements are real and they answer different questions; the
+second is the one the allocator obeys.** The bullets are kept because the symbol-level lift they
+report is what makes the *routing sentence* name a function inside the ranked file:
 
 - **Files are too coarse.** Of 1,316 follow-up fixes we examined, **989 touched only the same
   file at different lines** — that is continued development, not a repair. File-level signal
@@ -255,7 +274,7 @@ precisely, and is what handles languages whose hunk headers are unreliable.
 Measured across four repositories, ranking lift over a random pick: **symbol +46, +36, +28,
 +17 points. File overlap erratic (+50 to −1). Line overlap dead (+7 to −5).**
 
-### Step 2 — build the ranking index, bounded by the past
+### Step 2 — build the ranking index, bounded by the past — **BUILT**
 
 For each changed unit, count the commits that touched it in the **year before this pull
 request** — and nothing after:
@@ -274,7 +293,7 @@ future-leaking run must move the score, or the harness is measuring lookahead ra
 history. On our corpus, leaking the future moved the top-1 rate from 50.0% to 37.5%, confirming
 the bound is load-bearing.
 
-### Step 3 — decide whether to speak, using a percentile
+### Step 3 — decide whether to speak, using a percentile — **BUILT**
 
 **An absolute threshold does not transfer between repositories.** "Twelve prior touches" is rare
 in a slow repository and unremarkable in a fast one; the same rule fired on 11% of one
@@ -286,7 +305,7 @@ velocity, this holds the comment rate at **10–12% everywhere**.
 
 Here `process_refund` at 34 touches is in this service's top decile. **We speak.**
 
-### Step 4 — allocate the inference budget
+### Step 4 — allocate the inference budget — **BUILT — labels only, nothing consumes them**
 
 ```
   process_refund            rank 1  →  deep read, xhigh effort, ONE pass
@@ -307,7 +326,7 @@ whose entire claim is that it needs no model. The ceiling is enforced and **obse
 review records its actual request count and token spend, because a ceiling never hit and a
 ceiling never wired up otherwise print the same thing.
 
-### Step 5 — read, with the repository cached
+### Step 5 — read, with the repository cached — **NOT BUILT**
 
 Prompt caching is a **prefix match**: the render order is tools, then system, then messages, and
 any byte change invalidates everything after it. That maps onto this product exactly:
@@ -324,7 +343,7 @@ model frozen for a conversation** (both render at the very front).
 Findings come back as **structured JSON against a schema**, never prose — the verification step
 can only check a claim it can parse.
 
-### Step 6 — verify the model's structural claims
+### Step 6 — verify the model's structural claims — **NOT BUILT**
 
 The model returns:
 
@@ -353,7 +372,7 @@ a live drop-rate counter: claims received and claims dropped, by claim class, pe
 rate that falls to zero and stays there is either a flawless model or a dead verifier, and those
 two must never look the same on the wire.
 
-### Step 7 — emit, with the coverage line first
+### Step 7 — emit, with the coverage line first — **NOT BUILT as written — the coverage line ships, the finding does not**
 
 ```
 QuantaMind
@@ -671,7 +690,14 @@ whether a developer changed the code. On the offline layer, against human-verifi
 **CodeRabbit is at 36.5%.** Our 65.2%-wrong figure had been compared against an assumed field
 floor near 49% correct for months. **The real comparison was never as bad as we told ourselves.**
 
-**And no tool of the 48 scored exceeds roughly 63% recall.** Nobody has solved this.
+**And no tool of the 48 exceeds roughly 63% recall.** Nobody has solved this.
+
+**On 48 against 49:** Martian's leaderboard lists **49 tools**; **48** of them carry the
+evaluations this comparison is computed from, per
+`docs/plans/preregistrations/reviewer/martian-comparison-preregistration.md` — "48 tools, 50 pull
+requests, two judges". The leaderboard count is the one to use when naming Qodo's position; the
+scored count is the one to use for any statement about what tools achieved. **They are two
+denominators, not a disagreement.**
 
 ## The experiment that decided our configuration
 
@@ -927,11 +953,10 @@ The answer, in the order it should be given.
 
 **We entered Martian's offline layer rather than asserting this.** Against human-verified issues on
 50 pull requests, scored by one judge: **Greptile 56.5%, us 43.6%, CodeRabbit 36.5%.** We are level
-with CodeRabbit and behind Greptile, and **no tool of the 48 scored exceeds roughly 63% recall.**
+with CodeRabbit and behind Greptile, and **no tool of the 48 scored exceeds roughly 63% recall**
+(48 scored of the 49 listed — see the note above).
 
-**The 49–76% band the market quotes is the ONLINE layer** — and "What we do differently" should have said so where it
-first appeared, because `publishing-rules.md` bars an online-layer precision from standing as a
-backdrop to our own numbers at all. Restated: — did a developer change the code — and
+**The 49–76% band the market quotes is the ONLINE layer** — did a developer change the code — and
 it is a different measurement on a different population. The same CodeRabbit that reports 49.2%
 there is at **36.5%** against verified issues. **The field is materially worse than its own
 marketing, and the benchmark's authors say their gold set is incomplete on top of that.**
@@ -1029,11 +1054,12 @@ document exists to avoid.
 
 | | **Free** | **Team** | **Business** | **Enterprise** |
 |---|---|---|---|---|
-| Price | $0 | **$12**/repo/mo annual · $15 monthly | **$10**/repo/mo annual, 10 repo minimum | from **$2.5K**/mo, unlimited repositories |
+| Price | $0 | **$12**/repo/mo annual · $15 monthly | **$10**/repo/mo annual, **10 repo minimum** | from **$2.5K**/mo, unlimited repositories |
+| | | | *At exactly 10 repositories Business is $100 against Team's $120 for a superset — Team is dominated from 10 up, deliberately. The minimum is the crossover, and it is set where pooling starts being worth buying.* | |
 | **Priced on** | — | **repository** | **repository** | contract |
 | Seats | unlimited | **unlimited** | **unlimited** | unlimited |
 | Buyer | anyone | team lead | Director or VP Engineering | procurement and security |
-| What is being bought | the proof | the reviewer | the report | the contract |
+| What is being bought | the proof | **the routing** | **the org-wide report** | the contract |
 | Bought with | nothing | credit card | light purchase order | MSA, DPA, security review |
 | Ranking, coverage line, retrospective | ✓ | ✓ | ✓ | ✓ |
 | **Coverage line names every skipped unit** | ✓ | ✓ | ✓ | ✓ |
@@ -1042,8 +1068,7 @@ document exists to avoid.
 | **Pooled retrospective across repositories** | single repo | single repo | **✓ org-wide** | ✓ org-wide |
 | Cross-repository aggregation, quarterly audit, SSO | — | — | ✓ | ✓ |
 | Verifier drop-rate telemetry | — | — | ✓ | ✓ |
-| **Bring your own key** — allowlisted model | — | — | **✓** | ✓ |
-| **Bring your own model** — uncertified or self-hosted | — | — | — | **✓** |
+| ~~Bring your own key~~ / ~~Bring your own model~~ | **NOT SELLABLE while `infer/` ships nothing — there is no model call to bring a key for.** Kept as the shape the Enterprise tier would take if the reviewer reopened ||||
 | Self-hosting, audit logs, residency, SLA | — | — | — | ✓ |
 | ~~Token budget~~ | **No model runs at any tier. There is no token budget to sell.** ||||
 | **Our cost of goods** | storage + CPU | **a clone and an index per repository** — 15 MB and 393 KB for flask, CPU seconds per run |||
@@ -1064,10 +1089,11 @@ answer is the one that exists, and a single repository often cannot be given one
 That is an honest upsell because the constraint is arithmetic rather than artificial: we are not
 withholding a number at the lower tier, the lower tier's data cannot support one.
 
-**And the margin improves at the deeper tier**, which is why depth sits at Business rather than
-being sold as an add-on: twenty developers across four repositories is $380 of revenue against
-$112 of cost at three units (71%), or $780 against $164 at five (79%). Paying more buys less
-silence and costs us proportionally less.
+~~**And the margin improves at the deeper tier**~~ — **that arithmetic priced per-seat revenue
+against per-unit inference cost, and both are retired.** Depth is not a tier lever, the row is
+struck through above, and there is no per-unit cost to improve on. What replaces it is simpler:
+**four repositories cost four clones and four indexes whichever tier they sit on**, so the margin
+difference between tiers is the price, not the cost.
 
 **The quarterly coverage audit is a separate line, $8,000–15,000 per engagement**, sold to an
 engineering leader out of a different budget than seats. It is plausibly the larger business.
@@ -1083,7 +1109,7 @@ per-pull-request inference. A repository that doubles its merge rate now costs u
 `git log` it cost before. **Revenue and cost sit on the same axis for the first time.**
 
 **The tiers split by who signs, not by how much you get.** Team is a credit card and a team
-lead buying a reviewer. Business is a light purchase order and a director buying an org-wide
+lead buying routing for their repositories. Business is a light purchase order and a director buying an org-wide
 report — which is why SSO becomes mandatory there and not before. Enterprise is procurement
 buying a contract: it runs where legal permits, with a number we will defend to their auditor.
 **A tier whose only distinction is a bigger quota is anchoring, not a tier.**
@@ -1235,19 +1261,18 @@ change touching three files or fewer "in the top 3" is **true by construction**:
 refuses to publish a table at all if a history read did not complete, which is how the airflow
 defect recorded further below was caught rather than absorbed.
 
-~~**This run ranks FILES, and the allocator ranks FUNCTIONS. It does not validate the allocation
-policy.**~~ **THIS RUN RANKS FILES AND SO DOES THE ALLOCATOR, SO IT VALIDATES EXACTLY THE POLICY
-WE OPERATE.** The harness reads history with `--name-only`, every unit above is a file, and
-`rank/order.py` emits `Site(path, line=0)` for the same reason. The nested strategy — top file,
-then top function inside it — scored **54.2%, below its own 61.0% null**, in the table further up
-this section, which is part of why functions were not chosen.
+**This run ranks FILES, and so does the allocator, so it validates exactly the policy we operate.**
+The harness reads history with `--name-only`, every unit above is a file, and `rank/order.py`
+emits `Site(path, line=0)` — the zero says the unit is the whole file. The file-level table
+therefore describes the shipped policy, and it is the arm that replicated out-of-sample on six
+unseen repositories. The nested strategy — top file, then top function inside it — scored
+**54.2%, below its own 61.0% null** in the table further up this section, which is part of why
+functions were not chosen.
 
-**THE STRIKETHROUGH ABOVE WAS TRUE OF AN ALLOCATOR WE DECIDED NOT TO BUILD.** This paragraph, and the subsection
-below it, were written when the plan was to allocate over functions. It is not: `rank/order.py`
-emits `Site(path, line=0)` and the zero says the unit is the whole file. The file-level table
-therefore describes **the policy we actually operate**, and it is the arm that replicated
-out-of-sample on six unseen repositories. The sentence "the function-level figure is unmeasured"
-was also wrong when written — the subsection immediately below is titled *measured*, and it is.
+> **This paragraph and the subsection below it were written when the plan was to allocate over
+> functions.** They said the run "does not validate the allocation policy" and that the
+> function-level figure was "unmeasured" — the second contradicted by the subsection immediately
+> below, which is titled *measured* and is.
 
 **The operational number is the pooled row, not the ≥4 row** — and this is the ONE operational
 number, now that the function-level arm is documented as the road not taken rather than as "the
