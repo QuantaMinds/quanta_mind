@@ -1,0 +1,4304 @@
+{
+ "model": "gemini-2.5-pro",
+ "arm": "1 \u2014 config exclusion, NOT the model lever",
+ "prs": 300,
+ "reviewable": 194,
+ "skipped": 106,
+ "removed_before_call": {
+  "documentation": 187,
+  "configuration": 203,
+  "dependency manifest": 27,
+  "lockfile": 11
+ },
+ "results": [
+  {
+   "repo": "sqlalchemy/sqlalchemy",
+   "pr": 13349,
+   "title": "Removed erroneous debug print in pysqlcipher.py",
+   "url": "https://github.com/sqlalchemy/sqlalchemy/pull/13349",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "sqlalchemy/sqlalchemy",
+   "pr": 13287,
+   "title": "Remove redundant deserializer assignment from asyncpg dialect",
+   "url": "https://github.com/sqlalchemy/sqlalchemy/pull/13287",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "sqlalchemy/sqlalchemy",
+   "pr": 13351,
+   "title": "test: cover missing error path",
+   "url": "https://github.com/sqlalchemy/sqlalchemy/pull/13351",
+   "removed": {},
+   "files": 1,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "test/orm/test_bind.py",
+     "line": 528,
+     "claim": "The test asserts an incorrect error message, as the string representation of a `User` instance (`u_object`) is not the hardcoded string \"User()\".",
+     "quote": "\"Not an acceptable bind target: User()\",",
+     "fix": "f\"Not an acceptable bind target: {u_object}\",",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 8,
+     "repo": "sqlalchemy/sqlalchemy",
+     "pr": 13351,
+     "url": "https://github.com/sqlalchemy/sqlalchemy/pull/13351"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "sqlalchemy/sqlalchemy",
+   "pr": 13277,
+   "title": "Replace logging.WARN by logging.WARNING",
+   "url": "https://github.com/sqlalchemy/sqlalchemy/pull/13277",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 2,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "sqlalchemy/sqlalchemy",
+   "pr": 13342,
+   "title": "Document quoted_name use with PostgreSQL INHERITS",
+   "url": "https://github.com/sqlalchemy/sqlalchemy/pull/13342",
+   "removed": {},
+   "files": 3,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "sqlalchemy/sqlalchemy",
+   "pr": 13245,
+   "title": "Fix typo \"nad\" -> \"and\" in DefaultDialect.construct_arguments docstring",
+   "url": "https://github.com/sqlalchemy/sqlalchemy/pull/13245",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "sqlalchemy/sqlalchemy",
+   "pr": 13275,
+   "title": "limit pypy to one build, fix typo",
+   "url": "https://github.com/sqlalchemy/sqlalchemy/pull/13275",
+   "removed": {
+    "configuration": 1
+   },
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "sqlalchemy/sqlalchemy",
+   "pr": 13237,
+   "title": "Fix 'compatiblity' typo in sqlite dialect docstring",
+   "url": "https://github.com/sqlalchemy/sqlalchemy/pull/13237",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "sqlalchemy/sqlalchemy",
+   "pr": 13155,
+   "title": "docs: fix RelationshipProperty comparator cross-references",
+   "url": "https://github.com/sqlalchemy/sqlalchemy/pull/13155",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "sqlalchemy/sqlalchemy",
+   "pr": 13463,
+   "title": "Synchronise sqlite DATETIME doc example (regexp and storage_format)",
+   "url": "https://github.com/sqlalchemy/sqlalchemy/pull/13463",
+   "removed": {},
+   "files": 1,
+   "failed": "not JSON even salvaged: Expecting property name enclosed in double quotes: line 6 column 5"
+  },
+  {
+   "repo": "sqlalchemy/sqlalchemy",
+   "pr": 13271,
+   "title": "Bump pypa/cibuildwheel from 3.3.0 to 3.4.1",
+   "url": "https://github.com/sqlalchemy/sqlalchemy/pull/13271",
+   "removed": {
+    "configuration": 2
+   },
+   "files": 1,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "noxfile.py",
+     "line": 26,
+     "claim": "The removal of the \"3.13t\" version is inconsistent as the corresponding \"3.14t\" version for the next Python release was not also removed.",
+     "quote": "PYTHON_VERSIONS = [\"3.10\", \"3.11\", \"3.12\", \"3.13\", \"3.14\", \"3.14t\"]",
+     "fix": "PYTHON_VERSIONS = [\"3.10\", \"3.11\", \"3.12\", \"3.13\", \"3.14\"]",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 1,
+     "repo": "sqlalchemy/sqlalchemy",
+     "pr": 13271,
+     "url": "https://github.com/sqlalchemy/sqlalchemy/pull/13271"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "sqlalchemy/sqlalchemy",
+   "pr": 13063,
+   "title": "docs: fixups in PostgreSQL dialect rST docstrings",
+   "url": "https://github.com/sqlalchemy/sqlalchemy/pull/13063",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "sqlalchemy/sqlalchemy",
+   "pr": 12768,
+   "title": "Remove unnecessary r-prefix from docstring in 'columns' method",
+   "url": "https://github.com/sqlalchemy/sqlalchemy/pull/12768",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "sqlalchemy/sqlalchemy",
+   "pr": 12751,
+   "title": "Fix rendering of a SQL example in indexable examples",
+   "url": "https://github.com/sqlalchemy/sqlalchemy/pull/12751",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "sqlalchemy/sqlalchemy",
+   "pr": 12713,
+   "title": "chore: Fix typo in autoflush SAWarning",
+   "url": "https://github.com/sqlalchemy/sqlalchemy/pull/12713",
+   "removed": {},
+   "files": 2,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "sqlalchemy/sqlalchemy",
+   "pr": 12622,
+   "title": "docs: Clarify Mapped accepts equivalents to Optional",
+   "url": "https://github.com/sqlalchemy/sqlalchemy/pull/12622",
+   "removed": {
+    "documentation": 3
+   },
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "sqlalchemy/sqlalchemy",
+   "pr": 13047,
+   "title": "fix typos",
+   "url": "https://github.com/sqlalchemy/sqlalchemy/pull/13047",
+   "removed": {
+    "documentation": 22,
+    "dependency manifest": 1,
+    "configuration": 1
+   },
+   "files": 39,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "sqlalchemy/sqlalchemy",
+   "pr": 12568,
+   "title": "Remove unused typing imports",
+   "url": "https://github.com/sqlalchemy/sqlalchemy/pull/12568",
+   "removed": {},
+   "files": 2,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "sqlalchemy/sqlalchemy",
+   "pr": 13038,
+   "title": "fix typos",
+   "url": "https://github.com/sqlalchemy/sqlalchemy/pull/13038",
+   "removed": {
+    "documentation": 11
+   },
+   "files": 50,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "sqlalchemy/sqlalchemy",
+   "pr": 12726,
+   "title": "Make __aiter__ in AsyncTupleReulst a sync function.",
+   "url": "https://github.com/sqlalchemy/sqlalchemy/pull/12726",
+   "removed": {},
+   "files": 1,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "lib/sqlalchemy/ext/asyncio/result.py",
+     "line": 857,
+     "claim": "Changing the `__aiter__` type stub to be synchronous is an API contract violation if the runtime implementation remains `async`, as `__aiter__()` would then return a coroutine instead of the declared iterator type, breaking consumers of the typed API.",
+     "quote": "def __aiter__(self) -> AsyncIterator[_R]: ...",
+     "fix": "async def __aiter__(self) -> AsyncIterator[_R]: ...",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 1,
+     "repo": "sqlalchemy/sqlalchemy",
+     "pr": 12726,
+     "url": "https://github.com/sqlalchemy/sqlalchemy/pull/12726"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10986,
+   "title": "test: add coverage for poetry.toml.TOMLFile",
+   "url": "https://github.com/python-poetry/poetry/pull/10986",
+   "removed": {},
+   "files": 2,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10988,
+   "title": "test: cover single-page repository responses",
+   "url": "https://github.com/python-poetry/poetry/pull/10988",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 11004,
+   "title": "perf: defer the requests imports in poetry.utils.helpers",
+   "url": "https://github.com/python-poetry/poetry/pull/11004",
+   "removed": {},
+   "files": 9,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10987,
+   "title": "fix(solver): resolve extra dependencies missing from a reused package's requires",
+   "url": "https://github.com/python-poetry/poetry/pull/10987",
+   "removed": {},
+   "files": 3,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/poetry/puzzle/provider.py",
+     "line": 588,
+     "claim": "This condition is incorrect because it prevents adding a missing optional dependency if another dependency for the same extra is already present, as it checks for the presence of the extra group as a whole rather than the specific dependency.",
+     "quote": "if is_direct_origin and extra not in requires_extras:",
+     "fix": "                        if is_direct_origin and extra_dependency not in requires:",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 2,
+     "repo": "python-poetry/poetry",
+     "pr": 10987,
+     "url": "https://github.com/python-poetry/poetry/pull/10987"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10982,
+   "title": "Fix explicit-priority sources not checked by poetry show --outdated",
+   "url": "https://github.com/python-poetry/poetry/pull/10982",
+   "removed": {},
+   "files": 2,
+   "raw": 1,
+   "published": [],
+   "rejected": {
+    "G-outer": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10973,
+   "title": "Fix editable installs for project GUI scripts",
+   "url": "https://github.com/python-poetry/poetry/pull/10973",
+   "removed": {},
+   "files": 2,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "tests/masonry/builders/test_editable_builder.py",
+     "line": 300,
+     "claim": "The test assertion for the content of `entry_points.txt` is incorrect because it omits the spaces around the equals sign, which are present in the actual generated file.",
+     "quote": "    assert \"[gui_scripts]\\nfoo-gui=foo:bar\\n\" in dist_info.joinpath(",
+     "fix": "    assert \"[gui_scripts]\\nfoo-gui = foo:bar\\n\" in dist_info.joinpath(",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 43,
+     "repo": "python-poetry/poetry",
+     "pr": 10973,
+     "url": "https://github.com/python-poetry/poetry/pull/10973"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10959,
+   "title": "perf: avoid redundant keyring lookups for repositories without credentials",
+   "url": "https://github.com/python-poetry/poetry/pull/10959",
+   "removed": {},
+   "files": 1,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/poetry/utils/authenticator.py",
+     "line": 330,
+     "claim": "The full request `url` is passed as the service name for the keyring lookup, but this is not a meaningful service name and the lookup should use the `netloc` instead, as is done for git URLs in the function below.",
+     "quote": "credential = self._password_manager.get_credential(url, parsed_url.netloc)",
+     "fix": "credential = self._password_manager.get_credential(parsed_url.netloc, parsed_url.netloc)",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 15,
+     "repo": "python-poetry/poetry",
+     "pr": 10959,
+     "url": "https://github.com/python-poetry/poetry/pull/10959"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10954,
+   "title": "perf: caching",
+   "url": "https://github.com/python-poetry/poetry/pull/10954",
+   "removed": {},
+   "files": 2,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/poetry/repositories/http_repository.py",
+     "line": 80,
+     "claim": "Overwriting `self._find_packages` in the initializer breaks inheritance, as any subclass that overrides the original `_find_packages` method will have its implementation silently replaced by the base class's cached implementation.",
+     "quote": "self._find_packages = functools.cache(self._find_packages_uncached)  # type: ignore[method-assign]",
+     "fix": "self._find_packages_cached = functools.cache(self._find_packages_uncached)  # type: ignore[method-assign]",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 2,
+     "repo": "python-poetry/poetry",
+     "pr": 10954,
+     "url": "https://github.com/python-poetry/poetry/pull/10954"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10953,
+   "title": "perf: cache link objects that have been created lazily",
+   "url": "https://github.com/python-poetry/poetry/pull/10953",
+   "removed": {},
+   "files": 4,
+   "raw": 1,
+   "published": [],
+   "rejected": {
+    "G-outer": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10958,
+   "title": "perf: cache absolute scheme paths and avoid `is_relative_to`",
+   "url": "https://github.com/python-poetry/poetry/pull/10958",
+   "removed": {},
+   "files": 1,
+   "raw": 2,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/poetry/installation/wheel_installer.py",
+     "line": 83,
+     "claim": "The case-sensitive string comparison is incorrect on case-insensitive filesystems (like Windows and default macOS), and will reject valid paths that `pathlib.Path.is_relative_to()` would have correctly accepted.",
+     "quote": "if target_path_str != target_dir and not target_path_str.startswith(",
+     "fix": "if os.path.normcase(target_path_str) != os.path.normcase(target_dir) and not os.path.normcase(target_path_str).startswith(",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 16,
+     "repo": "python-poetry/poetry",
+     "pr": 10958,
+     "url": "https://github.com/python-poetry/poetry/pull/10958"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/poetry/installation/wheel_installer.py",
+     "line": 84,
+     "claim": "On POSIX systems, if `target_dir` is the root ('/'), this expression becomes '//', which causes the `startswith` check to incorrectly pass for any absolute path, creating a path traversal vulnerability.",
+     "quote": "target_dir + os.sep",
+     "fix": "os.path.join(target_dir, \"\")",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 16,
+     "repo": "python-poetry/poetry",
+     "pr": 10958,
+     "url": "https://github.com/python-poetry/poetry/pull/10958"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10951,
+   "title": "perf: create link objects lazily",
+   "url": "https://github.com/python-poetry/poetry/pull/10951",
+   "removed": {},
+   "files": 4,
+   "raw": 2,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/poetry/repositories/link_sources/base.py",
+     "line": 108,
+     "claim": "Calling `splitext` with `is_filename=True` likely disables the special handling for compound extensions like `.tar.gz`, which will cause package name and version parsing to fail for some sdist formats.",
+     "quote": "info, _ext = splitext(filename, is_filename=True)",
+     "fix": "info, _ext = splitext(filename)",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 11,
+     "repo": "python-poetry/poetry",
+     "pr": 10951,
+     "url": "https://github.com/python-poetry/poetry/pull/10951"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/poetry/repositories/link_sources/json.py",
+     "line": 38,
+     "claim": "Calling `splitext` with `is_filename=True` likely disables special handling for compound extensions, causing valid formats like `.tar.gz` to be incorrectly identified as `.gz` and skipped.",
+     "quote": "if splitext(filename, is_filename=True)[1] not in self.SUPPORTED_FORMATS:",
+     "fix": "if splitext(filename)[1] not in self.SUPPORTED_FORMATS:",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 36,
+     "repo": "python-poetry/poetry",
+     "pr": 10951,
+     "url": "https://github.com/python-poetry/poetry/pull/10951"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10943,
+   "title": "avoid spurious empty-constraint conflict with duplicates across extras",
+   "url": "https://github.com/python-poetry/poetry/pull/10943",
+   "removed": {},
+   "files": 2,
+   "raw": 1,
+   "published": [],
+   "rejected": {
+    "G-outer": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10949,
+   "title": "perf: avoid to construct package objects to build the link cache when only name and version is needed",
+   "url": "https://github.com/python-poetry/poetry/pull/10949",
+   "removed": {},
+   "files": 3,
+   "raw": 1,
+   "published": [],
+   "rejected": {
+    "G-outer": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10941,
+   "title": "fix(env): fail on incompatible Python without venv creation",
+   "url": "https://github.com/python-poetry/poetry/pull/10941",
+   "removed": {},
+   "files": 3,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10929,
+   "title": "chore(tests): remove poetry.core-based test",
+   "url": "https://github.com/python-poetry/poetry/pull/10929",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10944,
+   "title": "fix(solver): prune sibling deps disjoint with override marker context",
+   "url": "https://github.com/python-poetry/poetry/pull/10944",
+   "removed": {},
+   "files": 3,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/poetry/puzzle/provider.py",
+     "line": 603,
+     "claim": "This check for pruning a dependency is incomplete because it does not consider the marker of the parent package, potentially leaving dependencies that can never be used and whose constraints might cause spurious conflicts.",
+     "quote": "if self._overrides_marker_intersection.intersect(dep.marker).is_empty():",
+     "fix": "if self._overrides_marker_intersection.intersect(dep.marker.intersect(dep.transitive_marker)).is_empty():",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 7,
+     "repo": "python-poetry/poetry",
+     "pr": 10944,
+     "url": "https://github.com/python-poetry/poetry/pull/10944"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10915,
+   "title": "docs: clarify what `--no-cache` disables",
+   "url": "https://github.com/python-poetry/poetry/pull/10915",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10917,
+   "title": "Resolve relative direct URLs for local sources",
+   "url": "https://github.com/python-poetry/poetry/pull/10917",
+   "removed": {},
+   "files": 2,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/poetry/installation/executor.py",
+     "line": 945,
+     "claim": "Resolving a relative path with `Path.resolve()` uses the current working directory, which can be incorrect if the command is run from a subdirectory of the project; it should be resolved relative to the project root.",
+     "quote": "source = source.resolve()",
+     "fix": "source = (self._config.cwd / source).resolve()",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 9,
+     "repo": "python-poetry/poetry",
+     "pr": 10917,
+     "url": "https://github.com/python-poetry/poetry/pull/10917"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10916,
+   "title": "Use configured env for activation command",
+   "url": "https://github.com/python-poetry/poetry/pull/10916",
+   "removed": {},
+   "files": 2,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10914,
+   "title": "test: add unit tests for `CommandLoader.register_factory`",
+   "url": "https://github.com/python-poetry/poetry/pull/10914",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10909,
+   "title": "fix(init): validate version constraint in interactive prompt",
+   "url": "https://github.com/python-poetry/poetry/pull/10909",
+   "removed": {},
+   "files": 2,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/poetry/console/commands/init.py",
+     "line": 535,
+     "claim": "The raised `ValueError` discards the original error message from the caught exception, providing a less specific error message to the user than is available.",
+     "quote": "raise ValueError(f\"Invalid version constraint: {constraint}\") from e",
+     "fix": "raise ValueError(f\"Invalid version constraint '{constraint}': {e}\") from e",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 15,
+     "repo": "python-poetry/poetry",
+     "pr": 10909,
+     "url": "https://github.com/python-poetry/poetry/pull/10909"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10907,
+   "title": "perf/tests: use more appropriate data type for package filter policy packages and add tests",
+   "url": "https://github.com/python-poetry/poetry/pull/10907",
+   "removed": {},
+   "files": 2,
+   "raw": 2,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "tests/config/test_config.py",
+     "line": 58,
+     "claim": "The test incorrectly asserts that a package not in the policy is allowed, but the `allows` method should only permit packages that are explicitly in the policy list.",
+     "quote": "assert policy.allows(\"Poetry\")",
+     "fix": "assert not policy.allows(\"Poetry\")",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 10,
+     "repo": "python-poetry/poetry",
+     "pr": 10907,
+     "url": "https://github.com/python-poetry/poetry/pull/10907"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "tests/config/test_config.py",
+     "line": 60,
+     "claim": "The test incorrectly asserts that `has_exact_package(\"PyTest\")` is true, but package names are stored in a normalized (lowercase) form, so an exact, case-sensitive match for \"PyTest\" should fail.",
+     "quote": "assert policy.has_exact_package(\"PyTest\")",
+     "fix": "assert not policy.has_exact_package(\"PyTest\")",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 10,
+     "repo": "python-poetry/poetry",
+     "pr": 10907,
+     "url": "https://github.com/python-poetry/poetry/pull/10907"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10906,
+   "title": "perf: fast path single-token repository search",
+   "url": "https://github.com/python-poetry/poetry/pull/10906",
+   "removed": {},
+   "files": 3,
+   "raw": 3,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "tests/repositories/test_repository.py",
+     "line": 111,
+     "claim": "This test incorrectly asserts OR logic for a multi-token search, whereas AND logic is the expected behavior and would only match packages containing both \"foo\" and \"bar\".",
+     "quote": "assert repo.search([\"foo\", \"bar\"]) == [package_foo1, package_foo2, package_foobar]",
+     "fix": "assert repo.search([\"foo\", \"bar\"]) == [package_foobar]",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 1,
+     "repo": "python-poetry/poetry",
+     "pr": 10906,
+     "url": "https://github.com/python-poetry/poetry/pull/10906"
+    }
+   ],
+   "rejected": {
+    "G-outer": 2
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10908,
+   "title": "fix(add): include pyproject.toml path in \"already present\" message",
+   "url": "https://github.com/python-poetry/poetry/pull/10908",
+   "removed": {},
+   "files": 3,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/poetry/console/commands/add.py",
+     "line": 447,
+     "claim": "The file path is not escaped, which can lead to garbled output if the path contains special characters like '<' that are meaningful to the console formatter.",
+     "quote": "f\" (<c2>{self.poetry.file.path}</c2>) and will be skipped:\\n\"",
+     "fix": "f\" (<c2>{self.escape(str(self.poetry.file.path))}</c2>) and will be skipped:\\n\"",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 2,
+     "repo": "python-poetry/poetry",
+     "pr": 10908,
+     "url": "https://github.com/python-poetry/poetry/pull/10908"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10926,
+   "title": "test: cover utility helper edge cases",
+   "url": "https://github.com/python-poetry/poetry/pull/10926",
+   "removed": {},
+   "files": 1,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "tests/utils/test_helpers.py",
+     "line": 155,
+     "claim": "The test assertion is incorrect because it expects progress values of `[2, 4]` for a 4-byte download, but the generator yields the chunk size, not the cumulative total.",
+     "quote": "    assert list(downloader.download_with_progress(chunk_size=2)) == [2, 4]",
+     "fix": "    assert list(downloader.download_with_progress(chunk_size=2)) == [2, 2]",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 14,
+     "repo": "python-poetry/poetry",
+     "pr": 10926,
+     "url": "https://github.com/python-poetry/poetry/pull/10926"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10901,
+   "title": "tomlkit 0.15.0",
+   "url": "https://github.com/python-poetry/poetry/pull/10901",
+   "removed": {
+    "lockfile": 1
+   },
+   "files": 16,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10905,
+   "title": "perf: cache supported wheel tags set",
+   "url": "https://github.com/python-poetry/poetry/pull/10905",
+   "removed": {},
+   "files": 4,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10896,
+   "title": "perf: avoid urljoin for absolute urls",
+   "url": "https://github.com/python-poetry/poetry/pull/10896",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10903,
+   "title": "perf: avoid urljoin for absolute HTML links",
+   "url": "https://github.com/python-poetry/poetry/pull/10903",
+   "removed": {},
+   "files": 4,
+   "raw": 1,
+   "published": [],
+   "rejected": {
+    "G-outer": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10900,
+   "title": "fix unreliable unit test",
+   "url": "https://github.com/python-poetry/poetry/pull/10900",
+   "removed": {},
+   "files": 1,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "tests/utils/test_threading.py",
+     "line": 101,
+     "claim": "The timeout for waiting on futures is the same as the barrier timeout within the threads, creating a race condition that can cause the test to fail spuriously if thread synchronization is slow.",
+     "quote": "wait(futures, 10)",
+     "fix": "    wait(futures, 20)",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 7,
+     "repo": "python-poetry/poetry",
+     "pr": 10900,
+     "url": "https://github.com/python-poetry/poetry/pull/10900"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10895,
+   "title": "perf: use filename field instead of parsing filename from URL",
+   "url": "https://github.com/python-poetry/poetry/pull/10895",
+   "removed": {
+    "lockfile": 1,
+    "dependency manifest": 1
+   },
+   "files": 2,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/poetry/repositories/link_sources/json.py",
+     "line": 52,
+     "claim": "The code assumes the \"filename\" key is always present in the file dictionary, which will cause a KeyError if the JSON source is not compliant with PEP 691.",
+     "quote": "filename=file[\"filename\"],",
+     "fix": "filename=file.get(\"filename\"),",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 2,
+     "repo": "python-poetry/poetry",
+     "pr": 10895,
+     "url": "https://github.com/python-poetry/poetry/pull/10895"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10884,
+   "title": "test: assert config migration results",
+   "url": "https://github.com/python-poetry/poetry/pull/10884",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10891,
+   "title": "test: cover config migration dry run",
+   "url": "https://github.com/python-poetry/poetry/pull/10891",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10885,
+   "title": "fix `poetry update <dep>` where <dep> is a transitive dependency",
+   "url": "https://github.com/python-poetry/poetry/pull/10885",
+   "removed": {},
+   "files": 2,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10893,
+   "title": "Add tests for test helper utilities",
+   "url": "https://github.com/python-poetry/poetry/pull/10893",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10883,
+   "title": "test: cover module entrypoint",
+   "url": "https://github.com/python-poetry/poetry/pull/10883",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "python-poetry/poetry",
+   "pr": 10881,
+   "title": "patch up test scripts for poetry-core#939",
+   "url": "https://github.com/python-poetry/poetry/pull/10881",
+   "removed": {
+    "lockfile": 1
+   },
+   "files": 4,
+   "raw": 2,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/poetry/repositories/http_repository.py",
+     "line": 374,
+     "claim": "Using `or` to provide a default incorrectly treats an empty `requires_python` string, which signifies compatibility with any Python version, as a falsy value and wrongly applies the default constraint `^2.7`.",
+     "quote": "                            info.requires_python or \"^2.7\"",
+     "fix": "                            info.requires_python if info.requires_python is not None else \"^2.7\"",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 6,
+     "repo": "python-poetry/poetry",
+     "pr": 10881,
+     "url": "https://github.com/python-poetry/poetry/pull/10881"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/poetry/repositories/http_repository.py",
+     "line": 377,
+     "claim": "Using `or` to provide a default incorrectly treats an empty `requires_python` string, which signifies compatibility with any Python version, as a falsy value and wrongly applies the default constraint `^3`.",
+     "quote": "                                py3_info.requires_python or \"^3\"",
+     "fix": "                                py3_info.requires_python if py3_info.requires_python is not None else \"^3\"",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 6,
+     "repo": "python-poetry/poetry",
+     "pr": 10881,
+     "url": "https://github.com/python-poetry/poetry/pull/10881"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11302,
+   "title": "Do not propose generators instead of async list comprehensions (#7271)",
+   "url": "https://github.com/pylint-dev/pylint/pull/11302",
+   "removed": {},
+   "files": 9,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11301,
+   "title": "[Backport maintenance/4.0.x] fix(refactoring): handle non-AssignName targets in use-yield-from (#11286)",
+   "url": "https://github.com/pylint-dev/pylint/pull/11301",
+   "removed": {},
+   "files": 3,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11300,
+   "title": "fix(refactoring): handle non-AssignName targets in use-yield-from (#11286)",
+   "url": "https://github.com/pylint-dev/pylint/pull/11300",
+   "removed": {},
+   "files": 3,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11305,
+   "title": "[Backport maintenance/4.0.x] Skip unspecified-encoding for unknown open modes",
+   "url": "https://github.com/pylint-dev/pylint/pull/11305",
+   "removed": {},
+   "files": 3,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "tests/functional/u/unspecified_encoding_py38.py",
+     "line": 205,
+     "claim": "This test case is ineffective because it provides an `encoding` argument, which already prevents the `unspecified-encoding` warning, making the check for an unknown `mode` irrelevant.",
+     "quote": "open(FILENAME, mode, encoding=None)",
+     "fix": "    open(FILENAME, mode, None)",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 9,
+     "repo": "pylint-dev/pylint",
+     "pr": 11305,
+     "url": "https://github.com/pylint-dev/pylint/pull/11305"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11288,
+   "title": "Treat 0 as a supplied location in UnittestLinter.add_message",
+   "url": "https://github.com/pylint-dev/pylint/pull/11288",
+   "removed": {},
+   "files": 2,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11284,
+   "title": "Pin astroid as third party in the PEP 810 import order test",
+   "url": "https://github.com/pylint-dev/pylint/pull/11284",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11275,
+   "title": "Treat qualified typing.NoReturn as a terminating annotation",
+   "url": "https://github.com/pylint-dev/pylint/pull/11275",
+   "removed": {},
+   "files": 4,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11296,
+   "title": "Do not count trailing tool pragmas toward line-too-long",
+   "url": "https://github.com/pylint-dev/pylint/pull/11296",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 7,
+   "raw": 3,
+   "published": [],
+   "rejected": {
+    "G-quote": 2,
+    "G-outer": 3
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11264,
+   "title": "Record the Python 2 checks removed in pylint 2.2 as deleted messages",
+   "url": "https://github.com/pylint-dev/pylint/pull/11264",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 2,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "pylint/message/_deleted_message_ids.py",
+     "line": 134,
+     "claim": "The message ID for 'property-on-old-class' is incorrect, as the historical ID for this message was 'E1003', not 'W1001'.",
+     "quote": "        DeletedMessage(\"W1001\", \"property-on-old-class\"),",
+     "fix": "        DeletedMessage(\"E1003\", \"property-on-old-class\"),",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 9,
+     "repo": "pylint-dev/pylint",
+     "pr": 11264,
+     "url": "https://github.com/pylint-dev/pylint/pull/11264"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11269,
+   "title": "[Backport maintenance/4.0.x] Fix crash in docparams on raising a non-exception name",
+   "url": "https://github.com/pylint-dev/pylint/pull/11269",
+   "removed": {},
+   "files": 5,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11263,
+   "title": "Give every built-in checker an anchor to link to",
+   "url": "https://github.com/pylint-dev/pylint/pull/11263",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 4,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11268,
+   "title": "Fix class checker crashes on `x.__class__` targets outside plain assignments",
+   "url": "https://github.com/pylint-dev/pylint/pull/11268",
+   "removed": {},
+   "files": 6,
+   "raw": 1,
+   "published": [],
+   "rejected": {
+    "G-outer": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11262,
+   "title": "Fix crash in docparams on raising a non-exception name",
+   "url": "https://github.com/pylint-dev/pylint/pull/11262",
+   "removed": {},
+   "files": 5,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11261,
+   "title": "Link to a single option instead of the whole checker section",
+   "url": "https://github.com/pylint-dev/pylint/pull/11261",
+   "removed": {
+    "documentation": 4
+   },
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11259,
+   "title": "Improve the no-member example and shorten its details",
+   "url": "https://github.com/pylint-dev/pylint/pull/11259",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 6,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11256,
+   "title": "Pin py-version in the unspecified-encoding doc example",
+   "url": "https://github.com/pylint-dev/pylint/pull/11256",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11257,
+   "title": "Fix the existing checks on PEP 798 comprehension unpacking",
+   "url": "https://github.com/pylint-dev/pylint/pull/11257",
+   "removed": {
+    "configuration": 2,
+    "documentation": 3
+   },
+   "files": 27,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11260,
+   "title": "Regenerate a message page when its documentation data changes",
+   "url": "https://github.com/pylint-dev/pylint/pull/11260",
+   "removed": {},
+   "files": 1,
+   "raw": 2,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "doc/exts/pylint_messages.py",
+     "line": 504,
+     "claim": "The modification time of the directory itself is only considered when the directory is empty, but it should always be included as actions like file deletion update the directory's modification time.",
+     "quote": "return max(\n            (_get_newest_mtime(child) for child in path.iterdir()),\n            default=path.stat().st_mtime,\n        )",
+     "fix": "        child_mtimes = [_get_newest_mtime(child) for child in path.iterdir()]\n        return max([path.stat().st_mtime] + child_mtimes)",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 17,
+     "repo": "pylint-dev/pylint",
+     "pr": 11260,
+     "url": "https://github.com/pylint-dev/pylint/pull/11260"
+    }
+   ],
+   "rejected": {
+    "G-outer": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11258,
+   "title": "Add functional tests for messages affected by PEP 798 comprehension unpacking",
+   "url": "https://github.com/pylint-dev/pylint/pull/11258",
+   "removed": {},
+   "files": 21,
+   "raw": 5,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "tests/functional/c/consider/consider_using_generator_py315.txt",
+     "line": 1,
+     "claim": "The suggested code `sum(*x for x in NESTED)` is syntactically invalid because a generator expression cannot contain a starred expression as its yielded element.",
+     "quote": "consider-using-generator:3:8:3:33::Consider using a generator instead 'sum(*x for x in NESTED)':UNDEFINED",
+     "fix": "consider-using-generator:3:8:3:33::Consider using a generator instead 'sum(item for sublist in NESTED for item in sublist)':UNDEFINED",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 2,
+     "repo": "pylint-dev/pylint",
+     "pr": 11258,
+     "url": "https://github.com/pylint-dev/pylint/pull/11258"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "tests/functional/c/consider/consider_using_generator_py315.txt",
+     "line": 2,
+     "claim": "The suggested code `tuple(*x for x in NESTED)` is syntactically invalid because a generator expression cannot contain a starred expression as its yielded element.",
+     "quote": "consider-using-generator:4:11:4:38::Consider using a generator instead 'tuple(*x for x in NESTED)':UNDEFINED",
+     "fix": "consider-using-generator:4:11:4:38::Consider using a generator instead 'tuple(item for sublist in NESTED for item in sublist)':UNDEFINED",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 2,
+     "repo": "pylint-dev/pylint",
+     "pr": 11258,
+     "url": "https://github.com/pylint-dev/pylint/pull/11258"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "tests/functional/n/nested_min_max_py315.txt",
+     "line": 1,
+     "claim": "The suggested code `min(*x for x in NESTED)` is syntactically invalid because a generator expression cannot contain a starred expression as its yielded element.",
+     "quote": "consider-using-generator:3:18:3:43::Consider using a generator instead 'min(*x for x in NESTED)':UNDEFINED",
+     "fix": "consider-using-generator:3:18:3:43::Consider using a generator instead 'min(item for sublist in NESTED for item in sublist)':UNDEFINED",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 2,
+     "repo": "pylint-dev/pylint",
+     "pr": 11258,
+     "url": "https://github.com/pylint-dev/pylint/pull/11258"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "tests/functional/u/use/use_a_generator_py315.txt",
+     "line": 1,
+     "claim": "The suggested code `any(*x for x in NESTED)` is syntactically invalid because a generator expression cannot contain a starred expression as its yielded element.",
+     "quote": "use-a-generator:3:6:3:31::Use a generator instead 'any(*x for x in NESTED)':UNDEFINED",
+     "fix": "use-a-generator:3:6:3:31::Use a generator instead 'any(item for sublist in NESTED for item in sublist)':UNDEFINED",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 2,
+     "repo": "pylint-dev/pylint",
+     "pr": 11258,
+     "url": "https://github.com/pylint-dev/pylint/pull/11258"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "tests/functional/u/use/use_a_generator_py315.txt",
+     "line": 2,
+     "claim": "The suggested code `all(*x for x in NESTED)` is syntactically invalid because a generator expression cannot contain a starred expression as its yielded element.",
+     "quote": "use-a-generator:4:6:4:31::Use a generator instead 'all(*x for x in NESTED)':UNDEFINED",
+     "fix": "use-a-generator:4:6:4:31::Use a generator instead 'all(item for sublist in NESTED for item in sublist)':UNDEFINED",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 2,
+     "repo": "pylint-dev/pylint",
+     "pr": 11258,
+     "url": "https://github.com/pylint-dev/pylint/pull/11258"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11250,
+   "title": "Fix crash on NaN comparison with an uninferable call",
+   "url": "https://github.com/pylint-dev/pylint/pull/11250",
+   "removed": {},
+   "files": 4,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11251,
+   "title": "Add functional tests for messages affected by PEP 810 lazy imports",
+   "url": "https://github.com/pylint-dev/pylint/pull/11251",
+   "removed": {},
+   "files": 39,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11246,
+   "title": "Bump pylint to 4.0.7, update changelog",
+   "url": "https://github.com/pylint-dev/pylint/pull/11246",
+   "removed": {
+    "documentation": 1,
+    "configuration": 1
+   },
+   "files": 13,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11252,
+   "title": "Python 3.15  deprecations",
+   "url": "https://github.com/pylint-dev/pylint/pull/11252",
+   "removed": {},
+   "files": 4,
+   "raw": 1,
+   "published": [],
+   "rejected": {
+    "G-outer": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11249,
+   "title": "Add functional tests for the multiple naming style census",
+   "url": "https://github.com/pylint-dev/pylint/pull/11249",
+   "removed": {},
+   "files": 5,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11248,
+   "title": "Fix two release-tooling bugs hit while releasing 4.0.7",
+   "url": "https://github.com/pylint-dev/pylint/pull/11248",
+   "removed": {},
+   "files": 2,
+   "raw": 1,
+   "published": [],
+   "rejected": {
+    "G-fix": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11245,
+   "title": "[Backport maintenance/4.0.x] Fix false positive for invalid-name on TypedDict instances",
+   "url": "https://github.com/pylint-dev/pylint/pull/11245",
+   "removed": {},
+   "files": 4,
+   "raw": 3,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "pylint/checkers/base/name_checker/checker.py",
+     "line": 585,
+     "claim": "The check for `EnumMeta` uses an unqualified name, which is not robust against user-defined classes that might share the same name.",
+     "quote": "if \"EnumMeta\" in {",
+     "fix": "if \"enum.EnumMeta\" in {",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 10,
+     "repo": "pylint-dev/pylint",
+     "pr": 11245,
+     "url": "https://github.com/pylint-dev/pylint/pull/11245"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "pylint/checkers/base/name_checker/checker.py",
+     "line": 594,
+     "claim": "The check for `TypedDict` is based on the unqualified class name, which will incorrectly trigger for any user-defined class that is also named `TypedDict`.",
+     "quote": "if inferred_assign_type._proxied.name == \"TypedDict\":",
+     "fix": "if inferred_assign_type._proxied.qname() == \"typing.TypedDict\":",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 10,
+     "repo": "pylint-dev/pylint",
+     "pr": 11245,
+     "url": "https://github.com/pylint-dev/pylint/pull/11245"
+    }
+   ],
+   "rejected": {
+    "G-quote": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11244,
+   "title": "[Backport maintenance/4.0.x] Fix crash in comparison-with-callable on a proxied lambda",
+   "url": "https://github.com/pylint-dev/pylint/pull/11244",
+   "removed": {},
+   "files": 3,
+   "raw": 1,
+   "published": [],
+   "rejected": {
+    "G-outer": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11232,
+   "title": "Fix false positive for invalid-name on TypedDict instances",
+   "url": "https://github.com/pylint-dev/pylint/pull/11232",
+   "removed": {},
+   "files": 4,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "pylint/checkers/base/name_checker/checker.py",
+     "line": 594,
+     "claim": "Checking for `TypedDict` by its simple name is fragile and can cause false positives on user-defined classes with the same name; the check should use the fully qualified name.",
+     "quote": "if inferred_assign_type._proxied.name == \"TypedDict\":",
+     "fix": "            if inferred_assign_type._proxied.qname() == \"typing.TypedDict\":",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 10,
+     "repo": "pylint-dev/pylint",
+     "pr": 11232,
+     "url": "https://github.com/pylint-dev/pylint/pull/11232"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11225,
+   "title": "Fix a crash on calls unpacking dicts with non-string keys",
+   "url": "https://github.com/pylint-dev/pylint/pull/11225",
+   "removed": {},
+   "files": 3,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11221,
+   "title": "Ignore primer pragma noise caused by a new message id",
+   "url": "https://github.com/pylint-dev/pylint/pull/11221",
+   "removed": {},
+   "files": 5,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11239,
+   "title": "Fix repeated output formats writing only to the last file",
+   "url": "https://github.com/pylint-dev/pylint/pull/11239",
+   "removed": {},
+   "files": 4,
+   "raw": 1,
+   "published": [],
+   "rejected": {
+    "G-fix": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11212,
+   "title": "fix: correct typo in test function name",
+   "url": "https://github.com/pylint-dev/pylint/pull/11212",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11226,
+   "title": "[Backport maintenance/4.0.x] Fix a crash on calls unpacking dicts with non-string keys",
+   "url": "https://github.com/pylint-dev/pylint/pull/11226",
+   "removed": {},
+   "files": 3,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11206,
+   "title": "Run CI on the released Python 3.15 beta",
+   "url": "https://github.com/pylint-dev/pylint/pull/11206",
+   "removed": {
+    "configuration": 4
+   },
+   "files": 1,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "tests/testutils/_primer/test_primer.py",
+     "line": 29,
+     "claim": "The interpreter version is being set to 3.14, but the pull request title indicates the goal is to support Python 3.15.",
+     "quote": "PRIMER_CURRENT_INTERPRETER = (3, 14)",
+     "fix": "PRIMER_CURRENT_INTERPRETER = (3, 15)",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 1,
+     "repo": "pylint-dev/pylint",
+     "pr": 11206,
+     "url": "https://github.com/pylint-dev/pylint/pull/11206"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11207,
+   "title": "Diff the primer on Python 3.15 instead of 3.14",
+   "url": "https://github.com/pylint-dev/pylint/pull/11207",
+   "removed": {
+    "configuration": 3
+   },
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11219,
+   "title": "Recognize math.nan, numpy.nan and Decimal(\"nan\") in nan-comparison",
+   "url": "https://github.com/pylint-dev/pylint/pull/11219",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 7,
+   "raw": 1,
+   "published": [],
+   "rejected": {
+    "G-fix": 1,
+    "G-outer": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11200,
+   "title": "[pre-commit.ci] pre-commit autoupdate",
+   "url": "https://github.com/pylint-dev/pylint/pull/11200",
+   "removed": {
+    "configuration": 1
+   },
+   "files": 2,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11204,
+   "title": "Remove a dead Python 3.5 interpreter check in yield-inside-async-function",
+   "url": "https://github.com/pylint-dev/pylint/pull/11204",
+   "removed": {},
+   "files": 1,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "pylint/checkers/async_checker.py",
+     "line": 50,
+     "claim": "This change introduces a logic error by removing the check for a simple `yield` inside an async function, which is a syntax error on Python 3.5 and was correctly flagged by the original code.",
+     "quote": "if child.scope() is node and isinstance(child, nodes.YieldFrom):",
+     "fix": "if child.scope() is node and (\n    sys.version_info[:2] == (3, 5) or isinstance(child, nodes.YieldFrom)\n):",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 1,
+     "repo": "pylint-dev/pylint",
+     "pr": 11204,
+     "url": "https://github.com/pylint-dev/pylint/pull/11204"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 5120,
+   "title": "docs: correct description of Retry.RETRY_AFTER_STATUS_CODES",
+   "url": "https://github.com/urllib3/urllib3/pull/5120",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11213,
+   "title": "Don't emit useless-parent-delegation for uninspectable C-level parents",
+   "url": "https://github.com/pylint-dev/pylint/pull/11213",
+   "removed": {},
+   "files": 4,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "pylint/checkers/classes/class_checker.py",
+     "line": 1414,
+     "claim": "The logic incorrectly assumes that if `super()` delegation can be inferred for a C-level method, it must be `object.__init__`, which can lead to false positives if `astroid` improves and learns to infer other C-level methods like `dict.__init__`.",
+     "quote": "or util.safe_infer(call.func) is None",
+     "fix": "or (inferred_call := util.safe_infer(call.func)) is None or inferred_call.qname() != \"builtins.object.__init__\"",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 11,
+     "repo": "pylint-dev/pylint",
+     "pr": 11213,
+     "url": "https://github.com/pylint-dev/pylint/pull/11213"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 5140,
+   "title": "Add an unique extra attribute to retrying warning (so pip can rewrite it)",
+   "url": "https://github.com/urllib3/urllib3/pull/5140",
+   "removed": {},
+   "files": 1,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/urllib3/connectionpool.py",
+     "line": 878,
+     "claim": "The dictionary key `__urllib3-retry-warning` contains hyphens, making it an invalid Python identifier and preventing consumers from accessing it as a standard attribute on the log record.",
+     "quote": "extra={\"__urllib3-retry-warning\": {\"host\": self.host}},",
+     "fix": "extra={\"urllib3_retry_warning\": {\"host\": self.host}},",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 10,
+     "repo": "urllib3/urllib3",
+     "pr": 5140,
+     "url": "https://github.com/urllib3/urllib3/pull/5140"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 5102,
+   "title": "Add assert_hostname and assert_fingerprint to SSL_KEYWORDS",
+   "url": "https://github.com/urllib3/urllib3/pull/5102",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 2,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 5101,
+   "title": "Preserve explicit port 0 in connection_from_url and HTTP/2 authority",
+   "url": "https://github.com/urllib3/urllib3/pull/5101",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 4,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "pylint-dev/pylint",
+   "pr": 11203,
+   "title": "Report suppression event only once in the primer comment",
+   "url": "https://github.com/pylint-dev/pylint/pull/11203",
+   "removed": {},
+   "files": 32,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "pylint/testutils/_primer/primer_compare_command.py",
+     "line": 150,
+     "claim": "This categorization is incorrect because it lumps new `useless-suppression` messages, which indicate fixed false-positives, into the generic `other_new` category.",
+     "quote": "other_new = [\n            m\n            for m in new_messages\n            if m[\"symbol\"] not in {\"astroid-error\", \"suppressed-message\"}\n        ]",
+     "fix": "other_new = [\n            m\n            for m in new_messages\n            if m[\"symbol\"] not in {\"astroid-error\", \"suppressed-message\", \"useless-suppression\"}\n        ]",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 47,
+     "repo": "pylint-dev/pylint",
+     "pr": 11203,
+     "url": "https://github.com/pylint-dev/pylint/pull/11203"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 5103,
+   "title": "Replace deprecated pyOpenSSL `X509.get_subject` and `Context.set_passwd_cb` methods",
+   "url": "https://github.com/urllib3/urllib3/pull/5103",
+   "removed": {
+    "documentation": 1,
+    "lockfile": 1
+   },
+   "files": 1,
+   "raw": 1,
+   "published": [],
+   "rejected": {
+    "G-outer": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 5094,
+   "title": "Don't parameterize tests using non-Collection iterables",
+   "url": "https://github.com/urllib3/urllib3/pull/5094",
+   "removed": {
+    "documentation": 1,
+    "lockfile": 1
+   },
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 5097,
+   "title": "Deal with ssl.PROTOCOL_TLSv1 removal from Python built with OpenSSL 4+",
+   "url": "https://github.com/urllib3/urllib3/pull/5097",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 3,
+   "raw": 2,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "test/test_util.py",
+     "line": 1221,
+     "claim": "The `resolve_ssl_version` function expects short protocol names (e.g. \"SSLv23\") and prepends \"PROTOCOL_\" itself, so this test case passing a prefixed string is incorrect and will fail.",
+     "quote": "        (\"PROTOCOL_SSLv23\", ssl.PROTOCOL_SSLv23),",
+     "fix": "        # (\"PROTOCOL_SSLv23\", ssl.PROTOCOL_SSLv23),  # This test case is incorrect.",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 15,
+     "repo": "urllib3/urllib3",
+     "pr": 5097,
+     "url": "https://github.com/urllib3/urllib3/pull/5097"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "test/test_util.py",
+     "line": 1228,
+     "claim": "The `resolve_ssl_version` function expects short protocol names (e.g. \"TLSv1\") and prepends \"PROTOCOL_\" itself, so this test case passing a prefixed string is incorrect and will fail.",
+     "quote": "                (\"PROTOCOL_TLSv1\", ssl.PROTOCOL_TLSv1),",
+     "fix": "                # (\"PROTOCOL_TLSv1\", ssl.PROTOCOL_TLSv1),  # This test case is incorrect.",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 15,
+     "repo": "urllib3/urllib3",
+     "pr": 5097,
+     "url": "https://github.com/urllib3/urllib3/pull/5097"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 5092,
+   "title": "Make Basic auth encoding explicit in `make_headers`",
+   "url": "https://github.com/urllib3/urllib3/pull/5092",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 3,
+   "raw": 2,
+   "published": [],
+   "rejected": {
+    "G-fix": 2
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 5091,
+   "title": "Port \"Reject CR/LF in HTTP tunnel request headers\"",
+   "url": "https://github.com/urllib3/urllib3/pull/5091",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 2,
+   "raw": 3,
+   "published": [],
+   "rejected": {
+    "G-quote": 2,
+    "G-outer": 3,
+    "G-nit": 3
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 5093,
+   "title": "HTTPSConnection: Prefer proxy verify policy for the proxy connection",
+   "url": "https://github.com/urllib3/urllib3/pull/5093",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 3,
+   "raw": 3,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/urllib3/connection.py",
+     "line": 932,
+     "claim": "This line incorrectly prevents the use of a pool-supplied `ssl_context` for tunneling proxies by setting it to `None` when `self.proxy_is_forwarding` is false.",
+     "quote": "ssl_context = self.ssl_context if self.proxy_is_forwarding else None",
+     "fix": "            ssl_context = self.ssl_context",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 34,
+     "repo": "urllib3/urllib3",
+     "pr": 5093,
+     "url": "https://github.com/urllib3/urllib3/pull/5093"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/urllib3/connection.py",
+     "line": 844,
+     "claim": "This line causes the proxy's certificate verification status to be incorrectly reported as `False` because `self.proxy_is_verified` is `None` at this point in execution.",
+     "quote": "is_verified = self.proxy_is_verified is True",
+     "fix": "# This logic is flawed. The verification status from `_connect_tls_proxy` is lost.\n                # The line below will always evaluate to `False`.\n                is_verified = self.proxy_is_verified is True",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 22,
+     "repo": "urllib3/urllib3",
+     "pr": 5093,
+     "url": "https://github.com/urllib3/urllib3/pull/5093"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "test/with_dummyserver/test_proxy_poolmanager.py",
+     "line": 850,
+     "claim": "This assertion will fail because the `ssl_context` object was created with `cert_reqs=ssl.CERT_NONE` and its `verify_mode` is not modified by the code under test.",
+     "quote": "assert ssl_context.verify_mode == ssl.CERT_REQUIRED",
+     "fix": "                assert conn.sock.context.verify_mode == ssl.CERT_REQUIRED",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 17,
+     "repo": "urllib3/urllib3",
+     "pr": 5093,
+     "url": "https://github.com/urllib3/urllib3/pull/5093"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 5095,
+   "title": "Reject invalid URL hosts",
+   "url": "https://github.com/urllib3/urllib3/pull/5095",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 4,
+   "raw": 3,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/urllib3/util/url.py",
+     "line": 418,
+     "claim": "The decoded value from this function is discarded, which prevents the normalization of percent-encoded unreserved characters in IPv6 zone identifiers.",
+     "quote": "_decode_percent_encoding(match, error_host=error_host)",
+     "fix": "decoded_octet = _decode_percent_encoding(match, error_host=error_host)",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 30,
+     "repo": "urllib3/urllib3",
+     "pr": 5095,
+     "url": "https://github.com/urllib3/urllib3/pull/5095"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/urllib3/util/url.py",
+     "line": 412,
+     "claim": "This line returns the original percent-encoded string instead of the decoded character, which prevents normalization of percent-encoded unreserved characters in IPv6 zone identifiers and can lead to double-encoding.",
+     "quote": "return match.group(0).upper()",
+     "fix": "if decoded_octet in _UNRESERVED_CHARS:\n    return decoded_octet\nreturn match.group(0).upper()",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 30,
+     "repo": "urllib3/urllib3",
+     "pr": 5095,
+     "url": "https://github.com/urllib3/urllib3/pull/5095"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/urllib3/util/url.py",
+     "line": 374,
+     "claim": "This line uses a regex that fails to detect and reject malformed percent-encodings like a lone '%' in an IPv6 zone identifier.",
+     "quote": "zone_id = _PERCENT_RE.sub(",
+     "fix": "zone_id = _HOST_PERCENT_RE.sub(",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 6,
+     "repo": "urllib3/urllib3",
+     "pr": 5095,
+     "url": "https://github.com/urllib3/urllib3/pull/5095"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 5071,
+   "title": "Fix port-zero handling",
+   "url": "https://github.com/urllib3/urllib3/pull/5071",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 7,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 5062,
+   "title": "Fix HTTPConnectionPool.urlopen raising FullPoolError",
+   "url": "https://github.com/urllib3/urllib3/pull/5062",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 2,
+   "raw": 2,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "test/test_connectionpool.py",
+     "line": 286,
+     "claim": "This test is incorrect as `timeout=\"1\"` is a valid value that can be coerced to a float, so `urlopen` will not raise a `ValueError` as the test expects.",
+     "quote": "pool.urlopen(\"GET\", \"/\", timeout=\"1\")  # type: ignore[arg-type]",
+     "fix": "pool.urlopen(\"GET\", \"/\", timeout=\"invalid\")  # type: ignore[arg-type]",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 8,
+     "repo": "urllib3/urllib3",
+     "pr": 5062,
+     "url": "https://github.com/urllib3/urllib3/pull/5062"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "test/test_connectionpool.py",
+     "line": 284,
+     "claim": "The expected error message is incorrect for an invalid string timeout and also nonsensical, as it claims the integer `1` is an invalid timeout value.",
+     "quote": "match=\"Timeout value connect was 1, but it must be an int, float or None\",",
+     "fix": "match=r\"Timeout value connect was 'invalid', but it must be an int, float or None\\.\",",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 8,
+     "repo": "urllib3/urllib3",
+     "pr": 5062,
+     "url": "https://github.com/urllib3/urllib3/pull/5062"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 5057,
+   "title": "Resolve default pool queue lazily",
+   "url": "https://github.com/urllib3/urllib3/pull/5057",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 2,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 5079,
+   "title": "Strip fragments from absolute request targets",
+   "url": "https://github.com/urllib3/urllib3/pull/5079",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 5,
+   "raw": 1,
+   "published": [],
+   "rejected": {
+    "G-outer": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 5055,
+   "title": "Add auth decoding properties for URL class",
+   "url": "https://github.com/urllib3/urllib3/pull/5055",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 4,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 5031,
+   "title": "Decode SOCKS proxy credentials from URLs",
+   "url": "https://github.com/urllib3/urllib3/pull/5031",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 2,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 5054,
+   "title": "Document that `default_socket_options` is not supposed to be changed",
+   "url": "https://github.com/urllib3/urllib3/pull/5054",
+   "removed": {},
+   "files": 1,
+   "raw": 1,
+   "published": [],
+   "rejected": {
+    "G-outer": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 4990,
+   "title": "Sync test/port_helpers.py with CPython 3.14 socket_helper.py",
+   "url": "https://github.com/urllib3/urllib3/pull/4990",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 4979,
+   "title": "Drop support for EOL PyPy3.10",
+   "url": "https://github.com/urllib3/urllib3/pull/4979",
+   "removed": {
+    "configuration": 1,
+    "documentation": 3
+   },
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 5019,
+   "title": "HTTPResponse: drain_conn in 64KiB chunks to avoid overloading memory",
+   "url": "https://github.com/urllib3/urllib3/pull/5019",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 5029,
+   "title": "Make `is_ipaddress` detect non-standard forms of IPv4 addresses",
+   "url": "https://github.com/urllib3/urllib3/pull/5029",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 2,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/urllib3/util/url.py",
+     "line": 59,
+     "claim": "The regular expression is too permissive and incorrectly matches invalid IPv4 address strings, such as \"256.0.0.0\", because it does not validate that each part of a 4-part address is a valid octet.",
+     "quote": "r\"^(?:0[xX][0-9a-fA-F]+|[0-9]+)(?:\\.(?:0[xX][0-9a-fA-F]+|[0-9]+)){0,3}$\"",
+     "fix": "r\"^((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|(?:0[xX][0-9a-fA-F]{1,8}|[0-9]{1,10}))$\"",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 3,
+     "repo": "urllib3/urllib3",
+     "pr": 5029,
+     "url": "https://github.com/urllib3/urllib3/pull/5029"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 4978,
+   "title": "Upgrade mypy to version 1.20.2",
+   "url": "https://github.com/urllib3/urllib3/pull/4978",
+   "removed": {
+    "lockfile": 1
+   },
+   "files": 2,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 4972,
+   "title": "Bump dev dependencies",
+   "url": "https://github.com/urllib3/urllib3/pull/4972",
+   "removed": {
+    "configuration": 4,
+    "lockfile": 1
+   },
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 5020,
+   "title": "Unfold obsolete folded response header values",
+   "url": "https://github.com/urllib3/urllib3/pull/5020",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 3,
+   "raw": 2,
+   "published": [],
+   "rejected": {
+    "G-nit": 1,
+    "G-outer": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 4974,
+   "title": "Avoid infinite loop in `HTTPResponse.read_chunked` when `amt` is zero",
+   "url": "https://github.com/urllib3/urllib3/pull/4974",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 2,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 4970,
+   "title": "Fix a misleading example for `ProxyManager`",
+   "url": "https://github.com/urllib3/urllib3/pull/4970",
+   "removed": {},
+   "files": 1,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/urllib3/poolmanager.py",
+     "line": 547,
+     "claim": "The request to `http://google.com/` redirects to HTTPS, which causes an extra connection pool to be created for the tunneled connection, making the example's subsequent pool count of 1 incorrect.",
+     "quote": "resp1 = proxy.request(\"GET\", \"http://google.com/\")",
+     "fix": "resp1 = proxy.request(\"GET\", \"http://example.com/\")",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 4,
+     "repo": "urllib3/urllib3",
+     "pr": 4970,
+     "url": "https://github.com/urllib3/urllib3/pull/4970"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13932,
+   "title": "Fix memory_zone cleanup on exception",
+   "url": "https://github.com/explosion/spaCy/pull/13932",
+   "removed": {},
+   "files": 3,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13947,
+   "title": "fix: check pip module availability instead of PATH binary in download",
+   "url": "https://github.com/explosion/spaCy/pull/13947",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "urllib3/urllib3",
+   "pr": 4967,
+   "title": "Prevent content caching after a partial read",
+   "url": "https://github.com/urllib3/urllib3/pull/4967",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 4,
+   "raw": 2,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/urllib3/response.py",
+     "line": 1106,
+     "claim": "This condition is a logic error because it fails to prevent caching for a partial read when `cache_content` is true, which would lead to a partial response body being cached.",
+     "quote": "if not cache_content:",
+     "fix": "        if not cache_content or amt is not None:",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 2,
+     "repo": "urllib3/urllib3",
+     "pr": 4967,
+     "url": "https://github.com/urllib3/urllib3/pull/4967"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "test/test_response.py",
+     "line": 2046,
+     "claim": "This implementation of `readline(amt)` is incorrect because it disables line-based reading when a positive `amt` is provided, violating the method's contract which should only limit the number of bytes read from a line.",
+     "quote": "return self.pop_current_chunk(amt, till_crlf=amt < 0)",
+     "fix": "        return self.pop_current_chunk(amt, till_crlf=True)",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 2,
+     "repo": "urllib3/urllib3",
+     "pr": 4967,
+     "url": "https://github.com/urllib3/urllib3/pull/4967"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13940,
+   "title": "Fully migrate to Pydantic v2",
+   "url": "https://github.com/explosion/spaCy/pull/13940",
+   "removed": {
+    "configuration": 9,
+    "dependency manifest": 2
+   },
+   "files": 22,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13922,
+   "title": "Switch dependency back from `typer-slim` to `typer`",
+   "url": "https://github.com/explosion/spaCy/pull/13922",
+   "removed": {
+    "dependency manifest": 1,
+    "configuration": 1
+   },
+   "files": 1,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "spacy/cli/_util.py",
+     "line": 71,
+     "claim": "This change ineffectively disables rich text features because `rich_markup_mode=None` is the default value, and other rich features like pretty exceptions and help panels remain enabled.",
+     "quote": "app = typer.Typer(name=NAME, help=HELP, rich_markup_mode=None)",
+     "fix": "app = typer.Typer(name=NAME, help=HELP, pretty_exceptions_enable=False, rich_help_panel=None)",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 1,
+     "repo": "explosion/spaCy",
+     "pr": 13922,
+     "url": "https://github.com/explosion/spaCy/pull/13922"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13876,
+   "title": "Fixed the import issue in displacy/__init__.py",
+   "url": "https://github.com/explosion/spaCy/pull/13876",
+   "removed": {},
+   "files": 1,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "spacy/displacy/__init__.py",
+     "line": 69,
+     "claim": "The `HTML` class is imported from an internal IPython API (`IPython.core.display`), which is not guaranteed to be stable, when it is available from the public API (`IPython.display`).",
+     "quote": "from IPython.core.display import HTML",
+     "fix": "from IPython.display import HTML, display",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 2,
+     "repo": "explosion/spaCy",
+     "pr": 13876,
+     "url": "https://github.com/explosion/spaCy/pull/13876"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13865,
+   "title": "chore(ipython): import from `IPython.display` instead of `IPython.cor\u2026",
+   "url": "https://github.com/explosion/spaCy/pull/13865",
+   "removed": {
+    "documentation": 2
+   },
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13844,
+   "title": "Closes #13843: Deprecation Warning [Click package]",
+   "url": "https://github.com/explosion/spaCy/pull/13844",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13877,
+   "title": "docs(website): remove spaCy Quickstart from Universe/Courses due to spam redirect (fixes #13853)",
+   "url": "https://github.com/explosion/spaCy/pull/13877",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13848,
+   "title": "Add custom download URL",
+   "url": "https://github.com/explosion/spaCy/pull/13848",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 1,
+   "raw": 1,
+   "published": [],
+   "rejected": {
+    "G-quote": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13813,
+   "title": "Fix typos",
+   "url": "https://github.com/explosion/spaCy/pull/13813",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 3,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13816,
+   "title": "fix: match hyphenated words to lemmas in index_table (e.g. \"co-author\u2026",
+   "url": "https://github.com/explosion/spaCy/pull/13816",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13823,
+   "title": "Python 3.13 support",
+   "url": "https://github.com/explosion/spaCy/pull/13823",
+   "removed": {
+    "configuration": 2,
+    "dependency manifest": 2
+   },
+   "files": 49,
+   "raw": 2,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "spacy/pipeline/factories.py",
+     "line": 901,
+     "claim": "The `labels` parameter from the factory is ignored and not passed to the `MultitaskObjective` component, even though the `target` parameter is now correctly passed.",
+     "quote": "    return MultitaskObjective(nlp.vocab, model, name, target=target)",
+     "fix": "    return MultitaskObjective(nlp.vocab, model, name, labels=labels, target=target)",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 929,
+     "repo": "explosion/spaCy",
+     "pr": 13823,
+     "url": "https://github.com/explosion/spaCy/pull/13823"
+    }
+   ],
+   "rejected": {
+    "G-nit": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13800,
+   "title": "Add TeNs plugin",
+   "url": "https://github.com/explosion/spaCy/pull/13800",
+   "removed": {},
+   "files": 1,
+   "raw": 3,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "website/meta/universe.json",
+     "line": 6,
+     "claim": "The `thumb` URL is a temporary, signed AWS S3 URL that will expire, causing the image to become a broken link.",
+     "quote": "\"thumb\": \"https://github-production-user-asset-6210df.s3.amazonaws.com/40547052/433595900-fae3c9d9-7181-4d8b-8b49-e6dc4fca930b.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20250414%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250414T235545Z&X-Amz-Expires=300&X-Amz-Signature=e21d3c06300ceb15fa1dadd7cb60081cc9f1b35e5a7bfd07f6e8b90dd7fad9d0&X-Amz-SignedHeaders=host\",",
+     "fix": "The `thumb` URL must be replaced with a permanent link to the image asset.",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 69,
+     "repo": "explosion/spaCy",
+     "pr": 13800,
+     "url": "https://github.com/explosion/spaCy/pull/13800"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "website/meta/universe.json",
+     "line": 9,
+     "claim": "There is a leading space in the URL of a markdown link, which may cause it to render incorrectly.",
+     "quote": "\"description\": \"**[Temporal Expressions Normalization spaCy (TeNs)](https://github.com/iliedorobat/timespan-normalization-spacy)** is a powerful pipeline component for spaCy that seamlessly identifies and parses date entities in text. It leverages the **[Temporal Expressions Normalization Framework]( https://github.com/iliedorobat/timespan-normalization)** to recognize a wide variety of date formats using an extensive set of regular expressions (RegEx), ensuring robust and adaptable date extraction across diverse textual sources.\\n\\nUnlike conventional solutions that primarily focus on well-structured date formats, TeNs excels in handling real-world text by **identifying** not only standard date representations but also **abbreviated, informal, or even misspelled temporal expressions.** This makes it particularly effective for processing noisy or unstructured data, such as historical records, user-generated content, and scanned documents with OCR inaccuracies.\",",
+     "fix": "\"description\": \"**[Temporal Expressions Normalization spaCy (TeNs)](https://github.com/iliedorobat/timespan-normalization-spacy)** is a powerful pipeline component for spaCy that seamlessly identifies and parses date entities in text. It leverages the **[Temporal Expressions Normalization Framework](https://github.com/iliedorobat/timespan-normalization)** to recognize a wide variety of date formats using an extensive set of regular expressions (RegEx), ensuring robust and adaptable date extraction across diverse textual sources.\\n\\nUnlike conventional solutions that primarily focus on well-structured date formats, TeNs excels in handling real-world text by **identifying** not only standard date representations but also **abbreviated, informal, or even misspelled temporal expressions.** This makes it particularly effective for processing noisy or unstructured data, such as historical records, user-generated content, and scanned documents with OCR inaccuracies.\",",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 69,
+     "repo": "explosion/spaCy",
+     "pr": 13800,
+     "url": "https://github.com/explosion/spaCy/pull/13800"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "website/meta/universe.json",
+     "line": 27,
+     "claim": "The `subprocess.run` call does not check for errors, so if the model download fails, the script will proceed and crash on the subsequent `spacy.load` call.",
+     "quote": "\"    subprocess.run(['python', '-m', 'spacy', 'download', 'ro_core_news_sm'])\",",
+     "fix": "\"    subprocess.run(['python', '-m', 'spacy', 'download', 'ro_core_news_sm'], check=True)\",",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 69,
+     "repo": "explosion/spaCy",
+     "pr": 13800,
+     "url": "https://github.com/explosion/spaCy/pull/13800"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13784,
+   "title": "Update spaCy Universe entry for ChatterBot to use the correct name casing",
+   "url": "https://github.com/explosion/spaCy/pull/13784",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13929,
+   "title": "Format",
+   "url": "https://github.com/explosion/spaCy/pull/13929",
+   "removed": {},
+   "files": 92,
+   "failed": "not JSON even salvaged: Expecting ',' delimiter: line 10 column 15 (char 514)"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13807,
+   "title": "Added Haitian Creole (ht) Language Support to spaCy",
+   "url": "https://github.com/explosion/spaCy/pull/13807",
+   "removed": {},
+   "files": 15,
+   "raw": 6,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "spacy/lang/ht/punctuation.py",
+     "line": 16,
+     "claim": "The list of elided prefixes is missing \"p\" for the negation \"pa\", which is included in tokenizer exceptions and normalization maps.",
+     "quote": "_prefixes_elision = \"m n l y t k w\"",
+     "fix": "_prefixes_elision = \"m n l y t k p w\"",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 43,
+     "repo": "explosion/spaCy",
+     "pr": 13807,
+     "url": "https://github.com/explosion/spaCy/pull/13807"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "spacy/lang/ht/punctuation.py",
+     "line": 29,
+     "claim": "The regex for suffix contractions is missing \"p\" for the negation \"pa\", which is treated as a contractable particle elsewhere in the code.",
+     "quote": "r\"(?<=[{a}])['\u2019][mwlnytk](?=\\s|$)\".format(a=ALPHA),  # contractions",
+     "fix": "r\"(?<=[{a}])['\u2019][mwlnytkp](?=\\s|$)\".format(a=ALPHA),  # contractions",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 43,
+     "repo": "explosion/spaCy",
+     "pr": 13807,
+     "url": "https://github.com/explosion/spaCy/pull/13807"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "spacy/lang/ht/stop_words.py",
+     "line": 8,
+     "claim": "The stop word \"deja\" is duplicated in the list.",
+     "quote": "de depi deja deja",
+     "fix": "de depi deja",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 50,
+     "repo": "explosion/spaCy",
+     "pr": 13807,
+     "url": "https://github.com/explosion/spaCy/pull/13807"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "spacy/lang/ht/stop_words.py",
+     "line": 38,
+     "claim": "The stop word \"si\" is duplicated in the list.",
+     "quote": "sa san si swa si",
+     "fix": "sa san si swa",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 50,
+     "repo": "explosion/spaCy",
+     "pr": 13807,
+     "url": "https://github.com/explosion/spaCy/pull/13807"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "spacy/lang/ht/tokenizer_exceptions.py",
+     "line": 6,
+     "claim": "This line incorrectly appends an apostrophe to the first token of a contraction, making it inconsistent with how non-apostrophe contractions like \"map\" are handled, which are split into \"m\" and \"ap\".",
+     "quote": "{ORTH: base.split(\"'\")[0] + \"'\", NORM: first_norm},",
+     "fix": "{ORTH: base.split(\"'\")[0], NORM: first_norm},",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 121,
+     "repo": "explosion/spaCy",
+     "pr": 13807,
+     "url": "https://github.com/explosion/spaCy/pull/13807"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "spacy/lang/ht/tokenizer_exceptions.py",
+     "line": 10,
+     "claim": "This line incorrectly appends an apostrophe to the first token of a capitalized contraction, making it inconsistent with how non-apostrophe contractions are handled.",
+     "quote": "{ORTH: base.split(\"'\")[0].capitalize() + \"'\", NORM: first_norm.capitalize()},",
+     "fix": "{ORTH: base.split(\"'\")[0].capitalize(), NORM: first_norm.capitalize()},",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 121,
+     "repo": "explosion/spaCy",
+     "pr": 13807,
+     "url": "https://github.com/explosion/spaCy/pull/13807"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13740,
+   "title": "Change Twitter to X",
+   "url": "https://github.com/explosion/spaCy/pull/13740",
+   "removed": {
+    "documentation": 4
+   },
+   "files": 1,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "website/meta/site.json",
+     "line": 78,
+     "claim": "This line replaces the Twitter link with a Bluesky link, which contradicts the pull request's stated goal of changing \"Twitter\" to \"X\".",
+     "quote": "{ \"text\": \"Bluesky\", \"url\": \"https://bsky.app/profile/explosion-ai.bsky.social\" },",
+     "fix": "{ \"text\": \"X\", \"url\": \"https://x.com/spacy_io\" },",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 1,
+     "repo": "explosion/spaCy",
+     "pr": 13740,
+     "url": "https://github.com/explosion/spaCy/pull/13740"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13646,
+   "title": "[WIP] Investigate windows CI failures",
+   "url": "https://github.com/explosion/spaCy/pull/13646",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13760,
+   "title": "Remove dependency on langcodes",
+   "url": "https://github.com/explosion/spaCy/pull/13760",
+   "removed": {
+    "dependency manifest": 1,
+    "configuration": 1,
+    "documentation": 3
+   },
+   "files": 3,
+   "raw": 2,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "spacy/util.py",
+     "line": 120,
+     "claim": "The comment incorrectly states that \"in\" is an obsolete code for Hebrew, when it is actually the obsolete code for Indonesian.",
+     "quote": "    \"id\": [\"ind\", \"in\"], # \"in\" is the obsolete ISO 639-1 code for Hebrew",
+     "fix": "    \"id\": [\"ind\", \"in\"], # \"in\" is the obsolete ISO 639-1 code for Indonesian",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 77,
+     "repo": "explosion/spaCy",
+     "pr": 13760,
+     "url": "https://github.com/explosion/spaCy/pull/13760"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "spacy/util.py",
+     "line": 161,
+     "claim": "The alias \"viw\" for Vietnamese is not a valid ISO language code; the correct ISO 639-3 code is \"vie\".",
+     "quote": "    \"vi\": [\"viw\"],",
+     "fix": "    \"vi\": [\"vie\"],",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 77,
+     "repo": "explosion/spaCy",
+     "pr": 13760,
+     "url": "https://github.com/explosion/spaCy/pull/13760"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13713,
+   "title": "Fix allocation of non-transient strings in StringStore",
+   "url": "https://github.com/explosion/spaCy/pull/13713",
+   "removed": {
+    "configuration": 2
+   },
+   "files": 4,
+   "raw": 2,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "spacy/morphology.pyx",
+     "line": 60,
+     "claim": "The trailing comma creates a tuple that is immediately discarded, which is a logic error.",
+     "quote": "self.strings.add(field, allow_transient=False),",
+     "fix": "self.strings.add(field, allow_transient=False)",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 7,
+     "repo": "explosion/spaCy",
+     "pr": 13713,
+     "url": "https://github.com/explosion/spaCy/pull/13713"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "spacy/morphology.pyx",
+     "line": 64,
+     "claim": "The trailing comma creates a tuple that is immediately discarded, which is a logic error.",
+     "quote": "self.strings.add(field_sep_value, allow_transient=False),",
+     "fix": "self.strings.add(field_sep_value, allow_transient=False)",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 7,
+     "repo": "explosion/spaCy",
+     "pr": 13713,
+     "url": "https://github.com/explosion/spaCy/pull/13713"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13631,
+   "title": "Fix misspelling (#13631) [ci skip]",
+   "url": "https://github.com/explosion/spaCy/pull/13631",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13632,
+   "title": "Update universe.json to add my spaCy online course (#13632) [ci skip]",
+   "url": "https://github.com/explosion/spaCy/pull/13632",
+   "removed": {},
+   "files": 1,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "website/meta/universe.json",
+     "line": 2595,
+     "claim": "This line is missing a trailing comma, which results in invalid JSON syntax.",
+     "quote": "            \"description\":\"In this course, I use the itables Python library inside a Jupyter notebook so that you can visualize the different spaCy document objects. This will provide a solid foundation for people who wish to learn the spaCy NLP library.\"",
+     "fix": "            \"description\":\"In this course, I use the itables Python library inside a Jupyter notebook so that you can visualize the different spaCy document objects. This will provide a solid foundation for people who wish to learn the spaCy NLP library.\",",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 14,
+     "repo": "explosion/spaCy",
+     "pr": 13632,
+     "url": "https://github.com/explosion/spaCy/pull/13632"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13643,
+   "title": "Usage page on memory management, explaining memory zones and doc_cleaner (#13643) [ci skip]",
+   "url": "https://github.com/explosion/spaCy/pull/13643",
+   "removed": {
+    "documentation": 2
+   },
+   "files": 1,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "website/meta/sidebars.json",
+     "line": 59,
+     "claim": "The `\"tag\": \"new\"` property was accidentally removed from the 'Large Language Models' sidebar item during reformatting.",
+     "quote": "                        \"url\": \"/usage/large-language-models\"",
+     "fix": "                        \"url\": \"/usage/large-language-models\",\n                        \"tag\": \"new\"",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 69,
+     "repo": "explosion/spaCy",
+     "pr": 13643,
+     "url": "https://github.com/explosion/spaCy/pull/13643"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13727,
+   "title": "Update requirements, fixing windows crashes",
+   "url": "https://github.com/explosion/spaCy/pull/13727",
+   "removed": {
+    "dependency manifest": 2,
+    "configuration": 1
+   },
+   "files": 6,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13603,
+   "title": "Use cibuildwheel to build wheels",
+   "url": "https://github.com/explosion/spaCy/pull/13603",
+   "removed": {
+    "configuration": 2,
+    "dependency manifest": 1
+   },
+   "files": 1,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "spacy/about.py",
+     "line": 3,
+     "claim": "The version string \"3.7.6a\" is not compliant with PEP 440, as it is missing the required number after the 'a' pre-release identifier.",
+     "quote": "__version__ = \"3.7.6a\"",
+     "fix": "__version__ = \"3.7.6a0\"",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 1,
+     "repo": "explosion/spaCy",
+     "pr": 13603,
+     "url": "https://github.com/explosion/spaCy/pull/13603"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13627,
+   "title": "universe-pipeline-solipCysme-french (#13627) [ci skip]",
+   "url": "https://github.com/explosion/spaCy/pull/13627",
+   "removed": {},
+   "files": 1,
+   "raw": 2,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "website/meta/universe.json",
+     "line": 291,
+     "claim": "This line begins a `for` loop that is split across multiple strings in the JSON array, resulting in syntactically invalid Python code.",
+     "quote": "\"for i in nlp(\",",
+     "fix": "\"for i in nlp(\\\"la MACHINE \u00e0 (b)rouiller le temps s'est peut-\u00eatre d\u00e9raill\u00e9e..?\\\"):\",",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 41,
+     "repo": "explosion/spaCy",
+     "pr": 13627,
+     "url": "https://github.com/explosion/spaCy/pull/13627"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "website/meta/universe.json",
+     "line": 294,
+     "claim": "This line begins a `print` call that is split across multiple strings in the JSON array, resulting in syntactically invalid Python code.",
+     "quote": "\"    print(\",",
+     "fix": "\"    print(i, i.norm_, i.pos_, i.morph, i.lemma_, i.dep_, i._.tokentype, i._.vv_pos, i._.vv_morph)\",",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 41,
+     "repo": "explosion/spaCy",
+     "pr": 13627,
+     "url": "https://github.com/explosion/spaCy/pull/13627"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13561,
+   "title": "Add Kurdish Kurmanji language",
+   "url": "https://github.com/explosion/spaCy/pull/13561",
+   "removed": {},
+   "files": 9,
+   "raw": 5,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "spacy/lang/kmr/lex_attrs.py",
+     "line": 85,
+     "claim": "The word \"p\u00eanciyem\u00een\" is misspelled and should be \"p\u00eanc\u00eeyem\u00een\" to be consistent with the base number \"p\u00eanc\u00ee\" and the other ordinal form \"p\u00eanc\u00eeyem\".",
+     "quote": "    \"p\u00eanciyem\u00een\",",
+     "fix": "    \"p\u00eanc\u00eeyem\u00een\",",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 139,
+     "repo": "explosion/spaCy",
+     "pr": 13561,
+     "url": "https://github.com/explosion/spaCy/pull/13561"
+    }
+   ],
+   "rejected": {
+    "G-nit": 4
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13515,
+   "title": "universe-project-presque (#13515) [ci skip]",
+   "url": "https://github.com/explosion/spaCy/pull/13515",
+   "removed": {},
+   "files": 1,
+   "raw": 2,
+   "published": [],
+   "rejected": {
+    "G-nit": 1,
+    "G-quote": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13514,
+   "title": "universe-package-quelquhui (#13514) [ci skip]",
+   "url": "https://github.com/explosion/spaCy/pull/13514",
+   "removed": {},
+   "files": 1,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "website/meta/universe.json",
+     "line": 4565,
+     "claim": "The class `Toquenizer` is misspelled and should be `Tokenizer`, causing the example code to fail.",
+     "quote": "\"nlp.tokenizer = quelquhui.Toquenizer(nlp.vocab)\"",
+     "fix": "\"nlp.tokenizer = quelquhui.Tokenizer(nlp.vocab)\"",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 20,
+     "repo": "explosion/spaCy",
+     "pr": 13514,
+     "url": "https://github.com/explosion/spaCy/pull/13514"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13493,
+   "title": "Set version to 3.7.5",
+   "url": "https://github.com/explosion/spaCy/pull/13493",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13621,
+   "title": "Support 'memory zones' for user memory management",
+   "url": "https://github.com/explosion/spaCy/pull/13621",
+   "removed": {},
+   "files": 8,
+   "raw": 3,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "spacy/strings.pyx",
+     "line": 162,
+     "claim": "The variable `str_hash` is not defined in this code path; the lookup should use `string_or_id` which holds the hash value.",
+     "quote": "utf8str = <Utf8Str*>self._transient_map.get(str_hash)",
+     "fix": "utf8str = <Utf8Str*>self._transient_map.get(string_or_id)",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 4,
+     "repo": "explosion/spaCy",
+     "pr": 13621,
+     "url": "https://github.com/explosion/spaCy/pull/13621"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "spacy/strings.pyx",
+     "line": 276,
+     "claim": "The lookup in the transient map incorrectly uses the original string `string_or_id` instead of its computed hash `str_hash`.",
+     "quote": "elif self._transient_map is not None and self._transient_map.get(string_or_id) is not NULL:",
+     "fix": "elif self._transient_map is not None and self._transient_map.get(str_hash) is not NULL:",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 44,
+     "repo": "explosion/spaCy",
+     "pr": 13621,
+     "url": "https://github.com/explosion/spaCy/pull/13621"
+    }
+   ],
+   "rejected": {
+    "G-quote": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13472,
+   "title": "Update LICENSE to include 2024",
+   "url": "https://github.com/explosion/spaCy/pull/13472",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13466,
+   "title": "Fix typos in docs",
+   "url": "https://github.com/explosion/spaCy/pull/13466",
+   "removed": {
+    "documentation": 12
+   },
+   "files": 2,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13570,
+   "title": "Add Scottish Gaelic Language",
+   "url": "https://github.com/explosion/spaCy/pull/13570",
+   "removed": {},
+   "files": 3,
+   "failed": "not JSON even salvaged: Expecting ',' delimiter: line 18 column 16 (char 768)"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21888,
+   "title": "ci: remove the markdown link checker",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21888",
+   "removed": {
+    "documentation": 1,
+    "configuration": 1
+   },
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13510,
+   "title": "add Tibetan support",
+   "url": "https://github.com/explosion/spaCy/pull/13510",
+   "removed": {},
+   "files": 9,
+   "raw": 2,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "spacy/lang/bo/lex_attrs.py",
+     "line": 8,
+     "claim": "The word for eighteen, \"\u0f56\u0f45\u0f74\u0f0b\u0f54\u0f62\u0f92\u0fb1\u0f51\", is misspelled, which will prevent it from being matched as a number.",
+     "quote": "    \"\u0f56\u0f45\u0f74\u0f0b\u0f42\u0f45\u0f72\u0f42\u0f0b\", \"\u0f56\u0f45\u0f74\u0f0b\u0f42\u0f49\u0f72\u0f66\u0f0b\", \"\u0f56\u0f45\u0f74\u0f0b\u0f42\u0f66\u0f74\u0f58\u0f0b\", \"\u0f56\u0f45\u0f74\u0f0b\u0f56\u0f5e\u0f72\u0f0b\", \"\u0f56\u0f45\u0f74\u0f0b\u0f63\u0f94\u0f0b\", \"\u0f56\u0f45\u0f74\u0f0b\u0f51\u0fb2\u0f74\u0f42\u0f0b\", \"\u0f56\u0f45\u0f74\u0f0b\u0f56\u0f51\u0f74\u0f53\u0f0b\", \"\u0f56\u0f45\u0f74\u0f0b\u0f54\u0f62\u0f92\u0fb1\u0f51\", \"\u0f56\u0f45\u0f74\u0f0b\u0f51\u0f42\u0f74\u0f0b\", \"\u0f49\u0f72\u0f0b\u0f64\u0f74\u0f0b\",",
+     "fix": "    \"\u0f56\u0f45\u0f74\u0f0b\u0f42\u0f45\u0f72\u0f42\u0f0b\", \"\u0f56\u0f45\u0f74\u0f0b\u0f42\u0f49\u0f72\u0f66\u0f0b\", \"\u0f56\u0f45\u0f74\u0f0b\u0f42\u0f66\u0f74\u0f58\u0f0b\", \"\u0f56\u0f45\u0f74\u0f0b\u0f56\u0f5e\u0f72\u0f0b\", \"\u0f56\u0f45\u0f74\u0f0b\u0f63\u0f94\u0f0b\", \"\u0f56\u0f45\u0f74\u0f0b\u0f51\u0fb2\u0f74\u0f42\u0f0b\", \"\u0f56\u0f45\u0f74\u0f0b\u0f56\u0f51\u0f74\u0f53\u0f0b\", \"\u0f56\u0f45\u0f7c\u0f0b\u0f56\u0f62\u0f92\u0fb1\u0f51\u0f0b\", \"\u0f56\u0f45\u0f74\u0f0b\u0f51\u0f42\u0f74\u0f0b\", \"\u0f49\u0f72\u0f0b\u0f64\u0f74\u0f0b\",",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 32,
+     "repo": "explosion/spaCy",
+     "pr": 13510,
+     "url": "https://github.com/explosion/spaCy/pull/13510"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "spacy/lang/bo/lex_attrs.py",
+     "line": 10,
+     "claim": "The number word \"\u0f56\u0fb1\u0f7a\u0f0b\u0f56\u0f0b\" is preceded by a tab character, which will prevent it from being matched correctly.",
+     "quote": "    \"\u0f66\u0f9f\u0f7c\u0f44\u0f0b\", \"\u0f41\u0fb2\u0f72\u0f0b\", \"\u0f66\u0f0b\u0f61\u0f0b\", \"\t\u0f56\u0fb1\u0f7a\u0f0b\u0f56\u0f0b\", \"\u0f51\u0f74\u0f44\u0f0b\u0f55\u0fb1\u0f74\u0f62\u0f0b\", \"\u0f50\u0f7a\u0f62\u0f0b\u0f60\u0f56\u0f74\u0f58\u0f0b\", \"\u0f50\u0f7a\u0f62\u0f0b\u0f60\u0f56\u0f74\u0f58\u0f0b\u0f46\u0f7a\u0f53\u0f0b\u0f54\u0f7c\u0f0b\", \"\u0f41\u0fb2\u0f42\u0f0b\u0f41\u0fb2\u0f72\u0f42\u0f0b\", \"\u0f41\u0fb2\u0f42\u0f0b\u0f41\u0fb2\u0f72\u0f42\u0f0b\u0f46\u0f7a\u0f53\u0f0b\u0f54\u0f7c\u0f0b\",",
+     "fix": "    \"\u0f66\u0f9f\u0f7c\u0f44\u0f0b\", \"\u0f41\u0fb2\u0f72\u0f0b\", \"\u0f66\u0f0b\u0f61\u0f0b\", \"\u0f56\u0fb1\u0f7a\u0f0b\u0f56\u0f0b\", \"\u0f51\u0f74\u0f44\u0f0b\u0f55\u0fb1\u0f74\u0f62\u0f0b\", \"\u0f50\u0f7a\u0f62\u0f0b\u0f60\u0f56\u0f74\u0f58\u0f0b\", \"\u0f50\u0f7a\u0f62\u0f0b\u0f60\u0f56\u0f74\u0f58\u0f0b\u0f46\u0f7a\u0f53\u0f0b\u0f54\u0f7c\u0f0b\", \"\u0f41\u0fb2\u0f42\u0f0b\u0f41\u0fb2\u0f72\u0f42\u0f0b\", \"\u0f41\u0fb2\u0f42\u0f0b\u0f41\u0fb2\u0f72\u0f42\u0f0b\u0f46\u0f7a\u0f53\u0f0b\u0f54\u0f7c\u0f0b\",",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 32,
+     "repo": "explosion/spaCy",
+     "pr": 13510,
+     "url": "https://github.com/explosion/spaCy/pull/13510"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13458,
+   "title": "Remove empty file",
+   "url": "https://github.com/explosion/spaCy/pull/13458",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21853,
+   "title": "fix(tests): flaky model summary precision test on CPU",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21853",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21858,
+   "title": "Fixes mypy issues with `bitsandbytes > 0.48`",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21858",
+   "removed": {
+    "configuration": 1,
+    "documentation": 1
+   },
+   "files": 3,
+   "raw": 2,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/lightning/fabric/plugins/precision/bitsandbytes.py",
+     "line": 269,
+     "claim": "Using `assert` for API input validation is incorrect as assertions can be disabled, which would allow a `None` device to be passed to downstream code that does not expect it.",
+     "quote": "assert device is not None",
+     "fix": "if device is None:\n    raise ValueError(\"to_empty() requires a 'device' but got None\")",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 2,
+     "repo": "Lightning-AI/pytorch-lightning",
+     "pr": 21858,
+     "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21858"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/lightning/fabric/plugins/precision/bitsandbytes.py",
+     "line": 269,
+     "claim": "Using `assert` for API input validation is incorrect as assertions can be disabled, which would allow a `None` device to be passed to downstream code that does not expect it.",
+     "quote": "assert device is not None",
+     "fix": "if device is None:\n    raise ValueError(\"to_empty() requires a 'device' but got None\")",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 2,
+     "repo": "Lightning-AI/pytorch-lightning",
+     "pr": 21858,
+     "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21858"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21849,
+   "title": "Remove unreachable torchvision<0.14 fallback in get_torchvision_model",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21849",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21848,
+   "title": "Remove dead jsonargparse<4.39 skip guards",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21848",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "explosion/spaCy",
+   "pr": 13490,
+   "title": "Update v4 branch with latest from master",
+   "url": "https://github.com/explosion/spaCy/pull/13490",
+   "removed": {
+    "configuration": 8,
+    "dependency manifest": 1,
+    "documentation": 3
+   },
+   "files": 20,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21837,
+   "title": "Disable compile tracing at the LightningModule.log boundary",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21837",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21870,
+   "title": "Remove dead PyTorch < 2.6 version guards",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21870",
+   "removed": {
+    "documentation": 2
+   },
+   "files": 34,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21851,
+   "title": "ci: drop PyTorch 2.1-2.5 and raise minimum to 2.6",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21851",
+   "removed": {
+    "configuration": 6,
+    "dependency manifest": 1
+   },
+   "files": 12,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21847,
+   "title": "Remove dead Python 3.9 guards and duplicate torch constant",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21847",
+   "removed": {},
+   "files": 3,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21832,
+   "title": "fix(checkpoint): prevent arbitrary code execution via `_instantiator` in `load_from_checkpoint`",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21832",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 2,
+   "raw": 1,
+   "published": [],
+   "rejected": {
+    "G-outer": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21826,
+   "title": "feat: support remote storage (fsspec) in checkpoint consolidation",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21826",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 9,
+   "raw": 1,
+   "published": [],
+   "rejected": {
+    "G-quote": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21824,
+   "title": "Stream atomic checkpoint saves to local disk instead of buffering",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21824",
+   "removed": {},
+   "files": 2,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21805,
+   "title": "Fix FSDP CPU offloading when shards are already on CPU",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21805",
+   "removed": {},
+   "files": 2,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21811,
+   "title": "fix: warn when training batches are fewer than `accumulate_grad_batches`",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21811",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 2,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21835,
+   "title": "ci: add pytorch 2.12 and 2.13 to cpu tests",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21835",
+   "removed": {
+    "configuration": 2
+   },
+   "files": 1,
+   "raw": 1,
+   "published": [],
+   "rejected": {
+    "G-outer": 1
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21776,
+   "title": "Profile dataloader initialization in FitLoop and update outdated docs",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21776",
+   "removed": {
+    "documentation": 2
+   },
+   "files": 2,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21758,
+   "title": "Fix: Add `weights_only` parameter to LearningRateFinder checkpoint restore",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21758",
+   "removed": {},
+   "files": 4,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21747,
+   "title": "jsonargparse 4.39 required for CLI, check at run-time",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21747",
+   "removed": {},
+   "files": 3,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21821,
+   "title": "Add fsspec URL support for distributed checkpoints in ModelParallelStrategy",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21821",
+   "removed": {
+    "documentation": 2
+   },
+   "files": 5,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/lightning/fabric/strategies/model_parallel.py",
+     "line": 477,
+     "claim": "The `torch.load` function is called with `path`, which under the `if _is_local_file_protocol(str(path))` condition is an fsspec URL string that `torch.load` cannot handle.",
+     "quote": "checkpoint = torch.load(path, mmap=True, map_location=\"cpu\", weights_only=weights_only)",
+     "fix": "checkpoint = _load(path, map_location=\"cpu\", weights_only=weights_only)",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 5,
+     "repo": "Lightning-AI/pytorch-lightning",
+     "pr": 21821,
+     "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21821"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21774,
+   "title": "fix(FSDP): pass explicit CPU    device to satisfy torch>=2.5 device_id contract",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21774",
+   "removed": {
+    "documentation": 2
+   },
+   "files": 4,
+   "raw": 4,
+   "published": [],
+   "rejected": {
+    "G-outer": 4
+   },
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21775,
+   "title": "Support remote storage (fsspec URLs) for FSDP checkpoints",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21775",
+   "removed": {
+    "documentation": 4
+   },
+   "files": 7,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/lightning/fabric/utilities/cloud_io.py",
+     "line": 193,
+     "claim": "When given a `pathlib.Path` object created from a remote URL string (e.g., `Path(\"s3://...\")`), the function returns a corrupted URL string instead of treating it as a local path.",
+     "quote": "return str(path)",
+     "fix": "    return path",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 99,
+     "repo": "Lightning-AI/pytorch-lightning",
+     "pr": 21775,
+     "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21775"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21745,
+   "title": "Prepare Patch Release 2.6.5",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21745",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 3,
+   "raw": 2,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "tests/tests_fabric/utilities/test_cloud_io.py",
+     "line": 102,
+     "claim": "A `MagicMock` created this way will not pass the `isinstance` check in the code under test, even with the subsequent `__class__` assignment, causing the test to incorrectly exercise the non-Azure code path and fail.",
+     "quote": "mock_fs = mock.MagicMock()",
+     "fix": "mock_fs = mock.MagicMock(spec=AzureBlobFileSystem())",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 58,
+     "repo": "Lightning-AI/pytorch-lightning",
+     "pr": 21745,
+     "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21745"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "tests/tests_fabric/utilities/test_cloud_io.py",
+     "line": 129,
+     "claim": "Assigning to `__class__` on a `MagicMock` instance does not make it pass an `isinstance` check, so this line is ineffective and the test fails to cover the intended code path for Azure filesystems.",
+     "quote": "mock_fs.__class__ = AzureBlobFileSystem",
+     "fix": "# This line is now redundant and should be removed.",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 58,
+     "repo": "Lightning-AI/pytorch-lightning",
+     "pr": 21745,
+     "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21745"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21734,
+   "title": "[Docs] Fix Sphinx parameter permalink positioning",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21734",
+   "removed": {},
+   "files": 2,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21727,
+   "title": "Cherry-pick publishing changes to release/stable",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21727",
+   "removed": {
+    "configuration": 4
+   },
+   "files": 2,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21715,
+   "title": "Update version from 2.6.1 to 2.6.4",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21715",
+   "removed": {},
+   "files": 1,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21746,
+   "title": "fix: AccumulateGrad stream mismatch warning when using DDP with Fabric & Trainer",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21746",
+   "removed": {
+    "documentation": 2
+   },
+   "files": 3,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21739,
+   "title": "Pin disabled TPU workflow actions to SHAs (6/n)",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21739",
+   "removed": {},
+   "files": 1,
+   "raw": 4,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": ".github/workflows/tpu-tests.yml.disabled",
+     "line": 49,
+     "claim": "The specified commit SHA `a26af69be951a213d495a4c3e4e4022e16d87065` does not exist in the `actions/setup-python` repository, which will cause the workflow to fail.",
+     "quote": "      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0",
+     "fix": "      - uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 4,
+     "repo": "Lightning-AI/pytorch-lightning",
+     "pr": 21739,
+     "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21739"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": ".github/workflows/tpu-tests.yml.disabled",
+     "line": 53,
+     "claim": "The specified commit SHA `c200f3691d83b41bf9bbd8638997a462592937ed` does not exist in the `google-github-actions/auth` repository, which will cause the workflow to fail.",
+     "quote": "      - uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2.1.13",
+     "fix": "      - uses: google-github-actions/auth@2421820b45a7336c4513988b8d3c0947c3695c4b # v2.1.2",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 4,
+     "repo": "Lightning-AI/pytorch-lightning",
+     "pr": 21739,
+     "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21739"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": ".github/workflows/tpu-tests.yml.disabled",
+     "line": 56,
+     "claim": "The specified commit SHA `e427ad8a34f8676edf47cf7d7925499adf3eb74f` does not exist in the `google-github-actions/setup-gcloud` repository, which will cause the workflow to fail.",
+     "quote": "      - uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f # v2.2.1",
+     "fix": "      - uses: google-github-actions/setup-gcloud@52d34c34e93b29c603c20585433352b09e1504d9 # v2.1.0",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 4,
+     "repo": "Lightning-AI/pytorch-lightning",
+     "pr": 21739,
+     "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21739"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": ".github/workflows/tpu-tests.yml.disabled",
+     "line": 168,
+     "claim": "The specified commit SHA `75cd11691c0faa626561e295848008c8a7dddffe` does not exist in the `codecov/codecov-action` repository, which will cause the workflow to fail.",
+     "quote": "        uses: codecov/codecov-action@75cd11691c0faa626561e295848008c8a7dddffe # v5.5.4",
+     "fix": "        uses: codecov/codecov-action@894ff025c7b54507a923d41c98286076f30b5b73 # v4.1.0",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 1,
+     "repo": "Lightning-AI/pytorch-lightning",
+     "pr": 21739,
+     "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21739"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21743,
+   "title": "Fix FLOPs inconsistency and add using_sparse_model flag",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21743",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 2,
+   "raw": 8,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/lightning/fabric/utilities/throughput.py",
+     "line": 432,
+     "claim": "The bfloat16 FLOPs for the A40 GPU is the sparse value, but it should be the dense value to be consistent with the new `using_sparse_model` flag.",
+     "quote": "torch.bfloat16: 1.497e14,",
+     "fix": "torch.bfloat16: 7.48e13,",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 143,
+     "repo": "Lightning-AI/pytorch-lightning",
+     "pr": 21743,
+     "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21743"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/lightning/fabric/utilities/throughput.py",
+     "line": 433,
+     "claim": "The float16 FLOPs for the A40 GPU is the sparse value, but it should be the dense value to be consistent with the new `using_sparse_model` flag.",
+     "quote": "torch.float16: 1.497e14,",
+     "fix": "torch.float16: 7.48e13,",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 143,
+     "repo": "Lightning-AI/pytorch-lightning",
+     "pr": 21743,
+     "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21743"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/lightning/fabric/utilities/throughput.py",
+     "line": 434,
+     "claim": "The int8 FLOPs for the A40 GPU is the sparse value, but it should be the dense value to be consistent with the new `using_sparse_model` flag.",
+     "quote": "torch.int8: 2.993e14,",
+     "fix": "torch.int8: 1.4965e14,",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 143,
+     "repo": "Lightning-AI/pytorch-lightning",
+     "pr": 21743,
+     "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21743"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/lightning/fabric/utilities/throughput.py",
+     "line": 372,
+     "claim": "The bfloat16 FLOPs for the RTX 4090 is incorrectly set to the FP32 rate, but it should be the much higher dense Tensor Core rate.",
+     "quote": "torch.bfloat16: 8.26e13,",
+     "fix": "torch.bfloat16: 3.305e14,",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 143,
+     "repo": "Lightning-AI/pytorch-lightning",
+     "pr": 21743,
+     "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21743"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/lightning/fabric/utilities/throughput.py",
+     "line": 373,
+     "claim": "The float16 FLOPs for the RTX 4090 is incorrectly set to the FP32 rate, but it should be the much higher dense Tensor Core rate.",
+     "quote": "torch.float16: 8.26e13,",
+     "fix": "torch.float16: 3.305e14,",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 143,
+     "repo": "Lightning-AI/pytorch-lightning",
+     "pr": 21743,
+     "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21743"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/lightning/fabric/utilities/throughput.py",
+     "line": 424,
+     "claim": "The float16 FLOPs for the A6000 GPU is incorrectly set to the FP32 rate, but it should be the higher dense Tensor Core rate.",
+     "quote": "torch.float16: 3.87e13,",
+     "fix": "torch.float16: 7.74e13,",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 143,
+     "repo": "Lightning-AI/pytorch-lightning",
+     "pr": 21743,
+     "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21743"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/lightning/fabric/utilities/throughput.py",
+     "line": 425,
+     "claim": "The int8 FLOPs for the A6000 GPU is the sparse value, but it should be the dense value to be consistent with the new `using_sparse_model` flag.",
+     "quote": "torch.int8: 3.097e14,",
+     "fix": "torch.int8: 1.5485e14,",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 143,
+     "repo": "Lightning-AI/pytorch-lightning",
+     "pr": 21743,
+     "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21743"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/lightning/fabric/utilities/throughput.py",
+     "line": 456,
+     "claim": "The tfloat32 FLOPs for the RTX 3090 is incorrectly set to the FP32 rate, but Ampere GPUs support TF32 at twice the FP32 rate.",
+     "quote": "\"tfloat32\": 3.56e13,",
+     "fix": "\"tfloat32\": 7.12e13,",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 143,
+     "repo": "Lightning-AI/pytorch-lightning",
+     "pr": 21743,
+     "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21743"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21686,
+   "title": "Fix torch.compile breaking toggle_optimizer / untoggle_optimizer",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21686",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 2,
+   "raw": 0,
+   "published": [],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21707,
+   "title": "feat: add `filter_keys\u200b` to log only specified device stats",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21707",
+   "removed": {},
+   "files": 2,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/lightning/pytorch/callbacks/device_stats_monitor.py",
+     "line": 171,
+     "claim": "This check for unrecognized keys is unreliable because it runs in `setup` where the full set of device statistic keys may not be available, leading to spurious warnings for valid keys that appear later during execution.",
+     "quote": "unrecognized = self._filter_keys - device_stats.keys()",
+     "fix": "unrecognized = set()",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 14,
+     "repo": "Lightning-AI/pytorch-lightning",
+     "pr": 21707,
+     "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21707"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21708,
+   "title": "fix: use del instead of explicit shutdown in CombinedLoader.reset()",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21708",
+   "removed": {
+    "documentation": 1
+   },
+   "files": 3,
+   "raw": 1,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/lightning/pytorch/utilities/combined_loader.py",
+     "line": 400,
+     "claim": "This explicit deletion is redundant because the subsequent assignment `dataloader._iterator = None` is sufficient to dereference the old iterator object, which is what triggers its finalizer for garbage collection.",
+     "quote": "del dataloader._iterator",
+     "fix": "pass",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 1,
+     "repo": "Lightning-AI/pytorch-lightning",
+     "pr": 21708,
+     "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21708"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  },
+  {
+   "repo": "Lightning-AI/pytorch-lightning",
+   "pr": 21701,
+   "title": "Cherry-pick new publishing to release branch",
+   "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21701",
+   "removed": {
+    "configuration": 9,
+    "documentation": 1
+   },
+   "files": 6,
+   "raw": 3,
+   "published": [
+    {
+     "ok": true,
+     "failed": [],
+     "path": "requirements/collect_env_details.py",
+     "line": 55,
+     "claim": "The package name used as a dictionary key is not normalized to lowercase, which is a regression from the previous implementation and changes the data contract of the function.",
+     "quote": "return {dist.metadata[\"Name\"]: dist.version for dist in distributions()}",
+     "fix": "    return {dist.metadata[\"Name\"].lower(): dist.version for dist in distributions()}",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 1,
+     "repo": "Lightning-AI/pytorch-lightning",
+     "pr": 21701,
+     "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21701"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/lightning_fabric/__setup__.py",
+     "line": 51,
+     "claim": "The requirement string assigned as the value in the `extras` dictionary is the raw string from the requirements file, which can include comments, making it an invalid requirement specifier for setuptools.",
+     "quote": "extras[req.name.lower().replace(\"-\", \"_\")] = [req_str]",
+     "fix": "        extras[req.name.lower().replace(\"-\", \"_\")] = [str(req)]",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 7,
+     "repo": "Lightning-AI/pytorch-lightning",
+     "pr": 21701,
+     "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21701"
+    },
+    {
+     "ok": true,
+     "failed": [],
+     "path": "src/lightning_fabric/__setup__.py",
+     "line": 51,
+     "claim": "The requirement string assigned as the value in the `extras` dictionary is the raw string from the requirements file, which can include comments, making it an invalid requirement specifier for setuptools.",
+     "quote": "extras[req.name.lower().replace(\"-\", \"_\")] = [req_str]",
+     "fix": "        extras[req.name.lower().replace(\"-\", \"_\")] = [str(req)]",
+     "unseen": [],
+     "evidence": "",
+     "cites_evidence": false,
+     "hunk_size": 7,
+     "repo": "Lightning-AI/pytorch-lightning",
+     "pr": 21701,
+     "url": "https://github.com/Lightning-AI/pytorch-lightning/pull/21701"
+    }
+   ],
+   "rejected": {},
+   "finish": "STOP"
+  }
+ ]
+}

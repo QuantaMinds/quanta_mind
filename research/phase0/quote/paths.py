@@ -86,8 +86,14 @@ def filter_diff(diff: str, strict: bool = False) -> tuple[str, dict[str, int], i
     for chunk in diff.split("diff --git "):
         if not chunk.strip():
             continue
-        m = re.search(r"b/(\S+)", chunk.split("\n", 1)[0])
-        path = m.group(1) if m else ""
+        # **ANCHORED, BECAUSE `re.search(r"b/(\S+)")` MATCHED THE `b/` INSIDE `.github/`.**
+        # "github" ends in b, so `.github/workflows/ci.yml` extracted as `workflows/ci.yml` and
+        # every CI path escaped a filter written to catch it. The `.yml` rule still caught most of
+        # them by extension, which is why this survived: the filter looked like it worked because a
+        # DIFFERENT rule was doing its job. `.github/workflows/tpu-tests.yml.disabled` is the one
+        # that got through and put four findings into design fourteen's pool.
+        m = re.match(r"a/(.*?) b/(.+)$", chunk.split("\n", 1)[0])
+        path = m.group(2) if m else ""
         why = reason_strict(path) if strict else reason(path)
         if why:
             removed[why] = removed.get(why, 0) + 1

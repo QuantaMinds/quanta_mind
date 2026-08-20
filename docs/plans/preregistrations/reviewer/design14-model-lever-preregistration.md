@@ -251,3 +251,88 @@ verdict exists on this corpus, and the repository literal is untouched — `sqla
 stays in the corpus despite supplying the fewest usable pull requests of the six, because removing
 a repository after measuring its yield is selection, and its low yield is a fact to report rather
 than a reason to drop it.
+
+---
+
+# Result — arm 1 measured nothing, because the judge was the weaker instrument
+
+**The run happened. The headline it produced is withdrawn by the check that follows it, and the
+check was run because the headline was too good.**
+
+## What arm 1 scored
+
+300 pull requests, 194 reviewable, 148 raw findings, **104 published after the gate**, 102 unique.
+Graded blind against the unchanged rubric with 12 sabotaged controls.
+
+| | W/n | C/n | TRIVIAL |
+|---|---|---|---|
+| arm 1, first grading | 24.5% | 62.7% | **0.0%** |
+| arm 1, second grading (temperature 0 replication) | 28.4% | 59.8% | **0.0%** |
+| design thirteen, as reported | 52.3% | 8.1% | 18.8% |
+
+**C/n went from 8.1% to 62.7% on a change that only REMOVES findings.** Excluding CI config cannot
+manufacture correct findings, and the pre-registration above says in as many words that C/n reaching
+0.49 needed an eightfold increase and was not expected. **A result that far past its own written
+prior is an instrument change until proven otherwise**, and the judge was new.
+
+**TRIVIAL = 0 of 102 was the tell.** Design thirteen's rater used that bucket on 18.8% of findings.
+A grader that never reaches for one bucket is not grading the same way.
+
+## The check: hold the judge fixed, vary the design
+
+`judge_compare.py` re-graded **design thirteen's own pool** with arm 1's judge.
+
+| design thirteen's pool | W/n | C/n |
+|---|---|---|
+| as its own rater graded it | **52.3%** | **8.1%** |
+| as arm 1's judge grades it | **29.1%** | **57.0%** |
+
+**Raw agreement between the two raters on the same 86 findings: 34.9%.** Read off one instrument,
+design thirteen and design fourteen are indistinguishable — W/n 29.1% against 24.5–28.4%, C/n 57.0%
+against 59.8–62.7%. **The config exclusion moved nothing. The entire apparent improvement was the
+rater.**
+
+## Which rater is right, and it is not the new one
+
+27 findings design thirteen called WRONG were called CORRECT by arm 1's judge, tagged `EXTERNAL`
+(18) and `TRACE` (9). The disagreements are not close calls:
+
+| design thirteen's rater | arm 1's judge |
+|---|---|
+| `actions/checkout` v7.0.1 exists and `3d3c42e5` carries that exact tag | "no such release exists" |
+| the comment reads Aug 16 2026 and today is Aug 18 2026, so the date is past | "the comment contains the future year 2026, which is a typo" |
+| the `open` has no `O_TRUNC`, so the truncation the claim rests on cannot occur | "a race condition where an existing file could be..." |
+
+**The judge is the same family as the subject, and it ratifies the subject's own blind spots.**
+Design thirteen's rater went and checked whether a pinned SHA carries the tag the reviewer disputed;
+arm 1's judge could not, and accepted the reviewer's claim. It repeated the reviewer's belief that
+2026 is in the future — while running in 2026. **A judge that shares the subject's training cutoff
+and its inability to reach outside the diff will grade the subject's hallucinations CORRECT**, and
+that is precisely the failure class design thirteen measured as `EXTERNAL`.
+
+## The sabotage control has a blind spot, and this is the first time it has been seen
+
+**12 of 12 planted findings were caught. 10 of 10 on design thirteen's pool. The judge was wrong on
+a third of the real ones anyway.**
+
+Sabotaged controls pair a real quote with a claim about entirely different code — grossly,
+structurally wrong. Catching them proves a pool is not rubber-stamping. **It does not prove the pool
+can tell a confident, well-formed, false claim about an external fact from a true one**, which is
+the failure that actually dominates this corpus. The control measures a proxy for rater quality and
+reads 100% while the quantity it stands for is failing — the defect `AGENTS.md` rule 14 names, found
+in the project's own adjudication protocol.
+
+**A same-family judge is disqualified as an instrument for this task.** A future adjudication needs
+a rater from a different family than the subject, or one that can check a claim against the
+repository and the network, and the sabotage pool needs items that are subtly rather than grossly
+wrong.
+
+## Standing conclusion
+
+**`infer/` and `verify/` stay closed. Design thirteen's numbers — W/n 52.3%, C/n 8.1% — remain the
+operative measurement**, because that rater demonstrably checked facts this one demonstrably did
+not. Arm 1 cleared no bar: it produced no comparable number.
+
+**Arm 2, the model lever, is untouched by all of this and remains blocked** on a frontier model
+being reachable. When it runs, it must be graded by an instrument that has been calibrated against
+design thirteen's pool first — which is now a thing this repository can do, and could not before.
