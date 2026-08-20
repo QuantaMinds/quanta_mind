@@ -20,10 +20,10 @@ evidence and it is not the commercial plan. Those were moved out so this reads a
 | stage | status | evidence |
 |---|---|---|
 | **the skeleton** | **DONE** | ten layers importable; `types/` holds the value objects; `serve/cli.py` runs |
-| **the reader** | **STARTED** | `ingest/history.py` built (PR #46). `ingest/diff.py` and `parse/` not begun |
-| **the store and the ranker** | **STARTED** | `store/schema.py`, `store/touches.py` and `rank/score.py` built and live-verified against real repositories. `rank/order.py` and `rank/discriminate.py` still to come |
-| **render and the free tier** | not begun | — |
-| **the retrospective** | not begun | — |
+| **the reader** | **STARTED** | `ingest/history.py`, `ingest/diff.py`, `ingest/commits.py`, `ingest/github_comments.py`, `parse/languages.py` and `parse/units.py` all built and live-verified. The stage's own gate is not signed off |
+| **the store and the ranker** | **STARTED** | `store/schema.py`, `store/touches.py`, `rank/score.py`, `rank/order.py`, `rank/events.py` and `rank/baseline.py` built and live-verified. Gate 2b is met at 1.21% vs 3.12% on six unseen repositories |
+| **render and the free tier** | **STARTED** | `render/coverage_line.py`, `render/comment.py` and `ingest/github_comments.py` built; `post()` has written, refused a duplicate, and reposted on a moved head |
+| **the retrospective** | **STARTED** | `serve/retrospective.py` and `render/replay_report.py` built; `quantamind retrospective <clone>` runs against any clone and is live-tested |
 | **serve** | **STARTED** | the endpoint binds, authenticates, de-duplicates and answers; `serve/listener.py` + `run_endpoint.py`. **Nothing is wired to the work callback** — `review` is unbuilt |
 | **held in reserve — allocate, infer, verify** | **NOT SCHEDULED** | closed on evidence; the conditions to open are under "What would reopen the reserved layers" |
 
@@ -245,7 +245,7 @@ previous sabotage here disabled only the entry point and left the suite green.
 
 ---
 
-# Stage — The store and the ranker  ·  NEXT
+# Stage — The store and the ranker  ·  STARTED
 
 **This is the stage that decides whether the research is the product.**
 
@@ -336,16 +336,16 @@ produce the no-history label, not an arbitrary order presented as a ranking.
 
 ---
 
-# Stage — Render and the free tier
+# Stage — Render and the free tier  ·  STARTED
 
 **Goal: something a repository can install that costs nothing to run and states its own coverage.**
 
 ### Steps
 
-1. `render/coverage_line.py` — **the coverage line comes first in every comment**, naming what was
-   not analysed and why.
-2. `render/comment.py` — the comment body: the ranking, the budget, the unresolved list.
-3. `ingest/github_comments.py` posts it, idempotently, keyed on head SHA.
+1. **DONE.** `render/coverage_line.py` — **the coverage line comes first in every comment**,
+   naming what was not analysed and why.
+2. **DONE.** `render/comment.py` — the comment body: the ranking, the budget, the unresolved list.
+3. **DONE.** `ingest/github_comments.py` posts it, idempotently, keyed on head SHA.
 
 ### Output
 
@@ -373,7 +373,7 @@ different unresolved sets and asserts the lines differ.
 
 ---
 
-# Stage — The retrospective
+# Stage — The retrospective  ·  STARTED
 
 **Goal: run the ranker over a repository's closed history and show what it would have said.**
 
@@ -382,8 +382,11 @@ retrospective` against a clone.
 
 ### Steps
 
-1. Walk closed pull requests, rank each against history **bounded by that pull request's parent**.
-2. Report where the budget would have gone and what a later fix returned to.
+1. **DONE.** `serve/retrospective.py` — walk closed pull requests, rank each against history
+   **bounded by that pull request's parent**.
+2. **DONE.** `render/replay_report.py` — report where the budget would have gone and what a later
+   fix returned to, with the positivity count, because a pooled win carried by one repository is an
+   artefact and that line is the only thing that can say so.
 
 ### Gate
 

@@ -61,6 +61,7 @@ guards:
     uv run python scripts/guard/check_subprocess_timeouts.py .
     uv run python scripts/guard/records/check_burned_corpora.py .
     uv run python scripts/guard/records/check_plan_state.py .
+    uv run python scripts/guard/records/check_stage_table.py .
     uv run python scripts/guard/records/check_withdrawn_amendments.py .
     uv run python scripts/guard/citations/resolve.py .
     uv run python scripts/guard/citations/freshness.py .
