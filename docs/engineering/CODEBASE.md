@@ -907,6 +907,69 @@ store through `schema.open_store`, so **version mismatch and schema drift** — 
 produces, invisible to a file check — fail the probe. It never raises: an orchestrator needs a
 verdict, not a stack trace.
 
+#### `serve/listener.py` — the socket, and the dependency count still reads zero
+
+`webhook_github.py` was two pure functions over bytes with no caller; nothing bound a port. This is
+the caller. Two routes, `POST /webhook` and `GET /health`, on `http.server` from the standard
+library. The plan left this "a separate decision about whether to take a framework or use stdlib",
+and a framework would have been the project's **first runtime dependency**, bought on every install
+to save about forty lines of routing we do not need.
+
+**`http.server` is not a hardened edge server and its own documentation says so** — no TLS, no rate
+limiting, no slow-loris defence. Run it behind a reverse proxy. That is a deployment requirement,
+and this file is the only place it is written down.
+
+**Verify before parse.** The body is read by `Content-Length` and handed to `verify()` as raw bytes
+before anything treats it as JSON, because parsing first runs an untrusted document through a parser
+for anyone who can reach the port — and the HMAC covers the exact bytes, so re-serialising to check
+a signature is how an authentic delivery starts failing. `Content-Length` is attacker-controlled, so
+it is bounded at GitHub's documented 25 MB maximum, and the three ways it can be unusable — absent,
+unparseable, oversized — are three distinct 411 messages, because a misconfigured proxy, a malformed
+client and an attack look nothing alike to whoever is reading the log.
+
+**Answer, then work.** GitHub requires a 2XX inside ten seconds; a real run clones and indexes a
+repository and will not finish in ten. So the handler claims the delivery with `begin()`, answers
+**202**, and processes afterwards — which is what the separate `begin()`/`complete()` calls in
+`store/deliveries.py` were built for. A process that dies mid-work leaves no `completed_at`, and
+GitHub's redelivery of the same GUID is then a legitimate retry rather than a replay.
+
+**A fault answers 500 rather than dropping the socket.** The stdlib handler lets an unhandled
+exception close the connection with no response at all, which GitHub records as a failed delivery
+with no status — the least diagnosable outcome available.
+
+**The secret is read from `QUANTAMIND_WEBHOOK_SECRET` and never from `Settings`**, so it cannot be
+printed by `quantamind config`. `build()` refuses to bind without one: an endpoint that verifies
+nothing is an open command channel, and it passes every test that supplies a secret.
+
+**`staticmethod(work)`, and it is not decoration.** A plain function stored as a class attribute is
+a descriptor, so Python binds it and `self.work(review)` arrives as `work(self, review)`. The first
+version failed exactly that way against the CLI **while the unit tests passed** — they injected
+`list.append`, a builtin bound method, which is not a descriptor and so was never re-bound. **The
+test agreed for a reason unrelated to the property it was testing**; only a plain-function caller
+could tell. Rule 14's verb, in a place nobody was looking.
+
+#### `serve/run_endpoint.py` — the banner prints with `flush=True`, and that is not decoration
+
+`quantamind serve` bound the port and **said nothing at all**. Python line-buffers stdout to a
+terminal and BLOCK-buffers it to a pipe — and a pipe is every real deployment: systemd, Docker, CI,
+a redirect to a log file. `serve_forever()` never returns, the 4 KB buffer never fills, and SIGTERM
+ends the process without flushing. The banner was not late. **It was lost.**
+
+The line this cost is the one that mattered most. "IT DOES NOT REVIEW" is the only thing telling an
+operator that a delivery is authenticated, acknowledged and then dropped, and it was invisible to
+exactly the person who needed it — while the endpoint sat there listening, answering 202, looking
+entirely healthy.
+
+**Found by running the command under a pipe.** Every in-process test passed, and would have kept
+passing: `capsys` replaces stdout with an object that has no pipe behind it, so the buffering mode —
+a property of the real file descriptor — is the one thing a captured test cannot observe. The
+regression test in `tests/unit/layers/serve/test_serve_banner.py` therefore pays for a subprocess.
+
+**Its read is bounded, and that came from the sabotage.** Removing the flushes did not make the
+first version of that test fail — it made it **hang**, because nothing is ever written and
+`readline()` blocks forever. A hang in CI burns the job's timeout and reads as "stuck" rather than
+"broken". The read now runs on a thread with a deadline and fails in thirty seconds saying which.
+
 **Owns:** the HTTP webhook, the CLI, health, configuration, and the contracts at the edge.
 **Must not:** let the two adapters diverge. What a customer verifies with the CLI must be what
 the App runs.

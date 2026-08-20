@@ -47,7 +47,7 @@ three months stale.
 | `infer/` | **0** | **reserve — needs G2 under 50% wrong, twice, once independently graded** |
 | `verify/` | **0** | **reserve — ships with `infer/`, never after** |
 | `render/` | **3** | `comment.py`, `coverage_line.py`, `replay_report.py` |
-| `serve/` | **4** | `cli.py`, `health.py`, `retrospective.py`, `webhook_github.py` |
+| `serve/` | **6** | `cli.py`, `health.py`, `listener.py`, `retrospective.py`, `run_endpoint.py`, `webhook_github.py` |
 
 <!-- plan-state:end -->
 

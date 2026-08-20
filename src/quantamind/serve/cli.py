@@ -1,15 +1,17 @@
 """The command line: the same pipeline, invoked locally, posting nothing.
 
-WHAT: `main()` and the argument parser behind `uv run quantamind`. Today it reports version
-      and resolved configuration; the review and retrospective commands arrive with the
-      layers they need.
+WHAT: `main()` and the argument parser behind `uv run quantamind`. `config` prints the resolved
+      settings, `retrospective` replays the ranker over a clone's own history, `serve` binds the
+      webhook endpoint. `review` is the one command still unbuilt, and it says so and exits 2.
 WHY:  The CLI is not a convenience. It runs the retrospective, it is how a sceptic verifies
       us before granting repository access, and it is what answers the ranker gate. So it is
       built first and stays. The App is this plus a webhook, a signature check and
       idempotency -- and the pipeline must not know which one called it, or what a customer
       verified here is not what runs there.
-IMPORTS: stdlib only (argparse, sys), and types.settings. No layer to the left is skipped;
-      there is simply no pipeline to call yet.
+IMPORTS: stdlib (argparse, pathlib, tempfile) and types.settings at module scope. The heavier
+      layers -- render.replay_report, serve.{run_endpoint,retrospective}, types.pooled_outcome --
+      are imported inside the command that needs them, so `--version` and `config` still answer
+      when a layer below is broken.
 CONSUMED BY: the `quantamind` entry point in pyproject.toml, and tests/unit.
 """
 
@@ -29,7 +31,6 @@ from quantamind.types.settings import Settings, SettingsError, load
 # work it never did.
 UNBUILT: dict[str, str] = {
     "review": "the reader, ranker and render stages",
-    "serve": "the serve stage",
 }
 
 
@@ -42,6 +43,10 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command")
 
     subparsers.add_parser("config", help="print the resolved configuration and exit")
+    listen = subparsers.add_parser(
+        "serve", help="authenticate and de-duplicate GitHub webhooks over HTTP"
+    )
+    listen.add_argument("--port", type=int, default=7331)
     walk = subparsers.add_parser(
         "retrospective", help="replay the ranker over a clone's own history and report"
     )
@@ -113,6 +118,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             "See docs/plans/implementation.md for the stage and its gate."
         )
         return 2
+
+    if args.command == "serve":
+        from quantamind.serve.run_endpoint import run
+
+        return run(args.port)
 
     if args.command == "retrospective":
         return _retrospective(args.clone, args.repo)

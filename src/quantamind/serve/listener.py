@@ -1,0 +1,199 @@
+"""The socket. Authenticate, claim the delivery, acknowledge inside ten seconds, then work.
+
+WHAT: `build(settings, secret, work)` returns a `ThreadingHTTPServer` serving two routes — `POST
+      /webhook` and `GET /health`. The handler verifies the signature, claims the delivery,
+      answers, and only then runs `work`.
+WHY:  **STDLIB, AND THE DEPENDENCY COUNT STAYS AT ZERO.** The plan calls this "a separate decision
+      about whether to take a framework or use stdlib", and it is the first runtime dependency this
+      project would ever take. What this endpoint needs is one POST route, an HMAC compare and a
+      status code — no routing table, no serialisation layer, no ORM. A framework would be paid for
+      on every install to save perhaps forty lines.
+
+      **`http.server` IS NOT A HARDENED PRODUCTION SERVER, AND ITS OWN DOCUMENTATION SAYS SO.** No
+      rate limiting, no TLS, no slow-loris defence. **Run it behind a reverse proxy that terminates
+      TLS** and treat this process as an application rather than an edge. That is a deployment
+      requirement, written here because a reader who mistakes this for a web server will not find
+      the warning anywhere else.
+
+      **VERIFY BEFORE PARSE, ALWAYS.** The body is read by `Content-Length` and handed to
+      `verify()` as raw bytes before anything treats it as JSON. Parsing first would run an
+      untrusted document through a parser for anyone who can reach the port — and the HMAC covers
+      the exact bytes, so re-serialising to check a signature is how an authentic delivery starts
+      failing.
+
+      **ACKNOWLEDGE, THEN WORK, WHICH IS WHAT `begin()`/`complete()` EXIST FOR.** GitHub requires a
+      2XX within ten seconds; a real run clones and indexes a repository and will not finish in
+      ten. So the handler claims the delivery, answers **202**, and processes afterwards. If the
+      process dies mid-work the row has no `completed_at`, and GitHub's redelivery — which reuses
+      the GUID — is a legitimate retry rather than a replay.
+IMPORTS: serve.{health,webhook_github}, store.{deliveries,schema}. Rightmost layer.
+CONSUMED BY: `serve/cli.py`.
+"""
+
+from __future__ import annotations
+
+import json
+from collections.abc import Callable
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+from typing import Any
+
+from quantamind.serve.health import health
+from quantamind.serve.webhook_github import (
+    DELIVERY_HEADER,
+    EVENT_HEADER,
+    SIGNATURE_HEADER,
+    Ignore,
+    MisconfiguredSecret,
+    Review,
+    interpret,
+    verify,
+)
+from quantamind.store import deliveries, schema
+
+# GitHub's documented maximum payload is 25 MB. A read with no ceiling is memory exhaustion handed
+# to anyone who can reach the port, and Content-Length is attacker-controlled.
+MAX_BODY_BYTES = 25 * 1024 * 1024
+WEBHOOK_PATH = "/webhook"
+HEALTH_PATH = "/health"
+
+Work = Callable[[Review], None]
+
+
+def _read_body(handler: BaseHTTPRequestHandler) -> tuple[bytes | None, str]:
+    """(body, reason). Exactly `Content-Length` bytes, or None with WHICH of three faults it was.
+
+    Reading to EOF would hang on a client that never closes, and reading a different number of
+    bytes than the signature covers turns an authentic delivery into a rejected one.
+
+    **The three refusals are distinct values, not one.** An absent header, an unparseable one and
+    an oversized one need different responses from whoever is debugging the 411 -- a
+    misconfigured proxy, a malformed client and an attack look nothing alike, and collapsing them
+    into a single message makes the endpoint answer the same way for all three.
+    """
+    raw = handler.headers.get("Content-Length")
+    if raw is None:
+        return None, "no Content-Length header; the body length must be declared"
+    try:
+        length = int(raw)
+    except ValueError:
+        return None, f"Content-Length {raw!r} is not an integer"
+    if length < 0:
+        return None, f"Content-Length {length} is negative"
+    if length > MAX_BODY_BYTES:
+        return None, f"Content-Length {length} exceeds the {MAX_BODY_BYTES}-byte ceiling"
+    return handler.rfile.read(length), ""
+
+
+class _Handler(BaseHTTPRequestHandler):
+    server_version = "quantamind"
+    sys_version = ""  # do not advertise the Python version
+
+    settings: Any
+    secret: str
+    work: Work
+
+    def _say(self, status: int, payload: dict[str, object]) -> None:
+        body = json.dumps(payload).encode()
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def log_message(self, fmt: str, *args: Any) -> None:
+        """One line per request, on stdout, without the client address the stdlib would print."""
+        print(f"[listener] {fmt % args}", flush=True)
+
+    def do_GET(self) -> None:
+        if self.path != HEALTH_PATH:
+            self._say(404, {"error": "no such path"})
+            return
+        verdict = health(self.settings.database_path)
+        self._say(200 if verdict.ok else 503, {"ok": verdict.ok, "detail": verdict.detail})
+
+    def do_POST(self) -> None:
+        # A fault below must answer, not drop the connection. The stdlib handler lets an unhandled
+        # exception close the socket with NO response, which GitHub records as a failed delivery
+        # with no status -- the least diagnosable outcome available. Caught here, logged loudly,
+        # and answered 500 so a redelivery is a retry of something we can see went wrong.
+        try:
+            self._post()
+        except Exception as exc:
+            print(f"[listener] unhandled fault: {type(exc).__name__}: {exc}", flush=True)
+            self._say(500, {"error": f"{type(exc).__name__}: {exc}"})
+
+    def _post(self) -> None:
+        if self.path != WEBHOOK_PATH:
+            self._say(404, {"error": "no such path"})
+            return
+        body, why = _read_body(self)
+        if body is None:
+            self._say(411, {"error": why})
+            return
+
+        # AUTHENTICATE FIRST. Nothing below reads the body as a document until this has passed.
+        #
+        # `verify()` raises `MisconfiguredSecret` on an empty secret, and this deliberately does NOT
+        # catch it. `build()` refuses to bind on `not secret.strip()`, which is strictly stronger,
+        # so the branch would be UNREACHABLE -- the exact defect rule 14 names: a check that runs
+        # only where the thing it checks cannot happen is indistinguishable from a real negative.
+        # The pair is held together by a test instead, not by a handler nothing can enter.
+        rejected = verify(self.secret, body, self.headers.get(SIGNATURE_HEADER))
+        if rejected is not None:
+            self._say(401, {"error": rejected.value})
+            return
+
+        delivery_id = self.headers.get(DELIVERY_HEADER, "")
+        event = self.headers.get(EVENT_HEADER, "")
+        decision = interpret(event, body)
+        if isinstance(decision, Ignore):
+            self._say(200, {"ignored": decision.reason})
+            return
+
+        conn = schema.open_store(Path(self.settings.database_path))
+        try:
+            try:
+                fresh = deliveries.begin(conn, delivery_id, event)
+            except ValueError as exc:
+                self._say(400, {"error": str(exc)})
+                return
+            if not fresh:
+                self._say(200, {"replay": delivery_id, "note": "already completed, not repeated"})
+                return
+
+            # ANSWERED BEFORE THE WORK RUNS. See the module docstring.
+            self._say(202, {"accepted": delivery_id, "repo": decision.repo, "pr": decision.number})
+            try:
+                self.work(decision)
+            except Exception as exc:
+                print(f"[listener] {delivery_id} FAILED, left retryable: {exc}", flush=True)
+                return
+            deliveries.complete(conn, delivery_id)
+        finally:
+            conn.close()
+
+
+def build(settings: Any, secret: str, work: Work, port: int = 7331) -> ThreadingHTTPServer:
+    """A server ready for `serve_forever()`. Binds immediately, so a port clash fails here.
+
+    `work` is injected rather than imported: the socket layer can then be exercised without running
+    a ranking, and it never reaches rightward into a pipeline it has no business knowing about.
+    """
+    if not secret.strip():
+        raise MisconfiguredSecret(
+            "no webhook secret: refusing to bind. An endpoint that verifies nothing is an open "
+            "command channel, and it would pass every test that supplies a secret."
+        )
+    # **`staticmethod`, and it is not decoration.** A plain function stored as a class attribute is
+    # a descriptor: Python binds it and `self.work(review)` arrives as `work(self, review)`. The
+    # first version of this failed exactly that way against `serve/cli.py`, while the unit tests
+    # passed -- because they injected `list.append`, a BUILTIN bound method, which is not a
+    # descriptor and so was never re-bound. **The test agreed for a reason unrelated to the
+    # property**, and only a plain-function caller could tell.
+    bound = type(
+        "_Bound",
+        (_Handler,),
+        {"settings": settings, "secret": secret, "work": staticmethod(work)},
+    )
+    return ThreadingHTTPServer(("127.0.0.1", port), bound)

@@ -74,7 +74,7 @@ accommodate a tidy-up. **Do not take guidance from them.**
 ```bash
 uv sync --all-extras            # install
 uv run quantamind review <pr>   # NOT BUILT, exits 2   documented-command:unbuilt
-uv run quantamind serve         # NOT BUILT, exits 2   documented-command:unbuilt
+uv run quantamind serve         # webhook endpoint; authenticates, does NOT review
 just check                      # ruff + mypy + guards + unit tests — before every commit
 just verify                     # check + live data verification — before every PR
 ```

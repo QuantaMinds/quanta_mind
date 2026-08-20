@@ -122,9 +122,55 @@ that line is the only thing in the report that can say so.
 Exits **2** naming the stage that will deliver it. It parses so the argument shape is fixed; it
 does nothing else.
 
-### `quantamind serve` — NOT BUILT <!-- documented-command:unbuilt -->
+### `quantamind serve [--port N]` — binds; authenticates; **does not review**
 
-Exits **2**. The webhook's decisions exist and are tested; nothing listens on a socket yet.
+Serves two routes on `127.0.0.1` (default port **7331**) using the standard library, so the
+project's runtime dependency count is still zero.
+
+**The secret comes from the environment and nowhere else.** `QUANTAMIND_WEBHOOK_SECRET` is read at
+serve time and is deliberately absent from `Settings`, so `quantamind config` cannot print it into a
+scrollback or a CI log. With no secret set the command refuses to bind and exits **1** — an endpoint
+that verifies nothing is an open command channel, and it would pass every test that supplies one.
+
+```bash
+QUANTAMIND_WEBHOOK_SECRET=... uv run quantamind serve --port 7331
+```
+
+Healthy startup — and read the third line, because it is the honest part:
+
+```
+[serve] listening on 127.0.0.1:7331
+[serve] POST /webhook  — verifies the signature, refuses a replay, answers 202
+[serve] GET  /health   — opens the store and reports what is wrong, never raises
+[serve] IT DOES NOT REVIEW. The work callback logs and returns; see run_endpoint.py.
+[serve] http.server is not a hardened edge — run it behind a TLS-terminating proxy.
+```
+
+**Nothing is wired to the work callback.** A delivery is authenticated, de-duplicated, acknowledged
+and logged; no repository is cloned and no comment is posted, because `review` is not built. The
+banner says so on every start rather than leaving an operator to infer it from an empty output
+directory — an endpoint that quietly accepted and dropped the work would look identical to one
+doing its job.
+
+| Exit | Meaning |
+| --- | --- |
+| **0** | stopped by Ctrl-C after serving |
+| **1** | no `QUANTAMIND_WEBHOOK_SECRET`, or the port could not be bound |
+
+Responses, all JSON:
+
+| Request | Status | Body |
+| --- | --- | --- |
+| signed, actionable | **202** | `{"accepted": <guid>, "repo": ..., "pr": ...}` — answered **before** the work runs, because GitHub requires a 2XX within ten seconds |
+| signed, already completed | **200** | `{"replay": <guid>, "note": "already completed, not repeated"}` |
+| signed ping, draft, label change | **200** | `{"ignored": <reason>}` |
+| wrong or absent signature | **401** | `{"error": "signature does not match the body"}` and the other two rejection reasons, kept distinct |
+| no `X-GitHub-Delivery` | **400** | replay protection has nothing to key on, so the delivery is refused rather than processed unprotected |
+| absent or unusable `Content-Length` | **411** | three distinct messages — absent, unparseable, over the 25 MB ceiling |
+| a fault inside the handler | **500** | `{"error": "<Type>: <message>"}` — an unhandled exception would otherwise close the socket with **no status at all**, which GitHub records as a failed delivery nobody can diagnose. A missing secret cannot appear here: it is refused at bind time, above |
+
+`GET /health` returns **200** or **503** with the same verdict `serve/health.py` produces — it opens
+the store, so a version mismatch fails the probe rather than passing it.
 
 ---
 

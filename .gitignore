@@ -84,3 +84,8 @@ research/phase0/quote/clones13/
 .verify-pack.db
 .verify-clone/
 tests/fixtures/repos/
+
+# The default Settings.database_path is a bare filename, so `quantamind serve` run from a
+# checkout writes its store into the repository root. Ignored since serve/listener.py made
+# that command reachable.
+quantamind.db
