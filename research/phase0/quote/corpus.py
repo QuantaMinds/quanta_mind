@@ -67,10 +67,22 @@ REPOS_D13 = (
     "scikit-build/scikit-build-core",
     "aws/aws-cli",
 )
+# Design fourteen. Six more, each verified at zero prior mentions anywhere under research/ by
+# check_burned_corpora.py --check BEFORE selection. Fixed in
+# docs/plans/preregistrations/reviewer/design14-model-lever-preregistration.md before the run.
+REPOS_D14 = (
+    "sqlalchemy/sqlalchemy",
+    "python-poetry/poetry",
+    "pylint-dev/pylint",
+    "urllib3/urllib3",
+    "explosion/spaCy",
+    "Lightning-AI/pytorch-lightning",
+)
 PER_REPO = 10
 PER_REPO_D9 = 15
 PER_REPO_D10 = 10
 PER_REPO_D13 = 15
+PER_REPO_D14 = 15
 MAX_DIFF_CHARS = 120_000
 CACHE = pathlib.Path(
     "/private/tmp/claude-501/-Users-dhanu-Documents-SaaS-quanta-mind/"
