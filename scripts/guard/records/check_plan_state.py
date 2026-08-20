@@ -37,15 +37,19 @@ LAYERS = (
     "render",
     "serve",
 )
-# Empty ON PURPOSE, closed on evidence, with conditions recorded under "What would reopen the
-# reserved layers". **An empty row and a reserved row look identical in a table of counts**, and
-# three separate summaries in one session read these as pending work -- one of them recommending
-# `allocate/` be deleted. The block is regenerated from the filesystem, so the distinction has to
-# be printed BY the generator or it cannot survive in it.
+# Empty and SCHEDULED, with what each will hold recorded under "The reviewer half" in
+# `implementation.md`. **An empty row says nothing about why it is empty**, and three separate
+# summaries in one session read these as abandoned -- one of them recommending `allocate/` be
+# deleted. The block is regenerated from the filesystem, so the distinction has to be printed BY
+# the generator or it cannot survive in it.
+# **THESE WERE A CLOSED RESERVE AND ARE NOW SCHEDULED WORK.** Until 2026-08-20 the three rows read
+# "closed on evidence" with a re-opening gate the measurements had never cleared. The reviewer half
+# is a product decision now, so the rows say what is not built yet rather than what is refused --
+# a status line describing a withdrawn decision is worse than none, because it reads as current.
 RESERVED = {
-    "allocate": "reserve — opens only with `infer/`",
-    "infer": "reserve — needs G2 under 50% wrong, twice, once independently graded",
-    "verify": "reserve — ships with `infer/`, never after",
+    "allocate": "NOT BUILT — the budget `infer/` reads under",
+    "infer": "NOT BUILT — the reviewer, on Gemini, over the ranked files only",
+    "verify": "NOT BUILT — ONE isolated judge, a DIFFERENT model family from `infer/`",
 }
 
 

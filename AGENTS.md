@@ -18,9 +18,9 @@ follow-up fix, and that ranking decides where inference goes.
 inherits none of it.** What justifies it is the only claim here that reproduced out-of-sample:
 **top-three-by-fix-history misses 1.21% of the changes a later fix returns to against alphabetical
 order's 3.12% — six repositories the method never saw, n = 2,400, p < 1e-6, 6 of 6 positive, 0.05
-points from the original eight.** The model-free half replicated; **the model's own findings are
-66.7–82.1% wrong and are not shipped.** Read `docs/product/QUANTAMIND.md` for why and
-`docs/product/evidence-ledger.md` for what failed; `research/` is evidence, never product code.
+points from the original eight.** The model-free half replicated; raw model findings are **66.7 to
+82.1% wrong**, and an isolated judge of a DIFFERENT family clears every claim before it ships. See
+`docs/product/QUANTAMIND.md`, `docs/product/evidence-ledger.md`; `research/` is evidence, not code.
 
 ---
 
@@ -202,9 +202,9 @@ A change is done when all seven are true. Not six.
 - **Deterministic beats clever.** If a parser can answer it, a model must not.
 - **The residual is the product.** What we cannot resolve is not our failure to hide; it
   is the thing the customer is paying us to find.
-- **We do not build a better bug-finder.** **Four blind pools, two corpora: 66.7%, 74.2%, 82.1%
-  wrong, ZERO correct of 39 off-corpus.** Anchor repair, structured context, a rejection filter and
-  hunk expansion moved nothing; **CI-config findings are 66.7% wrong, 23 of 24 undecidable from a
-  diff.** **Never quote rivals' 49–76%** — theirs is behavioural, ours is truth. → `docs/plans/preregistrations/reviewer/adjudication-preregistration.md`
+- **We do not build a better bug-finder — we build the judge.** Four blind pools: **66.7–82.1%
+  wrong RAW**; anchor repair, structured context, a rejection filter and hunk expansion moved
+  nothing. **Nothing publishes until an isolated judge of a DIFFERENT family clears it** — a
+  same-family one agreed with a careful rater on **34.9%**. → `docs/plans/preregistrations/reviewer/design14-model-lever-preregistration.md`
 - **Assume the next reader knows nothing.** Every file explains itself to someone who
   joined this morning.
