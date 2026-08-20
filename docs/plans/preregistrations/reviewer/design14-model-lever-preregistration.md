@@ -145,3 +145,109 @@ reserve closed and costs one experiment rather than a shipped reviewer that is w
 - **`finishReason` on every call.** Six of design thirteen's eight silences pinned the thinking cap
   first; a truncation reported without its finish reason reads as "the model found nothing", which
   is the exact failure shape this project keeps hitting.
+
+---
+
+# Amendment 1 — the lever this design is named after is not reachable, and the run splits
+
+**Written after the document above was committed at `315605b`, before any review call was made.
+Nothing in the bars, the corpus or the prior has been touched.**
+
+## What was probed, and what answered
+
+`quantamind-oss`, with a live `gcloud` token, `POST …:generateContent` and `…:rawPredict`:
+
+| model | publisher | us-central1 | us-east5 | global |
+|---|---|---|---|---|
+| `gemini-3-pro-preview`, `gemini-3-pro`, `gemini-3.0-pro` | google | 404 | 404 | 404 |
+| `gemini-2.5-pro-preview-06-05`, `gemini-2.5-pro-002`, `gemini-exp-1206` | google | 404 | — | — |
+| `gemini-2.5-pro` | google | **200** | **200** | 404 |
+| `claude-sonnet-4-5`, `claude-opus-4-1` | anthropic | 404 | 404 | — |
+
+`ANTHROPIC_API_KEY` is not set in the environment either.
+
+**`gemini-2.5-pro` is the only capable model this project can reach, and it is the model design
+thirteen already ran.** The subject model cannot change today, so the change this design is named
+after cannot be executed.
+
+## The run splits, and only one arm is executable
+
+**Arm 1 — the config exclusion, out-of-sample. `gemini-2.5-pro`, new corpus, `.github/` and config
+excluded before the call.** This is **not** the model lever and must never be reported as it.
+
+What it buys is real and is not a consolation: **the 42.0% source-code-only figure was computed
+POST HOC**, by filtering design thirteen's already-adjudicated pool after the verdicts existed.
+This project's own rule is that choosing a subset after seeing a result is the same defect as
+moving a threshold after seeing a number, so that figure is a hypothesis, not a measurement.
+Applying the filter BEFORE the run, on a corpus the method has never seen, is what turns it into
+one. If W/n does not clear 0.50 here, the model lever is moot and arm 2 need not be paid for.
+
+**Arm 2 — the model lever. BLOCKED.** It needs a frontier model enabled in Vertex Model Garden for
+this project, or an Anthropic API key. Until then it is not run, and no result may be described as
+having tested it.
+
+## What arm 1 cannot do, stated before it runs
+
+**Arm 1 alone cannot reopen `infer/`, and a good result must not be read as though it could.**
+Excluding config removes wrong findings; it creates no correct ones. Design thirteen's
+source-code-only pool held **3 correct findings in 50**, and C/n has to reach 0.49. The reserve
+needs both bars, and this arm can only move one of them.
+
+**The expected reading of arm 1 is REBUILD on W/n and a failure on C/n**, which is the same
+expectation recorded for the full design above, reached one lever short.
+
+---
+
+# Amendment 2 — the sample was silently short, and this design was underpowered before it ran
+
+**Written before any review call. No verdict exists on this corpus. `PER_REPO_D14` changes from 15
+to 50 and nothing else does.**
+
+## `corpus.pulls()` read ONE page and stopped
+
+The function requested `state=closed&per_page=40`, took the merged rows out of that single page,
+and returned however many it found. **It never paginated and it never said it was short.**
+
+**Design thirteen asked for 6 × 15 = 90 pull requests and ran on 80.** Re-running its own request
+against the fixed function returns 90. Nothing in `quote13_run.json`, and nothing printed at the
+time, recorded the missing eleven percent.
+
+This is the silent-cap shape `AGENTS.md` names: *"if a workflow bounds coverage, log what was
+dropped — silent truncation reads as 'covered everything' when it didn't."* The fix paginates to
+`MAX_PAGES` and **prints a line naming the repository and the shortfall** whenever one remains, so
+a corpus that cannot supply the sample says so instead of quietly supplying a smaller one.
+
+**This does not invalidate design thirteen.** Its findings were adjudicated as they stood, and 80
+pull requests is a real sample; it is simply not the sample the document says it is. Recorded here
+because it was found while sizing this run, and a defect found in the instrument belongs beside the
+next measurement it would have affected.
+
+## The power calculation, which had not been done
+
+Design thirteen reached n = 96 adjudicated findings from **three arms** over 80 pull requests.
+**Design fourteen runs one arm**, correctly — hunk expansion and the conventions file each moved
+nothing, and re-measuring them would triple the cost to re-answer two settled questions. But it
+means the same n costs three times the pull requests, and that had not been carried through.
+
+Measured on this corpus, before any model call:
+
+| quantity | measured |
+|---|---|
+| reviewable after the strict filter | **73%** of merged pull requests |
+| published findings per pull request, design thirteen arm A | **0.41** |
+| at the original `PER_REPO_D14 = 15` → 90 PRs | ~66 reviewable → **~27 findings** |
+
+**At n ≈ 27 the Wilson interval is about ±19 points.** Against a threshold of 0.50 and a point
+estimate expected near 0.42, that interval spans the threshold under every outcome — and this
+document already says an interval spanning a threshold is INCONCLUSIVE and not a pass. **The run
+as sized could not have returned an answer, whatever the model did.**
+
+`PER_REPO_D14 = 50` gives ~300 pull requests, ~219 reviewable, **~90 findings**, which is the n the
+power statement above assumes.
+
+**This is a change to a pre-registered parameter and it is made for one reason: the original value
+made the experiment unable to answer its own question.** It is recorded before any review call, no
+verdict exists on this corpus, and the repository literal is untouched — `sqlalchemy/sqlalchemy`
+stays in the corpus despite supplying the fewest usable pull requests of the six, because removing
+a repository after measuring its yield is selection, and its low yield is a fact to report rather
+than a reason to drop it.

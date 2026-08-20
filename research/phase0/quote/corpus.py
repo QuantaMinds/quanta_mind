@@ -14,8 +14,26 @@ CONSUMED BY: `run.py` in this package.
 from __future__ import annotations
 
 import json
-import pathlib
-import subprocess
+
+# Re-exported so designs nine through fourteen import the names they always did.
+from fetch import CACHE, MAX_DIFF_CHARS, FetchFailed, _gh, base_sha, blob, diff, root_names
+
+__all__ = [
+    "CACHE",
+    "MAX_DIFF_CHARS",
+    "REPOS",
+    "REPOS_D9",
+    "REPOS_D10",
+    "REPOS_D11",
+    "REPOS_D13",
+    "REPOS_D14",
+    "FetchFailed",
+    "base_sha",
+    "blob",
+    "diff",
+    "pulls",
+    "root_names",
+]
 
 # Fixed in the quote-anchor pre-registration before any run. Never edited to fit a result.
 # → docs/plans/preregistrations/reviewer/quote-anchor-preregistration.md
@@ -82,26 +100,9 @@ PER_REPO = 10
 PER_REPO_D9 = 15
 PER_REPO_D10 = 10
 PER_REPO_D13 = 15
-PER_REPO_D14 = 15
-MAX_DIFF_CHARS = 120_000
-CACHE = pathlib.Path(
-    "/private/tmp/claude-501/-Users-dhanu-Documents-SaaS-quanta-mind/"
-    "6063c1dc-2654-4975-b12a-47677aad0026/scratchpad/quote_diffs"
-)
-
-
-class FetchFailed(RuntimeError):
-    """A gh read that did not exit zero. Never silently an empty result."""
-
-
-def _gh(args: list[str], accept: str | None = None) -> bytes:
-    cmd = ["gh", "api", *args]
-    if accept:
-        cmd += ["-H", f"Accept: {accept}"]
-    p = subprocess.run(cmd, capture_output=True, timeout=180)
-    if p.returncode != 0:
-        raise FetchFailed(f"gh {args[0]} exited {p.returncode}: {p.stderr[:200]!r}")
-    return p.stdout
+PER_REPO_D14 = 50
+# Pagination bound. Stated so a shortfall is the repository's, not an unreported page limit.
+MAX_PAGES = 8
 
 
 def pulls(repos: tuple[str, ...] = REPOS, per_repo: int = PER_REPO) -> list[dict[str, object]]:
@@ -114,81 +115,41 @@ def pulls(repos: tuple[str, ...] = REPOS, per_repo: int = PER_REPO) -> list[dict
     """
     out: list[dict[str, object]] = []
     for repo in repos:
-        raw = _gh([f"repos/{repo}/pulls?state=closed&per_page=40"])
         got = 0
-        for pr in json.loads(raw):
-            if not pr.get("merged_at") or got >= per_repo:
-                continue
-            if (pr.get("changed_files") or 0) > 40:
-                continue
-            out.append(
-                {
-                    "repo": repo,
-                    "number": int(pr["number"]),
-                    "title": str(pr.get("title") or ""),
-                    "url": str(pr.get("html_url") or ""),
-                }
-            )
-            got += 1
+        for page in range(1, MAX_PAGES + 1):
+            if got >= per_repo:
+                break
+            raw = _gh([f"repos/{repo}/pulls?state=closed&per_page=100&page={page}"])
+            batch = json.loads(raw)
+            if not batch:
+                break
+            for pr in batch:
+                if got >= per_repo:
+                    break
+                if not pr.get("merged_at"):
+                    continue
+                if (pr.get("changed_files") or 0) > 40:
+                    continue
+                out.append(
+                    {
+                        "repo": repo,
+                        "number": int(pr["number"]),
+                        "title": str(pr.get("title") or ""),
+                        "url": str(pr.get("html_url") or ""),
+                    }
+                )
+                got += 1
         if got == 0:
-            raise FetchFailed(f"{repo}: no merged pull requests in the first page")
+            raise FetchFailed(f"{repo}: no merged pull requests found")
+        if got < per_repo:
+            # **SAID, NOT SWALLOWED.** This function used to read ONE page of 40 and stop, so any
+            # per_repo above ~40 came back short in silence. Design thirteen asked for 90 pull
+            # requests and ran on 80; nothing in its output recorded the other ten. A sample that
+            # is quietly smaller than the one that was pre-registered is the silent-truncation
+            # shape -- it reads as "we covered the corpus" when it did not.
+            print(
+                f"  [corpus] {repo}: {got} merged pull requests, {per_repo} asked for "
+                f"-- the repository does not have more within {MAX_PAGES} pages",
+                flush=True,
+            )
     return out
-
-
-def diff(repo: str, number: int) -> str:
-    """The unified diff, cached. Raises rather than returning an empty string."""
-    CACHE.mkdir(parents=True, exist_ok=True)
-    path = CACHE / f"{repo.replace('/', '_')}_{number}.diff"
-    if path.exists() and path.stat().st_size > 0:
-        return path.read_text()[:MAX_DIFF_CHARS]
-    text = _gh([f"repos/{repo}/pulls/{number}"], "application/vnd.github.v3.diff").decode(
-        "utf-8", "replace"
-    )
-    if not text.strip():
-        raise FetchFailed(f"{repo}#{number}: empty diff at exit 0")
-    path.write_text(text)
-    return text[:MAX_DIFF_CHARS]
-
-
-def base_sha(repo: str, number: int) -> str:
-    """The commit the pull request was diffed AGAINST.
-
-    `expand.py` walks the ORIGINAL file, so the base is the correct ref. Reading the head would
-    silently misalign every expansion by whatever the pull request itself changed.
-    """
-    obj = json.loads(_gh([f"repos/{repo}/pulls/{number}"]))
-    sha = str((obj.get("base") or {}).get("sha") or "")
-    if not sha:
-        raise FetchFailed(f"{repo}#{number}: no base sha at exit 0")
-    return sha
-
-
-def blob(repo: str, ref: str, path: str) -> list[str] | None:
-    """A file's lines at `ref`, or None when it is absent, binary or too large.
-
-    None is returned for a MISSING file and raised for a broken read, because "this pull request
-    adds the file" and "GitHub refused us" are different facts and must not share a value.
-    """
-    cmd = [
-        "gh",
-        "api",
-        f"repos/{repo}/contents/{path}?ref={ref}",
-        "-H",
-        "Accept: application/vnd.github.raw",
-    ]
-    p = subprocess.run(cmd, capture_output=True, timeout=120)
-    if p.returncode != 0:
-        err = p.stderr.decode("utf-8", "replace")
-        if "404" in err or "Not Found" in err:
-            return None
-        raise FetchFailed(f"contents {repo}:{path}@{ref[:8]} exited {p.returncode}: {err[:160]!r}")
-    try:
-        return p.stdout.decode("utf-8").split("\n")
-    except UnicodeDecodeError:
-        return None
-
-
-def root_names(repo: str, ref: str) -> list[str]:
-    """Filenames at the repository root at `ref`. Used to find the conventions file."""
-    raw = _gh([f"repos/{repo}/contents?ref={ref}"])
-    return [str(e.get("name") or "") for e in json.loads(raw) if e.get("type") == "file"]
