@@ -53,13 +53,16 @@ def build_parser() -> argparse.ArgumentParser:
     look.add_argument(
         "--sha", required=True, help="the commit to review, scored against history BEFORE it"
     )
-    look.add_argument(
-        "--deep",
-        metavar="GCP_PROJECT",
-        default="",
-        help="also read the ranked files with a model. Raw findings are 66.7-82.1%% wrong; only "
-        "those a parser can anchor in the diff are shown, and the discards are counted.",
-    )
+    # **SUPPRESSED FROM `--help`, NOT REMOVED, AND OFF UNLESS ASKED FOR BY NAME.**
+    # `docs/product/QUANTAMIND.md` says the product publishes no model findings. A flag advertised
+    # in `--help` contradicts that document, and a CLI quietly offering what the canonical document
+    # says is not shipped is precisely the drift this project spends its time catching.
+    #
+    # It stays because the measurement half needs it: raw findings are **66.7-82.1% wrong** at
+    # **0.013-0.037 correct per pull request**, and the parser gate in front of it has adjudicated
+    # exactly ONE live finding — which it dropped. That is not a capability to put in front of a
+    # customer; it is an instrument for finding out whether it could ever be one.
+    look.add_argument("--deep", metavar="GCP_PROJECT", default="", help=argparse.SUPPRESS)
     walk = subparsers.add_parser(
         "retrospective", help="replay the ranker over a clone's own history and report"
     )

@@ -91,7 +91,7 @@ def report(clone: Path, sha: str, out: Reviewed, project: str) -> None:
         # The ranking already printed and is not retracted by an inference failure.
         print(f"\n[deep] NOT RUN: {type(exc).__name__}: {exc}")
         return
-    print(f"\n[deep] read {len(result.read)} ranked file(s)")
+    print("\n[deep] NOT A PRODUCT FEATURE. This is the measurement half, run by hand.")
     print(
         f"[deep] {result.raw} raw finding(s); {result.unanchored} dropped — quote not in the diff"
     )
@@ -99,4 +99,9 @@ def report(clone: Path, sha: str, out: Reviewed, project: str) -> None:
         print(f"  {f.path}:{f.line}  {f.claim}")
     if not result.anchored:
         print("  (nothing survived the anchor check)")
-    print("[deep] RAW FINDINGS MEASURE 66.7-82.1% WRONG. Anchored is not verified true.")
+    print(
+        f"[deep] read {len(result.read)} ranked file(s). RAW FINDINGS MEASURE 66.7-82.1% WRONG "
+        f"across four blind rater pools, at 0.013-0.037 correct per pull request. "
+        f"'Anchored' means a parser found the quoted line in the diff. It does NOT mean the claim "
+        f"is true, and nothing here is published to a pull request."
+    )
