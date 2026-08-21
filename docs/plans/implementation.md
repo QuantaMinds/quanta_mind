@@ -39,10 +39,10 @@ three months stale.
 | layer | modules | files |
 |---|---|---|
 | `types/` | **10** | `change.py`, `commit.py`, `finding.py`, `pooled_outcome.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `settings.py`, `touch.py`, `verdict.py` |
-| `store/` | **4** | `deliveries.py`, `drift.py`, `schema.py`, `touches.py` |
+| `store/` | **5** | `calibration.py`, `deliveries.py`, `drift.py`, `schema.py`, `touches.py` |
 | `ingest/` | **4** | `commits.py`, `diff.py`, `github_comments.py`, `history.py` |
 | `parse/` | **2** | `languages.py`, `units.py` |
-| `rank/` | **4** | `baseline.py`, `events.py`, `order.py`, `score.py` |
+| `rank/` | **5** | `baseline.py`, `events.py`, `firing.py`, `order.py`, `score.py` |
 | `allocate/` | **0** | **NOT BUILT — its work is done inside `rank/order.py`, which emits the labels** |
 | `infer/` | **1** | `gemini.py` |
 | `verify/` | **1** | `anchor.py` |

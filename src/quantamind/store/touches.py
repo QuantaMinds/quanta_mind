@@ -36,8 +36,6 @@ YEAR_SECONDS = 365 * 86400
 
 
 # How many recent changes the firing decile is calibrated over. Enough to be stable, few
-# enough that the correlated count stays one bounded pass.
-RECENT_CHANGES = 400
 
 
 class UnboundedRankingError(ValueError):
@@ -76,77 +74,6 @@ def index(conn: sqlite3.Connection, repo_id: int, touches: Iterable[Touch]) -> i
         conn.execute("DELETE FROM touch WHERE repo_id = ?", (repo_id,))
         conn.executemany("INSERT INTO touch (repo_id, path, committed_at) VALUES (?, ?, ?)", rows)
     return len(rows)
-
-
-def baseline(
-    conn: sqlite3.Connection,
-    repo_id: int,
-    *,
-    as_of: int,
-    quantile: float = 0.9,
-    window: int = YEAR_SECONDS,
-    over: int = RECENT_CHANGES,
-) -> int:
-    """The score a change's TOP file must reach to be in this repository's top decile OF CHANGES.
-
-    **CALIBRATED OVER CHANGES, NOT OVER FILES, AND THE DIFFERENCE IS 62% AGAINST 11%.** Measured
-    2026-08-20 on four repositories the rule was not built from:
-
-    | firing rule | rate | spread |
-    |---|---|---|
-    | absolute threshold, as previously shipped | 91.3% | 83.0-97.0% |
-    | top decile of this repository's FILES | 62.2% | 42.7-79.7% |
-    | top decile of this repository's CHANGES | ~11% | 10.0-12.3% |
-
-    **The file-calibrated version does not work, and the reason is selection.** A change's
-    top-ranked file is the most-touched among the files that change touched, and changed files are
-    drawn from the active part of the repository -- so it clears a repository-wide file decile most
-    of the time. Calibrating over changes compares a change to other changes, which is the unit the
-    rate is quoted over.
-
-    **A PREDICTION WAS WRITTEN DOWN FIRST AND IT WAS WRONG.** Files were expected to fire LESS than
-    functions, since a pull request holds fewer files than functions and fewer units get a chance to
-    clear the bar. They fire MORE, for the selection reason above. Recorded because a refuted
-    prediction is worth more than an unrecorded one.
-
-    **AND THE RATE IS DEFINITIONAL, NOT DISCOVERED.** A top decile of changes fires on a tenth of
-    changes because that is what a top decile is. The transferable finding is the CONTRAST an
-    absolute threshold could not deliver: 11% of one repository against 53% of another.
-
-    Returns 0 when there is no history to calibrate against, which leaves the gate firing on
-    anything above zero rather than silencing a repository it cannot yet judge.
-    """
-    if as_of <= 0:
-        raise UnboundedRankingError(f"as_of must be a positive timestamp, got {as_of}")
-    if not 0.0 < quantile < 1.0:
-        raise UnboundedRankingError(f"quantile must be in (0, 1), got {quantile}")
-    tops = [
-        int(row[0])
-        for row in conn.execute(
-            # **CONTEMPORANEOUS, NOT MERELY TRAILING.** Calibrating over "the last 400 changes"
-            # reached ~1.5 years back on an active repository, so the floor described a busier era
-            # than the change being judged and SILENCED two repositories entirely -- 0.0% of 300
-            # changes on both. The calibration window is the same window the scores come from.
-            "WITH recent AS ("
-            "  SELECT DISTINCT committed_at FROM touch"
-            "  WHERE repo_id = ? AND committed_at < ? AND committed_at >= ?"
-            "  ORDER BY committed_at DESC LIMIT ?"
-            ") "
-            "SELECT MAX(("
-            "  SELECT COUNT(*) FROM touch prior"
-            "  WHERE prior.repo_id = ? AND prior.path = changed.path"
-            "    AND prior.committed_at >= recent.committed_at - ?"
-            "    AND prior.committed_at <  recent.committed_at"
-            ")) AS top "
-            "FROM recent JOIN touch changed"
-            "  ON changed.repo_id = ? AND changed.committed_at = recent.committed_at "
-            "GROUP BY recent.committed_at ORDER BY top",
-            (repo_id, as_of, as_of - window, over, repo_id, window, repo_id),
-        )
-    ]
-    if not tops:
-        return 0
-    return tops[min(len(tops) - 1, int(quantile * len(tops)))]
 
 
 def counts(

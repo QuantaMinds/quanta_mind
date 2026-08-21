@@ -192,12 +192,32 @@ and `types/ranking.py` already recorded that `threshold_percentile` "governs not
 | absolute threshold, **as previously shipped** | **91.3%** | 83.0–97.0% |
 | top decile of this repository's **files** | **62.2%** | 42.7–79.7% |
 | top decile of this repository's **changes**, calibrated IN-SAMPLE | ~11% | 10.0–12.3% |
-| **top decile of changes, calibrated out-of-sample — WHAT SHIPS** | **9.5%** | **0.0% – 25.0%** |
+| **top decile of changes, calibrated out-of-sample — WHAT SHIPS** | **14.0%** | **6.3% – 29.0%** |
 
-**The pooled 9.5% is an average of a rule that is silent on one repository and speaks on a quarter
-of changes at another.** `sveltejs/svelte` fires on **0.0% of 300 changes**: it has a handful of
-dominant files, so the decile of change-tops lands at the hottest file's count and almost nothing
-clears it. `gin-gonic/gin` fires on 25.0%.
+**The pooled number is an average of a rate that varies four-fold between repositories**, and
+**an average is not what any individual customer gets.** So the product computes it from the
+customer's own history instead of quoting a band: `rank/firing.py` replays their recent changes
+through the real gate and prints *"on your last 400 changes this would have spoken 88 times — 22%"*
+before anything is installed.
+
+**Three bugs were found getting here, each by a number that did not close:**
+
+1. Calibrating over "the last 400 changes" reached about **1.5 years back** on an active repository,
+   so the floor described a busier era than the change being judged.
+2. Each calibration change's top was counted in **its own** prior year and compared against a top
+   counted in **today's** year — two different quantities. On a cooling repository the floor sat
+   above everything the present could produce: **`sveltejs/svelte` fired on 0.0% of 300 changes.**
+   Counting both sides in the same window took it to **13.0%**.
+3. On integer counts the decile lands on a value many changes share. On `gin-gonic/gin` **every one
+   of the 87 firings was an exact tie at the floor** — `>=` fired on 29.0% and `>` on **0.0%**. The
+   rule was deciding a quarter of the corpus on which comparison operator was written. The cut is
+   chosen by realised share now, not by index.
+
+**A third typed state exists because of the second bug.** Beside `NO_HISTORY` and `FLAT_NONZERO`
+there is now `CONCENTRATED`: a repository whose few dominant files put the decile beyond reach, so
+the gate would be structurally silent. **That silence is not legible from a coverage line** — the
+review would truthfully report that nothing was skipped, because nothing was. It is named and
+reported at install rather than discovered in week three.
 
 **The in-sample row is why this needed measuring twice.** Calibrating the decile on the same
 changes it is tested against gives 10–12% *by construction* — it is a tenth of a tenth. Calibrated

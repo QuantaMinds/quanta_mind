@@ -35,9 +35,11 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from quantamind.ingest.history import read_touches
+from quantamind.rank import firing
 from quantamind.rank.order import NothingToRank, rank
 from quantamind.render.comment import comment
-from quantamind.store import schema
+from quantamind.serve.deep_review import report
+from quantamind.store import calibration, schema
 from quantamind.store import touches as touch_store
 from quantamind.types.change import REVIEWABLE_SUFFIXES, Language, language_of
 from quantamind.types.ranking import Ranking
@@ -62,6 +64,12 @@ class Reviewed:
     """Changed paths in a language we do not read. **Named, not dropped** — this is what the
     coverage line reports, and a file that vanishes from both lists is the silence this product
     exists to refuse."""
+
+    forecast: firing.Estimate | None = None
+    """How often this repository would be spoken on AT ALL, from its own history.
+
+    **The firing rate is a property of the customer's repository, not of the product** — measured
+    6.3% to 31.0% across five repositories. None when nothing was indexed."""
 
 
 def _index(clone: Path, repo: str, store_path: Path) -> tuple[sqlite3.Connection, int]:
@@ -106,16 +114,20 @@ def review(
         scores = touch_store.counts(conn, repo_id, considered, as_of=as_of)
         # **THE REPOSITORY'S OWN TOP DECILE, NOT THIS CHANGE'S.** Without it `fires()` falls back to
         # the absolute threshold the research rejected, which fired on 198 of 200 real changes.
-        floor = touch_store.baseline(conn, repo_id, as_of=as_of)
+        floor = calibration.baseline(conn, repo_id, as_of=as_of)
+        # **WHAT THIS REPOSITORY WOULD ACTUALLY GET.** The firing rate is a property of the
+        # customer's history, not of the product: measured 6.3-31.0% across five repositories. A
+        # rate quoted from a document is an average nobody receives, so it is computed here.
+        forecast = firing.estimate(conn, repo_id, as_of=as_of)
     finally:
         conn.close()
 
     try:
         ranking = rank(scores, baseline=floor)
     except NothingToRank:
-        return Reviewed(None, Ranking(), tuple(considered), tuple(skipped))
+        return Reviewed(None, Ranking(), tuple(considered), tuple(skipped), forecast)
 
-    return Reviewed(comment(ranking), ranking, tuple(considered), tuple(skipped))
+    return Reviewed(comment(ranking), ranking, tuple(considered), tuple(skipped), forecast)
 
 
 def review_commit(clone: Path, repo: str, sha: str, *, deep_project: str = "") -> int:
@@ -140,36 +152,17 @@ def review_commit(clone: Path, repo: str, sha: str, *, deep_project: str = "") -
     print(
         f"[review] {len(out.considered)} file(s) ranked, {len(out.skipped)} skipped as unsupported"
     )
+    if out.forecast is not None:
+        print(f"[review] {out.forecast.sentence()}")
+        if out.forecast.selectivity is not firing.Selectivity.SELECTIVE:
+            print(f"[review] SELECTIVITY: {out.forecast.selectivity.value.upper()}")
     if out.body is None:
         print("[review] not worth speaking on — no comment would be posted")
         return 0
     print(out.body)
     if deep_project:
-        _deep(clone, sha, out, deep_project)
+        report(clone, sha, out, deep_project)
     return 0
-
-
-def _deep(clone: Path, sha: str, out: Reviewed, project: str) -> None:
-    """The reviewer pass, printed with its discards. Never raises into the ranking's result."""
-    from quantamind.infer.gemini import InferenceFailed, Unavailable
-    from quantamind.serve.deep_review import deep
-
-    ranked = [u.unit.site.path for u in out.ranking.units if u.allocation.value != "cold"]
-    try:
-        result = deep(clone, sha, ranked, project=project)
-    except (Unavailable, InferenceFailed) as exc:
-        # The ranking already printed and is not retracted by an inference failure.
-        print(f"\n[deep] NOT RUN: {type(exc).__name__}: {exc}")
-        return
-    print(f"\n[deep] read {len(result.read)} ranked file(s)")
-    print(
-        f"[deep] {result.raw} raw finding(s); {result.unanchored} dropped — quote not in the diff"
-    )
-    for f in result.anchored:
-        print(f"  {f.path}:{f.line}  {f.claim}")
-    if not result.anchored:
-        print("  (nothing survived the anchor check)")
-    print("[deep] RAW FINDINGS MEASURE 66.7-82.1% WRONG. Anchored is not verified true.")
 
 
 def _timestamp(clone: Path, sha: str) -> tuple[list[str], int] | None:

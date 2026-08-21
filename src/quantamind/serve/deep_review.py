@@ -26,12 +26,17 @@ from __future__ import annotations
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from quantamind.infer import gemini
+from quantamind.infer.gemini import InferenceFailed, Unavailable
 from quantamind.types.finding import Finding
 from quantamind.verify.anchor import locate
 
 GIT_TIMEOUT_S = 60
+
+if TYPE_CHECKING:  # `Reviewed` lives in run_review, which imports THIS module at runtime.
+    from quantamind.serve.run_review import Reviewed
 
 
 @dataclass(frozen=True, slots=True)
@@ -75,3 +80,23 @@ def deep(clone: Path, sha: str, ranked: list[str], *, project: str) -> Deep:
     located = [locate(f, text) for f in found]
     kept = tuple(f for f in located if f is not None)
     return Deep(kept, len(found), len(found) - len(kept), tuple(ranked))
+
+
+def report(clone: Path, sha: str, out: Reviewed, project: str) -> None:
+    """The reviewer pass, printed with its discards. Never raises into the ranking's result."""
+    ranked = [u.unit.site.path for u in out.ranking.units if u.allocation.value != "cold"]
+    try:
+        result = deep(clone, sha, ranked, project=project)
+    except (Unavailable, InferenceFailed) as exc:
+        # The ranking already printed and is not retracted by an inference failure.
+        print(f"\n[deep] NOT RUN: {type(exc).__name__}: {exc}")
+        return
+    print(f"\n[deep] read {len(result.read)} ranked file(s)")
+    print(
+        f"[deep] {result.raw} raw finding(s); {result.unanchored} dropped — quote not in the diff"
+    )
+    for f in result.anchored:
+        print(f"  {f.path}:{f.line}  {f.claim}")
+    if not result.anchored:
+        print("  (nothing survived the anchor check)")
+    print("[deep] RAW FINDINGS MEASURE 66.7-82.1% WRONG. Anchored is not verified true.")
