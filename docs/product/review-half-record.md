@@ -127,6 +127,55 @@ real-world code review deployment."*
 
 ---
 
+## 6b. Form does not predict truth — a road closed for an hour and no model calls
+
+**Nothing here had ever measured FORM.** Every number in this record is about truth: is the claim
+correct, does it point at the right line, can a parser confirm it. Whether a finding is one line or
+six, concrete or hedged, names a fix or waves at a problem, had never been looked at.
+
+**n = 152, two designs, two corpora, every finding that still has its text joined to its blind
+verdict.** → `research/phase0/quote/form_vs_truth.py`
+
+| form feature | n | WRONG | vs rest | Fisher p |
+|---|---|---|---|---|
+| *(all findings)* | 152 | 58.6% | | |
+| **hedged** | 27 | 59.3% | 58.4% | **1.0000** |
+| definite wording | 63 | **66.7%** | 52.8% | 0.0971 |
+| has a code token | 120 | 59.2% | 56.2% | 0.8408 |
+| names a fix | 25 | 48.0% | 60.6% | 0.2715 |
+| short (≤ 20 words) | 19 | 47.4% | 60.2% | 0.3258 |
+| long (> 40 words) | 16 | 81.2% | 55.9% | 0.0623 |
+
+**HEDGING IS NOT A FILTER. 59.3% against 58.4%, p = 1.0000** — a perfect null on the headline
+feature, and the one everybody assumes will work.
+
+**THE INVERSION IS THE USEFUL PART: `definite wording` is the WORST of the confident forms at 66.7%
+wrong.** That is the mechanism behind this project's most memorable failures, measured rather than
+anecdotal — *"Version 1.45.34 of awscli does not exist on PyPI"* is one line, specific, unhedged,
+and false. **Somebody will eventually propose publishing only the confident findings. This is the
+answer.**
+
+**The trends are not nothing, and they are not usable.** Short is 47.4% against 60.2%, names-a-fix
+48.0% against 60.6%, long 81.2% — all pointing where the intuition says they should. **The direction
+is consistent with the intuition and the effect sizes are within noise at this n.** The closest to
+significance, `long` at p = 0.0623, is a reason to CUT long comments rather than a way to find true
+ones.
+
+**AND THE CORRECT-RATE IS THE SENTENCE THAT CLOSES IT: 3.7% to 12.0% across every form.** Even the
+best-formed slice tops out at one in eight. Unlike a wrong-rate, that is a number **no deletion can
+improve** — the same argument that killed design fourteen's exclusion, applied to a different lever.
+
+**This is the third attempt to find truth in the surface of the text**, beside the anchor repairs
+and the lexical marker. The corpus study concluded review content is not keyword-shaped; this
+concludes findings are not form-shaped either.
+
+**Which leaves the schema as the only lever, and for a reason worth stating precisely: it does not
+reward good form, it makes bad form INEXPRESSIBLE.** A model cannot hedge inside five typed fields.
+That is why **≥ 39% surviving** matters, and why **150 hand-graded findings by someone who did not
+write the definition** is the last thing standing.
+
+---
+
 ## 7. How to move forward
 
 **Do now:**
