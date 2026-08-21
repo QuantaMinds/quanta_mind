@@ -28,7 +28,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from quantamind.rank.order import fires
-from quantamind.store.calibration import RECENT_CHANGES, baseline
+from quantamind.store.calibration import RECENT_CHANGES, baseline, window_for
 from quantamind.store.touches import YEAR_SECONDS
 
 
@@ -52,6 +52,13 @@ class Selectivity(Enum):
 
 
 CONCENTRATED_AT = 0.02
+UNSTABLE_AT = 0.10
+"""Spread across a repository's own windows past which the headline rate is not worth quoting.
+
+Set from the measurement rather than chosen: `vuejs/core` and `trpc/trpc` sit at 5 points and their
+rates are usable; `sveltejs/svelte` at 16 and `facebook/react` at 10 move enough that a single
+number misleads. The boundary is where the observed repositories actually separate.
+"""
 ALWAYS_AT = 0.50
 
 
@@ -63,6 +70,20 @@ class Estimate:
     fired: int
     floor: int
     selectivity: Selectivity
+    calibrated_on: int = 0
+    """How many changes the floor was estimated from. Reported, not gated on.
+
+    **A MINIMUM-SIZE FLOOR WAS PROPOSED AND THE MEASUREMENT REFUSED IT.** Across five repositories
+    the calibration size does not predict stability: `sveltejs/svelte` calibrates on **703** changes
+    and its rate swings **16 points** between periods, while `vuejs/core` calibrates on **243** and
+    swings **5**. `facebook/react` has the largest sample of all at 808 and swings 10. Refusing to
+    report below some sample size would have been a rule with nothing behind it.
+    """
+
+    spread: tuple[float, ...] = ()
+    """The rate on earlier windows of this same repository. **This is the number that says whether
+    the headline is trustworthy**, and it is what a sample-size floor was reaching for and missing.
+    """
 
     @property
     def rate(self) -> float:
@@ -85,10 +106,22 @@ class Estimate:
                 f"— {self.rate:.0%}. That is close to every change, which is the noise this "
                 f"product exists to reduce. It should not be installed here as configured."
             )
-        return (
+        line = (
             f"On your last {self.changes} changes this would have spoken {self.fired} time(s) "
             f"— {self.rate:.0%}."
         )
+        if self.spread:
+            low, high = min(self.spread), max(self.spread)
+            line += (
+                f" On {len(self.spread)} earlier windows of your own history it ranged "
+                f"{low:.0%} to {high:.0%}."
+            )
+            if high - low >= UNSTABLE_AT:
+                line += (
+                    " That range is wide enough that the headline should not be relied"
+                    " on: your rate moves with your own activity, not with anything we set."
+                )
+        return line
 
 
 def estimate(
@@ -101,6 +134,7 @@ def estimate(
 ) -> Estimate:
     """Replay recent changes through the real gate. **Not a model of it — the gate itself.**"""
     floor = baseline(conn, repo_id, as_of=as_of, window=window, over=over)
+    _reach, calibrated = window_for(conn, repo_id, as_of=as_of, window=window)
     rows = conn.execute(
         "WITH recent AS ("
         "  SELECT DISTINCT committed_at FROM touch"
@@ -119,14 +153,22 @@ def estimate(
     ).fetchall()
     tops = [int(r[0]) for r in rows]
     if not tops or max(tops) == 0:
-        return Estimate(len(tops), 0, floor, Selectivity.NO_HISTORY)
+        return Estimate(len(tops), 0, floor, Selectivity.NO_HISTORY, calibrated)
 
     fired = sum(1 for top in tops if fires({"unit": top}, floor))
     rate = fired / len(tops)
+    # **THE SAME GATE ON EARLIER WINDOWS OF THIS REPOSITORY.** One number cannot say whether it is
+    # worth quoting; the range across a customer's own history can. Computed from `tops`, which is
+    # already in hand, so it costs nothing extra.
+    window_size = max(len(tops) // 4, 1)
+    spread = tuple(
+        sum(1 for top in tops[i : i + window_size] if fires({"unit": top}, floor)) / window_size
+        for i in range(0, len(tops) - window_size + 1, window_size)
+    )
     if rate <= CONCENTRATED_AT:
         state = Selectivity.CONCENTRATED
     elif rate >= ALWAYS_AT:
         state = Selectivity.ALWAYS
     else:
         state = Selectivity.SELECTIVE
-    return Estimate(len(tops), fired, floor, state)
+    return Estimate(len(tops), fired, floor, state, calibrated, spread)

@@ -20,6 +20,45 @@ from quantamind.store.touches import YEAR_SECONDS, UnboundedRankingError
 RECENT_CHANGES = 400
 
 
+MIN_CALIBRATION = 150
+"""Fewest changes the floor may be estimated from before the window is widened.
+
+**A 90th percentile from 71 points is estimated from about 7 points above it.** `gin-gonic/gin`
+holds only 71 changes in a year and fired on **29.0%** against a 10% target, while three larger
+repositories landed at 6.3-13.0% — the floor was noise, not policy. Widening trades some
+contemporaneity for a sample the tail can actually be read from, which is the right trade when the
+alternative is a threshold set by a handful of observations.
+"""
+
+MAX_WINDOW_YEARS = 4
+"""How far back the widening may reach. Beyond this the repository is a different codebase and a
+contemporaneous floor stops meaning anything, so a short sample is reported rather than fabricated.
+"""
+
+
+def window_for(
+    conn: sqlite3.Connection, repo_id: int, *, as_of: int, window: int = YEAR_SECONDS
+) -> tuple[int, int]:
+    """(window actually used, changes it contains). Widens only until the sample is usable.
+
+    Returns the FIRST window holding at least `MIN_CALIBRATION` changes, or the widest allowed when
+    no window does. The count is returned rather than discarded because a floor estimated from 40
+    changes and one estimated from 400 are different claims, and the caller reports which it had.
+    """
+    for years in range(1, MAX_WINDOW_YEARS + 1):
+        span = window * years
+        n = int(
+            conn.execute(
+                "SELECT COUNT(*) FROM (SELECT DISTINCT committed_at FROM touch "
+                "WHERE repo_id = ? AND committed_at < ? AND committed_at >= ?)",
+                (repo_id, as_of, as_of - span),
+            ).fetchone()[0]
+        )
+        if n >= MIN_CALIBRATION or years == MAX_WINDOW_YEARS:
+            return span, n
+    return window, 0
+
+
 def baseline(
     conn: sqlite3.Connection,
     repo_id: int,
@@ -62,6 +101,13 @@ def baseline(
         raise UnboundedRankingError(f"as_of must be a positive timestamp, got {as_of}")
     if not 0.0 < quantile < 1.0:
         raise UnboundedRankingError(f"quantile must be in (0, 1), got {quantile}")
+    # **TWO WINDOWS, AND CONFLATING THEM IS BUG 2 IN A NEW COSTUME.**
+    #   `reach`  — how far back to go to find ENOUGH CHANGES to estimate a tail from.
+    #   `window` — the span touches are COUNTED over, which must match what the scorer uses.
+    # Widening `window` too made the floor a four-year count compared against a one-year score, and
+    # `gin-gonic/gin` went from 29.0% to **0.0%**. The sample can reach further back; the
+    # measurement may not.
+    reach, _n = window_for(conn, repo_id, as_of=as_of, window=window)
     tops = [
         int(row[0])
         for row in conn.execute(
@@ -89,7 +135,7 @@ def baseline(
             "FROM recent JOIN touch changed"
             "  ON changed.repo_id = ? AND changed.committed_at = recent.committed_at "
             "GROUP BY recent.committed_at ORDER BY top",
-            (repo_id, as_of, as_of - window, over, repo_id, as_of - window, as_of, repo_id),
+            (repo_id, as_of, as_of - reach, over, repo_id, as_of - window, as_of, repo_id),
         )
     ]
     if not tops:

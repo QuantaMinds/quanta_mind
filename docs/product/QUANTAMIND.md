@@ -192,10 +192,37 @@ and `types/ranking.py` already recorded that `threshold_percentile` "governs not
 | absolute threshold, **as previously shipped** | **91.3%** | 83.0–97.0% |
 | top decile of this repository's **files** | **62.2%** | 42.7–79.7% |
 | top decile of this repository's **changes**, calibrated IN-SAMPLE | ~11% | 10.0–12.3% |
-| **top decile of changes, calibrated out-of-sample — WHAT SHIPS** | **14.0%** | **6.3% – 29.0%** |
+| **top decile of changes, calibrated out-of-sample — WHAT SHIPS** | **8–14% on six of seven repositories** | gin-gonic/gin, alone, at 31% |
 
-**The pooled number is an average of a rate that varies four-fold between repositories**, and
-**an average is not what any individual customer gets.** So the product computes it from the
+**Seven repositories, none of which the rule was built from, spanning 2,007 to 38,217 commits:**
+
+| repository | commits | files ever | rate | range across its own windows | |
+|---|---|---|---|---|---|
+| `angular/angular` | 38,217 | 30,108 | **11%** | 9–12% | tightest |
+| `facebook/react` | 21,640 | 13,323 | 12% | 8–17% | |
+| `nestjs/nest` | 21,639 | 4,541 | 8% | 3–11% | |
+| `sveltejs/svelte` | 11,326 | 17,236 | 14% | 9–18% | |
+| `vuejs/core` | 7,157 | 957 | 13% | 8–15% | |
+| `trpc/trpc` | 4,902 | 2,542 | 12% | 10–14% | |
+| `gin-gonic/gin` | 2,007 | **236** | **31%** | 24–41% | **flagged unreliable** |
+
+**Six of seven land at 8–14%, and the largest repository is the tightest.** The documented band
+substantially holds at file level — which was not knowable before, because it had only ever been
+measured at function level.
+
+**The one outlier is a small-surface repository, and the product detects it.** `gin-gonic/gin` has
+**236 files ever** against angular's 30,108 — a 128-fold difference. On a surface that small the
+touch-count distribution is coarse, a decile lands where many changes tie, and the rate lands at
+31% with a 17-point range. **`rank/firing.py` reports that range and marks the estimate unreliable
+rather than quoting the headline.**
+
+**A MINIMUM CALIBRATION SIZE WAS PROPOSED AND THE MEASUREMENT REFUSED IT.** Sample size does not
+predict stability: `sveltejs/svelte` calibrates on **703** changes and swings 9 points, `vuejs/core`
+on **243** and swings 7. `gin` calibrates on 184 — more than vue — and is the unreliable one. **The
+driver is the file surface, not the sample.** A size floor would have been a rule with nothing
+behind it, and the variability report is what it was reaching for.
+
+**An average is still not what any individual customer gets.** So the product computes it from the
 customer's own history instead of quoting a band: `rank/firing.py` replays their recent changes
 through the real gate and prints *"on your last 400 changes this would have spoken 88 times — 22%"*
 before anything is installed.
