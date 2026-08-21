@@ -37,9 +37,16 @@ from client import Client  # noqa: E402
 
 import corpus  # noqa: E402
 
-MODEL = "gemini-2.5-pro"
+# **TWO MODELS, AND CONFLATING THEM WOULD VOID THE RUN.**
+# JUDGE_MODEL is the isolated judge under test -- the thing this experiment varies.
+# SCORING_MODEL is the BENCHMARK judge that matches survivors to golden comments, and it stays
+# `gemini-2.5-pro` because that is the one calibrated against Martian's Claude judge to within
+# 3.1 points on precision and 2.9 on recall (the P0 gate). Changing it would make every number
+# here a comparison between scorers rather than between judges.
+JUDGE_MODEL = "gemini-2.5-flash"
+SCORING_MODEL = "gemini-2.5-pro"
 NITS = HERE / "results" / "nits_arm.json"
-OUT = HERE / "results" / "judged_arm.json"
+OUT = HERE / "results" / f"judged_arm_{JUDGE_MODEL}.json"
 
 
 def score(tp: int, fp: int, fn: int) -> tuple[float, float, float]:
@@ -55,7 +62,9 @@ def main() -> int:
     total_before = sum(len(v) for v in cands.values())
     print(f"  {len(cands)} pull requests, {total_before} candidates before the judge\n")
 
-    client = Client(MODEL)
+    judge_client = Client(JUDGE_MODEL)
+    score_client = Client(SCORING_MODEL)
+    print(f"  judge {JUDGE_MODEL}   scorer {SCORING_MODEL} (calibrated, unchanged)\n")
     kept: dict[str, list[str]] = {}
     detail: list[dict[str, object]] = []
     failures = 0
@@ -69,7 +78,7 @@ def main() -> int:
             print(f"    {key}: diff unavailable ({str(exc)[:50]}) — arm left unjudged")
             kept[key] = issues
             continue
-        verdicts = isolated_judge.screen(client, diff, issues)
+        verdicts = isolated_judge.screen(judge_client, diff, issues)
         failures += sum(1 for v in verdicts if v.get("failed"))
         kept[key] = [str(v["issue"]) for v in verdicts if v["keep"]]
         detail.append({"key": key, "verdicts": verdicts})
@@ -82,7 +91,8 @@ def main() -> int:
     OUT.write_text(
         json.dumps(
             {
-                "model": MODEL,
+                "judge_model": JUDGE_MODEL,
+                "scoring_model": SCORING_MODEL,
                 "same_family_as_reviewer": True,
                 "before": total_before,
                 "after": total_after,
@@ -117,7 +127,7 @@ def main() -> int:
         if not g:
             fp += len(issues)
             continue
-        v = judge.verdicts(client, g, issues)
+        v = judge.verdicts(score_client, g, issues)
         tp += len(v["tp"])
         fp += len(v["fp"])
         fn += len(v["fn"])
@@ -126,7 +136,8 @@ def main() -> int:
     OUT.write_text(
         json.dumps(
             {
-                "model": MODEL,
+                "judge_model": JUDGE_MODEL,
+                "scoring_model": SCORING_MODEL,
                 "same_family_as_reviewer": True,
                 "before": {"candidates": total_before},
                 "after": {"candidates": total_after},
@@ -146,7 +157,8 @@ def main() -> int:
     print(f"\n  {'arm':<34}{'cands':>7}{'prec':>8}{'recall':>9}{'F1':>8}{'noise/PR':>10}")
     for label, c, pp, rr, ff in (
         ("ours, nits allowed (before)", 464, 0.216, 0.578, 0.314),
-        ("ours + ISOLATED JUDGE (after)", total_after, p, r, f),
+        (f"ours + JUDGE {JUDGE_MODEL}", total_after, p, r, f),
+        ("ours + judge gemini-2.5-pro", 366, 0.280, 0.561, 0.373),
         ("ours, nits suppressed", 181, 0.436, 0.457, 0.446),
         ("greptile-v4-1", 161, 0.565, 0.526, 0.545),
         ("qodo-extended-v2", 152, 0.651, 0.572, 0.601),

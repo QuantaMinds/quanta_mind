@@ -19,7 +19,7 @@ allocation budget and no judge — deliberately, so it was comparable to how the
 | **1 · what gets read** | whole diff, plus a code graph, 40+ linters and a microVM | whole diff, plus a semantic code graph and agentic multi-hop retrieval | whole diff | **a model-free rank of the changed FILES by how often a later fix returned to them; the top three only** |
 | **2 · budget** | none — reads everything | none | none | **`allocate/`: deep on rank 1, shallow on 2–3, no call at all on a cold file** |
 | **3 · read** | model over the whole diff | model + graph | model, severity-ranked | **Gemini, over the ranked files only** |
-| **4 · verify** | none — findings publish directly | none — findings publish directly | **a judge agent filters low-confidence findings** | **ONE isolated judge, a DIFFERENT model family, that never sees the reviewer's reasoning** |
+| **4 · verify** | none — findings publish directly | none — findings publish directly | **a judge agent filters low-confidence findings** | **a mechanical decidability gate FIRST, then one cross-family judge** (cross-family is baseline practice, not ours) |
 | **5 · say** | ten-section walkthrough, sequence diagrams, grouped file tables, one-click fix, chat, IDE plugin | confidence 0–5 and P0/P1/P2 severities | severity-ranked findings | **one comment, or silence — plus the coverage line, always** |
 | **says what it could NOT analyse** | no | no | no | **yes, on every pull request** |
 
@@ -33,12 +33,15 @@ Three things are ours, and only three:
 1. **The ranker gates what is read at all.** Everyone else reads the whole diff and then decides
    what to say; we decide what to read first, from seven years of history, with no model in the
    loop. It is also what bounds the bill — the model never sees a file the ranker did not pick.
-2. **The judge is a DIFFERENT model family and is isolated in code.** `AGENTS.md` rule 7 forbids
-   `verify/` importing `infer/`. Qodo's judge agent is, as far as anything published says, the same
-   system reviewing its own output. **2026-08-20 measured why that matters**: a same-family judge
-   agreed with a careful rater on **34.9%** of findings, and it did not fail randomly — it ratified
-   the reviewer's own hallucinations, accepting invented claims about which tag a pinned SHA
-   carries and repeating the reviewer's belief that 2026 lay in the future while running in 2026.
+2. **A MECHANICAL gate before the model judge**, which is a rule rather than a model: decidable
+   findings were 0 of 14 wrong against 9 of 15, Fisher **p = 0.0007**, at no inference cost.
+   Rivals' filters are model-only.
+
+   **Cross-family judging is baseline practice, not a differentiator, and claiming it was an
+   error.** The 2026 guidance says plainly: never use the same family as generator and judge. Our
+   34.9%-agreement finding is a local instance of a published effect (up to **50%** more of a
+   generator's own failures waved through, even on programmatically verifiable rubrics). We should
+   do it because it is correct, and never pitch it as ours.
 3. **Typed silence.** Every layer emits `Unresolved(site, reason, construct)` rather than nothing,
    so the coverage line names what was skipped. **Verified unavailable to all seven competitors**;
    Greptile's `Failed` means the run broke, not that analysis was incomplete.

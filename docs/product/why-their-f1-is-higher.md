@@ -121,12 +121,19 @@ cost. Keep it, sell it as economics, do not sell it as accuracy.
 
 **Three things survive:**
 
-1. **The judge is a DIFFERENT model family and is isolated in code** (`AGENTS.md` rule 7 forbids
-   `verify/` importing `infer/`). Qodo's judge agent is, on everything published, the same system
-   grading its own output. **2026-08-20 measured what that costs**: a same-family judge agreed with
-   a careful rater on **34.9%** of findings and ratified the reviewer's own hallucinations. If that
-   generalises, it is a real defect in their architecture and a real edge in ours — **and it is not
-   yet demonstrated on their output, which is the experiment worth running.**
+1. **A MECHANICAL gate BEFORE the model judge.** The decidability label is a rule, not a model:
+   findings decidable from the diff were **0 of 14 wrong**, findings needing an outside fact were
+   **9 of 15 wrong**, Fisher **p = 0.0007**. It costs no inference and removes exactly the class a
+   model judge is worst at. Rivals' filters are model-only. **The caveat is in our own record: at
+   n = 29 the intervals are wide, and the rater graded WRONG using reasoning correlated with the
+   gate's rule, so the separation is partly structural.**
+
+   **Cross-family judging is NOT on this list, and putting it here was an error.** The 2026
+   guidance is flat: never use the same family as generator and judge. It is baseline practice, and
+   anyone who reads the field says so. Our 34.9%-agreement result is a local measurement of a
+   documented effect — on IFEval, where rubrics are programmatically verifiable, a judge is up to
+   **50% more likely** to mark its own generator's failures as satisfied. That is the literature's
+   finding, not ours.
 2. **Typed silence and the coverage line** — verified unavailable to all seven competitors.
    Greptile's `Failed` means the run broke, not that analysis was incomplete.
 3. **Bounded, predictable cost per repository** rather than per seat, because the ranker caps what

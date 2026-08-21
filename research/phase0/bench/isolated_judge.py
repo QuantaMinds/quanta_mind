@@ -70,6 +70,50 @@ Respond with ONLY a JSON object:
 "why": "one sentence giving the deciding fact"}}"""
 
 
+# **THE SECOND PROMPT, AND THE DIFFERENCE IS THE DIAGNOSIS.** `PROMPT` above asks whether a finding
+# is TRUE, and it answers that well: it dropped 89 of 464 -- nits, typos, style preferences and
+# claims the diff contradicts -- and kept 366. But the benchmark counts a candidate as a FALSE
+# POSITIVE when no human wrote that comment, whether or not it is true. Four separate reports of
+# the same `forEach` hazard in four files are all true; the humans wrote one.
+#
+# **So truth is the wrong bar. Materiality is the bar.** This is what Qodo's judge filters on --
+# "confidence AND RELEVANCE", and a "Precise" mode that "reports only issues that clearly require
+# developer action". The pair is the experiment: same evidence requirement, different question.
+PROMPT_MATERIAL = """You are the last check before a code-review comment is posted to a real pull
+request. A reviewer has proposed ONE issue about the diff below.
+
+A human maintainer reviewing this pull request wrote a handful of comments. Your question is NOT
+"is this true?" -- it is "IS THIS ONE OF THE COMMENTS A MAINTAINER WOULD HAVE WRITTEN?"
+
+YOUR DEFAULT IS DROP. Most true observations are not worth a comment.
+
+DROP unless ALL of these hold:
+- the diff itself shows the claim to be true; you can name the line
+- a maintainer would require a change before merging, not merely note it
+- it is the PRIMARY defect in that code, not a secondary observation about it
+- it is specific to what this pull request changed, not a pre-existing property of the file
+
+DROP on sight if:
+- deciding it needs a fact this diff cannot supply: a version, a tag, another file, a caller, the
+  current date
+- it is hedged: "may", "might", "could", "potentially", "consider"
+- it is style, naming, formatting, documentation, or test coverage and the code is not wrong
+- it asserts a test is wrong. This pull request was MERGED and its tests passed
+- it repeats an issue that is obvious from the same change in another file: the maintainer writes
+  that comment ONCE
+
+Diff:
+```
+{diff}
+```
+
+Proposed issue: {issue}
+
+Respond with ONLY a JSON object:
+{{"line": "the exact diff line that decides it, or empty", "verdict": "KEEP" or "DROP",
+"why": "one sentence giving the deciding fact"}}"""
+
+
 class JudgeFailed(RuntimeError):
     """The judge returned nothing parseable. Never silently a KEEP."""
 
@@ -88,10 +132,12 @@ def _parse(text: str) -> tuple[bool, str, str]:
     return verdict == "KEEP", str(obj.get("why", ""))[:200], str(obj.get("line", ""))[:200]
 
 
-def adjudicate(client: object, diff: str, issue: str) -> tuple[bool, str, str]:
+def adjudicate(
+    client: object, diff: str, issue: str, prompt: str = PROMPT
+) -> tuple[bool, str, str]:
     """(keep, why, line). A failure RAISES; it is never turned into a publish."""
     body = {
-        "contents": [{"role": "user", "parts": [{"text": PROMPT.format(diff=diff, issue=issue)}]}],
+        "contents": [{"role": "user", "parts": [{"text": prompt.format(diff=diff, issue=issue)}]}],
         # 32768, NOT 8192. Gemini bills thinking tokens against this ceiling, so a judge that
         # reasons about a 20k-character diff finishes MAX_TOKENS and returns nothing. At 8192 this
         # failed on **136 of 464 candidates** -- and every failure was recorded as a DROP, which is
@@ -104,7 +150,9 @@ def adjudicate(client: object, diff: str, issue: str) -> tuple[bool, str, str]:
     return _parse(str(answer["text"]))
 
 
-def screen(client: object, diff: str, issues: list[str]) -> list[dict[str, object]]:
+def screen(
+    client: object, diff: str, issues: list[str], prompt: str = PROMPT
+) -> list[dict[str, object]]:
     """Adjudicate every candidate for one pull request, independently and in parallel.
 
     **INDEPENDENTLY IS THE POINT.** Judging the list together lets the model rank them against each
@@ -113,7 +161,9 @@ def screen(client: object, diff: str, issues: list[str]) -> list[dict[str, objec
     """
     out: list[dict[str, object]] = [{} for _ in issues]
     with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
-        futures = {pool.submit(adjudicate, client, diff, i): n for n, i in enumerate(issues)}
+        futures = {
+            pool.submit(adjudicate, client, diff, i, prompt): n for n, i in enumerate(issues)
+        }
         for done in concurrent.futures.as_completed(futures):
             n = futures[done]
             try:
