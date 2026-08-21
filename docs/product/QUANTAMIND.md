@@ -196,29 +196,38 @@ and `types/ranking.py` already recorded that `threshold_percentile` "governs not
 
 **Seven repositories, none of which the rule was built from, spanning 2,007 to 38,217 commits:**
 
-| repository | commits | files ever | **oldest → newest** | direction | **current** |
-|---|---|---|---|---|---|
-| `angular/angular` | 38,217 | 30,108 | 7 4 5 6 **11** | rising | **11%** |
-| `facebook/react` | 21,640 | 13,323 | 3 7 5 11 **13** | rising | **13%** |
-| `nestjs/nest` | 21,639 | 4,541 | 11 8 7 5 **8** | falling | **8%** |
-| `sveltejs/svelte` | 11,326 | 17,236 | 23 27 16 15 **11** | falling | **11%** |
-| `vuejs/core` | 7,157 | 957 | 9 4 9 7 **8** | steady | **8%** |
-| `trpc/trpc` | 4,902 | 2,542 | 8 5 6 9 **11** | rising | **11%** |
-| `gin-gonic/gin` | 2,007 | **236** | 21 24 21 28 **30** | rising | **30%** |
+| repository | commits | files ever | earlier windows, each vs **its own** floor | **current** |
+|---|---|---|---|---|
+| `angular/angular` | 38,217 | 30,108 | 12 11 11 10 | **11%** |
+| `facebook/react` | 21,640 | 13,323 | 14 8 11 15 | **12%** |
+| `nestjs/nest` | 21,639 | 4,541 | 10 12 14 12 | **8%** |
+| `sveltejs/svelte` | 11,326 | 17,236 | 14 10 18 28 | **14%** |
+| `vuejs/core` | 7,157 | 957 | 12 18 7 12 | **13%** |
+| `trpc/trpc` | 4,902 | 2,542 | 14 6 9 11 | **12%** |
+| `gin-gonic/gin` | 2,007 | **236** | 32 24 24 32 | **31%** |
 
-**READ THESE AS SEQUENCES, NOT AS RANGES, AND THE PICTURE TIGHTENS.** Five of seven move three of
-four steps in one direction — `sveltejs/svelte` runs 23% down to 11%, `facebook/react` runs 3% up
-to 13%. That is not imprecision; it is the repository changing. **On the most recent window, six of
-seven sit at 8–13%**, which is tighter than any range across their whole histories suggests.
+**Six of seven are STEADY across their own history, and that is the finding.** Each earlier window
+is scored against **its own contemporaneous floor**, which is the only comparison that isolates
+selectivity from activity. Six sit at 8–15% throughout; `gin-gonic/gin` sits at 24–32% throughout,
+which is a stable property of a **236-file** surface against angular's 30,108, not an error.
 
-**So the current window is the estimate, and the direction is reported beside it** — *"it has been
-rising, so the figure above is the one to plan on, not the average."*
+**A SELF-CALIBRATING RULE HAS LITTLE TREND BY CONSTRUCTION, AND THAT IS THE POINT.** If the bar
+moves with the repository, each period fires at roughly its own target whatever the activity did.
+**So the rate is a per-repository constant that can be measured once, at install, and relied on.**
 
-> **A REPORTING ERROR IS RECORDED HERE BECAUSE IT INVERTED A CONCLUSION.** These windows were first
-> printed newest-first and read as oldest-first, which made `facebook/react` look like it was
-> falling from 13% to 3% when it is rising from 3% to 13%. The SQL had no `ORDER BY` — SQLite
-> returned groups in whatever order it chose, and **a trend read off an unordered list is noise
-> wearing a direction.** Ordered now.
+> **THIS MEASUREMENT WAS WRONG TWICE BEFORE IT WAS RIGHT, BOTH TIMES LOOKING PLAUSIBLE.**
+> First the earlier windows were sliced out of the calibration set itself — in-sample, so the newest
+> slice shared a period with the bar and could agree for that reason. Then they were made disjoint
+> but scored against **today's** floor, which compares a top counted in one era against a bar
+> derived from another: `trpc/trpc` read **70%, 68%, 62%, 54%** on periods when it was simply
+> busier, against 12% now. **That is the same defect that silenced svelte and gin, in a third
+> costume**, and it produced a confident trend in five of seven repositories that does not exist.
+> A fourth instance would have been reported as a finding.
+>
+> **And an earlier report of these windows was printed newest-first and read as oldest-first**,
+> which inverted the direction for two repositories. The SQL had no `ORDER BY`: a trend read off an
+> unordered list is noise wearing a direction.
+
 
 **Six of seven land at 8–14%, and the largest repository is the tightest.** The documented band
 substantially holds at file level — which was not knowable before, because it had only ever been

@@ -27,6 +27,7 @@ import sqlite3
 from dataclasses import dataclass
 from enum import Enum
 
+from quantamind.rank.history_rates import earlier_rates
 from quantamind.rank.order import fires
 from quantamind.store.calibration import RECENT_CHANGES, baseline, window_for
 from quantamind.store.touches import YEAR_SECONDS
@@ -52,6 +53,7 @@ class Selectivity(Enum):
 
 
 CONCENTRATED_AT = 0.02
+
 UNSTABLE_AT = 0.10
 """Spread across a repository's own windows past which the headline rate is not worth quoting.
 
@@ -176,14 +178,16 @@ def estimate(
 
     fired = sum(1 for top in tops if fires({"unit": top}, floor))
     rate = fired / len(tops)
-    # **THE SAME GATE ON EARLIER WINDOWS OF THIS REPOSITORY.** One number cannot say whether it is
-    # worth quoting; the range across a customer's own history can. Computed from `tops`, which is
-    # already in hand, so it costs nothing extra.
-    window_size = max(len(tops) // 4, 1)
-    spread = tuple(
-        sum(1 for top in tops[i : i + window_size] if fires({"unit": top}, floor)) / window_size
-        for i in range(0, len(tops) - window_size + 1, window_size)
-    )
+    # **THE EARLIER WINDOWS MUST BE DISJOINT FROM THE CALIBRATION SET, AND THE FIRST VERSION WAS
+    # NOT.** Slicing `tops` — the very changes the floor was derived from — measures which quarter
+    # of the calibration window holds the high-scoring changes. About a tenth of that set clears its
+    # own decile by construction, so the newest slice and the floor share a period and could agree
+    # for that reason rather than because the repository changed.
+    #
+    # These windows are drawn from BEFORE the calibration window and scored against TODAY's floor.
+    # Holding the bar fixed and varying only the period is what isolates a change in the
+    # repository's behaviour from a change in the bar.
+    spread = earlier_rates(conn, repo_id, as_of=as_of, window=window, over=over)
     if rate <= CONCENTRATED_AT:
         state = Selectivity.CONCENTRATED
     elif rate >= ALWAYS_AT:
