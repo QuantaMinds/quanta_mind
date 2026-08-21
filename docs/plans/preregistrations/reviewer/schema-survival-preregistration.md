@@ -106,12 +106,21 @@ is the useful part of running them together.
 | bar | verdict |
 |---|---|
 | **≥ 50%** — the schema is the product | **INCONCLUSIVE.** The interval spans it, and this document says an interval spanning a bar is not a pass |
-| **20–49%** — high-precision, low-volume tier | **CLEARS.** The lower bound is 39.2% |
+| **20–49%** — high-precision, low-volume tier | **NOT A PASS EITHER.** The point estimate is 56.7%, which is ABOVE this band, and the interval covers both |
 
-**So the floor is established and the ceiling is not.** A mechanically-verified reviewer is viable
+**A FLOOR IS ESTABLISHED. WHICH TIER WE ARE IN IS NOT KNOWN.** Reading the second row as a clean
+pass would be the error the first row refuses: 39.2%–72.6% sits inside both bands, so the honest
+statement is **"at least 39% survive"** and nothing more. The schema may be the product or may be a
+narrow tier, and this run cannot tell them apart. A mechanically-verified reviewer is viable
 as a low-volume, high-precision tier — at 173 goldens over 50 pull requests, 3.46 useful findings
 per pull request, of which at least ~39% survive the schema is **at least 1.3 published per pull
 request with a parser behind each one.** Whether it is the whole product needs n far above 30.
+
+> **THIS CAVEAT TRAVELS WITH THE NUMBER, PERMANENTLY.** The 173 goldens are *benchmark* defect
+> reports — curated, and skewed toward the structural, checkable kind of finding. **General review
+> traffic is 5.9% structural.** Measuring how many books fit a shelf using the reference section
+> tells you little about the general collection. **Any quotation of 56.7%, or of the 39% floor, that
+> does not carry this sentence is overstating what was measured.**
 
 ## The prediction was wrong in the informative direction
 
