@@ -128,9 +128,22 @@ set confidence to low and consider filtering it out."* **That is our anchor gate
 independently by somebody else — which is worth knowing precisely because it is one of the few
 mechanisms here that is NOT a differentiator.
 
-**[OURS]** **Per-category thresholds.** Our gate is single-threshold. **Our own file-kind rates
-differ enough to derive one** — 65.6% wrong on CI config against 42.0% on source code — so a per-category
-threshold is computable from data already on disk.
+**[OURS] — AVAILABLE, DELIBERATELY NOT BUILT.** **Per-category thresholds.** Our gate is
+single-threshold. **Our own file-kind rates differ enough to derive one** — 65.6% wrong on CI config against 42.0% on source code — so a per-category
+threshold is computable from data already on disk, with no new corpus and no model calls.
+
+> **AND IT IS NOT BEING BUILT, WHICH IS THE POINT OF RECORDING IT.** A per-category threshold is a
+> Half B mechanism, and **Half B is closed pending the ceiling** — the schema question has a floor
+> at ≥39% and no upper bound, and it takes ~150 hand-graded findings by an independent grader to
+> resolve.
+>
+> **Refining the thresholds of a reviewer that produces 3.7–12% correct findings is optimising a
+> component of something that does not ship.** It is the same error as tuning a firing threshold
+> until it matches a sentence: work that improves a number inside a mechanism whose output nobody
+> has decided to publish.
+>
+> **It is recorded here so nobody rediscovers it and treats it as new**, and so it is ready if the
+> ceiling ever clears. That is the whole intended lifetime of this entry.
 
 ---
 
