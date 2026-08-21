@@ -29,9 +29,7 @@ from quantamind.types.settings import Settings, SettingsError, load
 # exit non-zero with the stage that will deliver them, rather than exiting 0 having done
 # nothing -- a documented command that silently succeeds is how a runbook comes to report
 # work it never did.
-UNBUILT: dict[str, str] = {
-    "review": "the reader, ranker and render stages",
-}
+UNBUILT: dict[str, str] = {}
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -47,6 +45,21 @@ def build_parser() -> argparse.ArgumentParser:
         "serve", help="authenticate and de-duplicate GitHub webhooks over HTTP"
     )
     listen.add_argument("--port", type=int, default=7331)
+    look = subparsers.add_parser(
+        "review", help="rank one change's files against history and print what we would say"
+    )
+    look.add_argument("clone", type=Path, help="a full clone; nothing is sent anywhere")
+    look.add_argument("--repo", default="local/clone", help="owner/name, for the store key")
+    look.add_argument(
+        "--sha", required=True, help="the commit to review, scored against history BEFORE it"
+    )
+    look.add_argument(
+        "--deep",
+        metavar="GCP_PROJECT",
+        default="",
+        help="also read the ranked files with a model. Raw findings are 66.7-82.1%% wrong; only "
+        "those a parser can anchor in the diff are shown, and the discards are counted.",
+    )
     walk = subparsers.add_parser(
         "retrospective", help="replay the ranker over a clone's own history and report"
     )
@@ -123,6 +136,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         from quantamind.serve.run_endpoint import run
 
         return run(args.port)
+
+    if args.command == "review":
+        from quantamind.serve.run_review import review_commit
+
+        return review_commit(args.clone, args.repo, args.sha, deep_project=args.deep)
 
     if args.command == "retrospective":
         return _retrospective(args.clone, args.repo)

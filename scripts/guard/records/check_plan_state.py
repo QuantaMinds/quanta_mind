@@ -47,9 +47,7 @@ LAYERS = (
 # is a product decision now, so the rows say what is not built yet rather than what is refused --
 # a status line describing a withdrawn decision is worse than none, because it reads as current.
 RESERVED = {
-    "allocate": "NOT BUILT — the budget `infer/` reads under",
-    "infer": "NOT BUILT — the reviewer, on Gemini, over the ranked files only",
-    "verify": "NOT BUILT — ONE isolated judge, a DIFFERENT model family from `infer/`",
+    "allocate": "NOT BUILT — its work is done inside `rank/order.py`, which emits the labels",
 }
 
 

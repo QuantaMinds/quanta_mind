@@ -38,16 +38,16 @@ three months stale.
 
 | layer | modules | files |
 |---|---|---|
-| `types/` | **9** | `change.py`, `commit.py`, `pooled_outcome.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `settings.py`, `touch.py`, `verdict.py` |
+| `types/` | **10** | `change.py`, `commit.py`, `finding.py`, `pooled_outcome.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `settings.py`, `touch.py`, `verdict.py` |
 | `store/` | **4** | `deliveries.py`, `drift.py`, `schema.py`, `touches.py` |
 | `ingest/` | **4** | `commits.py`, `diff.py`, `github_comments.py`, `history.py` |
 | `parse/` | **2** | `languages.py`, `units.py` |
 | `rank/` | **4** | `baseline.py`, `events.py`, `order.py`, `score.py` |
-| `allocate/` | **0** | **NOT BUILT — the budget `infer/` reads under** |
-| `infer/` | **0** | **NOT BUILT — the reviewer, on Gemini, over the ranked files only** |
-| `verify/` | **0** | **NOT BUILT — ONE isolated judge, a DIFFERENT model family from `infer/`** |
+| `allocate/` | **0** | **NOT BUILT — its work is done inside `rank/order.py`, which emits the labels** |
+| `infer/` | **1** | `gemini.py` |
+| `verify/` | **1** | `anchor.py` |
 | `render/` | **3** | `comment.py`, `coverage_line.py`, `replay_report.py` |
-| `serve/` | **6** | `cli.py`, `health.py`, `listener.py`, `retrospective.py`, `run_endpoint.py`, `webhook_github.py` |
+| `serve/` | **8** | `cli.py`, `deep_review.py`, `health.py`, `listener.py`, `retrospective.py`, `run_endpoint.py`, `run_review.py`, `webhook_github.py` |
 
 <!-- plan-state:end -->
 

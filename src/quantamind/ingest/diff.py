@@ -28,6 +28,8 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
+from quantamind.types.change import REVIEWABLE_SUFFIXES
+
 # Declared, not defaulted: a GitHub read is a network call and 30s is the house default.
 API_TIMEOUT_S = 30
 GIT_TIMEOUT_S = 60
@@ -73,7 +75,9 @@ def _gh(repo: str, number: int, path: str) -> object:
         raise DiffReadFailed(repo, number, f"gh api {path} returned non-JSON: {exc}") from None
 
 
-def changed_files(repo: str, number: int, suffix: str = ".py") -> list[str]:
+def changed_files(
+    repo: str, number: int, suffixes: tuple[str, ...] = REVIEWABLE_SUFFIXES
+) -> list[str]:
     """Paths the pull request changed that still exist afterwards, sorted.
 
     Returns `[]` only when the change genuinely touches no matching file. Every failure raises.
@@ -94,7 +98,7 @@ def changed_files(repo: str, number: int, suffix: str = ".py") -> list[str]:
             status = str(entry.get("status") or "")
             if not name or not status:
                 raise DiffReadFailed(repo, number, f"a files entry lacked filename/status: {entry}")
-            if name.endswith(suffix) and status in KEPT_STATUSES:
+            if name.endswith(suffixes) and status in KEPT_STATUSES:
                 out.append(name)
         if len(got) < PER_PAGE:
             break

@@ -23,9 +23,10 @@ CONSUMED BY: parse.units, and render.coverage_line, which prints the depth.
 from __future__ import annotations
 
 from enum import Enum
-from pathlib import PurePosixPath
 
-from quantamind.types.change import Language
+from quantamind.types.change import BY_SUFFIX, Language, language_of
+
+__all__ = ["BY_LANGUAGE", "BY_SUFFIX", "Depth", "language_of", "supported"]
 
 
 class Depth(Enum):
@@ -41,20 +42,9 @@ class Depth(Enum):
     """A real parse of the file. Requires tree-sitter, which is not a dependency today."""
 
 
-# Suffix to language. A suffix absent here is UNSUPPORTED, which is a value that renders.
-BY_SUFFIX: dict[str, Language] = {
-    ".py": Language.PYTHON,
-    ".pyi": Language.PYTHON,
-    ".ts": Language.TYPESCRIPT,
-    ".tsx": Language.TYPESCRIPT,
-    ".js": Language.JAVASCRIPT,
-    ".jsx": Language.JAVASCRIPT,
-    ".java": Language.JAVA,
-    ".go": Language.GO,
-    ".cc": Language.CPP,
-    ".cpp": Language.CPP,
-    ".hpp": Language.CPP,
-}
+# **RE-EXPORTED FROM `types/change.py`, NOT REDEFINED HERE.** `ingest/` needs the same set and sits
+# left of this layer, so the map lives in the leftmost one. Two copies of this list would drift the
+# first time a language was added, and the drift would show up as files silently not reviewed.
 
 # What we can actually do, which is not the same as what we recognise. Every entry here is
 # HEADER because git's funcname driver is the only pass built; nothing reaches EXACT.
@@ -66,11 +56,6 @@ BY_LANGUAGE: dict[Language, Depth] = {
     Language.GO: Depth.HEADER,
     Language.CPP: Depth.HEADER,
 }
-
-
-def language_of(path: str) -> Language:
-    """The language of a path, or `UNSUPPORTED`. Never `None`: absence must render."""
-    return BY_SUFFIX.get(PurePosixPath(path).suffix.lower(), Language.UNSUPPORTED)
 
 
 def depth_of(language: Language) -> Depth:
