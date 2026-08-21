@@ -43,9 +43,8 @@ sys.path.insert(0, str(HERE))
 
 import decidable  # noqa: E402  — from quote/
 import judge  # noqa: E402
+import martian_corpus as corpus  # noqa: E402  — bench/corpus.py, NOT quote/corpus.py
 from client import Client  # noqa: E402
-
-import corpus  # noqa: E402  — bench/corpus.py, NOT quote/corpus.py
 
 assert hasattr(corpus, "_assert_intact"), "wrong corpus module resolved; check sys.path order"
 

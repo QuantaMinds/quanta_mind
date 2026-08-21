@@ -33,9 +33,8 @@ sys.path.insert(0, str(HERE.parent / "vertex"))
 
 import isolated_judge  # noqa: E402
 import judge  # noqa: E402
+import martian_corpus as corpus  # noqa: E402
 from client import Client  # noqa: E402
-
-import corpus  # noqa: E402
 
 # **TWO MODELS, AND CONFLATING THEM WOULD VOID THE RUN.**
 # JUDGE_MODEL is the isolated judge under test -- the thing this experiment varies.

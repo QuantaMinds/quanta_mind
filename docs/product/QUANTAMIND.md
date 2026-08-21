@@ -164,7 +164,7 @@ and a fifth that this document used to claim has been measured and withdrawn.** 
 | **Quiet** | Fires on 10–12% of changes across repositories differing 80× in velocity. **Close to definitional rather than discovered** — a percentile threshold fires on a fixed share of its own distribution by construction. The evidence that it is doing work is the CONTRAST: an absolute threshold fired on 11% of one repository and 53% of another |
 | **Honest** | Reports its own blind spots — verified as unavailable to all seven competitors |
 | **Right about where to look** | **Replicated out-of-sample.** Ranking the changed files by prior touch count and reading the top three misses **1.21%** of the changes a later fix returns to, against **3.12%** for an alphabetical ordering — on **six repositories the method was never developed against**, n = 2,400, McNemar **p < 0.000001**, positive in **6 of 6**. The original eight gave **1.44% vs 3.31%**. The two lifts differ by **0.05 points**. **Leave scrapy out and the lift is +0.90 rather than +1.92** — `publishing-rules.md` requires the smaller number wherever one figure is quoted, because a caveat does not travel with a number into someone else's deck |
-| **Honest about what cannot be decided** | A claim needing a fact outside the diff is labelled, not published. The label separates at Fisher **p = 0.0007** — and it is why the isolated judge exists: raw findings measure **66.7–82.1% wrong**, and the largest single failure class is a confident claim the diff cannot settle |
+| **Honest about what cannot be decided** | A claim needing a fact outside the diff is labelled, not published. **A MODEL gate separated at Fisher p = 0.0007 on n = 29** — an inference call, not a rule, with wide intervals and a rater whose reasoning correlated with the gate's own criterion. **The free keyword rule that approximates it was tested out-of-sample and INVERTED: D/L 1.40 against chance 3.64.** The largest failure class is a confident claim the diff cannot settle |
 | **Cheaper** — *billed, not estimated* | **$0.119 per pull request** on real diffs through Vertex, against a $0.140 derived estimate — but the estimate was right by luck: input is 5.2% of the bill and **thinking is 91.3%** |
 
 ---
@@ -666,7 +666,7 @@ evidence, and no customers yet.
 | Fires on | nearly every change | nearly every change | nearly every change | **10–12%** |
 | Marginal cost per pull request | tokens, scaling with lines read | tokens | tokens | **tokens on 10–12% of changes, and only on the ranked files — the ranker is the budget** |
 | Priced | per seat | per seat | per seat | **per repository** |
-| Separates *undecidable* from *clean* | **no** | **no** | **no** | **yes — measured, `p = 0.0007`** |
+| Separates *undecidable* from *clean* | **no** | **no** | **no** | **a MODEL gate did, `p = 0.0007`, n = 29, never out-of-sample. The free rule inverted** |
 
 **Three rows in this table were wrong until the benchmark run and are corrected above.** Greptile
 was listed as not using history; its v3 agent calls git history as a tool. We were listed as
@@ -825,14 +825,25 @@ answer.**
 
 ### The label separates, and this is the measurement
 
-**Design ten's findings, split by the label the product would print:**
+**Design ten's findings, split by the label the product would print. THE LABEL IS PRODUCED BY A
+MODEL — `decidable.judge_one()`, one inference call per finding. It is not a rule and it is not
+free.** The distinction is written here because it was lost once: the figure below was cited as
+evidence that a *rule* separates, and the rule it was credited to inverted on the first corpus it
+was tested against.
 
 | label | n | WRONG | rate | 95% CI |
 |---|---|---|---|---|
 | **"decidable from the diff"** | 14 | **0** | **0.0%** | 0.0–21.5% |
 | **"needs a deeper look"** | 15 | **9** | **60.0%** | 35.7–80.2% |
 
-**Fisher exact p = 0.0007.**
+**Fisher exact p = 0.0007** — `research/phase0/quote/results/quote10_run.json` against
+`adj10/verdicts.json`, the `decidable` field, which `run10.py` fills from the model.
+
+**The free keyword approximation was measured separately and FAILED.** On design ten's own corpus it
+also separates (kept 20 at 10.0% wrong against dropped 12 at 75.0%, Fisher p = 0.0003). On the
+Martian corpus it **inverts**: 24 findings dropped, **14 false and 10 true, D/L 1.40 against a
+chance value of 3.64** — discarding true findings faster than random deletion would. **The word list
+learned design ten's corpus, not the property.**
 
 **This is the only number from the review-half work that is about the PRODUCT rather than about a
 benchmark.** Eleven designs chased a wrong-rate; what they produced instead is a label that sorts

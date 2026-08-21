@@ -23,9 +23,8 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "vertex"))
 
 import judge
+import martian_corpus as corpus
 from client import Client
-
-import corpus
 
 MODEL = "gemini-2.5-pro"
 OURS = pathlib.Path(__file__).resolve().parent / "results" / "martian_comparison.json"

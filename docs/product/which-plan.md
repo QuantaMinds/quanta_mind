@@ -1,7 +1,11 @@
 # Which plan, after the trial and error
 
-**Short answer: stop trying to win on F1. Ship the reviewer at parity, and compete on the three
-things that actually replicated. Spend the next month on distribution, not on the filter.**
+**Short answer: ship the half that replicated, and go find out whether anyone wants it.**
+
+> **PLAN A OF THE FIRST DRAFT — "ship the reviewer at parity" — IS WITHDRAWN.** It reopened the half
+> this project closed on evidence, and it rested on two claims of mine that do not survive the
+> canonical document. Both are corrected below rather than deleted; the error is more instructive
+> than the conclusion was.
 
 ---
 
@@ -42,9 +46,18 @@ is a body of evidence about where the value is not.
 | coderabbit | 36.5% | **60.7%** | 45.6% | 3.7 |
 | **ours, best arm** | 43.6% | 45.7% | **44.6%** | **2.0** |
 
-**We are level with CodeRabbit and behind the other two.** And the decisive structural fact:
-**with nits allowed our recall is 57.8% against Qodo's 57.2%.** We find as much as the leader. We
-cannot tell which of our findings are the good ones, and fourteen attempts say so.
+**We are BELOW CodeRabbit once our own number is corrected, and behind the other two.** Our arm
+was judged by its own model family; a blind out-of-family adjudication put our over-match rate at
+**15.0% against the rivals' 5.0%**, moving 43.6% to **37.1%** — level with CodeRabbit's 36.5%
+rather than above it. That has been in the canonical document since commit `7ba0391`. **The
+self-preference effect this thread spent days measuring was inflating our own headline**, and the
+first draft of this page quoted the uncorrected figure.
+
+**And the decisive structural fact, stated correctly.** With nits allowed our recall is 57.8%
+against Qodo's 57.2% — **but that arm runs at 21.6% precision, 464 candidates, 7.3 noise per pull
+request.** It is a statement about *detection capacity*. **It is not a statement about anything
+shippable**; the arm that could ship is the strict one at **45.7%** recall. The first draft quoted
+one arm's recall and the other arm's shippability in the same sentence.
 
 ## 4. The one lever never pulled — and why it is still not the plan
 
@@ -63,9 +76,23 @@ competitor's known strength, funded by a company whose stated weakest point is d
 
 ## 5. The plan
 
-**A. The reviewer is table stakes. Treat it as a cost, not as the product.**
-Ship the arm we have — F1 44.6%, level with CodeRabbit, at 45% less noise per pull request. Put
-whatever filter is available in front of it. **Do not spend another month trying to reach 60%.**
+**A. WITHDRAWN — do not ship the reviewer.**
+
+*The first draft said: ship the arm we have, F1 44.6%, level with CodeRabbit, 45% less noise.*
+
+**"Level with CodeRabbit" is a shaped truth, and it had already been caught once in this project.**
+CodeRabbit is **24th of 49** on that leaderboard. Parity with the 24th tool is not a reason for
+anyone to change vendors, and the corrected estimate is 37.1% rather than 43.6%.
+
+**The yield ends it.** **0.013–0.037 correct findings per pull request** — one useful comment per 27
+to 77 pull requests. That is the number that closed the review half. A tool posting mostly-wrong
+comments at that yield is muted in week three, which is exactly the failure the positioning exists
+to avoid. **Publishing the drop counts does not mitigate it**: the honest published sentence reads
+*two-thirds of what we post is wrong*.
+
+The canonical document's own words: **the pitch this evidence forbids is "an autonomous senior
+engineer."** Shipping the reviewer at parity is a weaker version of that pitch, not a different
+one.
 
 **B. Run arm B once, when a cross-family model is reachable — then stop.**
 It is one run, it is correct practice rather than a differentiator, and it is the last cheap
@@ -93,3 +120,37 @@ published them** — which is the position this company has taken every previous
 **And the reviewer may simply not be a wedge.** Parity with CodeRabbit is not a reason to switch
 vendors. If customers do not buy the coverage line and the retrospective, the reviewer will not
 save it — and that is the question thirty days with a real team answers, not another experiment.
+
+
+---
+
+# The defect class this thread named
+
+**A mechanism's evidence must cite the run that produced it, not the section it sits in.**
+
+Three instances, and the third was found only by tracing a citation:
+
+| the mechanism credited | the work actually belonged to |
+|---|---|
+| hunk expansion | the corpus |
+| the model's findings | the ranker's location signal |
+| **the free keyword rule** | **`decidable.judge_one()`, a model gate** |
+
+**The third is the clearest.** `p = 0.0007` sat in a section about labelling findings, and was cited
+as showing that *a rule* separates. It shows that *an inference call* separates, on n = 29, with a
+rater whose reasoning correlated with the gate's own criterion. The rule it was credited to was
+tested out-of-sample for the first time and **inverted**.
+
+**The figure guard catches a number that does not match its artefact. It does not catch a number
+matched to the WRONG artefact.** Extending it to trace which run produced each figure would have
+caught this, and that is the check worth building.
+
+## And a sixth instance of the instrument-reporting-on-the-wrong-thing class
+
+`bench/corpus.py` and `quote/corpus.py` both define a module named `corpus`. `sys.path` order
+decided which one `import corpus` resolved to, **and there is no error at all** — the wrong module
+loads, its API differs, and the failure surfaces as a missing attribute somewhere unrelated or, in
+the worse case, as a plausible number computed from the wrong data.
+
+`scripts/guard/check_module_identity.py` already exists for "never leave two modules with one
+name", scoped to `src/`. **It does not cover `research/`, which is where the collision is.**

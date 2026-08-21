@@ -34,6 +34,15 @@ from discovery import Violation, iter_python_files, project_root, report
 # `tests/pipeline/test_assemble.py` mirrors `src/phase0/pipeline/assemble.py` on purpose.
 PACKAGE_ROOTS = ("src", "research/phase0/src")
 
+# **DIRECTORIES SEVERAL SCRIPTS PUT ON sys.path TOGETHER.** A repeated basename ACROSS package
+# roots is fine -- tests mirror sources on purpose. A repeated basename across these is not: they
+# are flat directories added by `sys.path.insert(0, ...)` in the same file, so which one wins is
+# decided by INSERT ORDER and nothing reports the choice. `bench/corpus.py` and `quote/corpus.py`
+# both exist; `run_gate.py` listed bench first, so `import corpus` silently got quote's, whose API
+# differs. There is no error -- the wrong module loads and the failure surfaces somewhere else, or
+# does not surface at all and a plausible number is computed from the wrong data.
+SYS_PATH_GROUP = ("research/phase0/bench", "research/phase0/quote", "research/phase0/vertex")
+
 # Conventional files nothing imports by name. Command-line entry points are detected
 # structurally instead — see `_is_entry_point`.
 UNIMPORTED_BY_DESIGN = frozenset({"__init__", "__main__", "conftest"})
@@ -143,9 +152,39 @@ def unreferenced_modules(root: Path) -> list[Violation]:
     return violations
 
 
+def shared_path_collisions(root: Path) -> list[Violation]:
+    """One module name in two directories that get added to sys.path together."""
+    seen: dict[str, Path] = {}
+    out: list[Violation] = []
+    for rel in SYS_PATH_GROUP:
+        d = root / rel
+        if not d.is_dir():
+            continue
+        for f in sorted(d.glob("*.py")):
+            if f.name == "__init__.py":
+                continue
+            first = seen.get(f.stem)
+            if first is None:
+                seen[f.stem] = f
+                continue
+            out.append(
+                Violation(
+                    f,
+                    1,
+                    "module-identity",
+                    f"`{f.stem}` also exists at {first.relative_to(root)}. Both directories are "
+                    f"put on sys.path by the same scripts, so `import {f.stem}` resolves by "
+                    f"INSERT ORDER and nothing reports which one won. Rename one, or import it "
+                    f"by an explicit path.",
+                )
+            )
+    return out
+
+
 def main() -> int:
     root = project_root()
-    return report(duplicate_basenames(root) + unreferenced_modules(root), root, "module-identity")
+    found = duplicate_basenames(root) + unreferenced_modules(root) + shared_path_collisions(root)
+    return report(found, root, "module-identity")
 
 
 if __name__ == "__main__":
