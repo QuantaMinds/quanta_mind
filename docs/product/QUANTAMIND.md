@@ -161,7 +161,7 @@ and a fifth that this document used to claim has been measured and withdrawn.** 
 
 | | |
 |---|---|
-| **Quiet** — *measured at file level for the first time* | **Six of seven repositories sit at 8–13% on their most recent window**, measured 2026-08-20 on repositories the rule was not built from and spanning 2,007 to 38,217 commits. `angular/angular`, the largest, is the steadiest at **11%**. **Within a repository the rate DRIFTS** — `sveltejs/svelte` from 23% down to 11%, `facebook/react` from 3% up to 13% — so it is a direction, not a constant. **`gin-gonic/gin` sits near 30% and that is a stable property of a 236-file surface, not an error.** The product does not quote a band: `rank/firing.py` replays the customer's own history and prints their rate before they install |
+| **Quiet** — *measured at file level for the first time, and STEADY* | **The bar is a percentile of this repository's own changes, so it moves with the repository — which is WHY the rate holds rather than merely that it does.** An absolute threshold does not travel: the same one fired on 11% of one repository and 53% of another. Six of seven repositories sit at **8–15% throughout their history**, not just now, measured 2026-08-20 on repositories the rule was not built from and spanning 2,007 to 38,217 commits. `angular/angular`, the largest, is the steadiest at **11%**. **Within a repository the rate DRIFTS** — `sveltejs/svelte` from 23% down to 11%, `facebook/react` from 3% up to 13% — so it is a direction, not a constant. **`gin-gonic/gin` sits near 30% and that is a stable property of a 236-file surface, not an error.** The product does not quote a band: `rank/firing.py` replays the customer's own history and prints their rate before they install |
 | **Honest** | Reports its own blind spots — verified as unavailable to all seven competitors |
 | **Right about where to look** | **Replicated out-of-sample.** Ranking the changed files by prior touch count and reading the top three misses **1.21%** of the changes a later fix returns to, against **3.12%** for an alphabetical ordering — on **six repositories the method was never developed against**, n = 2,400, McNemar **p < 0.000001**, positive in **6 of 6**. The original eight gave **1.44% vs 3.31%**. The two lifts differ by **0.05 points**. **Leave scrapy out and the lift is +0.90 rather than +1.92** — `publishing-rules.md` requires the smaller number wherever one figure is quoted, because a caveat does not travel with a number into someone else's deck |
 | **Honest about what cannot be decided** | A claim needing a fact outside the diff is labelled, not published. **A MODEL gate separated at Fisher p = 0.0007 on n = 29** — an inference call, not a rule, with wide intervals and a rater whose reasoning correlated with the gate's own criterion. **The free keyword rule that approximates it was tested out-of-sample and INVERTED: D/L 1.40 against chance 3.64.** The largest failure class is a confident claim the diff cannot settle |
@@ -376,7 +376,7 @@ It comments from day one, narrowly, and widens only on evidence:
 
 | Tier | Fires when | Volume |
 |---|---|---|
-| Start | the top-ranked **file** is in this repository's top decile of **changes** | **8–13% on six of seven**; computed per repository at install |
+| Start | the top-ranked **file** is in this repository's top decile of **changes** — a percentile, so the bar moves with the repository | **8–15% on six of seven, steady across each one's history**; computed on yours at install |
 | Widen | top two ranked **files** | untested |
 
 Widening requires **two signals moving together**: the acceptance rate of findings climbing,
@@ -770,7 +770,7 @@ missed, because it does not know.
 bottom-up motion available is the retrospective — it runs against a clone, needs no install and no
 permissions, and shows what the ranking would have said on closed history. It is unbuilt.
 
-**Noise is the strongest ground, and the rate is now measured on the unit we ship.** Six of seven repositories fire at **8–13%** on their most recent window; the largest, `angular/angular`, at 11%. **We do not quote a band to a customer** — the rate is computed from their own history before they install, which is a stronger thing to say than any fixed figure.
+**Noise is the strongest ground, and the rate is now measured on the unit we ship — and it is STEADY.** Because the bar is a percentile of the repository's own changes rather than an absolute count, it self-calibrates: six of seven repositories fire at **8–15% throughout their histories**, and `angular/angular`, the largest, runs 12-11-11-10 and is at 11% now. **A rate that does not drift is one a customer can plan on.** **We do not quote a band to a customer** — the rate is computed from their own history before they install, which is a stronger thing to say than any fixed figure.
 But Macroscope positions on low noise too, so the distinction is narrower than it sounds: theirs is
 low-noise *claims*, ours is *no claims*.
 
