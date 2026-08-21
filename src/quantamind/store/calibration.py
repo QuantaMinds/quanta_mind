@@ -36,6 +36,29 @@ contemporaneous floor stops meaning anything, so a short sample is reported rath
 """
 
 
+class SpanMismatch(RuntimeError):
+    """The bar and the score were measured over different spans. Never a silent zero."""
+
+
+def assert_spans(reach: int, window: int) -> None:
+    """The sample may reach further back; the MEASUREMENT may not.
+
+    **THIS HAS HAPPENED TWICE AND BOTH TIMES THE SYMPTOM WAS A CLEAN, PLAUSIBLE ZERO.** First a
+    calibration change's top was counted over its own prior year and compared against a top counted
+    over today's year -- `sveltejs/svelte` fired on 0.0% of 300 changes. Then widening the sample to
+    four years widened the COUNTING window with it, making the floor a four-year count against a
+    one-year score -- `gin-gonic/gin` fired on 0.0%. Neither raised anything. Both looked like a
+    repository that simply had nothing to say.
+
+    A sentence in a docstring did not stop the second one, so it is an assertion now.
+    """
+    if reach < window:
+        raise SpanMismatch(
+            f"the calibration sample reaches {reach}s but touches are counted over {window}s. "
+            f"The sample may reach further back than the measurement; it may never reach less."
+        )
+
+
 def window_for(
     conn: sqlite3.Connection, repo_id: int, *, as_of: int, window: int = YEAR_SECONDS
 ) -> tuple[int, int]:
@@ -108,6 +131,7 @@ def baseline(
     # `gin-gonic/gin` went from 29.0% to **0.0%**. The sample can reach further back; the
     # measurement may not.
     reach, _n = window_for(conn, repo_id, as_of=as_of, window=window)
+    assert_spans(reach, window)
     tops = [
         int(row[0])
         for row in conn.execute(

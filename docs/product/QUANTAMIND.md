@@ -196,15 +196,29 @@ and `types/ranking.py` already recorded that `threshold_percentile` "governs not
 
 **Seven repositories, none of which the rule was built from, spanning 2,007 to 38,217 commits:**
 
-| repository | commits | files ever | rate | range across its own windows | |
+| repository | commits | files ever | **oldest → newest** | direction | **current** |
 |---|---|---|---|---|---|
-| `angular/angular` | 38,217 | 30,108 | **11%** | 9–12% | tightest |
-| `facebook/react` | 21,640 | 13,323 | 12% | 8–17% | |
-| `nestjs/nest` | 21,639 | 4,541 | 8% | 3–11% | |
-| `sveltejs/svelte` | 11,326 | 17,236 | 14% | 9–18% | |
-| `vuejs/core` | 7,157 | 957 | 13% | 8–15% | |
-| `trpc/trpc` | 4,902 | 2,542 | 12% | 10–14% | |
-| `gin-gonic/gin` | 2,007 | **236** | **31%** | 24–41% | **flagged unreliable** |
+| `angular/angular` | 38,217 | 30,108 | 7 4 5 6 **11** | rising | **11%** |
+| `facebook/react` | 21,640 | 13,323 | 3 7 5 11 **13** | rising | **13%** |
+| `nestjs/nest` | 21,639 | 4,541 | 11 8 7 5 **8** | falling | **8%** |
+| `sveltejs/svelte` | 11,326 | 17,236 | 23 27 16 15 **11** | falling | **11%** |
+| `vuejs/core` | 7,157 | 957 | 9 4 9 7 **8** | steady | **8%** |
+| `trpc/trpc` | 4,902 | 2,542 | 8 5 6 9 **11** | rising | **11%** |
+| `gin-gonic/gin` | 2,007 | **236** | 21 24 21 28 **30** | rising | **30%** |
+
+**READ THESE AS SEQUENCES, NOT AS RANGES, AND THE PICTURE TIGHTENS.** Five of seven move three of
+four steps in one direction — `sveltejs/svelte` runs 23% down to 11%, `facebook/react` runs 3% up
+to 13%. That is not imprecision; it is the repository changing. **On the most recent window, six of
+seven sit at 8–13%**, which is tighter than any range across their whole histories suggests.
+
+**So the current window is the estimate, and the direction is reported beside it** — *"it has been
+rising, so the figure above is the one to plan on, not the average."*
+
+> **A REPORTING ERROR IS RECORDED HERE BECAUSE IT INVERTED A CONCLUSION.** These windows were first
+> printed newest-first and read as oldest-first, which made `facebook/react` look like it was
+> falling from 13% to 3% when it is rising from 3% to 13%. The SQL had no `ORDER BY` — SQLite
+> returned groups in whatever order it chose, and **a trend read off an unordered list is noise
+> wearing a direction.** Ordered now.
 
 **Six of seven land at 8–14%, and the largest repository is the tightest.** The documented band
 substantially holds at file level — which was not knowable before, because it had only ever been

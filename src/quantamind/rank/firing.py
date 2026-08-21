@@ -81,9 +81,22 @@ class Estimate:
     """
 
     spread: tuple[float, ...] = ()
-    """The rate on earlier windows of this same repository. **This is the number that says whether
-    the headline is trustworthy**, and it is what a sample-size floor was reaching for and missing.
+    """The rate on earlier windows of this repository, **OLDEST FIRST**.
+
+    **These are a sequence, not a range, and reading them as a range loses the finding.** Five of
+    seven repositories move three of four steps in one direction: `facebook/react` runs
+    3-7-5-11-13% and `sveltejs/svelte` runs 23-27-16-15-11%. Neither is imprecision. **The rate is
+    a property of the repository's own activity, and it drifts.** So the headline is the MOST
+    RECENT window rather than an average, and the direction is reported beside it.
     """
+
+    @property
+    def direction(self) -> str:
+        """`rising`, `falling` or `steady`, from first window to last."""
+        if len(self.spread) < 3:
+            return "steady"
+        move = self.spread[-1] - self.spread[0]
+        return "rising" if move > 0.03 else "falling" if move < -0.03 else "steady"
 
     @property
     def rate(self) -> float:
@@ -111,15 +124,17 @@ class Estimate:
             f"— {self.rate:.0%}."
         )
         if self.spread:
-            low, high = min(self.spread), max(self.spread)
-            line += (
-                f" On {len(self.spread)} earlier windows of your own history it ranged "
-                f"{low:.0%} to {high:.0%}."
-            )
-            if high - low >= UNSTABLE_AT:
+            track = " to ".join(f"{r:.0%}" for r in self.spread)
+            line += f" Across your history, oldest to newest, it ran {track}."
+            if self.direction != "steady":
                 line += (
-                    " That range is wide enough that the headline should not be relied"
-                    " on: your rate moves with your own activity, not with anything we set."
+                    f" It has been {self.direction}, so the figure above — your most recent"
+                    f" window — is the one to plan on, not the average."
+                )
+            elif max(self.spread) - min(self.spread) >= UNSTABLE_AT:
+                line += (
+                    " That moves around without a direction, so treat the figure above as"
+                    " approximate."
                 )
         return line
 
@@ -148,7 +163,11 @@ def estimate(
         ")) AS top "
         "FROM recent JOIN touch changed"
         "  ON changed.repo_id = ? AND changed.committed_at = recent.committed_at "
-        "GROUP BY recent.committed_at",
+        # **ORDERED, BECAUSE THESE ARE A SEQUENCE AND NOT A BAG.** Without it SQLite returns the
+        # groups in whatever order it likes, and a trend read off an unordered list is noise
+        # wearing a direction. An earlier report of these windows was printed newest-first and
+        # read as oldest-first, which inverted the conclusion for two repositories.
+        "GROUP BY recent.committed_at ORDER BY recent.committed_at",
         (repo_id, as_of, as_of - window, over, repo_id, as_of - window, as_of, repo_id),
     ).fetchall()
     tops = [int(r[0]) for r in rows]
