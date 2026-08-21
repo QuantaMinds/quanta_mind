@@ -18,16 +18,24 @@ repos:
       - id: ruff
         args: [--fix]
 
+  # VENDORED THIRD-PARTY DATA IS EXCLUDED FROM EVERY MUTATING HOOK.
+  # `end-of-file-fixer` appended a newline to Martian's checked-in benchmark JSON on its first
+  # commit, which broke the SHA-256 that `bench/corpus.py` asserts before reading. The checksum
+  # caught it -- that is what it is for -- but a formatter silently editing a third party's
+  # measurement data is not something to catch repeatedly. It is excluded instead.
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
       - id: end-of-file-fixer
+        exclude: '^research/phase0/bench/martian/'
       - id: trailing-whitespace
-        exclude: '\.md$'
+        exclude: '\.md$|^research/phase0/bench/martian/'
       - id: check-toml
       - id: check-json
+        exclude: '^research/phase0/bench/martian/'
       - id: check-merge-conflict
       - id: mixed-line-ending
+        exclude: '^research/phase0/bench/martian/'
         args: [--fix=lf]
 
   - repo: local

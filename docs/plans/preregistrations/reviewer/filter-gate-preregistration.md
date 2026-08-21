@@ -118,3 +118,65 @@ an assumption, and this measurement cannot license it.**
 > `research/phase0/bench/corpus.py`** — a scratchpad belonging to a dead session, on a path the OS
 > may clear. This project has been bitten by exactly this before. **Copy it into the repository's
 > own storage before any run depends on it.**
+
+---
+
+# Arm A — the result. It fails, and it fails BELOW CHANCE.
+
+**Measured directly on the 24 candidates the gate dropped, not by differencing two judge passes.**
+
+| | |
+|---|---|
+| gate fired on | **24 of 464** candidates (5.2%), zero model calls |
+| **D** — false positives removed | **14** |
+| **L** — true findings lost | **10** |
+| **D/L** | **1.40** |
+| chance value of D/L on this pool | **3.64** |
+
+| bar | value | required | verdict |
+|---|---|---|---|
+| B1 trade D/L | **1.40** | ≥ 15 | **FAIL** |
+| B2 volume D | **14** | ≥ 180 | **FAIL** |
+| B3 recall L | 10 | ≤ 15 | PASS |
+
+**B3 passes only because the rule barely fires.** A filter that touches 5% of the pool cannot lose
+much recall; that is not a property worth crediting.
+
+**D/L = 1.40 against a chance value of 3.64 means the gate discards TRUE findings at roughly two
+and a half times the rate random deletion would.** This is prediction 13's outcome, not prediction
+1's: **inverted, not null.** Of the 24 findings it removed, **10 were correct**.
+
+## Why it inverted, and it is a failure this project has already had once
+
+**The keyword list was tuned on design ten's failures** — `does not exist`, `no such version`,
+`future date`, `assertion is incorrect` — which were Python-library findings about package
+registries and dates. Recomputed on design ten's own 32 adjudicated findings the rule genuinely
+separates: kept 20 at 10.0% wrong against dropped 12 at 75.0% wrong, **Fisher p = 0.0003**.
+
+**On this corpus — cal.com, discourse, grafana, keycloak, sentry — it inverts.** The same tokens
+appear inside true findings about web application code, where "will fail" describes a real defect
+rather than an unverifiable claim about a registry.
+
+**The evidence ledger already records this exact collapse:** *"the word-list filter — beautiful
+in-sample, dead on fresh data at p = 0.16"*, and *"review content is not keyword-shaped"*. This is
+the same failure with a different word list.
+
+## Two corrections that follow, and both are against my own claims
+
+**1. The mechanical gate comes OFF the differentiator list.** I put it at number one after removing
+cross-family judging from that list. It fails its own bars on the first corpus it was tested against
+that it was not built on. **It may not be pitched, and the p = 0.0007 figure describes the MODEL
+gate, not this rule** — a second attribution error, which is the trap of crediting a mechanism with
+work that belongs to another, for the third time in this project.
+
+**2. Arm B changes shape.** It was specified as *gate, then cross-family judge*. The gate half is
+now measured as harmful on this corpus, so stacking a judge on top would inherit a filter that
+removes 10 true findings for 14 false ones. **Arm B is a cross-family judge ALONE**, and the gate is
+withdrawn pending a rule that survives a corpus it was not tuned on.
+
+## What survives
+
+**The decidability CONCEPT is not refuted; the keyword implementation of it is.** The model gate
+separated at p = 0.0001 on design ten and has never been tested out-of-sample. That is a different
+mechanism with a different cost — it is inference, not a rule — and any future claim about it must
+say which of the two produced the number.

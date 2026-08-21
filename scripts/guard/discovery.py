@@ -31,6 +31,7 @@ EXCLUDED_DIRS: frozenset[str] = frozenset(
         # Generated and unbounded like the other caches; the cap was firing on it.
         ".hypothesis",
         "vendor",
+        "martian",  # Martian's benchmark data, vendored off /private/tmp. Not ours to police.
         "node_modules",
         "htmlcov",
         "dist",

@@ -17,20 +17,52 @@ CONSUMED BY: `run.py` in this package.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import pathlib
 import subprocess
 
-BENCH = pathlib.Path(
-    "/private/tmp/claude-501/-Users-dhanu-Documents-SaaS-quanta-mind/"
-    "6063c1dc-2654-4975-b12a-47677aad0026/scratchpad/bench/code-review-benchmark/offline"
-)
+# **IN THE REPOSITORY, NOT IN /private/tmp.** This pointed at a scratchpad belonging to a dead
+# session. Such a path does not fail loudly when the OS clears it -- the file is simply gone and the
+# run reports a smaller denominator or a clean skip. `_assert_intact()` below refuses instead.
+BENCH = pathlib.Path(__file__).resolve().parent / "martian" / "data"
 CACHE = pathlib.Path(
     "/private/tmp/claude-501/-Users-dhanu-Documents-SaaS-quanta-mind/"
     "6063c1dc-2654-4975-b12a-47677aad0026/scratchpad/bench/diffs"
 )
 JUDGE_DIR = "anthropic_claude-opus-4-5-20251101"
 MAX_DIFF_CHARS = 180_000
+
+
+def _assert_intact() -> None:
+    """Refuse to read a corpus that has moved, vanished or changed since it was checksummed."""
+    root = BENCH.parent
+    stamp = root / "CHECKSUM"
+    if not BENCH.is_dir() or not stamp.is_file():
+        raise CorpusMissing(f"{BENCH} or its CHECKSUM is absent; the benchmark data is not here")
+    files = sorted(p for p in BENCH.rglob("*") if p.is_file() and p.suffix in (".json", ".py"))
+    digest = hashlib.sha256()
+    for f in files:
+        digest.update(hashlib.sha256(f.read_bytes()).hexdigest().encode() + b"  " + str(f).encode())
+    # The recipe in martian/README.md hashes `shasum` output lines; reproduce it exactly.
+    lines = "".join(
+        f"{hashlib.sha256(f.read_bytes()).hexdigest()}  {f.relative_to(root)}\n" for f in files
+    )
+    got = hashlib.sha256(lines.encode()).hexdigest()
+    want = stamp.read_text().strip()
+    if got != want:
+        raise CorpusChanged(
+            f"benchmark data does not match {stamp}: {got[:12]} vs {want[:12]}. "
+            f"Regenerate the checksum only if the change was deliberate."
+        )
+
+
+class CorpusMissing(RuntimeError):
+    """The benchmark data is not where it is supposed to be."""
+
+
+class CorpusChanged(RuntimeError):
+    """The benchmark data changed under a run that depends on it."""
 
 
 class FetchFailed(RuntimeError):
