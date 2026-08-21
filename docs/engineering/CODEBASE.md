@@ -970,6 +970,42 @@ first version of that test fail — it made it **hang**, because nothing is ever
 `readline()` blocks forever. A hang in CI burns the job's timeout and reads as "stuck" rather than
 "broken". The read now runs on a thread with a deadline and fails in thirty seconds saying which.
 
+#### `check_stage_table.py` — the summary table drifted; the block below it did not
+
+`docs/plans/implementation.md` opens with a hand-written stage table and, twelve lines lower, a
+block regenerated from the filesystem by `check_plan_state.py`. **The regenerated block was right.
+The table above it was wrong in four rows** — `ingest/diff.py` and `parse/` "not begun",
+`rank/order.py` "still to come", render and the retrospective both "not begun" — every one of them
+shipping. A fifth disagreement sat in a third place: a `· NEXT` heading over a `STARTED` row.
+
+`check_plan_state.py` says in its own docstring that it "cannot check that a stage's prose is
+honest". That was accurate, and the prose then drifted for months in the section labelled **"This is
+the resume point."**
+
+**The guard refuses to judge completion, and that is what makes it sound.** Whether a stage is DONE
+depends on its gate, which is prose about evidence. Every rule fires only on a contradiction
+between a claim and the filesystem: an absence claim about a module that exists, a `DONE` step
+naming one that does not, a stage called not-begun whose every named artefact is present, and a
+status outside the vocabulary — `NEXT` is a schedule, not a state.
+
+**A stage naming no module is a violation, not a skip.** Two stages were written as future plans
+whose steps named no file at all — "Walk closed pull requests, rank each against history" — so
+nothing about them could ever be checked, and their rows sat at "not begun" through the entire
+build. Silently passing an unverifiable stage is the unreachable-check defect: identical output
+whether the stage is honest or three months stale.
+
+**The parsing unit is split out into `plan_claims.py` deliberately.** This repository has now got
+that unit wrong three times in opposite directions — `check_documented_recipes.py` joined two
+backtick spans into one command, `check_decided_vocabulary.py` first split a negation across a
+wrapped line and then merged a table's rows until a four-column sabotage passed. Here one evidence
+cell carries both polarities ("`history.py` built. `diff.py` not begun"), so the unit is a
+sentence, and the module says why.
+
+**The orphan check now reads imports instead of naming `discovery.py`.** `check_enforcement_map.py`
+exempted exactly one filename from "every guard must be invoked by something"; the second shared
+module would have been reported as an orphan, and the obvious fix was to add a second name.
+Resolving imports states the actual property and still covers `discovery.py` without naming it.
+
 **Owns:** the HTTP webhook, the CLI, health, configuration, and the contracts at the edge.
 **Must not:** let the two adapters diverge. What a customer verifies with the CLI must be what
 the App runs.

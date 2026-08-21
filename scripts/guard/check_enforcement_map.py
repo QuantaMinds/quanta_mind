@@ -34,6 +34,9 @@ from discovery import Violation, report
 TOKEN = re.compile(r"\b(guard|ci|hook):([A-Za-z0-9_./-]+)")
 
 # Recipe names in the justfile: a line starting at column 0 ending in ':'.
+# `from discovery import ...` / `import discovery` inside scripts/guard/, at column 0.
+IMPORT = re.compile(r"^(?:from|import)\s+([a-z_][a-z0-9_]*)", re.MULTILINE)
+
 JUST_RECIPE = re.compile(r"^([a-z][a-z0-9-]*)\s*(?:[A-Za-z0-9_= \"'.]*)?:", re.MULTILINE)
 
 # Guards that are invoked by Claude Code rather than by a recipe. They still have
@@ -116,13 +119,22 @@ def check_no_orphan_guards(settings: Path, root: Path) -> list[Violation]:
         ]
     )
 
+    # A shared module is invoked by no recipe because another guard IMPORTS it. This used to be
+    # the single hard-coded name `discovery.py`, which meant the second shared module anyone wrote
+    # was reported as an orphan and the obvious fix was to add a second name. Reading the imports
+    # states the actual property, and it keeps covering discovery.py without naming it.
+    imported = {
+        module
+        for path in guard_dir.rglob("*.py")
+        for module in IMPORT.findall(path.read_text(encoding="utf-8"))
+    }
+
     violations: list[Violation] = []
     # rglob: hooks live in scripts/guard/hooks/ since the directory hit its fan-out
     # cap. A non-recursive glob would silently stop checking them for orphan
     # status -- the guard-that-guards-guards quietly covering less than it says.
     for path in sorted(guard_dir.rglob("*.py")):
-        # discovery.py is the shared walker, imported rather than invoked.
-        if path.name == "discovery.py":
+        if path.stem in imported:
             continue
         # A sub-package's __init__.py declares the package; it is not a guard and has
         # nothing to invoke. The modules beside it are still checked individually.
