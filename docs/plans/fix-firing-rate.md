@@ -66,3 +66,71 @@ measured on anything but the corpus it was designed against.
 
 **Nothing in `rank/` changes until this plan is reviewed.** That is the rule for this layer and it
 exists because a wrong turn here is a correctness bug, not a style bug.
+
+---
+
+# The five-minute question, answered: it is a bug AND a claim that does not transfer
+
+**"Did the research ever measure this?" Yes. On an arm the product does not ship, with a mechanism
+the product does not contain.**
+
+## What was measured
+
+`docs/findings/RETROSPECTIVE_SWEEP_2026-08.md` — eight repositories, **function-level ranking**,
+**PCTL≥90** (fire on the top decile of prior touch counts):
+
+| Repository | Fire |
+|---|---|
+| browser-use | 10% |
+| Skyvern | 10% |
+| cartography | 11% |
+| AGI-Alpha | 11% |
+| OpenPipe ART | 12% |
+| TabPFN | 12% |
+
+> **The fire rate lands at 10–12% on every repository across an 80× velocity range.** That is the
+> percentile doing its job, and it is the property no absolute threshold had.
+
+**So the figure is real and it is not invented.** It is also three things it is not usually quoted
+as being.
+
+## One: the mechanism was never built
+
+The measured rule is **a percentile** — the sweep's own heading is *"The firing rule that works: a
+percentile, not a threshold"*, and its argument is that an absolute threshold fired on **11% of
+cartography and 53% of Skyvern**, which is exactly the failure `rank/order.py` now has.
+
+**`fires()` implements the threshold the sweep rejected, not the percentile it recommended.**
+`types/ranking.py` already says `threshold_percentile` "governs nothing". The research answer exists
+and was not carried into the code.
+
+## Two: it was measured on the arm that LOST
+
+**The sweep is FUNCTION-level. The product ships FILE-level**, and the canonical document is
+emphatic about why: file-level misses **1.22%** of the changes a later fix returns to against
+function-level's **8.84%**, *"the file arm is the one that replicated out-of-sample"*, and
+*"allocation is file-level everywhere"*.
+
+**The firing rate of the shipped unit has never been measured.** There is no file-level fire-rate
+number anywhere in `research/`.
+
+## Three: at PCTL≥90 the number is close to definitional, and the document says so
+
+`QUANTAMIND.md` already carries the caveat: *"Close to definitional rather than discovered — a
+percentile threshold fires on a fixed share of its own distribution by construction."* A top-decile
+rule fires on about a tenth of its distribution because that is what a top decile is. **The
+transferable finding is the CONTRAST — 11% versus 53% for an absolute threshold — not the 10–12%
+itself.**
+
+## What this changes
+
+**Building the percentile gate is not "fixing a bug to hit 11%".** It is implementing the rule the
+research chose, and then **measuring what rate it produces at file level, on repositories it was not
+built from** — because the number that has been quoted belongs to a different unit.
+
+**Whatever comes out is the number, and the claim is rewritten to match it.** If file-level PCTL≥90
+fires on 30% of pull requests, the table says 30%.
+
+**And "Quiet" cannot be quoted as a measured property of the shipped product until that exists.**
+Today it is a measurement of the function-level arm, produced by a mechanism the code does not have.
+That is the sentence that would not survive a client asking how it was obtained.
