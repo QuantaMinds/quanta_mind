@@ -104,11 +104,14 @@ def review(
             # the caller still gets the skipped list so the coverage line can name them.
             return Reviewed(None, Ranking(), (), tuple(skipped))
         scores = touch_store.counts(conn, repo_id, considered, as_of=as_of)
+        # **THE REPOSITORY'S OWN TOP DECILE, NOT THIS CHANGE'S.** Without it `fires()` falls back to
+        # the absolute threshold the research rejected, which fired on 198 of 200 real changes.
+        floor = touch_store.baseline(conn, repo_id, as_of=as_of)
     finally:
         conn.close()
 
     try:
-        ranking = rank(scores)
+        ranking = rank(scores, baseline=floor)
     except NothingToRank:
         return Reviewed(None, Ranking(), tuple(considered), tuple(skipped))
 

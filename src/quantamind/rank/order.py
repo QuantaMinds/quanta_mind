@@ -67,8 +67,20 @@ def percentiles(scores: Mapping[str, int]) -> dict[str, float]:
     return out
 
 
-def fires(scores: Mapping[str, int]) -> bool:
+def fires(scores: Mapping[str, int], baseline: int | None = None) -> bool:
     """Whether this change is worth speaking on.
+
+    **`baseline` IS THIS REPOSITORY'S TOP-DECILE TOUCH COUNT, AND WITHOUT IT THIS RULE IS THE ONE
+    THE RESEARCH REJECTED.** `docs/findings/RETROSPECTIVE_SWEEP_2026-08.md` measured the firing rule
+    and its heading is *"The firing rule that works: a percentile, not a threshold"* -- an absolute
+    threshold fired on **11% of cartography and 53% of Skyvern**, an order of magnitude apart for
+    the same rule. With `baseline=None` this falls back to `max(scores) > 0`, which is that rejected
+    threshold at its loosest setting: measured on `trpc/trpc` it fired on **198 of 200** real
+    changes, 99.0%, against a documented 10-12%.
+
+    **The fallback is kept and is NOT the default anyone should ship**, because a caller with no
+    repository index still needs an answer, and returning False there would silence a ranking that
+    is perfectly good. `serve/run_review.py` passes the baseline.
 
     False when there is nothing to rank: with every file at zero the ordering is alphabetical, and
     speaking would present `sort(filenames)` as a judgement about risk. Staying quiet is the
@@ -84,7 +96,12 @@ def fires(scores: Mapping[str, int]) -> bool:
     """
     if discriminate(scores) is Discrimination.NO_HISTORY:
         return False
-    return max(scores.values(), default=0) > 0
+    top = max(scores.values(), default=0)
+    if baseline is None:
+        return top > 0
+    # At or above the repository's own top decile. `>=` rather than `>`: the baseline IS a touch
+    # count some file has, and a file tying the decile boundary is in the decile.
+    return top >= baseline and top > 0
 
 
 class NothingToRank(ValueError):
@@ -104,6 +121,7 @@ def rank(
     budget: int = BUDGET,
     threshold: float = DEFAULT_THRESHOLD,
     language: Language = Language.PYTHON,
+    baseline: int | None = None,
 ) -> Ranking:
     """Every changed path, ordered and labelled. Cold units included by design."""
     if not scores:
@@ -149,7 +167,7 @@ def rank(
         )
     return Ranking(
         units=tuple(units),
-        fired=fires(scores),
+        fired=fires(scores, baseline),
         threshold_percentile=threshold,
         discrimination=split,
     )

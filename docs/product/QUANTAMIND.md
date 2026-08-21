@@ -161,11 +161,68 @@ and a fifth that this document used to claim has been measured and withdrawn.** 
 
 | | |
 |---|---|
-| **Quiet** | Fires on 10–12% of changes across repositories differing 80× in velocity. **Close to definitional rather than discovered** — a percentile threshold fires on a fixed share of its own distribution by construction. The evidence that it is doing work is the CONTRAST: an absolute threshold fired on 11% of one repository and 53% of another |
+| **Quiet** — *see the correction below* | **UNMEASURED FOR WHAT WE SHIP, AND THE SHIPPED CODE DOES NOT CONTAIN THE RULE.** The 10–12% is real and was measured at **function** level; the product ranks **files**, and the file-level rate had never been measured. Measured 2026-08-20 on four repositories the rule was not built from: the shipped absolute threshold fires on **91.3%**, and a top-decile-of-**files** gate on **62.2%**. Only a top-decile-of-**changes** gate reproduces 10–12%, and it does so **by construction**. **The part that transfers is the CONTRAST — an absolute threshold fired on 11% of one repository and 53% of another** |
 | **Honest** | Reports its own blind spots — verified as unavailable to all seven competitors |
 | **Right about where to look** | **Replicated out-of-sample.** Ranking the changed files by prior touch count and reading the top three misses **1.21%** of the changes a later fix returns to, against **3.12%** for an alphabetical ordering — on **six repositories the method was never developed against**, n = 2,400, McNemar **p < 0.000001**, positive in **6 of 6**. The original eight gave **1.44% vs 3.31%**. The two lifts differ by **0.05 points**. **Leave scrapy out and the lift is +0.90 rather than +1.92** — `publishing-rules.md` requires the smaller number wherever one figure is quoted, because a caveat does not travel with a number into someone else's deck |
 | **Honest about what cannot be decided** | A claim needing a fact outside the diff is labelled, not published. **A MODEL gate separated at Fisher p = 0.0007 on n = 29** — an inference call, not a rule, with wide intervals and a rater whose reasoning correlated with the gate's own criterion. **The free keyword rule that approximates it was tested out-of-sample and INVERTED: D/L 1.40 against chance 3.64.** The largest failure class is a confident claim the diff cannot settle |
 | **Cheaper** — *billed, not estimated* | **$0.119 per pull request** on real diffs through Vertex, against a $0.140 derived estimate — but the estimate was right by luck: input is 5.2% of the bill and **thinking is 91.3%** |
+
+
+## Correction — "Quiet" is not a measured property of the shipped product
+
+**A client will ask how that number was obtained. This is the answer, written before they ask.**
+
+**The 10–12% is real.** `docs/findings/RETROSPECTIVE_SWEEP_2026-08.md`, eight repositories spanning
+an 80× velocity range, fire rates of 10, 10, 11, 11, 12, 12%. Nobody invented it.
+
+**It describes a different unit.** That sweep ranks **functions**. This product ranks **files** —
+deliberately, because file-level misses **1.22%** of the changes a later fix returns to against
+function-level's **8.84%**, and the file arm is the one that replicated out-of-sample. **The
+file-level firing rate had never been measured anywhere.**
+
+**And the mechanism was never built.** The sweep's own heading is *"The firing rule that works: a
+percentile, not a threshold"*; `rank/order.py` shipped the absolute threshold that sweep rejected,
+and `types/ranking.py` already recorded that `threshold_percentile` "governs nothing".
+
+**Measured 2026-08-20**, four repositories the rule was not built from — `sveltejs/svelte`,
+`vuejs/core`, `gin-gonic/gin`, `nestjs/nest`, 1,200 changes:
+
+| firing rule | pooled rate | **spread across the four repositories** |
+|---|---|---|
+| absolute threshold, **as previously shipped** | **91.3%** | 83.0–97.0% |
+| top decile of this repository's **files** | **62.2%** | 42.7–79.7% |
+| top decile of this repository's **changes**, calibrated IN-SAMPLE | ~11% | 10.0–12.3% |
+| **top decile of changes, calibrated out-of-sample — WHAT SHIPS** | **9.5%** | **0.0% – 25.0%** |
+
+**The pooled 9.5% is an average of a rule that is silent on one repository and speaks on a quarter
+of changes at another.** `sveltejs/svelte` fires on **0.0% of 300 changes**: it has a handful of
+dominant files, so the decile of change-tops lands at the hottest file's count and almost nothing
+clears it. `gin-gonic/gin` fires on 25.0%.
+
+**The in-sample row is why this needed measuring twice.** Calibrating the decile on the same
+changes it is tested against gives 10–12% *by construction* — it is a tenth of a tenth. Calibrated
+on changes it has not seen, the same rule gives 0.0–25.0%. **This project has hit that collapse
+before: the word-list filter was beautiful in-sample and inverted on fresh data.**
+
+**A prediction was written down first and it was WRONG.** Files were expected to fire *less* than
+functions — a pull request holds fewer files than functions, so fewer units get a chance to clear
+the bar. They fire *more*, because the top-ranked file of a change is the most-touched among the
+changed files, and changed files are heavily selected relative to the repository as a whole.
+
+**Only the IN-SAMPLE change-calibrated rule reproduces 10–12%, and it is definitional.** A top
+decile of changes fires on a tenth of changes because that is what a top decile is. Out-of-sample
+the same rule ranges 0.0–25.0%.
+
+**"10–12% everywhere across an 80× velocity range" DOES NOT HOLD AT FILE LEVEL.** It was measured
+at function level and it does not transfer to the unit this product ships. **The transferable
+finding was never the rate — it is the contrast: 11% against 53% for an absolute threshold, which
+is the evidence that a percentile travels between codebases better than an absolute number.** Even
+that is weaker than it reads: the percentile's own spread here is 0.0–25.0%.
+
+**What ships is still a large improvement and is not the claim.** 91.3% to 9.5% pooled is the
+difference between commenting on nearly every pull request and commenting on roughly one in ten.
+**The per-repository stability that would let us call the product "quiet" has not been
+demonstrated**, and until it is, that word does not belong in a table of proven properties.
 
 ---
 
@@ -249,7 +306,7 @@ It comments from day one, narrowly, and widens only on evidence:
 
 | Tier | Fires when | Volume |
 |---|---|---|
-| Start | the top-ranked **file** is in this repository's top decile of prior touch counts | 10–12% |
+| Start | the top-ranked **file** is in this repository's top decile of prior touch counts | **62.2% measured** — see the correction; 10–12% is the function-level figure |
 | Widen | top two ranked **files** | untested |
 
 Widening requires **two signals moving together**: the acceptance rate of findings climbing,
@@ -643,7 +700,7 @@ missed, because it does not know.
 bottom-up motion available is the retrospective — it runs against a clone, needs no install and no
 permissions, and shows what the ranking would have said on closed history. It is unbuilt.
 
-**Noise is the strongest ground.** We fire on **10–12% of changes** and publish **zero findings**.
+**Noise is the strongest ground — and the rate is under correction.** The 10–12% is a function-level measurement; the shipped file-level rate is **62.2%** under a top-decile-of-files gate and **91.3%** under the threshold currently in the code.
 But Macroscope positions on low noise too, so the distinction is narrower than it sounds: theirs is
 low-noise *claims*, ours is *no claims*.
 
@@ -663,7 +720,7 @@ evidence, and no customers yet.
 | Uses history | files that change together, as hidden context | codebase-aware model | **yes — git history is a tool its v3 agent calls** | **fix history is the entire ranking** |
 | Says what it could not analyse | **no** | **no** | **no** | **yes, on every pull request** |
 | Publishes model claims about correctness | yes | yes | yes | **only what an isolated judge in a different model family confirmed** |
-| Fires on | nearly every change | nearly every change | nearly every change | **10–12%** |
+| Fires on | nearly every change | nearly every change | nearly every change | **under correction — 62.2% measured at file level; 10–12% was function-level** |
 | Marginal cost per pull request | tokens, scaling with lines read | tokens | tokens | **tokens on 10–12% of changes, and only on the ranked files — the ranker is the budget** |
 | Priced | per seat | per seat | per seat | **per repository** |
 | Separates *undecidable* from *clean* | **no** | **no** | **no** | **a MODEL gate did, `p = 0.0007`, n = 29, never out-of-sample. The free rule inverted** |
