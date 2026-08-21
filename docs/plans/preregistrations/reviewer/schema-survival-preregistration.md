@@ -79,3 +79,63 @@ measured on seven years of history, which argues for the low end; but the golden
 
 **If it lands above 50% I should be suspicious of my own classifier**, because it would sit far
 above the structural rate measured on real review traffic.
+
+---
+
+# The result — the calibration gate fired, and the question is not answered
+
+**Run 2026-08-21. All 173 golden comments classified, zero failures.**
+
+| pass | agreement with the hand baseline | bar |
+|---|---|---|
+| **model** (`gemini-2.5-pro`) | **76.7%** | 0.85 |
+| **mechanical** (identifier present, no hedge) | **50.0%** | — |
+
+**THE MODEL PASS IS VOID.** It came in below the 0.85 bar fixed before the run, so its number is not
+quoted — it would be a measurement of the classifier rather than of the schema.
+
+**And the free approximation is worthless: 50.0% against a hand baseline is a coin flip.**
+`decidable.py`'s discipline — *"the free approximation, scored alongside the model so the model's
+value is measurable rather than assumed"* — was applied here and **both instruments failed**, which
+is the useful part of running them together.
+
+## What can be quoted
+
+**The hand sample alone: 17 of 30 survive = 56.7%, Wilson 39.2% – 72.6%.**
+
+| bar | verdict |
+|---|---|
+| **≥ 50%** — the schema is the product | **INCONCLUSIVE.** The interval spans it, and this document says an interval spanning a bar is not a pass |
+| **20–49%** — high-precision, low-volume tier | **NOT A PASS EITHER.** The point estimate is 56.7%, which is ABOVE this band, and the interval covers both |
+
+**A FLOOR IS ESTABLISHED. WHICH TIER WE ARE IN IS NOT KNOWN.** Reading the second row as a clean
+pass would be the error the first row refuses: 39.2%–72.6% sits inside both bands, so the honest
+statement is **"at least 39% survive"** and nothing more. The schema may be the product or may be a
+narrow tier, and this run cannot tell them apart. A mechanically-verified reviewer is viable
+as a low-volume, high-precision tier — at 173 goldens over 50 pull requests, 3.46 useful findings
+per pull request, of which at least ~39% survive the schema is **at least 1.3 published per pull
+request with a parser behind each one.** Whether it is the whole product needs n far above 30.
+
+> **THIS CAVEAT TRAVELS WITH THE NUMBER, PERMANENTLY.** The 173 goldens are *benchmark* defect
+> reports — curated, and skewed toward the structural, checkable kind of finding. **General review
+> traffic is 5.9% structural.** Measuring how many books fit a shelf using the reference section
+> tells you little about the general collection. **Any quotation of 56.7%, or of the 39% floor, that
+> does not carry this sentence is overstating what was measured.**
+
+## The prediction was wrong in the informative direction
+
+**I predicted 25–40% and wrote that above 50% I should suspect my own classifier.** It landed at
+56.7%. The suspicion is recorded rather than resolved: these are *defect* comments from a benchmark,
+which skew toward concrete code faults, where general review traffic is **5.9% structural**. The
+number is real for this corpus and should not be read as a property of review comments at large.
+
+## What this actually costs to finish, and it is the debt this project already owes
+
+**More hand-grading.** The model cannot do it — 76.7% — and the keyword rule cannot — 50.0%. To
+separate 40% from 60% needs roughly 150 hand-graded findings, and **the grader must not be the
+author of the definition**, which is the same independent-rater debt four prior designs have
+carried.
+
+**That is a day of a person's attention, and it is the only thing standing between this and an
+answer.** It is also cheaper than every experiment in this document's history, none of which
+resolved it.
