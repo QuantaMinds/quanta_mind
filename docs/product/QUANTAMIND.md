@@ -161,7 +161,7 @@ and a fifth that this document used to claim has been measured and withdrawn.** 
 
 | | |
 |---|---|
-| **Quiet** — *see the correction below* | **UNMEASURED FOR WHAT WE SHIP, AND THE SHIPPED CODE DOES NOT CONTAIN THE RULE.** The 10–12% is real and was measured at **function** level; the product ranks **files**, and the file-level rate had never been measured. Measured 2026-08-20 on four repositories the rule was not built from: the shipped absolute threshold fires on **91.3%**, and a top-decile-of-**files** gate on **62.2%**. Only a top-decile-of-**changes** gate reproduces 10–12%, and it does so **by construction**. **The part that transfers is the CONTRAST — an absolute threshold fired on 11% of one repository and 53% of another** |
+| **Quiet** — *measured at file level for the first time* | **Six of seven repositories sit at 8–13% on their most recent window**, measured 2026-08-20 on repositories the rule was not built from and spanning 2,007 to 38,217 commits. `angular/angular`, the largest, is the steadiest at **11%**. **Within a repository the rate DRIFTS** — `sveltejs/svelte` from 23% down to 11%, `facebook/react` from 3% up to 13% — so it is a direction, not a constant. **`gin-gonic/gin` sits near 30% and that is a stable property of a 236-file surface, not an error.** The product does not quote a band: `rank/firing.py` replays the customer's own history and prints their rate before they install |
 | **Honest** | Reports its own blind spots — verified as unavailable to all seven competitors |
 | **Right about where to look** | **Replicated out-of-sample.** Ranking the changed files by prior touch count and reading the top three misses **1.21%** of the changes a later fix returns to, against **3.12%** for an alphabetical ordering — on **six repositories the method was never developed against**, n = 2,400, McNemar **p < 0.000001**, positive in **6 of 6**. The original eight gave **1.44% vs 3.31%**. The two lifts differ by **0.05 points**. **Leave scrapy out and the lift is +0.90 rather than +1.92** — `publishing-rules.md` requires the smaller number wherever one figure is quoted, because a caveat does not travel with a number into someone else's deck |
 | **Honest about what cannot be decided** | A claim needing a fact outside the diff is labelled, not published. **A MODEL gate separated at Fisher p = 0.0007 on n = 29** — an inference call, not a rule, with wide intervals and a rater whose reasoning correlated with the gate's own criterion. **The free keyword rule that approximates it was tested out-of-sample and INVERTED: D/L 1.40 against chance 3.64.** The largest failure class is a confident claim the diff cannot settle |
@@ -367,7 +367,7 @@ It comments from day one, narrowly, and widens only on evidence:
 
 | Tier | Fires when | Volume |
 |---|---|---|
-| Start | the top-ranked **file** is in this repository's top decile of prior touch counts | **62.2% measured** — see the correction; 10–12% is the function-level figure |
+| Start | the top-ranked **file** is in this repository's top decile of **changes** | **8–13% on six of seven**; computed per repository at install |
 | Widen | top two ranked **files** | untested |
 
 Widening requires **two signals moving together**: the acceptance rate of findings climbing,
@@ -761,7 +761,7 @@ missed, because it does not know.
 bottom-up motion available is the retrospective — it runs against a clone, needs no install and no
 permissions, and shows what the ranking would have said on closed history. It is unbuilt.
 
-**Noise is the strongest ground — and the rate is under correction.** The 10–12% is a function-level measurement; the shipped file-level rate is **62.2%** under a top-decile-of-files gate and **91.3%** under the threshold currently in the code.
+**Noise is the strongest ground, and the rate is now measured on the unit we ship.** Six of seven repositories fire at **8–13%** on their most recent window; the largest, `angular/angular`, at 11%. **We do not quote a band to a customer** — the rate is computed from their own history before they install, which is a stronger thing to say than any fixed figure.
 But Macroscope positions on low noise too, so the distinction is narrower than it sounds: theirs is
 low-noise *claims*, ours is *no claims*.
 
@@ -781,7 +781,7 @@ evidence, and no customers yet.
 | Uses history | files that change together, as hidden context | codebase-aware model | **yes — git history is a tool its v3 agent calls** | **fix history is the entire ranking** |
 | Says what it could not analyse | **no** | **no** | **no** | **yes, on every pull request** |
 | Publishes model claims about correctness | yes | yes | yes | **only what an isolated judge in a different model family confirmed** |
-| Fires on | nearly every change | nearly every change | nearly every change | **under correction — 62.2% measured at file level; 10–12% was function-level** |
+| Fires on | nearly every change | nearly every change | nearly every change | **8–13% on six of seven repositories, and computed on yours before you install** |
 | Marginal cost per pull request | tokens, scaling with lines read | tokens | tokens | **tokens on 10–12% of changes, and only on the ranked files — the ranker is the budget** |
 | Priced | per seat | per seat | per seat | **per repository** |
 | Separates *undecidable* from *clean* | **no** | **no** | **no** | **a MODEL gate did, `p = 0.0007`, n = 29, never out-of-sample. The free rule inverted** |
