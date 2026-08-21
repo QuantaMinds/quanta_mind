@@ -30,6 +30,7 @@ CONSUMED BY: ingest.history derives Touch values; the ranker's replay gate reads
 from __future__ import annotations
 
 import subprocess
+from collections.abc import Sequence
 from pathlib import Path
 
 from quantamind.types.commit import Commit
@@ -116,7 +117,7 @@ def assert_readable(repo_dir: Path) -> None:
         )
 
 
-def read_commits(repo_dir: Path, pathspec: str | None = None) -> list[Commit]:
+def read_commits(repo_dir: Path, pathspec: str | Sequence[str] | None = None) -> list[Commit]:
     """Every non-merge commit touching `pathspec`, OLDEST FIRST, with its subject and files.
 
     Returns `[]` for a repository with no commits — detected structurally rather than by matching
@@ -136,7 +137,13 @@ def read_commits(repo_dir: Path, pathspec: str | None = None) -> list[Commit]:
         # errors, not bookkeeping ones. `tests/live/test_counts_match_git.py` already used
         # --full-history as its ORACLE and passed, because its repositories have flatter
         # histories than these -- the oracle was right and the reader was wrong.
-        args += ["--full-history", "--", pathspec]
+        # **A SEQUENCE BECOMES SEVERAL PATHSPECS, NOT ONE BRACE GLOB.** `:(glob)**/*{py,ts}` looked
+        # right and returned ZERO commits on a repository with 1,990 of them -- git's glob magic has
+        # no brace expansion, so the pattern matched nothing and the read reported an empty history,
+        # which is indistinguishable from a repository that has none. Caught by running it against a
+        # real clone rather than trusting the syntax.
+        specs = [pathspec] if isinstance(pathspec, str) else list(pathspec)
+        args += ["--full-history", "--", *specs]
     result = _git(repo_dir, args, HISTORY_TIMEOUT_S)
     if result.returncode != 0:
         raise HistoryReadFailed(

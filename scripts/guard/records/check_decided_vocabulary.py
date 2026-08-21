@@ -75,10 +75,22 @@ RULES = (
         r"\bper seat\b|\bper developer per month\b|/dev/mo",
         'docs/product/QUANTAMIND.md — "price on the axis the costs actually sit on"',
     ),
+    # **THIS RULE REPLACES ONE THAT ENFORCED THE OPPOSITE, AND THE REVERSAL IS RECORDED RATHER
+    # THAN QUIETLY APPLIED.** It used to read "no model reads the code -- `infer/` and `verify/`
+    # ship nothing", which was true of the product until 2026-08-20, when the reviewer half was
+    # brought back in as a product decision. A guard enforcing a withdrawn decision is worse than
+    # no guard: it turns the build red for saying the true thing.
+    #
+    # What is worth protecting NOW is the mechanism that makes shipping a model defensible, and it
+    # is the part a summary drops first: findings are published only after an isolated judge in a
+    # DIFFERENT model family clears them. Measured 2026-08-20 -- a same-family judge agreed with a
+    # careful rater on 34.9% of findings and certified the reviewer's own invented facts.
     Rule(
-        "no model reads the code — `infer/` and `verify/` ship nothing",
-        r"bring your own \*?key\*?\s+at\b|model findings in the pull request \| — \| ✓",
-        "src/quantamind/infer/ and src/quantamind/verify/ — an __init__.py each",
+        "raw model findings are never published, and the judge is a DIFFERENT family",
+        r"publish(?:es|ed)? (?:the )?(?:raw |model )?findings? (?:directly|unverified|as[- ]is)|"
+        r"same model (?:family|as the reviewer)|"
+        r"no judge|without (?:a|the) judge|judge is the same",
+        'docs/product/QUANTAMIND.md — "THE JUDGE IS THE RELIABILITY MECHANISM"',
     ),
 )
 

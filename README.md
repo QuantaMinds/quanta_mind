@@ -8,12 +8,14 @@ only there, and state what we could not analyse.** Every other tool in the categ
 is *wrong*; we do not, because we measured that half and it did not survive.
 
 A model-free pass ranks the changed files by how often a later fix has returned to them, and that
-ranking decides where attention goes. **No model reads the code and no claims are published** —
-`infer/` and `verify/` are closed on evidence. Every review ends with its coverage line.
+ranking decides where the model reads. **Raw findings are never published**: one isolated judge, a
+DIFFERENT model family from the reviewer, clears every claim first — a same-family judge agreed
+with a careful rater on 34.9% and certified the reviewer's own hallucinations. Every review ends
+with its coverage line.
 
 **Status: seven of ten layers built.** The chain from git history to a rendered comment runs end
 to end and is verified against real repositories. `allocate/`, `infer/` and `verify/` are empty
-**because they are closed on evidence**, not merely unwritten.
+**and scheduled** — the reviewer runs on Gemini over the ranked files, behind the isolated judge.
 
 **No count of modules appears here on purpose.** The one that used to said five layers were empty
 when four of them were not. **Start at `docs/plans/implementation.md`, section "Where this is

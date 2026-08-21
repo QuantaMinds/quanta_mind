@@ -154,7 +154,7 @@ the online leaderboard, which measures a different quantity entirely.
 # The result — at level with CodeRabbit, significantly behind Greptile
 
 Run: `research/phase0/bench/run.py`. 50 pull requests, 173 golden comments, one Gemini judge
-across every arm. Artefact: `research/phase0/bench/martian_comparison.json`.
+across every arm. Artefact: `research/phase0/bench/results/martian_comparison.json`.
 
 **P0 passed first**: our judge scored CodeRabbit at **P = 37.8%, R = 62.4%** against their Claude
 judge's **34.7% / 59.5%** — 3.1 and 2.9 points. Calibrated on both axes.

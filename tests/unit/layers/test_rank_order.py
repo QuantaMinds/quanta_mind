@@ -154,3 +154,19 @@ def test_funded_is_empty_on_a_no_history_ranking_even_if_the_labels_say_otherwis
     assert ranking.funded() == (), (
         "the discrimination must override the labels, not agree with them"
     )
+
+
+def test_the_gate_without_a_baseline_is_the_rule_the_research_rejected() -> None:
+    """`fires(scores)` with no baseline is the ABSOLUTE threshold, and it must stay documented.
+
+    Measured on trpc/trpc it fired on 198 of 200 real changes. The fallback exists for a caller
+    with no repository index, not as a default anyone should ship, and this test pins the
+    difference so the two cannot be confused by a future edit.
+    """
+    from quantamind.rank.order import fires
+
+    scores = {"hot.ts": 3, "cold.ts": 0}
+    assert fires(scores) is True, "with no baseline, any history at all speaks"
+    assert fires(scores, baseline=3) is True, "at the floor is IN the decile"
+    assert fires(scores, baseline=4) is False, "below the floor is silence"
+    assert fires({"a.ts": 0, "b.ts": 0}, baseline=0) is False, "no history never speaks"

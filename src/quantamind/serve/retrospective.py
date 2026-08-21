@@ -41,11 +41,13 @@ from quantamind.rank.order import BUDGET
 from quantamind.rank.score import discriminate, order
 from quantamind.store import schema
 from quantamind.store import touches as touch_store
+from quantamind.types.change import REVIEWABLE_SUFFIXES
 from quantamind.types.ranking import Discrimination
 from quantamind.types.replay_outcome import DEGENERATE_AT, Outcome, Stratum
 from quantamind.types.touch import Touch
 
 FLAT_SCORES = "every file scored the same"
+PATHSPEC: tuple[str, ...] = tuple(f"*{s}" for s in REVIEWABLE_SUFFIXES)
 
 
 class _Tally:
@@ -80,7 +82,10 @@ def replay(clone: Path, repo: str, store_path: Path, cap: int | None = None) -> 
     the clone, never a durable one: a live test that wrote it inside a fixture stranded itself the
     first time `SCHEMA_VERSION` moved.
     """
-    commits = read_commits(clone, pathspec="*.py")
+    # **DERIVED FROM `REVIEWABLE_SUFFIXES`, NOT HARDCODED.** This read `"*.py"`, which silently
+    # returned an empty history for every repository that is not Python -- a retrospective that
+    # reports nothing looks exactly like a repository with no history.
+    commits = read_commits(clone, pathspec=PATHSPEC)
     if not commits:
         raise ValueError(f"{clone}: no Python history to replay; a retrospective needs commits")
 

@@ -19,6 +19,7 @@ CONSUMED BY: store.touches, for the index; rank consumes the index, never this m
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from pathlib import Path
 
 from quantamind.ingest.commits import HistoryReadFailed, assert_readable, read_commits
@@ -27,7 +28,7 @@ from quantamind.types.touch import Touch
 __all__ = ["HistoryReadFailed", "assert_readable", "read_touches"]
 
 
-def read_touches(repo_dir: Path, pathspec: str | None = None) -> list[Touch]:
+def read_touches(repo_dir: Path, pathspec: str | Sequence[str] | None = None) -> list[Touch]:
     """Every (file, commit-time) pair in this repository's history.
 
     `pathspec` narrows the read the way git does — `"*.py"` for the Python surface. Merge commits

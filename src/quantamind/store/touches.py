@@ -35,6 +35,9 @@ from quantamind.types.touch import Touch
 YEAR_SECONDS = 365 * 86400
 
 
+# How many recent changes the firing decile is calibrated over. Enough to be stable, few
+
+
 class UnboundedRankingError(ValueError):
     """A count was asked for without an `as_of` bound, or with a bound that cannot be honoured.
 

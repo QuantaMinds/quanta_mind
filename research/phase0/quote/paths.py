@@ -15,7 +15,7 @@ WHY:  Design eight published 18 findings about lockfiles and **every one of them
       eight's eight CORRECT findings. Excluding it because it is YAML would repeat the bucketing
       error that made the design-eight stratification wrong the first time it was computed.
 IMPORTS: stdlib only (re).
-CONSUMED BY: `run9.py` in this package.
+CONSUMED BY: `run9.py` and `run14.py` in this package.
 """
 
 from __future__ import annotations
@@ -26,6 +26,10 @@ import re
 LOCKFILE = re.compile(r"(^|/)([^/]*\.lock|package-lock\.json|yarn\.lock|pylock[^/]*\.toml)$")
 MANIFEST = re.compile(r"(^|/)(pyproject\.toml|requirements[^/]*\.txt|Pipfile|package\.json)$")
 DOCS = re.compile(r"\.(md|mdx|rst|html)$")
+# Design fourteen only. Fixed in
+# docs/plans/preregistrations/reviewer/design14-model-lever-preregistration.md before the run.
+CI = re.compile(r"^\.github/")
+CONFIG = re.compile(r"\.(ya?ml|cfg|ini|toml)$")
 
 
 def reason(path: str) -> str | None:
@@ -43,7 +47,33 @@ def reviewable(path: str) -> bool:
     return reason(path) is None
 
 
-def filter_diff(diff: str) -> tuple[str, dict[str, int], int]:
+def reason_strict(path: str) -> str | None:
+    """`reason()`, plus the CI and config paths design fourteen excludes.
+
+    **`reason()` IS LEFT EXACTLY AS IT WAS, and that is the point.** Designs nine through thirteen
+    ran against it; editing it in place would silently change what those runs are recorded as
+    having done, and this project has voided measurements over an instrument that changed
+    mid-study. The new rule is a new function.
+
+    **The `.github/` decision is REVERSED here, on evidence, and the old reason is still true.**
+    This module says CI configuration is kept on purpose because it "produced three of design
+    eight's eight CORRECT findings". Design thirteen's blind adjudication, recomputed from
+    `adj13/verdicts.json` against its sealed key, says `.github/` is **65.6% wrong** across 32
+    findings and supplies **21 of the 28 EXTERNAL failures** -- the model asserting that a pinned
+    action SHA is not tagged what it is tagged, which no diff can settle. Design eight's reading
+    was right on design eight's data and is outlived.
+    """
+    named = reason(path)
+    if named:
+        return named
+    if CI.search(path):
+        return "CI configuration"
+    if CONFIG.search(path):
+        return "configuration"
+    return None
+
+
+def filter_diff(diff: str, strict: bool = False) -> tuple[str, dict[str, int], int]:
     """(filtered diff, {reason: files removed}, files kept).
 
     Splits on `diff --git` so a removed file takes its whole hunk set with it. Returning the counts
@@ -56,9 +86,15 @@ def filter_diff(diff: str) -> tuple[str, dict[str, int], int]:
     for chunk in diff.split("diff --git "):
         if not chunk.strip():
             continue
-        m = re.search(r"b/(\S+)", chunk.split("\n", 1)[0])
-        path = m.group(1) if m else ""
-        why = reason(path)
+        # **ANCHORED, BECAUSE `re.search(r"b/(\S+)")` MATCHED THE `b/` INSIDE `.github/`.**
+        # "github" ends in b, so `.github/workflows/ci.yml` extracted as `workflows/ci.yml` and
+        # every CI path escaped a filter written to catch it. The `.yml` rule still caught most of
+        # them by extension, which is why this survived: the filter looked like it worked because a
+        # DIFFERENT rule was doing its job. `.github/workflows/tpu-tests.yml.disabled` is the one
+        # that got through and put four findings into design fourteen's pool.
+        m = re.match(r"a/(.*?) b/(.+)$", chunk.split("\n", 1)[0])
+        path = m.group(2) if m else ""
+        why = reason_strict(path) if strict else reason(path)
         if why:
             removed[why] = removed.get(why, 0) + 1
             continue

@@ -667,8 +667,9 @@ cents cannot separate a cache read from fresh input. `docs/plans/design/storage.
 `cost_cents` column three sections above the rule forbidding it — the listing was corrected, not
 the rule.
 
-**`finding` and `claim` exist and nothing writes to them.** `infer/` is closed on evidence; adding
-a table later is a migration, so they are created now and left empty.
+**`finding` and `claim` exist and nothing writes to them.** `infer/` is not built yet; adding a
+table later is a migration, so they are created now and left empty. They will carry the reviewer's
+claims and the isolated judge's verdict on each.
 
 **Owns:** persistence — versioned schema, migrations, one repository module per aggregate,
 per-repository spend.

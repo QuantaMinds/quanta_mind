@@ -21,11 +21,10 @@ import time
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "vertex"))
 
+import bench_reviewer as reviewer
 import judge
-import reviewer
+import martian_corpus as corpus
 from client import Client
-
-import corpus
 
 MODEL = "gemini-2.5-pro"
 RIVALS = ("coderabbit", "greptile-v4-1")  # calibration tool + the offline precision leader

@@ -34,6 +34,40 @@ class Language(Enum):
     UNSUPPORTED = "unsupported"
 
 
+# **THE SUFFIX MAP LIVES HERE, NOT IN `parse/`, AND THE LAYER ORDER IS WHY.** `ingest/` must decide
+# which changed files to fetch, and `ingest` sits LEFT of `parse` -- it may not import
+# `parse/languages.py`. Putting the map in the leftmost layer lets both read one source of truth
+# instead of two lists that drift. `parse/languages.py` re-exports it.
+#
+# **A suffix absent here is UNSUPPORTED, which is a VALUE that renders into the coverage line.**
+# Widening this set is how a language is added, and it is deliberately one edit.
+BY_SUFFIX: dict[str, Language] = {
+    ".py": Language.PYTHON,
+    ".pyi": Language.PYTHON,
+    ".ts": Language.TYPESCRIPT,
+    ".tsx": Language.TYPESCRIPT,
+    ".js": Language.JAVASCRIPT,
+    ".jsx": Language.JAVASCRIPT,
+    ".mjs": Language.JAVASCRIPT,
+    ".cjs": Language.JAVASCRIPT,
+    ".java": Language.JAVA,
+    ".go": Language.GO,
+    ".cc": Language.CPP,
+    ".cpp": Language.CPP,
+    ".hpp": Language.CPP,
+}
+
+REVIEWABLE_SUFFIXES: tuple[str, ...] = tuple(sorted(BY_SUFFIX))
+"""Every suffix the product will look at. `ingest/` filters on this; `parse/` maps it."""
+
+
+def language_of(path: str) -> Language:
+    """The language of a path, or `UNSUPPORTED`. Never `None`: absence must render."""
+    from pathlib import PurePosixPath
+
+    return BY_SUFFIX.get(PurePosixPath(path).suffix.lower(), Language.UNSUPPORTED)
+
+
 @dataclass(frozen=True, slots=True)
 class Repo:
     """A repository we have been asked to look at.

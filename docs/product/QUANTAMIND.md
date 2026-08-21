@@ -16,11 +16,15 @@ Nothing described here is shipped. Where a claim is unproven it says so.
 
 # 1. What QuantaMind is
 
-> **QuantaMind — Focus: model-free triage of where to look first in a large change, ranked by which
-> files a later fix has returned to, with a published coverage line naming what was not analysed.**
+> **QuantaMind — Focus: a model-free pass ranks where to look first in a large change, by which
+> files a later fix has returned to; the model reads only there, one isolated judge adjudicates
+> every claim before it is published, and a coverage line names what was not analysed.**
 
 That is the one-line thesis, in the form the category states its own. **Every other line in that
-category ends in "…and reviews your code." Ours does not, and that is the entire bet.**
+category ends in "…and reviews your code." Ours reviews a tenth of it, on purpose, and says which
+tenth and why.** The bet is not that we skip the model — it is that deciding *where* to point it,
+and refusing to publish what an isolated judge cannot confirm, beats reading everything at one
+depth.
 
 **Every AI code reviewer reads the whole diff at the same depth. QuantaMind decides where to
 look first, and only reads hard there.**
@@ -115,9 +119,11 @@ this section was reaching for.
 
 ## What we do differently
 
-A free pass that runs no model ranks the **files** a change touches by how often each has needed
-a follow-up fix before, and publishes that ranking with a line saying what was not analysed and
-why. **That is the whole shipped product.**
+A free pass that runs **no model** ranks the **files** a change touches by how often each has
+needed a follow-up fix before. **That ranking then decides where the model reads** — deep on rank
+one, shallow on two and three, not at all on a cold file — and every claim it returns goes to an
+isolated judge before anyone sees it. What ships is the surviving findings plus a line saying what
+was not analysed and why.
 
 **FILES, NOT FUNCTIONS, AND THE DIFFERENCE IS THE RESULT.** At a three-unit budget, file-level
 ranking misses **1.22%** of the changes a later fix returns to; function-level misses **8.84%** on
@@ -127,12 +133,27 @@ unit is the whole file — and earlier drafts of this document described the arm
 worse. **Functions appear in one place only: the routing line's prose, which names a function to
 say where to start reading. Allocation is file-level everywhere.**
 
-**NO MODEL READS THE CODE, AND NOTHING IS PUBLISHED ABOUT CORRECTNESS.** `infer/` and `verify/`
-contain an `__init__.py` and nothing else; `quantamind review` exits 2. Two corpora and four blind
-rater pools put our own findings **66.7–82.1% wrong** at **0.013–0.037 correct findings per pull
-request**, so the reviewer half was closed rather than shipped. Sections 2 and 3 below describe
-that half in full because the measurement is the asset — **every one of them is marked NOT BUILT,
-and none of it is behind a paywall in the pricing section.**
+**THE MODEL READS ONLY WHERE THE RANKER SENDS IT, AND ONE ISOLATED JUDGE DECIDES WHAT IS
+PUBLISHED.** The reviewer half is part of the product. It runs on **Gemini**, over the files the
+model-free ranker selected, and nothing it produces reaches a pull request until `verify/` clears
+it. `infer/` and `verify/` are empty today and `quantamind review` exits 2 — that is a build state,
+not the product.
+
+**THE JUDGE IS THE RELIABILITY MECHANISM, AND IT IS ISOLATED BY CONSTRUCTION.** Raw model findings
+are bad: two corpora and four blind rater pools put them **66.7–82.1% wrong** at **0.013–0.037
+correct findings per pull request**, and nine designs of prompt engineering moved that nothing.
+**So raw findings are not what ships.** `verify/` adjudicates every claim, and the architecture
+forbids it from importing `infer/` — the layer judging the model's claims cannot start trusting
+them.
+
+**AND THE JUDGE MUST NOT BE THE REVIEWER'S OWN FAMILY. THAT IS MEASURED, NOT ASSUMED.** On
+2026-08-20 a judge sharing the subject's model family was run against a pool a careful rater had
+already graded. It agreed with that rater **34.9% of the time**, and it did not fail randomly — it
+**ratified the reviewer's own hallucinations**, accepting invented claims about which tag a pinned
+SHA carries, and repeating the reviewer's belief that 2026 lay in the future while itself running in
+2026. **A judge sharing the subject's blind spots certifies them.** Twelve of twelve planted
+sabotage findings were caught while that was happening, so the sabotage control did not detect it
+either. The isolated judge is a different family, and this is why.
 
 Four properties follow. **Two are now measured out-of-sample, one is billed, one is verified —
 and a fifth that this document used to claim has been measured and withdrawn.** See
@@ -140,21 +161,149 @@ and a fifth that this document used to claim has been measured and withdrawn.** 
 
 | | |
 |---|---|
-| **Quiet** | Fires on 10–12% of changes across repositories differing 80× in velocity. **Close to definitional rather than discovered** — a percentile threshold fires on a fixed share of its own distribution by construction. The evidence that it is doing work is the CONTRAST: an absolute threshold fired on 11% of one repository and 53% of another |
+| **Quiet** — *measured at file level for the first time, and STEADY* | **The bar is a percentile of this repository's own changes, so it moves with the repository — which is WHY the rate holds rather than merely that it does.** An absolute threshold does not travel: the same one fired on 11% of one repository and 53% of another. Six of seven repositories sit at **8–15% throughout their history**, not just now, measured 2026-08-20 on repositories the rule was not built from and spanning 2,007 to 38,217 commits. `angular/angular`, the largest, is the steadiest at **11%**. **Within a repository the rate DRIFTS** — `sveltejs/svelte` from 23% down to 11%, `facebook/react` from 3% up to 13% — so it is a direction, not a constant. **`gin-gonic/gin` sits near 30% and that is a stable property of a 236-file surface, not an error.** The product does not quote a band: `rank/firing.py` replays the customer's own history and prints their rate before they install |
 | **Honest** | Reports its own blind spots — verified as unavailable to all seven competitors |
 | **Right about where to look** | **Replicated out-of-sample.** Ranking the changed files by prior touch count and reading the top three misses **1.21%** of the changes a later fix returns to, against **3.12%** for an alphabetical ordering — on **six repositories the method was never developed against**, n = 2,400, McNemar **p < 0.000001**, positive in **6 of 6**. The original eight gave **1.44% vs 3.31%**. The two lifts differ by **0.05 points**. **Leave scrapy out and the lift is +0.90 rather than +1.92** — `publishing-rules.md` requires the smaller number wherever one figure is quoted, because a caveat does not travel with a number into someone else's deck |
-| **Honest about what cannot be decided** | A claim needing a fact outside the diff is labelled, not published. The label separates at Fisher **p = 0.0007** — and it is why **`infer/` ships nothing**: two corpora and four blind rater pools put our own findings **66.7–82.1% wrong** |
+| **Honest about what cannot be decided** | A claim needing a fact outside the diff is labelled, not published. **A MODEL gate separated at Fisher p = 0.0007 on n = 29** — an inference call, not a rule, with wide intervals and a rater whose reasoning correlated with the gate's own criterion. **The free keyword rule that approximates it was tested out-of-sample and INVERTED: D/L 1.40 against chance 3.64.** The largest failure class is a confident claim the diff cannot settle |
 | **Cheaper** — *billed, not estimated* | **$0.119 per pull request** on real diffs through Vertex, against a $0.140 derived estimate — but the estimate was right by luck: input is 5.2% of the bill and **thinking is 91.3%** |
+
+
+## Correction — "Quiet" is not a measured property of the shipped product
+
+**A client will ask how that number was obtained. This is the answer, written before they ask.**
+
+**The 10–12% is real.** `docs/findings/RETROSPECTIVE_SWEEP_2026-08.md`, eight repositories spanning
+an 80× velocity range, fire rates of 10, 10, 11, 11, 12, 12%. Nobody invented it.
+
+**It describes a different unit.** That sweep ranks **functions**. This product ranks **files** —
+deliberately, because file-level misses **1.22%** of the changes a later fix returns to against
+function-level's **8.84%**, and the file arm is the one that replicated out-of-sample. **The
+file-level firing rate had never been measured anywhere.**
+
+**And the mechanism was never built.** The sweep's own heading is *"The firing rule that works: a
+percentile, not a threshold"*; `rank/order.py` shipped the absolute threshold that sweep rejected,
+and `types/ranking.py` already recorded that `threshold_percentile` "governs nothing".
+
+**Measured 2026-08-20**, four repositories the rule was not built from — `sveltejs/svelte`,
+`vuejs/core`, `gin-gonic/gin`, `nestjs/nest`, 1,200 changes:
+
+| firing rule | pooled rate | **spread across the four repositories** |
+|---|---|---|
+| absolute threshold, **as previously shipped** | **91.3%** | 83.0–97.0% |
+| top decile of this repository's **files** | **62.2%** | 42.7–79.7% |
+| top decile of this repository's **changes**, calibrated IN-SAMPLE | ~11% | 10.0–12.3% |
+| **top decile of changes, calibrated out-of-sample — WHAT SHIPS** | **8–14% on six of seven repositories** | gin-gonic/gin, alone, at 31% |
+
+**Seven repositories, none of which the rule was built from, spanning 2,007 to 38,217 commits:**
+
+| repository | commits | files ever | earlier windows, each vs **its own** floor | **current** |
+|---|---|---|---|---|
+| `angular/angular` | 38,217 | 30,108 | 12 11 11 10 | **11%** |
+| `facebook/react` | 21,640 | 13,323 | 14 8 11 15 | **12%** |
+| `nestjs/nest` | 21,639 | 4,541 | 10 12 14 12 | **8%** |
+| `sveltejs/svelte` | 11,326 | 17,236 | 14 10 18 28 | **14%** |
+| `vuejs/core` | 7,157 | 957 | 12 18 7 12 | **13%** |
+| `trpc/trpc` | 4,902 | 2,542 | 14 6 9 11 | **12%** |
+| `gin-gonic/gin` | 2,007 | **236** | 32 24 24 32 | **31%** |
+
+**Six of seven are STEADY across their own history, and that is the finding.** Each earlier window
+is scored against **its own contemporaneous floor**, which is the only comparison that isolates
+selectivity from activity. Six sit at 8–15% throughout; `gin-gonic/gin` sits at 24–32% throughout,
+which is a stable property of a **236-file** surface against angular's 30,108, not an error.
+
+**A SELF-CALIBRATING RULE HAS LITTLE TREND BY CONSTRUCTION, AND THAT IS THE POINT.** If the bar
+moves with the repository, each period fires at roughly its own target whatever the activity did.
+**So the rate is a per-repository constant that can be measured once, at install, and relied on.**
+
+> **THIS MEASUREMENT WAS WRONG TWICE BEFORE IT WAS RIGHT, BOTH TIMES LOOKING PLAUSIBLE.**
+> First the earlier windows were sliced out of the calibration set itself — in-sample, so the newest
+> slice shared a period with the bar and could agree for that reason. Then they were made disjoint
+> but scored against **today's** floor, which compares a top counted in one era against a bar
+> derived from another: `trpc/trpc` read **70%, 68%, 62%, 54%** on periods when it was simply
+> busier, against 12% now. **That is the same defect that silenced svelte and gin, in a third
+> costume**, and it produced a confident trend in five of seven repositories that does not exist.
+> A fourth instance would have been reported as a finding.
+>
+> **And an earlier report of these windows was printed newest-first and read as oldest-first**,
+> which inverted the direction for two repositories. The SQL had no `ORDER BY`: a trend read off an
+> unordered list is noise wearing a direction.
+
+
+**Six of seven land at 8–14%, and the largest repository is the tightest.** The documented band
+substantially holds at file level — which was not knowable before, because it had only ever been
+measured at function level.
+
+**The one outlier is a small-surface repository, and the product detects it.** `gin-gonic/gin` has
+**236 files ever** against angular's 30,108 — a 128-fold difference. On a surface that small the
+touch-count distribution is coarse, a decile lands where many changes tie, and the rate lands at
+31% with a 17-point range. **`rank/firing.py` reports that range and marks the estimate unreliable
+rather than quoting the headline.**
+
+**A MINIMUM CALIBRATION SIZE WAS PROPOSED AND THE MEASUREMENT REFUSED IT.** Sample size does not
+predict stability: `sveltejs/svelte` calibrates on **703** changes and swings 9 points, `vuejs/core`
+on **243** and swings 7. `gin` calibrates on 184 — more than vue — and is the unreliable one. **The
+driver is the file surface, not the sample.** A size floor would have been a rule with nothing
+behind it, and the variability report is what it was reaching for.
+
+**An average is still not what any individual customer gets.** So the product computes it from the
+customer's own history instead of quoting a band: `rank/firing.py` replays their recent changes
+through the real gate and prints *"on your last 400 changes this would have spoken 88 times — 22%"*
+before anything is installed.
+
+**Three bugs were found getting here, each by a number that did not close:**
+
+1. Calibrating over "the last 400 changes" reached about **1.5 years back** on an active repository,
+   so the floor described a busier era than the change being judged.
+2. Each calibration change's top was counted in **its own** prior year and compared against a top
+   counted in **today's** year — two different quantities. On a cooling repository the floor sat
+   above everything the present could produce: **`sveltejs/svelte` fired on 0.0% of 300 changes.**
+   Counting both sides in the same window took it to **13.0%**.
+3. On integer counts the decile lands on a value many changes share. On `gin-gonic/gin` **every one
+   of the 87 firings was an exact tie at the floor** — `>=` fired on 29.0% and `>` on **0.0%**. The
+   rule was deciding a quarter of the corpus on which comparison operator was written. The cut is
+   chosen by realised share now, not by index.
+
+**A third typed state exists because of the second bug.** Beside `NO_HISTORY` and `FLAT_NONZERO`
+there is now `CONCENTRATED`: a repository whose few dominant files put the decile beyond reach, so
+the gate would be structurally silent. **That silence is not legible from a coverage line** — the
+review would truthfully report that nothing was skipped, because nothing was. It is named and
+reported at install rather than discovered in week three.
+
+**The in-sample row is why this needed measuring twice.** Calibrating the decile on the same
+changes it is tested against gives 10–12% *by construction* — it is a tenth of a tenth. Calibrated
+on changes it has not seen, the same rule gives 0.0–25.0%. **This project has hit that collapse
+before: the word-list filter was beautiful in-sample and inverted on fresh data.**
+
+**A prediction was written down first and it was WRONG.** Files were expected to fire *less* than
+functions — a pull request holds fewer files than functions, so fewer units get a chance to clear
+the bar. They fire *more*, because the top-ranked file of a change is the most-touched among the
+changed files, and changed files are heavily selected relative to the repository as a whole.
+
+**Only the IN-SAMPLE change-calibrated rule reproduces 10–12%, and it is definitional.** A top
+decile of changes fires on a tenth of changes because that is what a top decile is. Out-of-sample
+the same rule ranges 0.0–25.0%.
+
+**"10–12% everywhere across an 80× velocity range" DOES NOT HOLD AT FILE LEVEL.** It was measured
+at function level and it does not transfer to the unit this product ships. **The transferable
+finding was never the rate — it is the contrast: 11% against 53% for an absolute threshold, which
+is the evidence that a percentile travels between codebases better than an absolute number.** Even
+that is weaker than it reads: the percentile's own spread here is 0.0–25.0%.
+
+**What ships is still a large improvement and is not the claim.** 91.3% to 9.5% pooled is the
+difference between commenting on nearly every pull request and commenting on roughly one in ten.
+**The per-repository stability that would let us call the product "quiet" has not been
+demonstrated**, and until it is, that word does not belong in a table of proven properties.
 
 ---
 
 # 2. How it works
 
-> **STAGES 3 AND 4 — READ and VERIFY — ARE NOT BUILT AND ARE NOT ON THE ROADMAP.** They are drawn
-> here because the measurement that closed them is the asset, and a diagram that quietly omitted
-> them would leave the reader wondering whether we had tried. We tried, across nine designs; the
-> findings were 66.7–82.1% wrong and `infer/` ships nothing. **What runs in production is RANK,
-> ALLOCATE and the coverage line.** `quantamind review` exits 2.
+> **STAGES 3 AND 4 — READ and VERIFY — ARE THE PRODUCT AND ARE NOT YET BUILT IN CODE.** `infer/`
+> and `verify/` are empty today and `quantamind review` exits 2; what runs in production right now
+> is RANK, ALLOCATE and the coverage line. **The measurement that used to close them is now the
+> specification for stage 4.** Nine designs of prompting could not make raw findings safe to
+> publish — 66.7–82.1% wrong — so the answer is not a better prompt, it is that nothing is
+> published until an isolated judge confirms it.
 
 ```
   a pull request opens
@@ -170,26 +319,37 @@ and a fifth that this document used to claim has been measured and withdrawn.** 
   │     BUILT      rank 1  → deep read, high effort           │
   │                rank 2–3 → shallow read                    │
   │                cold    → no model call at all             │
-  │                (labels are emitted; nothing consumes them │
-  │                 downstream, because stage 3 is closed)    │
+  │                this is what bounds the bill: the model    │
+  │                never sees a file the ranker did not pick  │
   ├──────────────────────────────────────────────────────────┤
-  │ 3. READ        NOT BUILT — closed on evidence             │
-  │                the model, on those files only,            │
-  │                returning structured findings              │
+  │ 3. READ        NOT BUILT YET — Gemini, on those files     │
+  │                only, returning structured findings        │
+  │                raw findings are 66.7–82.1% wrong and      │
+  │                NONE is published unverified               │
   ├──────────────────────────────────────────────────────────┤
-  │ 4. VERIFY      NOT BUILT — `verify/` is an __init__.py    │
-  │                the parser would check every structural    │
-  │                claim: confirmed → publish, else drop      │
+  │ 4. VERIFY      NOT BUILT YET — ONE ISOLATED JUDGE         │
+  │                a DIFFERENT model family from stage 3,     │
+  │                plus the parser on structural claims:      │
+  │                confirmed → publish, else drop             │
+  │                THIS is what makes stage 3 shippable       │
   ├──────────────────────────────────────────────────────────┤
   │ 5. SAY         one comment, or silence                    │
   │                plus the coverage line, always             │
   └──────────────────────────────────────────────────────────┘
 ```
 
-**That symmetry was the design, and stage 4 is not built, so it is an argument rather than a
-property today.** The deterministic layer that allocates the budget *would be* the same layer that
-adjudicates the model's output, which is what would make verification cheap. Nothing adjudicates
-anything at present: `verify/` contains an `__init__.py`.
+**That symmetry is the design, and stage 4 is not built yet, so it is an argument rather than a
+property today.** The deterministic layer that allocates the budget is the same layer that
+adjudicates the model's output, which is what makes verification cheap. Nothing adjudicates
+anything at present: `verify/` contains an `__init__.py`, and until it does not, `quantamind review`
+exits 2 rather than publishing unverified findings.
+
+**THE JUDGE IS ONE, AND IT IS ISOLATED.** Not an ensemble, not a second pass by the reviewer, not a
+reflection step in the same context — one judge, in a different model family from stage 3, that
+never sees the reviewer's reasoning. `AGENTS.md` rule 7 enforces the isolation in code: `verify/`
+may not import `infer/`. The measurement behind that constraint is in section 1 — a same-family
+judge agreed with a careful rater on 34.9% of findings and certified the reviewer's own invented
+facts.
 
 ## The day you install it
 
@@ -216,7 +376,7 @@ It comments from day one, narrowly, and widens only on evidence:
 
 | Tier | Fires when | Volume |
 |---|---|---|
-| Start | the top-ranked **file** is in this repository's top decile of prior touch counts | 10–12% |
+| Start | the top-ranked **file** is in this repository's top decile of **changes** — a percentile, so the bar moves with the repository | **8–15% on six of seven, steady across each one's history**; computed on yours at install |
 | Widen | top two ranked **files** | untested |
 
 Widening requires **two signals moving together**: the acceptance rate of findings climbing,
@@ -501,7 +661,9 @@ allocator actually specifies. **Treat it as a derived ceiling rather than a floo
 that a real run has since billed **$0.119 per pull request** against this table's $0.140, so the
 derived figure is an over-estimate, not a boundary that has been tested from below. The
 free tier runs no model at all and costs only compute — that part is structural, not an
-estimate.
+estimate. **Every paid tier now carries two model calls per fired change, not one**: the reviewer
+and the judge. The $0.119 figure above is the reviewer alone and is therefore a FLOOR for a tier
+that verifies, which is every tier that publishes a finding.
 
 ## What is still unproven
 
@@ -585,7 +747,10 @@ a conventions file each moved the headline nothing.
 
 **That is not a claim we are better at it.** On Martian's offline layer we are **level with
 CodeRabbit and behind Greptile**. It is a claim about the category — and we are the only ones who
-ran the experiment and then **stopped shipping the half that failed.**
+ran the experiment, published what it said, and then **built the judge the result demanded instead
+of shipping the findings raw.** Every competitor above publishes its model's claims directly. Ours
+do not reach a pull request unless a judge in a different model family confirms them, and what the
+judge dropped is reported as a number.
 
 **These figures are internal.** `docs/product/publishing-rules.md` governs the public form: our
 own precision, recall and miss rate do not go on a page, and a competitor's ONLINE precision is
@@ -605,7 +770,7 @@ missed, because it does not know.
 bottom-up motion available is the retrospective — it runs against a clone, needs no install and no
 permissions, and shows what the ranking would have said on closed history. It is unbuilt.
 
-**Noise is the strongest ground.** We fire on **10–12% of changes** and publish **zero findings**.
+**Noise is the strongest ground, and the rate is now measured on the unit we ship — and it is STEADY.** Because the bar is a percentile of the repository's own changes rather than an absolute count, it self-calibrates: six of seven repositories fire at **8–15% throughout their histories**, and `angular/angular`, the largest, runs 12-11-11-10 and is at 11% now. **A rate that does not drift is one a customer can plan on.** **We do not quote a band to a customer** — the rate is computed from their own history before they install, which is a stronger thing to say than any fixed figure.
 But Macroscope positions on low noise too, so the distinction is narrower than it sounds: theirs is
 low-noise *claims*, ours is *no claims*.
 
@@ -621,14 +786,14 @@ evidence, and no customers yet.
 | | CodeRabbit | Graphite | Greptile | **QuantaMind** |
 |---|---|---|---|---|
 | Question it answers | Is this change **wrong**? | Is this change **slow to ship**? | Is this change **wrong**? | **Where in this change should a human look first** |
-| Reads | whole diff + code graph, 40+ linters, microVM | whole diff | whole diff + semantic code graph, agentic multi-hop | **git history. No model reads the code** |
+| Reads | whole diff + code graph, 40+ linters, microVM | whole diff | whole diff + semantic code graph, agentic multi-hop | **git history first, then the model on the top-ranked files only** |
 | Uses history | files that change together, as hidden context | codebase-aware model | **yes — git history is a tool its v3 agent calls** | **fix history is the entire ranking** |
 | Says what it could not analyse | **no** | **no** | **no** | **yes, on every pull request** |
-| Publishes model claims about correctness | yes | yes | yes | **none — we ship no findings** |
-| Fires on | nearly every change | nearly every change | nearly every change | **10–12%** |
-| Marginal cost per pull request | tokens, scaling with lines read | tokens | tokens | **~$0 — a git read and a SQLite query** |
+| Publishes model claims about correctness | yes | yes | yes | **only what an isolated judge in a different model family confirmed** |
+| Fires on | nearly every change | nearly every change | nearly every change | **8–13% on six of seven repositories, and computed on yours before you install** |
+| Marginal cost per pull request | tokens, scaling with lines read | tokens | tokens | **tokens on 10–12% of changes, and only on the ranked files — the ranker is the budget** |
 | Priced | per seat | per seat | per seat | **per repository** |
-| Separates *undecidable* from *clean* | **no** | **no** | **no** | **yes — measured, `p = 0.0007`** |
+| Separates *undecidable* from *clean* | **no** | **no** | **no** | **a MODEL gate did, `p = 0.0007`, n = 29, never out-of-sample. The free rule inverted** |
 
 **Three rows in this table were wrong until the benchmark run and are corrected above.** Greptile
 was listed as not using history; its v3 agent calls git history as a tool. We were listed as
@@ -787,14 +952,25 @@ answer.**
 
 ### The label separates, and this is the measurement
 
-**Design ten's findings, split by the label the product would print:**
+**Design ten's findings, split by the label the product would print. THE LABEL IS PRODUCED BY A
+MODEL — `decidable.judge_one()`, one inference call per finding. It is not a rule and it is not
+free.** The distinction is written here because it was lost once: the figure below was cited as
+evidence that a *rule* separates, and the rule it was credited to inverted on the first corpus it
+was tested against.
 
 | label | n | WRONG | rate | 95% CI |
 |---|---|---|---|---|
 | **"decidable from the diff"** | 14 | **0** | **0.0%** | 0.0–21.5% |
 | **"needs a deeper look"** | 15 | **9** | **60.0%** | 35.7–80.2% |
 
-**Fisher exact p = 0.0007.**
+**Fisher exact p = 0.0007** — `research/phase0/quote/results/quote10_run.json` against
+`adj10/verdicts.json`, the `decidable` field, which `run10.py` fills from the model.
+
+**The free keyword approximation was measured separately and FAILED.** On design ten's own corpus it
+also separates (kept 20 at 10.0% wrong against dropped 12 at 75.0%, Fisher p = 0.0003). On the
+Martian corpus it **inverts**: 24 findings dropped, **14 false and 10 true, D/L 1.40 against a
+chance value of 3.64** — discarding true findings faster than random deletion would. **The word list
+learned design ten's corpus, not the property.**
 
 **This is the only number from the review-half work that is about the PRODUCT rather than about a
 benchmark.** Eleven designs chased a wrong-rate; what they produced instead is a label that sorts
@@ -1031,11 +1207,13 @@ thirds wrong."**
 
 ## What we charge, and why the tiers split where they do
 
-> **THIS SECTION PRICED A PRODUCT WE DO NOT SELL, AND THAT IS WHY IT CONTRADICTED THE
-> DIFFERENTIATION TABLE.** Every figure below used to rest on $0.140 of inference per pull
-> request. **The shipped product runs no inference at all** — `quantamind config` prints
-> `runs a model on a review: False`, and `infer/` contains an `__init__.py`. A per-seat price
-> defending a per-token cost was defending a cost we do not incur.
+> **PRICING STAYS PER REPOSITORY, AND THE REASON HAS CHANGED.** An earlier draft priced per
+> repository because the shipped product ran no inference and its only cost was a clone and an
+> index. **Inference is part of the product**, so tokens are a real cost again — but a BOUNDED
+> one, and that is the argument: the ranker fires on **10–12%** of changes and the allocation
+> budget caps the read to three files, so the bill tracks the repository's history rather than its
+> headcount. **Per-seat pricing stays rejected**, because a seat consumes nothing here — a
+> repository does.
 
 **What the shipped product actually costs is a clone and an index, per repository.** Measured:
 `pallets/flask` is **15 MB of history and a 393 KB index** holding 4,281 touches. A run is one
@@ -1072,21 +1250,22 @@ document exists to avoid.
 | Bought with | nothing | credit card | light purchase order | MSA, DPA, security review |
 | Ranking, coverage line, retrospective | ✓ | ✓ | ✓ | ✓ |
 | **Coverage line names every skipped unit** | ✓ | ✓ | ✓ | ✓ |
-| ~~Model findings in the pull request~~ | **NOT BUILT — closed on evidence, sold by nobody here** |||| 
-| ~~Review depth~~ | **NOT BUILT.** It was the tier lever in an earlier draft, and it cannot be: it prices a capability `infer/` does not contain |||| 
+| **Model findings in the pull request** | — | ✓ | ✓ | ✓ | 
+| **Review depth** | 3 files | 3 files | **5 files** | 5 files + org policy | 
 | **Pooled retrospective across repositories** | single repo | single repo | **✓ org-wide** | ✓ org-wide |
 | Cross-repository aggregation, quarterly audit, SSO | — | — | ✓ | ✓ |
 | Verifier drop-rate telemetry | — | — | ✓ | ✓ |
-| ~~Bring your own key~~ / ~~Bring your own model~~ | **NOT SELLABLE while `infer/` ships nothing — there is no model call to bring a key for.** Kept as the shape the Enterprise tier would take if the reviewer reopened ||||
+| **Bring your own key** / **Bring your own model** | — | — | — | **✓** — the reviewer runs on Gemini by default and Enterprise may supply its own key. **The judge stays ours and stays a different family from the reviewer**: a customer pointing both halves at one model would remove the mechanism they are paying for |
 | Self-hosting, audit logs, residency, SLA | — | — | — | ✓ |
-| ~~Token budget~~ | **No model runs at any tier. There is no token budget to sell.** ||||
-| **Our cost of goods** | storage + CPU | **a clone and an index per repository** — 15 MB and 393 KB for flask, CPU seconds per run |||
+| **Token budget** | capped, free tier | capped | higher cap | **org-wide pooled cap** |
+| **Our cost of goods** | storage + CPU | **a clone and an index per repository** — 15 MB and 393 KB for flask — **plus tokens on the 10–12% of changes that fire**, twice: once to read, once to judge |||
 
-> **THE TIER LEVER IN THIS TABLE WAS REVIEW DEPTH, AND IT PRICED SOMETHING THAT DOES NOT EXIST.**
-> Three units against five is a real measurement — 8.84% against 3.50%, paired, McNemar
-> p < 0.0001 — but both are *function-level* figures for a *model reading code*, and `infer/`
-> ships nothing. Selling depth would have been selling the half this document elsewhere says is
-> closed at 0.013–0.037 correct findings per pull request.
+> **REVIEW DEPTH IS THE TIER LEVER AGAIN, AND THE MEASUREMENT BEHIND IT IS NARROWER THAN THE ROW
+> SUGGESTS.** Three units against five is measured — 8.84% against 3.50%, paired, McNemar
+> p < 0.0001 — but both are **function-level** figures, and allocation ships at **file** level.
+> The direction holds; those magnitudes do not transfer to the shipped unit and must not be quoted
+> as if they did. **Depth multiplies the judge's bill as well as the reviewer's** — every extra
+> file read is a file to adjudicate.
 
 **The lever that survives is POOLING, and it is the one a customer actually hits.** A single
 repository rarely reaches the pre-registered floors — measured on repositories nobody had seen,
@@ -1129,12 +1308,14 @@ report — which is why SSO becomes mandatory there and not before. Enterprise i
 buying a contract: it runs where legal permits, with a number we will defend to their auditor.
 **A tier whose only distinction is a bigger quota is anchoring, not a tier.**
 
-> **NOT SELLABLE TODAY, AND THE TABLE ROW SAYS SO.** `infer/` ships nothing, so there is no model
-> call to bring a key for. The paragraph is kept as the shape the tiers would take if the reviewer
-> reopened; it is not a feature anyone can buy, and a reader quoting this passage would be quoting
-> a plan rather than a product.
+> **SELLABLE, AND WITH ONE LIMIT THAT IS NOT NEGOTIABLE.** A customer may bring a key or a model
+> for the REVIEWER. **The judge stays ours and stays a different family from whatever the reviewer
+> runs.** A customer who pointed both halves at one model would delete the mechanism this product
+> sells: a same-family judge agreed with a careful rater on 34.9% of findings and certified the
+> reviewer's own invented facts. That is a support burden and a correctness claim we cannot make on
+> their behalf, so it is a product limit rather than a preference.
 
-~~**Bring your own *key* at Business; bring your own *model* at Enterprise.**~~ The line would be
+**Bring your own *key* at Business; bring your own *model* at Enterprise.** The line would be
 one sentence — *we have certified that model, or we have not.* An allowlisted model costs us nothing
 because the evaluation is already amortised across every customer. An uncertified model means
 publishing a coverage number under our name for a configuration we never measured, which is the

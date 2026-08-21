@@ -1,0 +1,12 @@
+{
+ "arm": "A \u2014 mechanical gate only",
+ "gate": "decidable.keyword_flag",
+ "before": 464,
+ "after": 440,
+ "tp": 88,
+ "fp": 326,
+ "removed_fp": 38,
+ "lost_tp": 12,
+ "trade": 3.1666666666666665,
+ "chance": 3.64
+}

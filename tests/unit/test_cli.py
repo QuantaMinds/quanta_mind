@@ -43,14 +43,33 @@ def test_an_unbuilt_command_exits_non_zero(
     assert "not built yet" in capsys.readouterr().out
 
 
-def test_an_unbuilt_command_names_the_stage_that_delivers_it(
-    capsys: pytest.CaptureFixture[str],
+def test_the_unbuilt_message_names_a_stage_and_the_plan(
+    capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """ "Not implemented" sends a reader to the source. Naming the stage sends them to the plan."""
-    main(["review"])
+    """ "Not implemented" sends a reader to the source. Naming the stage sends them to the plan.
+
+    **This used to assert on `review`, which is now BUILT.** Rewriting it to pass by deleting the
+    assertion would have removed the check along with the case; instead the mechanism is exercised
+    against a synthetic entry, so it keeps working for the next unbuilt command. `UNBUILT` is empty
+    today and a test that merely iterated it would be vacuous — passing because there is nothing
+    to check, which reads identically to passing because everything is right.
+    """
+    monkeypatch.setitem(UNBUILT, "spike", "the stage that would deliver it")
+    assert main(["spike"]) == 2
     out = capsys.readouterr().out
-    assert UNBUILT["review"] in out
+    assert "the stage that would deliver it" in out
     assert "implementation.md" in out
+
+
+def test_review_is_built_and_no_longer_exits_two() -> None:
+    """The other half of the change: `review` must not still be reachable as an unbuilt command."""
+    assert "review" not in UNBUILT, (
+        "review is built; leaving it in UNBUILT would exit 2 on a real run"
+    )
+    with pytest.raises(SystemExit):
+        # It parses and REQUIRES its arguments, which is what a built command does. Exiting 2 with
+        # "not built yet" and exiting 2 for a missing argument are different failures.
+        main(["review"])
 
 
 def test_render_config_reports_whether_a_model_will_run() -> None:

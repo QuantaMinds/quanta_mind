@@ -89,3 +89,7 @@ tests/fixtures/repos/
 # checkout writes its store into the repository root. Ignored since serve/listener.py made
 # that command reachable.
 quantamind.db
+
+# Martian's full benchmark tree, copied out of a dead session's scratchpad. Only the four
+# artefacts we read are kept, under research/phase0/bench/martian/data/ and checksummed.
+research/phase0/bench/martian/offline/

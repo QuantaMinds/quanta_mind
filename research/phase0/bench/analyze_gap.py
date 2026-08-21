@@ -24,7 +24,7 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
-import corpus
+import martian_corpus as corpus
 
 DETAIL = pathlib.Path(__file__).resolve().parent / "results" / "gap_detail.json"
 IDENT = re.compile(r"`([^`]{2,80})`")

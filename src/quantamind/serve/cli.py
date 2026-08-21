@@ -29,9 +29,7 @@ from quantamind.types.settings import Settings, SettingsError, load
 # exit non-zero with the stage that will deliver them, rather than exiting 0 having done
 # nothing -- a documented command that silently succeeds is how a runbook comes to report
 # work it never did.
-UNBUILT: dict[str, str] = {
-    "review": "the reader, ranker and render stages",
-}
+UNBUILT: dict[str, str] = {}
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -47,6 +45,24 @@ def build_parser() -> argparse.ArgumentParser:
         "serve", help="authenticate and de-duplicate GitHub webhooks over HTTP"
     )
     listen.add_argument("--port", type=int, default=7331)
+    look = subparsers.add_parser(
+        "review", help="rank one change's files against history and print what we would say"
+    )
+    look.add_argument("clone", type=Path, help="a full clone; nothing is sent anywhere")
+    look.add_argument("--repo", default="local/clone", help="owner/name, for the store key")
+    look.add_argument(
+        "--sha", required=True, help="the commit to review, scored against history BEFORE it"
+    )
+    # **SUPPRESSED FROM `--help`, NOT REMOVED, AND OFF UNLESS ASKED FOR BY NAME.**
+    # `docs/product/QUANTAMIND.md` says the product publishes no model findings. A flag advertised
+    # in `--help` contradicts that document, and a CLI quietly offering what the canonical document
+    # says is not shipped is precisely the drift this project spends its time catching.
+    #
+    # It stays because the measurement half needs it: raw findings are **66.7-82.1% wrong** at
+    # **0.013-0.037 correct per pull request**, and the parser gate in front of it has adjudicated
+    # exactly ONE live finding — which it dropped. That is not a capability to put in front of a
+    # customer; it is an instrument for finding out whether it could ever be one.
+    look.add_argument("--deep", metavar="GCP_PROJECT", default="", help=argparse.SUPPRESS)
     walk = subparsers.add_parser(
         "retrospective", help="replay the ranker over a clone's own history and report"
     )
@@ -123,6 +139,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         from quantamind.serve.run_endpoint import run
 
         return run(args.port)
+
+    if args.command == "review":
+        from quantamind.serve.run_review import review_commit
+
+        return review_commit(args.clone, args.repo, args.sha, deep_project=args.deep)
 
     if args.command == "retrospective":
         return _retrospective(args.clone, args.repo)
