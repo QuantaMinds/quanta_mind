@@ -120,14 +120,19 @@ def _parse(text: str) -> list[str]:
     return out[:MAX_ISSUES]
 
 
-def review(client: object, title: str, diff: str, nits: bool = False) -> tuple[list[str], str]:
+def review(
+    client: object, title: str, diff: str, nits: bool = False, template: str | None = None
+) -> tuple[list[str], str]:
     """(issues, finish reason). Raises rather than returning [] when the model did not answer.
 
     The finish reason is returned and never inferred: a MAX_TOKENS truncation and a deliberate
     empty review print the same thing downstream, and this project has already published a number
     that was really eleven truncations.
     """
-    tmpl = PROMPT_NITS if nits else PROMPT
+    # `template` overrides the pair so a prompt arm can be measured without a second copy of the
+    # request-building, parsing and truncation-salvage code -- which is where a divergence between
+    # an arm and the control would hide, being invisible in the prompt diff a reader would check.
+    tmpl = template if template is not None else (PROMPT_NITS if nits else PROMPT)
     body = {
         "contents": [
             {

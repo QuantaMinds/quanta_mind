@@ -1137,3 +1137,25 @@ reason having nothing to do with the event definition.
 
 `tests/unit/layers/test_event_cap_population.py` pins the distinction: on a history whose first
 admissible event is flat-scored, `limit=2` yields one survivor while an uncapped walk yields two.
+
+### `research/phase0/bench/forensic/` — why the correct-rate is what it is
+
+Five modules sharing one dataset, each written to correct the one before it.
+
+- `label_candidates.py` — labels every candidate of every arm TP or FP and **stores the label**.
+  These never existed; `martian_comparison.json` keeps aggregate counts and
+  `gap_detail.json`'s `ours_caught` keeps GOLDENS, and four earlier analyses read the latter as
+  candidates, which is false by construction. Those four are withdrawn.
+- `judge_variance.py` — re-judges identical candidates three times. **Spread 2.1 points**, so the
+  judge is stable and the apparent +32 swing in CodeRabbit's true positives was a metric
+  definition, not noise.
+- `redundancy.py` — every arm on ONE judge, counting goldens covered and candidates that matched.
+  Their difference is redundancy: **ours 17 of 98, Qodo's 1 of 99.**
+- `prompt_arms.py` — four reviewer prompts over the same 50 pull requests. All three
+  non-control arms FAIL. → `docs/plans/preregistrations/reviewer/prompt-direction-preregistration.md`
+- `forensics.py` — cross-tabs over the stored labels. It deliberately does **not** ask whether a
+  false positive landed in the wrong file: the corpus has no file or line metadata, so the
+  question is unanswerable, and a marker that answered it from prose read 0.0% for three arms.
+
+`bench_reviewer.review()` gained `template=` so an arm is measured through the same request,
+parsing and truncation-salvage code as the control rather than a second copy of it.

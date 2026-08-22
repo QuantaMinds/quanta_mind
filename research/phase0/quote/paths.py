@@ -22,7 +22,8 @@ from __future__ import annotations
 
 import re
 
-# Fixed in docs/plans/preregistrations/reviewer/path-filter-preregistration.md before the run.
+# Fixed before the run, in
+# docs/plans/preregistrations/reviewer/anchoring/path-filter-preregistration.md
 LOCKFILE = re.compile(r"(^|/)([^/]*\.lock|package-lock\.json|yarn\.lock|pylock[^/]*\.toml)$")
 MANIFEST = re.compile(r"(^|/)(pyproject\.toml|requirements[^/]*\.txt|Pipfile|package\.json)$")
 DOCS = re.compile(r"\.(md|mdx|rst|html)$")
