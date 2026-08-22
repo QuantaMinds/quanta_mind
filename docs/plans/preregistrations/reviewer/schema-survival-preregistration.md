@@ -139,3 +139,62 @@ carried.
 **That is a day of a person's attention, and it is the only thing standing between this and an
 answer.** It is also cheaper than every experiment in this document's history, none of which
 resolved it.
+
+
+---
+
+# The grading pack was designed and is NOT being built — the question it answers is moot
+
+**A day of independent grading was about to be spent measuring the schema's RECALL. Reading the
+canonical document back found that its PRECISION is already determined, and it is zero.**
+
+## What the document already said
+
+`QUANTAMIND.md` step 6, written long before this run:
+
+> The verifier is a parser. It decides claims a parser can decide — a symbol exists, a signature has
+> that arity, a return precedes a write. **It cannot adjudicate a semantic claim**: that logic is
+> wrong, that an edge case is unhandled, that a lock is held. And semantic defects are precisely why
+> a model runs at all. So the verifier is structurally unable to check the claim class the model
+> exists to produce, and **a wrong semantic finding publishes.**
+
+## And now it is measured, not argued
+
+Design thirteen's 45 real WRONG findings, by the cause the blind rater assigned:
+
+| cause | n | can a parser refute it? |
+|---|---|---|
+| `EXTERNAL` | 28 | **No** — needs a fact outside the code |
+| `TRACE` | 17 | **No** — semantic; a parser cannot follow logic |
+| `ABSENT` | **0** | Yes — but every ABSENT verdict in the pool was a PLANTED sabotage item |
+
+**PARSER-REFUTABLE WRONG FINDINGS: 0 of 45.**
+
+**So the schema's recall does not matter.** Even if every useful finding fitted the form, the parser
+would still pass all 45 wrong ones through, because not one of them is structurally refutable. **The
+grading day would have measured the half that cannot change the answer** — which is the same defect
+as design fourteen's exclusion arm, arriving one level up.
+
+## What the best available fixes actually buy, on our own numbers
+
+Live lookup addresses 23 `EXTERNAL` findings; injecting the current date addresses 5 more:
+
+| | W/n | C/n |
+|---|---|---|
+| today | 52.3% | 8.1% |
+| + live lookup | 34.9% | 11.1% |
+| **+ lookup + date injection** | **29.3%** | **12.1%** |
+
+**The optimistic case clears the REBUILD bar (W/n < 30%) and misses the field floor (C/n ≥ 49%) by
+37 points.** Seventeen `TRACE` findings remain, and nothing in this project or in the field checks
+them — an August 2026 result has LLMs failing to re-localise a fault they had localised correctly in
+**78%** of cases under semantic-preserving mutation, which is that class exactly.
+
+## The standing decision
+
+**Half B is closed on a measurement.** Not on a judgement, not on a preference, and not pending an
+independent grader — **the grader was going to answer a question whose other half is already zero.**
+
+**What would reopen it is unchanged and is now specific:** a verifier that can settle EXTERNAL facts
+(a live lookup, which someone has shipped but never measured as a trade) and a verifier that can
+settle SEMANTIC claims (which nobody has). The second does not exist, and it is 17 of 45.
