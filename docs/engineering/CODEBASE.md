@@ -1171,3 +1171,18 @@ what the closure turned on.
 
 `docs/CORRECTIONS.md` entry 7 lists what the `ours_caught` mis-read voided, and — checked and
 re-derived — what it did not.
+
+### `population.assert_intersects` — the clean-zero rule, enforced
+
+`bench/forensic/population.py` refuses a membership test whose two sides never intersect, instead
+of reporting its zero. **A filter admitting nothing across a whole pass is a statement about the
+two sets, not about the data** — the third clean zero in this project to mean a broken comparison
+rather than an empty result (0 in-window commits where there were 1,298; 0 of 1,990 under a
+pathspec git does not expand; `candidate in ours_caught` false for all 194).
+
+One side empty stays a legal result — an arm that emitted nothing is a real outcome.
+`tests/forensic/test_population_mismatch.py` replays the real defect and requires the raise, and
+requires the correct comparison through, so the guard cannot pass by refusing everything.
+
+AGENTS.md rule 14 carries the rule, rewritten in place at the same line count so the instruction
+budget did not grow.

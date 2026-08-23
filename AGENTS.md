@@ -110,22 +110,22 @@ you remember to obey — the machine will stop you either way.
     name, and the copy left behind was missing the logic the analysis rested on. On a
     project whose thesis is provenance, letting git lose a rename is not a small irony. → `scripts/guard/check_module_identity.py`
 
-14. **A comment may explain *why*, never assert *whether*.** A claim of a safety property
-    — "this is caught later", "callers always hold the lock" — belongs in an assertion, a
-    test, or a returned value. A cleanup path said "a leftover is caught by the strict pass
-    on the next attempt"; the next attempt was a different repo, nothing checked, 1.6 GB
-    accumulated. `sweep()` returns the count instead — observable, not claimed.
+14. **A comment may explain *why*, never assert *whether*.** A safety claim — "this is caught
+    later", "callers always hold the lock" — belongs in an assertion, a test, or a returned
+    value. A cleanup path claimed a leftover was caught next attempt; it was a different repo,
+    nothing checked, 1.6 GB accumulated. `sweep()` returns the count instead.
 
-    **Ask what a check outputs when the thing it checks is broken. If the answer is "the
-    same thing", it is not a check.** *Wrong logic*: `all(b >= a)` said True on a flat
-    gradient. *Unreachable*: `history_rewritten` sat in `scan()`, which runs only on admitted
-    records — zero across 515 attempts, identical to a genuine null. *Measuring a proxy*: an
-    anchor check read 98.1% while blind raters found the anchors still wrong. **When a fix
-    breaks a test, ask whether it *asserted* the old behaviour or merely *relied* on it** —
-    two tests certified the corpus-for-GitHub substitution, and a control fixture scored 2/2
-    only because its consumer re-resolved. **Only a known-answer test tells these from a real
-    negative, and only sabotaging the WHOLE mechanism tests it** — sabotaging the entry point
-    left one of ours green and reading as coverage. → **ADVISORY** — notice the verb.
+    **Ask what a check outputs when the thing it checks is broken. If the answer is "the same
+    thing", it is not a check.** *Wrong logic*: `all(b >= a)` said True on a flat gradient.
+    *Unreachable*: `history_rewritten` ran only on admitted records — zero across 515, identical
+    to a genuine null. *Proxy*: an anchor check read 98.1% while raters found them wrong. *Two
+    populations*: `candidate in ours_caught` was false for all 194 — both sides `str`. **A clean
+    zero is a broken comparison until shown otherwise** — 0 in-window commits then 1,298; 0 of
+    1,990 on a bad pathspec. **Name the population on both sides of an `in`, and a filter
+    admitting NOTHING across a whole pass must raise, not report zero.** **When a fix breaks a
+    test, ask whether it *asserted* the old behaviour or merely *relied* on it. Only a
+    known-answer test tells these from a real negative, and only sabotaging the WHOLE mechanism
+    tests it** — the entry point left one green as coverage. → **ADVISORY** — notice the verb.
 
 15. **A documented command must run, or carry `documented-command:unbuilt`.** `python -m`
     with no `__main__` ignores flags, writes nothing, exits 0 — the runbook's "Days 3–5" reported success and did nothing. → `scripts/guard/records/check_documented_commands.py`

@@ -208,6 +208,33 @@ write the definition** is the last thing standing.
 
 ---
 
+## 7b. Five measurements have confirmed the closure, and none has challenged it
+
+**A closure is only as good as what came after it.** Five measurements have been taken since Half B
+closed on 0 of 45, and every one confirmed it. None was designed to; three were attempts to reopen
+it.
+
+| # | measurement | result | direction |
+|---|---|---|---|
+| 1 | schema survival on the 207 | recall floor ≥ 39%, ceiling unknown | did not reopen |
+| 2 | expansion and conventions (design thirteen) | moved nothing | confirmed |
+| 3 | isolated judge, different family | same-family judge agreed with a careful rater on 34.9% | confirmed the judge, not the parser |
+| 4 | form versus truth | null — form does not predict truth | confirmed |
+| 5 | three prompt-direction arms | all FAIL; generator retains 8.5–16.8% of the discrimination over its own output | confirmed |
+
+**The fifth is the strongest, because it measured the thing the closure assumed.** The closure said
+the parser cannot refute a wrong semantic finding. Measurement five says the *generator* cannot
+either — asked to keep only what it would defend, it deleted three-quarters of its findings and
+closed 10% of the distance to a perfect cut, with 130 false positives available to delete.
+
+**Five confirmations after a closure is the pattern that distinguishes a correct closure from a
+premature one.** A premature closure is contradicted by the next thing measured; this one has
+survived every attempt, including the ones built to overturn it. Recorded here so a later reader
+proposing to reopen the half can see what reopening would have to beat.
+
+Four fixes measured since are recorded rather than built, for one shared reason — they improve a
+ratio without creating a correct finding. → `docs/product/reviewer/recorded-not-built.md`
+
 ## 8. Where everything is
 
 | what | where |

@@ -14,7 +14,8 @@ WHY:  **THE PER-CANDIDATE LABELS WERE NEVER STORED, AND FOUR ANALYSES WERE BUILT
 
       **So this run exists to make the labels a stored artefact rather than a re-derivation.**
 IMPORTS: stdlib; local `martian_corpus`, `judge`, and the Vertex `client`.
-CONSUMED BY: `forensics.py` in this package.
+CONSUMED BY: `forensics.py` in this package. Guards its own membership test with
+            `population.assert_intersects`.
 """
 
 from __future__ import annotations
@@ -30,6 +31,7 @@ sys.path.insert(0, str(HERE.parent))
 import judge  # noqa: E402
 import martian_corpus as mc  # noqa: E402
 from client import Client  # noqa: E402
+from population import assert_intersects  # noqa: E402
 
 OUT = HERE.parent / "results" / "candidate_labels.json"
 RIVALS = ("qodo-extended-v2", "greptile-v4-1", "coderabbit")
@@ -56,6 +58,11 @@ def main() -> int:
                 continue
             v = judge.verdicts(client, g, texts)
             fp = set(v["fp"])
+            # `t in fp` is the same shape as the test that voided four analyses: two str sets
+            # that LOOK comparable. `v["fp"]` is drawn from `texts` today, so a whole-pass empty
+            # intersection would mean the judge had begun returning something else -- and the
+            # symptom would be every candidate labelled TP, which reads as a very good arm.
+            assert_intersects(f"{arm} {key}: judge false positives against candidates", fp, texts)
             for t in texts:
                 rows.append(
                     {"arm": arm, "pr": key, "text": t, "verdict": "FP" if t in fp else "TP"}
