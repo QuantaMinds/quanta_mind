@@ -1228,3 +1228,19 @@ by applying the sabotage, confirming it applied, and confirming the restore.
 Also fixed: `test_ingest_diff.py` called `changed_files(..., suffix=)` where the keyword is
 `suffixes`, so it raised `TypeError` before its assertion and **had never tested the property it
 named.**
+
+### `check_schema_shape.py` — the trigger for a golden that does not exist yet
+
+`just verify` says in its own banner what it cannot see: it recomputes every pack row from git per
+path, which is strong on **values** and blind to **form** — column order, row ordering, path
+encoding. A byte-level golden would catch those.
+
+**The golden is deliberately not built.** The schema is fixed, so it would have nothing to catch,
+and an unexercised snapshot is the one most likely to be regenerated without anyone reading the
+diff — worse than absent, because it reads as coverage. So what is built is the **trigger**: the
+guard hashes the DDL and fails the first time it moves, naming what that moment requires — a
+`SCHEMA_VERSION` bump, a migration, and the golden.
+
+Proven by reordering two columns in `repo` — a change a value-recomputation looks straight past —
+and watching the digest move from `d70a616667…` to `97a0a709ad…`. Sabotage confirmed applied,
+restore confirmed clean.
