@@ -1186,3 +1186,20 @@ requires the correct comparison through, so the guard cannot pass by refusing ev
 
 AGENTS.md rule 14 carries the rule, rewritten in place at the same line count so the instruction
 budget did not grow.
+
+### `docs/product/reviewer/what-it-would-take.md` — the two verifiers, costed
+
+The closure named two things that would reopen it. Both are now costed against the 207 adjudicated
+findings (WRONG 135 / UNFALSIFIABLE 36 / TRIVIAL 24 / **CORRECT 12**): **a perfect verifier for
+BOTH classes reaches C/n = 16.7%, against a field floor of 49%.** A verifier deletes; it cannot
+create. Best correct-rate any of six designs produced is 13.0%, and the execution gate — best
+wrong-rate at 27.8% — scored 11.1% correct, worse than the baseline.
+
+**The external-fact verifier cannot be built generically**, because for a business customer the
+external facts are their Jira, their Datadog, their internal docs. That makes it a moat and not a
+rescue: unmeasurable before an engagement, and it does not touch the 17 `TRACE` findings.
+
+Corroborated from outside by `Refute-or-Promote` (arXiv 2604.19049), August 2026: 79–83% kill rate,
+**no baseline precision reported**, and the authors' own statement that "no vulnerability was
+discovered autonomously". Its ten-model ensemble unanimously endorsed a non-existent padding
+oracle, killed only by a single empirical test.
