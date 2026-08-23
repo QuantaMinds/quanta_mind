@@ -52,6 +52,13 @@ class Settings:
     inference_enabled: bool = False
     model: str = "claude-opus-5"
     subprocess_timeout_seconds: int = 30
+    clone_root: str = ".quantamind-clones"
+    posting_enabled: bool = False
+    """**False on purpose, and it is the one default that writes to somebody else's project.**
+    With it off the endpoint runs the whole pipeline and prints the comment it would have posted,
+    which is a complete rehearsal of a delivery and touches nothing. A process that starts
+    commenting on a customer's pull requests because a default said so is not recoverable by
+    changing the default back -- the comments are already there."""
 
     def __post_init__(self) -> None:
         if self.max_requests < 0:
@@ -122,4 +129,6 @@ def load(env: Mapping[str, str] | None = None) -> Settings:
         inference_enabled=_read_bool(source, "INFERENCE_ENABLED", False),
         model=source.get(PREFIX + "MODEL", "claude-opus-5"),
         subprocess_timeout_seconds=_read_int(source, "SUBPROCESS_TIMEOUT_SECONDS", 30),
+        clone_root=source.get(PREFIX + "CLONE_ROOT", ".quantamind-clones"),
+        posting_enabled=_read_bool(source, "POSTING_ENABLED", False),
     )

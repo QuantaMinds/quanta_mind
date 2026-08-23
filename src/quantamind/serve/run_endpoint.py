@@ -40,22 +40,39 @@ def run(port: int) -> int:
     An endpoint that quietly accepted and dropped the work would be indistinguishable from one
     that was doing something.
     """
+    from quantamind.ingest.diff import DiffReadFailed
+    from quantamind.ingest.github_comments import CommentFailed
     from quantamind.serve.listener import build
+    from quantamind.serve.review_delivery import deliver
     from quantamind.serve.webhook_github import MisconfiguredSecret, Review
+    from quantamind.serve.working_clone import CloneFailed
 
     secret = os.environ.get(SECRET_VARIABLE, "")
     accepted: list[Review] = []
 
+    settings = load()
+
     def work(review: Review) -> None:
         accepted.append(review)
         print(
-            f"[serve] accepted {review.repo}#{review.number} at {review.head_sha[:12]} — "
-            f"NOT REVIEWED: no pipeline is attached to this callback",
-            flush=True,
+            f"[serve] accepted {review.repo}#{review.number} at {review.head_sha[:12]}", flush=True
         )
+        # **A FAILURE HERE MUST NOT BE SWALLOWED AND MUST NOT KILL THE THREAD SILENTLY.** The
+        # listener leaves the delivery without a `completed_at` when this raises, which makes
+        # GitHub's redelivery a legitimate retry -- so the exception is allowed to propagate after
+        # it has been named. What is NOT allowed is a bare except that turns a broken pipeline into
+        # a quiet 202, which is indistinguishable from a working one.
+        try:
+            done = deliver(review.repo, review.number, review.head_sha, settings)
+        except (CloneFailed, CommentFailed, DiffReadFailed) as exc:
+            print(f"[serve] {review.repo}#{review.number} FAILED: {exc}", flush=True)
+            raise
+        if done.body is not None and not settings.posting_enabled:
+            print(f"[serve] --- comment it would have posted ---\n{done.body}", flush=True)
+        print(f"[serve] {review.repo}#{review.number}: {done.sentence()}", flush=True)
 
     try:
-        server = build(load(), secret, work, port=port)
+        server = build(settings, secret, work, port=port)
     except MisconfiguredSecret as exc:
         print(f"configuration error: {exc}\n\nSet {SECRET_VARIABLE} and try again.")
         return 1

@@ -47,7 +47,7 @@ three months stale.
 | `infer/` | **1** | `gemini.py` |
 | `verify/` | **1** | `anchor.py` |
 | `render/` | **3** | `comment.py`, `coverage_line.py`, `replay_report.py` |
-| `serve/` | **8** | `cli.py`, `deep_review.py`, `health.py`, `listener.py`, `retrospective.py`, `run_endpoint.py`, `run_review.py`, `webhook_github.py` |
+| `serve/` | **10** | `cli.py`, `deep_review.py`, `health.py`, `listener.py`, `retrospective.py`, `review_delivery.py`, `run_endpoint.py`, `run_review.py`, `webhook_github.py`, `working_clone.py` |
 
 <!-- plan-state:end -->
 

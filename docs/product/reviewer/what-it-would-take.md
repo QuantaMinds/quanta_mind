@@ -36,20 +36,56 @@ moves that, because the filter's whole job is removing things.
 ## The August 2026 literature says the same thing, from outside
 
 `Refute-or-Promote` (arXiv 2604.19049) is the closest published work: adversarial kill mandates
-plus a cross-model critic, killing **79–83% of candidates** before disclosure — roughly the ~85%
-our own target named and our judges failed to reach (21–30%).
+plus a cross-model critic, over a 31-day campaign across 7 targets.
 
-Two findings in it matter more than its headline:
+**THE MECHANISM TRANSFERS; THE NUMBER DOES NOT, AND AN EARLIER DRAFT OF THIS PAGE QUOTED IT AS IF
+IT DID.** Their 79% is a kill rate on **171 vulnerability-discovery candidates before disclosure**
+— roughly five a day across seven targets — with 83% on a consolidated-protocol subset of n = 30.
+Our ~85% bar is for a judge filtering **per-pull-request review findings**. Different task,
+different population, **not commensurable**. Citing one as the other is the same defect as
+Macroscope's 55%, which is comment volume and not a false-positive rate.
+
+What does transfer is the mechanism, and two findings in it matter more than any rate:
 
 - **"Ten dedicated reviewers unanimously endorsed a non-existent Bleichenbacher padding oracle...
   it was killed only by a single empirical test."** A ten-model ensemble ratified a hallucination.
   Our same-family judge agreed with a careful rater on 34.9% and ratified our reviewer's invented
-  facts. **Ensembling model judges does not fix this; only running something did.**
+  facts. **Ensembling model judges does not fix this; only running something did.** The paper
+  reaches our cross-family argument independently — cross-family review catches correlated blind
+  spots same-family review misses — with empirical validation as the mandatory final gate.
 - **"No vulnerability was discovered autonomously; the contribution is external structure that
   filters LLM agents' persistent false positives."** Stated by the authors, about their own work.
 
-And the paper reports **no baseline precision**, so its kill rate is not a measured trade — the
-same defect as quoting Macroscope's 55% comment-volume figure as a false-positive rate.
+The paper reports **no baseline precision**, so its kill rate is not a measured trade.
+
+Its shape also confirms the campaign framing below: 31 days, 7 targets, 171 candidates → 4 CVEs,
+LWG 4549 accepted to the C++ working paper, 5 merged editorial pull requests, 3 compiler
+conformance bugs, 8 merged security fixes without a CVE. **That is an engagement, not a
+subscription.**
+
+## THIRD-PARTY MEASURED — what shipping at this precision does to the receiving end
+
+**This is the strongest external evidence for the closure, and it is a consequence rather than a
+score.**
+
+- **curl permanently closed its bug bounty**, effective 1 February 2026. Confirmed-vulnerability
+  rate had historically run **north of 15%; from 2025 it fell below 5%.** In the first 21 days of
+  2026: **20 submissions, seven inside one 16-hour window, and zero actual vulnerabilities.**
+- **HackerOne paused the Internet Bug Bounty** to new submissions from **27 March 2026**, citing
+  AI-expanded discovery outpacing maintainers' capacity to remediate, with valid submissions
+  likewise falling from ~15% to below 5%.
+
+**PROVENANCE, AND IT MATTERS:** what these measure is **a bug bounty programme's confirmed rate** —
+the share of *submissions* that were real vulnerabilities — **not a review tool's precision.**
+Different population, different task, and the numbers are not ours to quote as a like-for-like
+comparison. That is exactly the provenance error this project has made three times.
+
+**What they do establish is the consequence.** Our correct-rate on 207 adjudicated findings is
+**5.8%**, and sub-5% is the number that closed a bug bounty permanently and paused another.
+Maintainers described the influx as a denial-of-service attack. **A reviewer shipped at our
+measured precision is not a weak product; at volume it is a burden on the people receiving it** —
+observed in the wild, at scale, with named consequences. The cause, in the literature's own
+framing: **LLMs are optimised for plausibility, not correctness.**
 
 ## The CEO constraint, and it is the one thing here that is an asset
 
