@@ -29,7 +29,7 @@ points from the original eight.** The model-free half replicated; raw model find
 ```bash
 uv sync --all-extras            # install
 uv run quantamind review <pr>   # NOT BUILT, exits 2  documented-command:unbuilt
-uv run quantamind serve         # webhook endpoint; authenticates, does NOT review
+uv run quantamind serve         # webhook endpoint; reviews. POSTING_ENABLED=0 rehearses
 just check                      # ruff + mypy + guards + unit tests  (run before every commit)
 just verify                     # check + live data verification      (run before every PR)
 uv run pytest tests/unit -x     # fast loop, ~10s
