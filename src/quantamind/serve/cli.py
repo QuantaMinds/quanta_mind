@@ -84,6 +84,9 @@ def render_config(settings: Settings) -> str:
         f"inference_enabled          {settings.inference_enabled}",
         f"model                      {settings.model}",
         f"subprocess_timeout_seconds {settings.subprocess_timeout_seconds}",
+        f"clone_root                 {settings.clone_root}",
+        # **The one line here that says whether this process writes to somebody else's project.**
+        f"posting_enabled            {settings.posting_enabled}",
         "",
         f"runs a model on a review:  {settings.runs_model}",
     ]

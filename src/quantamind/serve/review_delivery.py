@@ -1,0 +1,108 @@
+"""The join: a verified delivery becomes a clone, a ranking, and a comment on the pull request.
+
+WHAT: `deliver(review, settings)` clones or fetches the repository, asks GitHub what the pull
+      request changed and what it was opened against, runs the ranking, and posts the comment --
+      or, with posting off, prints exactly what it would have posted. Returns a `Delivered` naming
+      which of six outcomes occurred.
+WHY:  **THE ENDPOINT AUTHENTICATED DELIVERIES AND REVIEWED NOTHING.** `run_endpoint.work()` logged
+      "NOT REVIEWED: no pipeline is attached to this callback" and returned. Every piece existed --
+      `review()` ranks and renders, `changed_files()` and `base_commit()` read the pull request,
+      `github_comments.post()` writes idempotently keyed on the head SHA -- and nothing joined
+      them. This is that join, and it is the gap between a command-line tool and a product a
+      customer can install.
+
+      **POSTING IS OFF UNLESS TURNED ON, AND THE DRY RUN IS A COMPLETE REHEARSAL.** With
+      `posting_enabled` false everything runs -- clone, fetch, API reads, ranking, rendering -- and
+      the comment is printed instead of sent. So the thing being rehearsed is the delivery rather
+      than a description of it, and the only step not exercised is the one that writes to someone
+      else's project.
+
+      **EVERY OUTCOME IS NAMED, INCLUDING THE QUIET ONES.** "Nothing worth saying", "every changed
+      file is in a language we do not read", and "already commented on this commit" are three
+      different results and a caller must be able to tell them apart. Collapsing them into a
+      silent return is the defect this product exists to refuse -- `Outcome` is an enum for that
+      reason, and mypy's exhaustiveness check is what keeps a seventh case from being forgotten.
+
+      **THE BASE COMMIT'S TIMESTAMP BOUNDS THE HISTORY, AND IT IS NOT `now`.** A ranking that reads
+      commits made after the pull request opened is scoring the change against its own future.
+IMPORTS: ingest.{diff,github_comments}, serve.{run_review,working_clone}, types.settings.
+      Rightmost layer.
+CONSUMED BY: `serve/run_endpoint.py`.
+"""
+
+from __future__ import annotations
+
+import enum
+from dataclasses import dataclass
+from pathlib import Path
+
+from quantamind.ingest.diff import base_commit, changed_files
+from quantamind.ingest.github_comments import post
+from quantamind.serve.run_review import review as run_ranking
+from quantamind.serve.working_clone import ensure
+from quantamind.types.settings import Settings
+
+
+class Outcome(enum.Enum):
+    """What became of one delivery. Six values, none of them silence."""
+
+    POSTED = "posted"
+    REHEARSED = "rehearsed — posting is off; the comment above was not sent"
+    DUPLICATE = "already commented on this commit"
+    NOTHING_TO_SAY = "ranked, and no file stood out enough to be worth a comment"
+    NO_READABLE_FILES = "every changed file is in a language this product does not read"
+    NO_FILES = "the pull request changed no files we could read from the API"
+
+
+@dataclass(frozen=True, slots=True)
+class Delivered:
+    """The outcome, and the counts behind it. Never a bare success."""
+
+    outcome: Outcome
+    considered: tuple[str, ...]
+    skipped: tuple[str, ...]
+    body: str | None
+
+    def sentence(self) -> str:
+        """One line for the log, stating what happened and what it was computed from."""
+        return (
+            f"{self.outcome.value} — {len(self.considered)} file(s) ranked, "
+            f"{len(self.skipped)} skipped as unreadable"
+        )
+
+
+def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) -> Delivered:
+    """Run the pipeline for one pull request and post, or rehearse posting.
+
+    Takes the three fields rather than the `Review` record so this never imports the webhook
+    parser: the join has no business knowing what shape GitHub's payload arrives in.
+    """
+    clone = ensure(delivery_repo, Path(settings.clone_root))
+    changed = changed_files(delivery_repo, number)
+    if not changed:
+        return Delivered(Outcome.NO_FILES, (), (), None)
+
+    # **The base commit, not the head and not the clock.** See the module docstring.
+    base = base_commit(delivery_repo, number, clone)
+    reviewed = run_ranking(
+        clone,
+        delivery_repo,
+        changed,
+        Path(settings.database_path),
+        as_of=base.committed_at,
+    )
+
+    if reviewed.body is None:
+        quiet = Outcome.NO_READABLE_FILES if not reviewed.considered else Outcome.NOTHING_TO_SAY
+        return Delivered(quiet, reviewed.considered, reviewed.skipped, None)
+
+    if not settings.posting_enabled:
+        return Delivered(Outcome.REHEARSED, reviewed.considered, reviewed.skipped, reviewed.body)
+
+    wrote = post(delivery_repo, number, head_sha, reviewed.body)
+    return Delivered(
+        Outcome.POSTED if wrote else Outcome.DUPLICATE,
+        reviewed.considered,
+        reviewed.skipped,
+        reviewed.body,
+    )

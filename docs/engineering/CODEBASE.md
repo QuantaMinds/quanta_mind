@@ -1186,3 +1186,45 @@ requires the correct comparison through, so the guard cannot pass by refusing ev
 
 AGENTS.md rule 14 carries the rule, rewritten in place at the same line count so the instruction
 budget did not grow.
+
+### `docs/product/reviewer/what-it-would-take.md` — the two verifiers, costed
+
+The closure named two things that would reopen it. Both are now costed against the 207 adjudicated
+findings (WRONG 135 / UNFALSIFIABLE 36 / TRIVIAL 24 / **CORRECT 12**): **a perfect verifier for
+BOTH classes reaches C/n = 16.7%, against a field floor of 49%.** A verifier deletes; it cannot
+create. Best correct-rate any of six designs produced is 13.0%, and the execution gate — best
+wrong-rate at 27.8% — scored 11.1% correct, worse than the baseline.
+
+**The external-fact verifier cannot be built generically**, because for a business customer the
+external facts are their Jira, their Datadog, their internal docs. That makes it a moat and not a
+rescue: unmeasurable before an engagement, and it does not touch the 17 `TRACE` findings.
+
+Corroborated from outside by `Refute-or-Promote` (arXiv 2604.19049), August 2026: 79–83% kill rate,
+**no baseline precision reported**, and the authors' own statement that "no vulnerability was
+discovered autonomously". Its ten-model ensemble unanimously endorsed a non-existent padding
+oracle, killed only by a single empirical test.
+
+### `serve/review_delivery.py` + `serve/working_clone.py` — the webhook now reviews
+
+`run_endpoint.work()` used to log `NOT REVIEWED: no pipeline is attached to this callback` and
+return. Every piece existed and nothing joined them. `deliver()` is the join: clone or fetch, read
+the changed files and the base commit, rank, render, and post — returning an `Outcome` naming which
+of six results occurred, so "nothing worth saying", "no readable files" and "already commented" stay
+three different answers rather than one silence.
+
+**`posting_enabled` is False by default and is the only setting that writes to somebody else's
+project.** With it off the whole pipeline runs and prints the comment instead of sending it, so the
+rehearsal is a real delivery minus the write. `quantamind config` reports both new settings.
+
+`working_clone.ensure()` clones full — never `--filter=blob:none`, because `git log -p` exits
+non-zero on a blob-filtered clone — fetches `refs/pull/*/head` so a fork's head is present, and
+treats a fetch failure as fatal rather than reviewing against a stale history. `sweep()` returns
+the count it removed.
+
+`tests/live/test_delivery_live.py` runs the join against a real merged pull request with posting
+off: 9 files ranked against a 6,491-commit history. **Sabotaging the join makes it fail**, verified
+by applying the sabotage, confirming it applied, and confirming the restore.
+
+Also fixed: `test_ingest_diff.py` called `changed_files(..., suffix=)` where the keyword is
+`suffixes`, so it raised `TypeError` before its assertion and **had never tested the property it
+named.**

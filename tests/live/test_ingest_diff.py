@@ -38,7 +38,10 @@ def test_a_real_pull_request_yields_only_matching_files_that_still_exist() -> No
 
 
 def test_a_suffix_that_matches_nothing_is_an_empty_list_not_an_error() -> None:
-    assert changed_files(REPO, 6096, suffix=".nope") == [], (
+    # **The keyword is `suffixes` and this said `suffix`, so it raised TypeError before reaching
+    # its assertion — it had never once tested what it claims to.** It read as coverage for the
+    # empty-result-is-not-a-failure property while proving nothing about it.
+    assert changed_files(REPO, 6096, suffixes=(".nope",)) == [], (
         "an empty result is a legitimate answer and must not be confused with a failure"
     )
 
