@@ -188,5 +188,7 @@ emits 53 comments that match nothing where we emit 96. Closing that means deleti
 wrong comments, and A1 established the generator cannot pick which 43. That residue is the judge's
 work, not the prompt's.
 
-Recorded, not built. It is a real lever with a measured size and it is model-free, which is the
-combination this project ships.
+**Recorded, not built** — the fourth such fix, and for the same reason as the other three. It moves
+a benchmark ratio without creating a correct finding, and the reviewer half is closed on 0 of 45
+and a 37-point miss, neither of which a ratio touches.
+→ `docs/product/reviewer/recorded-not-built.md`

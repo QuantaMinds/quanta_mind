@@ -4,7 +4,7 @@ WHAT: Joins the blind hand verdicts to the arm key and reports the over-match ra
       the share of issues the Gemini judge scored as a match where the hand rater said no.
 WHY:  Our reviewer and our judge are both Gemini; Greptile's candidates were written by another
       system. Self-preference would show up here as a HIGHER over-match rate on our arm than on
-      theirs, and it would inflate every table in `docs/product/greptile-gap-analysis.md`.
+      theirs, and it would inflate every table in `docs/product/reviewer/greptile-gap-analysis.md`.
 
       EVERY ITEM IN THE SAMPLE WAS SCORED AS A MATCH BY THE GEMINI JUDGE -- they are all issues
       one arm was credited with catching. So a hand verdict of "no" is a false positive of the

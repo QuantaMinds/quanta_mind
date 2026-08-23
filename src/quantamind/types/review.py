@@ -12,7 +12,8 @@ WHY:  Two things have to be observable rather than asserted. Coverage, because t
       against pre-registered bars and all seven failed, so no `infer/` ships and no `verify/`
       adjudicates. Fields nothing can fill describe a capability to the next reader that the
       system does not have, and the two guards that policed them could not fire -- an
-      unreachable check reads exactly like a passing one. → `docs/product/review-half-record.md`
+      unreachable check reads exactly like a passing one.
+      → `docs/product/reviewer/review-half-record.md`
 IMPORTS: stdlib only (dataclasses), and types.change, types.ranking, types.verdict.
 CONSUMED BY: render turns this into a comment; store persists it; telemetry queries it.
 """

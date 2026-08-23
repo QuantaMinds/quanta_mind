@@ -97,7 +97,7 @@ def test_a_review_cannot_carry_a_model_claim_at_all() -> None:
     with nothing able to populate them neither guard could fire: an unreachable check and a
     passing one print the same thing. The fields are gone, so the smuggling attempt below is
     refused by the dataclass rather than by a rule someone has to remember.
-    → `docs/product/review-half-record.md`
+    → `docs/product/reviewer/review-half-record.md`
     """
     with pytest.raises(TypeError, match="findings"):
         Review(  # type: ignore[call-arg]  # the point of the test is that this signature is gone
