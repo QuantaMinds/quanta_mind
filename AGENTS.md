@@ -174,8 +174,8 @@ you remember to obey — the machine will stop you either way.
   fixtures` (~1.3 GB, commits pinned in `tests/fixtures/pinned.json`) then `just gate-2b`.
 - **tree-sitter is NOT a dependency.** `pyproject.toml` declares `dependencies = []`. This line
   claimed it was pinned there; it never was. `parse/` reads git's funcname header and nothing else.
-- The SQLite schema is versioned. Changing `store/schema.py` requires a migration and a bump
-  to `SCHEMA_VERSION`. There is no "just delete it and re-index" fallback in prod.
+- `store/schema.py`: migration + `SCHEMA_VERSION` bump, no re-index in prod. **`just verify` reads
+  VALUES, not FORM** — `check_schema_shape.py` fires on the DDL's first move; build the golden THEN.
 - **`git log -p` exits non-zero on a blob-filtered clone** and emits a truncated patch stream.
   Any code reading patch content asserts the exit code. This defect voided four measurements.
 
