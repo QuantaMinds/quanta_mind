@@ -1,0 +1,985 @@
+{
+ "A0_CONTROL": {
+  "tp": 108,
+  "n": 238,
+  "prs": 50,
+  "errors": 0,
+  "precision": 0.453781512605042,
+  "tp_per_pr": 2.16,
+  "fp_per_tp": 1.2037037037037037,
+  "candidates": {
+   "https://github.com/calcom/cal.com/pull/8087": [
+    "In `packages/app-store/vital/lib/reschedule.ts`, an `async` callback is passed to `forEach`, which does not await the returned promises, causing event and meeting deletions to execute without being awaited by the parent `Reschedule` function.",
+    "In `packages/app-store/wipemycalother/lib/reschedule.ts`, an `async` callback is passed to `forEach`, which does not await the returned promises, causing event and meeting deletions to execute without being awaited by the parent `Reschedule` function.",
+    "In `packages/features/bookings/lib/handleCancelBooking.ts`, an `async` callback is passed to `forEach` at line 461 to update recurring events, but `forEach` does not await promises, so the updates will not be awaited by the request handler.",
+    "In `packages/trpc/server/routers/viewer/bookings.tsx`, an `async` callback is passed to `forEach` at line 554, which does not await the returned promises, causing event and meeting deletions to execute without being awaited by the tRPC mutation."
+   ],
+   "https://github.com/calcom/cal.com/pull/10600": [
+    "In `next-auth-options.ts`, the process of invalidating a backup code during login is vulnerable to a race condition, which could allow a backup code to be used multiple times.",
+    "In `next-auth-options.ts`, a used backup code is invalidated by setting its value to `null` in the array, which pollutes the data structure with mixed types and is a potential source of future bugs.",
+    "In `EnableTwoFactorModal.tsx`, a blob URL is created with `URL.createObjectURL` for the backup code download link but is never revoked when the component unmounts, causing a memory leak in the browser."
+   ],
+   "https://github.com/calcom/cal.com/pull/10967": [
+    "In `googlecalendar/lib/CalendarService.ts`, the logic to select a calendar in `updateEvent` and `deleteEvent` is flawed when `externalCalendarId` is not provided, as it attempts to find a calendar where `externalId` matches a null or undefined value.",
+    "In `googlecalendar/lib/CalendarService.ts`, `updateEvent` and `deleteEvent` lack the `credentialId` parameter, which is necessary to correctly identify the target calendar from the `destinationCalendar` array for a specific user, unlike `createEvent` which was correctly updated.",
+    "In `core/EventManager.ts`, there is a potential crash in `createEvent` when checking for Google Meet location, as `mainHostDestinationCalendar.integration` is accessed without checking if `mainHostDestinationCalendar` is undefined.",
+    "In `features/bookings/lib/handleNewBooking.ts`, team members' destination calendars are not added to the event if the main organizer does not have a destination calendar, because `evt.destinationCalendar` is initialized to `null` instead of an empty array.",
+    "In `features/bookings/lib/handleCancelBooking.ts`, the logic for recurring event cancellation incorrectly iterates over all of the user's calendar credentials instead of using the specific credential associated with the booking reference being cancelled.",
+    "In `trpc/server/routers/viewer/organizations/create.handler.ts`, the logic for setting an organization's slug has been inverted; it is now set only when team billing is enabled, which is the opposite of the previous behavior."
+   ],
+   "https://github.com/calcom/cal.com/pull/22345": [
+    "The constructor's public `options` type `InsightsBookingServicePublicOptions` is inconsistent with the internal Zod validation, allowing a `scope` of 'team' without a `teamId`, which will cause an unhandled exception during parsing.",
+    "The `getBaseConditions` method contains unreachable code branches because `getAuthorizationConditions` always returns a truthy `Prisma.Sql` object, making the `else if (filterConditions)` and subsequent `else` block dead code.",
+    "The raw SQL queries use the PostgreSQL-specific `= ANY()` syntax, which breaks the database portability that the Prisma ORM previously provided.",
+    "The constructor's `options` parameter is parsed by Zod, but the method does not handle potential validation errors, which will result in an unhandled exception if invalid options are provided."
+   ],
+   "https://github.com/calcom/cal.com/pull/7232": [
+    "In `emailReminderManager.ts`, when `deleteScheduledEmailReminder` is called with `immediateDelete: true`, it cancels the job with the provider but does not delete or update the database record, leaving an orphaned `WorkflowReminder` record that appears to still be active.",
+    "In `handleNewBooking.ts`, asynchronous reminder cancellation calls inside a `forEach` loop are not awaited, which means the surrounding `try...catch` block cannot handle any errors from them and execution proceeds without waiting for cancellations to complete.",
+    "In `scheduleEmailReminders.ts`, a failure to cancel a single email reminder via the API will throw an exception, preventing the cancellation of all subsequent reminders in the batch and also preventing the deletion of any database records for that batch.",
+    "In `WorkflowStepContainer.tsx`, the condition to render the phone number input block was changed from `(isPhoneNumberNeeded || isSenderIdNeeded)` to just `isPhoneNumberNeeded`, which incorrectly removes UI that is required when only a `senderId` is needed.",
+    "The cancellation logic for email and SMS reminders is inconsistent; `deleteScheduledEmailReminder` marks a record as `cancelled` for later processing, while `deleteScheduledSMSReminder` immediately deletes the record from the database.",
+    "In `emailReminderManager.ts`, the `deleteScheduledEmailReminder` function does not delete the `WorkflowReminder` record from the database when `immediateDelete` is true, which is contrary to what callers like `handleNewBooking.ts` expect and will lead to orphaned data.",
+    "The new `cancelled` column on the `WorkflowReminder` table is a nullable boolean, which can lead to ambiguity and query errors; it should be non-nullable with a default value of `false`.",
+    "In `trpc/server/routers/viewer/bookings.tsx`, asynchronous reminder deletion calls inside `forEach` are not awaited, which means errors are not handled and the main function may complete before the deletions are finished.",
+    "In `trpc/server/routers/viewer/workflows.tsx`, when a workflow is deleted, asynchronous reminder cancellation calls are made inside a `forEach` loop without being awaited, preventing proper error handling.",
+    "In `trpc/server/routers/viewer/workflows.tsx`, when a workflow step is edited, asynchronous reminder cancellation calls are made inside an `async` `forEach` loop without being awaited, preventing proper error handling.",
+    "In `handleCancelBooking.ts`, asynchronous reminder deletion calls inside a `forEach` loop are not awaited, which means errors are not handled and the handler may finish before the deletions are complete."
+   ],
+   "https://github.com/calcom/cal.com/pull/8330": [
+    "In `packages/lib/slots.ts`, the timezone adjustment logic for overrides is mathematically incorrect, as it adds an offset difference to a UTC time instead of performing a proper timezone conversion.",
+    "In `packages/lib/slots.ts`, date parsing with `dayjs(override.start.toString())` is unreliable because `Date.prototype.toString()` output is implementation-defined and sensitive to the server's timezone.",
+    "In `packages/trpc/server/routers/viewer/slots.ts`, `checkIfIsAvailable` compares Dayjs objects using `===`, which will always be false because it compares object references instead of values.",
+    "In `packages/trpc/server/routers/viewer/slots.ts`, the date override check incorrectly uses `dayjs(date.start)`, which interprets a UTC date in the server's local timezone rather than as UTC.",
+    "In `packages/trpc/server/routers/viewer/slots.ts`, the timezone conversion for date overrides is incorrect as it adds the UTC offset when it should be subtracted to get local time for zones behind UTC.",
+    "In `packages/trpc/server/routers/viewer/slots.ts`, the `workingHours` check in `checkIfIsAvailable` incorrectly compares a slot's time-of-day in UTC with working hours that are defined in a local timezone.",
+    "In `packages/trpc/server/routers/viewer/slots.ts`, the `workingHours` check in `checkIfIsAvailable` uses the day of the week from the slot's UTC time, which can be different from the day in the organizer's local timezone.",
+    "In `packages/trpc/server/routers/viewer/slots.ts`, the slot's end time is not checked against working hours because the `end` variable is a copy of the `start` variable due to a copy-paste error.",
+    "In `packages/trpc/server/routers/viewer/slots.ts`, `checkIfIsAvailable` processes a list of `dateOverrides` from multiple users using a single `organizerTimeZone`, leading to incorrect availability calculations.",
+    "In `packages/trpc/server/routers/viewer/slots.ts`, the TypeScript type for the `dateOverrides` parameter in `checkIfIsAvailable` omits the `timeZone` property, which is present in the data and required for correct timezone calculations.",
+    "In `packages/trpc/server/routers/viewer/slots.ts`, for round-robin scheduling, `checkIfIsAvailable` is called with aggregated availability data for all users instead of the specific user being checked, leading to incorrect results."
+   ],
+   "https://github.com/calcom/cal.com/pull/11059": [
+    "The webhook secret comparison in `app-credential.ts` is not constant-time, which makes it vulnerable to timing attacks.",
+    "In `app-credential.ts`, a call to `JSON.parse` on a decrypted payload is not wrapped in a try-catch block, which will cause an unhandled exception and a server crash if the payload is not valid JSON.",
+    "In `parseRefreshTokenResponse.ts`, if an OAuth provider does not return a new refresh token, the code hardcodes the value to the string \"refresh_token\", which will cause subsequent token refreshes to fail.",
+    "The `refreshOAuthTokens` function returns a raw `Response` object, but several of its callers (e.g., in Google Calendar, Hubspot, Zoho integrations) expect an object with a `data` property or a specific token structure, which will cause runtime errors.",
+    "In `GoogleCalendarService.ts`, the result of `parseRefreshTokenResponse` is stored directly in the database, but this function returns a `SafeParseReturnType` object (`{ success, data }`) instead of the parsed data itself, leading to incorrect credential data being saved.",
+    "The Salesforce token refresh logic in `SalesforceCalendarService.ts` has been reimplemented without using the new `refreshOAuthTokens` helper, meaning it will not support the external credential sync feature.",
+    "The `refreshToken` callback for the `jsforce` connection in `SalesforceCalendarService.ts` has been removed, breaking the library's ability to automatically refresh expired access tokens during its operation.",
+    "The check for a successful token refresh in `SalesforceCalendarService.ts` uses `response.statusText !== \"OK\"`, which is unreliable and will fail for any successful HTTP status other than 200.",
+    "In `ZohoBigin/CalendarService.ts`, the `refreshOAuthTokens` function is called with the credential ID instead of the user ID, which will cause the external credential sync to fail for the wrong user.",
+    "The `minimumTokenResponseSchema` in `parseRefreshTokenResponse.ts` uses a generic index signature to find the token expiry time, which is too permissive and could misinterpret other numeric fields in a token response as the expiry.",
+    "The suggested command in `.env.example` for generating `CALCOM_APP_CREDENTIAL_ENCRYPTION_KEY` (`openssl rand -base64 24`) produces a 24-byte key, which contradicts the comment stating a 32-byte key is required for AES-256."
+   ],
+   "https://github.com/calcom/cal.com/pull/14943": [
+    "The `deleteMany` query will delete any type of workflow reminder, not just SMS, if its `retryCount` is greater than one, which could cause unintended data loss for other reminder types.",
+    "If an SMS is sent successfully but the subsequent database update to mark it as 'scheduled' fails, the error is caught and the reminder's `retryCount` is incremented, leading to duplicate SMS messages being sent on the next run.",
+    "A failure during the database update to increment `retryCount` inside the `catch` block is unhandled and will cause the loop processing reminders to terminate prematurely, leaving subsequent reminders in the batch unprocessed."
+   ],
+   "https://github.com/calcom/cal.com/pull/14740": [
+    "In `addGuests.handler.ts`, the authorization check for team events requires a user to be both an admin and an owner, which is incorrect as it should permit the action if the user is either.",
+    "In `addGuests.handler.ts`, the handler will crash if a booking does not have an associated user (`booking.userId` is null), as it attempts a database query for a user with ID 0.",
+    "In `addGuests.handler.ts`, the database is updated with new attendees before the external calendar is updated, which can lead to data inconsistency if the calendar API call fails.",
+    "In `addGuests.handler.ts`, if all submitted guest emails already exist on the booking, the API returns a `BAD_REQUEST` with a misleading error message about invalid emails instead of succeeding or providing an accurate message.",
+    "In `addGuests.handler.ts`, the `sendAddGuestsEmails` function is called with the original list of guest emails from the input, not the filtered list of newly added guests, causing existing attendees to receive incorrect 'new booking' notifications.",
+    "In `addGuests.handler.ts`, errors from `sendAddGuestsEmails` are caught and logged with a generic message, swallowing the actual error details and making debugging difficult.",
+    "In `AddGuestsDialog.tsx`, the `handleAdd` function attempts to validate all email inputs, including empty ones, which will always fail and block submission instead of simply ignoring empty fields."
+   ],
+   "https://github.com/calcom/cal.com/pull/22532": [
+    "The logic to track `SelectedCalendar` updates is broken: queries in `user.ts` and `getConnectedDestinationCalendars.ts` select `updatedAt` and `googleChannelId` fields from the `SelectedCalendar` model, but the database schema migration to add these columns is missing. This will cause runtime errors.",
+    "In `CalendarService.ts`, the call to `SelectedCalendarRepository.updateManyByCredentialId` passes an empty object `{}`, which is a no-op that does not update any records and would not trigger an automatic timestamp update even if the field existed.",
+    "In `CredentialActionsDropdown.tsx`, the date is formatted with a hardcoded \"en-US\" locale, which will display incorrectly for international users instead of respecting their locale settings.",
+    "In `deleteCache.handler.ts`, an error is thrown with `throw new Error(\"...\")`, which will result in a generic 500 Internal Server Error for the client instead of a more specific TRPCError with a corresponding HTTP status code like `NOT_FOUND` or `FORBIDDEN`."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/1": [
+    "The client-side file size check is hardcoded to 10MB for all upload types, but the server-side downsizing logic only applies to images, causing non-image files larger than the site setting to be unnecessarily uploaded before being rejected.",
+    "The image downsizing is performed synchronously in a loop within the web request, which can lead to long request times and server timeouts for large images, creating a potential denial-of-service vulnerability.",
+    "If an image is still too large after five downsizing attempts, the code proceeds to create an upload that will fail validation, resulting in a generic error instead of a specific message that automatic downsizing was unsuccessful.",
+    "The return value of `OptimizedImage.downsize` is not checked inside the downsizing loop, so if the image processing command fails, the loop will needlessly continue for all remaining attempts on the unmodified file.",
+    "The `OptimizedImage.downsize` method signature was changed from `(from, to, max_width, max_height, opts)` to `(from, to, dimensions, opts)`, which is a breaking API change that will cause an `ArgumentError` for any existing callers that have not been updated.",
+    "The downsizing loop does not check if the file size is actually decreasing, which can lead to wasted CPU cycles if a downsizing operation results in an image of the same or larger size.",
+    "The server-side downsizing logic uses the global `SiteSetting.max_image_size_kb` limit, ignoring the upload `type` which may have a more specific and different size limit (e.g., for avatars).",
+    "The new upper limit for image uploads is hardcoded to 10MB in both client-side JavaScript and server-side Ruby, making it difficult to configure and inconsistent with how other limits are managed through site settings.",
+    "The client-side error message for a 413 \"Payload Too Large\" error displays a hardcoded 10MB limit, which is likely to be inaccurate as this limit is configured at the web server level.",
+    "The downsizing algorithm uses a fixed \"80%\" resize step in a loop, which is an inefficient strategy that may fail to reduce very large images below the size limit within the allowed number of attempts."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/2": [
+    "The `unsubscribe` action in `TopicsController` is missing an authentication check, which will cause a server error if an unauthenticated user visits the unsubscribe link.",
+    "The `unsubscribe` action in `TopicsController` will crash with a `NoMethodError` if a `TopicUser` record does not exist for the user and topic, as it does not handle the `nil` case when `find_by` returns no record.",
+    "The `unsubscribe` action performs a state-changing operation on a GET request, which is a security risk as it can be triggered by email scanners or browser pre-fetching, causing users to be unintentionally unsubscribed.",
+    "The `unsubscribe` action does not always mute a topic; for users 'watching' or 'tracking' a topic, it only reduces the notification level to 'regular', which may not meet the user's expectation of stopping all notifications.",
+    "The `topic-unsubscribe` client-side route makes a redundant API call to load the topic's data, which has already been preloaded by the server during the initial page render."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/3": [
+    "The `should_block?` method in the `BlockedEmail` model has a race condition because the read and write of `match_count` are not atomic, which will lead to an incorrect count under concurrent load.",
+    "The regular expression in `email_in_restriction_setting?` is not anchored to the end of the string, causing it to incorrectly block valid emails; for example, if `baddomain.com` is blacklisted, an address like `user@baddomain.com.good.com` will be blocked because the pattern `@baddomain.com` is found in the string, even though the actual domain is `good.com`.",
+    "The client-side `rejectedEmails` feature incorrectly treats all email validation failures as permanent rejections. This leads to providing incorrect feedback to the user, for example, showing a generic 'email invalid' error for an email that is merely already in use, on subsequent submission attempts.",
+    "The `uniqueness` validation on the `User` model's email attribute is not conditioned on the email having changed, causing an unnecessary database query to check for uniqueness every time any part of a user record is saved."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/4": [
+    "In `app/jobs/scheduled/poll_feed.rb`, `open(SiteSetting.feed_polling_url)` is vulnerable to remote command execution because `open-uri`'s `open` method executes shell commands if the argument starts with a pipe character.",
+    "In `app/models/post.rb`, posts with `cook_method` of `raw_html` bypass sanitization, leading to a stored XSS vulnerability if the raw content from an RSS feed contains malicious scripts.",
+    "In `app/assets/javascripts/embed.js`, the origin check for `postMessage` is `discourseUrl.indexOf(e.origin) === -1`, which is insufficient and allows messages from origins that are a prefix of the `discourseUrl`'s origin, creating a security vulnerability.",
+    "In `app/controllers/embed_controller.rb`, `response.headers['X-Frame-Options']` is set to `\"ALLOWALL\"`, which is not a standard value and effectively disables clickjacking protection for the embedded content.",
+    "In `app/views/layouts/embed.html.erb`, `postMessage` is called with the full `request.referer` URL as the `targetOrigin`, which is invalid and will cause the browser to block the message, breaking the iframe resizing feature.",
+    "In `app/views/embed/loading.html.erb`, the page automatically reloads every 30 seconds, which will cause an endless loop of requests if the background job is slow or fails, potentially leading to a self-inflicted denial of service.",
+    "In `lib/topic_retriever.rb`, `perform_retrieve` calls `Jobs::PollFeed.new.execute({})` to find a single topic, which inefficiently triggers a poll of the entire RSS feed instead of fetching only the required URL.",
+    "In `app/jobs/scheduled/poll_feed.rb`, using `open()` on a URL from site settings without validation allows an administrator to perform Server-Side Request Forgery (SSRF) attacks or read local files using `file://` URIs.",
+    "In `app/models/topic_embed.rb`, `open(url)` is used to fetch remote content, which can lead to a Server-Side Request Forgery (SSRF) vulnerability, as it may allow requests to internal services on the `embeddable_host`."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/5": [
+    "The `order` mixin incorrectly sets `-webkit-box-ordinal-group` and `-moz-box-ordinal-group` to `$val`, but these properties are 1-based and should be set to `$val + 1` to correctly map from the 0-based `order` property.",
+    "The `align-items` mixin includes the non-existent CSS property `-ms-align-items`, which will be ignored by browsers.",
+    "In `header.scss`, the vertical margin on `.contents` was removed, which will alter the header's spacing and likely cause a visual regression.",
+    "In `topic-post.scss`, the vertical padding on `.small-action-desc` was removed, which will reduce its height and change vertical spacing within the element.",
+    "In `topic-post.scss`, the vertical margin on paragraphs within `.small-action-desc .creator` was removed, which will cause them to render without any space between them.",
+    "In `topic-post.scss`, the top padding on paragraphs within `.small-action-desc .topic-info` was removed, which will alter the vertical alignment of text.",
+    "In `topic.scss`, the top margin was removed from `.badge-wrapper.bullet`, which may cause vertical misalignment of the badge."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/6": [
+    "The logic to detect related subdomains is flawed, as it will incorrectly treat different domains like `my-site.co.uk` and `your-site.co.uk` as related because it naively compares the `co.uk` part.",
+    "The parent domain check `discourse_host.ends_with?(\".\" << website_host)` can be tricked by a user setting their website to a TLD like `com`, which would then be incorrectly treated as a parent domain for any `.com` site.",
+    "The use of `URI(website.to_s).host` will fail to extract a host from a URL that lacks a scheme (e.g., `example.com`), causing the website to not be displayed for users who enter their URL in this common format."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/7": [
+    "In `desktop/topic-post.scss`, the color for `.post-links-container .user-name a` in light themes is changed from 30% lightness to 70% lightness, which will make the text much lighter and likely have insufficient contrast.",
+    "In `desktop/user.scss`, the color for `.user-card .name` in light themes is changed from 30% lightness to 50% lightness, which is an unintended visual change that makes the text lighter.",
+    "In `mobile/modal.scss`, the color for `.custom-message-length` in light themes is changed from 70% lightness to 30% lightness, making the text much darker than intended; the light and dark theme values appear to have been swapped.",
+    "In `mobile/topic-post.scss`, the color for `a.star h3` in light themes is changed from 20% lightness to 50% lightness, making the heading text significantly lighter than intended.",
+    "In `mobile/user.scss`, the color for `.user-card .name` in light themes is changed from 30% lightness to 50% lightness, which is an unintended visual change that makes the text lighter."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/8": [
+    "The `totalPages` computed property in `admin-group.js.es6` uses `Math.floor(...) + 1`, which is incorrect when `user_count` is an exact multiple of `limit`, leading to an extra, empty page being shown.",
+    "In `admin/groups_controller.rb`, the `add_members` and `remove_member` actions read the group's ID from `params.require(:group_id)`, but the router provides this value as `params[:id]`, which will cause these requests to fail with a `ParameterMissing` error.",
+    "In `discourse/models/group.js`, the promises returned by `Discourse.ajax` in `addMembers` and `removeMember` do not have rejection handlers. Server-side errors will not be caught, leading to silent failures with no user feedback.",
+    "In `admin/routes/admin_group_route.js` and `discourse/routes/group-members.js.es6`, the `findMembers()` call in `setupController` is not awaited and lacks error handling, which will cause member loading failures to be silent.",
+    "The `members` action in `groups_controller.rb` does not validate the `limit` parameter. A request with `limit=0` is possible and would cause the client to attempt a division by zero when calculating `totalPages`.",
+    "In `discourse/models/group.js`, `findMembers` returns `undefined` if the group has no name, whereas the previous implementation returned a resolved promise. Callers expecting a promise will break.",
+    "In `admin-group.js.es6`, the `next` action calculates the new offset as `Math.min(group.get(\"offset\") + group.get(\"limit\"), group.get(\"user_count\"))`. If the number of users is a multiple of the limit, this can result in an offset equal to the user count, which is an invalid offset for the next page."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/9": [
+    "In `config/initializers/i18n.rb`, the `FallbackLocaleList#[]` method calls `SiteSetting.default_locale` on every invocation. This method is called by the I18n backend whenever a translation is missing, which can lead to numerous database lookups per request and cause a significant performance degradation.",
+    "In `lib/freedom_patches/translate_accelerator.rb`, the `ensure_loaded!` and `load_locale` methods are not thread-safe. The non-atomic check-then-act pattern on the shared `@loaded_locales` array creates a race condition that can lead to the same locale data being loaded multiple times concurrently in a multi-threaded environment.",
+    "In `config/initializers/i18n.rb`, the `FallbackLocaleList#ensure_loaded!` method calls `I18n.ensure_loaded!`. However, the `ensure_loaded!` method is defined on the I18n backend, not the `I18n` module itself. This will raise a `NoMethodError` at runtime; the call should be `I18n.backend.ensure_loaded!`."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/10": [
+    "In `app/assets/javascripts/admin/components/embeddable-host.js.es6`, the `save` action manually sets the category on the model after the save completes, which can overwrite the category ID set by the server (e.g., a default category) with the component's outdated state.",
+    "In `app/assets/javascripts/admin/components/embeddable-host.js.es6`, the `destroyRecord()` promise in the `delete` action is missing a `.catch` handler, which will cause deletion errors to fail silently from the user's perspective.",
+    "In `app/controllers/admin/embeddable_hosts_controller.rb`, the `update` and `destroy` actions will raise a `NoMethodError` and result in a 500 error if a record with the given `id` is not found, because they do not handle the `nil` case after `where(...).first`.",
+    "In `app/controllers/admin/embeddable_hosts_controller.rb`, the `save_host` method does not use strong parameters, creating a potential mass assignment vulnerability.",
+    "In `app/models/embeddable_host.rb`, the `before_validation` hook calls `sub!` on `self.host` without a presence check, which will raise an exception if a new record is created with a nil host.",
+    "In `app/models/embeddable_host.rb`, the `record_for_host` method does not lowercase the `host` variable before the database query, which can cause lookups to fail for hosts with uppercase letters depending on the database collation.",
+    "In `app/models/embeddable_host.rb`, the validation regex for `host` incorrectly allows a path, which is then stripped in a `before_validation` hook, making the validation logic confusing and potentially buggy.",
+    "The migration in `db/migrate/20150818190757_create_embeddable_hosts.rb` is vulnerable to SQL injection because it uses string interpolation to insert host names from a site setting directly into a SQL query.",
+    "The migration in `db/migrate/20150818190757_create_embeddable_hosts.rb` will fail with a `NoMethodError` if the SQL queries to find category IDs return no results, as it does not handle the nil case.",
+    "The contents of `spec/fabricators/category_fabricator.rb` and the new file `spec/fabricators/embeddable_host_fabricator.rb` have been swapped, causing fabricators to be defined in the wrong files.",
+    "In `test/javascripts/helpers/create-pretender.js.es6`, the mock API for `GET /fruits/:id` is broken as it ignores the requested ID and always returns the first fruit, making tests that rely on it unreliable.",
+    "In `app/models/topic.rb`, `expandable_first_post?` no longer checks if any embeddable hosts are configured, meaning topics with existing embeds will remain expandable even if embedding has been globally disabled by removing all hosts."
+   ],
+   "https://github.com/grafana/grafana/pull/79265": [
+    "In `pkg/services/anonymous/anonimpl/anonstore/database.go`, the `CreateOrUpdateDevice` function has a race condition because it checks the number of devices and then potentially inserts a new one in two separate, non-atomic operations, which can lead to the device limit being exceeded under concurrent requests.",
+    "In `pkg/services/anonymous/anonimpl/client.go`, the error handling in `Authenticate` is inconsistent: an `ErrDeviceLimitReached` error causes authentication to fail, but any other error from `TagDevice` (e.g., a database connection error) is only logged while authentication proceeds, treating different device-tagging failures differently.",
+    "In `pkg/services/anonymous/anonimpl/impl.go`, `ProvideAnonymousDeviceService` now creates its own concrete `anonstore.AnonDBStore` instead of accepting an `anonstore.AnonStore` interface, which breaks dependency injection and couples the service to a specific implementation, making it less modular and harder to test."
+   ],
+   "https://github.com/grafana/grafana/pull/103633": [
+    "In the `Check` method, if a permission check against cached permissions results in a denial, the code proceeds to query the database instead of returning the denial, which is inconsistent with the `List` method's behavior and defeats the purpose of caching for negative lookups.",
+    "The new `permDenialCache` can cause incorrect authorization denials because there is no apparent mechanism to invalidate its entries when underlying permissions change; a user who is granted a permission they were previously denied will continue to be denied until the cache entry expires.",
+    "The `permDenialCache` uses the external user UID from the request to construct its cache key, whereas the `permCache` uses a resolved internal, stable user UID, creating an inconsistency that could lead to incorrect cache behavior.",
+    "In the `Check` method, the `permissionCacheUsage` metric is incorrectly recorded as a cache miss when a cache hit on `permCache` occurs but results in a denial, misrepresenting cache effectiveness."
+   ],
+   "https://github.com/grafana/grafana/pull/76186": [
+    "The `TestLogger.FromContext` implementation returns a new, independent logger instance, which prevents tests from inspecting logs made on the logger returned from `FromContext`.",
+    "In `grafanaInfraLogWrapper.FromContext`, the fallback logic for a failed type assertion calls `d.New()` without arguments, which discards the context from the `ctx` parameter.",
+    "The new `ContextualLoggerMiddleware` does not instrument stream-related requests (`SubscribeStream`, `PublishStream`, `RunStream`), so contextual log attributes will be missing for those operations."
+   ],
+   "https://github.com/grafana/grafana/pull/107534": [
+    "In both `querySplitting.ts` and `shardQuerySplitting.ts`, queries are filtered for a non-empty expression before template variables are applied, which could cause queries with an expression that resolves to an empty string to be processed instead of being correctly filtered out.",
+    "The test `Interpolates queries before execution` in `shardQuerySplitting.test.ts` reveals that sharded metric queries are constructed incorrectly, resulting in invalid LogQL syntax like `count_over_time(... | drop __stream_shard__[5m])`.",
+    "In `shardQuerySplitting.ts`, `runShardSplitQuery` applies template variables before splitting, but a test change asserts `applyTemplateVariables` is called per-shard, suggesting that interpolation also occurs within the splitting logic, which makes the initial interpolation redundant and potentially incorrect."
+   ],
+   "https://github.com/grafana/grafana/pull/106778": [
+    "In `useAbilities.ts`, `useAllRulerRuleAbilities` now hardcodes `isFederated` to `false`, which will cause read-only federated rules to incorrectly appear editable or deletable because the hook no longer receives the necessary `RuleGroup` object to check this property.",
+    "In `GrafanaGroupLoader.tsx`, the client-side reconciliation between ruler and prometheus API responses has been removed, which means rules in a transitional 'creating' or 'deleting' state will no longer be displayed as such; this is a functional regression that will cause the UI to lag behind user actions if backend propagation is not instantaneous.",
+    "The `getEditableIdentifier` function in `RuleActionsButtons.V2.tsx` does not handle the case where `promRule` is a non-Grafana cloud rule, causing it to return `undefined` and preventing any action buttons from rendering for such rules in the rule list."
+   ],
+   "https://github.com/grafana/grafana/pull/90045": [
+    "The `Delete` method incorrectly returns an error when an object is not found, violating the idempotency requirement of a DELETE operation.",
+    "The `Update` method introduces a race condition by potentially calling `objInfo.UpdatedObject` concurrently from the main flow and a new goroutine, which is unsafe if the `UpdatedObjectInfo` implementation is not thread-safe.",
+    "In `Create` and `Update`, a failure in the primary storage operation incorrectly records a metric for the legacy storage backend instead of the primary one.",
+    "In `DeleteCollection`, the asynchronous call to the legacy storage backend incorrectly records a metric for the primary storage backend.",
+    "The `Delete` method provides the object's name instead of its kind when recording a storage duration metric, resulting in incorrect metric labels.",
+    "In the `Delete` method, the context passed to downstream functions is re-initialized with a less specific logger, causing loss of contextual logging information."
+   ],
+   "https://github.com/grafana/grafana/pull/80329": [
+    "The `deleteByIDs` function does not account for parameter limits on databases other than SQLite, which will cause queries to fail if the batch size exceeds the limit of a database like PostgreSQL.",
+    "Throughout `xorm_store.go`, `log.Error` is used to log routine information about the cleanup process, which incorrectly reports normal operation as an error and will create excessive noise in error logs."
+   ],
+   "https://github.com/grafana/grafana/pull/90939": [
+    "The double-checked locking pattern in `GetWebAssets` is incorrect because it does not re-check if the cache is populated after acquiring the write lock, leading to a race condition where the cache may be regenerated multiple times unnecessarily."
+   ],
+   "https://github.com/grafana/grafana/pull/94942": [
+    "In `pkg/expr/reader.go`, the `enableSqlExpressions` function always returns `false` due to a logic error, which prevents the SQL expression feature from ever being enabled.",
+    "The new SQL database implementation in `pkg/expr/sql/db.go` consists of stub methods that return 'not implemented' errors, breaking the SQL expression functionality that was previously handled by the now-removed `go-duck` dependency."
+   ],
+   "https://github.com/grafana/grafana/pull/97529": [
+    "In `pkg/storage/unified/resource/server.go`, the `NewResourceServer` function calls `s.Init(ctx)`, but `ctx` is an undeclared variable within this function's scope, which will cause a compilation error.",
+    "In `pkg/storage/unified/search/bleve.go`, `BuildIndex` has a concurrency hazard because the mutex lock only protects the cache write, not the entire index creation process, which can lead to a resource leak if multiple goroutines build an index for the same key concurrently, as all but the last created index will be orphaned and never closed."
+   ],
+   "https://github.com/ai-code-review-evaluation/keycloak-greptile/pull/1": [
+    "In `PasswordForm.java`, the new code calls the method `isConditionalPasskeysEnabled`, but this method is not defined or in scope for this class. It is a protected method in the sibling class `UsernamePasswordForm`, which will cause a compilation error.",
+    "In `passkeys.ftl`, a form with `id=\"authn_select\"` is added. This form is used for a non-conditional WebAuthn flow where a user selects from a list of authenticators. The conditional UI flow, which this template supports, does not use this form, making its inclusion incorrect and adding unused markup."
+   ],
+   "https://github.com/keycloak/keycloak/pull/32918": [
+    "In `InfinispanIdentityProviderStorageProvider.getForLogin`, calling `cache.invalidateObject(cacheKey)` when a cache miss occurs for a specific `organizationId` within an existing `IdentityProviderListQuery` is incorrect. This invalidates the entire cache entry across the cluster, forcing other nodes to rebuild it from scratch, even for `organizationId`s that were already cached, thus reducing cache effectiveness.",
+    "The change to `IdentityProviderStorageProvider.LoginFilter.getLoginPredicate` incorrectly excludes non-public organization-linked identity providers. This causes the caching layer to miss invalidating the `getForLogin` cache when such a provider is modified (e.g., disabled), because the invalidation logic in `registerIDPLoginInvalidationOnUpdate` will fail to recognize it as a login provider, leading to stale data being served from the cache.",
+    "The cached implementation of `getForLogin` in `InfinispanIdentityProviderStorageProvider` returns an unordered stream of identity providers because it reconstructs the result from a `HashSet`. The underlying database query provides a sorted list, so this change introduces an inconsistency where the presence of a cached result changes the ordering of the returned providers, which is an implicit API contract violation.",
+    "In `OrganizationCacheTest.testCacheIDPForLogin`, the test cleanup logic is incorrect. It attempts to remove an identity provider with the literal alias `\"alias\"` in a loop where providers are created with dynamic aliases like `\"idp-alias-0\"`. This will fail to clean up the created identity providers, causing test pollution."
+   ],
+   "https://github.com/keycloak/keycloak/pull/33832": [
+    "The static factory method `AuthzClient.create` modifies a global static crypto provider, which is a side-effect that can cause unpredictable behavior in applications using this client library.",
+    "The method `AuthzClientCryptoProvider.getBouncyCastleProvider` violates its API contract by returning the default keystore provider, which is not guaranteed to be BouncyCastle.",
+    "The `integerToBytes` method in `AuthzClientCryptoProvider` silently truncates the most significant bytes from oversized `BigInteger` values, which corrupts cryptographic data instead of throwing an error.",
+    "`ASN1Decoder.readSequence` fails to verify that the sum of the lengths of the contained elements matches the sequence's declared length, potentially leading to processing of malformed data without error.",
+    "In `AuthzClientCryptoProvider.concatenatedRSToASN1DER`, two `ASN1Encoder` instances are created and written to but are then immediately discarded, which is a logic error as this code has no effect.",
+    "In `ASN1Decoder.readSequence`, the loop condition `while (length > 0)` and update `length = length - bytes.length` can result in an infinite loop if `readNext()` returns an empty byte array."
+   ],
+   "https://github.com/keycloak/keycloak/pull/36882": [
+    "The documentation in `advanced-configuration.adoc` claims the Keycloak Operator will fail if the `rolling-updates` feature is not enabled, but no corresponding logic to enforce this and cause a failure is present in the pull request, making the documentation's claim incorrect.",
+    "The test `testMissingOptionOnSave` in `UpdateCommandDistTest.java` incorrectly asserts that no error message for a missing required argument is shown; the `metadata` subcommand should fail because the required `--output` option is not provided."
+   ],
+   "https://github.com/keycloak/keycloak/pull/36880": [
+    "The `hasPermission(ClientModel client, String scope)` method in `ClientPermissionsV2.java` does not check for permissions on the \"all-clients\" resource if a resource for the specific client already exists, which can lead to incorrect permission denials.",
+    "The `canManage(ClientModel client)` method in `ClientPermissionsV2.java` fails to check for the global fine-grained `manage` permission, unlike `canView(ClientModel client)` which correctly checks for its corresponding global permission.",
+    "The `hasPermission(ClientModel client, String scope)` method in `ClientPermissionsV2.java` may incorrectly deny permissions when using the \"all-clients\" resource because it prematurely returns false if the resource has no directly associated policies, ignoring permissions that could be granted via scope-based policies.",
+    "The `getClientsWithPermission(String scope)` method in `ClientPermissionsV2.java` incorrectly handles a global permission grant by adding the literal string \"Clients\" to the result set instead of returning the IDs of all clients in the realm."
+   ],
+   "https://github.com/keycloak/keycloak/pull/37038": [
+    "In `UsersResource.java`, the `searchForUser` method removes the `.filter(usersEvaluator::canView)` call from the user stream. This is a security defect because the stream of users from `searchForUserStream` is no longer being checked against fine-grained permissions for each user, which could expose user data that the administrator should not be able to see if the underlying storage search is not exhaustive in its filtering.",
+    "In `GroupPermissionsV2.java`, the `canManage()` method incorrectly returns true if the user has the `VIEW` scope on all groups; it should only grant this capability for the `MANAGE` scope.",
+    "In `GroupPermissionsV2.java`, the `getGroupIdsWithViewPermission` method incorrectly uses `groupResource.getId()` when calling `hasPermission`. This passes the resource's internal ID instead of its name (which is the group ID), causing permission checks to fall back to evaluating 'all-groups' permissions instead of permissions for the specific group.",
+    "In `GroupPermissionsV2.java`, `getGroupIdsWithViewPermission` adds `groupResource.getId()` to the returned set of group IDs. This is incorrect as `groupResource.getId()` is the resource's internal authorization store ID, not the group's ID. It should add `groupResource.getName()`."
+   ],
+   "https://github.com/keycloak/keycloak/pull/37429": [
+    "In `themes/src/main/resources-community/theme/base/account/messages/messages_lt.properties`, the value for the `totpStep1` key is in Italian, not Lithuanian.",
+    "In `themes/src/main/resources-community/theme/base/login/messages/messages_lt.properties`, the value for the `loginTotpStep1` key is in Italian, not Lithuanian.",
+    "In `themes/src/main/resources-community/theme/base/account/messages/messages_zh_CN.properties`, the new value for `totpStep1` uses Traditional Chinese characters (`\u61c9\u7528\u7a0b\u5f0f`) in a Simplified Chinese (`zh_CN`) file.",
+    "In `VerifyMessageProperties.java`, the `verifySafeHtml` method throws a `RuntimeException` if it cannot open a properties file (e.g., a missing English reference file), which will crash the build instead of reporting a verification error.",
+    "The `santizeAnchors` method in `VerifyMessageProperties.java` has a logic error; it assumes that anchor tags appear in the same order in both the English and translated strings, which will incorrectly reject valid translations where sentence structure is different.",
+    "The `santizeAnchors` method in `VerifyMessageProperties.java` uses `String.replaceFirst` to modify the string being iterated over by a `Matcher`. This is a bug that will cause incorrect behavior if a message contains multiple identical anchor tags, as it will always replace the first occurrence.",
+    "The logic to find the English resource file in `VerifyMessageProperties.java` by replacing `resources-community` with `resources` in the path is brittle and will cause the build to fail if the base English file is also in a `resources-community` directory.",
+    "The regex `CLAIM\\\\.<[A-Z]*>` in `normalizeValue` for the `templateHelp` key is incorrect as it does not match the documented format `CLAIM.<NAME>` or the example `CLAIM.sub`, which will lead to false-positive HTML validation errors.",
+    "In `VerifyMessageProperties.java`, the code explicitly removes `<!-- -->` which the comment states is added by the sanitizer for double curly braces. This masks a signal from the sanitizer and could hide template injection or other issues.",
+    "In `themes/src/main/resources-community/theme/base/login/messages/messages_sk.properties`, the `error-invalid-multivalued-size` message incorrectly uses parameter index `1` in the choice format for the third placeholder (`{2}`), which is a copy-paste error from the second placeholder."
+   ],
+   "https://github.com/keycloak/keycloak/pull/37634": [
+    "In `AccessTokenContext`, the constructor incorrectly performs a null check on `grantType` a second time with an error message for `rawTokenId`, instead of checking `rawTokenId` itself, which could lead to a `NullPointerException` if a null `rawTokenId` is passed.",
+    "In `DefaultTokenContextEncoderProviderFactory`, the lazy-loading of grant type shortcuts for hot-deployed providers is not thread-safe. If two providers with the same shortcut are deployed, a race condition can cause one mapping to overwrite the other, leading to incorrect grant type resolution when decoding token IDs.",
+    "In `AssertEvents.java`, the `isAccessTokenId` matcher is incorrect: it uses `substring(3, 5)` instead of `substring(4, 6)` to extract the grant type shortcut, and the conditional logic is inverted, causing the test to fail on a correct match instead of an incorrect one."
+   ],
+   "https://github.com/keycloak/keycloak/pull/38446": [
+    "In `RecoveryAuthnCodeInputLoginBean`, the constructor calls `credentialModelOpt.get()` without an `isPresent()` check, which will cause a `NoSuchElementException` if a user without recovery codes somehow reaches this step.",
+    "In `RecoveryAuthnCodeInputLoginBean`, the constructor calls `.get()` on the result of `getNextRecoveryAuthnCode()`, which will cause a `NoSuchElementException` if the credential exists but has no remaining codes.",
+    "In `CredentialHelper.createRecoveryCodesCredential`, the `recoveryCodeCredentialProvider` is fetched but not checked for null before being used in the `else` block, which will cause a `NullPointerException` if the provider is not found.",
+    "In `BackwardsCompatibilityUserStorage.updateCredential`, the logic for `input instanceof UserCredentialModel` returns `false` for recovery code credentials, preventing them from being created in the user storage provider and causing the feature's tests to fail.",
+    "In `BackwardsCompatibilityUserStorage.updateCredential`, when updating a recovery code credential after use, `input.getChallengeResponse()` is called on a `RecoveryAuthnCodesCredentialModel`, which returns null and erases the stored codes.",
+    "In `BackwardsCompatibilityUserStorage.getCredentials`, the returned `RecoveryAuthnCodesCredentialModel` is created without preserving the ID from the stored `myUser.recoveryCodes` credential, which will cause management operations like deletion to fail."
+   ],
+   "https://github.com/keycloak/keycloak/pull/40940": [
+    "The new test `createMultiDeleteMultiReadMulti` has a race condition because the main thread does not wait for the background reader thread to finish before checking for exceptions, which can cause the test to pass incorrectly."
+   ],
+   "https://github.com/ai-code-review-evaluation/sentry-greptile/pull/1": [
+    "The change attempts to use negative offsets in queryset slicing in both `DateTimePaginator` and `OptimizedCursorPaginator`, but the Django ORM does not support negative indexing for querysets and will raise an `AssertionError`.",
+    "`OptimizedCursorPaginator` will fail with an `AttributeError` because it calls `self.build_queryset`, a method that is not defined on its base class `BasePaginator`.",
+    "In `OptimizedCursorPaginator`, the check `if cursor.value:` incorrectly treats a valid cursor value of `0` as an empty value, which will lead to incorrect query filtering.",
+    "The logic to trim results for reverse pagination in `OptimizedCursorPaginator` is invalid when a negative offset is used, as the condition `len(results) == offset + limit + extra` relies on the assumption that `offset` is non-negative."
+   ],
+   "https://github.com/ai-code-review-evaluation/sentry-greptile/pull/2": [
+    "In `add-buffer.lua`, the newly added eviction logic (`zpopmin`) can cause data loss when running concurrently with the flushing process in `_load_segment_data`.",
+    "In `factory.py`, accessing `val[\"end_timestamp_precise\"]` will raise a `KeyError` if the field is missing from the message payload, which can crash the consumer and is not robust against older message formats or data inconsistencies.",
+    "In `buffer.py`, the removal of the `max_segment_spans` check in `_load_segment_data` could lead to processing segments that are larger than previously allowed limits, potentially causing memory or performance issues in downstream systems."
+   ],
+   "https://github.com/ai-code-review-evaluation/sentry-greptile/pull/3": [
+    "In `_is_error_focused_query`, checking for the substring `event.type:error` is not a reliable way to determine if a query is exclusively for errors, which can lead to incorrect upsampling on mixed-event queries.",
+    "The `transform_query_columns_for_error_upsampling` function only transforms `count()` and does not handle other count aggregations like `count(column)`, which will result in those counts not being upsampled and producing misleading data.",
+    "The `_set_sample_rate_from_error_sampling` function uses overly broad `except Exception: pass` blocks, which can silently swallow important errors and make debugging difficult."
+   ],
+   "https://github.com/getsentry/sentry/pull/67876": [
+    "In `GitHubInstallation.dispatch`, the security check that compares the authenticated user with the app installer is bypassed if the `installation.created` webhook has not yet been processed, creating a race condition that defeats the security enhancement.",
+    "The code accesses `integration.metadata[\"sender\"][\"login\"]` without validating the existence of these keys, which could lead to an unhandled `KeyError` and a 500 error if the webhook payload from GitHub is missing this information.",
+    "In `OAuthLoginView.dispatch`, a broad `except Exception` is used when parsing the access token response from GitHub, which masks the specific cause of failures and hinders debugging."
+   ],
+   "https://github.com/ai-code-review-evaluation/sentry-greptile/pull/5": [
+    "In `github/integration.py` and `gitlab/integration.py`, `self.get_merged_pr_single_issue_template` is called on an instance of `...PRCommentWorkflow`, but this method does not exist on that class or its parents, which will cause a runtime `AttributeError`.",
+    "In `browser_reporting_collector.py`, the `BrowserReportSerializer` does not validate for the presence of at least one of `age` or `timestamp`, allowing reports that are missing both to be considered valid, which likely violates the Reporting API specification.",
+    "In `browser_reporting_collector.py`, the endpoint rejects an entire batch of reports if a single report fails validation, which contradicts the Reporting API specification's recommendation to process the valid reports in a batch.",
+    "In `organization_preprod_artifact_assemble.py`, the `preprod_artifact.api.assemble` analytics event is recorded before the feature flag is checked, causing events to be tracked for organizations that do not have the feature enabled.",
+    "In `project_replay_summarize_breadcrumbs.py`, the `fetch_error_details` function incorrectly uses `zip(error_ids, events.values())`, which assumes a specific ordering of dictionary values that is not guaranteed, leading to error details being associated with the wrong error IDs.",
+    "In `widgetCard/chart.tsx`, when the `use-table-widget-visualization` feature flag is on, the `TableWidgetVisualization` component is always rendered with hardcoded empty data instead of the actual data from the query result."
+   ],
+   "https://github.com/getsentry/sentry/pull/93824": [
+    "In the `SpanFlusher` constructor, a `max_processes` value of `0` is incorrectly handled as it falls through the `or` condition, resulting in the number of processes defaulting to the number of assigned shards instead of zero.",
+    "In `SpanFlusher`, if `num_processes` is zero but there are assigned shards, the shard distribution logic `i % self.num_processes` will raise a `ZeroDivisionError`.",
+    "The `join` method in `SpanFlusher` incorrectly handles timeouts when multiple processes are running; if the timeout expires, it breaks out of the main loop, failing to join or terminate any subsequent processes and causing them to be leaked.",
+    "The `join` method in `SpanFlusher` does not correctly budget the timeout, as it passes the original timeout to `self.next_step.join()` and then reuses the original deadline for joining its own processes, meaning `next_step` can consume the entire timeout leaving no time for flushing.",
+    "The metric `spans.buffer.flusher.wait_produce` is emitted with a tag key `shards`, which is inconsistent with other metrics in the same function that use the tag key `shard` for the same data, complicating metric queries.",
+    "The method `_create_process_for_shard` is defined but never used, making it dead code."
+   ],
+   "https://github.com/getsentry/sentry/pull/77754": [
+    "The `queued` field in `AssignmentSource` uses a default value that is evaluated at module load time, not at instantiation, resulting in stale timestamps.",
+    "`AssignmentSource.to_dict` returns a dictionary containing a `datetime` object, which is not JSON-serializable and will cause background task scheduling to fail.",
+    "The `from_dict` method in `AssignmentSource` does not handle deserializing a string representation of a `datetime`, which is necessary to complement a serializable `to_dict` method.",
+    "The sync cycle prevention mechanism is not implemented for status updates, as no call sites for `sync_status_outbound` are updated to pass the new `assignment_source` parameter."
+   ],
+   "https://github.com/getsentry/sentry/pull/80528": [
+    "In `get_monitor_environment_context`, a copy of the monitor config is modified, but the original `monitor_environment.monitor.config` is returned, so the modifications are lost.",
+    "In `try_incident_threshold`, when a monitor first enters a failed state with a `failure_issue_threshold` greater than one, a loop creates an issue occurrence for every check-in in the failure sequence, which will likely generate multiple redundant alerts for a single incident.",
+    "The `try_incident_threshold` function checks and updates `monitor_env.status` without acquiring a lock, which creates a race condition where concurrent processing of failed check-ins could lead to incorrect state transitions or multiple attempts to create an incident."
+   ],
+   "https://github.com/getsentry/sentry/pull/95633": [
+    "The worker shutdown mechanism in `FixedQueuePool` is broken because it attempts to call a non-existent `shutdown` method on `queue.Queue` objects.",
+    "Worker threads in `OrderedQueueWorker` will not terminate if they are blocked waiting for items on an empty queue, as there is no mechanism to unblock the `work_queue.get()` call during shutdown.",
+    "The `OrderedQueueWorker`'s `run` method attempts to catch a `queue.ShutDown` exception, which does not exist in the standard `queue` module, indicating a flawed shutdown design.",
+    "The `test_thread_queue_parallel_error_handling` test incorrectly asserts that no offsets are committed after a processing error, contradicting the implementation's design which completes offsets even on failure to prevent blocking."
+   ],
+   "https://github.com/getsentry/sentry/pull/80168": [
+    "In `StatefulDetectorHandler.evaluate_group_key_value`, `PriorityLevel(new_status)` will raise a `ValueError` because the integer values of `DetectorPriorityLevel` do not correspond to valid `PriorityLevel` enum members.",
+    "The `MetricAlertDetectorHandler` class in `sentry/incidents/grouptype.py` is not a concrete implementation because it fails to implement the abstract methods `get_group_key_values` and `build_occurrence_and_event_data` inherited from `StatefulDetectorHandler`."
+   ]
+  }
+ },
+ "A1_ABSTAIN": {
+  "tp": 30,
+  "n": 59,
+  "prs": 49,
+  "errors": 1,
+  "precision": 0.5084745762711864,
+  "tp_per_pr": 0.6122448979591837,
+  "fp_per_tp": 0.9666666666666667,
+  "candidates": {
+   "https://github.com/calcom/cal.com/pull/8087": [
+    "In `packages/app-store/vital/lib/reschedule.ts`, `packages/app-store/wipemycalother/lib/reschedule.ts`, `packages/features/bookings/lib/handleCancelBooking.ts`, and `packages/trpc/server/routers/viewer/bookings.tsx`, `forEach` is used with an `async` callback, but `forEach` does not await the promises returned by the callback, creating a race condition where the function may return before the asynchronous operations complete."
+   ],
+   "https://github.com/calcom/cal.com/pull/10600": [
+    "The process of invalidating a used backup code during login is susceptible to a race condition, which could allow a single backup code to be used multiple times."
+   ],
+   "https://github.com/calcom/cal.com/pull/10967": [
+    "In `packages/core/EventManager.ts`, if an event has no destination calendar, accessing `mainHostDestinationCalendar.integration` will throw a `TypeError` because `mainHostDestinationCalendar` will be `undefined`."
+   ],
+   "https://github.com/calcom/cal.com/pull/22345": [
+    "The `options` property is typed as nullable and is checked for null, but the constructor always initializes it to a non-null value, which makes the null-check dead code and the type definition misleading."
+   ],
+   "https://github.com/calcom/cal.com/pull/7232": [
+    "Asynchronous reminder cancellation functions are called within `forEach` loops without being awaited across multiple files (e.g., `handleCancelBooking.ts`, `handleNewBooking.ts`, `viewer/workflows.tsx`). This fire-and-forget pattern means the parent function will not wait for the cleanup to complete, and any errors during cancellation will be unhandled, leading to silent failures and inconsistent data."
+   ],
+   "https://github.com/calcom/cal.com/pull/8330": [
+    "In `checkIfIsAvailable`, the logic to determine if a slot is on the same day as a date override is flawed because it compares the date portion of UTC timestamps, which will be incorrect for slots that are in the evening for many timezones, as they will fall on the next day in UTC."
+   ],
+   "https://github.com/calcom/cal.com/pull/11059": [
+    "The webhook secret comparison in `apps/web/pages/api/webhook/app-credential.ts` uses a standard string comparison (`!==`), which is not constant-time and therefore vulnerable to timing attacks.",
+    "The `refreshOAuthTokens` function returns a `fetch` `Response` object when credential sync is enabled, but returns the result of `refreshFunction` otherwise, which can be an `axios` response or a raw object, causing runtime crashes in integrations like Google Calendar and Zoho that expect a specific object shape.",
+    "The `parseRefreshTokenResponse` function injects a hardcoded invalid value `\"refresh_token\"` for the refresh token if one is not present in the response, which will corrupt the stored credential by overwriting a valid refresh token that many OAuth providers do not include in refresh responses.",
+    "The instructions for generating `CALCOM_APP_CREDENTIAL_ENCRYPTION_KEY` in `.env.example` are incorrect; `openssl rand -base64 24` generates a 24-byte key, but AES-256 requires a 32-byte key, which will cause the application to fail at runtime."
+   ],
+   "https://github.com/calcom/cal.com/pull/14943": [
+    "The `deleteMany` query will delete any `WorkflowReminder` with `retryCount > 1`, not just SMS reminders, because the second part of the `OR` condition is missing the `method: WorkflowMethods.SMS` filter."
+   ],
+   "https://github.com/calcom/cal.com/pull/14740": [
+    "The `addGuests` handler has a race condition that can cause attendees to be lost from an external calendar event. If two requests to add guests to the same booking run concurrently, their updates to the external calendar can overwrite each other, as the attendee list is read at the beginning of the request and the external calendar is updated at the end without any locking."
+   ],
+   "https://github.com/calcom/cal.com/pull/22532": [
+    "In `CalendarService.ts`, the call to `updateManyByCredentialId` with an empty data object is a no-op and will not update the `updatedAt` timestamp on `SelectedCalendar` records, because Prisma's `updateMany` does not automatically update `@updatedAt` fields."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/1": [
+    "The image downsizing loop in `uploads_controller.rb` modifies a tempfile in-place without checking for errors from `OptimizedImage.downsize`, which can lead to corrupted or empty files being processed for upload if image conversion fails."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/2": [
+    "In `TopicsController#unsubscribe`, the code does not handle the case where a `TopicUser` record does not yet exist for the user and topic, which will cause a crash when `notification_level` is called on the `nil` result of `TopicUser.find_by`."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/3": [
+    "The `match_count` increment in `BlockedEmail.should_block?` is not atomic, which will cause lost updates and an incorrect count under concurrent requests due to a race condition."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/4": [
+    "In `app/jobs/scheduled/poll_feed.rb`, the `open` method is called with `SiteSetting.feed_polling_url`, which is a user-configurable setting. This allows an administrator to provide a `file://` path to read local files from the server, or a pipe (`|`) to execute arbitrary shell commands, leading to a remote code execution vulnerability."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/5": [
+    "The new `order` mixin incorrectly calculates the value for `-webkit-box-ordinal-group`, which will cause incorrect ordering on older WebKit-based browsers for items with `order: 1`."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/6": [
+    "The parent domain check can be fooled by TLDs, causing the full path to be displayed when it should not; for an instance at `forum.example.com` and a user website of `http://com/foo`, the logic incorrectly treats `.com` as a parent domain and displays `com/foo` instead of just `com`."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/7": [
+    "In `desktop/topic-post.scss`, the light theme color for `.replies .reply-info a` has been changed from a lightness of 30% to 70%, which is an unintended regression; the lightness values for the light and dark themes appear to have been swapped."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/8": [
+    "The `create` action in `Admin::GroupsController` does not handle the `alias_level` parameter, so this setting is silently ignored when a new group is created."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/9": [
+    "The custom fallback logic in `FallbackLocaleList` incorrectly allows the English locale to fall back to another language, which can result in showing text in an unexpected language to users who have selected English."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/10": [
+    "The migration in `db/migrate/20150818190757_create_embeddable_hosts.rb` is vulnerable to SQL injection because it interpolates a host name from a site setting directly into an SQL string, allowing a malicious administrator to execute arbitrary SQL.",
+    "In `Admin::EmbeddableHostsController`, the `update` and `destroy` actions will raise a `NoMethodError` if an invalid ID is provided, because they use `where(...).first` to find a record and do not handle the case where no record is found."
+   ],
+   "https://github.com/grafana/grafana/pull/79265": [
+    "In `CreateOrUpdateDevice`, the check for the number of devices and the subsequent insertion of a new device are not performed atomically. This creates a race condition where multiple concurrent requests can observe the count to be below the limit, and then all proceed to insert a new device, causing the total number of devices to exceed the configured limit."
+   ],
+   "https://github.com/grafana/grafana/pull/103633": [
+    "In the `Check` method, if a permission check against the `permCache` results in a denial, the code proceeds to re-fetch permissions from the database instead of returning the denial. This negates the performance benefit of caching for authorization denials and is inconsistent with the caching logic in the `List` method, which correctly trusts the cache. The cache entry should be considered authoritative for its TTL for both grants and denials."
+   ],
+   "https://github.com/grafana/grafana/pull/76186": [
+    "The new `ContextualLoggerMiddleware` does not add contextual information to the context for stream requests (`SubscribeStream`, `PublishStream`, `RunStream`), which means logs generated during these requests will lack important context like the plugin ID."
+   ],
+   "https://github.com/grafana/grafana/pull/107534": [
+    "In both `querySplitting.ts` and `shardQuerySplitting.ts`, queries are filtered for having a non-empty expression before template variables are applied. This can lead to processing queries with empty expressions if a variable resolves to an empty string, whereas previously such queries would have been filtered out."
+   ],
+   "https://github.com/grafana/grafana/pull/106778": [
+    "The `GrafanaGroupLoader` component no longer shows if a rule is in a \"Creating\" or \"Deleting\" state because it no longer fetches data from the ruler API to compare against the Prometheus API. This is a regression, as users will not get feedback on transient rule states and may see a rule that is being deleted as a normal rule, or not see a rule that is being created at all."
+   ],
+   "https://github.com/grafana/grafana/pull/90045": [
+    "In `Delete`, `recordStorageDuration` is called with the object `name` as the `kind` label. This creates a new time series for every object deletion, which will cause a high cardinality problem for the metrics system. `options.Kind` should be used instead."
+   ],
+   "https://github.com/grafana/grafana/pull/80329": [
+    "Informational messages in the annotation cleanup logic are logged at the ERROR level, which is incorrect and will generate distracting noise in error-monitoring systems."
+   ],
+   "https://github.com/grafana/grafana/pull/90939": [
+    "The double-checked locking pattern is incorrect: after acquiring the write lock, the code does not check again if the cache has been populated by another goroutine, which can lead to redundant, expensive work."
+   ],
+   "https://github.com/grafana/grafana/pull/94942": [
+    "The `enableSqlExpressions` function always returns `false`, which causes the SQL expression feature to be permanently disabled and always return an error, regardless of the feature flag's value."
+   ],
+   "https://github.com/grafana/grafana/pull/97529": [
+    "In `pkg/storage/unified/search/bleve.go`, moving the lock in `BuildIndex` to only cover the cache write introduces a race condition. If multiple goroutines call `BuildIndex` for the same key concurrently, they will all perform the expensive index-building process simultaneously, with all but one doing redundant work. The lock should be used to ensure that only one build operation is in flight for a given key."
+   ],
+   "https://github.com/ai-code-review-evaluation/keycloak-greptile/pull/1": [
+    "In `passkeys.ftl`, the newly added `authn_select` form is generated inside an `<#if authenticators??>` block. However, the `authenticators` variable is only set for non-resident key selection, while this template is included only when conditional UI is enabled, which is a mutually exclusive scenario. This makes the new form unreachable dead code. If it were to become reachable, it would be buggy as it creates multiple hidden inputs with the same name (`authn_use_chk`), leading to ambiguous form submissions."
+   ],
+   "https://github.com/keycloak/keycloak/pull/32918": [
+    "In `InfinispanIdentityProviderStorageProvider.getForLogin`, when a cache entry for a `fetchMode` exists but does not contain results for the specific `organizationId` being requested, the entire cache entry is invalidated with `cache.invalidateObject(cacheKey)`. This is incorrect and inefficient as it discards cached results for all other `organizationId`s, defeating the purpose of `IdentityProviderListQuery` holding multiple search results. The correct behavior, as seen in the `getByOrganization` method in the same class, is to add the new results to the existing cached object without invalidation."
+   ],
+   "https://github.com/keycloak/keycloak/pull/33832": [
+    "The static `AuthzClient.create` method unconditionally initializes the global `CryptoIntegration` singleton. If an application using this library calls this method before its own crypto initialization, the global crypto provider may be permanently set to the minimal `AuthzClientCryptoProvider`, causing any subsequent attempt by the application to use a more complete crypto provider to fail."
+   ],
+   "https://github.com/keycloak/keycloak/pull/36882": [
+    "In `UpdateCommandDistTest.java`, the test `testMissingOptionOnSave` incorrectly asserts that an error message is not present, when the command is expected to fail because a required option is missing."
+   ],
+   "https://github.com/keycloak/keycloak/pull/36880": [
+    "In `ClientPermissionsV2.java`, the `hasPermission(ClientModel client, String scope)` method's permission checking logic is flawed because it does not combine permissions from the specific client resource with permissions from the general 'all clients' resource, which will lead to incorrect denials when permissions are set at both levels."
+   ],
+   "https://github.com/keycloak/keycloak/pull/37429": [
+    "The `santizeAnchors` method incorrectly requires `<a>` tags in a translated message to appear in the same order as in the English source, which will reject valid translations where phrases containing links are reordered by the translator.",
+    "The `containsHtml` method uses a case-sensitive regex to detect HTML tags, which will fail to identify tags written in uppercase or mixed case (e.g., `<P>`) and cause the sanitizer to incorrectly reject translations that use the lowercase equivalent.",
+    "In `themes/src/main/resources-community/theme/base/account/messages/messages_lt.properties` and `themes/src/main/resources-community/theme/base/login/messages/messages_lt.properties`, the Lithuanian translations for `totpStep1` and `loginTotpStep1` have been replaced with Italian text."
+   ],
+   "https://github.com/keycloak/keycloak/pull/37634": [
+    "In `DefaultTokenContextEncoderProviderFactory`, the `grantsByShortcuts` and `grantsToShortcuts` maps are updated non-atomically when dynamically loading a new grant type provider, creating a race condition that can lead to an inconsistent state between the two maps.",
+    "In the `AccessTokenContext` constructor, a `requireNonNull` check for `rawTokenId` was likely copy-pasted and incorrectly checks `grantType` instead, preventing null-checks on `rawTokenId`.",
+    "The `isAccessTokenId` matcher in `AssertEvents` uses incorrect substring indices and inverted logic to check the grant type shortcut, causing tests to not validate the token ID format correctly."
+   ],
+   "https://github.com/keycloak/keycloak/pull/38446": [
+    "In `CredentialHelper.createRecoveryCodesCredential`, the `UserCredentialModel` for the user storage provider is created by serializing `generatedCodes`, which is a list of raw recovery codes. This results in storing raw secrets in the user storage, which is a security vulnerability. This method should instead serialize `credentialModel.getRecoveryAuthnCodeData()`, which contains hashed codes, to be consistent with how credentials are created for local storage."
+   ],
+   "https://github.com/keycloak/keycloak/pull/40940": [
+    "The new test `createMultiDeleteMultiReadMulti` has a race condition where the main thread does not wait for the background reader thread to terminate before asserting that no exceptions were caught, which can lead to a flaky test that might not detect the bug it is intended to."
+   ],
+   "https://github.com/ai-code-review-evaluation/sentry-greptile/pull/1": [
+    "The code attempts to slice a Django queryset using a negative start index in `paginator.py`, which is not supported by the ORM and will raise an `AssertionError`."
+   ],
+   "https://github.com/ai-code-review-evaluation/sentry-greptile/pull/2": [
+    "The `zunionstore` calls in the Lua script do not specify an aggregation strategy, causing Redis to default to `SUM`, which will incorrectly sum timestamps for any spans that exist in both sets being merged."
+   ],
+   "https://github.com/ai-code-review-evaluation/sentry-greptile/pull/3": [
+    "The function `_is_error_focused_query` incorrectly identifies error queries using a simple substring check, which fails for negative or complex queries."
+   ],
+   "https://github.com/getsentry/sentry/pull/67876": [],
+   "https://github.com/ai-code-review-evaluation/sentry-greptile/pull/5": [
+    "In `get_merged_pr_single_issue_template`, `PRCommentWorkflow` is used but it is not defined or imported in `src/sentry/integrations/source_code_management/commit_context.py`, which will cause a `NameError` at runtime.",
+    "The new `TableWidgetVisualization` component is being passed hardcoded empty data, which means it will render an empty table when the `use-table-widget-visualization` feature flag is enabled.",
+    "In `browser_reporting_collector.py`, the `BrowserReportSerializer` allows both `age` and `timestamp` to be missing from a report, but at least one should be present according to the Reporting API specification."
+   ],
+   "https://github.com/getsentry/sentry/pull/93824": [
+    "In multiprocessing mode, the `SpansBuffer` object is passed to the new process, which will fail with a `PicklingError` because it contains a non-pickleable Redis client instance, preventing the flusher processes from starting.",
+    "The `join` method's timeout logic is flawed; it breaks out of the loop that iterates over all processes if the timeout is exceeded while waiting for one process, leaving subsequent processes orphaned instead of attempting to join or terminate them."
+   ],
+   "https://github.com/getsentry/sentry/pull/77754": [
+    "The `AssignmentSource.from_dict` method does not deserialize the `queued` field from a string back into a `datetime` object. After being passed to a Celery task, this field will be a string, but the `from_dict` method will assign it to the `queued` attribute without conversion, creating an object with an incorrect type that will fail if used as a datetime."
+   ],
+   "https://github.com/getsentry/sentry/pull/80528": [
+    "In `sentry.monitors.logic.incidents.try_incident_threshold`, when a monitor first meets its failure threshold, an issue occurrence is created for each of the consecutive failing check-ins, but for subsequent failures on an already-failed monitor, only a single occurrence is created, leading to inconsistent behavior."
+   ],
+   "https://github.com/getsentry/sentry/pull/95633": [
+    "The `FixedQueuePool` shutdown logic is incorrect because it calls a non-existent `shutdown` method on a standard `queue.Queue` object and workers try to catch a non-existent `queue.ShutDown` exception, which will cause worker threads to hang indefinitely during shutdown."
+   ],
+   "https://github.com/getsentry/sentry/pull/80168": [
+    "In `evaluate_group_key_value`, `PriorityLevel(new_status)` will raise a `ValueError` because the integer values of `DetectorPriorityLevel` do not correspond to any members of `PriorityLevel`. A mapping between the two enum types is required before creating the `PriorityLevel` instance."
+   ]
+  }
+ },
+ "A2_AIM": {
+  "tp": 88,
+  "n": 185,
+  "prs": 50,
+  "errors": 0,
+  "precision": 0.4756756756756757,
+  "tp_per_pr": 1.76,
+  "fp_per_tp": 1.1022727272727273,
+  "candidates": {
+   "https://github.com/calcom/cal.com/pull/8087": [
+    "In `packages/app-store/vital/lib/reschedule.ts`, `forEach` is called with an `async` function. `forEach` does not wait for promises returned by its callback, so the `deleteEvent` and `deleteMeeting` operations will not be awaited, and any errors they throw will be unhandled.",
+    "In `packages/app-store/wipemycalother/lib/reschedule.ts`, `forEach` is called with an `async` function. `forEach` does not wait for promises returned by its callback, so the `deleteEvent` and `deleteMeeting` operations will not be awaited, and any errors they throw will be unhandled.",
+    "In `packages/features/bookings/lib/handleCancelBooking.ts` at line 461, `forEach` is used with an `async` callback. The loop will not wait for the `updateEvent` calls within it to complete, leading to a race condition where the function may proceed before events are actually updated in the calendar.",
+    "In `packages/trpc/server/routers/viewer/bookings.tsx`, `forEach` is called with an `async` function to delete booking references. `forEach` does not wait for the promises to resolve, meaning the `deleteEvent` and `deleteMeeting` operations will not be awaited, and any potential errors will be unhandled."
+   ],
+   "https://github.com/calcom/cal.com/pull/10600": [
+    "In `next-auth-options.ts`, the read-modify-write logic for consuming a backup code is subject to a race condition, which could allow a backup code to be reused.",
+    "In `EnableTwoFactorModal.tsx`, a memory leak occurs because `URL.createObjectURL` is called to generate a download link for backup codes, but `URL.revokeObjectURL` is not called when the component unmounts.",
+    "In `BackupCode.tsx`, the `minLength` and `maxLength` validation for the backup code input is flawed because it doesn't account for the optional hyphen, allowing a user to submit a value like '12345-6789' which has a length of 10 but will be processed on the backend as a 9-character code and fail.",
+    "In `next-auth-options.ts`, when a user uses their last available backup code, the array of codes becomes filled with `null` values, but subsequent login attempts with an invalid code will result in an 'Incorrect backup code' error instead of a more informative error that all codes have been used."
+   ],
+   "https://github.com/calcom/cal.com/pull/10967": [
+    "In `packages/core/EventManager.ts`, `mainHostDestinationCalendar.integration` is accessed without a null check, which will throw a `TypeError` if `evt.destinationCalendar` is null or empty.",
+    "In `packages/features/bookings/lib/handleNewBooking.ts`, `evt.destinationCalendar.push` is called, but `evt.destinationCalendar` can be `null` from a prior assignment, which will throw a `TypeError`.",
+    "In `packages/features/bookings/lib/handleNewBooking.ts`, when creating a booking in the database, only the first destination calendar is connected, causing data loss for all other hosts in a collective event.",
+    "In `packages/app-store/googlecalendar/lib/CalendarService.ts`, the logic in `updateEvent` to find the selected calendar is flawed when `externalCalendarId` is falsy, which will prevent event updates from succeeding.",
+    "In `packages/app-store/googlecalendar/lib/CalendarService.ts`, the logic in `deleteEvent` to find the calendar ID is flawed when `externalCalendarId` is falsy, which will prevent event deletions from succeeding.",
+    "In `packages/types/Calendar.d.ts`, the `updateEvent` and `deleteEvent` methods on the `Calendar` interface were not updated to accept a `credentialId`, which is required for implementations to correctly select a calendar when multiple are available.",
+    "In `packages/core/EventManager.ts`, if a destination calendar in `createAllCalendarEvents` lacks a `credentialId`, the system will create an event on all of a user's calendars for that integration type, leading to unwanted duplicates.",
+    "In `packages/trpc/server/routers/viewer/organizations/create.handler.ts`, the logic for setting the `slug` field during organization creation has been inverted, causing it to be set when `IS_TEAM_BILLING_ENABLED` is true instead of false.",
+    "In `packages/trpc/server/routers/viewer/bookings/requestReschedule.handler.ts`, the fallback to the user's default destination calendar is missing when creating a reschedule event, which is inconsistent with other parts of the application and may cause requests to fail."
+   ],
+   "https://github.com/calcom/cal.com/pull/22345": [],
+   "https://github.com/calcom/cal.com/pull/7232": [
+    "When `deleteScheduledEmailReminder` is called with `immediateDelete: true`, it cancels the scheduled email with the provider but does not delete the `WorkflowReminder` record from the database, leaving orphaned data.",
+    "The deferred email cancellation logic in `scheduleEmailReminders.ts` only processes reminders scheduled to be sent within the next hour, which is fragile; if the job fails to run in that narrow window, an incorrect reminder for a cancelled event will be sent.",
+    "In `scheduleEmailReminders.ts`, a single failed API request to cancel a scheduled email will cause the entire loop to terminate, preventing any subsequent reminders in the batch from being cancelled.",
+    "The logic to cancel reminders for a rescheduled booking is inconsistent: `handleNewBooking.ts` uses immediate cancellation, while the TRPC endpoint in `viewer/bookings.tsx` uses deferred cancellation for the same operation.",
+    "In `deleteScheduledSMSReminder`, if the call to `twilio.cancelSMS` fails, the function exits without deleting the `WorkflowReminder` record, but if the subsequent `prisma.workflowReminder.delete` fails, the function also exits, leaving an inconsistent state where the external job is cancelled but the local record remains.",
+    "In `handleNewBooking.ts`, when cancelling reminders for a rescheduled booking, `deleteScheduledEmailReminder` is called with `immediateDelete: true`, which orphans the database record, whereas `deleteScheduledSMSReminder` correctly deletes its record.",
+    "When a workflow or workflow step is deleted in `trpc/server/routers/viewer/workflows.tsx`, `deleteScheduledEmailReminder` is called with `immediateDelete: true`, which orphans the `WorkflowReminder` database records.",
+    "When a workflow step is edited or event types are removed from a workflow, email reminders are marked for deferred cancellation, while SMS reminders are cancelled and deleted immediately, creating inconsistent behavior between reminder types for the same action.",
+    "In `handleCancelBooking.ts`, email reminders are now marked for deferred cancellation, but SMS reminders are cancelled and deleted immediately, which is an inconsistent handling of a booking cancellation."
+   ],
+   "https://github.com/calcom/cal.com/pull/8330": [
+    "In `checkIfIsAvailable`, if a slot is found to be within a date override's time range, the function immediately returns `true` without checking for busy calendar events, which will lead to offering slots that conflict with existing bookings.",
+    "In `checkIfIsAvailable`, when checking if a slot is within `workingHours`, the slot's end time-of-day is calculated using `slotStartTime` instead of a value derived from `slotEndTime`. This causes the check to incorrectly validate only the slot's start time against the working hours range, not its full duration.",
+    "In `checkIfIsAvailable`, the logic checks against `workingHours` even for dates that have a date override. A slot that should be available due to an override will be incorrectly marked as unavailable if it falls outside the regular working schedule.",
+    "The timezone adjustment for date overrides in `packages/lib/slots.ts` is incorrect. It adds the difference of UTC offsets to a UTC time, which is not a valid method for timezone conversion and will result in the wrong time-of-day being calculated for the override.",
+    "In `checkIfIsAvailable`, two `dayjs` objects are compared using `===`, which will always be false. This prevents the logic from correctly identifying an override where the start and end times are identical.",
+    "In `checkIfIsAvailable`, the logic to determine if a slot is on the same day as a date override is flawed. It manipulates the override's date with an offset before comparing it to the slot's date, which is an incorrect way to handle timezones and will lead to incorrect date matching.",
+    "The date override logic in `packages/lib/slots.ts` uses `override.start.toString()` for date parsing. The format of this string is implementation-dependent and not guaranteed to be parsed correctly, which can lead to errors.",
+    "In `checkIfIsAvailable`, the logic to handle multiple date overrides on the same day is flawed. It uses `find` and returns `false` if the slot is outside the first matching override, failing to check if the slot might be valid under a different override on the same day."
+   ],
+   "https://github.com/calcom/cal.com/pull/11059": [
+    "In `apps/web/pages/api/webhook/app-credential.ts`, the webhook secret is compared using `!==`, which is not a constant-time comparison and is vulnerable to timing attacks.",
+    "In `apps/web/pages/api/webhook/app-credential.ts`, the call to `JSON.parse` on the decrypted keys is not wrapped in a try-catch block, which will cause an unhandled exception and a 500 error if decryption fails or the payload is not valid JSON.",
+    "In `packages/app-store/_utils/oauth/parseRefreshTokenResponse.ts`, if a refresh token is not present in the response, it is hardcoded to the string \"refresh_token\", which will be saved to the database and cause all future token refreshes for that credential to fail.",
+    "The new `refreshOAuthTokens` function returns a raw `fetch` Response object, but callers in `googlecalendar`, `hubspot`, `zoho-bigin`, and `zohocrm` expect a different object structure (e.g., an object with a `.data` property), which will cause runtime TypeErrors.",
+    "In `salesforce/lib/CalendarService.ts`, the token refresh logic is executed on every call to `getCalendar` without first checking if the access token is expired, leading to unnecessary API calls that could cause rate-limiting.",
+    "In `salesforce/lib/CalendarService.ts`, the check `response.statusText !== \"OK\"` to validate the token refresh response is too strict and will reject valid HTTP responses with a 2xx status other than 200.",
+    "In `zoho-bigin/lib/CalendarService.ts`, `refreshOAuthTokens` is called with `credentialId` for the `userId` parameter, but the credential sync endpoint expects a user ID, not a credential ID.",
+    "In `.env.example`, the provided `openssl` command to generate `CALCOM_APP_CREDENTIAL_ENCRYPTION_KEY` produces a 24-byte key, but the comment and AES-256 algorithm require a 32-byte key, which will cause encryption to fail at runtime."
+   ],
+   "https://github.com/calcom/cal.com/pull/14943": [
+    "The `deleteMany` operation will delete any `WorkflowReminder` (including non-SMS reminders) if its `retryCount` is greater than 1, because the `retryCount` check is in an `OR` condition and is not constrained by `method: WorkflowMethods.SMS`.",
+    "The `deleteMany` query's `OR` condition will prematurely delete reminders that have a `retryCount` greater than 1, even if their `scheduledDate` is still in the future, preventing them from ever being sent.",
+    "The `retryCount` is incremented non-atomically via `reminder.retryCount + 1` in both the `else` and `catch` blocks, creating a race condition where concurrent executions will cause the count to be lower than the actual number of failed attempts."
+   ],
+   "https://github.com/calcom/cal.com/pull/14740": [
+    "In `addGuests.handler.ts`, the permission check for team administrators or owners uses a logical AND (`&&`) instead of an OR (`||`), which will always evaluate to false as a user cannot be both an admin and an owner simultaneously for the same team.",
+    "In `addGuests.handler.ts`, if a user attempts to add guests who are all already attendees of the booking, the `uniqueGuests` array becomes empty, and the handler throws a `BAD_REQUEST` error instead of succeeding silently.",
+    "In `addGuests.handler.ts`, the `sendAddGuestsEmails` function is called with the original `guests` input array, which causes existing attendees to incorrectly receive a new booking invitation if their email was included in the input.",
+    "In `AddGuestsDialog.tsx`, an empty email input field causes the entire form submission to fail validation, whereas empty fields should be ignored."
+   ],
+   "https://github.com/calcom/cal.com/pull/22532": [
+    "In `CalendarService.ts`, the call to `SelectedCalendarRepository.updateManyByCredentialId` passes an empty data object `{}`. Since the `SelectedCalendar` model's `updatedAt` field is not automatically updated by Prisma, this call is a no-op and fails to update the timestamp as the comment above it suggests is the intent.",
+    "In `CredentialActionsDropdown.tsx`, the `cacheUpdatedAt` date is formatted using a hardcoded `en-US` locale. This will result in an incorrectly formatted date for users who have selected a different language or locale in the application.",
+    "The migration file `packages/prisma/migrations/20250715160635_add_calendar_cache_updated_at/migration.sql` is dated for the year 2025. This will cause migration tools to apply it out of order relative to any new migrations created before that date, which can lead to schema errors."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/1": [
+    "In `uploads_controller.rb`, if the downsizing loop completes after 5 attempts but the image file is still larger than `max_image_size_kb`, the code proceeds to `Upload.create_for`, which will then fail validation, resulting in a generic error instead of a specific message that downsizing failed.",
+    "In `uploads_controller.rb`, the return value of `OptimizedImage.downsize` is not checked. If the image processing command fails (e.g., for a corrupt image), `downsize` will return `false`, but the loop will continue, pointlessly retrying the failing command on an unchanged file.",
+    "In `app/models/optimized_image.rb`, the signature of `OptimizedImage.downsize` was changed from `(from, to, max_width, max_height, opts={})` to `(from, to, dimensions, opts={})`. This is a breaking change that will cause `ArgumentError` or `NoMethodError` for any other callers in the codebase that use the old signature.",
+    "In `app/assets/javascripts/discourse/lib/utilities.js`, the client-side file size check is hardcoded to 10MB for all uploads. This breaks validation for non-image attachments, as they will bypass the client-side check against `max_attachment_size_kb` and be rejected by the server only after the user has waited for the upload to complete.",
+    "In `app/assets/javascripts/discourse/lib/utilities.js`, the error message for a 413 (Entity Too Large) response hardcodes the file size limit to 10MB. This is misleading because the 413 error is generated by the web server, which may have a different limit configured.",
+    "In `app/controllers/uploads_controller.rb`, the size limit for downloading an image from a URL via the API is hardcoded to 10 megabytes, replacing the configurable `SiteSetting.max_image_size_kb` and preventing administrators from allowing larger images to be downloaded for downsizing."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/2": [
+    "In `TopicsController#unsubscribe`, the action will crash for a logged-out user because `ensure_logged_in` is skipped, but the code proceeds to call `current_user.id` which raises a `NoMethodError` on `nil`.",
+    "In `TopicsController#unsubscribe`, the action will crash if a `TopicUser` record does not exist for the user and topic, because `TopicUser.find_by` will return `nil` and the subsequent access to `tu.notification_level` will raise a `NoMethodError`.",
+    "In `TopicsController#unsubscribe`, the action will crash if a `TopicUser` record exists but has a `nil` `notification_level`, because comparing `nil` with an integer using `>` raises an `ArgumentError`."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/3": [
+    "The `match_count` update in `BlockedEmail.should_block?` uses a non-atomic read-modify-write pattern, which will result in an incorrect count under concurrent registration attempts with the same blocked email.",
+    "The email lookup in `BlockedEmail.should_block?` is case-sensitive, allowing the block to be bypassed by changing the case of characters in the email address (e.g., `Blocked@example.com` instead of `blocked@example.com`).",
+    "The update to `match_count` in `BlockedEmail.should_block?` occurs inside the main user creation transaction, so if user creation fails for an unrelated reason (e.g., invalid username), the update to `match_count` is rolled back and the attempt is not logged.",
+    "The client-side logic in `create_account_controller.js` adds an email to `rejectedEmails` for any server-side email error, causing a generic 'invalid' message on subsequent attempts, which incorrectly overrides more specific errors like 'email has already been taken'."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/4": [
+    "In `app/assets/javascripts/embed.js`, the origin check for `postMessage` uses `indexOf`, which is insecure and can be bypassed if an attacker controls a domain that is a substring of the `discourseUrl`.",
+    "In `app/jobs/scheduled/poll_feed.rb`, content from RSS/Atom feeds is not sanitized before being stored with `cook_method: :raw_html`, leading to a stored cross-site scripting (XSS) vulnerability.",
+    "In `app/models/topic_embed.rb`, the `import_remote` method uses `open(url)`, which is vulnerable to Server-Side Request Forgery (SSRF) because it follows redirects to arbitrary schemes like `file://`.",
+    "In `app/jobs/scheduled/poll_feed.rb`, `open(SiteSetting.feed_polling_url)` is used without validating the URL's scheme, making it vulnerable to Local File Inclusion (LFI) or SSRF if an admin sets the URL to a `file://` path or an internal resource.",
+    "In `lib/topic_retriever.rb`, the throttling mechanism in `retrieved_recently?` uses non-atomic `SETNX` and `EXPIRE` commands, which can lead to a permanent lock on a URL if the process fails between the two calls.",
+    "In `lib/topic_retriever.rb`, `perform_retrieve` triggers a poll of the entire RSS feed to find a single URL, which is highly inefficient and will cause significant server load for each new embedded page.",
+    "In `app/models/topic_embed.rb`, the `absolutize_urls` method only handles root-relative URLs (starting with `/`) and fails to convert other relative URLs, which will result in broken links and images.",
+    "In `app/models/topic_embed.rb`, the `import` method embeds a URL in an `<a>` tag without HTML escaping, creating a stored cross-site scripting (XSS) vulnerability.",
+    "In `app/views/embed/loading.html.erb`, the page automatically reloads every 30 seconds, while the background job it triggers is throttled to 60 seconds, causing every other reload to be a no-op that still enqueues a job and creates unnecessary load."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/5": [
+    "In `header.scss`, the entire CSS rule for `.title` is deleted, not just the `float: left` property, which will cause the element to lose all of its styles.",
+    "In `topic-post.scss`, removing the top and bottom padding from `.small-action-desc` will cause its text content to sit flush against the top and bottom of its container, which is a visual regression.",
+    "The new `inline-flex` mixin in `mixins.scss` incorrectly includes `display: -moz-inline-box`, which is not a flexbox property and will cause incorrect rendering in older Firefox browsers that support it.",
+    "The new `order` mixin in `mixins.scss` does not account for the fact that `box-ordinal-group` is 1-based while `order` is 0-based, which will result in different layout ordering in legacy browsers versus modern browsers for some inputs."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/6": [
+    "The logic to detect if the instance is a subdomain of the user's website incorrectly uses `ends_with?`, causing `foobar.com` to be treated as a subdomain of `bar.com`.",
+    "The logic to detect related sibling domains will fail for domains under a public suffix like `.co.uk`, causing it to incorrectly treat `myforum.co.uk` and `anotherblog.co.uk` as related because they both share the `.co.uk` suffix."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/7": [
+    "In `desktop/topic-post.scss`, the color for `.in-reply-to a` in light themes has been unintentionally changed from a lightness of 30% to 70%, which will make the link text significantly lighter and likely reduce readability.",
+    "In `desktop/user.scss`, the color for `.name` in a user card has had its lightness for light themes unintentionally changed from 30% to 50%, making the name appear lighter than before.",
+    "In `mobile/modal.scss`, the color for `.custom-message-length` in light themes has been changed from a lightness of 70% to 30%, which will make the text much darker; the light and dark theme values appear to have been swapped.",
+    "In `mobile/topic-post.scss`, the color for `h3` within `a.star` has had its lightness for light themes unintentionally changed from 20% to 50%, making the header text significantly lighter.",
+    "In `mobile/user.scss`, the color for `.name` in a user card has had its lightness for light themes unintentionally changed from 30% to 50%, making the name appear lighter than before."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/8": [
+    "In `admin/groups_controller.rb`, the `add_members` and `remove_member` actions will fail because they try to read `params.require(:group_id)`, but the corresponding member routes provide the group's ID as `params[:id]`.",
+    "The `totalPages` computed property in `admin-group.js.es6` is calculated incorrectly using `Math.floor(user_count / limit) + 1`. When the number of users is a non-zero multiple of the page size, this calculates one page too many (e.g., 100 users with a limit of 50 results in 3 pages instead of 2).",
+    "Due to the incorrect `totalPages` calculation, the `showingLast` property in `admin-group.js.es6` is false on the actual last page of members. This allows the user to click 'next' and navigate to an empty page of results.",
+    "In `discourse/models/group.js`, the `removeMember` function reloads the current page of members after a deletion. If the user deletes the last member on a page, the view will show an empty list instead of navigating to the previous page, which is confusing.",
+    "In `admin-group.js.es6`, the `addMembers` action does not clear the `usernames` property after successfully adding members. The UI input field remains populated with the names, which could cause the user to add the same members again."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/9": [
+    "The custom fallback logic is a functional regression from standard I18n fallbacks, as it does not correctly handle language variants; for example, a request for 'fr-CA' will no longer fall back to 'fr' and will instead use the site default.",
+    "The `FallbackLocaleList#[]` method is called for every translation miss and executes `SiteSetting.default_locale`, causing a severe performance degradation due to repeated lookups of a site setting in a hot path.",
+    "The `I18n.ensure_loaded!` method in `translate_accelerator.rb` has a race condition where multiple threads can attempt to load the same locale simultaneously because the check for an already-loaded locale and the subsequent load operation are not atomic.",
+    "Replacing `I18n.fallbacks` with a `Hash` subclass breaks the API contract expected by the `i18n` gem; for instance, `I18n.fallbacks.map` will now invoke `Hash#map`, breaking any code that uses it to define fallback rules."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/10": [
+    "In `app/assets/javascripts/admin/components/embeddable-host.js.es6`, the `save` action manually sets the `category` on the model after the save promise resolves. If no category is selected, the server correctly assigns a default, but this client-side code then overwrites the category with `undefined` based on its stale state, causing a UI-server data inconsistency.",
+    "The database migration in `db/migrate/20150818190757_create_embeddable_hosts.rb` will crash with a `NoMethodError` if the `embed_category` site setting is empty or does not correspond to an existing category, as it does not check for an empty result set before accessing `[0]['id']`.",
+    "The database migration in `db/migrate/20150818190757_create_embeddable_hosts.rb` is vulnerable to SQL injection because it inserts hostnames from a site setting directly into a SQL string. This will also cause the migration to fail if a hostname contains a single quote.",
+    "In `app/controllers/admin/embeddable_hosts_controller.rb`, the `update` and `destroy` actions find records using `where(...).first`, which will silently fail to do anything if `params[:id]` is for a record that doesn't exist, instead of raising a `RecordNotFound` error and returning a 404 as is conventional.",
+    "The contents of `spec/fabricators/category_fabricator.rb` and `spec/fabricators/embeddable_host_fabricator.rb` have been swapped. The category fabricator is in the embeddable host file and vice versa, which is incorrect.",
+    "The change to `app/models/topic.rb` makes `expandable_first_post?` return `false` if `has_topic_embed?` is false. This is incorrect because a topic can be embedded without having a `TopicEmbed` record if it was created before embedding was enabled for its host."
+   ],
+   "https://github.com/grafana/grafana/pull/79265": [
+    "In `pkg/services/anonymous/anonimpl/anonstore/database.go`, the `CreateOrUpdateDevice` function contains a race condition that can cause the device limit to be exceeded. The code first counts the number of devices and then, in a separate step, inserts a new device if the count is below the limit. If multiple requests execute concurrently when the device count is near the limit, they may all read the count as being below the limit and proceed to insert new devices, violating the `anonymousDeviceLimit`.",
+    "In `pkg/services/anonymous/anonimpl/client.go`, the call to `TagDevice` within `Authenticate` was changed to be synchronous but the explicit timeout that existed in the previous asynchronous implementation was removed. The new implementation relies solely on the request context for cancellation. If the database is slow and the request context has no deadline, the request can hang indefinitely, which is a regression in resilience and could lead to resource exhaustion."
+   ],
+   "https://github.com/grafana/grafana/pull/103633": [
+    "In `Service.Check`, the `permDenialCache` key is created using the raw `checkReq.UserUID`, but the `permCache` and database lookups use a canonical user UID resolved later, which can cause the denial cache to be missed if a user is identified by different strings (e.g., login vs. internal UID).",
+    "The `List` method trusts the `permCache` as authoritative and returns results directly from it, but the `Check` method's logic treats the same cache as potentially stale and falls back to the database on a negative check, creating an inconsistency where `List` can return incomplete results."
+   ],
+   "https://github.com/grafana/grafana/pull/76186": [
+    "In `pkg/plugins/log/logger.go`, the `grafanaInfraLogWrapper.FromContext` implementation loses the provided context if the underlying logger's `FromContext` method does not return a `*log.ConcreteLogger`, because the fallback path calls `d.New()` which does not use the context.",
+    "In `pkg/plugins/log/fake.go`, `TestLogger.FromContext` returns a new, empty `TestLogger` instance, which prevents tests from inspecting logs made through the contextual logger, as they are recorded on a separate, inaccessible object."
+   ],
+   "https://github.com/grafana/grafana/pull/107534": [
+    "In both `querySplitting.ts` and `shardQuerySplitting.ts`, queries are filtered for a non-empty expression before template variables are applied, which can cause a query whose expression becomes empty after interpolation to be processed instead of dropped, likely leading to errors downstream.",
+    "The test 'Interpolates queries before running' in `shardQuerySplitting.test.ts` asserts that `applyTemplateVariables` is called 5 times, but the implementation in `runShardSplitQuery` will only call it once for the single-target request configured in the test, causing the test to fail.",
+    "The mock for `applyTemplateVariables` in `shardQuerySplitting.test.ts` mutates its input query object, which causes the `request.targets` array to be modified in place; this side-effect can lead to unpredictable behavior in other parts of the system that may use the request object."
+   ],
+   "https://github.com/grafana/grafana/pull/106778": [
+    "In `useAbilities.ts`, the `useAllRulerRuleAbilities` hook hardcodes `isFederated` to `false`, which will cause read-only federated rules to be incorrectly treated as mutable.",
+    "In `useAbilities.ts`, the new `useIsGrafanaPromRuleEditable` hook will crash at runtime because it attempts to call `ctx.hasPermissionInMetadata`, which is not a function on the `contextSrv` object.",
+    "The `GrafanaGroupLoader` component no longer shows rules in a transient \"creating\" or \"deleting\" state, which is a regression that can mislead users about the actual state of an alert rule."
+   ],
+   "https://github.com/grafana/grafana/pull/90045": [
+    "In `Create`, if writing to the primary storage fails, the error is incorrectly recorded as a failure for the legacy storage via `recordLegacyDuration` instead of `recordStorageDuration`.",
+    "In `Delete`, the object's name is passed as the `kind` when recording a successful storage operation metric, which will cause a high-cardinality `kind` label in Prometheus.",
+    "In `Delete`, the context's logger is overwritten with a less specific logger, losing the `name` and `kind` fields for any subsequent logging that uses the context.",
+    "In `Update`, if writing to the primary storage fails, the error is incorrectly recorded as a failure for the legacy storage via `recordLegacyDuration` instead of `recordStorageDuration`.",
+    "In `DeleteCollection`, the background goroutine for deleting from legacy storage incorrectly records its latency metric as a storage operation using `recordStorageDuration` instead of `recordLegacyDuration`."
+   ],
+   "https://github.com/grafana/grafana/pull/80329": [
+    "The `deleteByIDs` function can fail on certain databases like SQL Server because it attempts to delete all IDs in a single `DELETE` statement, which will exceed the database's parameter limit if the batch size is configured to be large enough.",
+    "The annotation cleanup process logs routine information, such as the number of items being cleaned, at the `Error` level, which will generate excessive noise in production logs and may obscure actual errors.",
+    "The test helper `createTestAnnotations` has been modified to manually assign primary keys for batch insertion, which is not a portable pattern and will cause tests to fail on database systems like PostgreSQL or SQL Server that restrict inserting explicit values into identity columns."
+   ],
+   "https://github.com/grafana/grafana/pull/90939": [
+    "The double-checked locking pattern is incomplete. After acquiring the write lock, the code does not re-check if the cache has been populated, which can lead to multiple goroutines redundantly computing the assets when the cache is initially empty."
+   ],
+   "https://github.com/grafana/grafana/pull/94942": [
+    "In `pkg/expr/reader.go`, the `enableSqlExpressions` function is implemented to always return `false`, which causes all SQL expression queries to be rejected with an error, regardless of the `FlagSqlExpressions` feature flag setting.",
+    "In `pkg/expr/sql_command.go`, `SQLCommand.Execute` will always fail with a 'not implemented' error because it now calls a stub implementation of `QueryFramesInto`.",
+    "In `pkg/expr/sql/parser.go`, the `TablesList` function will always fail with a 'not implemented' error because it now calls a stub implementation of `RunCommands`."
+   ],
+   "https://github.com/grafana/grafana/pull/97529": [
+    "The `NewResourceServer` function initiates a potentially long-running server initialization using `context.Background()`, which makes the process uncancellable and can block the application's graceful shutdown.",
+    "The `BuildIndex` function in `bleve.go` is subject to a race condition where concurrent calls with the same key will cause redundant index building and a resource leak, as the first completed index will be overwritten in the cache by the second."
+   ],
+   "https://github.com/ai-code-review-evaluation/keycloak-greptile/pull/1": [],
+   "https://github.com/keycloak/keycloak/pull/32918": [
+    "In `InfinispanIdentityProviderStorageProvider.getForLogin`, updating the cache for a new `organizationId` is subject to a race condition that can cause lost data.",
+    "In `InfinispanIdentityProviderStorageProvider.getForLogin`, the method returns differently wrapped `IdentityProviderModel` objects depending on whether there is a cache hit or miss, leading to inconsistent behavior for callers.",
+    "In `InfinispanIdentityProviderStorageProvider.remove`, an unnecessary duplicate database call to `idpDelegate.getByAlias(alias)` is made when an alias cache entry is invalid."
+   ],
+   "https://github.com/keycloak/keycloak/pull/33832": [
+    "The `ASN1Decoder` class incorrectly handles indefinite-length ASN.1 encodings; for example, `readSequence` returns an empty list instead of parsing elements, and other methods like `readInteger` will crash with a `NegativeArraySizeException` because they don't handle the -1 length value.",
+    "In `ASN1Decoder.readSequence`, if the actual length of the contained elements does not match the sequence's declared length, the parser may read beyond the sequence's boundary or fail to consume all of it, leading to incorrect parsing of subsequent data.",
+    "`AuthzClientCryptoProvider.getBouncyCastleProvider()` returns the default JCE provider for the default keystore type, not the Bouncy Castle provider, which violates the method's contract and will cause failures for callers expecting a Bouncy Castle provider."
+   ],
+   "https://github.com/keycloak/keycloak/pull/36882": [
+    "The `rolling-updates` feature is enabled at build-time in the default operator image, but the documentation implies it must be enabled by the user in the Keycloak CR. This inconsistency means rolling updates will be attempted even if a user has not explicitly opted in via the CR, which could lead to unexpected behavior and future breakages when the build-time default is removed."
+   ],
+   "https://github.com/keycloak/keycloak/pull/36880": [
+    "In `AdminPermissions`, the event listener for `ClientRemovedEvent` calls `clients().setPermissionsEnabled(..., false)`, but the new `ClientPermissionsV2` implementation for this method throws `UnsupportedOperationException`. This will cause any attempt to delete a client to fail with an exception when the `ADMIN_FINE_GRAINED_AUTHZ` feature is enabled.",
+    "In `ClientPermissionsV2.hasPermission(ClientModel, String)`, when no specific permission is configured for a client, the logic falls back to evaluating permissions on the generic 'all-clients' resource. This is incorrect because the evaluation context loses information about the specific client being checked, which will cause any policies that rely on the resource's attributes to fail or evaluate incorrectly.",
+    "In `ClientPermissionsV2.hasPermission(ClientModel, String)`, the fallback logic includes an optimization that checks if any policies are associated with the 'all-clients' resource (`getPolicyStore().findByResource(...)`). This check is incorrect because it only looks for policies directly on the resource, and will wrongly deny permission if access is granted via policies attached to scopes or permissions, but not directly to the resource."
+   ],
+   "https://github.com/keycloak/keycloak/pull/37038": [
+    "In `UsersResource` and `BruteForceUsersResource`, user searches will be incomplete for administrators with fine-grained permissions. The updated code filters users based only on group membership at the database level and no longer applies in-memory filtering for users who might be visible due to direct permissions, causing those users to be omitted from search results.",
+    "In `GroupPermissionsV2`, the `canManage()` method incorrectly grants management capabilities to users who only have `view` permission on all groups. This allows an administrator with only view permissions to perform management actions such as creating new groups, which is a privilege escalation.",
+    "The `getGroupIdsWithViewPermission` method in `GroupPermissionsV2` is implemented incorrectly, causing user searches based on group permissions to fail. It uses a resource's internal ID instead of its name (the group ID) for permission checks, and it adds these internal resource IDs to the returned set instead of the required group IDs."
+   ],
+   "https://github.com/keycloak/keycloak/pull/37429": [
+    "In `VerifyMessageProperties.java`, the `verifySafeHtml` method calls `StringEscapeUtils.unescapeHtml4` on the sanitized string before comparing it to the original. This will incorrectly approve illegal HTML-like text such as `<1>` or `<foo>` in translations where no HTML is allowed, because the sanitizer will escape it to `&lt;1&gt;` and the `unescapeHtml4` call will change it back to `<1>`, making it identical to the original input and thus passing the check.",
+    "In `VerifyMessageProperties.java`, the `santizeAnchors` method modifies the `value` string while iterating over it with a `Matcher`. This relies on undefined behavior of the `Matcher` class when the underlying character sequence is mutated, and is likely to cause incorrect behavior or crashes.",
+    "In `VerifyMessageProperties.java`, the `santizeAnchors` method uses `value.replaceFirst()` to remove a matched anchor tag. If the same anchor tag appears multiple times in the string, this will always remove the first occurrence, not necessarily the one the `Matcher` is currently pointing at, leading to incorrect logic.",
+    "The message format for `error-invalid-multivalued-size` was changed from `{{...}}` to `{...}` in properties files for JavaScript applications (`account-ui`, `admin-ui`). This is a Java `MessageFormat` syntax that is unlikely to be compatible with the JavaScript i18n library, which probably expects the `{{...}}` syntax, and will break message interpolation in the UI.",
+    "The Lithuanian translation for `totpStep1` in `themes/src/main/resources-community/theme/base/account/messages/messages_lt.properties` has been replaced with Italian text.",
+    "The Lithuanian translation for `loginTotpStep1` in `themes/src/main/resources-community/theme/base/login/messages/messages_lt.properties` has been replaced with Italian text."
+   ],
+   "https://github.com/keycloak/keycloak/pull/37634": [
+    "In `AccessTokenContext`, the constructor has a copy-paste error in its null checks, causing it to validate `grantType` twice while failing to validate that `rawTokenId` is not null.",
+    "In `DefaultTokenContextEncoderProviderFactory`, the lazy-loading of grant type shortcuts is not atomic, creating a race condition where deploying multiple providers with the same shortcut can lead to an inconsistent state in the internal grant-to-shortcut maps.",
+    "The `isAccessTokenId` matcher in `AssertEvents` is implemented incorrectly: it uses the wrong substring indices to extract the grant shortcut from the encoded token ID, and its conditional logic is inverted, returning false on a successful match."
+   ],
+   "https://github.com/keycloak/keycloak/pull/38446": [
+    "In `RecoveryAuthnCodesFormAuthenticator`, when a recovery code from a user storage provider is used, the authenticator does not update the credential in the user storage to mark the code as used. Instead, it attempts to update a credential in the local database. This allows the same recovery code to be reused, which is a security vulnerability. The authenticator logic needs to be updated to correctly handle credential updates for user storage providers.",
+    "The `RecoveryAuthnCodeInputLoginBean` constructor will throw a `NoSuchElementException` if the recovery code credential is removed after the authenticator has checked for its existence but before the login page is rendered. This can happen in concurrent scenarios or if the user refreshes the page, leading to a server error. The constructor should handle the case where the `Optional<CredentialModel>` is empty.",
+    "In `BackwardsCompatibilityUserStorage`, the `getCredentials` and `isValid` methods use `JsonSerialization.readValue(..., List.class)` to deserialize recovery codes. This will return a `List<Object>` and likely cause a `ClassCastException` later, for instance when `RecoveryAuthnCodesCredentialModel.createFromValues` expects a `List<String>`. The deserialization should use a `TypeReference` to correctly specify the generic type.",
+    "The new `getCredentials` method in `BackwardsCompatibilityUserStorage` does not return password credentials, even though the provider manages them. This will cause features that list user credentials, such as the account console, to not display the password credential, preventing users from managing it."
+   ],
+   "https://github.com/keycloak/keycloak/pull/40940": [
+    "The new test `createMultiDeleteMultiReadMulti` has a race condition: the main thread does not wait for the background reader thread to complete before checking for exceptions, which can lead to the test passing incorrectly if an exception occurs in the final read operation."
+   ],
+   "https://github.com/ai-code-review-evaluation/sentry-greptile/pull/1": [
+    "Slicing a Django queryset with a negative start index is not supported and will raise a `ValueError`, but the new logic in `Paginator.get_result` and `OptimizedCursorPaginator.get_result` attempts to do this when `offset` is negative, causing a crash.",
+    "In `OptimizedCursorPaginator`, the condition `len(results) == offset + limit + extra` for backwards pagination is incorrect because it includes `offset`, which will prevent it from being met and cause an extra, duplicate item to be returned to the user."
+   ],
+   "https://github.com/ai-code-review-evaluation/sentry-greptile/pull/2": [
+    "The `add-buffer.lua` script will fail with an error if it is called for a segment that has fewer than 1000 spans, because `span_count - 1000` will be negative and `ZPOPMIN` requires a positive count.",
+    "The `max_segment_spans` check has been removed from `_load_segment_data`, which can lead to excessive memory usage in the flusher if a segment grows beyond the new limit due to a failure in the span processing pipeline that prevents the trimming logic from running.",
+    "The span processing logic in `process_batch` will raise a `KeyError` if it consumes a message that lacks the `end_timestamp_precise` field, which will crash the consumer when processing spans from older producers.",
+    "The maximum redirect depth in `add-buffer.lua` has been reduced from 10,000 to 1,000, which will prevent the correct assembly of trace segments that have a chain of parent-child relationships longer than 1,000."
+   ],
+   "https://github.com/ai-code-review-evaluation/sentry-greptile/pull/3": [
+    "The `upsampled_count` function in `discover.py` truncates the final count instead of rounding, which can lead to undercounting for certain sample rates.",
+    "The function `transform_query_columns_for_error_upsampling` only transforms `count()`, but does not handle other common forms of counting like `count(id)`, which will result in those queries returning non-upsampled counts.",
+    "In `sentry/testutils/factories.py`, the function `_set_sample_rate_from_error_sampling` uses `if client_sample_rate:` to check for presence, which incorrectly evaluates to false for a sample rate of `0`. This will cause test events with a sample rate of 0 to be processed as if they were not sampled, leading to incorrect test outcomes."
+   ],
+   "https://github.com/getsentry/sentry/pull/67876": [
+    "In `OAuthLoginView.dispatch`, the call to `safe_urlopen` to exchange the OAuth code for an access token is not wrapped in a `try...except` block, which will cause an unhandled exception and a server error if the network request to GitHub fails.",
+    "In `GitHubInstallation.dispatch`, if an `Integration` object for the installation does not yet exist, the logic proceeds to the next pipeline step, which bypasses the new security check that compares the installing GitHub user with the user completing the setup. This creates a race condition vulnerability.",
+    "The `get_user_info` function, called by the new `OAuthLoginView`, does not wrap its `safe_urlopen` call in a `try...except` block, which will cause an unhandled exception and a server error if the API request to GitHub fails.",
+    "The security check `integration.metadata[\"sender\"][\"login\"]` will raise a `KeyError` and cause a server error if the `sender` key or its `login` sub-key do not exist in the integration's metadata, for example, if the integration was created by a different process that does not store this information."
+   ],
+   "https://github.com/ai-code-review-evaluation/sentry-greptile/pull/5": [
+    "In `src/sentry/integrations/source_code_management/commit_context.py`, the static method `get_merged_pr_single_issue_template` calls `PRCommentWorkflow._truncate_title(title)`, which will raise an `AttributeError` because the `_truncate_title` method is defined on `CommitContextIntegration`, not `PRCommentWorkflow`.",
+    "In `src/sentry/integrations/github/integration.py` and `src/sentry/integrations/gitlab/integration.py`, `get_merged_pr_single_issue_template` is called on `self`, but the method is not available on the `...PRCommentWorkflow` classes. This will raise an `AttributeError`. It should be called on `self.integration`.",
+    "In `src/sentry/replays/endpoints/project_replay_summarize_breadcrumbs.py`, `fetch_error_details` zips `error_ids` with `events.values()`. This is unsafe because the order of values from a dictionary is not guaranteed to match the original list of IDs, and if any event is not found in nodestore, it could lead to mis-associating event data with the wrong error ID.",
+    "In `static/app/views/dashboards/widgetCard/chart.tsx`, when the `use-table-widget-visualization` feature is enabled, the `TableWidgetVisualization` component is rendered with hardcoded empty data instead of the data from `tableResults`. This will cause the table to be empty."
+   ],
+   "https://github.com/getsentry/sentry/pull/93824": [
+    "The `SpansBuffer` object, which contains an unpickleable Redis client connection, is passed to child processes during creation, which will cause a crash on startup because multiprocessing with 'spawn' context requires objects to be pickled.",
+    "The `join` method incorrectly handles timeouts by passing the entire timeout budget to `next_step.join` and then using a `break` statement in the cleanup loop, which can result in orphaned child processes if the timeout expires."
+   ],
+   "https://github.com/getsentry/sentry/pull/77754": [
+    "`AssignmentSource.from_dict` does not parse the `queued` field from a string back into a `datetime` object after it has been serialized for a task, resulting in the `queued` attribute having a `str` type instead of the expected `datetime`.",
+    "The `assignment_source` parameter is added to `IssueSyncIntegration.sync_status_outbound`, but no callers are updated to pass it, which means status update sync loops are not prevented, contrary to the goal of this change."
+   ],
+   "https://github.com/getsentry/sentry/pull/80528": [
+    "In `get_monitor_environment_context`, the modified `config` dictionary is discarded and the original `monitor_environment.monitor.config` is used in the return value, causing the human-readable `schedule_type` to be missing from the event context.",
+    "In `try_incident_threshold`, check-ins with an `IN_PROGRESS` status are incorrectly treated as failures, which can cause a failure incident to be created when the monitor has not actually failed.",
+    "When a monitor first enters a failed state, `try_incident_threshold` creates an issue occurrence for every check-in in the failure window, leading to multiple occurrences and potential alerts for a single new incident."
+   ],
+   "https://github.com/getsentry/sentry/pull/95633": [
+    "The `OrderedQueueWorker` unconditionally completes message offsets in a `finally` block, causing data to be lost if the message processor fails.",
+    "The shutdown logic in `FixedQueuePool` is broken because `OrderedQueueWorker` threads can block indefinitely on `work_queue.get()` without a timeout, preventing them from observing the shutdown signal."
+   ],
+   "https://github.com/getsentry/sentry/pull/80168": [
+    "In `StatefulDetectorHandler.evaluate_group_key_value`, `event_data` is not assigned when `new_status` is `DetectorPriorityLevel.OK`, which will cause an `UnboundLocalError` when `DetectorEvaluationResult` is constructed.",
+    "The `MetricAlertDetectorHandler` class does not implement the abstract method `build_occurrence_and_event_data` from its parent `StatefulDetectorHandler`, which will cause a `TypeError` when it is instantiated.",
+    "The call to `PriorityLevel(new_status)` in `evaluate_group_key_value` will raise a `ValueError` because the integer values of the `DetectorPriorityLevel` and `PriorityLevel` enums are not compatible and there is no mapping between them.",
+    "In `test_state_results_multi_group`, the mock occurrence for `group_2` is built with a value of 6, but the input data for `group_2` is 10, making the test assertion incorrect.",
+    "In `TestEvaluate.test_results_on_change`, the mock occurrence is built with a value of 6, but the input data has a value of 100, making the test assertion incorrect.",
+    "In `TestEvaluateGroupKeyValue.test_dedupe`, the mock occurrence is built with a value of 6, but the `evaluate_group_key_value` function is called with a value of 100, making the test assertion incorrect."
+   ]
+  }
+ },
+ "A3_BOTH": {
+  "tp": 33,
+  "n": 66,
+  "prs": 49,
+  "errors": 1,
+  "precision": 0.5,
+  "tp_per_pr": 0.673469387755102,
+  "fp_per_tp": 1.0,
+  "candidates": {
+   "https://github.com/calcom/cal.com/pull/8087": [
+    "In `packages/app-store/vital/lib/reschedule.ts`, `forEach` is called with an `async` function, but `forEach` does not await the promises returned by its callback. This will cause the `Reschedule` function to return before the asynchronous `deleteEvent` or `deleteMeeting` calls are complete, meaning events may not be deleted."
+   ],
+   "https://github.com/calcom/cal.com/pull/10600": [
+    "The backup code invalidation during login is not atomic, creating a race condition where a single-use backup code can be used multiple times by making concurrent requests."
+   ],
+   "https://github.com/calcom/cal.com/pull/10967": [
+    "In `handleNewBooking.ts`, if an event organizer for a collective event does not have a destination calendar, the destination calendars of other team members are not collected, because `evt.destinationCalendar` is `null` and the subsequent `push` operation is a no-op.",
+    "In `packages/app-store/googlecalendar/lib/CalendarService.ts`, the fallback logic for `selectedCalendar` in `updateEvent` and `deleteEvent` is incorrect. When `externalCalendarId` is not provided, it attempts to find a calendar with a null `externalId`, which will fail and may cause the event to be updated or deleted from the wrong calendar (e.g., 'primary').",
+    "In `packages/trpc/server/routers/viewer/organizations/create.handler.ts`, the logic for setting an organization's slug based on `IS_TEAM_BILLING_ENABLED` has been inverted. This will likely break organization creation by either omitting the slug or bypassing the intended `requestedSlug` workflow."
+   ],
+   "https://github.com/calcom/cal.com/pull/22345": [
+    "In `buildOrgAuthorizationCondition`, the list of `teamIds` is built only from sub-teams of the organization (`teamsFromOrg`). It omits the organization's own ID (`options.orgId`). This means bookings made against the top-level organization team will be excluded from results for an org-scoped query, which is incorrect. The corresponding test correctly expects the organization's ID to be in the list of team IDs to check against."
+   ],
+   "https://github.com/calcom/cal.com/pull/7232": [
+    "When a booking is cancelled, email reminders are not cancelled immediately but are instead marked for deferred cancellation. This creates a race condition where reminders for a cancelled booking can still be sent if the cancellation happens between the periodic cancellation job runs."
+   ],
+   "https://github.com/calcom/cal.com/pull/8330": [
+    "In `checkIfIsAvailable`, the end time of a slot for checking against working hours is calculated using `slotStartTime` instead of the slot's end time, which will cause slots that end after working hours to be incorrectly marked as available.",
+    "In `checkIfIsAvailable`, a strict equality check `===` is used to compare two `dayjs` objects, which will always evaluate to false because they are different object instances; `.isSame()` should be used instead.",
+    "In `getSlots`, the calculation to adjust date override times for the invitee's timezone is incorrect; it adds the difference in UTC offsets to the UTC time, which does not correctly convert the time to the target timezone.",
+    "In `checkIfIsAvailable`, when checking if a slot is within working hours, the slot's day, hour, and minute are taken from its UTC representation, but they should be calculated in the organizer's timezone to correctly compare against their working hours."
+   ],
+   "https://github.com/calcom/cal.com/pull/11059": [
+    "In `packages/app-store/_utils/oauth/parseRefreshTokenResponse.ts`, the `minimumTokenResponseSchema` is defined with `[z.string().toString()]` as a key, which incorrectly creates a schema expecting a literal property named 'ZodString' instead of validating an object with an arbitrary key holding a number value for expiry.",
+    "The `refreshOAuthTokens` function in `packages/app-store/_utils/oauth/refreshOAuthTokens.ts` returns a `fetch` Response object when using the credential sync endpoint, but an Axios response or other object from the original `refreshFunction`, breaking callers like Google Calendar and HubSpot which expect a `.data` property that does not exist on the `Response` object.",
+    "In `packages/app-store/_utils/oauth/parseRefreshTokenResponse.ts`, the function will add a placeholder `refresh_token: \"refresh_token\"` if one is not present in the response, which will corrupt the stored credential by overwriting a valid refresh token with this placeholder.",
+    "In `packages/app-store/zoho-bigin/lib/CalendarService.ts`, the call to `refreshOAuthTokens` passes an undefined variable `credentialId`, which will cause a `ReferenceError` during token refresh.",
+    "The webhook handler in `apps/web/pages/api/webhook/app-credential.ts` does not use a timing-safe comparison for the webhook secret, making it vulnerable to timing attacks.",
+    "In `apps/web/pages/api/webhook/app-credential.ts`, a failed `JSON.parse` on the decrypted keys will cause an unhandled exception and result in a 500 error instead of a more appropriate 400-level error."
+   ],
+   "https://github.com/calcom/cal.com/pull/14943": [
+    "The retry count is incorrectly incremented on successful SMS scheduling instead of on failure, because the `retryCount` update is in the `else` branch of the `scheduledSMS.status === 'failed'` check."
+   ],
+   "https://github.com/calcom/cal.com/pull/14740": [
+    "In `addGuests.handler.ts`, `sendAddGuestsEmails` is called with the raw `guests` input array, which causes existing attendees to receive an incorrect email if their email is included in the input. The `uniqueGuests` array, which has already been filtered to only include new guests, should be passed instead to ensure existing attendees receive a guest update notification rather than a new booking confirmation."
+   ],
+   "https://github.com/calcom/cal.com/pull/22532": [
+    "In `CalendarService.ts`, `syncAvailableCalendars` updates `SelectedCalendar` timestamps even when the cache is disabled and no sync occurs, because the update call is outside the `if (this.isCacheEnabled())` block."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/1": [
+    "In `uploads_controller.rb`, the `while` loop's condition uses `tempfile.size`, which is not updated after the `OptimizedImage.downsize` call modifies the file on disk. As a result, the loop will always run 5 times if the image is initially oversized, rather than stopping as soon as the file size is below the threshold."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/2": [
+    "The `unsubscribe` action in `TopicsController` will crash with a `NoMethodError` if a user clicks the unsubscribe link from an email without being logged in. The action is explicitly exempted from the `ensure_logged_in` filter, allowing `current_user` to be `nil`, but then `current_user.id` is used without a `nil` check."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/3": [
+    "In `app/models/blocked_email.rb`, the `should_block?` method uses a non-atomic read-modify-write pattern to increment `match_count`, creating a race condition where concurrent requests for the same email will cause updates to be lost, leading to an incorrect `match_count`."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/4": [
+    "The new `raw_html` cook method for posts bypasses sanitization, but it is used for content imported from external RSS feeds in `Jobs::PollFeed`. Since the RSS content is not sanitized, a malicious or compromised feed can inject arbitrary HTML and script into Discourse pages, leading to a stored cross-site scripting vulnerability."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/5": [
+    "The `order` mixin will produce incorrect layouts on older browsers because it does not account for the legacy `-webkit-box-ordinal-group` and `-moz-box-ordinal-group` properties being 1-based, whereas the modern `order` property is 0-based. For example, an element with `@include order(1)` will be assigned `-webkit-box-ordinal-group: 1`, which is the default value, causing it to render in DOM order on older browsers instead of being reordered as it would be on modern browsers."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/6": [
+    "The `website_name` method uses `URI(...).path` to construct the display text, which strips the query string from the original URL. For a user website like `http://example.com/search?q=foo`, if the instance domain is also `example.com`, the displayed text will be `example.com/search`, which is an incomplete and misleading representation of the link's destination."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/7": [
+    "In `desktop/topic-post.scss`, the lightness values for the `.in-reply-to a` color have been swapped, changing the light theme's lightness from 30% to 70% and causing a visual regression."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/8": [
+    "The `totalPages` calculation is incorrect when the number of members is an exact multiple of the page limit. `Math.floor(count / limit) + 1` will result in one page too many in this case (e.g., for 50 members with a limit of 50, it calculates 2 pages instead of 1), which allows users to navigate to an empty page."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/9": [
+    "The new `ensure_loaded!` method in `translate_accelerator.rb` has a race condition: the check for a locale's existence in `@loaded_locales` and the subsequent call to `load_locale` are not atomic. In a multi-threaded environment, this can cause `load_locale` to be called multiple times for the same locale concurrently, leading to redundant work and potential data corruption if `load_locale` is not re-entrant."
+   ],
+   "https://github.com/ai-code-review-evaluation/discourse-graphite/pull/10": [
+    "The database migration `CreateEmbeddableHosts` is vulnerable to SQL injection. The `host` value from the `embeddable_hosts` site setting is interpolated directly into the INSERT statement, which could lead to arbitrary SQL execution and data loss if a maliciously crafted hostname is present in the setting before migration.",
+    "The database migration `CreateEmbeddableHosts` will crash if the `embed_category` site setting is not set or does not correspond to an existing category. The code attempts to read a property on the first row of a database query result that may be empty, which will raise a `NoMethodError` on `nil` and halt the migration process.",
+    "In the `embeddable-host` component, clicking the edit button will cause a crash because it attempts to access `host.category.id`, but the `host.category` object is not loaded, only `host.category_id` is available."
+   ],
+   "https://github.com/grafana/grafana/pull/79265": [
+    "In `CreateOrUpdateDevice`, the check for the device count and the subsequent insertion of a new device are not atomic, creating a race condition that allows the number of anonymous devices to exceed the configured limit under concurrent load."
+   ],
+   "https://github.com/grafana/grafana/pull/103633": [
+    "The new permission denial cache (`permDenialCache`) will cause incorrect authorization decisions if a user's permissions are changed to grant access after a denial has been cached, as there is no cache invalidation mechanism for this new cache. The user will continue to be denied access until the cache entry expires."
+   ],
+   "https://github.com/grafana/grafana/pull/76186": [
+    "The implementation of `FromContext` on `TestLogger` is incorrect as it returns a new, empty logger, which means any logs sent to it will be lost and cannot be inspected by tests that hold a reference to the original logger."
+   ],
+   "https://github.com/grafana/grafana/pull/107534": [
+    "Filtering for empty expressions is performed before template variable substitution, which will cause queries whose expressions consist only of variables that resolve to an empty string to be processed with an empty expression string, instead of being filtered out."
+   ],
+   "https://github.com/grafana/grafana/pull/106778": [
+    "The `GrafanaGroupLoader` component no longer shows transient states for rules being created or deleted. If there is any propagation delay between the ruler and prometheus endpoints, a newly created rule will be missing from the list, and a recently deleted rule will still appear as active, potentially confusing the user into thinking their action failed."
+   ],
+   "https://github.com/grafana/grafana/pull/90045": [
+    "In `dualwriter_mode3.go`, the `Get` method accesses `options.Kind`, but the `options` parameter is of type `*k8s.io/apimachinery/pkg/apis/meta/v1.GetOptions`, which does not have a `Kind` field, causing a compilation error."
+   ],
+   "https://github.com/grafana/grafana/pull/80329": [
+    "The new annotation cleanup logic logs routine, successful operations at the ERROR level, which will generate excessive noise and can hide actual errors."
+   ],
+   "https://github.com/grafana/grafana/pull/90939": [
+    "The double-checked locking implementation is flawed because it does not re-check if the cache has been populated after acquiring the write lock, which will cause multiple concurrent callers to redundantly perform the expensive asset computation on a cache miss."
+   ],
+   "https://github.com/grafana/grafana/pull/94942": [
+    "The new SQL analytics implementation in `pkg/expr/sql/db.go` consists of stub methods that return `errors.New(\"not implemented\")`, which means the feature will always fail at runtime.",
+    "The function `enableSqlExpressions` in `pkg/expr/reader.go` always returns `false`, which causes the SQL expression feature to be permanently disabled and always return an error, regardless of the feature flag configuration."
+   ],
+   "https://github.com/grafana/grafana/pull/97529": [
+    "In `pkg/storage/unified/resource/server.go`, the `NewResourceServer` function calls `s.Init(ctx)`, but `ctx` is not defined within the function's scope. This will cause a compilation error."
+   ],
+   "https://github.com/ai-code-review-evaluation/keycloak-greptile/pull/1": [],
+   "https://github.com/keycloak/keycloak/pull/32918": [
+    "In `InfinispanIdentityProviderStorageProvider.getForLogin`, the update logic for a partially-populated cache entry is not atomic, creating a race condition."
+   ],
+   "https://github.com/keycloak/keycloak/pull/33832": [
+    "In `ASN1Decoder.java`, the `readSequence` method does not verify that the consumed bytes exactly match the declared length of the sequence, causing it to incorrectly parse malformed ASN.1 data where the sum of inner element lengths does not equal the outer sequence length."
+   ],
+   "https://github.com/keycloak/keycloak/pull/36882": [],
+   "https://github.com/keycloak/keycloak/pull/36880": [
+    "In `ClientPermissionsV2.hasPermission(ClientModel, String)`, if a resource for a specific client exists, permissions granted at the resource type level (i.e., for all clients) are not evaluated. This is incorrect, as an administrator with 'view-all-clients' permission would lose the ability to view a specific client as soon as any other permission is defined for that specific client, because that action creates a client-specific resource."
+   ],
+   "https://github.com/keycloak/keycloak/pull/37038": [
+    "In `GroupPermissionsV2.getGroupIdsWithViewPermission`, resource IDs are used instead of group IDs for permission checks and for the returned set of group IDs, breaking the intended database-level filtering for user searches."
+   ],
+   "https://github.com/keycloak/keycloak/pull/37429": [
+    "In `VerifyMessageProperties.java`, the `santizeAnchors` method modifies the `value` string within a `while (matcher.find())` loop. A `Matcher`'s state is tied to the string it was created with; modifying this string externally while iterating causes the matcher's internal position to become invalid relative to the string's new content, which will lead to incorrect behavior when processing messages with multiple tags.",
+    "The `santizeAnchors` method in `VerifyMessageProperties.java` performs a sequential comparison of anchor tags between the original and translated strings. This will incorrectly reject valid translations where phrases containing links have been reordered, as reordering is common and legitimate during translation.",
+    "The `containsHtml` method in `VerifyMessageProperties.java` uses a regex that only detects lowercase opening HTML tags. It will fail to detect HTML in messages that use uppercase tags (e.g., `<BR>`) or only contain closing tags, causing the verifier to incorrectly reject valid translations that use allowed HTML.",
+    "The Lithuanian resource files `themes/src/main/resources-community/theme/base/account/messages/messages_lt.properties` and `themes/src/main/resources-community/theme/base/login/messages/messages_lt.properties` contain Italian text for the `totpStep1` and `loginTotpStep1` keys, respectively."
+   ],
+   "https://github.com/keycloak/keycloak/pull/37634": [
+    "In `DefaultTokenContextEncoderProviderFactory`, the lazy-loading logic for grant type shortcuts is not thread-safe and does not handle shortcut collisions from hot-deployed providers. If a new provider is deployed with a shortcut that is already in use, `getShortcutByGrantType` will call `grantsByShortcuts.put(shortcut, grantType)`, which overwrites the existing mapping. This can cause tokens for one grant type to be misinterpreted as another, which is a security risk."
+   ],
+   "https://github.com/keycloak/keycloak/pull/38446": [
+    "The `createRecoveryCodesCredential` method provides the raw, unhashed recovery codes to the user storage provider. This will cause the provider to store the codes in plaintext, which is a security issue as they should be hashed before storage, similar to how the local storage provider handles them."
+   ],
+   "https://github.com/keycloak/keycloak/pull/40940": [
+    "In `GroupTest.createMultiDeleteMultiReadMulti`, if any of the `remove()` calls in the `forEach` loop throws an exception, the test will fail and the `deletedAll` flag will never be set to `true`. This will cause the background thread to spin in an infinite loop, which can hang the test suite."
+   ],
+   "https://github.com/ai-code-review-evaluation/sentry-greptile/pull/1": [
+    "The pagination logic attempts to slice a Django queryset with a negative start index, which is not supported by the ORM and will raise an `AssertionError`.",
+    "The `OptimizedCursorPaginator.get_item_key` method will raise a `TypeError` by attempting to call `math.floor` or `math.ceil` on a `datetime` object, which is not a number."
+   ],
+   "https://github.com/ai-code-review-evaluation/sentry-greptile/pull/2": [
+    "In `add-buffer.lua`, the eviction logic has an off-by-one error that allows the number of spans in a buffer to exceed the limit of 1000. The check `if span_count > 1000` occurs before the current span is added; if the buffer has exactly 1000 spans, no eviction occurs, and the subsequent addition of the new span will grow the buffer to 1001 spans."
+   ],
+   "https://github.com/getsentry/sentry/pull/67876": [
+    "In `OAuthLoginView.dispatch`, the call to `get_user_info` is not wrapped in a try-except block, which will cause an unhandled exception and a 500 error if the API call to GitHub fails due to a network issue, an invalid token, or a GitHub service degradation."
+   ],
+   "https://github.com/ai-code-review-evaluation/sentry-greptile/pull/5": [
+    "In `src/sentry/integrations/source_code_management/commit_context.py`, the static method `get_merged_pr_single_issue_template` will raise an `AttributeError` because it attempts to call `_truncate_title` on the `PRCommentWorkflow` class, which does not have this method.",
+    "In `static/app/views/dashboards/widgetCard/chart.tsx`, when the `use-table-widget-visualization` feature flag is enabled, the new `TableWidgetVisualization` component is rendered with hardcoded empty data, which will cause table widgets to appear empty.",
+    "In `src/sentry/integrations/github/integration.py` and `gitlab/integration.py`, the call to `self.get_merged_pr_single_issue_template` will fail with an `AttributeError` because this method is not defined on the `PRCommentWorkflow` subclasses; it should be called via `self.integration`."
+   ],
+   "https://github.com/getsentry/sentry/pull/93824": [
+    "The `join` method in `SpanFlusher` may fail to terminate all child processes on timeout, leading to orphaned processes."
+   ],
+   "https://github.com/getsentry/sentry/pull/77754": [
+    "In `AssignmentSource`, the default value for the `queued` field is `timezone.now()`, which is evaluated once at module load time. This results in all instances created without an explicit `queued` value sharing the same timestamp from when the server process started, not their individual creation times."
+   ],
+   "https://github.com/getsentry/sentry/pull/80528": [
+    "In `get_monitor_environment_context`, the modified `config` dictionary is discarded and the original `monitor.config` is used in the returned context, which means `schedule_type` is not replaced with its display name as intended."
+   ],
+   "https://github.com/getsentry/sentry/pull/95633": [
+    "In `test_thread_queue_parallel_error_handling`, the assertion that no offsets are committed after a processing error is incorrect because the implementation uses a 'skip-on-error' strategy, which should result in the failed message's offset being committed."
+   ],
+   "https://github.com/getsentry/sentry/pull/80168": [
+    "In `tests/sentry/workflow_engine/processors/test_detector.py`, the new base class `BaseDetectorHandlerTest` is marked with `__test__ = Abstract(...)`, which prevents it and all its subclasses from being discovered by the test runner, meaning none of the tests for the new or existing `StatefulDetectorHandler` logic will run."
+   ]
+  }
+ }
+}

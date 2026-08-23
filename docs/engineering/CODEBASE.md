@@ -412,7 +412,7 @@ bars, 207 findings came back 5.80% correct — and the two validations guarding 
 therefore never fire, which is an unreachable check reading exactly like a passing one.
 `test_a_review_cannot_carry_a_model_claim_at_all` asserts the constructor refuses them.
 `ran_model` survives because it reads the ledger rather than the configuration, so "no model
-runs here" stays falsifiable. → `docs/product/review-half-record.md`
+runs here" stays falsifiable. → `docs/product/reviewer/review-half-record.md`
 
 ### `store/`
 
@@ -801,7 +801,7 @@ claims. Neither ships: seven designs failed a bar fixed before each run, the poo
 absent from the line they cite**. SWR-Bench puts five published systems at 2.79–15.39% precision
 on 1,000 pull requests, so this is an unsolved problem rather than a local defect.
 **Do not add an eighth design without a fresh corpus and a bar fixed first.**
-→ `docs/product/review-half-record.md`
+→ `docs/product/reviewer/review-half-record.md`
 
 ### `render/`
 
@@ -1137,3 +1137,37 @@ reason having nothing to do with the event definition.
 
 `tests/unit/layers/test_event_cap_population.py` pins the distinction: on a history whose first
 admissible event is flat-scored, `limit=2` yields one survivor while an uncapped walk yields two.
+
+### `research/phase0/bench/forensic/` — why the correct-rate is what it is
+
+Five modules sharing one dataset, each written to correct the one before it.
+
+- `label_candidates.py` — labels every candidate of every arm TP or FP and **stores the label**.
+  These never existed; `martian_comparison.json` keeps aggregate counts and
+  `gap_detail.json`'s `ours_caught` keeps GOLDENS, and four earlier analyses read the latter as
+  candidates, which is false by construction. Those four are withdrawn.
+- `judge_variance.py` — re-judges identical candidates three times. **Spread 2.1 points**, so the
+  judge is stable and the apparent +32 swing in CodeRabbit's true positives was a metric
+  definition, not noise.
+- `redundancy.py` — every arm on ONE judge, counting goldens covered and candidates that matched.
+  Their difference is redundancy: **ours 17 of 98, Qodo's 1 of 99.** Worth +4.0 points if fixed;
+  recorded rather than built → `docs/product/reviewer/recorded-not-built.md`
+- `prompt_arms.py` — four reviewer prompts over the same 50 pull requests. All three
+  non-control arms FAIL. → `docs/plans/preregistrations/reviewer/prompt-direction-preregistration.md`
+- `forensics.py` — cross-tabs over the stored labels. It deliberately does **not** ask whether a
+  false positive landed in the wrong file: the corpus has no file or line metadata, so the
+  question is unanswerable, and a marker that answered it from prose read 0.0% for three arms.
+
+`bench_reviewer.review()` gained `template=` so an arm is measured through the same request,
+parsing and truncation-salvage code as the control rather than a second copy of it.
+
+### `docs/product/reviewer/` — the reviewer half's evidence, and `recorded-not-built.md`
+
+Nine documents grouped out of `docs/product/` at the fanout cap. They are the closed reviewer
+half's record. `recorded-not-built.md` is the register of four measured fixes that were not built —
+deduplication, live registry lookup, date injection, per-category thresholds — each with its effect
+size, and the shared reason: they improve a ratio without creating a correct finding, which is not
+what the closure turned on.
+
+`docs/CORRECTIONS.md` entry 7 lists what the `ours_caught` mis-read voided, and — checked and
+re-derived — what it did not.

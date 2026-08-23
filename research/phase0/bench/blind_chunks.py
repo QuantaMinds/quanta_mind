@@ -5,7 +5,8 @@ WHAT: Samples the issues where our arm and Greptile's disagreed, writes each as 
       SEPARATE file the rater must not open.
 WHY:  Our reviewer is Gemini and our judge is Gemini; Greptile's candidates were written by another
       system. Self-preference in an LLM judge would inflate our side of every table in
-      `docs/product/greptile-gap-analysis.md`, and it is not a symmetric limitation -- it pushes
+      `docs/product/reviewer/greptile-gap-analysis.md`, and it is not a symmetric limitation --
+      it pushes
       one way. No non-Gemini model is reachable on this Vertex project (Anthropic, Meta and
       Mistral publishers all return 404), so the check has to be a hand adjudication.
 

@@ -1,0 +1,30 @@
+{
+ "OURS": {
+  "goldens_covered": 81,
+  "candidates_matching": 98,
+  "emitted": 194,
+  "redundant": 17,
+  "goldens_per_correct_comment": 0.826530612244898
+ },
+ "qodo-extended-v2": {
+  "goldens_covered": 98,
+  "candidates_matching": 99,
+  "emitted": 152,
+  "redundant": 1,
+  "goldens_per_correct_comment": 0.98989898989899
+ },
+ "greptile-v4-1": {
+  "goldens_covered": 86,
+  "candidates_matching": 93,
+  "emitted": 168,
+  "redundant": 7,
+  "goldens_per_correct_comment": 0.9247311827956989
+ },
+ "coderabbit": {
+  "goldens_covered": 106,
+  "candidates_matching": 140,
+  "emitted": 318,
+  "redundant": 34,
+  "goldens_per_correct_comment": 0.7571428571428571
+ }
+}

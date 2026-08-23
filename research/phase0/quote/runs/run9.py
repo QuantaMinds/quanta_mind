@@ -10,7 +10,7 @@ WHY:  Design eight failed at 60.8% wrong, and 18 of its 18 lockfile findings wer
 
       ONE THING CHANGES. Same prompt, same gate, same rubric, same sabotage controls. If the
       wrong-rate moves, the filter is why.
-      → `docs/plans/preregistrations/reviewer/path-filter-preregistration.md`
+      → `docs/plans/preregistrations/reviewer/anchoring/path-filter-preregistration.md`
 IMPORTS: stdlib only (collections, json, pathlib, sys). Local: `corpus`, `gate`, `paths`,
       `reviewer`, and the Vertex `client`.
 CONSUMED BY: nobody -- it prints and writes quote9_run.json.

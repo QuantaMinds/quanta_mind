@@ -174,5 +174,5 @@ claims a diff cannot settle.** Every one checked against GitHub was false.
 
 **So the gap to Qodo is not the two mechanisms.** It is that a diff-scoped reviewer should not be
 reviewing files whose defects are undecidable from a diff. Full result in
-`docs/product/expansion-conventions-result.md`; every number recomputed by
+`docs/product/reviewer/expansion-conventions-result.md`; every number recomputed by
 `research/phase0/claims/verify.py`.

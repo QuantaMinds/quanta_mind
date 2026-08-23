@@ -59,3 +59,74 @@ correct and semantically wrong.**
 of any comparison are counts of the same thing.** `assert_spans()` now enforces the narrow version
 of that for the firing gate — the bar and the score must be drawn from the same span — after the
 same defect produced three different plausible answers, twice as a clean zero and once as a trend.
+
+---
+
+## 7 · Four analyses read a field for something it does not hold — what is void, and what is not
+
+`gap_detail.json` carries a key called `ours_caught`. It holds **golden comments our arm covered**.
+During a forensic pass on 2026-08-22 I read it as **our candidates that were correct**, and asked
+`candidate in ours_caught`. That test is false for every candidate by construction — the two sets
+are drawn from different populations and never intersect. **All 194 of our candidates classified as
+false positives**, and everything computed from that split was arithmetic on a constant.
+
+### Void — do not cite these
+
+1. **"68% of our false positives are in the wrong place, 32% are in the right place with the wrong
+   claim."** The population it split was every candidate, not the false ones.
+2. **"Our false positives concentrate in async and error-handling code."** Same population, so this
+   describes our output in general and says nothing about our errors.
+3. **"Our duplicate rate is 0.0%."** Nothing could match, so the measurement could only return
+   zero. **The true figure is 17.3%** — the highest of the three arms it was compared against.
+4. **"Four `forEach`-with-`async` candidates are in the wrong place."** A symbol-overlap marker,
+   run over the same mis-typed split. A matching golden exists.
+
+A fifth error in the same pass had a different cause and is void for that reason: **the keycloak
+PR 36880 "near-verbatim golden recorded as a miss"** compared the *nits* arm's candidate text
+against the *strict* arm's scoreboard. Two arms, one scoreboard.
+
+### NOT void — checked, re-derived, and reproducing today
+
+The concern that prompted this entry was broader than the defect. Every committed consumer of the
+field iterates `for g in d["golden"]` and asks `g in ours_caught`, which is the field used for
+exactly what it holds. Re-running `analyze_gap.py` on 2026-08-23 reproduces the published tables:
+
+- **the severity table** — Low n = 46, both 6 / only THEM 12 / only US 6, net −6, and **"two-thirds
+  of the gap is Low severity" stands**
+- **the category table** — bug n = 94, security n = 11 at 45% only-US, style n = 10 at 50% only-THEM
+- **the prompt-ban deficit rates** in `docs/product/reviewer/greptile-gap-analysis.md`
+- the both / onlyTHEM / onlyUS / neither split: 52 / 38 / 29 / 54 of 173
+
+**These are golden-level and were never candidate-level.** The withdrawal is narrower than it first
+appeared, and saying so precisely is part of the correction — an over-broad retraction discards
+sound work and is its own kind of inaccuracy.
+
+### The pattern
+
+**A field name described the container, not the contents.** `ours_caught` is true of goldens we
+caught and reads equally well as candidates that caught something. Nothing failed: no exception, no
+empty result, no implausible number. A 68/32 split is exactly what a real finding looks like.
+
+Two sibling defects in the same session, same root:
+
+- an apparent **+32 swing** in CodeRabbit's true positives on a re-judge, attributed to judge
+  non-determinism and reported to the user as an unreliable instrument. Three replicates over
+  identical candidates spread **2.1 points**. The +32 was `run.py:judge_arm()` counting *goldens
+  matched* against a newer path counting *candidates matching* — and **that difference is the
+  redundancy rate**, so the artefact was the measurement.
+- **our judge's count placed beside Martian's published count for Qodo** in one table. Two
+  instruments, one column — the same defect as quoting Macroscope's 55% comment-volume figure as a
+  false-positive rate.
+
+### The rule this leaves
+
+Entry 6 left "state what a number is a count of before reasoning about it". This is that rule
+failing at the level below: **the two sides were both counts of comments, and were counts of
+comments from different populations.** So the narrower rule is —
+
+**When testing membership, name the population on both sides of the `in`.** `candidate in
+ours_caught` is a type error the language cannot see, because both sides are `str`. Where a
+container holds one population and its consumers use another, an empty intersection is the
+signature — and **an intersection that is empty for every element is not a finding, it is a
+mismatch.** `label_candidates.py` now stores the per-candidate verdict as an artefact so the
+question never has to be re-derived from a field that does not answer it.

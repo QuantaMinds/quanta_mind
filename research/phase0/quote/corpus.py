@@ -36,7 +36,7 @@ __all__ = [
 ]
 
 # Fixed in the quote-anchor pre-registration before any run. Never edited to fit a result.
-# → docs/plans/preregistrations/reviewer/quote-anchor-preregistration.md
+# → docs/plans/preregistrations/reviewer/anchoring/quote-anchor-preregistration.md
 REPOS = (
     "apache/superset",
     "ray-project/ray",
@@ -46,7 +46,7 @@ REPOS = (
     "PrefectHQ/prefect",
 )
 # Design nine. Six more repositories, none of the thirty-eight already burned. Fixed in
-# docs/plans/preregistrations/reviewer/path-filter-preregistration.md before the run.
+# docs/plans/preregistrations/reviewer/anchoring/path-filter-preregistration.md before the run.
 REPOS_D9 = (
     "dbt-labs/dbt-core",
     "streamlit/streamlit",
