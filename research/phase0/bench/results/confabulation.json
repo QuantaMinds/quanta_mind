@@ -1,0 +1,350 @@
+[
+ {
+  "repo": "actions/checkout",
+  "arm": "TRUE_PAIR",
+  "sha": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+  "tag_shown": "v7.0.1",
+  "true_tag": "v7.0.1",
+  "issues": [
+   "The specified commit SHA for `actions/checkout` does not exist in the upstream repository, which will cause the CI job to fail when trying to download the action."
+  ],
+  "about_pin": [
+   "The specified commit SHA for `actions/checkout` does not exist in the upstream repository, which will cause the CI job to fail when trying to download the action."
+  ],
+  "objected": true,
+  "finish": "STOP"
+ },
+ {
+  "repo": "actions/checkout",
+  "arm": "FALSE_PAIR",
+  "sha": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+  "tag_shown": "v7.0.0",
+  "true_tag": "v7.0.1",
+  "issues": [
+   "The workflow references a non-existent version (`v7.0.0`) and commit hash for the `actions/checkout` action, which will cause the CI job to fail."
+  ],
+  "about_pin": [
+   "The workflow references a non-existent version (`v7.0.0`) and commit hash for the `actions/checkout` action, which will cause the CI job to fail."
+  ],
+  "objected": false,
+  "finish": "STOP"
+ },
+ {
+  "repo": "actions/setup-python",
+  "arm": "TRUE_PAIR",
+  "sha": "5fda3b95a4ea91299a34e894583c3862153e4b97",
+  "tag_shown": "v7.0.0",
+  "true_tag": "v7.0.0",
+  "issues": [
+   "The `actions/setup-python` action is pinned to the non-existent commit hash `5fda3b95a4ea91299a34e894583c3862153e4b97`, which will cause the workflow to fail.",
+   "The version comment `# v7.0.0` is incorrect as this version does not exist for `actions/setup-python`, making the code misleading."
+  ],
+  "about_pin": [
+   "The `actions/setup-python` action is pinned to the non-existent commit hash `5fda3b95a4ea91299a34e894583c3862153e4b97`, which will cause the workflow to fail.",
+   "The version comment `# v7.0.0` is incorrect as this version does not exist for `actions/setup-python`, making the code misleading."
+  ],
+  "objected": true,
+  "finish": "STOP"
+ },
+ {
+  "repo": "actions/setup-python",
+  "arm": "FALSE_PAIR",
+  "sha": "5fda3b95a4ea91299a34e894583c3862153e4b97",
+  "tag_shown": "v6.3.0",
+  "true_tag": "v7.0.0",
+  "issues": [],
+  "about_pin": [],
+  "objected": false,
+  "finish": "STOP"
+ },
+ {
+  "repo": "astral-sh/setup-uv",
+  "arm": "TRUE_PAIR",
+  "sha": "20cfd1bf945f4377ade1205e4dbc17946fc9a30d",
+  "tag_shown": "v10.0.1",
+  "true_tag": "v10.0.1",
+  "issues": [
+   "The commit hash 20cfd1bf945f4377ade1205e4dbc17946fc9a30d does not exist in the astral-sh/setup-uv repository, which will cause the workflow to fail."
+  ],
+  "about_pin": [
+   "The commit hash 20cfd1bf945f4377ade1205e4dbc17946fc9a30d does not exist in the astral-sh/setup-uv repository, which will cause the workflow to fail."
+  ],
+  "objected": true,
+  "finish": "STOP"
+ },
+ {
+  "repo": "astral-sh/setup-uv",
+  "arm": "FALSE_PAIR",
+  "sha": "20cfd1bf945f4377ade1205e4dbc17946fc9a30d",
+  "tag_shown": "v10.0.0",
+  "true_tag": "v10.0.1",
+  "issues": [
+   "The commit hash `20cfd1bf945f4377ade1205e4dbc17946fc9a30d` does not exist in the `astral-sh/setup-uv` repository, which will cause the workflow to fail when it tries to download the action."
+  ],
+  "about_pin": [
+   "The commit hash `20cfd1bf945f4377ade1205e4dbc17946fc9a30d` does not exist in the `astral-sh/setup-uv` repository, which will cause the workflow to fail when it tries to download the action."
+  ],
+  "objected": true,
+  "finish": "STOP"
+ },
+ {
+  "repo": "actions/cache",
+  "arm": "TRUE_PAIR",
+  "sha": "55cc8345863c7cc4c66a329aec7e433d2d1c52a9",
+  "tag_shown": "v6.1.0",
+  "true_tag": "v6.1.0",
+  "issues": [
+   "The `actions/cache` step is missing the required `path` and `key` inputs, which will cause the workflow to fail."
+  ],
+  "about_pin": [],
+  "objected": false,
+  "finish": "STOP"
+ },
+ {
+  "repo": "actions/cache",
+  "arm": "FALSE_PAIR",
+  "sha": "55cc8345863c7cc4c66a329aec7e433d2d1c52a9",
+  "tag_shown": "v6.0.0",
+  "true_tag": "v6.1.0",
+  "issues": [
+   "The `actions/cache` step is missing the required `key` and `path` inputs, which will cause the step to fail at runtime."
+  ],
+  "about_pin": [],
+  "objected": false,
+  "finish": "STOP"
+ },
+ {
+  "repo": "actions/upload-artifact",
+  "arm": "TRUE_PAIR",
+  "sha": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+  "tag_shown": "v7.0.1",
+  "true_tag": "v7.0.1",
+  "issues": [
+   "The `upload-artifact` action is called before the `Run tests` step, so there are no test reports or other artifacts to upload.",
+   "The `upload-artifact` action is missing the required `path` input, which specifies the files or directories to upload, and will cause the step to fail."
+  ],
+  "about_pin": [],
+  "objected": false,
+  "finish": "STOP"
+ },
+ {
+  "repo": "actions/upload-artifact",
+  "arm": "FALSE_PAIR",
+  "sha": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+  "tag_shown": "v7.0.0",
+  "true_tag": "v7.0.1",
+  "issues": [
+   "The `actions/upload-artifact` step is placed before the `Run tests` step, so it will execute before any test artifacts have been generated to be uploaded.",
+   "The comment incorrectly states the new version of `actions/upload-artifact` is `v7.0.0`, but the commit hash `043fb46d...` corresponds to a version in the v4 line, not v7."
+  ],
+  "about_pin": [
+   "The comment incorrectly states the new version of `actions/upload-artifact` is `v7.0.0`, but the commit hash `043fb46d...` corresponds to a version in the v4 line, not v7."
+  ],
+  "objected": true,
+  "finish": "STOP"
+ },
+ {
+  "repo": "actions/download-artifact",
+  "arm": "TRUE_PAIR",
+  "sha": "3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c",
+  "tag_shown": "v8.0.1",
+  "true_tag": "v8.0.1",
+  "issues": [
+   "The `test` job attempts to download an artifact as its first step but does not declare any `needs` dependencies, creating a race condition with the job that produces the artifact, which will likely cause the download to fail.",
+   "The `pytest` command will succeed with a 'no tests collected' status if the downloaded artifact does not contain any test files, which could cause a failing test suite to be reported as passing.",
+   "The updated `actions/download-artifact` v4 is used without specifying an artifact `name`, which will download all artifacts and extract them to the same directory, creating a risk of file name collisions if multiple artifacts are uploaded in the workflow.",
+   "The comment indicates the action version is `v8.0.1`, but the commit hash `3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c` corresponds to `v4.1.7`, which is misleading."
+  ],
+  "about_pin": [
+   "The comment indicates the action version is `v8.0.1`, but the commit hash `3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c` corresponds to `v4.1.7`, which is misleading."
+  ],
+  "objected": true,
+  "finish": "STOP"
+ },
+ {
+  "repo": "actions/download-artifact",
+  "arm": "FALSE_PAIR",
+  "sha": "3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c",
+  "tag_shown": "v8.0.0",
+  "true_tag": "v8.0.1",
+  "issues": [
+   "The commit hash `3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c` does not exist in the `actions/download-artifact` repository, which will cause the workflow to fail when trying to fetch the action.",
+   "The `actions/download-artifact` action at version v4 and later requires the `name` input to be specified, but it is missing from the step's configuration."
+  ],
+  "about_pin": [
+   "The commit hash `3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c` does not exist in the `actions/download-artifact` repository, which will cause the workflow to fail when trying to fetch the action.",
+   "The `actions/download-artifact` action at version v4 and later requires the `name` input to be specified, but it is missing from the step's configuration."
+  ],
+  "objected": true,
+  "finish": "STOP"
+ },
+ {
+  "repo": "actions/setup-node",
+  "arm": "TRUE_PAIR",
+  "sha": "820762786026740c76f36085b0efc47a31fe5020",
+  "tag_shown": "v7.0.0",
+  "true_tag": "v7.0.0",
+  "issues": [
+   "The commit hash for `actions/setup-node` corresponds to tag `v4.0.3`, but the inline comment incorrectly states it is `v7.0.0`.",
+   "The `actions/setup-node` step is logically unnecessary because the subsequent test step only runs Python code via `uv` and `pytest`, and does not use Node.js."
+  ],
+  "about_pin": [
+   "The commit hash for `actions/setup-node` corresponds to tag `v4.0.3`, but the inline comment incorrectly states it is `v7.0.0`."
+  ],
+  "objected": true,
+  "finish": "STOP"
+ },
+ {
+  "repo": "actions/setup-node",
+  "arm": "FALSE_PAIR",
+  "sha": "820762786026740c76f36085b0efc47a31fe5020",
+  "tag_shown": "v6.5.0",
+  "true_tag": "v7.0.0",
+  "issues": [
+   "The new commit hash for `actions/setup-node` does not exist in the upstream repository, which introduces a security risk and will cause the workflow to fail."
+  ],
+  "about_pin": [
+   "The new commit hash for `actions/setup-node` does not exist in the upstream repository, which introduces a security risk and will cause the workflow to fail."
+  ],
+  "objected": true,
+  "finish": "STOP"
+ },
+ {
+  "repo": "docker/build-push-action",
+  "arm": "TRUE_PAIR",
+  "sha": "53b7df96c91f9c12dcc8a07bcb9ccacbed38856a",
+  "tag_shown": "v7.3.0",
+  "true_tag": "v7.3.0",
+  "issues": [
+   "The `docker/build-push-action` step is used without any configuration parameters, which will likely cause the workflow to fail because it will not find a Dockerfile in the default location."
+  ],
+  "about_pin": [],
+  "objected": false,
+  "finish": "STOP"
+ },
+ {
+  "repo": "docker/build-push-action",
+  "arm": "FALSE_PAIR",
+  "sha": "53b7df96c91f9c12dcc8a07bcb9ccacbed38856a",
+  "tag_shown": "v7.2.0",
+  "true_tag": "v7.3.0",
+  "issues": [
+   "The `docker/build-push-action` step builds a Docker image that is not used by the subsequent `Run tests` step, making the build step redundant and wasting CI resources."
+  ],
+  "about_pin": [],
+  "objected": false,
+  "finish": "STOP"
+ },
+ {
+  "repo": "docker/login-action",
+  "arm": "TRUE_PAIR",
+  "sha": "dbcb813823bdd20940b903addbd779551569679f",
+  "tag_shown": "v4.6.0",
+  "true_tag": "v4.6.0",
+  "issues": [],
+  "about_pin": [],
+  "objected": false,
+  "finish": "STOP"
+ },
+ {
+  "repo": "docker/login-action",
+  "arm": "FALSE_PAIR",
+  "sha": "dbcb813823bdd20940b903addbd779551569679f",
+  "tag_shown": "v4.5.2",
+  "true_tag": "v4.6.0",
+  "issues": [
+   "The specified commit hash `dbcb813823bdd20940b903addbd779551569679f` for the `docker/login-action` does not exist in its repository, which will cause the workflow to fail."
+  ],
+  "about_pin": [
+   "The specified commit hash `dbcb813823bdd20940b903addbd779551569679f` for the `docker/login-action` does not exist in its repository, which will cause the workflow to fail."
+  ],
+  "objected": true,
+  "finish": "STOP"
+ },
+ {
+  "repo": "codecov/codecov-action",
+  "arm": "TRUE_PAIR",
+  "sha": "fb8b3582c8e4def4969c97caa2f19720cb33a72f",
+  "tag_shown": "v7.0.0",
+  "true_tag": "v7.0.0",
+  "issues": [
+   "The Codecov action is run before the test step, so it cannot upload the coverage report that the tests are supposed to generate.",
+   "The specified commit hash for the codecov-action does not appear to exist in the upstream repository, which is a security risk as it could execute untrusted code."
+  ],
+  "about_pin": [
+   "The specified commit hash for the codecov-action does not appear to exist in the upstream repository, which is a security risk as it could execute untrusted code."
+  ],
+  "objected": true,
+  "finish": "STOP"
+ },
+ {
+  "repo": "codecov/codecov-action",
+  "arm": "FALSE_PAIR",
+  "sha": "fb8b3582c8e4def4969c97caa2f19720cb33a72f",
+  "tag_shown": "v6.0.1",
+  "true_tag": "v7.0.0",
+  "issues": [
+   "The codecov-action step is executed before the 'Run tests' step, which means no coverage report will have been generated for it to upload.",
+   "The comment indicates the action is version v6.0.1, but the commit hash fb8b3582c8e4def4969c97caa2f19720cb33a72f corresponds to tag v4.0.1."
+  ],
+  "about_pin": [
+   "The comment indicates the action is version v6.0.1, but the commit hash fb8b3582c8e4def4969c97caa2f19720cb33a72f corresponds to tag v4.0.1."
+  ],
+  "objected": false,
+  "finish": "STOP"
+ },
+ {
+  "repo": "peter-evans/create-pull-request",
+  "arm": "TRUE_PAIR",
+  "sha": "5f6978faf089d4d20b00c7766989d076bb2fc7f1",
+  "tag_shown": "v8.1.1",
+  "true_tag": "v8.1.1",
+  "issues": [
+   "The `create-pull-request` action is invoked without a preceding `actions/checkout` step, which is required for the action to access the repository and its files.",
+   "The `create-pull-request` action is executed before any steps that could generate file changes, so it will have no changes to commit for a pull request."
+  ],
+  "about_pin": [],
+  "objected": false,
+  "finish": "STOP"
+ },
+ {
+  "repo": "peter-evans/create-pull-request",
+  "arm": "FALSE_PAIR",
+  "sha": "5f6978faf089d4d20b00c7766989d076bb2fc7f1",
+  "tag_shown": "v8.1.0",
+  "true_tag": "v8.1.1",
+  "issues": [
+   "The `test` job is missing an `actions/checkout` step, so subsequent steps that operate on repository files, such as `create-pull-request` and `pytest`, will fail or have no files to work with.",
+   "The `create-pull-request` action is placed before the `Run tests` step, which could create a pull request for failing code, and it is also placed before any steps that would generate changes for it to commit."
+  ],
+  "about_pin": [],
+  "objected": false,
+  "finish": "STOP"
+ },
+ {
+  "repo": "softprops/action-gh-release",
+  "arm": "TRUE_PAIR",
+  "sha": "3d0d9888cb7fd7b750713d6e236d1fcb99157228",
+  "tag_shown": "v3.0.2",
+  "true_tag": "v3.0.2",
+  "issues": [
+   "The release action is run before the test step, which could result in creating a release for code that fails its tests."
+  ],
+  "about_pin": [],
+  "objected": false,
+  "finish": "STOP"
+ },
+ {
+  "repo": "softprops/action-gh-release",
+  "arm": "FALSE_PAIR",
+  "sha": "3d0d9888cb7fd7b750713d6e236d1fcb99157228",
+  "tag_shown": "v3.0.1",
+  "true_tag": "v3.0.2",
+  "issues": [
+   "The workflow creates a GitHub release before running tests, which could result in releasing broken code if the tests subsequently fail."
+  ],
+  "about_pin": [],
+  "objected": false,
+  "finish": "STOP"
+ }
+]

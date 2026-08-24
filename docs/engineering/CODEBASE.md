@@ -1303,3 +1303,13 @@ never observed in production renders `-`, never anything resembling good news.
 
 `quantamind dashboard <owner/name>` prints it. Labels will be thin: ~24 reviewed changes a month at
 200 PRs and 12% firing, and incidents that trace to one are a handful a quarter.
+
+### `bench/forensic/confabulation.py` — the dominant failure mechanism, tested live
+
+31.1% of real wrong findings are claims about which tag a pinned commit SHA carries. Tested rather
+than argued: 12 real GitHub Actions, each SHA fetched from the API during the run, each shown to
+the shipped prompt twice — once with the tag it genuinely carries, once with one it does not.
+
+**Objected to 6/12 correct pairings and 5/12 wrong ones: discrimination −8.3%, no signal.** In 7 of
+24 trials it stated the SHA does not exist; every one had been fetched from GitHub minutes earlier.
+→ `docs/product/reviewer/why-the-comments-are-false.md`
