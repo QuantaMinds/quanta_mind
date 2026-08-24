@@ -22,6 +22,10 @@ VOLATILE: dict[str, set[str]] = {
     # Every other column of `review` is derived from the diff and the history, so only this one
     # is excluded -- a whole-table exclusion would hide a real change in fire_decision.
     "review": {"created_at"},
+    # store.lifecycle stamps when we LOOKED, which is a clock reading. `merged_at` is NOT here:
+    # it is GitHub's timestamp for an event that happened, and two builds must agree on it.
+    "lifecycle": {"observed_at"},
+    "prod_signal": {"observed_at"},
 }
 
 

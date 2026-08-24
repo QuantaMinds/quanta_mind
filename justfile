@@ -118,8 +118,9 @@ verify: check test-live verify-no-source-leak verify-pack-vs-git verify-determin
     @echo ""
     @echo "✅ verify passed — the pipeline ran against real repositories and the pack holds no source."
     @echo "   Every pack row was recomputed from git per path, so this is not a self-comparison."
-    @echo "   NOT covered: the SERIALISED form -- schema shape, row ordering, path encoding --"
-    @echo "   which a byte-level golden would catch and a recomputation looks straight past."
+    @echo "   The SERIALISED form -- DDL text and column order -- is NOT covered here and does"
+    @echo "   not need to be: tests/unit/layers/store/test_schema_golden.py holds it byte for"
+    @echo "   byte, and requires a migrated store to equal a fresh one. Run just check for it."
 
 # Runs the full pipeline against real repositories. No mocks, by guard rule.
 test-live:

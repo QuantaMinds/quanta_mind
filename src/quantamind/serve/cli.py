@@ -41,6 +41,12 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command")
 
     subparsers.add_parser("config", help="print the resolved configuration and exit")
+    subparsers.add_parser("migrate", help="bring an existing store up to this build's schema")
+    show = subparsers.add_parser(
+        "dashboard", help="what we commented on, whether it merged, what production said"
+    )
+    show.add_argument("repo", help="owner/name, as recorded")
+    show.add_argument("--limit", type=int, default=100)
     listen = subparsers.add_parser(
         "serve", help="authenticate and de-duplicate GitHub webhooks over HTTP"
     )
@@ -150,6 +156,16 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.command == "retrospective":
         return _retrospective(args.clone, args.repo)
+
+    if args.command == "migrate":
+        from quantamind.serve.run_migrate import run_migrate
+
+        return run_migrate()
+
+    if args.command == "dashboard":
+        from quantamind.serve.run_dashboard import run_dashboard
+
+        return run_dashboard(args.repo, args.limit)
 
     try:
         settings = load()
