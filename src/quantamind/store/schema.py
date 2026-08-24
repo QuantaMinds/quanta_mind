@@ -41,7 +41,7 @@ from pathlib import Path
 from quantamind.store import drift
 
 # Bump on ANY change to the DDL below, and write a migration. There is no in-place edit.
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 # `finding` and `claim` exist because adding a table later is a migration, and the schema is
 # append-only. NOTHING WRITES TO THEM: `infer/` is closed on evidence and publishes no findings.
@@ -62,6 +62,20 @@ TABLES: tuple[str, ...] = (
         review_id INTEGER NOT NULL REFERENCES review(id), unit_path TEXT NOT NULL,
         unit_name TEXT, rank INTEGER NOT NULL, score REAL NOT NULL, percentile REAL,
         allocation TEXT NOT NULL, PRIMARY KEY (review_id, unit_path, rank))""",
+    # What happened to the change AFTER we spoke. Separate from `review` because `review` records
+    # a decision we made at one instant and this records facts that arrive later and change --
+    # and because adding columns to an existing table by ALTER produces DDL text that differs from
+    # a freshly created one in ways `drift` reports and nobody would predict.
+    """CREATE TABLE IF NOT EXISTS lifecycle (
+        review_id INTEGER PRIMARY KEY REFERENCES review(id), posted_at INTEGER,
+        merge_state TEXT NOT NULL DEFAULT 'unknown', merged_at INTEGER,
+        observed_at INTEGER NOT NULL)""",
+    # One row per observation, never one row per review: "still running" is a statement about an
+    # instant, and overwriting it would destroy the only evidence of what it said before it broke.
+    """CREATE TABLE IF NOT EXISTS prod_signal (
+        id INTEGER PRIMARY KEY, review_id INTEGER NOT NULL REFERENCES review(id),
+        observed_at INTEGER NOT NULL, state TEXT NOT NULL, source TEXT NOT NULL,
+        detail TEXT NOT NULL DEFAULT '')""",
     """CREATE TABLE IF NOT EXISTS finding (
         id INTEGER PRIMARY KEY, review_id INTEGER NOT NULL REFERENCES review(id),
         unit_path TEXT NOT NULL, kind TEXT NOT NULL, body TEXT NOT NULL,

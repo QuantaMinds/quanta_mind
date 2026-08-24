@@ -1267,3 +1267,39 @@ is a library function returning a value, `review_commit()` is an entry point tha
 Still unwritten and still needed for the dashboard: **merge status** and **production outcome**.
 Those need a schema change, which will fire `check_schema_shape.py` and require the byte-level
 golden — as designed.
+
+### Schema version 3 — `lifecycle`, `prod_signal`, and the golden the guard demanded
+
+`check_schema_shape.py` fired on the first real DDL change, one day after it was built, and named
+the three things required. All three exist.
+
+- **`store/migrations.py`** — `quantamind migrate`, an explicit operator command. `open_store()`
+  still refuses a store at the wrong version rather than migrating it: migrating production data
+  is a decision made once against a backup. `migrate()` runs `drift.differences()` at the end and
+  rolls back if it reports anything, because a step that runs without raising has still failed if
+  the result is not what this build creates.
+- **`tests/fixtures/schema_golden.json`** + `test_schema_golden.py` — the DDL text and per-table
+  column order, byte for byte, plus **a migrated-from-v2 store must equal a fresh one**. Proven by
+  swapping two columns in `prod_signal`: the golden failed and **ten value-level schema tests
+  passed straight through it.**
+- **Version 3 adds tables and alters none.** `ALTER TABLE ADD COLUMN` splices the column in before
+  the `UNIQUE` clause on whatever line that lands on — DDL text nobody would predict. It is also
+  the better model: `review` records a decision made at an instant, `lifecycle` and `prod_signal`
+  record facts that arrive later and change.
+
+### `store/lifecycle.py` + `render/dashboard.py` — the outcome table
+
+**The only measurement here that does not need the comment to be right.** Whether a finding was
+good is a judgement; whether the change we pointed at merged and later broke is an outcome.
+
+`prod_signal` is a log, not a column — "still running" is a claim about an instant, and overwriting
+it destroys the only evidence of what a service looked like before it broke. Nothing is backfilled
+and `unknown` is never invented: no lifecycle row means we have not looked, `unknown` means we
+looked and could not tell.
+
+`Board.thin()` reports when there are too few rows to read a proportion, and `dashboard.table()`
+renders it **before** the rows — a caveat under a table is read second or not at all. A change
+never observed in production renders `-`, never anything resembling good news.
+
+`quantamind dashboard <owner/name>` prints it. Labels will be thin: ~24 reviewed changes a month at
+200 PRs and 12% firing, and incidents that trace to one are a handful a quarter.
