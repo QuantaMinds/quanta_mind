@@ -39,7 +39,7 @@ three months stale.
 | layer | modules | files |
 |---|---|---|
 | `types/` | **10** | `change.py`, `commit.py`, `finding.py`, `pooled_outcome.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `settings.py`, `touch.py`, `verdict.py` |
-| `store/` | **5** | `calibration.py`, `deliveries.py`, `drift.py`, `schema.py`, `touches.py` |
+| `store/` | **6** | `calibration.py`, `deliveries.py`, `drift.py`, `reviews.py`, `schema.py`, `touches.py` |
 | `ingest/` | **4** | `commits.py`, `diff.py`, `github_comments.py`, `history.py` |
 | `parse/` | **2** | `languages.py`, `units.py` |
 | `rank/` | **6** | `baseline.py`, `events.py`, `firing.py`, `history_rates.py`, `order.py`, `score.py` |
@@ -47,7 +47,7 @@ three months stale.
 | `infer/` | **1** | `gemini.py` |
 | `verify/` | **1** | `anchor.py` |
 | `render/` | **3** | `comment.py`, `coverage_line.py`, `replay_report.py` |
-| `serve/` | **10** | `cli.py`, `deep_review.py`, `health.py`, `listener.py`, `retrospective.py`, `review_delivery.py`, `run_endpoint.py`, `run_review.py`, `webhook_github.py`, `working_clone.py` |
+| `serve/` | **11** | `cli.py`, `deep_review.py`, `health.py`, `listener.py`, `retrospective.py`, `review_delivery.py`, `run_commit.py`, `run_endpoint.py`, `run_review.py`, `webhook_github.py`, `working_clone.py` |
 
 <!-- plan-state:end -->
 

@@ -29,6 +29,8 @@ from pathlib import Path
 import pytest
 
 from quantamind.serve.review_delivery import Outcome, deliver
+from quantamind.store.reviews import recent
+from quantamind.store.schema import open_store
 from quantamind.types.settings import Settings
 
 REPO = "psf/requests"
@@ -76,3 +78,26 @@ def test_the_join_runs_end_to_end_and_posts_nothing(tmp_path: Path) -> None:
     else:
         assert done.body is None, f"{done.outcome.value} must carry no comment body"
     assert done.sentence(), "every outcome reports what it did"
+
+    # **The review must be ON DISK, not merely computed.** `review` and `ranked_unit` sat in the
+    # schema with zero writers, so the pipeline ran and left no trace it had; a dashboard has
+    # nothing to draw on until this row exists.
+    conn = open_store(Path(settings.database_path))
+    try:
+        repo_id = int(conn.execute("SELECT id FROM repo").fetchone()[0])
+        stored = recent(conn, repo_id)
+        assert stored, "the review ran but nothing was recorded"
+        assert stored[0].pr_number == NUMBER
+        assert stored[0].units == len(done.considered), (
+            "every ranked unit must be stored, COLD ones included — a table holding only the "
+            "units we spoke about cannot be asked whether the quiet ones were right"
+        )
+        assert 0 <= stored[0].read <= stored[0].units
+
+        # A redelivery is a normal event and must not double any count.
+        deliver(REPO, NUMBER, "0" * 40, settings)
+        again = recent(conn, repo_id)
+        assert len(again) == len(stored), "a redelivery added a second review row"
+        assert again[0].units == stored[0].units, "a redelivery doubled the ranked units"
+    finally:
+        conn.close()

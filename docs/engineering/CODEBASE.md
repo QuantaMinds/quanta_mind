@@ -1244,3 +1244,26 @@ guard hashes the DDL and fails the first time it moves, naming what that moment 
 Proven by reordering two columns in `repo` — a change a value-recomputation looks straight past —
 and watching the digest move from `d70a616667…` to `97a0a709ad…`. Sabotage confirmed applied,
 restore confirmed clean.
+
+### `store/reviews.py` — the product now writes down that it reviewed
+
+**`review` and `ranked_unit` had existed since the schema was written and had ZERO writers.** So did
+`outcome`, `reaction`, `finding` and `shadow_pick`. The product ranked, rendered, posted, and kept
+no record that any of it happened.
+
+That — not a missing Datadog integration — is why "what we commented on, whether it merged, whether
+it is still running" could not be built: there was nothing for an incident to be joined **to**.
+
+`record()` stores one `review` row and one `ranked_unit` row per unit, **cold ones included**,
+because a table holding only the units we spoke about cannot be asked whether the quiet ones were
+right. It is idempotent on `(repo, pr, head_sha)` — the same key `github_comments` uses — since a
+redelivered webhook is ordinary and a second row would double every count computed from it.
+`review.created_at` is registered in `scripts/verify/volatile.py`; the other columns are derived
+from the diff and history and stay in the determinism digest.
+
+`serve/run_commit.py` was split out of `run_review.py`, which crossed the 200-line cap: `review()`
+is a library function returning a value, `review_commit()` is an entry point that prints.
+
+Still unwritten and still needed for the dashboard: **merge status** and **production outcome**.
+Those need a schema change, which will fire `check_schema_shape.py` and require the byte-level
+golden — as designed.
