@@ -90,6 +90,10 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
         changed,
         Path(settings.database_path),
         as_of=base.committed_at,
+        # **Passed so the review is RECORDED.** Without these the ranking runs and leaves no row,
+        # which is how `review` and `ranked_unit` sat in the schema with zero writers.
+        pr_number=number,
+        head_sha=head_sha,
     )
 
     if reviewed.body is None:

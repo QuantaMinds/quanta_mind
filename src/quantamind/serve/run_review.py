@@ -31,6 +31,7 @@ NAMED: `run_review`, not `review`. `types/review.py` already defines `Review`, t
 from __future__ import annotations
 
 import sqlite3
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -38,8 +39,7 @@ from quantamind.ingest.history import read_touches
 from quantamind.rank import firing
 from quantamind.rank.order import NothingToRank, rank
 from quantamind.render.comment import comment
-from quantamind.serve.deep_review import report
-from quantamind.store import calibration, schema
+from quantamind.store import calibration, reviews, schema
 from quantamind.store import touches as touch_store
 from quantamind.types.change import REVIEWABLE_SUFFIXES, Language, language_of
 from quantamind.types.ranking import Ranking
@@ -86,6 +86,17 @@ def _index(clone: Path, repo: str, store_path: Path) -> tuple[sqlite3.Connection
     return conn, repo_id
 
 
+def _coverage(ranking: Ranking) -> float | None:
+    """Share of ranked units that were read. None when nothing was ranked.
+
+    None rather than 0.0: "we ranked nothing" and "we ranked things and read none of them" are
+    different facts, and storing both as zero would make the second invisible in any average.
+    """
+    if not ranking.units:
+        return None
+    return 1.0 - len(ranking.cold()) / len(ranking.units)
+
+
 def review(
     clone: Path,
     repo: str,
@@ -93,6 +104,8 @@ def review(
     store_path: Path,
     *,
     as_of: int,
+    pr_number: int | None = None,
+    head_sha: str = "",
 ) -> Reviewed:
     """Rank `changed` against `clone`'s history before `as_of`, and render the comment.
 
@@ -119,66 +132,29 @@ def review(
         # customer's history, not of the product: measured 6.3-31.0% across five repositories. A
         # rate quoted from a document is an average nobody receives, so it is computed here.
         forecast = firing.estimate(conn, repo_id, as_of=as_of)
+
+        try:
+            ranking = rank(scores, baseline=floor)
+        except NothingToRank:
+            return Reviewed(None, Ranking(), tuple(considered), tuple(skipped), forecast)
+
+        # **RECORDED BEFORE IT IS RENDERED, AND RECORDED EVEN WHEN WE DO NOT SPEAK.** `review` and
+        # `ranked_unit` sat in the schema with zero writers, so the product ranked, posted and kept
+        # no record that any of it happened -- which is why "what did it say, and did any of it
+        # matter" has never had an answer. A row exists for a silent review too: a ranking that
+        # chose not to fire is a decision, and a table holding only the loud ones cannot be asked
+        # whether the quiet ones were right.
+        if pr_number is not None:
+            reviews.record(
+                conn,
+                repo_id,
+                pr_number,
+                head_sha,
+                ranking,
+                at=int(time.time()),
+                coverage_pct=_coverage(ranking),
+            )
     finally:
         conn.close()
 
-    try:
-        ranking = rank(scores, baseline=floor)
-    except NothingToRank:
-        return Reviewed(None, Ranking(), tuple(considered), tuple(skipped), forecast)
-
     return Reviewed(comment(ranking), ranking, tuple(considered), tuple(skipped), forecast)
-
-
-def review_commit(clone: Path, repo: str, sha: str, *, deep_project: str = "") -> int:
-    """`quantamind review` — rank one commit's files against history strictly before it.
-
-    Prints the comment body, or says plainly that the change is not worth speaking on. **It posts
-    nothing**: this is the command a sceptic runs before granting any access, so it reads a clone
-    and writes to stdout.
-    """
-    from tempfile import TemporaryDirectory
-
-    if not (clone / ".git").exists():
-        print(f"{clone} is not a git clone; a review reads history and nothing else")
-        return 1
-    stamp = _timestamp(clone, sha)
-    if stamp is None:
-        print(f"{sha[:12]} is not in {clone}, or has no reviewable files")
-        return 1
-    changed, as_of = stamp
-    with TemporaryDirectory() as scratch:
-        out = review(clone, repo, changed, Path(scratch) / "review.db", as_of=as_of)
-    print(
-        f"[review] {len(out.considered)} file(s) ranked, {len(out.skipped)} skipped as unsupported"
-    )
-    if out.forecast is not None:
-        print(f"[review] {out.forecast.sentence()}")
-        if out.forecast.selectivity is not firing.Selectivity.SELECTIVE:
-            print(f"[review] SELECTIVITY: {out.forecast.selectivity.value.upper()}")
-    if out.body is None:
-        print("[review] not worth speaking on — no comment would be posted")
-        return 0
-    print(out.body)
-    if deep_project:
-        report(clone, sha, out, deep_project)
-    return 0
-
-
-def _timestamp(clone: Path, sha: str) -> tuple[list[str], int] | None:
-    """The reviewable files a commit changed, and its time. None when the commit is unknown."""
-    import subprocess
-
-    done = subprocess.run(
-        ["git", "-C", str(clone), "show", "--name-only", "--format=%ct", sha],
-        capture_output=True,
-        text=True,
-        timeout=60,
-    )
-    if done.returncode != 0:
-        return None
-    lines = [x for x in done.stdout.splitlines() if x.strip()]
-    if not lines:
-        return None
-    changed = [p for p in lines[1:] if p.endswith(REVIEWABLE_SUFFIXES)]
-    return changed, int(lines[0])

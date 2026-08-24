@@ -144,7 +144,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return run(args.port)
 
     if args.command == "review":
-        from quantamind.serve.run_review import review_commit
+        from quantamind.serve.run_commit import review_commit
 
         return review_commit(args.clone, args.repo, args.sha, deep_project=args.deep)
 

@@ -18,6 +18,10 @@ VOLATILE: dict[str, set[str]] = {
     "repo": {"first_seen"},
     # store.deliveries stamps both from time.time().
     "delivery": {"started_at", "completed_at"},
+    # store.reviews stamps when WE reviewed, which is genuinely a clock reading and not data.
+    # Every other column of `review` is derived from the diff and the history, so only this one
+    # is excluded -- a whole-table exclusion would hide a real change in fire_decision.
+    "review": {"created_at"},
 }
 
 
