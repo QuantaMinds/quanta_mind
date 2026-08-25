@@ -1372,3 +1372,21 @@ the same escape.
 Step 0 measures each oracle's own accuracy on live data **before** it is wired in — four instrument
 bugs across three fixes say that is not optional, and a model reasoning from a bad fact produces a
 well-grounded false finding that is harder to catch than confabulation.
+
+### The conversational arm — PASSED, and what it left behind
+
+`bench/forensic/conversational_arm.py` + `conversing.py`. The model asks, an oracle answers with a
+**fact** (never a verdict), and the model re-decides given the fact — never asked whether it was
+right, which is the lever measured five times at 8.5–16.8% retained discrimination.
+
+**29/45 asked (bar 60%), 21/29 settled (bar 50%), 18/45 dropped, 1 of 7 correct lost (bar ≤1).**
+Chance null cleared: random suppression at a 40% drop rate predicts losing 2.8 of 7.
+
+**Its first two runs measured the harness**, and both are recorded: a verifier was asked to resolve
+a question (a question asserts nothing), and the answerer had no date oracle while eight questions
+said "the given commit hash" without naming it.
+
+**16 of the 45 asked nothing at all** — "does this loop terminate" has no authority to ask. That
+residue is what `execution-grounding-preregistration.md` addresses, and that document leads with
+the problem it must confront: **our own execution gate INVERTED at p = 0.001 controlling for
+length**, so the "it only proves simple code" explanation is already half-refuted.
