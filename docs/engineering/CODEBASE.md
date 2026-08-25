@@ -1451,3 +1451,24 @@ Python repos, only **2%** of merged pull requests have ≥8 files *and* inline r
 **And it says something about the product:** "forty files land in your queue" is the tail, not the
 median. Ordering value concentrates in the ~6% of pull requests that are large — close to the firing
 gate's own 8–15%.
+
+### Half B's best measured configuration is now the shipped one
+
+`deep_review.deep()` was anchoring only. It now runs **anchor → oracle → settle**, ordered by cost:
+anchoring is local and free, an oracle is one network call, settling is two model calls.
+
+- **`verify/publishable.py`** — the oracle gate. `UNRESOLVABLE` drops the finding, because a claim
+  we could not check is not one we publish.
+- **`serve/settle.py`** — the conversational loop, the one filter that cleared its pre-registered
+  bars: **18 of 45 wrong findings dropped for 1 of 7 correct lost**, against a chance null of 2.8.
+  The model is never asked whether it was right — it is asked what would settle the claim, handed
+  the fact, and asked whether the finding still stands.
+- **`infer/prompt_once.py`** — `ask()`, split from `read()` because it parses nothing.
+
+**A settle that cannot run KEEPS the finding.** Dropping on failure would make an outage look like
+a filter working.
+
+**KNOWN GAP: the SHA→tag oracle cannot fire on the shipped path.** `.yml` is not in
+`REVIEWABLE_SUFFIXES`, so a workflow file never reaches `deep()` and `pins(diff)` is always empty.
+It was measured 24/24 on constructed workflow diffs and is unreachable where it is wired. The
+release oracle and the settle loop are both reachable and both fire.
