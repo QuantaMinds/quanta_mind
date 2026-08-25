@@ -1313,3 +1313,35 @@ the shipped prompt twice — once with the tag it genuinely carries, once with o
 **Objected to 6/12 correct pairings and 5/12 wrong ones: discrimination −8.3%, no signal.** In 7 of
 24 trials it stated the SHA does not exist; every one had been fetched from GitHub minutes earlier.
 → `docs/product/reviewer/why-the-comments-are-false.md`
+
+### `verify/external_facts.py` + `verify/pin_mismatch.py` — fix 1 of the failure taxonomy
+
+The SHA→tag class is 14 of 45 real wrong findings (31%), the single largest. Measured live: the
+shipped prompt objects to 6 of 12 **correct** pin/tag pairings and 5 of 12 wrong ones —
+**discrimination −8.3%**, a coin flip.
+
+- **`external_facts.adjudicate()`** is the verifier. Three verdicts, never two: `REFUTED`,
+  `CONFIRMED`, `UNRESOLVABLE` — and **`UNRESOLVABLE` drops the finding**, because collapsing it into
+  `CONFIRMED` reproduces the exact failure being fixed. `Adjudicated.reachable` is False when GitHub
+  did not answer, so a gate that drops everything because the network is down cannot read as a gate
+  working perfectly.
+- **The SHA comes from the diff, not the model's prose.** The model writes "the new commit SHA for
+  `actions/checkout` does not correspond to a known commit" without saying which. Resolving only
+  quoted SHAs left 7 of 15 findings unadjudicated; reading the pin from the diff took REFUTED from
+  4 to 7.
+- **`pin_mismatch.detect()` is not a verifier.** It reads the diff, resolves each pin, and states a
+  mismatch itself — a finding from a parser and an API, which no model was asked about. **24 of 24
+  on the live trials: fired on all 12 wrong comments, silent on all 12 correct ones.**
+
+**Whether it fires on a real pull request is unmeasured.** Those trials were built to contain
+mismatches. If the base rate in the wild is zero, the detector is correct and useless.
+
+### `bench/forensic/pin_prevalence.py` — the falsification that came before the build
+
+1,259 commented pins from 22 repositories at HEAD. **Genuine mismatch rate 0.24%** (3 of 1,244
+resolvable) once the major-alias convention is honoured; 1.05% under exact matching.
+
+Running it first is what caught two defects in the shipped oracle: `tags_at` parsed the tag list
+line-by-line when GitHub returns one line of compact JSON, and the rule demanded exact tag equality
+when `# v6` on a `v6.4.0` commit is convention. **They flagged 13 pins of which 10 were correct — a
+77% false positive rate, worse than the model.** Both fixed and tested.
