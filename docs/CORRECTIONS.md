@@ -8,6 +8,66 @@ should write them.** Numbering starts at 6 so the gap stays visible.
 
 ---
 
+## 9 · The rule was written down, and I broke it anyway, all week
+
+`docs/product/publishing-rules.md` says:
+
+> **Never quote a competitor's ONLINE precision beside one of our own numbers.** Martian's
+> leaderboard precision is *behavioural* — did the developer make the change — and our adjudication
+> measured whether a claim is *true and anchored*. **That band is quotable about them, never as a
+> backdrop for us.**
+
+And, as an explicit condition: **"offline and online figures must never appear in the same table."**
+
+**Across this week I compared our 5.8% strict-adjudication correct-rate against "a 49% field floor"
+repeatedly** — in conversation, in the execution pre-registration's bars, and in
+`why-the-correct-rate-is-low.md`, which was committed with the sentence *"The field floor is 49%.
+The best slice of anything is 13.0%."*
+
+### The two quantities
+
+- **49–76%** is Martian's ONLINE layer: **did a developer change the code.** Behavioural.
+- **5.8%** is a blind hand-adjudication of **whether the claim is true.**
+
+They are not the same question about the same population, and the gap between them is not a gap in
+performance.
+
+### What the comparable numbers actually are
+
+Martian's OFFLINE layer scores every tool against the same 50 pull requests and the same
+human-verified issues: **Greptile 56.5%, ours 43.6%, CodeRabbit 36.5%** — ours corrected to ~37.1%
+for out-of-family judging. **At level with CodeRabbit, behind Greptile.**
+
+**And the 5.8% has no comparator at all.** A search of the August 2026 literature found no
+published strict-adjudication rate for any tool: the field reports behavioural exact-match (best
+published research result **28.0%**) or benchmark matching against planted defects (best tool
+**F1 47%** over 8 tools and 67 real bugs). **Nobody publishes the number we hold ourselves to.**
+
+### Why it survived so long
+
+**Because it made the case stronger.** "43 points below the worst tool in the field" is a more
+decisive sentence than "our strictest instrument has no comparator", and the decision it supported
+— closing Half B — was correct on other grounds. **A wrong argument for a right conclusion is the
+hardest kind to notice**, and this project has entry 6 on record for the same shape: the defect
+that made the result more publishable was the one nobody re-examined.
+
+### What does NOT change
+
+The closure. **The stricter measurement governs shipping** — that rule is also written down — and
+12 correct of 207 is the stricter measurement. The yield argument, one useful comment per 27 to 77
+pull requests, is instrument-independent. **What changes is one sentence that was never
+supportable**, not the decision it was used to support.
+
+### The rule this leaves
+
+**A rule already written is not a rule already followed.** `check_decided_vocabulary.py` exists
+because decisions drift in the sentence people quote; this one drifted the same way, and the guard
+does not cover `publishing-rules.md`'s bans. **When a comparison makes the argument notably
+stronger, that is the moment to check both sides are the same instrument** — not after it has been
+committed.
+
+---
+
 ## 8 · A verifier that fails toward CONFIRMING is worse than no verifier
 
 **This is the most dangerous defect in this log, and it shipped as a fix for a different one.**

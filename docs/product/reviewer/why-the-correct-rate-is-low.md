@@ -18,7 +18,23 @@ keep the strong part. **It is not.** Best correct-rate on any factor, at n ≥ 1
 | is_test | source, not test | 96 | 8 | 8.3% |
 | unit size | ≤ 20 lines | 85 | 6 | 7.1% |
 
-**The field floor is 49%. The best slice of anything is 13.0%.**
+**The best slice of anything is 13.0%.**
+
+**AND IT IS NOT COMPARED TO 49%, THOUGH THIS DOCUMENT DID SO WHEN FIRST WRITTEN.**
+`docs/product/publishing-rules.md` bars exactly that: *"Never quote a competitor's ONLINE precision
+beside one of our own numbers… That band is quotable about them, never as a backdrop for us."* The
+49–76% band is **behavioural** — did a developer change the code. Our 5.8% is a blind
+adjudication of whether a claim is *true*. Two instruments, one column, and it is the fourth
+instance of that defect in this project.
+
+**The comparable layer is Martian's offline scoring**, where every tool meets the same 50 pull
+requests and the same human-verified issues: **Greptile 56.5%, ours 43.6%, CodeRabbit 36.5%** —
+corrected to ~37.1% for out-of-family judging, so *at level with CodeRabbit, behind Greptile*.
+
+**And the 5.8% has no comparator at all.** No rival has ever been put through a strict blind
+adjudication of whether its findings are true, by us or in the published literature. What that
+number licenses is a decision about *our own* shipping — under the rule that when two measurements
+disagree the stricter one governs — and nothing whatever about a gap to anyone else.
 
 There is no category, no design, no repository, and no function size where this reviewer approaches
 usable. **A filter selects a subset, and every subset is bad.**
@@ -83,7 +99,7 @@ again — measured directly at a **17.3% redundancy rate against Qodo's 1.0%.**
 what was generated and the correct findings were never generated in the first place.
 
 The arithmetic is the same statement in another form: delete all 135 wrong findings and 72 remain,
-12 of them correct — **16.7% against a floor of 49%.**
+12 of them correct — **16.7%**, against our own 5.8% and no external comparator on this instrument.
 
 ## The one mechanism that could change it, and its status
 
@@ -107,8 +123,9 @@ the model's capacity to author a proof rather than for the defect being real, is
 
 ## The shape of the conclusion
 
-1. **It is right about 6% of the time**, and there is no slice of the data where that is better than
-   13%.
+1. **It is right about 6% of the time under strict adjudication**, and there is no slice of the data
+   where that is better than 13%. That instrument has no published comparator — the field's numbers
+   are behavioural or benchmark-match, and on the comparable one we are level with CodeRabbit.
 2. **Nothing anyone deletes raises it** — proven four ways: no good subset, the not-wrong/useful
    axes diverging, four designs moving one axis and not the other, and the 16.7% perfect-filter
    ceiling.

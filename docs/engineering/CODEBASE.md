@@ -1415,3 +1415,17 @@ answers why no filter has helped:
 - **Volume is not coverage**: we emit 194 and cover 81 goldens; Qodo emits 152 and covers 98.
 
 **It is a generation failure and every mechanism tried has been a filter.**
+
+### `docs/plans/feat-execution-corpus.md` — the one road that is UNTESTED, and its price
+
+The Aug 2026 field: best published research on LLM code review is **28.0% RefineEM** (behavioural),
+best tool against planted ground truth is **F1 47%**, and **no strict-adjudication rate is published
+by anyone**. The same paper reproduces our hunk-expansion null — a third context type
+*underperformed* two, "additional context can redirect attention away from recoverable issues."
+
+So the plan is not a fix. It is a corpus specification that unblocks execution grounding: findings
+about **source** (not tests — the suite would be the subject of the claim), lines **covered** by an
+existing suite, **≥30 correct findings** so a hard stop is a bar and not a coin flip, labelled by
+someone who did not write the definition.
+
+**A pass would establish transfer, not confirm a known result — and it would not move the yield.**
