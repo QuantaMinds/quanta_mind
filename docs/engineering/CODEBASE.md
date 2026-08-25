@@ -1472,3 +1472,21 @@ a filter working.
 `REVIEWABLE_SUFFIXES`, so a workflow file never reaches `deep()` and `pins(diff)` is always empty.
 It was measured 24/24 on constructed workflow diffs and is unreachable where it is wired. The
 release oracle and the settle loop are both reachable and both fire.
+
+### `serve/pin_check.py` + `render/pin_block.py` — the detector, wired where it can fire
+
+The pin detector was measured 24/24 and put behind `deep_review.deep()`, which is shown only ranked
+files — and `.yml` is not a reviewable suffix, so a workflow is filtered into `skipped` before the
+reviewer exists. `pins(diff)` was always empty.
+
+**It never needed the reviewer.** `detect()` reads a diff and asks GitHub; no model is consulted. It
+now runs on the **raw changed-file list**, beside the ranking rather than inside it.
+
+**The other half stays unreachable and that is deliberate.** `adjudicate()` refutes a *model's* false
+SHA claim, which the model can only make if shown a workflow. Widening what the reviewer reads is a
+product decision with a measurable cost, not a wiring mistake.
+
+Verified live on werkzeug: 7 real pins produce 0 mismatches and 0 unresolved; falsifying one comment
+produces exactly 1, naming both the claim and what GitHub reports. Across 73 real workflow-touching
+commits in three repositories: 0 mismatches — consistent with the measured 0.24% base rate, and the
+known-answer test is what makes that zero readable.
