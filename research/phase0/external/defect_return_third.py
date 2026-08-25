@@ -147,7 +147,7 @@ def main() -> int:
     else:
         print("    NULL — the ranker does not beat alphabetical at defect-return off-corpus")
 
-    with open("defect_return_third.json", "w") as fh:
+    with open("results/defect_return_third.json", "w") as fh:
         json.dump(per, fh)
     return 0
 

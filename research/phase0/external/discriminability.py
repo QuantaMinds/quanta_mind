@@ -126,7 +126,7 @@ def main() -> int:
             f"{(alpha - hist) * 100:+6.2f}"
         )
 
-    with open("discriminability.json", "w") as fh:
+    with open("results/discriminability.json", "w") as fh:
         json.dump(per, fh)
     return 0
 
