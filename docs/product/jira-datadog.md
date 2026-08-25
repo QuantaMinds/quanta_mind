@@ -38,9 +38,19 @@ the prior should be the two nulls above.
 > evidence.
 
 **Datadog is the only thing that closes the last link.** Today the ranker is validated against a
-proxy: *a later commit whose message matched a fix-word touched this file*. That proxy is why the
-firing precision caps at roughly one in seven — **85.3% of admitted events are not genuine
-repairs**. Incidents are not a proxy. They are the outcome the customer actually cares about, and
+proxy: *a later commit whose message matched a fix-word touched this file*. **A proxy is not the
+outcome**, however well it is ranked, and that is the whole of the argument — the sentence that
+used to stand here was an inversion. Incidents are not a proxy.
+
+**THE INVERSION, RECORDED RATHER THAN QUIETLY DELETED.** This paragraph read *"the firing
+precision caps at roughly one in seven — 85.3% of admitted events are not genuine repairs"*.
+**85.3% is the ranker's top-1 HIT rate** against a 72.0% null, n = 4,293, 17 of 17 repositories;
+one in seven — **14.7% — is its ERROR rate**, halved from the null's 28.0%. The success figure and
+its complement were both reported as failures. → `docs/CORRECTIONS.md` entry 11
+
+**What survives without them:** the label carries known contamination — blind labelling put roughly
+**86% of symbol-overlap pairs** in the not-a-genuine-repair class, a different population reached a
+different way — and a fix-word proxy cannot answer whether anything reached production at all. They are the outcome the customer actually cares about, and
 this company has never held one.
 
 **Jira gives a second, independent label.** Pull requests linked to bug tickets are defect labels
