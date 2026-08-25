@@ -8,6 +8,40 @@ should write them.** Numbering starts at 6 so the gap stays visible.
 
 ---
 
+## 10 · The first defect in a PLAN rather than a measurement
+
+`feat-execution-corpus.md` specified **≥ 30 correct findings** and costed the round at **"~200
+findings by one independent rater. Days, not hours."**
+
+At the pool's 5.8% correct-rate, 200 findings yields **11.6 correct**. **The spec asked for 30 and
+the cost stated would have bought 12** — which is the pool we already have, and the size that
+collapsed to 2 coverable at step 0.
+
+The two numbers describe the same quantity, sat in the same document, and never met. Done properly:
+30 correct is **518 findings across 407 pull requests, about 52 hours** — a fortnight of one
+person, roughly an order of magnitude from "days, not hours".
+
+### Why this one is different from the nine above it
+
+**Every earlier entry is a defect in a measurement.** A wrong regex, a mis-read field, a verifier
+that confirmed by default — things that produced a number, where the number was wrong.
+
+**This one produced no number at all.** It was a plan whose two halves contradicted each other, and
+nothing would have caught it until someone had spent a fortnight discovering that a fortnight was
+the price. **A measurement gets checked because it is a claim. A cost estimate reads as an aside.**
+
+The same shape is on record once already: four fixes were recorded in a register that pointed at a
+branch, so the register and the thing it described disagreed and neither was wrong on its own.
+
+### The rule this leaves
+
+**Where a plan states a requirement and a cost, they are two views of one quantity and must be
+computed from each other, not written down separately.** The cost table in that document is now
+derived from the correct-count requirement rather than asserted beside it, so moving the
+requirement moves the cost.
+
+---
+
 ## 9 · The rule was written down, and I broke it anyway, all week
 
 `docs/product/publishing-rules.md` says:

@@ -1,0 +1,2382 @@
+{
+  "considered": 474,
+  "selected": [
+    {
+      "repo": "pallets/flask",
+      "pr": 6096,
+      "base": "514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b",
+      "source_changed": [
+        "src/flask/app.py"
+      ],
+      "named_by_a_test": [
+        "src/flask/app.py"
+      ],
+      "url": "https://github.com/pallets/flask/pull/6096"
+    },
+    {
+      "repo": "encode/httpx",
+      "pr": 3699,
+      "base": "ca097c96f97d8d2a5da09b8ca736c7e78a2467f6",
+      "source_changed": [
+        "httpx/__init__.py",
+        "httpx/_auth.py"
+      ],
+      "named_by_a_test": [
+        "httpx/__init__.py",
+        "httpx/_auth.py"
+      ],
+      "url": "https://github.com/encode/httpx/pull/3699"
+    },
+    {
+      "repo": "encode/httpx",
+      "pr": 3690,
+      "base": "20380490fd0bd13c68704080754c1385bff96d69",
+      "source_changed": [
+        "src/ahttpx/_parsers.py",
+        "src/ahttpx/_server.py",
+        "src/httpx/_parsers.py",
+        "src/httpx/_server.py"
+      ],
+      "named_by_a_test": [
+        "src/ahttpx/_server.py",
+        "src/httpx/_server.py"
+      ],
+      "url": "https://github.com/encode/httpx/pull/3690"
+    },
+    {
+      "repo": "encode/httpx",
+      "pr": 3673,
+      "base": "68989ae47d9fd10381a3859619a3880014d187f6",
+      "source_changed": [
+        "src/ahttpx/_parsers.py",
+        "src/ahttpx/_pool.py",
+        "src/ahttpx/_server.py",
+        "src/httpx/_network.py",
+        "src/httpx/_parsers.py",
+        "src/httpx/_pool.py",
+        "src/httpx/_server.py"
+      ],
+      "named_by_a_test": [
+        "src/ahttpx/_pool.py",
+        "src/ahttpx/_server.py",
+        "src/httpx/_pool.py",
+        "src/httpx/_server.py"
+      ],
+      "url": "https://github.com/encode/httpx/pull/3673"
+    },
+    {
+      "repo": "encode/httpx",
+      "pr": 3672,
+      "base": "4acf5c2c37714cc63b5cf71b3e284fca83c90311",
+      "source_changed": [
+        "src/ahttpx/_parsers.py",
+        "src/ahttpx/_pool.py",
+        "src/ahttpx/_server.py",
+        "src/httpx/_network.py",
+        "src/httpx/_parsers.py",
+        "src/httpx/_pool.py",
+        "src/httpx/_server.py"
+      ],
+      "named_by_a_test": [
+        "src/ahttpx/_pool.py",
+        "src/ahttpx/_server.py",
+        "src/httpx/_pool.py",
+        "src/httpx/_server.py"
+      ],
+      "url": "https://github.com/encode/httpx/pull/3672"
+    },
+    {
+      "repo": "encode/httpx",
+      "pr": 3670,
+      "base": "f9d5e1204978c0c66666fa169edada1bf719f8ba",
+      "source_changed": [
+        "src/ahttpx/_content.py",
+        "src/ahttpx/_streams.py",
+        "src/httpx/_content.py",
+        "src/httpx/_streams.py"
+      ],
+      "named_by_a_test": [
+        "src/ahttpx/_content.py",
+        "src/httpx/_content.py"
+      ],
+      "url": "https://github.com/encode/httpx/pull/3670"
+    },
+    {
+      "repo": "encode/httpx",
+      "pr": 3651,
+      "base": "89102021fcb44f6c3fab6304e5f951692723c908",
+      "source_changed": [
+        "httpx/_exceptions.py",
+        "httpx/_urls.py"
+      ],
+      "named_by_a_test": [
+        "httpx/_exceptions.py"
+      ],
+      "url": "https://github.com/encode/httpx/pull/3651"
+    },
+    {
+      "repo": "pydantic/pydantic",
+      "pr": 13699,
+      "base": "dc403980c7c1b43dc04d19d52fb9164ad7b1e516",
+      "source_changed": [
+        "pydantic/types.py"
+      ],
+      "named_by_a_test": [
+        "pydantic/types.py"
+      ],
+      "url": "https://github.com/pydantic/pydantic/pull/13699"
+    },
+    {
+      "repo": "pydantic/pydantic",
+      "pr": 13680,
+      "base": "59af43ad35d6b69534e7d18230ee87189320bac4",
+      "source_changed": [
+        "pydantic-core/python/pydantic_core/core_schema.py",
+        "pydantic/_internal/_core_utils.py",
+        "pydantic/functional_validators.py",
+        "pydantic/json_schema.py"
+      ],
+      "named_by_a_test": [
+        "pydantic-core/python/pydantic_core/core_schema.py",
+        "pydantic/json_schema.py"
+      ],
+      "url": "https://github.com/pydantic/pydantic/pull/13680"
+    },
+    {
+      "repo": "pydantic/pydantic",
+      "pr": 13667,
+      "base": "7d8e596aeab128b54d12d9b0e4799ac8d975544e",
+      "source_changed": [
+        "pydantic-core/python/pydantic_core/core_schema.py",
+        "pydantic/_internal/_discriminated_union.py",
+        "pydantic/json_schema.py"
+      ],
+      "named_by_a_test": [
+        "pydantic-core/python/pydantic_core/core_schema.py",
+        "pydantic/_internal/_discriminated_union.py",
+        "pydantic/json_schema.py"
+      ],
+      "url": "https://github.com/pydantic/pydantic/pull/13667"
+    },
+    {
+      "repo": "pydantic/pydantic",
+      "pr": 13665,
+      "base": "9a8429701a327cb1218517cc43b2c01606938c2f",
+      "source_changed": [
+        "pydantic/json_schema.py"
+      ],
+      "named_by_a_test": [
+        "pydantic/json_schema.py"
+      ],
+      "url": "https://github.com/pydantic/pydantic/pull/13665"
+    },
+    {
+      "repo": "pydantic/pydantic",
+      "pr": 13632,
+      "base": "52fbbfa1dc14a9b1fc40a1e246a3cbf2ce4987d1",
+      "source_changed": [
+        "pydantic/json_schema.py"
+      ],
+      "named_by_a_test": [
+        "pydantic/json_schema.py"
+      ],
+      "url": "https://github.com/pydantic/pydantic/pull/13632"
+    },
+    {
+      "repo": "scrapy/scrapy",
+      "pr": 8083,
+      "base": "e112c4ab96174b585051753bb565ca50ccc07745",
+      "source_changed": [
+        "docs/conf.py"
+      ],
+      "named_by_a_test": [
+        "docs/conf.py"
+      ],
+      "url": "https://github.com/scrapy/scrapy/pull/8083"
+    },
+    {
+      "repo": "scrapy/scrapy",
+      "pr": 8071,
+      "base": "3857c6906b2da51e12ca6005434512b7704fd659",
+      "source_changed": [
+        "scrapy/commands/genspider.py"
+      ],
+      "named_by_a_test": [
+        "scrapy/commands/genspider.py"
+      ],
+      "url": "https://github.com/scrapy/scrapy/pull/8071"
+    },
+    {
+      "repo": "scrapy/scrapy",
+      "pr": 8067,
+      "base": "3857c6906b2da51e12ca6005434512b7704fd659",
+      "source_changed": [
+        "scrapy/utils/response.py"
+      ],
+      "named_by_a_test": [
+        "scrapy/utils/response.py"
+      ],
+      "url": "https://github.com/scrapy/scrapy/pull/8067"
+    },
+    {
+      "repo": "scrapy/scrapy",
+      "pr": 8060,
+      "base": "45c837cc8626daa6ec1264f1a0a8b5c9a231f9c5",
+      "source_changed": [
+        "scrapy/utils/log.py"
+      ],
+      "named_by_a_test": [
+        "scrapy/utils/log.py"
+      ],
+      "url": "https://github.com/scrapy/scrapy/pull/8060"
+    },
+    {
+      "repo": "scrapy/scrapy",
+      "pr": 8052,
+      "base": "da7c2fc59e286e796d0f8cfe01d4363d6fa3729f",
+      "source_changed": [
+        "scrapy/commands/__init__.py"
+      ],
+      "named_by_a_test": [
+        "scrapy/commands/__init__.py"
+      ],
+      "url": "https://github.com/scrapy/scrapy/pull/8052"
+    },
+    {
+      "repo": "scrapy/scrapy",
+      "pr": 8051,
+      "base": "da7c2fc59e286e796d0f8cfe01d4363d6fa3729f",
+      "source_changed": [
+        "scrapy/utils/project.py"
+      ],
+      "named_by_a_test": [
+        "scrapy/utils/project.py"
+      ],
+      "url": "https://github.com/scrapy/scrapy/pull/8051"
+    },
+    {
+      "repo": "scrapy/scrapy",
+      "pr": 8033,
+      "base": "643243e878a7477cf65496de475eae5faf345d51",
+      "source_changed": [
+        "scrapy/utils/request.py"
+      ],
+      "named_by_a_test": [
+        "scrapy/utils/request.py"
+      ],
+      "url": "https://github.com/scrapy/scrapy/pull/8033"
+    },
+    {
+      "repo": "aio-libs/aiohttp",
+      "pr": 13545,
+      "base": "115f4e26f6777e74975ac7535f95c37f03bb6ef8",
+      "source_changed": [
+        "aiohttp/_websocket/reader_py.py",
+        "aiohttp/client.py",
+        "aiohttp/client_ws.py",
+        "aiohttp/web_ws.py"
+      ],
+      "named_by_a_test": [
+        "aiohttp/client.py",
+        "aiohttp/client_ws.py",
+        "aiohttp/web_ws.py"
+      ],
+      "url": "https://github.com/aio-libs/aiohttp/pull/13545"
+    },
+    {
+      "repo": "aio-libs/aiohttp",
+      "pr": 13544,
+      "base": "4281195e6e8f2561d1ef8c68f70ae460fa82aa8a",
+      "source_changed": [
+        "aiohttp/web_response.py"
+      ],
+      "named_by_a_test": [
+        "aiohttp/web_response.py"
+      ],
+      "url": "https://github.com/aio-libs/aiohttp/pull/13544"
+    },
+    {
+      "repo": "aio-libs/aiohttp",
+      "pr": 13543,
+      "base": "115f4e26f6777e74975ac7535f95c37f03bb6ef8",
+      "source_changed": [
+        "aiohttp/web_response.py"
+      ],
+      "named_by_a_test": [
+        "aiohttp/web_response.py"
+      ],
+      "url": "https://github.com/aio-libs/aiohttp/pull/13543"
+    },
+    {
+      "repo": "aio-libs/aiohttp",
+      "pr": 13542,
+      "base": "4281195e6e8f2561d1ef8c68f70ae460fa82aa8a",
+      "source_changed": [
+        "aiohttp/_websocket/writer.py",
+        "aiohttp/client_reqrep.py",
+        "aiohttp/client_ws.py",
+        "aiohttp/connector.py",
+        "aiohttp/web_protocol.py",
+        "aiohttp/web_ws.py"
+      ],
+      "named_by_a_test": [
+        "aiohttp/_websocket/writer.py",
+        "aiohttp/client_reqrep.py",
+        "aiohttp/client_ws.py",
+        "aiohttp/connector.py",
+        "aiohttp/web_protocol.py",
+        "aiohttp/web_ws.py"
+      ],
+      "url": "https://github.com/aio-libs/aiohttp/pull/13542"
+    },
+    {
+      "repo": "aio-libs/aiohttp",
+      "pr": 13541,
+      "base": "0b28073f52ffdbd38c9f798d7d271d730c3b457d",
+      "source_changed": [
+        "aiohttp/_websocket/writer.py",
+        "aiohttp/client_reqrep.py",
+        "aiohttp/client_ws.py",
+        "aiohttp/connector.py",
+        "aiohttp/web_protocol.py",
+        "aiohttp/web_ws.py"
+      ],
+      "named_by_a_test": [
+        "aiohttp/_websocket/writer.py",
+        "aiohttp/client_reqrep.py",
+        "aiohttp/client_ws.py",
+        "aiohttp/connector.py",
+        "aiohttp/web_protocol.py",
+        "aiohttp/web_ws.py"
+      ],
+      "url": "https://github.com/aio-libs/aiohttp/pull/13541"
+    },
+    {
+      "repo": "aio-libs/aiohttp",
+      "pr": 13530,
+      "base": "29303217e0dc5f0bc469833ebed8475c04bf1093",
+      "source_changed": [
+        "aiohttp/_websocket/writer.py",
+        "aiohttp/client_reqrep.py",
+        "aiohttp/client_ws.py",
+        "aiohttp/connector.py",
+        "aiohttp/web_protocol.py",
+        "aiohttp/web_ws.py"
+      ],
+      "named_by_a_test": [
+        "aiohttp/_websocket/writer.py",
+        "aiohttp/client_reqrep.py",
+        "aiohttp/client_ws.py",
+        "aiohttp/connector.py",
+        "aiohttp/web_protocol.py",
+        "aiohttp/web_ws.py"
+      ],
+      "url": "https://github.com/aio-libs/aiohttp/pull/13530"
+    },
+    {
+      "repo": "aio-libs/aiohttp",
+      "pr": 13526,
+      "base": "3b3c220add772cd0e99908f9c99abfc2c8f4a9d0",
+      "source_changed": [
+        "aiohttp/http_parser.py"
+      ],
+      "named_by_a_test": [
+        "aiohttp/http_parser.py"
+      ],
+      "url": "https://github.com/aio-libs/aiohttp/pull/13526"
+    },
+    {
+      "repo": "aio-libs/aiohttp",
+      "pr": 13525,
+      "base": "9867bd1cfc66186fa79af9c3ee3e380d2079c117",
+      "source_changed": [
+        "aiohttp/http_parser.py"
+      ],
+      "named_by_a_test": [
+        "aiohttp/http_parser.py"
+      ],
+      "url": "https://github.com/aio-libs/aiohttp/pull/13525"
+    },
+    {
+      "repo": "aio-libs/aiohttp",
+      "pr": 13524,
+      "base": "bd89ad6704783015bc4d97dd847509023199904e",
+      "source_changed": [
+        "aiohttp/client_reqrep.py"
+      ],
+      "named_by_a_test": [
+        "aiohttp/client_reqrep.py"
+      ],
+      "url": "https://github.com/aio-libs/aiohttp/pull/13524"
+    },
+    {
+      "repo": "aio-libs/aiohttp",
+      "pr": 13523,
+      "base": "663094d20b5d6ea82fd809d7e46603eb732a492c",
+      "source_changed": [
+        "aiohttp/client_reqrep.py"
+      ],
+      "named_by_a_test": [
+        "aiohttp/client_reqrep.py"
+      ],
+      "url": "https://github.com/aio-libs/aiohttp/pull/13523"
+    },
+    {
+      "repo": "aio-libs/aiohttp",
+      "pr": 13522,
+      "base": "a4b038adbd44bf88c68ddcc14d500b350eae47f6",
+      "source_changed": [
+        "aiohttp/helpers.py"
+      ],
+      "named_by_a_test": [
+        "aiohttp/helpers.py"
+      ],
+      "url": "https://github.com/aio-libs/aiohttp/pull/13522"
+    },
+    {
+      "repo": "aio-libs/aiohttp",
+      "pr": 13513,
+      "base": "3d850ee9b92573c7e913821cbcb96005beb3f4df",
+      "source_changed": [
+        "aiohttp/multipart.py"
+      ],
+      "named_by_a_test": [
+        "aiohttp/multipart.py"
+      ],
+      "url": "https://github.com/aio-libs/aiohttp/pull/13513"
+    },
+    {
+      "repo": "aio-libs/aiohttp",
+      "pr": 13512,
+      "base": "3a7b6df6562a494b1a298513efbbf0f926636773",
+      "source_changed": [
+        "aiohttp/multipart.py"
+      ],
+      "named_by_a_test": [
+        "aiohttp/multipart.py"
+      ],
+      "url": "https://github.com/aio-libs/aiohttp/pull/13512"
+    },
+    {
+      "repo": "aio-libs/aiohttp",
+      "pr": 13511,
+      "base": "7844dddfdf20836fc67bf89a7fda85356a934b76",
+      "source_changed": [
+        "aiohttp/web_protocol.py"
+      ],
+      "named_by_a_test": [
+        "aiohttp/web_protocol.py"
+      ],
+      "url": "https://github.com/aio-libs/aiohttp/pull/13511"
+    },
+    {
+      "repo": "aio-libs/aiohttp",
+      "pr": 13510,
+      "base": "ff4b1261d98f3d232edfc9e22c5684fb42fcc252",
+      "source_changed": [
+        "aiohttp/web_protocol.py"
+      ],
+      "named_by_a_test": [
+        "aiohttp/web_protocol.py"
+      ],
+      "url": "https://github.com/aio-libs/aiohttp/pull/13510"
+    },
+    {
+      "repo": "aio-libs/aiohttp",
+      "pr": 13509,
+      "base": "2e64b0f1435d6268f24fba41ea190f4f13ef1b56",
+      "source_changed": [
+        "aiohttp/multipart.py"
+      ],
+      "named_by_a_test": [
+        "aiohttp/multipart.py"
+      ],
+      "url": "https://github.com/aio-libs/aiohttp/pull/13509"
+    },
+    {
+      "repo": "celery/celery",
+      "pr": 10501,
+      "base": "2de9b55eab6071098b45603f1876c6e8946dd086",
+      "source_changed": [
+        "celery/utils/functional.py"
+      ],
+      "named_by_a_test": [
+        "celery/utils/functional.py"
+      ],
+      "url": "https://github.com/celery/celery/pull/10501"
+    },
+    {
+      "repo": "celery/celery",
+      "pr": 10500,
+      "base": "fe94573271579924db06e891c51f2fe7544b9be3",
+      "source_changed": [
+        "celery/worker/consumer/events.py",
+        "celery/worker/loops.py"
+      ],
+      "named_by_a_test": [
+        "celery/worker/consumer/events.py"
+      ],
+      "url": "https://github.com/celery/celery/pull/10500"
+    },
+    {
+      "repo": "celery/celery",
+      "pr": 10498,
+      "base": "d35acd7f5bda45325616cfabd7a4a7b9fbddaeb9",
+      "source_changed": [
+        "t/integration/tasks.py"
+      ],
+      "named_by_a_test": [
+        "t/integration/tasks.py"
+      ],
+      "url": "https://github.com/celery/celery/pull/10498"
+    },
+    {
+      "repo": "celery/celery",
+      "pr": 10497,
+      "base": "2c42237d375718a84f01f3a7b4eb12a85e061e37",
+      "source_changed": [
+        "celery/backends/redis.py"
+      ],
+      "named_by_a_test": [
+        "celery/backends/redis.py"
+      ],
+      "url": "https://github.com/celery/celery/pull/10497"
+    },
+    {
+      "repo": "celery/celery",
+      "pr": 10493,
+      "base": "0690889a935aaae877a1c3ec8f3606fe712d0855",
+      "source_changed": [
+        "celery/worker/request.py"
+      ],
+      "named_by_a_test": [
+        "celery/worker/request.py"
+      ],
+      "url": "https://github.com/celery/celery/pull/10493"
+    },
+    {
+      "repo": "celery/celery",
+      "pr": 10488,
+      "base": "86b1b9486babfd99814aab577627328e923a77d9",
+      "source_changed": [
+        "celery/app/defaults.py",
+        "celery/app/log.py",
+        "celery/utils/log.py"
+      ],
+      "named_by_a_test": [
+        "celery/app/defaults.py",
+        "celery/app/log.py",
+        "celery/utils/log.py"
+      ],
+      "url": "https://github.com/celery/celery/pull/10488"
+    },
+    {
+      "repo": "celery/celery",
+      "pr": 10485,
+      "base": "583fa06aff1b532bac61b6f897c3999b4990c95a",
+      "source_changed": [
+        "celery/worker/consumer/connection.py"
+      ],
+      "named_by_a_test": [
+        "celery/worker/consumer/connection.py"
+      ],
+      "url": "https://github.com/celery/celery/pull/10485"
+    },
+    {
+      "repo": "celery/celery",
+      "pr": 10468,
+      "base": "1fcbf6fa4fb3ebd38ac80d3ee0a53b079b1e9d18",
+      "source_changed": [
+        "celery/beat.py"
+      ],
+      "named_by_a_test": [
+        "celery/beat.py"
+      ],
+      "url": "https://github.com/celery/celery/pull/10468"
+    },
+    {
+      "repo": "celery/celery",
+      "pr": 10459,
+      "base": "f109abf852525b69a1b6eee0457c6cd5561e0529",
+      "source_changed": [
+        "celery/backends/rpc.py"
+      ],
+      "named_by_a_test": [
+        "celery/backends/rpc.py"
+      ],
+      "url": "https://github.com/celery/celery/pull/10459"
+    },
+    {
+      "repo": "celery/celery",
+      "pr": 10455,
+      "base": "f52429cfd6e41501407d012535a1059ad560aee2",
+      "source_changed": [
+        "celery/app/amqp.py",
+        "celery/result.py",
+        "celery/signals.py"
+      ],
+      "named_by_a_test": [
+        "celery/app/amqp.py",
+        "celery/result.py",
+        "celery/signals.py"
+      ],
+      "url": "https://github.com/celery/celery/pull/10455"
+    },
+    {
+      "repo": "celery/celery",
+      "pr": 10453,
+      "base": "7c5d9a62d90c685bd0e1ae002d66ae40980b2847",
+      "source_changed": [
+        "celery/app/task.py"
+      ],
+      "named_by_a_test": [
+        "celery/app/task.py"
+      ],
+      "url": "https://github.com/celery/celery/pull/10453"
+    },
+    {
+      "repo": "celery/celery",
+      "pr": 10435,
+      "base": "dd7c23862eb08a2cfde7da6926f28410b699c077",
+      "source_changed": [
+        "celery/events/dispatcher.py"
+      ],
+      "named_by_a_test": [
+        "celery/events/dispatcher.py"
+      ],
+      "url": "https://github.com/celery/celery/pull/10435"
+    },
+    {
+      "repo": "celery/celery",
+      "pr": 10431,
+      "base": "6e435fc9c6ad199e8b1e6e5331fbfe97e4bd9297",
+      "source_changed": [
+        "celery/backends/rpc.py"
+      ],
+      "named_by_a_test": [
+        "celery/backends/rpc.py"
+      ],
+      "url": "https://github.com/celery/celery/pull/10431"
+    },
+    {
+      "repo": "celery/celery",
+      "pr": 10418,
+      "base": "f85031f61247dae1dcf19ca88cc057edba1534ee",
+      "source_changed": [
+        "celery/worker/consumer/gossip.py"
+      ],
+      "named_by_a_test": [
+        "celery/worker/consumer/gossip.py"
+      ],
+      "url": "https://github.com/celery/celery/pull/10418"
+    },
+    {
+      "repo": "celery/celery",
+      "pr": 10417,
+      "base": "efc3a7f117b74e32e56a7e2c36317dd273eb6867",
+      "source_changed": [
+        "celery/events/dispatcher.py"
+      ],
+      "named_by_a_test": [
+        "celery/events/dispatcher.py"
+      ],
+      "url": "https://github.com/celery/celery/pull/10417"
+    },
+    {
+      "repo": "celery/celery",
+      "pr": 10414,
+      "base": "d96df921e2e7bf4f520295e344b094952fe1a870",
+      "source_changed": [
+        "celery/apps/multi.py"
+      ],
+      "named_by_a_test": [
+        "celery/apps/multi.py"
+      ],
+      "url": "https://github.com/celery/celery/pull/10414"
+    },
+    {
+      "repo": "celery/celery",
+      "pr": 10410,
+      "base": "1432d9b6c6868a77e7ee2ede1650da00a8d187ac",
+      "source_changed": [
+        "t/smoke/workers/alias.py"
+      ],
+      "named_by_a_test": [
+        "t/smoke/workers/alias.py"
+      ],
+      "url": "https://github.com/celery/celery/pull/10410"
+    },
+    {
+      "repo": "jazzband/pip-tools",
+      "pr": 2461,
+      "base": "3a54d0cde32f9124122d16b789f14b5dd35ceb38",
+      "source_changed": [
+        "piptools/scripts/compile.py"
+      ],
+      "named_by_a_test": [
+        "piptools/scripts/compile.py"
+      ],
+      "url": "https://github.com/jazzband/pip-tools/pull/2461"
+    },
+    {
+      "repo": "jazzband/pip-tools",
+      "pr": 2445,
+      "base": "29e28ed670d7f98e55fda425bf5741b5c9d272ea",
+      "source_changed": [
+        "piptools/repositories/local.py",
+        "piptools/sync.py"
+      ],
+      "named_by_a_test": [
+        "piptools/repositories/local.py",
+        "piptools/sync.py"
+      ],
+      "url": "https://github.com/jazzband/pip-tools/pull/2445"
+    },
+    {
+      "repo": "jazzband/pip-tools",
+      "pr": 2438,
+      "base": "be3feba19f990d0e54abe721b3b60a8169b91e8e",
+      "source_changed": [
+        "piptools/_compat/__init__.py",
+        "piptools/_compat/pip_compat.py",
+        "piptools/_internal/_pip_api/__init__.py",
+        "piptools/_internal/_pip_api/command_methods.py",
+        "piptools/_internal/_pip_api/package_finder.py",
+        "piptools/repositories/pypi.py",
+        "piptools/resolver.py",
+        "piptools/scripts/compile.py",
+        "piptools/sync.py",
+        "piptools/writer.py"
+      ],
+      "named_by_a_test": [
+        "piptools/_compat/__init__.py",
+        "piptools/_compat/pip_compat.py",
+        "piptools/_internal/_pip_api/__init__.py",
+        "piptools/_internal/_pip_api/package_finder.py",
+        "piptools/repositories/pypi.py",
+        "piptools/resolver.py",
+        "piptools/scripts/compile.py",
+        "piptools/sync.py",
+        "piptools/writer.py"
+      ],
+      "url": "https://github.com/jazzband/pip-tools/pull/2438"
+    },
+    {
+      "repo": "jazzband/pip-tools",
+      "pr": 2429,
+      "base": "e7f9099f5a87e5c08fbdd9b6e6d7b8f2132cb8d4",
+      "source_changed": [
+        "piptools/repositories/pypi.py"
+      ],
+      "named_by_a_test": [
+        "piptools/repositories/pypi.py"
+      ],
+      "url": "https://github.com/jazzband/pip-tools/pull/2429"
+    },
+    {
+      "repo": "jazzband/pip-tools",
+      "pr": 2407,
+      "base": "e7f9099f5a87e5c08fbdd9b6e6d7b8f2132cb8d4",
+      "source_changed": [
+        "docs/conf.py"
+      ],
+      "named_by_a_test": [
+        "docs/conf.py"
+      ],
+      "url": "https://github.com/jazzband/pip-tools/pull/2407"
+    },
+    {
+      "repo": "jazzband/pip-tools",
+      "pr": 2406,
+      "base": "6800e98c5301f84c1278b006fe8c47d95d8ab9e7",
+      "source_changed": [
+        "docs/conf.py"
+      ],
+      "named_by_a_test": [
+        "docs/conf.py"
+      ],
+      "url": "https://github.com/jazzband/pip-tools/pull/2406"
+    },
+    {
+      "repo": "tornadoweb/tornado",
+      "pr": 3707,
+      "base": "4888e034ab20292596a621cea11f6d37c005d071",
+      "source_changed": [
+        "setup.py",
+        "tornado/locale.py",
+        "tornado/web.py"
+      ],
+      "named_by_a_test": [
+        "setup.py",
+        "tornado/locale.py",
+        "tornado/web.py"
+      ],
+      "url": "https://github.com/tornadoweb/tornado/pull/3707"
+    },
+    {
+      "repo": "tornadoweb/tornado",
+      "pr": 3706,
+      "base": "e530031405e2154654dedc4c84d5656b557ea310",
+      "source_changed": [
+        "tornado/auth.py",
+        "tornado/escape.py",
+        "tornado/httputil.py",
+        "tornado/web.py"
+      ],
+      "named_by_a_test": [
+        "tornado/auth.py",
+        "tornado/escape.py",
+        "tornado/httputil.py",
+        "tornado/web.py"
+      ],
+      "url": "https://github.com/tornadoweb/tornado/pull/3706"
+    },
+    {
+      "repo": "tornadoweb/tornado",
+      "pr": 3704,
+      "base": "48fc2d43d1f48b8b3b0be5dcf6a7634c6f45b1c4",
+      "source_changed": [
+        "tornado/__init__.py",
+        "tornado/auth.py",
+        "tornado/escape.py",
+        "tornado/httputil.py",
+        "tornado/web.py"
+      ],
+      "named_by_a_test": [
+        "tornado/__init__.py",
+        "tornado/auth.py",
+        "tornado/escape.py",
+        "tornado/httputil.py",
+        "tornado/web.py"
+      ],
+      "url": "https://github.com/tornadoweb/tornado/pull/3704"
+    },
+    {
+      "repo": "tornadoweb/tornado",
+      "pr": 3696,
+      "base": "e530031405e2154654dedc4c84d5656b557ea310",
+      "source_changed": [
+        "setup.py"
+      ],
+      "named_by_a_test": [
+        "setup.py"
+      ],
+      "url": "https://github.com/tornadoweb/tornado/pull/3696"
+    },
+    {
+      "repo": "tornadoweb/tornado",
+      "pr": 3686,
+      "base": "b689e0e20adb4345f5b207893820e40de7b3bf70",
+      "source_changed": [
+        "tornado/ioloop.py"
+      ],
+      "named_by_a_test": [
+        "tornado/ioloop.py"
+      ],
+      "url": "https://github.com/tornadoweb/tornado/pull/3686"
+    },
+    {
+      "repo": "tornadoweb/tornado",
+      "pr": 3647,
+      "base": "18e15a5e0093b398a216fb9f85af69a3279b6e64",
+      "source_changed": [
+        "tornado/locks.py",
+        "tornado/queues.py"
+      ],
+      "named_by_a_test": [
+        "tornado/locks.py",
+        "tornado/queues.py"
+      ],
+      "url": "https://github.com/tornadoweb/tornado/pull/3647"
+    },
+    {
+      "repo": "tornadoweb/tornado",
+      "pr": 3646,
+      "base": "e9520048b5cbdd5d688117d8f7d13f4bd85ecb63",
+      "source_changed": [
+        "tornado/httputil.py"
+      ],
+      "named_by_a_test": [
+        "tornado/httputil.py"
+      ],
+      "url": "https://github.com/tornadoweb/tornado/pull/3646"
+    },
+    {
+      "repo": "tornadoweb/tornado",
+      "pr": 3638,
+      "base": "f491e4c1914be0ac6635a0eacb3c978d89eec4f1",
+      "source_changed": [
+        "tornado/curl_httpclient.py"
+      ],
+      "named_by_a_test": [
+        "tornado/curl_httpclient.py"
+      ],
+      "url": "https://github.com/tornadoweb/tornado/pull/3638"
+    },
+    {
+      "repo": "tornadoweb/tornado",
+      "pr": 3634,
+      "base": "cf19b139283506db2f86a9393a2b404418788793",
+      "source_changed": [
+        "tornado/curl_httpclient.py"
+      ],
+      "named_by_a_test": [
+        "tornado/curl_httpclient.py"
+      ],
+      "url": "https://github.com/tornadoweb/tornado/pull/3634"
+    },
+    {
+      "repo": "tornadoweb/tornado",
+      "pr": 3633,
+      "base": "7d869c0739b264797ef92b6aa4a80c54b5993ea2",
+      "source_changed": [
+        "tornado/__init__.py",
+        "tornado/curl_httpclient.py"
+      ],
+      "named_by_a_test": [
+        "tornado/__init__.py",
+        "tornado/curl_httpclient.py"
+      ],
+      "url": "https://github.com/tornadoweb/tornado/pull/3633"
+    },
+    {
+      "repo": "tornadoweb/tornado",
+      "pr": 3629,
+      "base": "24e1e4fdbf4cbfaefc09af41233e99261d8d75f9",
+      "source_changed": [
+        "tornado/auth.py"
+      ],
+      "named_by_a_test": [
+        "tornado/auth.py"
+      ],
+      "url": "https://github.com/tornadoweb/tornado/pull/3629"
+    },
+    {
+      "repo": "tornadoweb/tornado",
+      "pr": 3628,
+      "base": "ecc40ae19fd30489435635f54841ca45613f59fc",
+      "source_changed": [
+        "tornado/auth.py",
+        "tornado/http1connection.py",
+        "tornado/simple_httpclient.py",
+        "tornado/util.py"
+      ],
+      "named_by_a_test": [
+        "tornado/auth.py",
+        "tornado/http1connection.py",
+        "tornado/simple_httpclient.py",
+        "tornado/util.py"
+      ],
+      "url": "https://github.com/tornadoweb/tornado/pull/3628"
+    },
+    {
+      "repo": "tornadoweb/tornado",
+      "pr": 3626,
+      "base": "27614316ef8ad125fe18725cf96e384560ba0e14",
+      "source_changed": [
+        "tornado/__init__.py",
+        "tornado/auth.py",
+        "tornado/curl_httpclient.py",
+        "tornado/http1connection.py",
+        "tornado/simple_httpclient.py",
+        "tornado/util.py"
+      ],
+      "named_by_a_test": [
+        "tornado/__init__.py",
+        "tornado/auth.py",
+        "tornado/curl_httpclient.py",
+        "tornado/http1connection.py",
+        "tornado/simple_httpclient.py",
+        "tornado/util.py"
+      ],
+      "url": "https://github.com/tornadoweb/tornado/pull/3626"
+    },
+    {
+      "repo": "tornadoweb/tornado",
+      "pr": 3621,
+      "base": "4d892393adb0a434baeaa98a427d23c6c459a4bc",
+      "source_changed": [
+        "tornado/locks.py",
+        "tornado/queues.py"
+      ],
+      "named_by_a_test": [
+        "tornado/locks.py",
+        "tornado/queues.py"
+      ],
+      "url": "https://github.com/tornadoweb/tornado/pull/3621"
+    },
+    {
+      "repo": "tornadoweb/tornado",
+      "pr": 3620,
+      "base": "87508512caabc9e1cdd0f497a97ae673d4f9618e",
+      "source_changed": [
+        "tornado/auth.py",
+        "tornado/escape.py",
+        "tornado/httputil.py",
+        "tornado/platform/asyncio.py",
+        "tornado/web.py"
+      ],
+      "named_by_a_test": [
+        "tornado/auth.py",
+        "tornado/escape.py",
+        "tornado/httputil.py",
+        "tornado/platform/asyncio.py",
+        "tornado/web.py"
+      ],
+      "url": "https://github.com/tornadoweb/tornado/pull/3620"
+    },
+    {
+      "repo": "tornadoweb/tornado",
+      "pr": 3617,
+      "base": "0ca3c5f8279d402b245718d16522bc18a8f5d958",
+      "source_changed": [
+        "tornado/curl_httpclient.py"
+      ],
+      "named_by_a_test": [
+        "tornado/curl_httpclient.py"
+      ],
+      "url": "https://github.com/tornadoweb/tornado/pull/3617"
+    },
+    {
+      "repo": "tornadoweb/tornado",
+      "pr": 3602,
+      "base": "bd0992259e7ccbc9ca034e39141b5dc0a29623ff",
+      "source_changed": [
+        "tornado/locale.py"
+      ],
+      "named_by_a_test": [
+        "tornado/locale.py"
+      ],
+      "url": "https://github.com/tornadoweb/tornado/pull/3602"
+    },
+    {
+      "repo": "urllib3/urllib3",
+      "pr": 5140,
+      "base": "627636551e0e0159996b0f28dd21a60372cc5b10",
+      "source_changed": [
+        "src/urllib3/connectionpool.py"
+      ],
+      "named_by_a_test": [
+        "src/urllib3/connectionpool.py"
+      ],
+      "url": "https://github.com/urllib3/urllib3/pull/5140"
+    },
+    {
+      "repo": "urllib3/urllib3",
+      "pr": 5120,
+      "base": "6a8536b6e1b0cbe69ae801337c599951e527ae29",
+      "source_changed": [
+        "src/urllib3/util/retry.py"
+      ],
+      "named_by_a_test": [
+        "src/urllib3/util/retry.py"
+      ],
+      "url": "https://github.com/urllib3/urllib3/pull/5120"
+    },
+    {
+      "repo": "urllib3/urllib3",
+      "pr": 5103,
+      "base": "4e5ce638723118dc41f218cd6715f91a9f321908",
+      "source_changed": [
+        "src/urllib3/contrib/pyopenssl.py"
+      ],
+      "named_by_a_test": [
+        "src/urllib3/contrib/pyopenssl.py"
+      ],
+      "url": "https://github.com/urllib3/urllib3/pull/5103"
+    },
+    {
+      "repo": "urllib3/urllib3",
+      "pr": 5102,
+      "base": "4e5ce638723118dc41f218cd6715f91a9f321908",
+      "source_changed": [
+        "src/urllib3/poolmanager.py"
+      ],
+      "named_by_a_test": [
+        "src/urllib3/poolmanager.py"
+      ],
+      "url": "https://github.com/urllib3/urllib3/pull/5102"
+    },
+    {
+      "repo": "urllib3/urllib3",
+      "pr": 5101,
+      "base": "e18a0d1a159210a5b64354a435b6e5437c80e0d6",
+      "source_changed": [
+        "src/urllib3/connectionpool.py",
+        "src/urllib3/http2/connection.py"
+      ],
+      "named_by_a_test": [
+        "src/urllib3/connectionpool.py",
+        "src/urllib3/http2/connection.py"
+      ],
+      "url": "https://github.com/urllib3/urllib3/pull/5101"
+    },
+    {
+      "repo": "urllib3/urllib3",
+      "pr": 5097,
+      "base": "6a8536b6e1b0cbe69ae801337c599951e527ae29",
+      "source_changed": [
+        "src/urllib3/contrib/pyopenssl.py"
+      ],
+      "named_by_a_test": [
+        "src/urllib3/contrib/pyopenssl.py"
+      ],
+      "url": "https://github.com/urllib3/urllib3/pull/5097"
+    },
+    {
+      "repo": "urllib3/urllib3",
+      "pr": 5095,
+      "base": "d7030c0077b6429a9d2ddeac703891973c82cbd5",
+      "source_changed": [
+        "src/urllib3/util/url.py"
+      ],
+      "named_by_a_test": [
+        "src/urllib3/util/url.py"
+      ],
+      "url": "https://github.com/urllib3/urllib3/pull/5095"
+    },
+    {
+      "repo": "urllib3/urllib3",
+      "pr": 5093,
+      "base": "6a8536b6e1b0cbe69ae801337c599951e527ae29",
+      "source_changed": [
+        "src/urllib3/connection.py",
+        "src/urllib3/poolmanager.py"
+      ],
+      "named_by_a_test": [
+        "src/urllib3/connection.py",
+        "src/urllib3/poolmanager.py"
+      ],
+      "url": "https://github.com/urllib3/urllib3/pull/5093"
+    },
+    {
+      "repo": "urllib3/urllib3",
+      "pr": 5092,
+      "base": "5cf0247049a4baa02e830666de53431e5b575694",
+      "source_changed": [
+        "src/urllib3/util/request.py",
+        "src/urllib3/util/url.py"
+      ],
+      "named_by_a_test": [
+        "src/urllib3/util/request.py",
+        "src/urllib3/util/url.py"
+      ],
+      "url": "https://github.com/urllib3/urllib3/pull/5092"
+    },
+    {
+      "repo": "urllib3/urllib3",
+      "pr": 5091,
+      "base": "c420e267acb739917bee96e021ad9a2d27de8aae",
+      "source_changed": [
+        "src/urllib3/connection.py"
+      ],
+      "named_by_a_test": [
+        "src/urllib3/connection.py"
+      ],
+      "url": "https://github.com/urllib3/urllib3/pull/5091"
+    },
+    {
+      "repo": "urllib3/urllib3",
+      "pr": 5079,
+      "base": "f4c411c09119f7999b29300b306d156992d699e6",
+      "source_changed": [
+        "src/urllib3/connectionpool.py",
+        "src/urllib3/poolmanager.py"
+      ],
+      "named_by_a_test": [
+        "src/urllib3/connectionpool.py",
+        "src/urllib3/poolmanager.py"
+      ],
+      "url": "https://github.com/urllib3/urllib3/pull/5079"
+    },
+    {
+      "repo": "urllib3/urllib3",
+      "pr": 5071,
+      "base": "f4e4bc31f40f8c94c6a1f1685df28f97ff48c305",
+      "source_changed": [
+        "src/urllib3/connectionpool.py",
+        "src/urllib3/poolmanager.py",
+        "src/urllib3/util/url.py"
+      ],
+      "named_by_a_test": [
+        "src/urllib3/connectionpool.py",
+        "src/urllib3/poolmanager.py",
+        "src/urllib3/util/url.py"
+      ],
+      "url": "https://github.com/urllib3/urllib3/pull/5071"
+    },
+    {
+      "repo": "pypa/packaging",
+      "pr": 1392,
+      "base": "4840c3a6817fbd0831f7e520c9a55367472a4a08",
+      "source_changed": [
+        "src/packaging/_ranges.py"
+      ],
+      "named_by_a_test": [
+        "src/packaging/_ranges.py"
+      ],
+      "url": "https://github.com/pypa/packaging/pull/1392"
+    },
+    {
+      "repo": "pypa/packaging",
+      "pr": 1384,
+      "base": "f8630ea2b7c810de81841459dcdb481d5b7a1318",
+      "source_changed": [
+        "src/packaging/specifiers.py"
+      ],
+      "named_by_a_test": [
+        "src/packaging/specifiers.py"
+      ],
+      "url": "https://github.com/pypa/packaging/pull/1384"
+    },
+    {
+      "repo": "pypa/packaging",
+      "pr": 1369,
+      "base": "3c6e2aabd76bacb3f6b08a356074ce4662fd4506",
+      "source_changed": [
+        "src/packaging/_parser.py",
+        "src/packaging/markers.py"
+      ],
+      "named_by_a_test": [
+        "src/packaging/_parser.py",
+        "src/packaging/markers.py"
+      ],
+      "url": "https://github.com/pypa/packaging/pull/1369"
+    },
+    {
+      "repo": "pypa/packaging",
+      "pr": 1368,
+      "base": "3c6e2aabd76bacb3f6b08a356074ce4662fd4506",
+      "source_changed": [
+        "src/packaging/_tokenizer.py",
+        "src/packaging/errors.py"
+      ],
+      "named_by_a_test": [
+        "src/packaging/errors.py"
+      ],
+      "url": "https://github.com/pypa/packaging/pull/1368"
+    },
+    {
+      "repo": "pypa/packaging",
+      "pr": 1367,
+      "base": "2d90d060e3e3170f95b85f3cc88fc314df186058",
+      "source_changed": [
+        "src/packaging/direct_url.py",
+        "src/packaging/pylock.py"
+      ],
+      "named_by_a_test": [
+        "src/packaging/direct_url.py",
+        "src/packaging/pylock.py"
+      ],
+      "url": "https://github.com/pypa/packaging/pull/1367"
+    },
+    {
+      "repo": "pypa/packaging",
+      "pr": 1366,
+      "base": "4e79787a31c99348649bb0dafee2a5078d3595be",
+      "source_changed": [
+        "src/packaging/direct_url.py",
+        "src/packaging/pylock.py"
+      ],
+      "named_by_a_test": [
+        "src/packaging/direct_url.py",
+        "src/packaging/pylock.py"
+      ],
+      "url": "https://github.com/pypa/packaging/pull/1366"
+    },
+    {
+      "repo": "pypa/packaging",
+      "pr": 1365,
+      "base": "4e79787a31c99348649bb0dafee2a5078d3595be",
+      "source_changed": [
+        "src/packaging/tags.py"
+      ],
+      "named_by_a_test": [
+        "src/packaging/tags.py"
+      ],
+      "url": "https://github.com/pypa/packaging/pull/1365"
+    },
+    {
+      "repo": "pypa/packaging",
+      "pr": 1362,
+      "base": "b1a7124fe3d40c3302c029e9eb01ac3fc3496a54",
+      "source_changed": [
+        "src/packaging/pylock.py"
+      ],
+      "named_by_a_test": [
+        "src/packaging/pylock.py"
+      ],
+      "url": "https://github.com/pypa/packaging/pull/1362"
+    },
+    {
+      "repo": "pypa/packaging",
+      "pr": 1360,
+      "base": "2d873eb6002021a8c007c933fbdab58b37a5079b",
+      "source_changed": [
+        "src/packaging/tags.py"
+      ],
+      "named_by_a_test": [
+        "src/packaging/tags.py"
+      ],
+      "url": "https://github.com/pypa/packaging/pull/1360"
+    },
+    {
+      "repo": "pypa/packaging",
+      "pr": 1356,
+      "base": "413d006fadf5b9b14d78ad444201d8189bff8c64",
+      "source_changed": [
+        "src/packaging/metadata.py"
+      ],
+      "named_by_a_test": [
+        "src/packaging/metadata.py"
+      ],
+      "url": "https://github.com/pypa/packaging/pull/1356"
+    },
+    {
+      "repo": "pypa/packaging",
+      "pr": 1354,
+      "base": "b80e6eb0a6c0f61dcaa9b1587f3aab370263dc65",
+      "source_changed": [
+        "noxfile.py",
+        "src/packaging/_manylinux.py",
+        "src/packaging/_parser.py",
+        "src/packaging/_ranges.py",
+        "src/packaging/_tokenizer.py",
+        "src/packaging/errors.py",
+        "src/packaging/licenses/_spdx.py",
+        "src/packaging/markers.py",
+        "src/packaging/metadata.py",
+        "src/packaging/pylock.py",
+        "src/packaging/ranges.py",
+        "src/packaging/specifiers.py",
+        "src/packaging/utils.py",
+        "src/packaging/version.py",
+        "tasks/pickle_compat.py"
+      ],
+      "named_by_a_test": [
+        "src/packaging/_manylinux.py",
+        "src/packaging/_parser.py",
+        "src/packaging/_ranges.py",
+        "src/packaging/errors.py",
+        "src/packaging/licenses/_spdx.py",
+        "src/packaging/markers.py",
+        "src/packaging/metadata.py",
+        "src/packaging/pylock.py",
+        "src/packaging/ranges.py",
+        "src/packaging/specifiers.py",
+        "src/packaging/utils.py",
+        "src/packaging/version.py"
+      ],
+      "url": "https://github.com/pypa/packaging/pull/1354"
+    },
+    {
+      "repo": "pypa/packaging",
+      "pr": 1351,
+      "base": "b62954b62d04f58a939d2856c67ebe4de32cdb5d",
+      "source_changed": [
+        "src/packaging/tags.py",
+        "src/packaging/utils.py"
+      ],
+      "named_by_a_test": [
+        "src/packaging/tags.py",
+        "src/packaging/utils.py"
+      ],
+      "url": "https://github.com/pypa/packaging/pull/1351"
+    },
+    {
+      "repo": "pypa/packaging",
+      "pr": 1349,
+      "base": "b62954b62d04f58a939d2856c67ebe4de32cdb5d",
+      "source_changed": [
+        "src/packaging/pylock.py"
+      ],
+      "named_by_a_test": [
+        "src/packaging/pylock.py"
+      ],
+      "url": "https://github.com/pypa/packaging/pull/1349"
+    },
+    {
+      "repo": "pypa/packaging",
+      "pr": 1347,
+      "base": "902ca322a745e135c3d49af5ab66eca4fce084c5",
+      "source_changed": [
+        "src/packaging/tags.py"
+      ],
+      "named_by_a_test": [
+        "src/packaging/tags.py"
+      ],
+      "url": "https://github.com/pypa/packaging/pull/1347"
+    },
+    {
+      "repo": "pypa/packaging",
+      "pr": 1346,
+      "base": "0bfc3cea4f9fe1b1b0c80ce06f02bd2433500c81",
+      "source_changed": [
+        "src/packaging/tags.py"
+      ],
+      "named_by_a_test": [
+        "src/packaging/tags.py"
+      ],
+      "url": "https://github.com/pypa/packaging/pull/1346"
+    },
+    {
+      "repo": "kevin1024/vcrpy",
+      "pr": 1012,
+      "base": "1421b3636226a0774c2b4766fe848289e6b45c23",
+      "source_changed": [
+        "vcr/serialize.py",
+        "vcr/serializers/yamlserializer.py"
+      ],
+      "named_by_a_test": [
+        "vcr/serialize.py",
+        "vcr/serializers/yamlserializer.py"
+      ],
+      "url": "https://github.com/kevin1024/vcrpy/pull/1012"
+    },
+    {
+      "repo": "kevin1024/vcrpy",
+      "pr": 1008,
+      "base": "b1fb62bf474d27be3ccafdc6bc1b8a7a1c5c4b8d",
+      "source_changed": [
+        "vcr/serialize.py"
+      ],
+      "named_by_a_test": [
+        "vcr/serialize.py"
+      ],
+      "url": "https://github.com/kevin1024/vcrpy/pull/1008"
+    },
+    {
+      "repo": "kevin1024/vcrpy",
+      "pr": 1001,
+      "base": "30a721d400b55ced25f5d8a612b8a1ae01240160",
+      "source_changed": [
+        "vcr/patch.py"
+      ],
+      "named_by_a_test": [
+        "vcr/patch.py"
+      ],
+      "url": "https://github.com/kevin1024/vcrpy/pull/1001"
+    },
+    {
+      "repo": "kevin1024/vcrpy",
+      "pr": 996,
+      "base": "16b6c2651bddb9b62debc20f1f82a52c8a8ae5ba",
+      "source_changed": [
+        "tests/integration/aiohttp_utils.py",
+        "vcr/stubs/aiohttp_stubs.py"
+      ],
+      "named_by_a_test": [
+        "tests/integration/aiohttp_utils.py"
+      ],
+      "url": "https://github.com/kevin1024/vcrpy/pull/996"
+    },
+    {
+      "repo": "kevin1024/vcrpy",
+      "pr": 993,
+      "base": "99e028875208ba4f2081860fa13c789275e5d8c6",
+      "source_changed": [
+        "vcr/patch.py",
+        "vcr/stubs/httpx_stubs.py"
+      ],
+      "named_by_a_test": [
+        "vcr/patch.py"
+      ],
+      "url": "https://github.com/kevin1024/vcrpy/pull/993"
+    },
+    {
+      "repo": "kevin1024/vcrpy",
+      "pr": 985,
+      "base": "16b6c2651bddb9b62debc20f1f82a52c8a8ae5ba",
+      "source_changed": [
+        "vcr/errors.py"
+      ],
+      "named_by_a_test": [
+        "vcr/errors.py"
+      ],
+      "url": "https://github.com/kevin1024/vcrpy/pull/985"
+    },
+    {
+      "repo": "kevin1024/vcrpy",
+      "pr": 982,
+      "base": "16b6c2651bddb9b62debc20f1f82a52c8a8ae5ba",
+      "source_changed": [
+        "vcr/serializers/compat.py"
+      ],
+      "named_by_a_test": [
+        "vcr/serializers/compat.py"
+      ],
+      "url": "https://github.com/kevin1024/vcrpy/pull/982"
+    },
+    {
+      "repo": "kevin1024/vcrpy",
+      "pr": 980,
+      "base": "9b586631e4131fce906207c40eeb71e41df6c23a",
+      "source_changed": [
+        "vcr/patch.py",
+        "vcr/stubs/__init__.py",
+        "vcr/stubs/urllib3_stubs.py"
+      ],
+      "named_by_a_test": [
+        "vcr/patch.py",
+        "vcr/stubs/__init__.py"
+      ],
+      "url": "https://github.com/kevin1024/vcrpy/pull/980"
+    },
+    {
+      "repo": "kevin1024/vcrpy",
+      "pr": 976,
+      "base": "9b586631e4131fce906207c40eeb71e41df6c23a",
+      "source_changed": [
+        "vcr/stubs/__init__.py"
+      ],
+      "named_by_a_test": [
+        "vcr/stubs/__init__.py"
+      ],
+      "url": "https://github.com/kevin1024/vcrpy/pull/976"
+    },
+    {
+      "repo": "kevin1024/vcrpy",
+      "pr": 972,
+      "base": "9b586631e4131fce906207c40eeb71e41df6c23a",
+      "source_changed": [
+        "vcr/patch.py",
+        "vcr/stubs/httpx_stubs.py"
+      ],
+      "named_by_a_test": [
+        "vcr/patch.py"
+      ],
+      "url": "https://github.com/kevin1024/vcrpy/pull/972"
+    },
+    {
+      "repo": "kevin1024/vcrpy",
+      "pr": 965,
+      "base": "ca4b1e19c2e9259690987e18587f70362fe98858",
+      "source_changed": [
+        "vcr/patch.py",
+        "vcr/stubs/httpcore_stubs.py"
+      ],
+      "named_by_a_test": [
+        "vcr/patch.py"
+      ],
+      "url": "https://github.com/kevin1024/vcrpy/pull/965"
+    },
+    {
+      "repo": "kevin1024/vcrpy",
+      "pr": 962,
+      "base": "ca4b1e19c2e9259690987e18587f70362fe98858",
+      "source_changed": [
+        "vcr/cassette.py"
+      ],
+      "named_by_a_test": [
+        "vcr/cassette.py"
+      ],
+      "url": "https://github.com/kevin1024/vcrpy/pull/962"
+    },
+    {
+      "repo": "kevin1024/vcrpy",
+      "pr": 953,
+      "base": "a23fe0333ae033cf99edd37fd8a13bcca1c6bff2",
+      "source_changed": [
+        "setup.py",
+        "vcr/cassette.py",
+        "vcr/matchers.py",
+        "vcr/request.py",
+        "vcr/serialize.py",
+        "vcr/stubs/__init__.py",
+        "vcr/stubs/aiohttp_stubs.py",
+        "vcr/stubs/tornado_stubs.py"
+      ],
+      "named_by_a_test": [
+        "vcr/cassette.py",
+        "vcr/matchers.py",
+        "vcr/request.py",
+        "vcr/serialize.py",
+        "vcr/stubs/__init__.py"
+      ],
+      "url": "https://github.com/kevin1024/vcrpy/pull/953"
+    },
+    {
+      "repo": "kevin1024/vcrpy",
+      "pr": 943,
+      "base": "e2f32408359687b43376f138369c5cedc2fd3c05",
+      "source_changed": [
+        "setup.py",
+        "vcr/patch.py",
+        "vcr/stubs/httpcore_stubs.py",
+        "vcr/stubs/httpx_stubs.py"
+      ],
+      "named_by_a_test": [
+        "vcr/patch.py"
+      ],
+      "url": "https://github.com/kevin1024/vcrpy/pull/943"
+    },
+    {
+      "repo": "kevin1024/vcrpy",
+      "pr": 921,
+      "base": "19bd4e012c8fd6970fd7f2af3cc60aed1e5f1ab5",
+      "source_changed": [
+        "vcr/cassette.py"
+      ],
+      "named_by_a_test": [
+        "vcr/cassette.py"
+      ],
+      "url": "https://github.com/kevin1024/vcrpy/pull/921"
+    },
+    {
+      "repo": "python-attrs/attrs",
+      "pr": 1606,
+      "base": "f38b8a3f1625060aa4245930822c34c11c252f83",
+      "source_changed": [
+        "src/attr/_make.py"
+      ],
+      "named_by_a_test": [
+        "src/attr/_make.py"
+      ],
+      "url": "https://github.com/python-attrs/attrs/pull/1606"
+    },
+    {
+      "repo": "python-attrs/attrs",
+      "pr": 1603,
+      "base": "c1c1e0e25f855be68caf1d1a1dfa832a25acbf58",
+      "source_changed": [
+        "src/attr/_compat.py",
+        "src/attr/_make.py",
+        "src/attr/converters.py",
+        "tests/strategies.py",
+        "tests/utils.py"
+      ],
+      "named_by_a_test": [
+        "src/attr/_compat.py",
+        "src/attr/_make.py",
+        "src/attr/converters.py",
+        "tests/strategies.py",
+        "tests/utils.py"
+      ],
+      "url": "https://github.com/python-attrs/attrs/pull/1603"
+    },
+    {
+      "repo": "python-attrs/attrs",
+      "pr": 1600,
+      "base": "ca0f04585d3fb132c6e2f6baa9d7d966d8036760",
+      "source_changed": [
+        "src/attr/__init__.py",
+        "src/attr/_compat.py",
+        "src/attr/_funcs.py",
+        "src/attr/_make.py",
+        "src/attrs/__init__.py"
+      ],
+      "named_by_a_test": [
+        "src/attr/__init__.py",
+        "src/attr/_compat.py",
+        "src/attr/_funcs.py",
+        "src/attr/_make.py",
+        "src/attrs/__init__.py"
+      ],
+      "url": "https://github.com/python-attrs/attrs/pull/1600"
+    },
+    {
+      "repo": "python-attrs/attrs",
+      "pr": 1593,
+      "base": "6851ab593cd25f3c14393e9355d57d22bec2a074",
+      "source_changed": [
+        "src/attr/_make.py"
+      ],
+      "named_by_a_test": [
+        "src/attr/_make.py"
+      ],
+      "url": "https://github.com/python-attrs/attrs/pull/1593"
+    },
+    {
+      "repo": "python-attrs/attrs",
+      "pr": 1592,
+      "base": "79fb1645a17118666144ead131a88fdc8d8cd59f",
+      "source_changed": [
+        "src/attr/_compat.py",
+        "src/attr/_make.py",
+        "src/attr/_next_gen.py",
+        "src/attr/setters.py",
+        "typing-examples/baseline.py"
+      ],
+      "named_by_a_test": [
+        "src/attr/_compat.py",
+        "src/attr/_make.py",
+        "src/attr/setters.py",
+        "typing-examples/baseline.py"
+      ],
+      "url": "https://github.com/python-attrs/attrs/pull/1592"
+    },
+    {
+      "repo": "python-attrs/attrs",
+      "pr": 1589,
+      "base": "45de9beb093d2142517ab7d1ebda6522e3d3c4ac",
+      "source_changed": [
+        "typing-examples/baseline.py"
+      ],
+      "named_by_a_test": [
+        "typing-examples/baseline.py"
+      ],
+      "url": "https://github.com/python-attrs/attrs/pull/1589"
+    },
+    {
+      "repo": "python-attrs/attrs",
+      "pr": 1571,
+      "base": "f616f732c6c5f87a8f7a762176422baed250a6be",
+      "source_changed": [
+        "src/attr/validators.py"
+      ],
+      "named_by_a_test": [
+        "src/attr/validators.py"
+      ],
+      "url": "https://github.com/python-attrs/attrs/pull/1571"
+    },
+    {
+      "repo": "python-attrs/attrs",
+      "pr": 1541,
+      "base": "57b314c0dc8e0b80c0ed8f61c0be81965137ea41",
+      "source_changed": [
+        "src/attr/_make.py"
+      ],
+      "named_by_a_test": [
+        "src/attr/_make.py"
+      ],
+      "url": "https://github.com/python-attrs/attrs/pull/1541"
+    },
+    {
+      "repo": "pallets/click",
+      "pr": 3781,
+      "base": "2103e157683c5e4cadc8ee1838df526a54bde9a4",
+      "source_changed": [
+        "src/click/_termui_impl.py",
+        "src/click/termui.py",
+        "tests/typing/typing_edit.py"
+      ],
+      "named_by_a_test": [
+        "src/click/_termui_impl.py",
+        "src/click/termui.py"
+      ],
+      "url": "https://github.com/pallets/click/pull/3781"
+    },
+    {
+      "repo": "pallets/click",
+      "pr": 3777,
+      "base": "61b69e967e525bd502f5bf42def4d551e761fe0e",
+      "source_changed": [
+        "src/click/_termui_impl.py"
+      ],
+      "named_by_a_test": [
+        "src/click/_termui_impl.py"
+      ],
+      "url": "https://github.com/pallets/click/pull/3777"
+    },
+    {
+      "repo": "pallets/click",
+      "pr": 3776,
+      "base": "f36d58bbd7f188178de2d4fe1d0292c510375ca7",
+      "source_changed": [
+        "src/click/_termui_impl.py"
+      ],
+      "named_by_a_test": [
+        "src/click/_termui_impl.py"
+      ],
+      "url": "https://github.com/pallets/click/pull/3776"
+    },
+    {
+      "repo": "pallets/click",
+      "pr": 3769,
+      "base": "8b44edfff7d9a6c895fa804148c16b3a0bc9efb5",
+      "source_changed": [
+        "src/click/_termui_impl.py"
+      ],
+      "named_by_a_test": [
+        "src/click/_termui_impl.py"
+      ],
+      "url": "https://github.com/pallets/click/pull/3769"
+    },
+    {
+      "repo": "pallets/click",
+      "pr": 3767,
+      "base": "cbd7a4109da16ce58f54c2a618b4c986e3041fcf",
+      "source_changed": [
+        "src/click/_compat.py",
+        "src/click/_termui_impl.py"
+      ],
+      "named_by_a_test": [
+        "src/click/_compat.py",
+        "src/click/_termui_impl.py"
+      ],
+      "url": "https://github.com/pallets/click/pull/3767"
+    },
+    {
+      "repo": "pallets/click",
+      "pr": 3764,
+      "base": "150d1071d69c5cdad7de78590013ffe56cf9e3bb",
+      "source_changed": [
+        "src/click/_termui_impl.py"
+      ],
+      "named_by_a_test": [
+        "src/click/_termui_impl.py"
+      ],
+      "url": "https://github.com/pallets/click/pull/3764"
+    },
+    {
+      "repo": "pallets/click",
+      "pr": 3739,
+      "base": "9c4dfdaebe0e6b2aabc566eb81f6f10eb5cd6ea1",
+      "source_changed": [
+        "src/click/_termui_impl.py"
+      ],
+      "named_by_a_test": [
+        "src/click/_termui_impl.py"
+      ],
+      "url": "https://github.com/pallets/click/pull/3739"
+    },
+    {
+      "repo": "pallets/click",
+      "pr": 3728,
+      "base": "00e592cea702e0b2caa0dee42489fdb1c22cd845",
+      "source_changed": [
+        "src/click/core.py"
+      ],
+      "named_by_a_test": [
+        "src/click/core.py"
+      ],
+      "url": "https://github.com/pallets/click/pull/3728"
+    },
+    {
+      "repo": "encode/starlette",
+      "pr": 3471,
+      "base": "04d7869c1ec3016fa11f58382a9ac7bc14b46662",
+      "source_changed": [
+        "starlette/_utils.py",
+        "starlette/datastructures.py",
+        "starlette/middleware/trustedhost.py"
+      ],
+      "named_by_a_test": [
+        "starlette/_utils.py",
+        "starlette/datastructures.py",
+        "starlette/middleware/trustedhost.py"
+      ],
+      "url": "https://github.com/Kludex/starlette/pull/3471"
+    },
+    {
+      "repo": "encode/starlette",
+      "pr": 3463,
+      "base": "3b0bc1df1e577ddf675ffcda5193c057018bf806",
+      "source_changed": [
+        "starlette/middleware/opentelemetry.py"
+      ],
+      "named_by_a_test": [
+        "starlette/middleware/opentelemetry.py"
+      ],
+      "url": "https://github.com/Kludex/starlette/pull/3463"
+    },
+    {
+      "repo": "encode/starlette",
+      "pr": 3454,
+      "base": "91f889c0613f2e0da384cc656e60d4563fd92d77",
+      "source_changed": [
+        "benchmarks/_utils.py",
+        "benchmarks/file_response_benchmark.py",
+        "benchmarks/multipart_benchmark.py",
+        "benchmarks/streaming_response_benchmark.py",
+        "benchmarks/urlencoded_benchmark.py",
+        "benchmarks/websocket_benchmark.py"
+      ],
+      "named_by_a_test": [
+        "benchmarks/_utils.py"
+      ],
+      "url": "https://github.com/Kludex/starlette/pull/3454"
+    },
+    {
+      "repo": "encode/starlette",
+      "pr": 3450,
+      "base": "afa58b6ad70a329343aa439e9cc331af62d645a1",
+      "source_changed": [
+        "benchmarks/_utils.py",
+        "benchmarks/multipart_benchmark.py",
+        "benchmarks/request_benchmark.py"
+      ],
+      "named_by_a_test": [
+        "benchmarks/_utils.py"
+      ],
+      "url": "https://github.com/Kludex/starlette/pull/3450"
+    },
+    {
+      "repo": "encode/starlette",
+      "pr": 3448,
+      "base": "398e5a3430eb1ddd33e1d48d766efe41426e231f",
+      "source_changed": [
+        "benchmarks/__init__.py",
+        "benchmarks/_utils.py",
+        "benchmarks/gzip_benchmark.py",
+        "benchmarks/response_benchmark.py",
+        "benchmarks/routing_benchmark.py"
+      ],
+      "named_by_a_test": [
+        "benchmarks/__init__.py",
+        "benchmarks/_utils.py"
+      ],
+      "url": "https://github.com/Kludex/starlette/pull/3448"
+    },
+    {
+      "repo": "encode/starlette",
+      "pr": 3438,
+      "base": "7a114ffbada149e34af17544cecdd136b8a25ab6",
+      "source_changed": [
+        "starlette/middleware/opentelemetry.py",
+        "starlette/routing.py"
+      ],
+      "named_by_a_test": [
+        "starlette/middleware/opentelemetry.py",
+        "starlette/routing.py"
+      ],
+      "url": "https://github.com/Kludex/starlette/pull/3438"
+    },
+    {
+      "repo": "encode/starlette",
+      "pr": 3434,
+      "base": "9eea41ad3c26ad21b9bdfe4578c1cdad6c9b9ac2",
+      "source_changed": [
+        "starlette/__init__.py"
+      ],
+      "named_by_a_test": [
+        "starlette/__init__.py"
+      ],
+      "url": "https://github.com/Kludex/starlette/pull/3434"
+    },
+    {
+      "repo": "encode/starlette",
+      "pr": 3432,
+      "base": "9c500db197859dba4a8db13fa8e7d2c55de8152c",
+      "source_changed": [
+        "starlette/__init__.py"
+      ],
+      "named_by_a_test": [
+        "starlette/__init__.py"
+      ],
+      "url": "https://github.com/Kludex/starlette/pull/3432"
+    },
+    {
+      "repo": "encode/starlette",
+      "pr": 3431,
+      "base": "c41236c03868fb3779a64101f4ea88cd47877e23",
+      "source_changed": [
+        "starlette/applications.py",
+        "starlette/formparsers.py",
+        "starlette/middleware/body_limit.py",
+        "starlette/routing.py"
+      ],
+      "named_by_a_test": [
+        "starlette/applications.py",
+        "starlette/formparsers.py",
+        "starlette/middleware/body_limit.py",
+        "starlette/routing.py"
+      ],
+      "url": "https://github.com/Kludex/starlette/pull/3431"
+    },
+    {
+      "repo": "encode/starlette",
+      "pr": 3430,
+      "base": "78ae82cad482fe66a73fb1217f0a6609b3f998f6",
+      "source_changed": [
+        "starlette/responses.py"
+      ],
+      "named_by_a_test": [
+        "starlette/responses.py"
+      ],
+      "url": "https://github.com/Kludex/starlette/pull/3430"
+    },
+    {
+      "repo": "encode/starlette",
+      "pr": 3427,
+      "base": "45fb3909e2216670b6cfe4d7a30c291267f71e89",
+      "source_changed": [
+        "starlette/__init__.py"
+      ],
+      "named_by_a_test": [
+        "starlette/__init__.py"
+      ],
+      "url": "https://github.com/Kludex/starlette/pull/3427"
+    },
+    {
+      "repo": "encode/starlette",
+      "pr": 3421,
+      "base": "50df0dcdf1852f90fedbcf9e78666f6ff86b1925",
+      "source_changed": [
+        "starlette/middleware/gzip.py"
+      ],
+      "named_by_a_test": [
+        "starlette/middleware/gzip.py"
+      ],
+      "url": "https://github.com/Kludex/starlette/pull/3421"
+    },
+    {
+      "repo": "encode/starlette",
+      "pr": 3420,
+      "base": "529053a3549ee5daa5e8587507038ab7d9263862",
+      "source_changed": [
+        "starlette/middleware/gzip.py"
+      ],
+      "named_by_a_test": [
+        "starlette/middleware/gzip.py"
+      ],
+      "url": "https://github.com/Kludex/starlette/pull/3420"
+    },
+    {
+      "repo": "encode/starlette",
+      "pr": 3419,
+      "base": "99b7cc62e0c2cb8d24e5f546b7e34e17496c265e",
+      "source_changed": [
+        "starlette/middleware/gzip.py"
+      ],
+      "named_by_a_test": [
+        "starlette/middleware/gzip.py"
+      ],
+      "url": "https://github.com/Kludex/starlette/pull/3419"
+    },
+    {
+      "repo": "encode/starlette",
+      "pr": 3418,
+      "base": "f7525198f08a6cdf5c336ecb0b9c7390142fc058",
+      "source_changed": [
+        "starlette/middleware/gzip.py"
+      ],
+      "named_by_a_test": [
+        "starlette/middleware/gzip.py"
+      ],
+      "url": "https://github.com/Kludex/starlette/pull/3418"
+    },
+    {
+      "repo": "encode/starlette",
+      "pr": 3416,
+      "base": "152cef477111a16c79fe0195126e094633627576",
+      "source_changed": [
+        "starlette/__init__.py"
+      ],
+      "named_by_a_test": [
+        "starlette/__init__.py"
+      ],
+      "url": "https://github.com/Kludex/starlette/pull/3416"
+    },
+    {
+      "repo": "encode/starlette",
+      "pr": 3415,
+      "base": "3d6d6c20e795d02d22b358758bfa987b436a3ec4",
+      "source_changed": [
+        "starlette/middleware/gzip.py"
+      ],
+      "named_by_a_test": [
+        "starlette/middleware/gzip.py"
+      ],
+      "url": "https://github.com/Kludex/starlette/pull/3415"
+    },
+    {
+      "repo": "encode/starlette",
+      "pr": 3413,
+      "base": "cb824a1c7d67924fc762bfc12359139892385b18",
+      "source_changed": [
+        "starlette/__init__.py"
+      ],
+      "named_by_a_test": [
+        "starlette/__init__.py"
+      ],
+      "url": "https://github.com/Kludex/starlette/pull/3413"
+    },
+    {
+      "repo": "marshmallow-code/marshmallow",
+      "pr": 3024,
+      "base": "c7b559a1fa3aba57ca6dba0ab336841c5038a782",
+      "source_changed": [
+        "src/marshmallow/utils.py"
+      ],
+      "named_by_a_test": [
+        "src/marshmallow/utils.py"
+      ],
+      "url": "https://github.com/marshmallow-code/marshmallow/pull/3024"
+    },
+    {
+      "repo": "marshmallow-code/marshmallow",
+      "pr": 3016,
+      "base": "3207be31474530f7c0685dfbd7b4faca5b35fbf5",
+      "source_changed": [
+        "src/marshmallow/validate.py"
+      ],
+      "named_by_a_test": [
+        "src/marshmallow/validate.py"
+      ],
+      "url": "https://github.com/marshmallow-code/marshmallow/pull/3016"
+    },
+    {
+      "repo": "marshmallow-code/marshmallow",
+      "pr": 3015,
+      "base": "fb6a7907d2ff9b629a88e79a65ab49ba1861bce3",
+      "source_changed": [
+        "src/marshmallow/fields.py"
+      ],
+      "named_by_a_test": [
+        "src/marshmallow/fields.py"
+      ],
+      "url": "https://github.com/marshmallow-code/marshmallow/pull/3015"
+    },
+    {
+      "repo": "marshmallow-code/marshmallow",
+      "pr": 3004,
+      "base": "3265c13945a9533f9a3ade8d47eb9b32412c4c27",
+      "source_changed": [
+        "src/marshmallow/fields.py"
+      ],
+      "named_by_a_test": [
+        "src/marshmallow/fields.py"
+      ],
+      "url": "https://github.com/marshmallow-code/marshmallow/pull/3004"
+    },
+    {
+      "repo": "marshmallow-code/marshmallow",
+      "pr": 2994,
+      "base": "3265c13945a9533f9a3ade8d47eb9b32412c4c27",
+      "source_changed": [
+        "src/marshmallow/fields.py",
+        "tests/base.py"
+      ],
+      "named_by_a_test": [
+        "src/marshmallow/fields.py",
+        "tests/base.py"
+      ],
+      "url": "https://github.com/marshmallow-code/marshmallow/pull/2994"
+    },
+    {
+      "repo": "marshmallow-code/marshmallow",
+      "pr": 2988,
+      "base": "7bb19f0fdce323a8b216245bf01810e35ed42f95",
+      "source_changed": [
+        "src/marshmallow/schema.py"
+      ],
+      "named_by_a_test": [
+        "src/marshmallow/schema.py"
+      ],
+      "url": "https://github.com/marshmallow-code/marshmallow/pull/2988"
+    },
+    {
+      "repo": "sqlalchemy/alembic",
+      "pr": 1808,
+      "base": "02d72c21d97c0f62b43d4856b60767524f17a00f",
+      "source_changed": [
+        "alembic/operations/base.py",
+        "alembic/operations/ops.py",
+        "alembic/util/langhelpers.py"
+      ],
+      "named_by_a_test": [
+        "alembic/operations/base.py",
+        "alembic/operations/ops.py"
+      ],
+      "url": "https://github.com/sqlalchemy/alembic/pull/1808"
+    },
+    {
+      "repo": "sqlalchemy/alembic",
+      "pr": 1769,
+      "base": "c94816e864f6d89842ebf248cf116031287d506e",
+      "source_changed": [
+        "alembic/ddl/postgresql.py",
+        "tools/toxnox.py"
+      ],
+      "named_by_a_test": [
+        "alembic/ddl/postgresql.py"
+      ],
+      "url": "https://github.com/sqlalchemy/alembic/pull/1769"
+    },
+    {
+      "repo": "sqlalchemy/alembic",
+      "pr": 1682,
+      "base": "c072e67aa91eb871a8123eaa26393fd568cc3f2e",
+      "source_changed": [
+        "alembic/autogenerate/compare.py"
+      ],
+      "named_by_a_test": [
+        "alembic/autogenerate/compare.py"
+      ],
+      "url": "https://github.com/sqlalchemy/alembic/pull/1682"
+    },
+    {
+      "repo": "psf/black",
+      "pr": 5312,
+      "base": "74371e2041a3120a049ced8f1cab0e7a6bc8ecd3",
+      "source_changed": [
+        "src/black/lines.py",
+        "tests/data/line_ranges_formatted/function_docstring.py"
+      ],
+      "named_by_a_test": [
+        "src/black/lines.py"
+      ],
+      "url": "https://github.com/psf/black/pull/5312"
+    },
+    {
+      "repo": "psf/black",
+      "pr": 5311,
+      "base": "74371e2041a3120a049ced8f1cab0e7a6bc8ecd3",
+      "source_changed": [
+        "src/black/comments.py",
+        "tests/data/cases/fmtskip10.py"
+      ],
+      "named_by_a_test": [
+        "src/black/comments.py"
+      ],
+      "url": "https://github.com/psf/black/pull/5311"
+    },
+    {
+      "repo": "psf/black",
+      "pr": 5304,
+      "base": "74371e2041a3120a049ced8f1cab0e7a6bc8ecd3",
+      "source_changed": [
+        "src/black/linegen.py",
+        "src/black/mode.py",
+        "tests/data/cases/preview_redundant_generator_parentheses.py"
+      ],
+      "named_by_a_test": [
+        "src/black/mode.py"
+      ],
+      "url": "https://github.com/psf/black/pull/5304"
+    },
+    {
+      "repo": "psf/black",
+      "pr": 5300,
+      "base": "74371e2041a3120a049ced8f1cab0e7a6bc8ecd3",
+      "source_changed": [
+        "src/black/lines.py",
+        "tests/data/cases/fmtonoff9.py"
+      ],
+      "named_by_a_test": [
+        "src/black/lines.py"
+      ],
+      "url": "https://github.com/psf/black/pull/5300"
+    },
+    {
+      "repo": "psf/black",
+      "pr": 5294,
+      "base": "006b2a74d4deac01fa16e85ccc9f5810b53a7391",
+      "source_changed": [
+        "src/black/linegen.py",
+        "src/black/nodes.py",
+        "src/black/numerics.py",
+        "src/black/trans.py"
+      ],
+      "named_by_a_test": [
+        "src/black/nodes.py",
+        "src/black/trans.py"
+      ],
+      "url": "https://github.com/psf/black/pull/5294"
+    },
+    {
+      "repo": "psf/black",
+      "pr": 5287,
+      "base": "c7801d9e24fe28b9c85742722cdcb97e1582a94d",
+      "source_changed": [
+        "src/black/nodes.py",
+        "tests/data/cases/t_docstring.py"
+      ],
+      "named_by_a_test": [
+        "src/black/nodes.py"
+      ],
+      "url": "https://github.com/psf/black/pull/5287"
+    },
+    {
+      "repo": "psf/black",
+      "pr": 5283,
+      "base": "006b2a74d4deac01fa16e85ccc9f5810b53a7391",
+      "source_changed": [
+        "src/black/trans.py"
+      ],
+      "named_by_a_test": [
+        "src/black/trans.py"
+      ],
+      "url": "https://github.com/psf/black/pull/5283"
+    },
+    {
+      "repo": "psf/black",
+      "pr": 5282,
+      "base": "006b2a74d4deac01fa16e85ccc9f5810b53a7391",
+      "source_changed": [
+        "src/black/trans.py"
+      ],
+      "named_by_a_test": [
+        "src/black/trans.py"
+      ],
+      "url": "https://github.com/psf/black/pull/5282"
+    },
+    {
+      "repo": "psf/black",
+      "pr": 5281,
+      "base": "006b2a74d4deac01fa16e85ccc9f5810b53a7391",
+      "source_changed": [
+        "src/black/nodes.py"
+      ],
+      "named_by_a_test": [
+        "src/black/nodes.py"
+      ],
+      "url": "https://github.com/psf/black/pull/5281"
+    },
+    {
+      "repo": "psf/black",
+      "pr": 5277,
+      "base": "d3b151ceba67b62264cd4ba700e92f4d6fbc9c8e",
+      "source_changed": [
+        "src/black/nodes.py"
+      ],
+      "named_by_a_test": [
+        "src/black/nodes.py"
+      ],
+      "url": "https://github.com/psf/black/pull/5277"
+    },
+    {
+      "repo": "psf/black",
+      "pr": 5272,
+      "base": "c7801d9e24fe28b9c85742722cdcb97e1582a94d",
+      "source_changed": [
+        "src/black/trans.py",
+        "tests/data/cases/skip_magic_trailing_comma.py"
+      ],
+      "named_by_a_test": [
+        "src/black/trans.py"
+      ],
+      "url": "https://github.com/psf/black/pull/5272"
+    },
+    {
+      "repo": "psf/black",
+      "pr": 5265,
+      "base": "ba7debff26632c612ee5bc173faf54a7399c3f46",
+      "source_changed": [
+        "src/black/linegen.py",
+        "src/black/strings.py",
+        "tests/data/cases/pep_750_nested_quotes.py"
+      ],
+      "named_by_a_test": [
+        "src/black/strings.py"
+      ],
+      "url": "https://github.com/psf/black/pull/5265"
+    },
+    {
+      "repo": "pytest-dev/pluggy",
+      "pr": 714,
+      "base": "54c95345d24edbe1b06646c931d6dcfcfa6683c2",
+      "source_changed": [
+        "docs/conf.py",
+        "downstream/run_downstream.py",
+        "src/pluggy/__init__.py",
+        "src/pluggy/_callers.py",
+        "src/pluggy/_hooks.py",
+        "src/pluggy/_manager.py",
+        "src/pluggy/_result.py",
+        "testing/benchmark.py"
+      ],
+      "named_by_a_test": [
+        "docs/conf.py",
+        "src/pluggy/__init__.py",
+        "src/pluggy/_callers.py",
+        "src/pluggy/_hooks.py",
+        "src/pluggy/_manager.py",
+        "src/pluggy/_result.py",
+        "testing/benchmark.py"
+      ],
+      "url": "https://github.com/pytest-dev/pluggy/pull/714"
+    }
+  ]
+}
