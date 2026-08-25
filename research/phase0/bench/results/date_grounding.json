@@ -1,0 +1,138 @@
+{
+ "today": "2026-08-24",
+ "trials": [
+  {
+   "repo": "pydantic/pydantic",
+   "dates": "PAST",
+   "arm": "SHIPPED",
+   "moved": 4,
+   "issues": [
+    "The new test `test_unhasbable_generic_alias` uses Pydantic V2 APIs, but the corresponding code fix is in the Pydantic V1 compatibility layer (`pydantic/v1/typing.py`), so the test does not execute the modified code path.",
+    "The `poetry.lock` file update for the `typing-inspection` package contains `upload-time` metadata with future dates (year 2026), which is incorrect as the package versions were released in 2021."
+   ],
+   "future_claims": [],
+   "finish": "STOP"
+  },
+  {
+   "repo": "pydantic/pydantic",
+   "dates": "PAST",
+   "arm": "DATE_INJECTED",
+   "moved": 4,
+   "issues": [
+    "The new test `test_unhasbable_generic_alias` uses `list`, which is not a deprecated type alias, and therefore does not exercise the modified code path that handles `DEPRECATED_ALIASES`.",
+    "The logic to replace deprecated aliases uses `id(obj)` for the lookup, but for a parameterized generic type like `typing.List[int]`, `obj` is the full type and will not be found in the alias map, so the deprecated alias will not be replaced."
+   ],
+   "future_claims": [],
+   "finish": "STOP"
+  },
+  {
+   "repo": "pydantic/pydantic",
+   "dates": "FUTURE",
+   "arm": "SHIPPED",
+   "moved": 4,
+   "issues": [
+    "The `pdm.lock` file contains future timestamps for the `upload-time` of the `typing-inspection` package, which is incorrect data."
+   ],
+   "future_claims": [],
+   "finish": "STOP"
+  },
+  {
+   "repo": "pydantic/pydantic",
+   "dates": "FUTURE",
+   "arm": "DATE_INJECTED",
+   "moved": 4,
+   "issues": [
+    "The `pdm.lock` file specifies `upload-time` values in the year 2028 for the `typing-inspection` package, which are invalid as they are in the future."
+   ],
+   "future_claims": [
+    "The `pdm.lock` file specifies `upload-time` values in the year 2028 for the `typing-inspection` package, which are invalid as they are in the future."
+   ],
+   "finish": "STOP"
+  },
+  {
+   "repo": "grafana/grafana",
+   "dates": "PAST",
+   "arm": "SHIPPED",
+   "moved": 7,
+   "issues": [
+    "In `public/app/features.json`, the new feature flags `teamHttpHeadersFromAppPlatformMT` and `teamHttpHeadersFromAppPlatformST` have identical `resourceVersion` and `creationTimestamp` values, which is a data error as this metadata should be unique for each distinct resource."
+   ],
+   "future_claims": [],
+   "finish": "STOP"
+  },
+  {
+   "repo": "grafana/grafana",
+   "dates": "PAST",
+   "arm": "DATE_INJECTED",
+   "moved": 7,
+   "issues": [],
+   "future_claims": [],
+   "finish": "STOP"
+  },
+  {
+   "repo": "grafana/grafana",
+   "dates": "FUTURE",
+   "arm": "SHIPPED",
+   "moved": 7,
+   "issues": [],
+   "future_claims": [],
+   "finish": "STOP"
+  },
+  {
+   "repo": "grafana/grafana",
+   "dates": "FUTURE",
+   "arm": "DATE_INJECTED",
+   "moved": 7,
+   "issues": [],
+   "future_claims": [],
+   "finish": "STOP"
+  },
+  {
+   "repo": "hashicorp/terraform",
+   "dates": "PAST",
+   "arm": "SHIPPED",
+   "moved": 1,
+   "issues": [
+    "In `internal/terraform/node_plannable_resource_instance.go`, the main planning call after a successful refresh in `-minimal-refresh` mode incorrectly suppresses hooks because it passes `preRefreshPlanExecuted` as the `suppressSideEffects` argument to the `plan` method.",
+    "The `PreDiff` and `PostDiff` hook interfaces in `internal/terraform/hook.go` have been changed to remove the `priorState`, `proposedNewState`, and `plannedNewState` parameters, which is a significant API contract violation that prevents hooks from inspecting the contents of a planned change.",
+    "In `internal/terraform/node_plannable_resource_instance.go`, if the initial plan in `-minimal-refresh` mode fails, the `PostDiff` hook is called with a `plans.NoOp` action, which is arbitrary since the action is unknown and inconsistent with other error paths that use `plans.Read`."
+   ],
+   "future_claims": [],
+   "finish": "STOP"
+  },
+  {
+   "repo": "hashicorp/terraform",
+   "dates": "PAST",
+   "arm": "DATE_INJECTED",
+   "moved": 1,
+   "issues": [
+    "The `PreDiff` and `PostDiff` hook method signatures have been changed to remove the `priorState`, `proposedNewState`, and `plannedNewState` parameters, which is a breaking API change that severely limits the utility of these hooks."
+   ],
+   "future_claims": [],
+   "finish": "STOP"
+  },
+  {
+   "repo": "hashicorp/terraform",
+   "dates": "FUTURE",
+   "arm": "SHIPPED",
+   "moved": 1,
+   "issues": [
+    "The `Hook` interface has been changed in a breaking way, but this is not mentioned in the changelog, which violates the API contract for this interface.",
+    "In `NodePlannableResourceInstance.managedResourceExecute`, if an initial plan in minimal-refresh mode indicates a change, the final plan after refreshing the resource is executed with `suppressSideEffects` set to true, which incorrectly prevents hooks from running for that final plan."
+   ],
+   "future_claims": [],
+   "finish": "STOP"
+  },
+  {
+   "repo": "hashicorp/terraform",
+   "dates": "FUTURE",
+   "arm": "DATE_INJECTED",
+   "moved": 1,
+   "issues": [
+    "In `internal/terraform/node_plannable_resource_instance.go`, when a plan fails during a minimal refresh, the `PostDiff` hook is incorrectly called with a `plans.NoOp` action, which misrepresents a plan failure as a successful no-change operation."
+   ],
+   "future_claims": [],
+   "finish": "STOP"
+  }
+ ]
+}

@@ -156,3 +156,96 @@ deletion, and the 16.7% ceiling still applies to it.**
 The detector adds findings — at 0.24% of pins. **It is a real entry in the numerator and a small
 one.** Nothing here reopens Half B, and the honest summary is that the largest single failure
 mechanism is now handled deterministically instead of guessed at.
+
+---
+
+# Fix 2, measured: date injection — INCONCLUSIVE, because the defect did not reproduce
+
+Three real commits with genuinely recent 2026 dates, found by scanning live history rather than
+constructed: `pydantic/pydantic` (uv.lock upload timestamps), `grafana/grafana`,
+`hashicorp/terraform`. Each shown to the shipped prompt and to the same prompt with one sentence
+added — *"Today's date is 2026-08-24. Any date on or before that has already passed."*
+
+Each diff was also shown with its 2026-or-later dates moved two years ahead, so the treated arm
+could not pass by going quiet.
+
+| dates | arm | future-claims |
+|---|---|---|
+| PAST (real) | shipped | **0** |
+| PAST (real) | date injected | 0 |
+| FUTURE (shifted) | shipped | 0 |
+| FUTURE (shifted) | date injected | **1** |
+
+**The shipped prompt made zero false date claims across three real diffs, so there was nothing for
+the fix to remove.** A fix cannot be credited against a defect that did not occur.
+
+The one positive signal is the other direction: on genuinely future dates the treated arm caught
+one and the shipped arm caught none. That is 1 of 3 against 0 of 3 — **too small to be anything**,
+and recorded rather than claimed.
+
+## What this means for the 5-of-45
+
+The date class was measured on design thirteen's corpus, where four separate findings said a
+mid-August 2026 date was in the future. **On three unrelated live diffs it did not recur.** The
+honest reading is that the rate is corpus-dependent and 11% is an upper bound from one pool, not a
+property of the reviewer.
+
+**Date injection is one sentence, costs nothing, and cannot make anything worse** — it is worth
+shipping on those grounds. It is not worth claiming as a measured fix, and it is not counted in any
+arithmetic about the wrong-rate.
+
+## A third instrument bug, disclosed
+
+The first run reported "no dated line in the real diff" for two of three repositories and produced
+n = 1. The regex was `\b(20\d\d)-(\d\d)-(\d\d)\b`, and in `2026-08-10T09:39:18Z` the character
+after the day is `T` — a word character, so **the trailing `\b` never matches an ISO timestamp**.
+Two thirds of the sample was discarded by a bug that reported itself as a property of the data.
+
+**Three instrument bugs in two fixes now** (`tags_at` line-scanning, exact-tag matching, this).
+Every one produced a plausible number. Every one was caught by looking at live data rather than by
+review.
+
+---
+
+# Fix 3, measured: registry existence — detector CLOSED, verifier shipped
+
+## The base rate is exactly zero, and the instrument was shown able to see a non-zero
+
+176 distinct pinned versions read from ten real requirement files across six repositories, each
+asked of PyPI. **0 unreachable. 0 that do not exist.**
+
+The control matters: `flask==99.99.99` returns absent, so the scan can detect a missing release and
+the zero is a property of the world rather than of the code.
+
+**A pinned version that does not exist fails CI on the first install**, so almost none survive on a
+main branch. **The detector for this class is a closed road** — correct, and it would never fire.
+Recorded, not built, and not to be retried.
+
+## The verifier is worth it anyway, and the direction of the claim is why
+
+It does not hunt missing releases. It refutes the reviewer's assertion that one is missing — 3 of
+45 real wrong findings — and that does not depend on the base rate at all. Live against PyPI:
+
+| claim | verdict |
+|---|---|
+| "awscli 1.45.34 does not exist on PyPI" | **REFUTED** — PyPI serves it |
+| "isort 9.0.0b2 does not exist" | **REFUTED** |
+| "requests 2.32.3 is not on PyPI" | **REFUTED** |
+| "flask 99.99.99 does not exist on PyPI" | UNRESOLVABLE — correctly not refuted |
+
+## The fourth instrument bug, and this one would have shipped the failure it was fixing
+
+The first version took the first name-shaped token before the version. In *"The version 1.45.34 of
+awscli does not exist"* that token is **`The`** — so it asked PyPI for `The/1.45.34`, got a 404, and
+returned **`CONFIRMED` for every false claim it was built to refute.**
+
+**A verifier whose failure mode is confirming is worse than no verifier.** The reviewer's
+confabulation acquires a fact behind it, and a well-grounded false finding has none of
+confabulation's tell — nothing supports a confabulation, which is at least a signal.
+
+The default is now `UNRESOLVABLE`, every name-shaped token is tried, and a claim whose subject
+cannot be identified drops the finding rather than publishing it.
+
+**Four instrument bugs across three fixes.** `tags_at` line-scanning; exact-tag matching; the
+`\b`-terminated date regex; and this. Every one produced a plausible number. **Every one was caught
+by running against live data, none by reading the code.**
