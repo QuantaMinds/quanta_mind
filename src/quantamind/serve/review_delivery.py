@@ -38,6 +38,8 @@ from pathlib import Path
 
 from quantamind.ingest.diff import base_commit, changed_files
 from quantamind.ingest.github_comments import post
+from quantamind.render.pin_block import block
+from quantamind.serve import pin_check
 from quantamind.serve.run_review import review as run_ranking
 from quantamind.serve.working_clone import ensure
 from quantamind.types.settings import Settings
@@ -96,14 +98,22 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
         head_sha=head_sha,
     )
 
-    if reviewed.body is None:
+    # **THE PIN CHECK RUNS ON THE RAW CHANGED LIST, NOT THE RANKED ONE.** Workflows are not a
+    # reviewable suffix, so they never appear in `reviewed.considered` — which is exactly why the
+    # detector sat unreachable behind the reviewer until now. It needs no model and no ranking.
+    mismatched, _unresolved = pin_check.check(clone, head_sha, changed)
+    pins = block(mismatched)
+
+    if reviewed.body is None and not pins:
         quiet = Outcome.NO_READABLE_FILES if not reviewed.considered else Outcome.NOTHING_TO_SAY
         return Delivered(quiet, reviewed.considered, reviewed.skipped, None)
 
-    if not settings.posting_enabled:
-        return Delivered(Outcome.REHEARSED, reviewed.considered, reviewed.skipped, reviewed.body)
+    body = (reviewed.body or "") + pins
 
-    wrote = post(delivery_repo, number, head_sha, reviewed.body)
+    if not settings.posting_enabled:
+        return Delivered(Outcome.REHEARSED, reviewed.considered, reviewed.skipped, body)
+
+    wrote = post(delivery_repo, number, head_sha, body)
     return Delivered(
         Outcome.POSTED if wrote else Outcome.DUPLICATE,
         reviewed.considered,
