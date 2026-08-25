@@ -117,7 +117,10 @@ that the mechanism is worth measuring properly, not a result about live rates.
 
 **And it cannot make the yield argument go away.** The ceiling arithmetic is unchanged: 207
 adjudicated findings, 12 correct, and a perfect verifier for every failure class reaches
-**C/n = 16.7%** against a field floor of 49%. **A verifier deletes; it cannot create.** Execution
+**C/n = 16.7%**, against our own 5.8% today. **A verifier deletes; it cannot create.** (This
+document first compared that to "a 49% field floor", which `publishing-rules.md` bars: 49% is a
+BEHAVIOURAL figure — did a developer change the code — and 16.7% is truth-adjudicated.
+→ `docs/CORRECTIONS.md` entry 9) Execution
 grounding deletes more accurately than a prompt does. It does not produce a correct finding that
 was not already there.
 
