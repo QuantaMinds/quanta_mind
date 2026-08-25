@@ -1,0 +1,277 @@
+[
+ {
+  "repo": "pallets/flask",
+  "pr": 6096,
+  "files": 4,
+  "attended": [
+   "src/flask/app.py",
+   "src/flask/testing.py"
+  ],
+  "ours": 0.5,
+  "alphabetical": 0.16666666666666666,
+  "by_diff_size": 0.5
+ },
+ {
+  "repo": "pydantic/pydantic",
+  "pr": 13667,
+  "files": 4,
+  "attended": [
+   "pydantic-core/python/pydantic_core/core_schema.py",
+   "pydantic/_internal/_discriminated_union.py",
+   "pydantic/json_schema.py",
+   "tests/test_json_schema.py"
+  ],
+  "ours": 0.5,
+  "alphabetical": 0.5,
+  "by_diff_size": 0.5
+ },
+ {
+  "repo": "aio-libs/aiohttp",
+  "pr": 13545,
+  "files": 7,
+  "attended": [
+   "aiohttp/_websocket/reader_py.py",
+   "tests/test_websocket_parser.py"
+  ],
+  "ours": 0.25,
+  "alphabetical": 0.5,
+  "by_diff_size": 0.4166666666666667
+ },
+ {
+  "repo": "aio-libs/aiohttp",
+  "pr": 13541,
+  "files": 6,
+  "attended": [
+   "aiohttp/client_reqrep.py"
+  ],
+  "ours": 0.2,
+  "alphabetical": 0.2,
+  "by_diff_size": 0.0
+ },
+ {
+  "repo": "aio-libs/aiohttp",
+  "pr": 13513,
+  "files": 3,
+  "attended": [
+   "tests/test_benchmarks_multipart.py",
+   "tests/test_multipart.py"
+  ],
+  "ours": 0.75,
+  "alphabetical": 0.75,
+  "by_diff_size": 0.5
+ },
+ {
+  "repo": "aio-libs/aiohttp",
+  "pr": 13512,
+  "files": 3,
+  "attended": [
+   "tests/test_benchmarks_multipart.py",
+   "tests/test_multipart.py"
+  ],
+  "ours": 0.75,
+  "alphabetical": 0.75,
+  "by_diff_size": 0.5
+ },
+ {
+  "repo": "aio-libs/aiohttp",
+  "pr": 13511,
+  "files": 3,
+  "attended": [
+   "tests/test_web_functional.py",
+   "tests/test_web_protocol.py"
+  ],
+  "ours": 0.75,
+  "alphabetical": 0.75,
+  "by_diff_size": 0.25
+ },
+ {
+  "repo": "aio-libs/aiohttp",
+  "pr": 13510,
+  "files": 3,
+  "attended": [
+   "tests/test_web_functional.py",
+   "tests/test_web_protocol.py"
+  ],
+  "ours": 0.75,
+  "alphabetical": 0.75,
+  "by_diff_size": 0.25
+ },
+ {
+  "repo": "celery/celery",
+  "pr": 10488,
+  "files": 4,
+  "attended": [
+   "celery/app/log.py",
+   "celery/utils/log.py"
+  ],
+  "ours": 0.5,
+  "alphabetical": 0.5,
+  "by_diff_size": 0.5
+ },
+ {
+  "repo": "celery/celery",
+  "pr": 10459,
+  "files": 3,
+  "attended": [
+   "celery/backends/rpc.py",
+   "t/unit/backends/test_rpc.py"
+  ],
+  "ours": 0.25,
+  "alphabetical": 0.5,
+  "by_diff_size": 0.5
+ },
+ {
+  "repo": "celery/celery",
+  "pr": 10418,
+  "files": 3,
+  "attended": [
+   "celery/worker/consumer/gossip.py"
+  ],
+  "ours": 0.5,
+  "alphabetical": 0.0,
+  "by_diff_size": 1.0
+ },
+ {
+  "repo": "jazzband/pip-tools",
+  "pr": 2438,
+  "files": 14,
+  "attended": [
+   "piptools/_internal/_pip_api/command_methods.py",
+   "piptools/_internal/_pip_api/package_finder.py",
+   "piptools/repositories/pypi.py",
+   "tests/test_cli_compile.py",
+   "tests/test_repository_pypi.py",
+   "tests/unit/_internal/pip_api/test_package_finder.py"
+  ],
+  "ours": 0.576923076923077,
+  "alphabetical": 0.5897435897435898,
+  "by_diff_size": 0.32051282051282054
+ },
+ {
+  "repo": "urllib3/urllib3",
+  "pr": 5101,
+  "files": 4,
+  "attended": [
+   "src/urllib3/http2/connection.py"
+  ],
+  "ours": 0.6666666666666666,
+  "alphabetical": 0.3333333333333333,
+  "by_diff_size": 0.6666666666666666
+ },
+ {
+  "repo": "urllib3/urllib3",
+  "pr": 5095,
+  "files": 4,
+  "attended": [
+   "src/urllib3/util/url.py"
+  ],
+  "ours": 0.6666666666666666,
+  "alphabetical": 0.0,
+  "by_diff_size": 0.3333333333333333
+ },
+ {
+  "repo": "urllib3/urllib3",
+  "pr": 5093,
+  "files": 3,
+  "attended": [
+   "src/urllib3/connection.py",
+   "test/with_dummyserver/test_proxy_poolmanager.py"
+  ],
+  "ours": 0.75,
+  "alphabetical": 0.5,
+  "by_diff_size": 0.25
+ },
+ {
+  "repo": "urllib3/urllib3",
+  "pr": 5079,
+  "files": 5,
+  "attended": [
+   "test/test_connectionpool.py"
+  ],
+  "ours": 0.75,
+  "alphabetical": 0.5,
+  "by_diff_size": 0.0
+ },
+ {
+  "repo": "kevin1024/vcrpy",
+  "pr": 993,
+  "files": 3,
+  "attended": [
+   "tests/integration/test_httpx2.py"
+  ],
+  "ours": 1.0,
+  "alphabetical": 0.0,
+  "by_diff_size": 0.0
+ },
+ {
+  "repo": "kevin1024/vcrpy",
+  "pr": 943,
+  "files": 4,
+  "attended": [
+   "vcr/stubs/httpcore_stubs.py"
+  ],
+  "ours": 1.0,
+  "alphabetical": 0.6666666666666666,
+  "by_diff_size": 0.0
+ },
+ {
+  "repo": "encode/starlette",
+  "pr": 3454,
+  "files": 6,
+  "attended": [
+   "benchmarks/file_response_benchmark.py",
+   "benchmarks/urlencoded_benchmark.py"
+  ],
+  "ours": 0.6000000000000001,
+  "alphabetical": 0.5,
+  "by_diff_size": 0.2
+ },
+ {
+  "repo": "encode/starlette",
+  "pr": 3448,
+  "files": 6,
+  "attended": [
+   "benchmarks/response_benchmark.py"
+  ],
+  "ours": 1.0,
+  "alphabetical": 0.8,
+  "by_diff_size": 0.0
+ },
+ {
+  "repo": "encode/starlette",
+  "pr": 3438,
+  "files": 3,
+  "attended": [
+   "starlette/middleware/opentelemetry.py"
+  ],
+  "ours": 0.5,
+  "alphabetical": 0.0,
+  "by_diff_size": 0.5
+ },
+ {
+  "repo": "encode/starlette",
+  "pr": 3431,
+  "files": 6,
+  "attended": [
+   "starlette/applications.py",
+   "starlette/formparsers.py",
+   "starlette/middleware/body_limit.py",
+   "starlette/routing.py",
+   "tests/middleware/test_body_limit.py"
+  ],
+  "ours": 0.4800000000000001,
+  "alphabetical": 0.4,
+  "by_diff_size": 0.52
+ },
+ {
+  "repo": "marshmallow-code/marshmallow",
+  "pr": 2994,
+  "files": 3,
+  "attended": [
+   "src/marshmallow/fields.py"
+  ],
+  "ours": 0.0,
+  "alphabetical": 0.0,
+  "by_diff_size": 1.0
+ }
+]
