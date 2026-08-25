@@ -23,83 +23,24 @@ WHY:  **THREE OF 45 REAL WRONG FINDINGS ASSERT THAT A RELEASE IS MISSING, AND AL
       confabulation acquires a fact behind it, and a well-grounded false finding has none of
       confabulation's tell.
 IMPORTS: verify.external_facts (its `Verdict` and `Adjudicated`). stdlib re, urllib.
-CONSUMED BY: `serve/deep_review.py`.
+CONSUMED BY: `verify/publishable.py`. Its patterns live in `verify/release_claims.py`.
 """
 
 from __future__ import annotations
 
-import re
 import urllib.error
 import urllib.request
 
 from quantamind.verify.external_facts import Adjudicated, Verdict
+from quantamind.verify.release_claims import (
+    BOUND,
+    DISPUTES_RELEASE,
+    NAMEISH,
+    NOT_A_PACKAGE,
+    VERSION,
+)
 
 PYPI_TIMEOUT_S = 20
-
-# A finding disputing that a release exists: "awscli 1.45.34 is not on PyPI", "isort 9.0.0b2
-# does not exist". Three of 45 real wrong findings are this claim, and all three were false.
-DISPUTES_RELEASE = re.compile(
-    r"does ?n[o']?t exist|is not (?:on|available|published)|was never (?:released|published)", re.I
-)
-VERSION = re.compile(r"\b(\d+\.\d+(?:\.\d+)?(?:[abrc]+\d+)?)\b")
-# A plausible distribution name. English words are excluded by a stop list rather than by shape,
-# because `requests`, `attrs` and `click` are all ordinary words AND real packages.
-NAMEISH = re.compile(r"[A-Za-z][\w.-]{1,40}")
-NOT_A_PACKAGE = frozenset(
-    [
-        "the",
-        "a",
-        "an",
-        "this",
-        "that",
-        "it",
-        "is",
-        "are",
-        "was",
-        "were",
-        "not",
-        "does",
-        "doesn",
-        "exist",
-        "version",
-        "package",
-        "pinned",
-        "on",
-        "in",
-        "of",
-        "and",
-        "or",
-        "but",
-        "pypi",
-        "npm",
-        "registry",
-        "release",
-        "released",
-        "published",
-        "available",
-        "never",
-        "latest",
-        "new",
-        "old",
-        "to",
-        "for",
-        "with",
-        "from",
-        "at",
-        "by",
-        "as",
-        "be",
-        "been",
-        "being",
-        "has",
-        "have",
-        "had",
-        "will",
-        "would",
-        "should",
-        "could",
-    ]
-)
 
 
 def released(name: str, version: str) -> tuple[bool, bool]:
@@ -125,7 +66,26 @@ def released(name: str, version: str) -> tuple[bool, bool]:
         return False, False
 
 
-def adjudicate_release(finding: str) -> Adjudicated:
+def package_exists(name: str) -> tuple[bool, bool]:
+    """(reached, the package exists at all). Distinct from whether a given RELEASE exists.
+
+    **THIS IS WHAT SEPARATES A TRUE ABSENCE-CLAIM FROM AN UNIDENTIFIABLE SUBJECT.** Without it,
+    "flask 99.99.99 does not exist" and "wibble 99.99.99 does not exist" look identical: no package
+    in the sentence has that release, so both come back UNRESOLVABLE and both findings drop. The
+    first is TRUE and was being thrown away.
+    """
+    try:
+        with urllib.request.urlopen(
+            f"https://pypi.org/pypi/{name}/json", timeout=PYPI_TIMEOUT_S
+        ) as r:
+            return True, r.status == 200
+    except urllib.error.HTTPError as e:
+        return True, e.code != 404
+    except (urllib.error.URLError, TimeoutError, OSError):
+        return False, False
+
+
+def adjudicate_release(finding: str, context: str = "") -> Adjudicated:
     """Check an "X does not exist" claim about a package release against PyPI.
 
     **THE DEFAULT IS `UNRESOLVABLE`, AND THE FIRST VERSION DEFAULTED THE OTHER WAY.** It took the
@@ -145,22 +105,53 @@ def adjudicate_release(finding: str) -> Adjudicated:
         return Adjudicated(Verdict.UNRESOLVABLE, "disputes a release but names no version")
 
     want = version.group(1)
-    candidates = [
+
+    # **REFUTING AND CONFIRMING GET DIFFERENT EVIDENCE BARS, BECAUSE THEY HAVE OPPOSITE RISKS.**
+    # A wrong REFUTED costs one true finding: bad, bounded, and the finding simply does not publish.
+    # A wrong CONFIRMED publishes a false claim with an authority behind it, which is the failure
+    # `docs/CORRECTIONS.md` entry 8 records. So refuting accepts any nearby candidate; confirming
+    # accepts only a name the sentence syntactically BINDS to the version.
+    around = finding[max(0, version.start() - 40) : version.end() + 40]
+    nearby = [
         t
-        for t in NAMEISH.findall(finding)
+        for t in NAMEISH.findall(around)
         if t.lower() not in NOT_A_PACKAGE and not VERSION.fullmatch(t)
     ]
-    any_reached = False
-    for name in candidates:
-        reached, exists = released(name, want)
-        any_reached = any_reached or reached
-        if reached and exists:
+    bound = [
+        g
+        for m in BOUND.finditer(finding)
+        for g in (m.group(1), m.group(3), m.group(6))
+        if g and g.lower() not in NOT_A_PACKAGE
+    ]
+
+    reached_any = False
+    for name in nearby:
+        reached, has_release = released(name, want)
+        reached_any = reached_any or reached
+        if reached and has_release:
             return Adjudicated(
                 Verdict.REFUTED, f"the finding says {name} {want} does not exist; PyPI serves it"
             )
-    if not any_reached:
+
+    # **AND THE BOUND NAME MUST APPEAR IN THE DIFF, or nothing is confirmed.** PyPI has packages
+    # called `pin`, `Some` and `dependency`, so a stop-list of English words is a race that cannot
+    # be won -- "Some dependency 91.7.3 does not exist" confirmed on `dependency` until this check
+    # existed. A finding about a package the reviewed change never mentions is not one to publish
+    # on the strength of a name collision. With no context supplied, CONFIRMED is unavailable and
+    # the finding drops, which is the safe direction.
+    for name in bound:
+        if not context or name not in context:
+            continue
+        reached, is_package = package_exists(name)
+        if reached and is_package:
+            return Adjudicated(
+                Verdict.CONFIRMED,
+                f"{name} is on PyPI, appears in the diff, and has no release {want}",
+            )
+
+    if not reached_any:
         return Adjudicated(Verdict.UNRESOLVABLE, "PyPI did not answer", reachable=False)
     return Adjudicated(
         Verdict.UNRESOLVABLE,
-        f"no package named in the finding has a release {want}; the subject is not identifiable",
+        f"nothing the sentence binds to {want} is a package the diff mentions; not identifiable",
     )

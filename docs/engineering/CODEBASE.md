@@ -1490,3 +1490,19 @@ Verified live on werkzeug: 7 real pins produce 0 mismatches and 0 unresolved; fa
 produces exactly 1, naming both the claim and what GitHub reports. Across 73 real workflow-touching
 commits in three repositories: 0 mismatches — consistent with the measured 0.24% base rate, and the
 known-answer test is what makes that zero readable.
+
+### `verify/releases.py` — refuting and confirming have different evidence bars
+
+The oracle could only refute. **`flask==99.99.99 does not exist` is a TRUE finding and was dropped
+as UNRESOLVABLE**, because version-existence alone cannot separate *"the subject is
+unidentifiable"* from *"the package is real and this release is not"*. `package_exists()` separates
+them.
+
+**Confirming needed a stricter bar than refuting, and the test found that before it shipped.** A
+wrong REFUTED costs one true finding and nothing publishes; a wrong CONFIRMED publishes a false
+claim with an authority behind it. The first attempt confirmed on `pin` for a flask claim and on
+`Some` for another — PyPI has packages by both names.
+
+So a confirmation needs **two** things: the name is BOUND to the version by syntax
+(`name==1.2.3`, `name 1.2.3`, `version 1.2.3 of name`), **and it appears in the diff**. With no diff
+supplied, CONFIRMED is unavailable. Patterns live in `verify/release_claims.py`.
