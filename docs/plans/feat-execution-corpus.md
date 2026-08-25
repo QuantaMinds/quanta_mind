@@ -46,7 +46,7 @@ findings is not a population.
 |---|---|---|
 | subject | findings about **source**, not tests or config | a suite cannot adjudicate its own assertion |
 | coverage | the named lines are executed by an existing test | measured at selection, not assumed |
-| size | **≥ 30 correct findings**, not 7 | so a hard stop is a bar and not a coin flip |
+| size | **≥ 15 correct findings**, not 7 | so a hard stop is a bar and not a coin flip — see the cost table |
 | labelling | one person who did **not** write the definition | design 14's judge agreed with a careful rater on 34.9% |
 | corpus | repositories whose suite runs green at the base commit | check 1 passed 23/23 here; keep it |
 
@@ -67,11 +67,47 @@ semantic class more accurately still only removes. The 16.7% perfect-filter ceil
 for length. The explanation — that the design selected for the model's capacity to author a proof
 rather than for the defect being real — is itself untested, and this corpus is what would test it.
 
-## Cost, honestly
+## Cost, honestly — and the first version of this section was wrong by 3x
 
-A hand-labelling round of ~200 findings by one independent rater, on a corpus selected for coverage
-rather than convenience. Days, not hours. **It answers one question and closes one road either
-way**, which is the only kind of spend this project has had a good return on.
+**It said "~200 findings by one independent rater. Days, not hours."** At the pool's 5.8%
+correct-rate, 200 findings yields **11.6 correct** — which is the pool we already have, and the
+size that collapsed to 2 coverable at step 0. **The spec required 30 correct and the cost stated
+would have produced 12.** The arithmetic was never done.
+
+Done now. The correct-count requirement drives everything linearly:
+
+| correct needed | findings to grade | pull requests | hours at 6 min each | null predicts lost |
+|---|---|---|---|---|
+| 10 | 172 | 136 | **17** | 6.0 |
+| **15** | **259** | **204** | **26** | **9.0** |
+| 20 | 345 | 272 | 34 | 12.0 |
+| 30 | 518 | 407 | 52 | 18.0 |
+
+**Thirty correct findings is 518 hand-graded findings across 407 pull requests — around 52 hours,
+which is a fortnight of one person, not "a few days".**
+
+### Why 15 and not 30
+
+The bar exists to distinguish *"it loses correct findings at the same rate as wrong ones"* from
+*"it loses far fewer"*. At a 60% wrong-drop rate:
+
+- **7 correct** — the null predicts 4.2 lost; observing 1 is suggestive and not decisive. This is
+  exactly where the last arm landed.
+- **15 correct** — the null predicts 9; observing ≤ 2 is decisive.
+- **30 correct** — the null predicts 18; more power than the question needs.
+
+**15 is the smallest number that answers the question**, and it halves the spend to ~26 hours over
+259 findings. Stated as the recommendation; 30 is available if the result has to survive a hostile
+reading.
+
+### The 3x saving that makes even this affordable
+
+**Select the corpus for coverage BEFORE adjudicating, never after.** Only 31% of semantic findings
+were about source a suite touches. Grading a random pool and filtering afterwards needs
+15 / (0.058 × 0.31) = **835 findings**. Selecting first needs **259**.
+
+That selection is mechanical — a pull request touching source files whose modules have tests — and
+it is the difference between a fortnight and two months.
 
 ## What NOT to do, on the evidence
 
