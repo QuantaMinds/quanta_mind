@@ -144,7 +144,7 @@ def main() -> int:
     if not any(per.values()):
         print("  REFUSING TO REPORT — no admissible events")
         return 1
-    with open("reviewer_effort.json", "w") as fh:
+    with open("results/reviewer_effort.json", "w") as fh:
         json.dump({"events": per, "sizes": sizes, "dropped": dropped}, fh)
     effort_bars.report(per, sizes, dropped)
     return 0

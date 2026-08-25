@@ -117,7 +117,7 @@ def main() -> int:
     if not allev:
         print("  REFUSING TO REPORT — no admissible events")
         return 1
-    with open("degenerate_rate.json", "w") as fh:
+    with open("results/degenerate_rate.json", "w") as fh:
         json.dump(per, fh)
 
     n = len(allev)
