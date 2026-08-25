@@ -121,7 +121,9 @@ out-of-sample.
 
 **Take the customer's Jira and Datadog for what the record says they are worth — validating the
 ranker, not rescuing the reviewer.** The ranker is currently validated against a proxy where
-**85.3% of admitted events are not genuine repairs.** Datadog incidents are the outcome itself.
+**the label is known to be contaminated** — roughly **86% of symbol-overlap pairs** are not
+genuine repairs by blind labelling. **85.3% is the ranker's top-1 hit rate, not a contamination
+rate.** → `docs/CORRECTIONS.md` entry 11 Datadog incidents are the outcome itself.
 Jira bug-links are a label independent of commit-message wording. **The founding correlation test
 died on a proxy (RR 1.040)**; an independent label is what stops that recurring. This is the
 on-thesis use and it upgrades the half that works.

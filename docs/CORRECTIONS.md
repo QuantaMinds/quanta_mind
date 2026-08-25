@@ -8,6 +8,65 @@ should write them.** Numbering starts at 6 so the gap stays visible.
 
 ---
 
+## 11 · A success figure reported as a failure figure, three times, in one week
+
+I wrote — in conversation, and into three committed documents — that
+
+> **85.3% of admitted events are not genuine repairs.**
+
+**85.3% is the ranker's top-1 attention hit rate**: 85.3% against a 72.0% null, 17 of 17
+repositories, n = 4,293, recorded as SOUND in `gravity-reviewer-build-plan.md`. **It is the
+headline success number of the half of this product that works, and I reported it as the
+contamination rate of that half's label.**
+
+The real contamination figure is nearby and different: **roughly 86% of symbol-overlap pairs are
+not genuine repairs**, from blind labelling, in `QUANTAMIND.md` — a different population
+(symbol-overlap pairs, not admitted file-level events) reached by a different method.
+
+**Two numbers a point apart, meaning opposite things about the same system.**
+
+### And its complement was inverted too, in the document I inherited it from
+
+`jira-datadog.md`, written 2026-08-20 and not by this week's work, read: *"the firing precision
+caps at roughly one in seven — 85.3% of admitted events are not genuine repairs."*
+
+**One in seven is 14.7%, which is the ranker's top-1 ERROR rate** — halved from the null's 28.0%,
+recorded two documents away as *"85.3% is +13.3 points — error roughly halved, 28.0% to 14.7%."*
+So the ranker's hit rate AND its error rate were both reported as evidence the ranker's label is
+worthless.
+
+**I did not originate it and I did not check it either**, which is the part that matters: it was
+load-bearing in an argument I made all week and one `grep` would have found the run.
+
+### What it was used to argue
+
+That the ranker's label is too contaminated to trust, so Jira and Datadog are needed as independent
+labels. **The conclusion may still be right** — the label does carry known contamination — but the
+number offered for it was the ranker's accuracy, and an argument that a measurement is worthless
+supported by that measurement's success rate is not an argument.
+
+### The shape, which is entry 9's shape
+
+**The wrong number made the case stronger.** "85.3% of admitted events are not genuine repairs" is
+a devastating sentence about a proxy label; "the label carries known contamination" is a careful
+one. The devastating version went unchecked for a week because it was pushing toward a conclusion
+already believed.
+
+**Entry 9 was the same:** a barred behavioural figure quoted as our backdrop, surviving because it
+made the closure look more decisive than the evidence needed.
+
+### The rule this leaves
+
+**A number that damages your own work is not thereby verified.** Scepticism is applied to numbers
+that flatter and relaxed on numbers that indict, and the second half of that habit is the one this
+log keeps catching. `check_decided_vocabulary.py` guards decided values; nothing guards a figure
+carried from one measurement to another because it fit the sentence being written.
+
+**Before quoting a number against your own product, find the run that produced it** — the standing
+rule, applied in the direction it is never applied.
+
+---
+
 ## 10 · The first defect in a PLAN rather than a measurement
 
 `feat-execution-corpus.md` specified **≥ 30 correct findings** and costed the round at **"~200

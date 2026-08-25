@@ -26,8 +26,10 @@ Merged and running through the CLI. `serve/run_review.py:review()` is rank → r
 forecast computed from the customer's own history.
 
 **Jira and Datadog belong here, not on the reviewer.** The ranker is currently validated against a
-proxy — *a later commit whose message matched a fix-word touched this file* — and **85.3% of
-admitted events are not genuine repairs.** Datadog incidents are the outcome itself, not a proxy.
+proxy — *a later commit whose message matched a fix-word touched this file* — and **the label is known to be contaminated** — blind labelling put roughly **86% of
+symbol-overlap pairs** in the not-a-genuine-repair class. (An earlier draft wrote *"85.3% of
+admitted events are not genuine repairs"*: **85.3% is the ranker's top-1 hit rate against a 72.0%
+null**, a success figure reported as a contamination figure. → `docs/CORRECTIONS.md` entry 11) Datadog incidents are the outcome itself, not a proxy.
 Jira bug-links are a second label that does not depend on commit-message wording at all. **The
 founding correlation test died on a proxy (RR 1.040)**; an independent label is precisely what
 stops that recurring. → `docs/product/jira-datadog.md`
