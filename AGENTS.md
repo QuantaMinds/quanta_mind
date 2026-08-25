@@ -121,11 +121,11 @@ you remember to obey — the machine will stop you either way.
     to a genuine null. *Proxy*: an anchor check read 98.1% while raters found them wrong. *Two
     populations*: `candidate in ours_caught` was false for all 194 — both sides `str`. **A clean
     zero is a broken comparison until shown otherwise** — 0 in-window commits then 1,298; 0 of
-    1,990 on a bad pathspec. **Name the population on both sides of an `in`, and a filter
-    admitting NOTHING across a whole pass must raise, not report zero.** **When a fix breaks a
-    test, ask whether it *asserted* the old behaviour or merely *relied* on it. Only a
-    known-answer test tells these from a real negative, and only sabotaging the WHOLE mechanism
-    tests it** — the entry point left one green as coverage. → **ADVISORY** — notice the verb.
+    1,990 on a bad pathspec; a code search reading 0 tests in a directory full of them.
+    **Name the population on both sides of an `in`; a filter admitting NOTHING must raise; and
+    every oracle needs a test NAMING the artefact it must find** — "does it return something"
+    passes while the instrument is silent. **Only a known-answer test tells these from a real
+    negative, and only sabotaging the WHOLE mechanism tests it.** → **ADVISORY** — notice the verb.
 
 15. **A documented command must run, or carry `documented-command:unbuilt`.** `python -m`
     with no `__main__` ignores flags, writes nothing, exits 0 — the runbook's "Days 3–5" reported success and did nothing. → `scripts/guard/records/check_documented_commands.py`
