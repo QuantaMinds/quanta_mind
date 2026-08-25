@@ -134,3 +134,38 @@ the model's capacity to author a proof rather than for the defect being real, is
 
 **Not "the reviewer is bad at reviewing."** It is right rarely, the rarity is a property of
 generation rather than of selection, and every tool available to this project acts on selection.
+
+---
+
+# The unit-size lever, tested — it is another filter
+
+The published gradient suggested restricting review to small hunks might raise the correct-rate
+rather than lower the wrong-rate. **Tested on the 207. It does not.**
+
+| unit size | n | wrong | correct | C/n |
+|---|---|---|---|---|
+| 0–10 | 37 | 46% | 4 | **10.8%** |
+| 11–20 | 48 | 67% | 2 | 4.2% |
+| 21–40 | 61 | 62% | 4 | 6.6% |
+| 41–80 | 33 | 70% | 1 | 3.0% |
+| 81+ | 28 | 89% | 1 | 3.6% |
+
+**The spread is 3.6×, not the 15× the published work reports, and it is not monotonic** — the
+21–40 band beats 11–20.
+
+And the restriction behaves like every other mechanism here:
+
+| keep only | findings kept | correct kept | C/n | **correct LOST** |
+|---|---|---|---|---|
+| ≤ 10 lines | 37 | 4 | **10.8%** | **8 of 12** |
+| ≤ 20 lines | 85 | 6 | 7.1% | 6 |
+| ≤ 40 lines | 146 | 10 | 6.8% | 2 |
+
+**Restricting to units of ten lines or fewer nearly doubles the correct-rate and throws away two
+thirds of the correct findings.** The rate rises because the denominator falls. It is a filter
+wearing a generation lever's clothes, and the absolute yield per pull request goes down.
+
+**One thing it does establish, and it is useful:** source findings are adjudicated correct at
+**8.3%** against test-file findings at **3.6%**. That is not a lever either — we cannot make a
+change touch source — but it is the property the execution corpus selects on, and it cuts that
+labelling round from 259 findings to 180.
