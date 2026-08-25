@@ -1335,3 +1335,13 @@ shipped prompt objects to 6 of 12 **correct** pin/tag pairings and 5 of 12 wrong
 
 **Whether it fires on a real pull request is unmeasured.** Those trials were built to contain
 mismatches. If the base rate in the wild is zero, the detector is correct and useless.
+
+### `bench/forensic/pin_prevalence.py` — the falsification that came before the build
+
+1,259 commented pins from 22 repositories at HEAD. **Genuine mismatch rate 0.24%** (3 of 1,244
+resolvable) once the major-alias convention is honoured; 1.05% under exact matching.
+
+Running it first is what caught two defects in the shipped oracle: `tags_at` parsed the tag list
+line-by-line when GitHub returns one line of compact JSON, and the rule demanded exact tag equality
+when `# v6` on a `v6.4.0` commit is convention. **They flagged 13 pins of which 10 were correct — a
+77% false positive rate, worse than the model.** Both fixed and tested.

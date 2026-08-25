@@ -12,10 +12,17 @@ WHY:  **A VERIFIER DELETES; IT CANNOT CREATE. THIS IS NOT A VERIFIER.** `externa
       ones -- 24 of 24.** The shipped reviewer prompt scored -8.3% discrimination on the identical
       inputs.
 
-      **WHETHER IT EVER FIRES ON A REAL PULL REQUEST IS A DIFFERENT QUESTION AND THIS MODULE DOES
-      NOT ANSWER IT.** The trials above were constructed to contain mismatches. The base rate of
-      genuinely mis-commented pins in the wild is unmeasured, and if it is zero this detector is
-      correct and useless.
+      **MEASURED IN THE WILD, THE BASE RATE IS 0.24%** -- 3 genuine disagreements in 1,244
+      resolvable commented pins across 22 large repositories. Not zero, so this is worth having;
+      very small, so it is a rare correct finding rather than a stream of them.
+
+      **"100% BY CONSTRUCTION" WAS CLAIMED AND WAS FALSE, TWICE.** The first `tags_at` scanned the
+      tag list line by line and GitHub returns it as ONE line of compact JSON, so it paired the
+      first name with the first sha and saw one tag where there were two. And the first version of
+      this file required exact tag equality, which calls the universal `# v6`-on-a-`v6.4.0`-commit
+      convention a defect. Together they flagged 13 pins of which 10 were correct -- **a 77% false
+      positive rate, worse than the model this was built to replace.** Both are fixed and the
+      claim is now that the rule is deterministic, not that it was right the first time.
 
       **ADDED LINES ONLY.** A pin the change removes is not a claim the change makes.
 IMPORTS: verify.external_facts (its resolvers). stdlib re.
@@ -47,6 +54,18 @@ def pins(diff: str) -> dict[str, str]:
         if found:
             out[found.group(1)] = found.group(2)
     return out
+
+
+def satisfies(commented: str, tag: str) -> bool:
+    """Does `tag` make a `# commented` comment truthful? Exact, or the alias it abbreviates.
+
+    **BOTH SIDES ARE STRIPPED HERE RATHER THAN BY THE CALLER.** The first version stripped only the
+    tag, so it was correct when `detect()` called it with an already-stripped comment and silently
+    wrong for every other caller -- which is how its own spot-check read `# v6` on `v6.4.0` as a
+    mismatch. A function whose correctness depends on what the caller did first is a defect.
+    """
+    want, actual = commented.lstrip("v"), tag.lstrip("v")
+    return actual == want or actual.startswith(want + ".")
 
 
 @dataclass(frozen=True, slots=True)
@@ -89,6 +108,11 @@ def detect(diff: str) -> tuple[list[Mismatch], int]:
             unresolved += 1
             continue
         want = tag.group(1).lstrip("v")
-        if not any(t.lstrip("v") == want for t in found):
+        # **`# v6` IS SATISFIED BY `v6.4.0`, AND GETTING THIS WRONG COST 10 FALSE POSITIVES IN 13.**
+        # A moving major alias is the normal convention: a repository pins the commit of v6.4.0 and
+        # comments `# v6`. The `v6` tag itself has usually moved on to a newer release, so it is
+        # NOT at that commit and an exact-match rule calls a correct comment a defect. Across 1,244
+        # real pins, exact matching flagged 13 and only 3 were genuine.
+        if not any(satisfies(want, t) for t in found):
             out.append(Mismatch(pin.group(1), pin.group(2), tag.group(1), tuple(found)))
     return out, unresolved

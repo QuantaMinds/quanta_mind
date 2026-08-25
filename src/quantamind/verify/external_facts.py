@@ -35,6 +35,7 @@ CONSUMED BY: `serve/deep_review.py`; `verify/pin_mismatch.py` uses its resolvers
 from __future__ import annotations
 
 import enum
+import json
 import re
 import subprocess
 from dataclasses import dataclass
@@ -93,17 +94,31 @@ def sha_exists(repo: str, sha: str) -> tuple[bool, bool]:
 
 
 def tags_at(repo: str, sha: str) -> tuple[bool, list[str]]:
-    """(reached, tags pointing at `sha`). Empty with reached=True means genuinely untagged."""
+    """(reached, every tag pointing at `sha`). Empty with reached=True means genuinely untagged.
+
+    **PARSED AS JSON, NOT SCANNED LINE BY LINE.** The first version matched `"name"` and `"sha"`
+    per line, and GitHub returns this endpoint as ONE line of compact JSON -- so it paired the
+    first name with the first sha and returned a single tag where there were two. Every moving
+    major alias (`v7` beside `v7.0.1`, pointing at the same commit) was therefore invisible, and a
+    correct `# v7` comment was reported as a mismatch. It inflated a base-rate scan before anyone
+    read a result from it.
+
+    **ALL tags are returned, not the first**, because `# v7` and `# v7.0.1` are both truthful
+    comments on a commit carrying both, and a checker that knows only one of them manufactures
+    disagreements for a living.
+    """
     reached, body = _gh(f"repos/{repo}/tags?per_page=100")
     if not reached or not body.strip():
         return reached, []
-    found = []
-    for line in body.splitlines():
-        name = re.search(r'"name":\s*"([^"]+)"', line)
-        commit = re.search(r'"sha":\s*"([0-9a-f]{40})"', line)
-        if name and commit and commit.group(1).startswith(sha[:7]):
-            found.append(name.group(1))
-    return True, found
+    try:
+        listing = json.loads(body)
+    except json.JSONDecodeError:
+        return False, []
+    return True, [
+        str(t["name"])
+        for t in listing
+        if isinstance(t, dict) and str(t.get("commit", {}).get("sha", "")).startswith(sha[:7])
+    ]
 
 
 def adjudicate(

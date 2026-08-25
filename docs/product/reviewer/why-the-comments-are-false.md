@@ -102,3 +102,57 @@ exactly the fact the diff does not carry.
 2. **"The objection tracks the repository rather than the pairing" was drafted and withdrawn.** The
    arms agreed for 7 of 12 actions, which is what a coin flip gives. There is no evidence for the
    stronger claim, and no signal is the finding.
+
+---
+
+# Fix 1, measured: the oracle, and what the base rate says about it
+
+## The prevalence of the defect the detector looks for
+
+1,259 commented SHA pins read from the workflow files of 22 large repositories at HEAD, each
+resolved against GitHub's tag list. 15 unresolvable, counted separately and never as clean.
+
+| rule | flagged | of 1,244 resolvable |
+|---|---|---|
+| exact tag match | 13 | 1.05% |
+| **alias-aware** (`# v6` satisfied by `v6.4.0`) | **3** | **0.24%** |
+
+The three genuine ones, all real and all verifiable by hand:
+
+| repository | action | commented | GitHub says |
+|---|---|---|---|
+| pandas-dev/pandas | codecov/codecov-action | `# v5` | v7.0.0, v7, v6.0.2, v6 |
+| grafana/grafana | docker/setup-docker-action | `# v4` | v5.3.0 |
+| grafana/grafana | peter-evans/create-or-update-comment | `# v4` | v5.0.0, v5 |
+
+**Not zero, so the detector is worth having. 0.24%, so it is a rare correct finding rather than a
+stream of them** — and the rate at which a *pull request introduces* one is lower still, because
+the stock bounds the flow.
+
+## "100% precision by construction" was claimed here and it was false — twice
+
+Both defects were found by running the cheap prevalence scan **before** building anything on the
+detector, which is the only reason they were found at all.
+
+1. **`tags_at` scanned the tag list line by line, and GitHub returns it as ONE line of compact
+   JSON.** It paired the first `"name"` with the first `"sha"` and returned a single tag where the
+   commit carried two. Every moving major alias was invisible.
+2. **The rule required exact tag equality.** `# v6` on a commit tagged `v6.4.0` is the universal
+   convention — the `v6` alias has moved on to a newer release and is not at that commit.
+
+Together they flagged 13 pins of which **10 were correct: a 77% false positive rate, worse than the
+model this was built to replace.** Both are fixed, both are covered by tests, and the claim is now
+that the rule is *deterministic* — not that it was right the first time.
+
+**A deterministic checker is not automatically a correct one.** It removes the model's confabulation
+and replaces it with the author's assumptions, and those need measuring too.
+
+## Where fix 1 leaves the arithmetic
+
+The class is 14 of 45 wrong findings (31%). The verifier removes them: on the 24 live trials it
+refuted 7 of 15 pin-related findings and left 4 unresolvable, which are also dropped. **That is
+deletion, and the 16.7% ceiling still applies to it.**
+
+The detector adds findings — at 0.24% of pins. **It is a real entry in the numerator and a small
+one.** Nothing here reopens Half B, and the honest summary is that the largest single failure
+mechanism is now handled deterministically instead of guessed at.

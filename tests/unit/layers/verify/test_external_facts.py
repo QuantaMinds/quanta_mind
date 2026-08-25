@@ -60,3 +60,30 @@ def test_an_unreachable_oracle_is_recorded_as_unreachable() -> None:
     """A gate that drops everything because the network is down looks like a gate working."""
     assert not Adjudicated(Verdict.UNRESOLVABLE, "no answer", reachable=False).reachable
     assert Adjudicated(Verdict.CONFIRMED, "ok").reachable
+
+
+def test_a_major_alias_comment_is_satisfied_by_the_release_it_abbreviates() -> None:
+    """`# v6` on a commit tagged v6.4.0 is the normal convention, not a defect.
+
+    **AN EXACT-MATCH RULE FLAGGED 13 REAL PINS AND ONLY 3 WERE GENUINE — a 77% false positive
+    rate, worse than the model this replaces.** The `v6` alias has usually moved on to a newer
+    release, so it is not at the pinned commit, and requiring it to be there manufactures
+    disagreements for a living.
+    """
+    from quantamind.verify.pin_mismatch import satisfies
+
+    assert satisfies("v6", "v6.4.0")
+    assert satisfies("v6", "v6")
+    assert satisfies("v4", "v4.0.3")
+    assert satisfies("v7", "v7.0.1")
+    # And the genuine disagreements must survive it, or the fix has deleted the detector.
+    assert not satisfies("v5", "v7.0.0")
+    assert not satisfies("v4", "v5.3.0")
+    assert not satisfies("v1.1.4", "v1.2.0")
+
+
+def test_satisfies_does_not_depend_on_the_caller_stripping_first() -> None:
+    """It stripped only the tag, so it was right for one caller and silently wrong for the rest."""
+    from quantamind.verify.pin_mismatch import satisfies
+
+    assert satisfies("v6", "v6.4.0") == satisfies("6", "6.4.0") is True
