@@ -1429,3 +1429,25 @@ existing suite, **≥30 correct findings** so a hard stop is a bar and not a coi
 someone who did not write the definition.
 
 **A pass would establish transfer, not confirm a known result — and it would not move the yield.**
+
+### `bench/forensic/fingerprint.py` — a silent parameter edit becomes a hard error
+
+Three parameter edits failed silently in one session. The worst: a widened corpus scan reported
+identical totals because `ruff` had reformatted the repository tuple one-per-line, so a multi-line
+`str.replace()` matched nothing — while a *different* edit in the same script DID apply, so the
+output format changed and the numbers did not. **That reads exactly like a real null result.**
+
+`stamp()` writes a params hash, a source hash and the git rev into the results file.
+`assert_differs()` raises when two runs claim different parameters and carry the same fingerprint.
+It does not stop the edit failing; it stops the failure looking like a finding.
+
+### `the-median-pull-request-changes-three-files.md` — the hit-rate study, closed by its own floor
+
+The pre-registered floor check fired before any hit rate was computed. **Median changed-file count
+is 3.** At a ≥8 floor, 22 of 173 survive and 10 come from two repositories. On the largest active
+Python repos, only **2%** of merged pull requests have ≥8 files *and* inline review comments — a
+170-PR study needs ~8,400 scanned.
+
+**And it says something about the product:** "forty files land in your queue" is the tail, not the
+median. Ordering value concentrates in the ~6% of pull requests that are large — close to the firing
+gate's own 8–15%.
