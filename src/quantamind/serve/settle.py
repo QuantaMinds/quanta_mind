@@ -33,8 +33,9 @@ from dataclasses import dataclass
 
 from quantamind.infer.prompt_once import ask as _ask
 from quantamind.types.finding import Finding
-from quantamind.verify.external_facts import Verdict, sha_exists, tags_at
-from quantamind.verify.releases import adjudicate_release
+from quantamind.verify.external_facts import sha_exists, tags_at
+from quantamind.verify.release_claims import BOUND, NOT_A_PACKAGE
+from quantamind.verify.releases import package_exists, released
 
 NAMES_REPO = re.compile(r"\b([A-Za-z0-9][\w.-]*/[A-Za-z0-9][\w.-]*)\b")
 NAMES_SHA = re.compile(r"\b([0-9a-f]{7,40})\b")
@@ -102,8 +103,30 @@ def answer(question: str, today: str) -> str:
         reached, found = tags_at(repo, shas[0])
         if reached:
             return f"{shas[0][:8]} in {repo} carries: {', '.join(found) or 'no tag'}."
-    release = adjudicate_release(question)
-    return release.detail if release.verdict is not Verdict.NO_CLAIM else ""
+    # **THE RELEASE PATH ASKS PyPI DIRECTLY AND DOES NOT ROUTE THROUGH THE VERIFIER.**
+    # `adjudicate_release` checks a DISPUTING assertion — "X does not exist" — and a question
+    # asserts nothing, so it returned NO_CLAIM for "Was requests==2.32.3 ever published to PyPI?"
+    # and the model published a false claim for want of an answer it could have had. That is the
+    # same defect the conversational arm's first run had on the SHA path, arriving here because
+    # the SHA path was fixed and this one was not.
+    for match in BOUND.finditer(question):
+        name = match.group(1) or match.group(3) or match.group(6)
+        want = match.group(2) or match.group(4) or match.group(5)
+        if not name or not want or name.lower() in NOT_A_PACKAGE:
+            continue
+        reached, has_release = released(name, want)
+        if not reached:
+            continue
+        if has_release:
+            return f"{name} {want} is published on PyPI."
+        answered, is_package = package_exists(name)
+        if answered:
+            return (
+                f"{name} is on PyPI and has no release {want}."
+                if is_package
+                else f"There is no package called {name} on PyPI."
+            )
+    return ""
 
 
 def settle(finding: Finding, *, project: str, today: str) -> Settled:

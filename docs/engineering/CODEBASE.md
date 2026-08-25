@@ -1506,3 +1506,24 @@ claim with an authority behind it. The first attempt confirmed on `pin` for a fl
 So a confirmation needs **two** things: the name is BOUND to the version by syntax
 (`name==1.2.3`, `name 1.2.3`, `version 1.2.3 of name`), **and it appears in the diff**. With no diff
 supplied, CONFIRMED is unavailable. Patterns live in `verify/release_claims.py`.
+
+### `serve/settle.py` — verified live, and the verification found a bug
+
+The ask → answer → re-decide sequence was measured in research code and had **never run in the
+product**. Across three live commits (requests, werkzeug, urllib3) it fired zero times, because the
+model made no external claim on any of them — so "it is wired in" was untested by observation.
+
+**Running it on real findings found a real bug.** The model asked *"Was requests 2.32.3 ever
+published to PyPI?"* — perfectly answerable — and `answer()` returned nothing, because the release
+path routed through `adjudicate_release`, which checks a **disputing assertion**, and a question
+asserts nothing. **The false finding published for want of an answer it could have had.** Same
+defect the conversational arm's first run had on the SHA path, arriving here because that path was
+fixed and this one was not. `answer()` now asks PyPI directly.
+
+Verified live: a false date claim is **withdrawn** against `Today's date is 2026-08-25`; a false
+package claim is **withdrawn** against `requests 2.32.3 is published on PyPI`; a semantic claim asks
+nothing and **survives**.
+
+**And the skip guard was wrong in the safe-looking direction** — it checked `PATH` while `gemini.py`
+uses an absolute gcloud path, so all three tests skipped while the model was working. A skip reads
+as a pass in the summary line.
