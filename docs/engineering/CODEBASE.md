@@ -1390,3 +1390,15 @@ said "the given commit hash" without naming it.
 residue is what `execution-grounding-preregistration.md` addresses, and that document leads with
 the problem it must confront: **our own execution gate INVERTED at p = 0.001 controlling for
 length**, so the "it only proves simple code" explanation is already half-refuted.
+
+### `tests/live/test_oracles_name_their_artefact.py` — the strict form of a known-answer test
+
+Every oracle asserts on a **named artefact** — this tag, this release, this commit — never on a
+count being non-zero. **"Does it return something" passes while the instrument is silent**, and
+that has now happened five times.
+
+It found two defects on its first run. One was a real product bug: **GitHub returns HTTP 422, not
+404, for a commit that does not exist**, so `_gh` classified "absent" as "unreachable" and
+`sha_exists` could never confirm a genuinely missing SHA — the one verdict it exists to reach. The
+other was a wrong fixture in the test itself: `v7` has moved to v7.0.1, so `v7.0.0` alone is
+correct at that commit, and the test was wrong rather than the oracle.

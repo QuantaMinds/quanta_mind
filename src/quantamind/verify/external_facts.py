@@ -82,8 +82,13 @@ def _gh(path: str) -> tuple[bool, str]:
     done = subprocess.run(["gh", "api", path], capture_output=True, text=True, timeout=GH_TIMEOUT_S)
     if done.returncode == 0:
         return True, done.stdout
-    # A 404 IS an answer: the object is not there. Anything else is a failure to reach.
-    if "404" in done.stderr or "Not Found" in done.stderr:
+    # **A 404 OR A 422 IS AN ANSWER: the object is not there. Anything else is a failure to
+    # reach.** GitHub returns 422 "No commit found for SHA", not 404, when a commit does not
+    # exist -- so treating only 404 as an answer meant `sha_exists` reported reached=False for
+    # every absent commit, and the one verdict this oracle can never reach is the one it exists to
+    # confirm. Caught by a named-artefact test asking it to deny a fabricated SHA; "does it return
+    # something" would have passed. -> tests/live/test_oracles_name_their_artefact.py
+    if any(code in done.stderr for code in ("404", "422")) or "Not Found" in done.stderr:
         return True, ""
     return False, done.stderr[:160]
 

@@ -133,3 +133,61 @@ one correct finding to exactly that: an oracle answered what tag a SHA carries w
 was about a rename, and the model withdrew anyway. A test that fails at head for an unrelated
 reason will read as confirmation. **Each base/head pair is run twice and a test that disagrees with
 itself is excluded**, reported as a count.
+
+---
+
+# STEP 0 RESULT — the arm does not run. Check 2 fails.
+
+Run 2026-08-25 over the 23 findings in scope: the 16 wrong findings the conversational arm could
+not ask about, and the 7 correct ones.
+
+| check | result | |
+|---|---|---|
+| 1 — base commit resolvable | **23/23** | pass |
+| 2 — a test even NAMES the module | 9/16 = 56% raw → **5/16 = 31% real** | **FAIL, bar was 50%** |
+| 3 — known-answer | passes (finds `test_repository_pypi.py`) | pass |
+
+**The arm is not run.** Its ceiling is below its bar by construction, which is exactly what step 0
+exists to establish before spending the run.
+
+## Why the raw 56% is not the real number
+
+**Seven of the sixteen findings are about test files themselves.** A suite cannot adjudicate a
+claim about a test's own assertion — *"this assertion is fragile because it assumes the help text
+is last"* is a claim about the test that would be doing the adjudicating. **The subject and the
+oracle are the same object**, and running it settles nothing.
+
+**Three more matched only because `conf` is a substring of `conftest`.** The findings are about
+`docs/conf.py`, a Sphinx configuration imported by `sphinx-build` and by no test in the suite. The
+"tests mentioning it" include `tests/packages/dynamic_metadata/plugins/local/version/nested/__init__.py`,
+which is a fixture package.
+
+What remains is **5 findings across 2 modules** — `piptools/repositories/pypi.py` and
+`falcon/uri.pyx`. **31%.**
+
+## And the hard-stop denominator collapses
+
+Of the 7 correct findings, **2 are coverable.** A bar of "lose no more than 1 of 7" over a
+population of 2 is not a bar — a single loss is 50% of it, and no result over 2 items distinguishes
+a working mechanism from chance.
+
+## What this establishes, which is not nothing
+
+**The residue the conversational arm left is not mostly executable.** It is 44% claims about test
+code, 19% claims about configuration files no test imports, and 31% claims about source a suite
+touches. **Execution grounding addresses the smallest of the three.**
+
+That is a finding about the class, not about the mechanism: the August 2026 literature's execution
+results come from vulnerability-discovery campaigns against library source, and **this pool's
+semantic residue is largely not that shape.** A published effect size does not transfer to a
+population it was not measured on.
+
+## What would make this runnable, recorded rather than pursued
+
+A corpus of semantic findings **about source code covered by an existing suite**, large enough that
+7 correct findings do not collapse to 2. That is a fresh corpus and a fresh hand-labelling round —
+the thing design 14 spent and the thing `docs/CORRECTIONS.md` entry 6 is about.
+
+**Recorded as a closed road for this pool. Not retried on it.** The mechanism remains untested
+rather than refuted, and the distinction is the whole point of stopping here: **an arm run at a 31%
+ceiling would have produced a number, and the number would have described the corpus.**

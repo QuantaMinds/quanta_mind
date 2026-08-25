@@ -26,6 +26,35 @@ It does **not** replace measurement where the answer is not obvious. The SHA→t
 to CI — a workflow pinned to a real commit with a stale version comment builds perfectly — which is
 exactly why its rate came back non-zero at 0.24%.
 
+## UNTESTED and REFUTED are different states, and the register says which
+
+Six roads are closed here. **They are not closed for the same reason, and collapsing them would
+lose the only thing that decides whether to revisit one.**
+
+| road | state | why |
+|---|---|---|
+| registry-existence **detector** | **REFUTED** | base rate 0.00% of 176 real pins; it would never fire |
+| date injection as a **fix** | **REFUTED for this pool** | the defect did not reproduce on three live diffs |
+| five prompt levers | **REFUTED** | measured, all null |
+| model-authored proof gate (design 13) | **REFUTED** | inverted at p = 0.001 controlling for length |
+| per-category thresholds | **UNTESTED** | never measured, deferred |
+| **execution grounding** | **UNTESTED** | published evidence behind it; **this pool cannot test it** |
+
+**A REFUTED road stays closed.** An UNTESTED one is waiting on an instrument, and execution
+grounding is waiting on a specific one:
+
+> **a corpus of semantic findings about SOURCE code covered by an existing suite, large enough that
+> 7 correct findings do not collapse to 2.**
+
+Step 0 established why this pool is not it: of the 16 semantic wrong findings, **44% are claims
+about test code** — where the suite doing the adjudicating is the subject of the claim — **19% are
+about configuration no test imports**, and only **31% are about source a suite touches**. Of the 7
+correct findings, 2 are coverable, so the hard stop would be a bar over a population of two.
+
+**That is the independent-grader debt with a purpose attached.** It was a general obligation; it is
+now a specific one, and what it would buy is stated: the only mechanism with published evidence
+that nobody here has been able to test.
+
 ## Verifier and detector are different products of the same oracle
 
 The two are worth different amounts and conflating them hides it. Stated once here, because

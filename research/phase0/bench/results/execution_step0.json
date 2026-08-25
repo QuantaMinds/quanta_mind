@@ -1,0 +1,315 @@
+[
+ {
+  "item": 6,
+  "verdict": "WRONG",
+  "repo": "jazzband/pip-tools",
+  "pr": 2429,
+  "path": "piptools/repositories/pypi.py",
+  "line": 538,
+  "claim": "The function does not ensure that a base URL with a path component ends with a trailing slash, causing `urllib.parse.urljoin` to incorrectly replace the last path segment instead of appending to it.",
+  "base": "e7f9099f5a87e5c08fbdd9b6e6d7b8f2132cb8d4",
+  "tests_mentioning": [
+   "tests/conftest.py",
+   "tests/test_repository_local.py",
+   "tests/test_repository_pypi.py",
+   "tests/test_resolver.py"
+  ]
+ },
+ {
+  "item": 7,
+  "verdict": "WRONG",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1523,
+  "path": "docs/conf.py",
+  "line": 97,
+  "claim": "The Sphinx extension name \"sphinx_llm.txt\" is invalid because it is not a valid Python module name, which will cause an ImportError during the documentation build.",
+  "base": "a8f39394a85ea458e4f764a70cc164cdd8e66b36",
+  "tests_mentioning": [
+   ".agents/skills/test-downstream/scripts/downstream_ab.py",
+   "tests/conftest.py",
+   "tests/packages/cmake_generated/src/cmake_generated/__init__.py",
+   "tests/packages/dynamic_metadata/plugins/local/version/nested/__init__.py"
+  ]
+ },
+ {
+  "item": 12,
+  "verdict": "CORRECT",
+  "repo": "falconry/falcon",
+  "pr": 2697,
+  "path": ".github/workflows/test-wheels.yaml",
+  "line": 21,
+  "claim": "This change incorrectly replaces the emulated wheel test for Python 3.14 on aarch64 instead of adding a new test for Python 3.15, thereby dropping test coverage for a supported Python version.",
+  "base": "2d85a15fcd360e8123ab4d093c35c9ea5ccd7227",
+  "tests_mentioning": []
+ },
+ {
+  "item": 16,
+  "verdict": "WRONG",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1523,
+  "path": "docs/conf.py",
+  "line": 97,
+  "claim": "The Sphinx extension name \"sphinx_llm.txt\" is invalid because it is not a valid Python module name, which will cause an ImportError during the documentation build.",
+  "base": "a8f39394a85ea458e4f764a70cc164cdd8e66b36",
+  "tests_mentioning": [
+   ".agents/skills/test-downstream/scripts/downstream_ab.py",
+   "tests/conftest.py",
+   "tests/packages/cmake_generated/src/cmake_generated/__init__.py",
+   "tests/packages/dynamic_metadata/plugins/local/version/nested/__init__.py"
+  ]
+ },
+ {
+  "item": 22,
+  "verdict": "WRONG",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1515,
+  "path": "tests/test_program_search.py",
+  "line": 113,
+  "claim": "This test assertion is incorrect because it validates that a broken CMake executable (one from which a version could not be parsed) is preferred over a working one when no version is specified.",
+  "base": "17c4bfed7ffd97ae637d8a5be7fa675b500c2083",
+  "tests_mentioning": []
+ },
+ {
+  "item": 33,
+  "verdict": "WRONG",
+  "repo": "jazzband/pip-tools",
+  "pr": 2429,
+  "path": "piptools/repositories/pypi.py",
+  "line": 539,
+  "claim": "This condition is too broad because it incorrectly matches any URL where a path segment ends with \"/simple\", such as \".../not-so-simple\", leading to a malformed URL.",
+  "base": "e7f9099f5a87e5c08fbdd9b6e6d7b8f2132cb8d4",
+  "tests_mentioning": [
+   "tests/conftest.py",
+   "tests/test_repository_local.py",
+   "tests/test_repository_pypi.py",
+   "tests/test_resolver.py"
+  ]
+ },
+ {
+  "item": 36,
+  "verdict": "CORRECT",
+  "repo": "aws/aws-cli",
+  "pr": 10534,
+  "path": "awscli/customizations/codeartifact/login.py",
+  "line": 520,
+  "claim": "The exception handler does not close the file descriptor `fd` if `os.fdopen` fails, causing a resource leak.",
+  "base": "b8ba3bfb01fbd7dc0233fb13373c38ac887df49c",
+  "tests_mentioning": []
+ },
+ {
+  "item": 37,
+  "verdict": "CORRECT",
+  "repo": "falconry/falcon",
+  "pr": 2682,
+  "path": "falcon/request.py",
+  "line": 651,
+  "claim": "Using 'replace' as the error handler for UTF-8 decoding causes data loss for invalid byte sequences, whereas PEP 3333 recommends 'surrogateescape' for path decoding.",
+  "base": "1ae55f7d46f1f210550972366ee68fc62cd9f3d9",
+  "tests_mentioning": [
+   "e2e-tests/conftest.py",
+   "e2e-tests/server/app.py",
+   "examples/look/tests/conftest.py",
+   "examples/look/tests/test_app.py",
+   "examples/look/tests/test_integration.py",
+   "falcon/testing/__init__.py",
+   "falcon/testing/client.py",
+   "falcon/testing/helpers.py",
+   "falcon/testing/resource.py",
+   "falcon/testing/srmock.py",
+   "falcon/testing/test_case.py",
+   "tests/_inspect_fixture.py",
+   "tests/asgi/test_asgi_conductor.py",
+   "tests/asgi/test_asgi_servers.py",
+   "tests/asgi/test_boundedstream_asgi.py"
+  ]
+ },
+ {
+  "item": 44,
+  "verdict": "CORRECT",
+  "repo": "falconry/falcon",
+  "pr": 2697,
+  "path": ".github/workflows/test-wheels.yaml",
+  "line": 21,
+  "claim": "This change incorrectly replaces the emulated wheel test for Python 3.14 on aarch64 instead of adding a new test for Python 3.15, thereby dropping test coverage for a supported Python version.",
+  "base": "2d85a15fcd360e8123ab4d093c35c9ea5ccd7227",
+  "tests_mentioning": []
+ },
+ {
+  "item": 45,
+  "verdict": "CORRECT",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1534,
+  "path": ".github/workflows/cd.yml",
+  "line": 28,
+  "claim": "The action `hynek/build-and-inspect-python-package` was renamed to `hynek/build-and-inspect` in v3, but the workflow uses the old name with a commit hash from the new repository, which will fail.",
+  "base": "36951451f3096b56d4139b77dc2765a97efe3fa7",
+  "tests_mentioning": [
+   "tests/packages/cmake_generated/src/cmake_generated/__init__.py"
+  ]
+ },
+ {
+  "item": 49,
+  "verdict": "WRONG",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1523,
+  "path": "docs/conf.py",
+  "line": 97,
+  "claim": "The Sphinx extension name \"sphinx_llm.txt\" is invalid because it is not a valid Python module name, which will cause an ImportError during the documentation build.",
+  "base": "a8f39394a85ea458e4f764a70cc164cdd8e66b36",
+  "tests_mentioning": [
+   ".agents/skills/test-downstream/scripts/downstream_ab.py",
+   "tests/conftest.py",
+   "tests/packages/cmake_generated/src/cmake_generated/__init__.py",
+   "tests/packages/dynamic_metadata/plugins/local/version/nested/__init__.py"
+  ]
+ },
+ {
+  "item": 52,
+  "verdict": "CORRECT",
+  "repo": "falconry/falcon",
+  "pr": 2697,
+  "path": ".github/workflows/test-wheels.yaml",
+  "line": 21,
+  "claim": "This change incorrectly replaces the emulated wheel test for Python 3.14 on aarch64 instead of adding a new test for Python 3.15, thereby dropping test coverage for a supported Python version.",
+  "base": "2d85a15fcd360e8123ab4d093c35c9ea5ccd7227",
+  "tests_mentioning": []
+ },
+ {
+  "item": 54,
+  "verdict": "CORRECT",
+  "repo": "jazzband/pip-tools",
+  "pr": 2454,
+  "path": "tests/test_utils.py",
+  "line": 766,
+  "claim": "The test does not verify that existing keys in `default_map` are preserved when loading from a config file, so it would incorrectly pass if the implementation replaces the entire map instead of updating it.",
+  "base": "5bc5ded0b685637d6dffb926c00829220b4c6834",
+  "tests_mentioning": []
+ },
+ {
+  "item": 59,
+  "verdict": "WRONG",
+  "repo": "falconry/falcon",
+  "pr": 2672,
+  "path": "falcon/cyutil/uri.pyx",
+  "line": 92,
+  "claim": "The logic in this block causes an infinite loop when `unquote_plus` is false because it fails to copy the literal `+` character and advance the source pointer.",
+  "base": "6566f4a4254fcc0158635c2e3bd4983663070ae4",
+  "tests_mentioning": [
+   "examples/asgilook/tests/test_thumbnails.py",
+   "falcon/testing/helpers.py",
+   "falcon/testing/resource.py",
+   "tests/asgi/test_asgi_servers.py"
+  ]
+ },
+ {
+  "item": 63,
+  "verdict": "WRONG",
+  "repo": "jazzband/pip-tools",
+  "pr": 2447,
+  "path": ".pre-commit-config.yaml",
+  "line": 8,
+  "claim": "The `isort` dependency is only partially updated, as another `isort` configuration in the same file is left unchanged at the old version `9.0.0b1`.",
+  "base": "be3feba19f990d0e54abe721b3b60a8169b91e8e",
+  "tests_mentioning": []
+ },
+ {
+  "item": 65,
+  "verdict": "WRONG",
+  "repo": "jazzband/pip-tools",
+  "pr": 2444,
+  "path": "tests/conftest.py",
+  "line": 124,
+  "claim": "The property is type-hinted to return an `InstallCommand`, but returning a generic `mock.Mock()` instance creates a type mismatch that will likely be flagged by a static type checker.",
+  "base": "29e28ed670d7f98e55fda425bf5741b5c9d272ea",
+  "tests_mentioning": []
+ },
+ {
+  "item": 67,
+  "verdict": "WRONG",
+  "repo": "falconry/falcon",
+  "pr": 2672,
+  "path": "falcon/cyutil/uri.pyx",
+  "line": 96,
+  "claim": "This conditional block is incomplete; when `unquote_plus` is false, it causes an infinite loop by failing to process the `+` character or advance the source pointer.",
+  "base": "6566f4a4254fcc0158635c2e3bd4983663070ae4",
+  "tests_mentioning": [
+   "examples/asgilook/tests/test_thumbnails.py",
+   "falcon/testing/helpers.py",
+   "falcon/testing/resource.py",
+   "tests/asgi/test_asgi_servers.py"
+  ]
+ },
+ {
+  "item": 70,
+  "verdict": "WRONG",
+  "repo": "jazzband/pip-tools",
+  "pr": 2444,
+  "path": "tests/conftest.py",
+  "line": 124,
+  "claim": "The property is type-hinted to return an `InstallCommand`, but returning a generic `mock.Mock()` instance creates a type mismatch that will likely be flagged by a static type checker.",
+  "base": "29e28ed670d7f98e55fda425bf5741b5c9d272ea",
+  "tests_mentioning": []
+ },
+ {
+  "item": 74,
+  "verdict": "WRONG",
+  "repo": "jazzband/pip-tools",
+  "pr": 2457,
+  "path": "tests/unit/scripts/test_options.py",
+  "line": 24,
+  "claim": "This assertion is fragile because it assumes the help text for the `--help` option is the last part of the output, which is not guaranteed if other options are present.",
+  "base": "8f2b7888ddbef793d4a3da977b5badf2298128a6",
+  "tests_mentioning": [
+   "tests/test_cli_compile.py"
+  ]
+ },
+ {
+  "item": 81,
+  "verdict": "WRONG",
+  "repo": "jazzband/pip-tools",
+  "pr": 2429,
+  "path": "piptools/repositories/pypi.py",
+  "line": 537,
+  "claim": "This condition is too broad because it incorrectly matches any URL where a path segment ends with \"/simple/\", such as \".../not-so-simple/\", leading to a malformed URL.",
+  "base": "e7f9099f5a87e5c08fbdd9b6e6d7b8f2132cb8d4",
+  "tests_mentioning": [
+   "tests/conftest.py",
+   "tests/test_repository_local.py",
+   "tests/test_repository_pypi.py",
+   "tests/test_resolver.py"
+  ]
+ },
+ {
+  "item": 84,
+  "verdict": "WRONG",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1535,
+  "path": "tests/test_program_search.py",
+  "line": 159,
+  "claim": "The test assertion uses a hardcoded value, making it brittle to changes in the `BASE_TIMEOUT` constant.",
+  "base": "36951451f3096b56d4139b77dc2765a97efe3fa7",
+  "tests_mentioning": []
+ },
+ {
+  "item": 86,
+  "verdict": "WRONG",
+  "repo": "falconry/falcon",
+  "pr": 2682,
+  "path": "tests/test_request_attrs.py",
+  "line": 64,
+  "claim": "The call to `.encode()` uses the system's default string encoding which is not guaranteed to be UTF-8, making the test brittle.",
+  "base": "1ae55f7d46f1f210550972366ee68fc62cd9f3d9",
+  "tests_mentioning": []
+ },
+ {
+  "item": 96,
+  "verdict": "WRONG",
+  "repo": "scikit-build/scikit-build-core",
+  "pr": 1535,
+  "path": "tests/test_program_search.py",
+  "line": 159,
+  "claim": "The test assertion uses a hardcoded value, making it brittle to changes in the `BASE_TIMEOUT` constant.",
+  "base": "36951451f3096b56d4139b77dc2765a97efe3fa7",
+  "tests_mentioning": []
+ }
+]
