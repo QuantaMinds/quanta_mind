@@ -57,7 +57,7 @@ def gate(finding: Finding, diff: str) -> Ruling:
     if sha.verdict is Verdict.UNRESOLVABLE:
         return Ruling(False, "sha-oracle", f"unresolvable, so not published — {sha.detail}")
 
-    release = adjudicate_release(claim)
+    release = adjudicate_release(claim, context=diff)
     if release.verdict is Verdict.REFUTED:
         return Ruling(False, "release-oracle", release.detail)
     if release.verdict is Verdict.UNRESOLVABLE:

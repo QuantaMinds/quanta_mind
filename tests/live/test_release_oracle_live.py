@@ -50,3 +50,40 @@ def test_an_unidentifiable_subject_is_unresolvable_not_confirmed() -> None:
     got = adjudicate_release("Some dependency 91.7.3 does not exist anywhere.")
     assert got.verdict is Verdict.UNRESOLVABLE
     assert not got.publishable()
+
+
+def test_a_true_absence_claim_is_CONFIRMED_when_the_diff_names_the_package() -> None:
+    """The direction the first version threw away: a real package with an absent release.
+
+    **`flask==99.99.99` is a TRUE finding and it was being dropped as UNRESOLVABLE**, because the
+    oracle could not tell "the subject is unidentifiable" from "the package is real and this
+    release is not". Version existence alone cannot separate those; package existence can.
+    """
+    got = adjudicate_release(
+        "The pin flask==99.99.99 is broken because that version does not exist on PyPI.",
+        context="+    flask==99.99.99\n",
+    )
+    if not got.reachable:
+        pytest.skip("PyPI unreachable")
+    assert got.verdict is Verdict.CONFIRMED, f"a true absence-claim was not confirmed: {got.detail}"
+    assert got.publishable(), "a confirmed true finding must publish"
+
+
+def test_a_package_the_diff_never_mentions_cannot_be_CONFIRMED() -> None:
+    """PyPI has packages called `pin`, `Some` and `dependency`. A stop-list cannot win that race.
+
+    **This exact sentence CONFIRMED on `dependency` before the diff check existed** — publishing a
+    finding on the strength of a name collision, which is `docs/CORRECTIONS.md` entry 8's direction.
+    """
+    got = adjudicate_release(
+        "Some dependency 91.7.3 does not exist anywhere.",
+        context="+    flask==1.0\n",
+    )
+    assert got.verdict is not Verdict.CONFIRMED, f"confirmed on a name collision: {got.detail}"
+    assert not got.publishable()
+
+
+def test_without_a_diff_confirming_is_unavailable() -> None:
+    """No context means no way to bind the name to the change, so the safe direction is to drop."""
+    got = adjudicate_release("The pin flask==99.99.99 does not exist on PyPI.", context="")
+    assert got.verdict is not Verdict.CONFIRMED
