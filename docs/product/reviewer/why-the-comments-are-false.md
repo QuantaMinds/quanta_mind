@@ -156,3 +156,51 @@ deletion, and the 16.7% ceiling still applies to it.**
 The detector adds findings — at 0.24% of pins. **It is a real entry in the numerator and a small
 one.** Nothing here reopens Half B, and the honest summary is that the largest single failure
 mechanism is now handled deterministically instead of guessed at.
+
+---
+
+# Fix 2, measured: date injection — INCONCLUSIVE, because the defect did not reproduce
+
+Three real commits with genuinely recent 2026 dates, found by scanning live history rather than
+constructed: `pydantic/pydantic` (uv.lock upload timestamps), `grafana/grafana`,
+`hashicorp/terraform`. Each shown to the shipped prompt and to the same prompt with one sentence
+added — *"Today's date is 2026-08-24. Any date on or before that has already passed."*
+
+Each diff was also shown with its 2026-or-later dates moved two years ahead, so the treated arm
+could not pass by going quiet.
+
+| dates | arm | future-claims |
+|---|---|---|
+| PAST (real) | shipped | **0** |
+| PAST (real) | date injected | 0 |
+| FUTURE (shifted) | shipped | 0 |
+| FUTURE (shifted) | date injected | **1** |
+
+**The shipped prompt made zero false date claims across three real diffs, so there was nothing for
+the fix to remove.** A fix cannot be credited against a defect that did not occur.
+
+The one positive signal is the other direction: on genuinely future dates the treated arm caught
+one and the shipped arm caught none. That is 1 of 3 against 0 of 3 — **too small to be anything**,
+and recorded rather than claimed.
+
+## What this means for the 5-of-45
+
+The date class was measured on design thirteen's corpus, where four separate findings said a
+mid-August 2026 date was in the future. **On three unrelated live diffs it did not recur.** The
+honest reading is that the rate is corpus-dependent and 11% is an upper bound from one pool, not a
+property of the reviewer.
+
+**Date injection is one sentence, costs nothing, and cannot make anything worse** — it is worth
+shipping on those grounds. It is not worth claiming as a measured fix, and it is not counted in any
+arithmetic about the wrong-rate.
+
+## A third instrument bug, disclosed
+
+The first run reported "no dated line in the real diff" for two of three repositories and produced
+n = 1. The regex was `\b(20\d\d)-(\d\d)-(\d\d)\b`, and in `2026-08-10T09:39:18Z` the character
+after the day is `T` — a word character, so **the trailing `\b` never matches an ISO timestamp**.
+Two thirds of the sample was discarded by a bug that reported itself as a property of the data.
+
+**Three instrument bugs in two fixes now** (`tags_at` line-scanning, exact-tag matching, this).
+Every one produced a plausible number. Every one was caught by looking at live data rather than by
+review.
