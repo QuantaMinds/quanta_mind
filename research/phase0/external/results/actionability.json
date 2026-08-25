@@ -1,0 +1,53 @@
+{
+ "per_repo": {
+  "ansible_ansible": {
+   "events_hit": 458,
+   "measured": 400,
+   "overlapping": 71,
+   "disjoint": 329,
+   "unreadable": 58
+  },
+  "celery_celery": {
+   "events_hit": 482,
+   "measured": 400,
+   "disjoint": 298,
+   "overlapping": 102,
+   "unreadable": 82
+  },
+  "django_django": {
+   "events_hit": 426,
+   "measured": 400,
+   "disjoint": 310,
+   "overlapping": 90,
+   "unreadable": 26
+  },
+  "pandas-dev_pandas": {
+   "events_hit": 428,
+   "measured": 400,
+   "disjoint": 342,
+   "overlapping": 58,
+   "unreadable": 28
+  },
+  "scikit-learn_scikit-learn": {
+   "events_hit": 450,
+   "measured": 400,
+   "disjoint": 223,
+   "unreadable": 50,
+   "overlapping": 177
+  },
+  "scrapy_scrapy": {
+   "events_hit": 476,
+   "unreadable": 76,
+   "measured": 400,
+   "overlapping": 125,
+   "disjoint": 275
+  }
+ },
+ "totals": {
+  "events_hit": 2720,
+  "measured": 2400,
+  "overlapping": 623,
+  "disjoint": 1777,
+  "unreadable": 320
+ }
+}
