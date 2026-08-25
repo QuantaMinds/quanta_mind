@@ -204,3 +204,48 @@ Two thirds of the sample was discarded by a bug that reported itself as a proper
 **Three instrument bugs in two fixes now** (`tags_at` line-scanning, exact-tag matching, this).
 Every one produced a plausible number. Every one was caught by looking at live data rather than by
 review.
+
+---
+
+# Fix 3, measured: registry existence — detector CLOSED, verifier shipped
+
+## The base rate is exactly zero, and the instrument was shown able to see a non-zero
+
+176 distinct pinned versions read from ten real requirement files across six repositories, each
+asked of PyPI. **0 unreachable. 0 that do not exist.**
+
+The control matters: `flask==99.99.99` returns absent, so the scan can detect a missing release and
+the zero is a property of the world rather than of the code.
+
+**A pinned version that does not exist fails CI on the first install**, so almost none survive on a
+main branch. **The detector for this class is a closed road** — correct, and it would never fire.
+Recorded, not built, and not to be retried.
+
+## The verifier is worth it anyway, and the direction of the claim is why
+
+It does not hunt missing releases. It refutes the reviewer's assertion that one is missing — 3 of
+45 real wrong findings — and that does not depend on the base rate at all. Live against PyPI:
+
+| claim | verdict |
+|---|---|
+| "awscli 1.45.34 does not exist on PyPI" | **REFUTED** — PyPI serves it |
+| "isort 9.0.0b2 does not exist" | **REFUTED** |
+| "requests 2.32.3 is not on PyPI" | **REFUTED** |
+| "flask 99.99.99 does not exist on PyPI" | UNRESOLVABLE — correctly not refuted |
+
+## The fourth instrument bug, and this one would have shipped the failure it was fixing
+
+The first version took the first name-shaped token before the version. In *"The version 1.45.34 of
+awscli does not exist"* that token is **`The`** — so it asked PyPI for `The/1.45.34`, got a 404, and
+returned **`CONFIRMED` for every false claim it was built to refute.**
+
+**A verifier whose failure mode is confirming is worse than no verifier.** The reviewer's
+confabulation acquires a fact behind it, and a well-grounded false finding has none of
+confabulation's tell — nothing supports a confabulation, which is at least a signal.
+
+The default is now `UNRESOLVABLE`, every name-shaped token is tried, and a claim whose subject
+cannot be identified drops the finding rather than publishing it.
+
+**Four instrument bugs across three fixes.** `tags_at` line-scanning; exact-tag matching; the
+`\b`-terminated date regex; and this. Every one produced a plausible number. **Every one was caught
+by running against live data, none by reading the code.**

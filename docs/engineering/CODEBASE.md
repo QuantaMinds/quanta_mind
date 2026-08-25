@@ -1345,3 +1345,17 @@ Running it first is what caught two defects in the shipped oracle: `tags_at` par
 line-by-line when GitHub returns one line of compact JSON, and the rule demanded exact tag equality
 when `# v6` on a `v6.4.0` commit is convention. **They flagged 13 pins of which 10 were correct — a
 77% false positive rate, worse than the model.** Both fixed and tested.
+
+### `verify/releases.py` — fix 3, and the detector that was closed before it was built
+
+**Registry base rate: 0 of 176 distinct pinned versions across ten real requirement files.** A
+version that does not exist fails CI on first install, so a detector would be correct and never
+fire → closed road, recorded in `bench/forensic/registry_prevalence.py`.
+
+The verifier ships regardless, because it refutes the *opposite* direction — the reviewer asserting
+a release is missing, 3 of 45 wrong findings. Live: refutes awscli 1.45.34, isort 9.0.0b2, requests
+2.32.3; correctly declines to refute flask 99.99.99.
+
+**Its default is `UNRESOLVABLE` because the first version defaulted to `CONFIRMED`** — it read `The`
+as the package name in "The version 1.45.34 of awscli does not exist", 404'd, and confirmed every
+false claim it existed to refute.

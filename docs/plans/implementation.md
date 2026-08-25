@@ -45,7 +45,7 @@ three months stale.
 | `rank/` | **6** | `baseline.py`, `events.py`, `firing.py`, `history_rates.py`, `order.py`, `score.py` |
 | `allocate/` | **0** | **NOT BUILT — its work is done inside `rank/order.py`, which emits the labels** |
 | `infer/` | **1** | `gemini.py` |
-| `verify/` | **3** | `anchor.py`, `external_facts.py`, `pin_mismatch.py` |
+| `verify/` | **4** | `anchor.py`, `external_facts.py`, `pin_mismatch.py`, `releases.py` |
 | `render/` | **4** | `comment.py`, `coverage_line.py`, `dashboard.py`, `replay_report.py` |
 | `serve/` | **13** | `cli.py`, `deep_review.py`, `health.py`, `listener.py`, `retrospective.py`, `review_delivery.py`, `run_commit.py`, `run_dashboard.py`, `run_endpoint.py`, `run_migrate.py`, `run_review.py`, `webhook_github.py`, `working_clone.py` |
 

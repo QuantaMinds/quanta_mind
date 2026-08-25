@@ -29,7 +29,8 @@ WHY:  **THE MODEL CANNOT CHECK AND DOES NOT DECLINE.** Measured live on 2026-08-
       one -- the same defect as a filter that admits nothing across a whole pass.
 IMPORTS: types.verdict. stdlib subprocess/re. Nothing to its right -- `verify/` may not see
       `infer/`, and this needs nothing from it: a claim is text, and GitHub is the authority.
-CONSUMED BY: `serve/deep_review.py`; `verify/pin_mismatch.py` uses its resolvers.
+CONSUMED BY: `serve/deep_review.py`. `verify/pin_mismatch.py` and `verify/releases.py`
+            share its resolvers and its `Verdict`.
 """
 
 from __future__ import annotations
