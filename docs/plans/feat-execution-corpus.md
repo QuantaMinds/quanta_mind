@@ -140,18 +140,26 @@ kept the 117 that change **source** whose modules an existing test names.
 
 | | |
 |---|---|
-| considered | 305 merged pull requests |
-| **qualify** | **117 = 38%** |
-| expected findings | ~149 at 1.27 per pull request |
-| expected correct | **~12.3** at the source-only rate of 8.3% |
-| needed for 15 correct | **~142 qualifying pull requests** |
+| considered | **474** merged pull requests, 20 repositories |
+| **qualify** | **173 = 36%** |
+| expected findings | ~220 at 1.27 per pull request |
+| expected correct | **~18.2** at the source-only rate of 8.3% |
+| needed for 15 correct | ~142 — **met, with 31 to spare** |
+
+**Widened by adding repositories, never by raising the depth per repository.** Deeper reaches
+further back into each history — older pull requests against older test suites — and would confound
+a change in the selection rate with the change in depth. **The rate held: 38% over 12 repositories,
+36% over 20.** Widening did not buy the shortfall by relaxing the filter.
+
+**Per-repository variance is wide and worth carrying**: `pytest-dev/pluggy` 3%, `pydantic` 17%,
+against `tornado` and `celery` at 57%. A grader's worklist drawn only from the top of that range
+would be a corpus of unusually well-tested code wearing a 36% label.
 
 **38% is a healthy rate and not an exotic corpus.** Had it come back at 5% the honest reading would
 be that we were about to test execution grounding on whatever code happens to be unusually well
 tested, and that limit is now measured rather than assumed.
 
-**The list is 25 pull requests short.** Widening to ~374 merged pull requests considered — more
-repositories or more depth per repository — closes it at the same 38%.
+**The shortfall is closed.** 173 against the 142 needed.
 
 ### The correct-rate in the selected pool, checked rather than assumed
 

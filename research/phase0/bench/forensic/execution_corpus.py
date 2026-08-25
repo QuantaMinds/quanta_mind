@@ -50,6 +50,18 @@ CANDIDATES = (
     "urllib3/urllib3",
     "pypa/packaging",
     "kevin1024/vcrpy",
+    # Added to close a 25-pull-request shortfall against the 15-correct requirement. **WIDENED BY
+    # ADDING REPOSITORIES, NEVER BY GOING DEEPER PER REPOSITORY** -- raising PER_REPO reaches
+    # further back into each history, a different population against older test suites, and would
+    # confound a change in the selection rate with the change in depth.
+    "python-attrs/attrs",
+    "pallets/click",
+    "pallets/jinja",
+    "encode/starlette",
+    "marshmallow-code/marshmallow",
+    "sqlalchemy/alembic",
+    "psf/black",
+    "pytest-dev/pluggy",
 )
 
 
@@ -140,7 +152,8 @@ def main() -> int:
                     "url": pull.get("html_url", ""),
                 }
             )
-        print(f"  {repo:<24} {len(pulls):>3} merged, {kept:>2} qualify", flush=True)
+        share = kept / len(pulls) if pulls else 0.0
+        print(f"  {repo:<28} {len(pulls):>3} merged, {kept:>2} qualify = {share:>4.0%}", flush=True)
 
     OUT.write_text(json.dumps({"considered": considered, "selected": rows}, indent=2))
     rate = len(rows) / considered if considered else 0.0
