@@ -1402,3 +1402,16 @@ It found two defects on its first run. One was a real product bug: **GitHub retu
 `sha_exists` could never confirm a genuinely missing SHA — the one verdict it exists to reach. The
 other was a wrong fixture in the test itself: `v7` has moved to v7.0.1, so `v7.0.0` alone is
 correct at that commit, and the test was wrong rather than the oracle.
+
+### `why-the-correct-rate-is-low.md` — forensics on the 12, not the 135
+
+Every earlier investigation was on the wrong findings. This one is on the correct ones, and it
+answers why no filter has helped:
+
+- **No slice is good.** Best correct-rate on any factor at n ≥ 15 is **13.0%**, against a 49% floor.
+- **Not-wrong and useful are different axes**: `resource_leak` has the lowest wrong-rate (33%) and
+  **zero** correct findings; `unhandled_case` has the most correct and is wrong 66% of the time.
+- **Four designs on one corpus** moved the wrong-rate 82% → 52% and the correct count 0, 1, 1, 1.
+- **Volume is not coverage**: we emit 194 and cover 81 goldens; Qodo emits 152 and covers 98.
+
+**It is a generation failure and every mechanism tried has been a filter.**
