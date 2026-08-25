@@ -1359,3 +1359,16 @@ a release is missing, 3 of 45 wrong findings. Live: refutes awscli 1.45.34, isor
 **Its default is `UNRESOLVABLE` because the first version defaulted to `CONFIRMED`** — it read `The`
 as the package name in "The version 1.45.34 of awscli does not exist", 404'd, and confirmed every
 false claim it existed to refute.
+
+### `docs/plans/preregistrations/reviewer/conversational-oracle-preregistration.md`
+
+The model asks, the oracle answers, the model reasons from the answer. Bars fixed before the run,
+including a **hard stop that is not traded against anything**: losing 2 or more of the 12 correct
+findings ends it as a FAIL whatever happens to the wrong-rate, because 12 is the entire yield of
+207 adjudicated and the correct-rate is what closed Half B. Design 8's quote requirement was
+satisfied by abstaining rather than by better anchoring, and a model asked to ask permission has
+the same escape.
+
+Step 0 measures each oracle's own accuracy on live data **before** it is wired in — four instrument
+bugs across three fixes say that is not optional, and a model reasoning from a bad fact produces a
+well-grounded false finding that is harder to catch than confabulation.

@@ -8,6 +8,62 @@ should write them.** Numbering starts at 6 so the gap stays visible.
 
 ---
 
+## 8 · A verifier that fails toward CONFIRMING is worse than no verifier
+
+**This is the most dangerous defect in this log, and it shipped as a fix for a different one.**
+
+`adjudicate_release()` was built to refute the reviewer's false claims that a package release does
+not exist. It took the first name-shaped token before the version number. In
+
+> "The version 1.45.34 of awscli does not exist on PyPI"
+
+that token is **`The`**. It asked PyPI for `The/1.45.34`, received a 404, and read the 404 as
+evidence that the claim was true. **It returned `CONFIRMED` for every false claim it existed to
+refute** — and `CONFIRMED` is the verdict that publishes.
+
+### Why this is worse than the 77% run, and worse than confabulation
+
+Three defects in this sequence produced wrong numbers. This one produces a wrong number **with a
+fact attached to it**, and the two are not the same kind of error:
+
+- **A verifier that wrongly REFUTES costs a true finding.** Bad, bounded, and visible: something
+  that should have published did not.
+- **A verifier that wrongly CONFIRMS takes a confabulation and grounds it.** The reviewer's
+  invented claim now has an authority behind it.
+
+**Nothing supports a confabulation, and that absence is itself the signal a reader uses.** A wrong
+confirmation removes the signal. A well-grounded false finding is harder to catch than an
+unsupported one, not easier — which inverts the entire reason for building the oracle.
+
+### The rule, and it is about the direction of a default
+
+**Fail toward dropping, never toward confirming.** `UNRESOLVABLE` is the default; every candidate
+subject is tried; a claim whose subject cannot be identified drops the finding rather than
+publishing it. The asymmetry is deliberate and it is not a tuning parameter.
+
+### The screening rule this sequence also produced
+
+Three base rates were measured before building on them: SHA→tag **0.24%**, registry existence
+**0.00%**, dates did not reproduce. Two of three detectors were closed before they were built.
+
+The registry zero came with a mechanism, and the mechanism generalises:
+
+> **A pinned version that does not exist fails CI on the first install, so almost none survive on a
+> main branch.**
+
+**So: before measuring a base rate, ask whether CI would already have caught the defect. If it
+would, expect zero.** That would have predicted the registry result without the run, and it is
+cheaper than measuring. It does NOT replace the measurement where the answer is not obvious — the
+SHA class is invisible to CI, which is exactly why its rate was non-zero.
+
+### And a zero means nothing without a control
+
+The registry scan reported 0 of 176. It is believable only because `flask==99.99.99` was asked in
+the same run and came back absent. **Without that, a zero is indistinguishable from a broken
+scan** — which is precisely what the other three defects in this sequence turned out to be.
+
+---
+
 ## 6 · The wrong answer was more publishable than the right one
 
 **2026-08-21, measuring whether the firing rate drifts within a repository.**

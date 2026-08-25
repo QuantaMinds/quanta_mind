@@ -9,10 +9,41 @@ sound the measurement behind it.
 They are recorded because the arithmetic is real and re-deriving it later would cost more than
 writing it down. **If the reviewer half is ever reopened, start here, in this order.**
 
+**Two of these were closed by measuring a base rate before building.** The register now records
+what was closed as well as what was deferred, because "we did not build it" and "we measured it and
+it cannot fire" are different facts and only one of them should be revisited.
+
+## The screening rule — ask before you measure
+
+> **A pinned version that does not exist fails CI on the first install, so almost none survive on a
+> main branch.**
+
+That is the mechanism behind the registry class's 0.00% base rate, and it generalises: **before
+measuring a base rate, ask whether CI would already have caught the defect. If it would, expect
+zero.** It would have predicted the registry result without the run.
+
+It does **not** replace measurement where the answer is not obvious. The SHA→tag class is invisible
+to CI — a workflow pinned to a real commit with a stale version comment builds perfectly — which is
+exactly why its rate came back non-zero at 0.24%.
+
+## Verifier and detector are different products of the same oracle
+
+The two are worth different amounts and conflating them hides it. Stated once here, because
+"base rate 0.00%, verifier ships" reads as a contradiction without it:
+
+| | what it does | its value depends on |
+|---|---|---|
+| **detector** | reads the diff and states a defect itself | how often the defect **occurs** |
+| **verifier** | refutes the reviewer's claim about the diff | how often the **model asserts** it |
+
+A class can have a zero base rate and a worthwhile verifier: registry existence never occurs in the
+wild, and the reviewer claimed it three times in 45.
+
 | fix | measured worth | evidence |
 |---|---|---|
 | deduplication | +4.0 points golden-level precision, 18% of the gap to Qodo | `research/phase0/bench/forensic/redundancy.py` |
-| live registry lookup | addresses 51% of wrong findings | `docs/product/reviewer/external-evidence-2026-08.md` |
+| live registry lookup — **verifier BUILT, detector CLOSED** | verifier refutes 3 of 45; detector base rate **0.00%** of 176 real pins | `research/phase0/bench/forensic/registry_prevalence.py` |
+| SHA→tag oracle — **BUILT, both halves** | verifier kills 31% of wrong findings; detector base rate **0.24%** of 1,244 real pins | `research/phase0/bench/forensic/pin_prevalence.py` |
 | date injection | addresses 11% of wrong findings | `docs/product/reviewer/external-evidence-2026-08.md` |
 | per-category thresholds | not sized; category rates differ 0%–45% | `docs/product/reviewer/greptile-gap-analysis.md` |
 
