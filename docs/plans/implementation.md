@@ -38,7 +38,7 @@ three months stale.
 
 | layer | modules | files |
 |---|---|---|
-| `types/` | **10** | `change.py`, `commit.py`, `finding.py`, `pooled_outcome.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `settings.py`, `touch.py`, `verdict.py` |
+| `types/` | **11** | `change.py`, `commit.py`, `deep.py`, `finding.py`, `pooled_outcome.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `settings.py`, `touch.py`, `verdict.py` |
 | `store/` | **8** | `calibration.py`, `deliveries.py`, `drift.py`, `lifecycle.py`, `migrations.py`, `reviews.py`, `schema.py`, `touches.py` |
 | `ingest/` | **6** | `change_shape.py`, `commits.py`, `diff.py`, `github_comments.py`, `history.py`, `review_window.py` |
 | `parse/` | **2** | `languages.py`, `units.py` |
@@ -46,7 +46,7 @@ three months stale.
 | `allocate/` | **0** | **NOT BUILT — its work is done inside `rank/order.py`, which emits the labels** |
 | `infer/` | **2** | `gemini.py`, `prompt_once.py` |
 | `verify/` | **6** | `anchor.py`, `external_facts.py`, `pin_mismatch.py`, `publishable.py`, `release_claims.py`, `releases.py` |
-| `render/` | **6** | `comment.py`, `coverage_line.py`, `dashboard.py`, `pin_block.py`, `replay_report.py`, `shape_line.py` |
+| `render/` | **7** | `comment.py`, `coverage_line.py`, `dashboard.py`, `deep_report.py`, `pin_block.py`, `replay_report.py`, `shape_line.py` |
 | `serve/` | **15** | `cli.py`, `deep_review.py`, `health.py`, `listener.py`, `pin_check.py`, `retrospective.py`, `review_delivery.py`, `run_commit.py`, `run_dashboard.py`, `run_endpoint.py`, `run_migrate.py`, `run_review.py`, `settle.py`, `webhook_github.py`, `working_clone.py` |
 
 <!-- plan-state:end -->

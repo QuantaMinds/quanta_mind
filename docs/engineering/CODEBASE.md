@@ -1607,3 +1607,52 @@ recomputes the window from git, and carries **two negative controls** — one re
 wall-clock window to disagree, one requiring HEAD-walking to admit commits the change never saw.
 Without them the assertions pass on any clone where the two windows happen to agree. Sabotaging the
 whole defect back in turns 3 of the 6 red.
+
+### `types/deep.py` + `render/deep_report.py` — the discards conserve, and each one names its mechanism
+
+`serve/deep_review.py` counted what the reviewer pass discarded and then reported one of the four
+numbers. Both halves were wrong.
+
+**The count was wrong.** `unanchored` was computed as `len(found) - len(surviving)`, which is
+quote-not-in-diff **plus** oracle-refuted, so every refuted finding was counted twice — once in
+`unanchored` and once in `refuted`. A trailing `- refuted + refuted` cancelled to nothing and made
+the expression read as deliberate.
+
+**Nothing in the tree asserted on it.** `grep unanchored tests/` returned nothing at all. The field
+was printed to an operator and checked by no one, which is why an expression that cannot be read
+without simplifying it on paper survived.
+
+**The report was wrong independently of the count.** `refuted` and `withdrawn` were correct on the
+record and never printed. Given four findings with one of each fate, an operator saw:
+
+```
+[deep] 4 raw finding(s); 2 dropped — quote not in the diff
+```
+
+Three discards, three different mechanisms, one number — and it was the wrong number. Worse,
+`(nothing survived the anchor check)` printed over findings that **had** survived the anchor check
+and were dropped two stages later by an oracle or by the model's own retraction. Now:
+
+```
+[deep] 4 raw finding(s) from the model:
+[deep]     1 anchored and surviving every check
+[deep]     1 dropped — the quoted code is not in the diff
+[deep]     1 dropped — an oracle refuted it or could not settle it
+[deep]     1 withdrawn — the model retracted it, given a fact
+```
+
+**The fix is an invariant, not a test.** `Deep.__post_init__` requires
+`anchored + unanchored + refuted + withdrawn == raw` and raises naming both totals. A field nobody
+asserts on can drift; an arithmetic identity checked at construction cannot.
+
+**`Deep.consulted` separates two states that printed identically.** When the ranked files carry no
+diff the model is never asked, and `raw = 0` then meant the same as `raw = 0` after a clean review.
+Rule 3: an instrument that did not run and a result are different values on the wire.
+
+**Both moved out of `serve/`, and the layering decided where to.** `render/` prints the record and
+may not import `serve/`, so the vocabulary sits left of both in `types/` — the same reason `Finding`
+is not in `infer/`. What pushed the split was `serve/deep_review.py` crossing the 200-line cap while
+`serve/` sat at its 15-file directory cap; what decided its shape was rule 6.
+
+→ `tests/unit/layers/serve/test_deep_counts.py`, which asserts the arithmetic AND the text. The
+counts being right on a record that never reaches the operator is the same failure as a wrong count.

@@ -16,15 +16,20 @@ WHY:  **THIS IS THE HALF THE EVIDENCE SAYS IS BAD, AND THE COUNTS ARE PRINTED FO
       judge is not added until one clears its pre-registered bars on a corpus it was not built on.**
 
       **THE MODEL IS SHOWN ONLY THE RANKED FILES.** That is the thesis and it is also the bill.
-IMPORTS: infer.gemini, verify.anchor, types.finding. Rightmost layer, so both are allowed here --
-      and `verify/` still cannot see `infer/`, which is the property rule 7 protects.
+IMPORTS: infer.gemini, verify.{anchor,publishable}, ingest.change_shape, types.deep, and
+      render.{deep_report,shape_line}. Rightmost layer, so all of them are allowed here -- and
+      `verify/` still cannot see `infer/`, which is the property rule 7 protects.
+
+      **THE RECORD AND THE PRINTING BOTH LEFT THIS FILE.** `Deep` is in `types/` because `render/`
+      prints it and may not import `serve/`; `render/deep_report.py` holds the text. What is left
+      here is one concern -- running the pass -- which is rule 6, and what pushed the split was
+      this file crossing the 200-line cap while `serve/` sat at its 15-file directory cap.
 CONSUMED BY: `serve/cli.py` behind `--deep`.
 """
 
 from __future__ import annotations
 
 import subprocess
-from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -33,9 +38,10 @@ from quantamind.infer import gemini
 from quantamind.infer.gemini import InferenceFailed, Unavailable
 from quantamind.ingest.change_shape import shape
 from quantamind.ingest.review_window import WindowUnreadable
+from quantamind.render.deep_report import lines
 from quantamind.render.shape_line import block
 from quantamind.serve.settle import settle
-from quantamind.types.finding import Finding
+from quantamind.types.deep import Deep
 from quantamind.verify import publishable
 from quantamind.verify.anchor import locate
 
@@ -43,30 +49,6 @@ GIT_TIMEOUT_S = 60
 
 if TYPE_CHECKING:  # `Reviewed` lives in run_review, which imports THIS module at runtime.
     from quantamind.serve.run_review import Reviewed
-
-
-@dataclass(frozen=True, slots=True)
-class Deep:
-    """What the reviewer pass produced, with every discard counted rather than absent."""
-
-    anchored: tuple[Finding, ...]
-    raw: int
-    """How many the model returned before anything was dropped."""
-
-    unanchored: int
-    """Dropped because the quoted code is not in the diff. **A count, never a silence.**"""
-
-    refuted: int
-    """Dropped because an oracle contradicted the claim, or could not settle it. The reviewer's
-    discrimination on the largest such class is **-8.3%** — a coin flip — so this is not a
-    refinement of its judgement, it is a replacement for it."""
-
-    withdrawn: int
-    """Dropped because the model itself withdrew the finding once handed a fact it did not have.
-    Measured at **18 of 45 wrong findings for 1 of 7 correct**, against a chance null of 2.8."""
-
-    read: tuple[str, ...]
-    """The files the model was actually shown."""
 
 
 def diff_for(clone: Path, sha: str, paths: list[str]) -> str:
@@ -111,7 +93,8 @@ def deep(
     """
     text = diff_for(clone, sha, ranked)
     if not text.strip():
-        return Deep((), 0, 0, 0, 0, tuple(ranked))
+        # Not "the model found nothing" -- it was never asked, because those paths carry no diff.
+        return Deep((), 0, 0, 0, 0, tuple(ranked), consulted=False)
     found = gemini.read(
         text, ranked, project=project, context=context_for(clone, sha, changed or ranked)
     )
@@ -144,7 +127,7 @@ def deep(
     return Deep(
         tuple(kept),
         len(found),
-        len(located) - len(surviving) + (len(found) - len(located)) - refuted + refuted,
+        len(found) - len(located),
         refuted,
         withdrawn,
         tuple(ranked),
@@ -163,17 +146,6 @@ def report(clone: Path, sha: str, out: Reviewed, project: str) -> None:
         # The ranking already printed and is not retracted by an inference failure.
         print(f"\n[deep] NOT RUN: {type(exc).__name__}: {exc}")
         return
-    print("\n[deep] NOT A PRODUCT FEATURE. This is the measurement half, run by hand.")
-    print(
-        f"[deep] {result.raw} raw finding(s); {result.unanchored} dropped — quote not in the diff"
-    )
-    for f in result.anchored:
-        print(f"  {f.path}:{f.line}  {f.claim}")
-    if not result.anchored:
-        print("  (nothing survived the anchor check)")
-    print(
-        f"[deep] read {len(result.read)} ranked file(s). RAW FINDINGS MEASURE 66.7-82.1% WRONG "
-        f"across four blind rater pools, at 0.013-0.037 correct per pull request. "
-        f"'Anchored' means a parser found the quoted line in the diff. It does NOT mean the claim "
-        f"is true, and nothing here is published to a pull request."
-    )
+    print("")
+    for line in lines(result):
+        print(line)
