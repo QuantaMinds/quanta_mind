@@ -85,15 +85,48 @@ def head_of(clone: pathlib.Path, number: int) -> tuple[str, str, list[str]]:
     return head, base, changed
 
 
-def context_for(clone: pathlib.Path, number: int) -> str:
-    """The shape block the product would send, byte for byte.
+def commit_of(clone: pathlib.Path, sha: str) -> tuple[str, list[str]]:
+    """(resolved sha, changed paths) for a corpus entry that names a COMMIT rather than a pull.
+
+    **TEN OF THE FIFTY GOLDEN ENTRIES ARE COMMIT URLS, ALL DISCOURSE**, and assuming every entry
+    was `/pull/<n>` crashed the run on `int('ffbaf8c5...')`. A commit is the single-commit case
+    `change_shape.shape()` was built for, so it takes no `against` range -- passing one would
+    measure the commit against its parent twice.
+    """
+    resolved = _git(clone, ["rev-parse", f"{sha}^{{commit}}"])
+    if not resolved:
+        raise Unresolved(f"commit {sha[:12]} is not in the clone")
+    changed = [x for x in _git(clone, ["show", "--name-only", "--format=", resolved]).split() if x]
+    if not changed:
+        raise Unresolved(f"commit {sha[:12]} changed no files")
+    return resolved, changed
+
+
+def context_for(clone: pathlib.Path, url: str) -> str:
+    """The shape block the product would send for `url`, byte for byte.
+
+    **THE CORPUS MIXES PULL REQUESTS AND BARE COMMITS**, 40 and 10 of the 50, and the two are
+    measured differently: a pull request is a RANGE against its merge-base, a commit is itself.
+    An entry that is neither raises `Unresolved` and is counted -- it is not silently given an
+    empty context, which would make its WITH_SHAPE arm identical to PLAIN and quietly dilute the
+    result toward null.
 
     **IT CALLS `render/shape_line.block()` RATHER THAN REBUILDING THE SENTENCE.** This file used
     to compose its own prose, so a PASS here would have licensed a string the product does not
     send. The arm has to be the shipped artefact or the result does not transfer to it.
     """
-    head, base, changed = head_of(clone, number)
-    return block(shape(clone, head, changed, against=base))
+    tail = url.rstrip("/").split("/")[-1]
+    if "/pull/" in url:
+        try:
+            number = int(tail)
+        except ValueError as exc:
+            raise Unresolved(f"pull URL does not end in a number: {url}") from exc
+        head, base, changed = head_of(clone, number)
+        return block(shape(clone, head, changed, against=base))
+    if "/commit/" in url:
+        sha, changed = commit_of(clone, tail)
+        return block(shape(clone, sha, changed))
+    raise Unresolved(f"URL names neither a pull request nor a commit: {url}")
 
 
 def gather(pulls: list[dict[str, object]], root: pathlib.Path) -> dict[str, str]:
@@ -128,11 +161,12 @@ def gather(pulls: list[dict[str, object]], root: pathlib.Path) -> dict[str, str]
         try:
             clone = ensure(repo, root)
             for pull in group:
-                number = int(str(pull["original"]).rstrip("/").split("/")[-1])
+                url = str(pull["original"])
                 try:
-                    contexts[str(pull["key"])] = context_for(clone, number)
-                except (Unresolved, subprocess.TimeoutExpired) as exc:
-                    print(f"    #{number}: NO CONTEXT — {type(exc).__name__}: {exc}", flush=True)
+                    contexts[str(pull["key"])] = context_for(clone, url)
+                except (Unresolved, ValueError, subprocess.TimeoutExpired) as exc:
+                    # Counted, never fatal: one unparseable entry must not discard the other 49.
+                    print(f"    {url[-40:]}: NO CONTEXT — {type(exc).__name__}: {exc}", flush=True)
                     contexts[str(pull["key"])] = ""
         except (CloneFailed, subprocess.TimeoutExpired) as exc:
             print(f"    {repo}: NO CLONE — {type(exc).__name__}: {str(exc)[:70]}", flush=True)
