@@ -1527,3 +1527,15 @@ nothing and **survives**.
 **And the skip guard was wrong in the safe-looking direction** — it checked `PATH` while `gemini.py`
 uses an absolute gcloud path, so all three tests skipped while the model was working. A skip reads
 as a pass in the summary line.
+
+### The YAML scope question — measured, then declined
+
+Adding `.yml`/`.yaml` to `REVIEWABLE_SUFFIXES` would make the SHA **verifier** reachable. Measured
+on the six out-of-sample repositories before deciding: **miss rate 1.21% → 1.17%, displacement
+25.5% → 25.4%, YAML in the top three on 2% of changes.** The cost is zero.
+
+**It was declined anyway.** The detector already runs on every workflow without the ranker. Widening
+only lets the model *read* workflows — where its discrimination is **−8.3%** — so it would invent
+SHA claims at chance and then pay an API call each to delete them. **It manufactures the exposure
+the oracle exists to cover.**
+→ `docs/product/reviewer/closed/widening-scope-manufactures-the-problem.md`
