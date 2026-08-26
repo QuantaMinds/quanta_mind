@@ -2,19 +2,13 @@
 
 WHAT: `gather(pulls, root)` returns `{key: context}` for every pull request, holding ONE clone at
       a time. `head_of` places a pull request's head and base; `context_for` renders it.
-WHY:  **SPLIT OUT BECAUSE `shape_context.py` CROSSED THE 200-LINE CAP**, and because obtaining a
-      pull request's shape and scoring an A/B are two concerns. This half is the one that touches
-      the disk and the one that was wrong: it read the clone's HEAD instead of the pull request,
-      kept every repository resident, and leaked a failed clone.
+WHY:  This is the half that touches the disk, and the half that kept being wrong: it read the
+      clone's HEAD instead of the pull request, kept every repository resident, and leaked a
+      failed clone. Each is fixed and each is recorded in `docs/engineering/CODEBASE.md`.
 
-      **PEAK DISK IS ONE REPOSITORY, NOT THEIR SUM.** `ensure()` was called per PULL against a root
-      swept once at the start, so all five repositories of this corpus stayed resident -- about
-      4.5 GB. Grouping by repository and dropping each clone before the next makes the peak the
-      largest single one. Free space is checked BEFORE each clone and the run refuses rather than
-      filling the disk; this project has filled a 228 GB disk with clones once already.
-
-      **THE CLEANUP PATH DOES NOT DEPEND ON THE CLONE SUCCEEDING.** Binding it to `ensure()`'s
-      return value left 997 MB of a half-fetched discourse behind on a machine with 2 GB free.
+      **PEAK DISK IS ONE REPOSITORY, NOT THEIR SUM**, free space is checked BEFORE each clone
+      rather than after, and the cleanup runs from `finally` so it does not depend on the clone
+      succeeding -- that last one left 997 MB of a half-fetched discourse on a 2 GB machine.
 IMPORTS: stdlib; the product's `ingest.change_shape`, `render.shape_line`, `serve.working_clone`.
 CONSUMED BY: `bench/forensic/shape_context.py`.
 """
@@ -33,6 +27,7 @@ sys.path.insert(0, str(HERE.parents[4] / "src"))
 from quantamind.ingest.change_shape import shape  # noqa: E402
 from quantamind.render.shape_line import block  # noqa: E402
 from quantamind.serve.working_clone import CloneFailed, ensure, path_for  # noqa: E402
+from shape.tally import pull_numbers  # noqa: E402
 
 
 class OutOfDisk(RuntimeError):
@@ -42,12 +37,14 @@ class OutOfDisk(RuntimeError):
 GIT_TIMEOUT_S = 300
 
 NEED_GB = 3.0
-"""Free space required before each clone. The largest single repository here is grafana at about
-1.9 GB plus its pull refs; at 2.5 keycloak started with exactly nothing to spare."""
+"""Free space required before each clone. grafana is ~2.3 GB with its pull refs; at 2.5 keycloak
+started with nothing to spare."""
 
-CLONE_TIMEOUT_S = 2700
-"""45 minutes. grafana timed out at the product's 900s default mid-clone and cost that run its
-ten pull requests. The bench has no user waiting on it, so it waits."""
+CLONE_TIMEOUT_S = FETCH_TIMEOUT_S = 2700
+"""45 minutes each, and **THE FETCH NEEDS IT MORE THAN THE CLONE DOES**: `ensure()` clones, then
+RECURSES, and the recursion takes the fetch branch -- where every `refs/pull/*` ref arrives, since
+a plain clone does not fetch them. Raising only the clone timeout fixed nothing; grafana's clone
+succeeded at 2.3 GB and the fetch behind it died on the 300s default."""
 
 
 def _free_gb(path: pathlib.Path) -> float:
@@ -70,13 +67,12 @@ def _git(clone: pathlib.Path, args: list[str]) -> str:
 def head_of(clone: pathlib.Path, number: int) -> tuple[str, str, list[str]]:
     """(head sha, base sha, changed paths) for pull request `number`, resolved in `clone`.
 
-    **THE PULL REQUEST, NOT THE CLONE'S HEAD.** The first version of this file read
-    `git log -1` -- the tip of the default branch -- and handed the model the shape of whatever
-    had merged most recently while asking it to review a completely unrelated diff. Both arms
-    would have received noise, WITH_SHAPE would have scored like PLAIN, and the run would have
-    been recorded as "shape does not help" with the instrument never having pointed at the change.
-    `working_clone.ensure()` fetches `+refs/pull/*/head:refs/remotes/pull/*`, so the head is
-    already on disk under `refs/remotes/pull/<number>`; nothing new is fetched here.
+    **THE PULL REQUEST, NOT THE CLONE'S HEAD.** The first version read `git log -1` -- the tip of
+    the default branch -- and handed the model the shape of whatever had merged most recently
+    while asking it to review an unrelated diff. Both arms would have got noise, WITH_SHAPE would
+    have scored like PLAIN, and the run would have been recorded as "shape does not help" with the
+    instrument never pointed at the change. `ensure()` puts the head at
+    `refs/remotes/pull/<number>`; nothing new is fetched here.
     """
     head = _git(clone, ["rev-parse", f"refs/remotes/pull/{number}"])
     if not head:
@@ -166,7 +162,14 @@ def gather(pulls: list[dict[str, object]], root: pathlib.Path) -> dict[str, str]
         # only runs on the success path is not a cleanup.
         where = path_for(repo, root)
         try:
-            clone = ensure(repo, root, clone_timeout_s=CLONE_TIMEOUT_S)
+            # Ask for the pull heads this group needs, not every one in the repository.
+            clone = ensure(
+                repo,
+                root,
+                clone_timeout_s=CLONE_TIMEOUT_S,
+                fetch_timeout_s=FETCH_TIMEOUT_S,
+                pull_refs=pull_numbers(group),
+            )
             for pull in group:
                 url = str(pull["original"])
                 try:
@@ -179,9 +182,14 @@ def gather(pulls: list[dict[str, object]], root: pathlib.Path) -> dict[str, str]
             print(f"    {repo}: NO CLONE — {type(exc).__name__}: {str(exc)[:70]}", flush=True)
             for pull in group:
                 contexts.setdefault(str(pull["key"]), "")
+        finally:
+            # **REPORTED FROM `finally`, SO IT PRINTS ON EVERY PATH.** The first version of this
+            # line sat in the `except` block and therefore announced coverage only when the clone
+            # FAILED -- silent on success, which is the one case a reader watches for. Ask what a
+            # check prints when the thing it checks is working: if the answer is "nothing", it is
+            # not a check.
             got = sum(1 for pull in group if contexts.get(str(pull["key"])))
             print(f"    {repo}: {got}/{len(group)} context(s) resolved", flush=True)
-        finally:
             # Dropped before the next repository, not swept at some later high-water mark, and
             # dropped whether or not the clone succeeded.
             if where.is_dir():

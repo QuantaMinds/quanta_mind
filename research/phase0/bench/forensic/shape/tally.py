@@ -20,6 +20,23 @@ CONSUMED BY: `bench/forensic/shape_context.py`.
 from __future__ import annotations
 
 
+def pull_numbers(entries: list[dict[str, object]]) -> list[int]:
+    """The pull-request numbers in `entries`, sorted. Commit-URL entries contribute none.
+
+    **THIS IS WHAT STOPS THE FETCH ASKING FOR 83,202 REFS TO RESOLVE TEN.** grafana carries that
+    many pull heads and discourse 42,495; `ensure(pull_refs=...)` takes this list instead of the
+    wildcard. Ten of the fifty golden entries name a commit rather than a pull request and
+    correctly contribute nothing here.
+    """
+    out: set[int] = set()
+    for entry in entries:
+        url = str(entry["original"]).rstrip("/")
+        tail = url.split("/")[-1]
+        if "/pull/" in url and tail.isdigit():
+            out.add(int(tail))
+    return sorted(out)
+
+
 def coverage(
     pulls: list[dict[str, object]], contexts: dict[str, str]
 ) -> tuple[int, dict[str, tuple[int, int]], list[str]]:

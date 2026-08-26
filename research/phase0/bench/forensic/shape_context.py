@@ -50,6 +50,34 @@ from shape.pulls import OutOfDisk, gather  # noqa: E402
 from shape.tally import coverage  # noqa: E402
 
 OUT = HERE.parent / "results" / "shape_context.json"
+CONTEXTS = HERE.parent / "results" / "shape_contexts.json"
+"""Phase one's output, banked per repository so a later failure does not discard it."""
+
+
+def resolve(repo: str) -> int:
+    """Gather ONE repository's contexts and merge them into `CONTEXTS`, then give the disk back.
+
+    **PHASE ONE IS RESUMABLE BECAUSE IT KEEPS FAILING PART-WAY THROUGH.** grafana timed out twice
+    and each time took cal.com and discourse's clones down with it -- 20 contexts already paid
+    for, discarded because they lived only in memory. Contexts are facts about a commit and do not
+    go stale, so they are written to disk as each repository finishes and a re-run skips what is
+    already there.
+    """
+    pulls = [p for p in mc.pulls() if p.get("golden") and f"/{repo}/" in str(p["original"])]
+    if not pulls:
+        print(f"no golden changes for {repo!r} -- check the name against the corpus")
+        return 1
+    have = json.loads(CONTEXTS.read_text()) if CONTEXTS.exists() else {}
+    try:
+        got = gather(pulls, clone_root())
+    except OutOfDisk as exc:
+        print(f"\n  ABORTING: {exc}")
+        return 1
+    have.update(got)
+    CONTEXTS.write_text(json.dumps(have, indent=1))
+    n, _, _ = coverage(pulls, got)
+    print(f"\n  {repo}: {n}/{len(pulls)} resolved. {len(have)} change(s) banked in {CONTEXTS.name}")
+    return 0 if n else 1
 
 
 def main() -> int:
@@ -61,13 +89,19 @@ def main() -> int:
 
     # **PHASE ONE TOUCHES THE DISK, PHASE TWO TOUCHES THE MODEL.** Contexts are gathered first,
     # one clone resident at a time, and every clone is given back before any model call is made.
+    # Anything already banked by `--resolve` is reused rather than re-cloned.
+    banked = json.loads(CONTEXTS.read_text()) if CONTEXTS.exists() else {}
+    missing = [p for p in pulls if not banked.get(str(p["key"]))]
+    if banked:
+        print(f"  {len(banked)} context(s) banked; {len(missing)} change(s) still to resolve")
     try:
-        contexts = gather(pulls, root)
+        contexts = {**banked, **(gather(missing, root) if missing else {})}
     except OutOfDisk as exc:
         print(f"\n  ABORTING: {exc}")
         print("  Free space or set QUANTAMIND_BENCH_CLONES to a volume with room.")
         OUT.write_text(json.dumps({"aborted": "insufficient disk", "why": str(exc)}, indent=1))
         return 1
+    CONTEXTS.write_text(json.dumps(contexts, indent=1))
 
     for pull in pulls:
         key = str(pull["key"])
@@ -159,4 +193,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    # `--resolve <repo>` does ONE repository and stops, which is how this is driven on a machine
+    # that cannot hold two of these clones at once. No argument runs everything still outstanding.
+    if len(sys.argv) == 3 and sys.argv[1] == "--resolve":
+        raise SystemExit(resolve(sys.argv[2]))
     raise SystemExit(main())

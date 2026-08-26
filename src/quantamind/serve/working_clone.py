@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import shutil
 import subprocess
+from collections.abc import Sequence
 from pathlib import Path
 
 CLONE_TIMEOUT_S = 900
@@ -60,12 +61,20 @@ def path_for(repo: str, root: Path) -> Path:
     return root / parts[0] / parts[1]
 
 
+def _pull_refspecs(pull_refs: Sequence[int] | None) -> list[str]:
+    """Refspecs for the pull heads asked for. None means every one, which is the old behaviour."""
+    if pull_refs is None:
+        return ["+refs/pull/*/head:refs/remotes/pull/*"]
+    return [f"+refs/pull/{n}/head:refs/remotes/pull/{n}" for n in pull_refs]
+
+
 def ensure(
     repo: str,
     root: Path,
     *,
     clone_timeout_s: int = CLONE_TIMEOUT_S,
     fetch_timeout_s: int = FETCH_TIMEOUT_S,
+    pull_refs: Sequence[int] | None = None,
 ) -> Path:
     """A current full clone of `repo`. Clones on first use, fetches thereafter.
 
@@ -76,8 +85,13 @@ def ensure(
     passes its own value and the endpoint keeps the one it was given.
 
     **A LONGER CEILING IS NOT FREE.** `review_delivery` blocks on this, so the default bounds how
-    long a webhook can sit on one delivery. What the grafana failure says about a large-monorepo
-    customer is a real question and it is NOT answered here.
+    long a webhook can sit on one delivery.
+
+    **`pull_refs` NARROWS THE FETCH TO THE PULL REQUESTS THE CALLER WANTS, AND THE WILDCARD IS NOT
+    A ROUNDING ERROR.** grafana carries **83,202** pull-head refs and discourse 42,495; a review
+    needs ONE. Fetching all of them timed out at 900s, then ran 25 minutes and exited 1 at 2700s.
+    `None` keeps the wildcard, so nothing changes for a caller that does not ask; an empty
+    sequence fetches branches only.
 
     Fetches `+refs/pull/*/head` as well as the branches, because the head of a pull request opened
     from a fork is on no branch of the upstream repository and a plain fetch will not have it.
@@ -100,7 +114,7 @@ def ensure(
                 "--prune",
                 "origin",
                 "+refs/heads/*:refs/remotes/origin/*",
-                "+refs/pull/*/head:refs/remotes/pull/*",
+                *_pull_refspecs(pull_refs),
             ],
             capture_output=True,
             text=True,
@@ -108,7 +122,10 @@ def ensure(
         )
         if done.returncode != 0:
             # NOT a fallback to the stale clone. See the module docstring.
-            raise CloneFailed(repo, f"fetch exited {done.returncode}: {done.stderr.strip()[:160]}")
+            # **THE TAIL, NOT THE HEAD.** git writes "From <url>" first and the real failure
+            # last, so the leading characters are reliably the part that says nothing.
+            tail = done.stderr.strip()[-300:]
+            raise CloneFailed(repo, f"fetch exited {done.returncode}: ...{tail}")
         return where
 
     where.parent.mkdir(parents=True, exist_ok=True)
@@ -122,7 +139,13 @@ def ensure(
         # A half-written directory would be taken for a good clone on the next delivery.
         shutil.rmtree(where, ignore_errors=True)
         raise CloneFailed(repo, f"clone exited {done.returncode}: {done.stderr.strip()[:160]}")
-    return ensure(repo, root, clone_timeout_s=clone_timeout_s, fetch_timeout_s=fetch_timeout_s)
+    return ensure(
+        repo,
+        root,
+        clone_timeout_s=clone_timeout_s,
+        fetch_timeout_s=fetch_timeout_s,
+        pull_refs=pull_refs,
+    )
 
 
 def sweep(root: Path, keep: int = DEFAULT_KEEP) -> int:
