@@ -19,7 +19,12 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
+import pathlib as _p
+import sys as _s
+
 from actionability import CLONES, FIXWORDS, MAX_FILES, WINDOW, YEAR
+
+_s.path.insert(0, str(_p.Path(__file__).resolve().parents[1]))
 from commit_stream import stream
 from git_reads import shas_matching, touched_lines
 
