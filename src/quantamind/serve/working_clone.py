@@ -60,8 +60,24 @@ def path_for(repo: str, root: Path) -> Path:
     return root / parts[0] / parts[1]
 
 
-def ensure(repo: str, root: Path) -> Path:
+def ensure(
+    repo: str,
+    root: Path,
+    *,
+    clone_timeout_s: int = CLONE_TIMEOUT_S,
+    fetch_timeout_s: int = FETCH_TIMEOUT_S,
+) -> Path:
     """A current full clone of `repo`. Clones on first use, fetches thereafter.
+
+    **THE TIMEOUTS ARE ARGUMENTS BECAUSE THE DEFAULT IS A PRODUCT DECISION AND A BENCH RUN IS
+    NOT.** 900 seconds is not enough for grafana -- 1.9 GB plus every `refs/pull/*` ref timed out
+    mid-clone and cost the run that repository's ten pull requests. Raising the shipped default
+    for a research harness would change what a customer's delivery waits for, so the harness
+    passes its own value and the endpoint keeps the one it was given.
+
+    **A LONGER CEILING IS NOT FREE.** `review_delivery` blocks on this, so the default bounds how
+    long a webhook can sit on one delivery. What the grafana failure says about a large-monorepo
+    customer is a real question and it is NOT answered here.
 
     Fetches `+refs/pull/*/head` as well as the branches, because the head of a pull request opened
     from a fork is on no branch of the upstream repository and a plain fetch will not have it.
@@ -88,7 +104,7 @@ def ensure(repo: str, root: Path) -> Path:
             ],
             capture_output=True,
             text=True,
-            timeout=FETCH_TIMEOUT_S,
+            timeout=fetch_timeout_s,
         )
         if done.returncode != 0:
             # NOT a fallback to the stale clone. See the module docstring.
@@ -100,13 +116,13 @@ def ensure(repo: str, root: Path) -> Path:
         ["git", "clone", "--no-checkout", f"https://github.com/{repo}.git", str(where)],
         capture_output=True,
         text=True,
-        timeout=CLONE_TIMEOUT_S,
+        timeout=clone_timeout_s,
     )
     if done.returncode != 0:
         # A half-written directory would be taken for a good clone on the next delivery.
         shutil.rmtree(where, ignore_errors=True)
         raise CloneFailed(repo, f"clone exited {done.returncode}: {done.stderr.strip()[:160]}")
-    return ensure(repo, root)
+    return ensure(repo, root, clone_timeout_s=clone_timeout_s, fetch_timeout_s=fetch_timeout_s)
 
 
 def sweep(root: Path, keep: int = DEFAULT_KEEP) -> int:

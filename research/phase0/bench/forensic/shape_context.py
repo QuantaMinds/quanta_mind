@@ -47,6 +47,7 @@ import martian_corpus as mc  # noqa: E402
 from borrowed_clones import root as clone_root  # noqa: E402
 from client import Client  # noqa: E402
 from shape.pulls import OutOfDisk, gather  # noqa: E402
+from shape.tally import coverage  # noqa: E402
 
 OUT = HERE.parent / "results" / "shape_context.json"
 
@@ -92,11 +93,25 @@ def main() -> int:
     # **AN EMPTY CONTEXT MAKES WITH_SHAPE BYTE-IDENTICAL TO PLAIN**, so a run where every clone
     # failed produces a perfect null and reads as a clean negative result. The count is printed
     # and stored, and the run refuses rather than reporting a verdict it cannot support.
-    with_context = sum(1 for v in contexts.values() if v)
-    print(f"\n  context resolved for {with_context} of {len(pulls)} pull request(s)", flush=True)
-    if with_context < len(pulls) * 0.8:
-        print("  REFUSING TO SCORE: fewer than 80% of pulls carry context, so the arms are")
-        print("  mostly the same prompt and any verdict would be about the clone step, not shape.")
+    # **A CHANGE WITH NO CONTEXT MAKES ITS WITH_SHAPE ARM BYTE-IDENTICAL TO PLAIN**, so every
+    # missing context is a change contributing exactly zero signal and pulling the result toward
+    # null. The arithmetic lives in `shape.pulls.coverage`, a pure function, so the gate can be
+    # given a known answer without running the experiment behind it.
+    with_context, by_repo, empty = coverage(pulls, contexts)
+    print(f"\n  context resolved for {with_context} of {len(pulls)} change(s)", flush=True)
+    for repo, (got, total) in sorted(by_repo.items()):
+        print(f"    {repo:<40} {got}/{total}", flush=True)
+
+    if empty:
+        print(f"\n  REFUSING TO SCORE: {', '.join(empty)} contributed NO context at all.")
+        print("  A whole repository missing is a systematic gap, not sampling noise: those")
+        print("  changes' WITH_SHAPE arm is byte-identical to PLAIN and would dilute the result")
+        print("  toward null. Fix the clone and re-run; do not score around it.")
+        OUT.write_text(json.dumps({"aborted": "repository missing", "empty": empty}, indent=1))
+        return 1
+    if with_context <= len(pulls) * 0.8:
+        print("\n  REFUSING TO SCORE: 80% or fewer of changes carry context, so the arms are")
+        print("  largely the same prompt and any verdict would be about the clone step, not shape.")
         OUT.write_text(
             json.dumps({"aborted": "insufficient context", "contexts": contexts}, indent=1)
         )

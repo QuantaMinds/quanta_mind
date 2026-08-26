@@ -40,7 +40,14 @@ class OutOfDisk(RuntimeError):
 
 
 GIT_TIMEOUT_S = 300
-NEED_GB = 2.5  # the largest single repository in this corpus (grafana) plus its pull refs
+
+NEED_GB = 3.0
+"""Free space required before each clone. The largest single repository here is grafana at about
+1.9 GB plus its pull refs; at 2.5 keycloak started with exactly nothing to spare."""
+
+CLONE_TIMEOUT_S = 2700
+"""45 minutes. grafana timed out at the product's 900s default mid-clone and cost that run its
+ten pull requests. The bench has no user waiting on it, so it waits."""
 
 
 def _free_gb(path: pathlib.Path) -> float:
@@ -159,7 +166,7 @@ def gather(pulls: list[dict[str, object]], root: pathlib.Path) -> dict[str, str]
         # only runs on the success path is not a cleanup.
         where = path_for(repo, root)
         try:
-            clone = ensure(repo, root)
+            clone = ensure(repo, root, clone_timeout_s=CLONE_TIMEOUT_S)
             for pull in group:
                 url = str(pull["original"])
                 try:
@@ -172,6 +179,8 @@ def gather(pulls: list[dict[str, object]], root: pathlib.Path) -> dict[str, str]
             print(f"    {repo}: NO CLONE — {type(exc).__name__}: {str(exc)[:70]}", flush=True)
             for pull in group:
                 contexts.setdefault(str(pull["key"]), "")
+            got = sum(1 for pull in group if contexts.get(str(pull["key"])))
+            print(f"    {repo}: {got}/{len(group)} context(s) resolved", flush=True)
         finally:
             # Dropped before the next repository, not swept at some later high-water mark, and
             # dropped whether or not the clone succeeded.
