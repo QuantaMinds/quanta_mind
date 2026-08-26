@@ -32,6 +32,7 @@ import tempfile
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parents[3] / "src"))
 
+from borrowed_clones import root as clone_root  # noqa: E402
 from quantamind.rank.order import NothingToRank  # noqa: E402
 from quantamind.serve.run_review import NoHistory, review  # noqa: E402
 from quantamind.serve.working_clone import CloneFailed, ensure  # noqa: E402
@@ -54,7 +55,9 @@ def changed(repo: str, pr: int) -> list[str]:
 
 def main() -> int:
     rows = json.loads(CORPUS.read_text())["selected"]
-    root = pathlib.Path(tempfile.mkdtemp(prefix="firing-"))
+    # **THE SHARED ROOT, NOT A FRESH ONE PER RUN.** A new mkdtemp every time is what put
+    # 11 GB of duplicate clones on the disk; this reuses them and bounds the total.
+    root = clone_root()
     out: list[dict[str, object]] = []
 
     for row in rows:
