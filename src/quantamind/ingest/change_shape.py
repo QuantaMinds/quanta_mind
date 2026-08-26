@@ -92,9 +92,19 @@ def _norms(clone: Path, sha: str) -> tuple[int, int]:
     )
 
 
-def shape(clone: Path, sha: str, changed: list[str]) -> Shape:
-    """The change's own shape, and the repository's, so the first can be read against the second."""
-    stat = _run(clone, ["show", "--numstat", "--format=", sha])
+def shape(clone: Path, sha: str, changed: list[str], *, against: str = "") -> Shape:
+    """The change's own shape, and the repository's, so the first can be read against the second.
+
+    `against` is the commit the change was opened from. **A PULL REQUEST IS A RANGE, NOT A
+    COMMIT**: with several commits on the branch `git show <head>` counts only the last of them,
+    so the line figure understates the change the reviewer is actually reading. Empty is the
+    single-commit case `quantamind review` passes, and leaves the read exactly as it was.
+    """
+    stat = (
+        _run(clone, ["diff", "--numstat", f"{against}...{sha}"])
+        if against
+        else _run(clone, ["show", "--numstat", "--format=", sha])
+    )
     lines = sum(
         int(x)
         for row in stat.splitlines()

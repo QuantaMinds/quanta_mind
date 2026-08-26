@@ -48,26 +48,58 @@ import martian_corpus as mc  # noqa: E402
 from borrowed_clones import root as clone_root  # noqa: E402
 from client import Client  # noqa: E402
 from quantamind.ingest.change_shape import shape  # noqa: E402
+from quantamind.render.shape_line import block  # noqa: E402
 from quantamind.serve.working_clone import CloneFailed, ensure  # noqa: E402
 
 OUT = HERE.parent / "results" / "shape_context.json"
+GIT_TIMEOUT_S = 300
 
 
-def context_for(clone: pathlib.Path, sha: str, changed: list[str]) -> str:
-    """The shape sentence the model would be given. Facts only, no instruction on what to do."""
-    got = shape(clone, sha, changed)
-    parts = [
-        f"This change touches {got.files} file(s) and {got.lines} line(s). "
-        f"This repository's median change is {got.median_files} file(s) and "
-        f"{got.median_lines} line(s)."
-    ]
-    if got.churn:
-        parts.append(f"These files changed {got.churn} times in the last 30 days.")
-    if got.hands:
-        parts.append(f"{got.hands} other people have edited them in that time.")
-    if got.unusual:
-        parts.append("Unusual for this repository: " + "; ".join(got.unusual) + ".")
-    return " ".join(parts)
+class Unresolved(RuntimeError):
+    """A pull request's head could not be placed in the clone. Counted, never silently skipped."""
+
+
+def _git(clone: pathlib.Path, args: list[str]) -> str:
+    done = subprocess.run(
+        ["git", "-C", str(clone), *args], capture_output=True, text=True, timeout=GIT_TIMEOUT_S
+    )
+    return done.stdout.strip() if done.returncode == 0 else ""
+
+
+def head_of(clone: pathlib.Path, number: int) -> tuple[str, str, list[str]]:
+    """(head sha, base sha, changed paths) for pull request `number`, resolved in `clone`.
+
+    **THE PULL REQUEST, NOT THE CLONE'S HEAD.** The first version of this file read
+    `git log -1` -- the tip of the default branch -- and handed the model the shape of whatever
+    had merged most recently while asking it to review a completely unrelated diff. Both arms
+    would have received noise, WITH_SHAPE would have scored like PLAIN, and the run would have
+    been recorded as "shape does not help" with the instrument never having pointed at the change.
+    `working_clone.ensure()` fetches `+refs/pull/*/head:refs/remotes/origin/pr/*`, so the head is
+    already on disk under `origin/pr/<number>`; nothing new is fetched here.
+    """
+    head = _git(clone, ["rev-parse", f"origin/pr/{number}"])
+    if not head:
+        raise Unresolved(f"origin/pr/{number} is not in the clone")
+    base = _git(clone, ["merge-base", "origin/HEAD", head]) or _git(
+        clone, ["rev-parse", f"{head}^"]
+    )
+    if not base:
+        raise Unresolved(f"no merge-base for origin/pr/{number}")
+    changed = [x for x in _git(clone, ["diff", "--name-only", f"{base}...{head}"]).split() if x]
+    if not changed:
+        raise Unresolved(f"origin/pr/{number} changed no files against its base")
+    return head, base, changed
+
+
+def context_for(clone: pathlib.Path, number: int) -> str:
+    """The shape block the product would send, byte for byte.
+
+    **IT CALLS `render/shape_line.block()` RATHER THAN REBUILDING THE SENTENCE.** This file used
+    to compose its own prose, so a PASS here would have licensed a string the product does not
+    send. The arm has to be the shipped artefact or the result does not transfer to it.
+    """
+    head, base, changed = head_of(clone, number)
+    return block(shape(clone, head, changed, against=base))
 
 
 def main() -> int:
@@ -91,25 +123,9 @@ def main() -> int:
         note = ""
         try:
             clone = ensure(repo, root)
-            sha = subprocess.run(
-                ["git", "-C", str(clone), "log", "--format=%H", "-1"],
-                capture_output=True,
-                text=True,
-                timeout=120,
-            ).stdout.strip()
-            changed = [
-                x
-                for x in subprocess.run(
-                    ["git", "-C", str(clone), "show", "--name-only", "--format=", sha],
-                    capture_output=True,
-                    text=True,
-                    timeout=120,
-                ).stdout.split()
-                if x.strip()
-            ]
-            note = context_for(clone, sha, changed)
-        except (CloneFailed, subprocess.TimeoutExpired) as exc:
-            print(f"  {repo}: {str(exc)[:60]}", flush=True)
+            note = context_for(clone, int(url.rstrip("/").split("/")[-1]))
+        except (CloneFailed, Unresolved, subprocess.TimeoutExpired, ValueError) as exc:
+            print(f"  {repo}: NO CONTEXT — {type(exc).__name__}: {str(exc)[:60]}", flush=True)
         contexts[key] = note
 
         for arm in ("PLAIN", "WITH_SHAPE"):
@@ -125,6 +141,19 @@ def main() -> int:
             flush=True,
         )
 
+    # **AN EMPTY CONTEXT MAKES WITH_SHAPE BYTE-IDENTICAL TO PLAIN**, so a run where every clone
+    # failed produces a perfect null and reads as a clean negative result. The count is printed
+    # and stored, and the run refuses rather than reporting a verdict it cannot support.
+    with_context = sum(1 for v in contexts.values() if v)
+    print(f"\n  context resolved for {with_context} of {len(pulls)} pull request(s)", flush=True)
+    if with_context < len(pulls) * 0.8:
+        print("  REFUSING TO SCORE: fewer than 80% of pulls carry context, so the arms are")
+        print("  mostly the same prompt and any verdict would be about the clone step, not shape.")
+        OUT.write_text(
+            json.dumps({"aborted": "insufficient context", "contexts": contexts}, indent=1)
+        )
+        return 1
+
     scored: dict[str, dict[str, int]] = {}
     for arm, cands in arms.items():
         covered = emitted = 0
@@ -139,7 +168,18 @@ def main() -> int:
         scored[arm] = {"defects_found": covered, "comments": emitted}
         print(f"\n  {arm:<12} {covered} of 173 defects, {emitted} comments", flush=True)
 
-    OUT.write_text(json.dumps({"scored": scored, "contexts": contexts, "arms": arms}, indent=1))
+    OUT.write_text(
+        json.dumps(
+            {
+                "scored": scored,
+                "with_context": with_context,
+                "of_pulls": len(pulls),
+                "contexts": contexts,
+                "arms": arms,
+            },
+            indent=1,
+        )
+    )
     a, b = scored.get("PLAIN", {}), scored.get("WITH_SHAPE", {})
     if a and b:
         d = (b["defects_found"] - a["defects_found"]) / 173 * 100

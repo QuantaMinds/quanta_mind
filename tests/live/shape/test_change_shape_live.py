@@ -150,3 +150,24 @@ def test_an_unreadable_time_raises_rather_than_defaulting_to_now() -> None:
     with pytest.raises(WindowUnreadable) as caught:
         ending_at("not-a-date", RECENT_DAYS, site="repo@deadbeef")
     assert "repo@deadbeef" in str(caught.value), "the error must carry its call site"
+
+
+def test_a_range_counts_every_commit_in_it(flask: Path, changed: list[str]) -> None:
+    """`against` makes a multi-commit change count as one, which is what a pull request is.
+
+    **THE SINGLE-COMMIT READ UNDERSTATES A BRANCH, AND NOT SUBTLY.** Measured on flask PR #5457,
+    twenty commits: 694 lines across the range against 26 from the head commit alone. A model told
+    "26 lines" about a 694-line change has been given a false fact, not a missing one.
+    """
+    base = git(flask, ["rev-parse", f"{SHA}~3"]).strip()
+    span = [x for x in git(flask, ["diff", "--name-only", f"{base}...{SHA}"]).split() if x.strip()]
+    assert len(span) >= len(changed), "the three-commit span touches fewer files than one commit"
+    one = shape(flask, SHA, changed)
+    many = shape(flask, SHA, span, against=base)
+    assert many.lines > one.lines, (
+        f"the range counted {many.lines} lines and the single commit {one.lines} -- `against` "
+        "changed nothing, so a pull request would be reported as its last commit"
+    )
+    assert one.lines == shape(flask, SHA, changed, against="").lines, (
+        "empty `against` must not move"
+    )
