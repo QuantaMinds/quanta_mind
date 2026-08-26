@@ -1,5 +1,11 @@
 # The review half — the complete record
 
+> **The corpus this rests on has a ±4-point noise floor**, measured 2026-08-26 by running the same
+> arm twice: 91 against 84 of 173 defects from nothing but model nondeterminism. Compare any effect
+> below to 4 points before believing it; large effects survive, small ones were never resolvable.
+> → `corpus-noise-floor.md`
+
+
 **Written so nothing here has to be rediscovered.** Every experiment run against the model half of
 this product, what was predicted before each ran, what came back, and where the data sits. The
 decision at the end is not a judgement call; it is what the pre-registered bars returned.

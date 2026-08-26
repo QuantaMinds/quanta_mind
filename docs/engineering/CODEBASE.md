@@ -1695,31 +1695,44 @@ repository, drops each clone before the next, and **checks free space before eve
 with the number rather than filling the disk. Model calls need no clone and run afterwards, once the
 disk is given back. Peak is the largest single repository (grafana, ~1.9 GB) instead of the sum.
 
-### The shape experiment ran, and passed — the first context lever that moved anything
+### The shape experiment is NULL, and it exposed a ±4-point noise floor under the whole corpus
 
-`research/phase0/bench/forensic/shape_context.py` was written, pre-registered with its bars in its
-own docstring, and **never run**. It has now run.
+`shape_context.py` was pre-registered with its bars in its own docstring and never run. It has now
+run three times, and each pass made the result smaller.
 
 ```
-PLAIN        81 of 173 defects, 210 comments
-WITH_SHAPE   90 of 173 defects, 206 comments
-             +5.2 points, −2% comments        -> PASS
+first judging      PLAIN 81   WITH_SHAPE 90    +9  (+5.2 points)   -> cleared both bars
+re-judge, same     PLAIN 81   WITH_SHAPE 87    +6  (+3.5 points)
+same-arm replicate PLAIN_A 91 PLAIN_B    84    ±7  (±4.0 points)   -> FROM NOTHING AT ALL
+McNemar b:c = 9:15, exact p = 0.31; per repository 2 of 5 improve, 1 worsens, 2 flat
 ```
 
-**Nine more real defects while emitting four fewer comments.** The bar was >+2.1 points — the
-judge's replicate spread — with comment volume capped at +15%. It cleared the first by two and a
-half times and moved the second the right way. Five prompt levers before it moved nothing.
+**THE EFFECT IS SMALLER THAN THE INSTRUMENT'S OWN WOBBLE, AND `PLAIN_A` SCORED 91 — BEATING THE 90
+THAT THE TREATED ARM SCORED.** A no-context run beat the treated arm inside the same experiment.
 
-→ `docs/product/reviewer/shape-context-result.md` for the bars, the caveats and what the result does
-not say. The short version of the caveats: it is recall against a gold set rather than precision,
-the judge is same-family, and the mechanism is not localised to individual findings.
+**The bar was set below the noise it existed to exclude.** `> +2.1 points` was the JUDGE's replicate
+spread, from re-scoring the same outputs. It omitted generation variance, which is roughly double:
+two identical runs disagreed by 0.76 comments per change, up to 4 on one, and a sentry change drew
+2 comments in one run and 6 in the other. Aggregate volume moved barely at all (221 vs 224), so **a
+stable total hid an unstable composition** — which is why the volume bar looked so healthy.
 
-**The instrument was wrong in seven ways before it produced this number**, and all seven are
-recorded above in the sections on `ingest/review_window.py`, `types/deep.py` and
-`working_clone.ensure()`. Every one of them destroys signal rather than creating it — a broken
-instrument makes a real effect vanish, it does not manufacture one across 49 changes and five
-repositories. That is the reason the number is believable, and the reason the fixes are documented
-at more length than the result.
+**This is a corpus finding and it travels.** Any reviewer arm scored on the 50-change golden set
+against a bar under ~4 points can be passed by noise, whatever its recorded status. The floor is
+written up once in `docs/product/reviewer/corpus-noise-floor.md`, and every result resting on that
+corpus now carries a pointer to it. **It does not touch the ranker**, which is a different corpus, a
+different method and model-free.
+
+**What survives:** comments fell 2% while the arms stayed matched change by change, so nothing was
+bought with volume — a fact about how the arm behaved, not evidence that it worked. And the seven
+instrument defects were all attenuating; that argument holds and rescues nothing, because a sound
+instrument pointed at 173 defects with ±4 points of noise still cannot resolve an effect of six.
+
+**Fixing the instrument was necessary and insufficient.** Both halves of that sentence are load
+bearing.
+
+**This licenses nothing to ship. It does not license publishing model findings, which stays gated on
+a different-family judge that has never run.** Those two sentences belong together and should not be
+separated.
 
 **Phase one is resumable, and that is not a convenience.** `--resolve <repo>` gathers one
 repository's contexts and banks them to `results/shape_contexts.json`. grafana failed three times,

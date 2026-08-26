@@ -1,5 +1,11 @@
 # Why the correct-rate is 5.8% — the forensics nobody had run
 
+> **The corpus this rests on has a ±4-point noise floor**, measured 2026-08-26 by running the same
+> arm twice: 91 against 84 of 173 defects from nothing but model nondeterminism. Compare any effect
+> below to 4 points before believing it; large effects survive, small ones were never resolvable.
+> → `corpus-noise-floor.md`
+
+
 **Every investigation in this project has been on the 135 wrong findings. This one is on the 12
 correct ones, because the correct-rate is the number that closed Half B.**
 

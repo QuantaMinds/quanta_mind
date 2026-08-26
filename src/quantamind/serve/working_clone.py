@@ -61,6 +61,38 @@ def path_for(repo: str, root: Path) -> Path:
     return root / parts[0] / parts[1]
 
 
+def _present(where: Path, pull_refs: Sequence[int], timeout_s: int) -> list[int]:
+    """The subset of `pull_refs` the remote actually has.
+
+    **AN EXPLICIT REFSPEC IS STRICT AND A WILDCARD IS NOT.** A pull head that does not exist fails
+    the WHOLE fetch -- `fatal: couldn't find remote ref`, exit 128 -- where the wildcard matched
+    whatever was there. So this asks first, in one `ls-remote` that moves no objects.
+    """
+    if not pull_refs:
+        return []
+    done = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(where),
+            "ls-remote",
+            "origin",
+            *(f"refs/pull/{n}/head" for n in pull_refs),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=timeout_s,
+    )
+    if done.returncode != 0:
+        return list(pull_refs)  # let the fetch report the real failure rather than guessing here
+    have = {
+        line.split("refs/pull/")[1].split("/")[0]
+        for line in done.stdout.splitlines()
+        if "refs/pull/" in line
+    }
+    return [n for n in pull_refs if str(n) in have]
+
+
 def _pull_refspecs(pull_refs: Sequence[int] | None) -> list[str]:
     """Refspecs for the pull heads asked for. None means every one, which is the old behaviour."""
     if pull_refs is None:
@@ -87,11 +119,10 @@ def ensure(
     **A LONGER CEILING IS NOT FREE.** `review_delivery` blocks on this, so the default bounds how
     long a webhook can sit on one delivery.
 
-    **`pull_refs` NARROWS THE FETCH TO THE PULL REQUESTS THE CALLER WANTS, AND THE WILDCARD IS NOT
-    A ROUNDING ERROR.** grafana carries **83,202** pull-head refs and discourse 42,495; a review
-    needs ONE. Fetching all of them timed out at 900s, then ran 25 minutes and exited 1 at 2700s.
-    `None` keeps the wildcard, so nothing changes for a caller that does not ask; an empty
-    sequence fetches branches only.
+    **`pull_refs` NARROWS THE FETCH, AND THE WILDCARD IS NOT A ROUNDING ERROR.** grafana carries
+    **83,202** pull-head refs and home-assistant/core 105,913; a review needs ONE. Fetching all of
+    them timed out at 900s, then ran 25 minutes and exited 1 at 2700s. `None` keeps the wildcard so
+    nothing changes for a caller that does not ask; an empty sequence fetches branches only.
 
     Fetches `+refs/pull/*/head` as well as the branches, because the head of a pull request opened
     from a fork is on no branch of the upstream repository and a plain fetch will not have it.
@@ -114,7 +145,9 @@ def ensure(
                 "--prune",
                 "origin",
                 "+refs/heads/*:refs/remotes/origin/*",
-                *_pull_refspecs(pull_refs),
+                *_pull_refspecs(
+                    None if pull_refs is None else _present(where, pull_refs, fetch_timeout_s)
+                ),
             ],
             capture_output=True,
             text=True,
