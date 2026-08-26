@@ -1656,3 +1656,41 @@ is not in `infer/`. What pushed the split was `serve/deep_review.py` crossing th
 
 → `tests/unit/layers/serve/test_deep_counts.py`, which asserts the arithmetic AND the text. The
 counts being right on a record that never reaches the operator is the same failure as a wrong count.
+
+### `working_clone.ensure()` could not clone a repository with a `pr/` branch
+
+Pull heads were fetched into `refs/remotes/origin/pr/*`. That is the same destination git computes
+for a branch named `pr/1`, and git refuses the **entire** fetch rather than the one ref:
+
+```
+fatal: Cannot fetch both refs/heads/pr/1 and refs/pull/1/head to refs/remotes/origin/pr/1
+```
+
+`ensure()` turns a non-zero fetch into `CloneFailed` and never falls back to a stale clone — which
+is correct, and which means such a repository could not be reviewed **at all**. Not degraded: no
+clone, so no history, so no ranking. Pull heads now land in `refs/remotes/pull/*`, a namespace no
+branch name can reach.
+
+**It was found by running something, not by reading anything.** The first live run of the shape
+harness hit it on discourse/discourse, which has such a branch. Six guards, a strict type check and
+a live suite had all passed over it, because nothing had ever asked this code to clone that
+repository.
+
+**And it left 997 MB behind on a machine with 2 GB free.** The harness bound its cleanup path to
+`ensure()`'s return value, so a raised `CloneFailed` left the variable unset and the `finally`
+cleaned up nothing. The path is now computed with `path_for()` before the clone is attempted. **A
+cleanup that only runs on the success path is not a cleanup** — the same lesson as `sweep()`
+returning its count, relearned in the failure branch this time.
+
+→ `tests/unit/layers/serve/test_clone_refspec.py` builds a local repository carrying both refs and
+pins the collision, with a negative control requiring the OLD refspec to still fail. It guards git's
+behaviour, not the call site: `ensure()` builds a `github.com` URL and cannot be pointed at a local
+path, and the test says so rather than implying coverage it does not have.
+
+### The shape harness holds one clone at a time
+
+`ensure()` was called per pull request against a root swept once at the start, so every repository
+the run touched stayed resident — about 4.5 GB for this corpus. It now groups the pulls by
+repository, drops each clone before the next, and **checks free space before every clone**, aborting
+with the number rather than filling the disk. Model calls need no clone and run afterwards, once the
+disk is given back. Peak is the largest single repository (grafana, ~1.9 GB) instead of the sum.

@@ -65,6 +65,13 @@ def ensure(repo: str, root: Path) -> Path:
 
     Fetches `+refs/pull/*/head` as well as the branches, because the head of a pull request opened
     from a fork is on no branch of the upstream repository and a plain fetch will not have it.
+
+    **PULL HEADS LAND IN `refs/remotes/pull/*`, NOT UNDER `refs/remotes/origin/`.** They used to
+    map to `refs/remotes/origin/pr/*`, which collides with any branch actually named `pr/<x>`:
+    git refuses the whole fetch with `fatal: Cannot fetch both refs/heads/pr/1 and
+    refs/pull/1/head to refs/remotes/origin/pr/1`. It is not hypothetical -- discourse/discourse
+    has such a branch, and `ensure()` raised `CloneFailed` on it every time. A separate namespace
+    cannot collide with a branch whatever the customer names it.
     """
     where = path_for(repo, root)
     if (where / ".git").is_dir():
@@ -77,7 +84,7 @@ def ensure(repo: str, root: Path) -> Path:
                 "--prune",
                 "origin",
                 "+refs/heads/*:refs/remotes/origin/*",
-                "+refs/pull/*/head:refs/remotes/origin/pr/*",
+                "+refs/pull/*/head:refs/remotes/pull/*",
             ],
             capture_output=True,
             text=True,

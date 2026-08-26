@@ -34,7 +34,6 @@ from __future__ import annotations
 
 import json
 import pathlib
-import subprocess
 import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -47,87 +46,36 @@ import judge  # noqa: E402
 import martian_corpus as mc  # noqa: E402
 from borrowed_clones import root as clone_root  # noqa: E402
 from client import Client  # noqa: E402
-from quantamind.ingest.change_shape import shape  # noqa: E402
-from quantamind.render.shape_line import block  # noqa: E402
-from quantamind.serve.working_clone import CloneFailed, ensure  # noqa: E402
+from shape.pulls import OutOfDisk, gather  # noqa: E402
 
 OUT = HERE.parent / "results" / "shape_context.json"
-GIT_TIMEOUT_S = 300
-
-
-class Unresolved(RuntimeError):
-    """A pull request's head could not be placed in the clone. Counted, never silently skipped."""
-
-
-def _git(clone: pathlib.Path, args: list[str]) -> str:
-    done = subprocess.run(
-        ["git", "-C", str(clone), *args], capture_output=True, text=True, timeout=GIT_TIMEOUT_S
-    )
-    return done.stdout.strip() if done.returncode == 0 else ""
-
-
-def head_of(clone: pathlib.Path, number: int) -> tuple[str, str, list[str]]:
-    """(head sha, base sha, changed paths) for pull request `number`, resolved in `clone`.
-
-    **THE PULL REQUEST, NOT THE CLONE'S HEAD.** The first version of this file read
-    `git log -1` -- the tip of the default branch -- and handed the model the shape of whatever
-    had merged most recently while asking it to review a completely unrelated diff. Both arms
-    would have received noise, WITH_SHAPE would have scored like PLAIN, and the run would have
-    been recorded as "shape does not help" with the instrument never having pointed at the change.
-    `working_clone.ensure()` fetches `+refs/pull/*/head:refs/remotes/origin/pr/*`, so the head is
-    already on disk under `origin/pr/<number>`; nothing new is fetched here.
-    """
-    head = _git(clone, ["rev-parse", f"origin/pr/{number}"])
-    if not head:
-        raise Unresolved(f"origin/pr/{number} is not in the clone")
-    base = _git(clone, ["merge-base", "origin/HEAD", head]) or _git(
-        clone, ["rev-parse", f"{head}^"]
-    )
-    if not base:
-        raise Unresolved(f"no merge-base for origin/pr/{number}")
-    changed = [x for x in _git(clone, ["diff", "--name-only", f"{base}...{head}"]).split() if x]
-    if not changed:
-        raise Unresolved(f"origin/pr/{number} changed no files against its base")
-    return head, base, changed
-
-
-def context_for(clone: pathlib.Path, number: int) -> str:
-    """The shape block the product would send, byte for byte.
-
-    **IT CALLS `render/shape_line.block()` RATHER THAN REBUILDING THE SENTENCE.** This file used
-    to compose its own prose, so a PASS here would have licensed a string the product does not
-    send. The arm has to be the shipped artefact or the result does not transfer to it.
-    """
-    head, base, changed = head_of(clone, number)
-    return block(shape(clone, head, changed, against=base))
 
 
 def main() -> int:
     mc._assert_intact()
     client = Client("gemini-2.5-pro")
     pulls = [p for p in mc.pulls() if p.get("golden")]
-    # **THE SHARED ROOT, NOT A FRESH ONE PER RUN.** A new mkdtemp every time is what put
-    # 11 GB of duplicate clones on the disk; this reuses them and bounds the total.
     root = clone_root()
     arms: dict[str, dict[str, list[str]]] = {"PLAIN": {}, "WITH_SHAPE": {}}
-    contexts: dict[str, str] = {}
+
+    # **PHASE ONE TOUCHES THE DISK, PHASE TWO TOUCHES THE MODEL.** Contexts are gathered first,
+    # one clone resident at a time, and every clone is given back before any model call is made.
+    try:
+        contexts = gather(pulls, root)
+    except OutOfDisk as exc:
+        print(f"\n  ABORTING: {exc}")
+        print("  Free space or set QUANTAMIND_BENCH_CLONES to a volume with room.")
+        OUT.write_text(json.dumps({"aborted": "insufficient disk", "why": str(exc)}, indent=1))
+        return 1
 
     for pull in pulls:
         key = str(pull["key"])
         url = str(pull["original"])
-        repo = "/".join(url.split("/")[3:5])
         try:
             diff = mc.diff(url)
         except mc.FetchFailed:
             continue
-        note = ""
-        try:
-            clone = ensure(repo, root)
-            note = context_for(clone, int(url.rstrip("/").split("/")[-1]))
-        except (CloneFailed, Unresolved, subprocess.TimeoutExpired, ValueError) as exc:
-            print(f"  {repo}: NO CONTEXT — {type(exc).__name__}: {str(exc)[:60]}", flush=True)
-        contexts[key] = note
-
+        note = contexts.get(key, "")
         for arm in ("PLAIN", "WITH_SHAPE"):
             body = diff if arm == "PLAIN" or not note else f"{note}\n\n{diff}"
             try:
