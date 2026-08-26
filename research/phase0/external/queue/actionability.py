@@ -38,10 +38,14 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
+import pathlib as _p
+import sys as _s
+
+_s.path.insert(0, str(_p.Path(__file__).resolve().parents[1]))
 from commit_stream import ReadFailed, stream
 from git_reads import shas_matching, touched_lines
 
-OUT = pathlib.Path(__file__).resolve().parent / "results" / "actionability.json"
+OUT = pathlib.Path(__file__).resolve().parents[1] / "results" / "actionability.json"
 CLONES = pathlib.Path("/Users/dhanu/.claude/jobs/4cdada9b/tmp/churn-clones")
 YEAR, WINDOW = 365 * 86400, 90 * 86400
 FIXWORDS = ("fix", "bug", "revert", "hotfix", "regression", "broken")
