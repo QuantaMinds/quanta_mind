@@ -1539,3 +1539,24 @@ only lets the model *read* workflows — where its discrimination is **−8.3%**
 SHA claims at chance and then pay an API call each to delete them. **It manufactures the exposure
 the oracle exists to cover.**
 → `docs/product/reviewer/closed/widening-scope-manufactures-the-problem.md`
+
+### `sweep()` is called now — it never was
+
+`working_clone.sweep()` was written with a docstring explaining why it returns the count it removed
+instead of claiming a cleanup happened, and **was then never called from anywhere.** Eleven
+gigabytes of clones accumulated in one working session and filled a 228 GB disk.
+
+**The leak was not a missing cleanup — it was a new root every run.** Each harness called
+`tempfile.mkdtemp()`; `attention.py`, `firing_by_size.py` and `shape_context.py` each re-cloned the
+same six repositories into a fresh directory and abandoned it. `sweep()` bounds *one* root and
+could not have helped.
+
+- **product** — `review_delivery.deliver()` sweeps after `ensure()`, which is safe because `sweep`
+  keeps the most recently modified and this delivery's clone is the newest.
+- **harnesses** — `bench/forensic/borrowed_clones.py` gives one shared root under
+  `~/.cache/quantamind-bench-clones`. Clones are reused rather than duplicated, which also removes
+  the repeated re-cloning that cost this session real wall-clock.
+
+**The bound is `keep + 1`, not `keep`** — `root()` sweeps and then the caller adds one. Measured
+1, 2, 3, 4, 4, 4 across six borrows at keep=3, and the docstring says so because the first version
+claimed the wrong invariant.

@@ -41,7 +41,7 @@ from quantamind.ingest.github_comments import post
 from quantamind.render.pin_block import block
 from quantamind.serve import pin_check
 from quantamind.serve.run_review import review as run_ranking
-from quantamind.serve.working_clone import ensure
+from quantamind.serve.working_clone import ensure, sweep
 from quantamind.types.settings import Settings
 
 
@@ -80,6 +80,17 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     parser: the join has no business knowing what shape GitHub's payload arrives in.
     """
     clone = ensure(delivery_repo, Path(settings.clone_root))
+    # **BOUND THE ROOT ON EVERY DELIVERY, AND PRINT THE COUNT RATHER THAN ASSUME IT.** `sweep()`
+    # was written with a docstring explaining why it returns a number instead of claiming a
+    # cleanup happened -- and was then never called from anywhere, for the whole of its existence.
+    # Eleven gigabytes of clones accumulated in a single working session and filled the disk.
+    #
+    # It runs AFTER `ensure()` deliberately: `sweep` keeps the most recently modified clones and
+    # the one just fetched is the newest, so this delivery's own clone cannot be what it deletes.
+    swept = sweep(Path(settings.clone_root))
+    if swept:
+        print(f"[deliver] removed {swept} stale clone(s)", flush=True)
+
     changed = changed_files(delivery_repo, number)
     if not changed:
         return Delivered(Outcome.NO_FILES, (), (), None)
