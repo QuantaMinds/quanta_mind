@@ -1560,3 +1560,50 @@ could not have helped.
 **The bound is `keep + 1`, not `keep`** — `root()` sweeps and then the caller adds one. Measured
 1, 2, 3, 4, 4, 4 across six borrows at keep=3, and the docstring says so because the first version
 claimed the wrong invariant.
+
+### `ingest/review_window.py` + `render/shape_line.py` — the shape reaches the model, in a window that ends at the change
+
+`ingest/change_shape.py` measured the facts a reviewer wants before reading anything — files and
+lines against the repository's median, how many other people have been in these files, how often
+they change, when it landed. **It was consumed by nothing.** Its docstring named
+`render/shape_line.py` as its consumer and that file did not exist, so a finished measurement sat
+dead in the tree with a promise in its header as the only evidence it was meant to be used.
+
+**It was also wrong in three ways, all the same way: it read a window that ends now.**
+
+| defect | what it did | measured |
+|---|---|---|
+| wall-clock window | `--since=30.days.ago`, relative to the run | django `2936a0a9` reported churn 6 where **3 of the 6 landed after the change**; flask `c17f3793` reported churn 0 against a true 2 on a clone whose history ended six months before the run |
+| the change counted itself | `--until` is inclusive | every figure was one too high |
+| `git log` walks from HEAD | no revision given | flask `c17f3793`: **7 commits from `main`, 3 from the change**, and the first number moves as HEAD moves |
+
+The empty-window case is the dangerous one. A stale clone returns **0 people, 0 changes** for every
+file — which reads as a quiet, untouched file and is the exact opposite of what a silent instrument
+means. → `docs/CORRECTIONS.md`, the clean-zero rule.
+
+**`review_window.py` exists because bounding time and counting files are two concerns**, and
+because bounding time is the half that was wrong. `ending_at(stamp, days, site)` is a pure function
+over a timestamp, so it can be given a known answer; the same logic inlined beside four git calls
+could not. **It raises rather than falling back to wall-clock** — the fallback is the original
+defect, and a default that reintroduces it is worse than an error.
+
+**`render/shape_line.py` is the promised consumer, finally written.** `block()` renders the shape
+for `serve/deep_review.py`, which passes it to `infer/gemini.read(..., context=...)`. The string is
+built in `render/` and never in `infer/`: rule 7 puts `render/` to the right, so the model layer
+cannot reach for it and is handed it instead. **Empty context is supported and leaves the prompt
+byte-identical to what it was before any of this was measured.**
+
+**The model reads only the ranked files but is told the shape of the whole change.** Different
+scopes on purpose — inference goes where the ranker pointed, but "6 files where your median is 2"
+is a fact about the change and would be false counted over the three files we funded.
+
+**The block tells the model the shape is not a defect.** A model shown "23 files against a median
+of 2" with no instruction reports the size as the finding, which the prompt already forbids.
+Verified live on flask `c17f3793`: the model returned the same finding it returned without the
+context and did not comment on the change's size.
+
+→ `tests/live/shape/test_change_shape_live.py`, which names the answer (churn 2, hands 0),
+recomputes the window from git, and carries **two negative controls** — one requiring the
+wall-clock window to disagree, one requiring HEAD-walking to admit commits the change never saw.
+Without them the assertions pass on any clone where the two windows happen to agree. Sabotaging the
+whole defect back in turns 3 of the 6 red.

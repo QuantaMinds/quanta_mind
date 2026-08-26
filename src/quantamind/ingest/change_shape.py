@@ -19,18 +19,20 @@ WHY:  **EVERY ONE OF THESE IS A FACT ABOUT HISTORY, NOT A JUDGEMENT ABOUT THE CO
       **WHAT THIS DOES NOT DO IS PREDICT.** It describes. Whether any of these facts predicts that a
       change will need repair is a separate question with its own measurement, and until that is
       run these are context for a human rather than a signal.
-IMPORTS: stdlib only. Left of rank.
-CONSUMED BY: `render/shape_line.py`.
+IMPORTS: stdlib, and `ingest.review_window` for the bound every backward-looking read carries.
+      Same layer, public surface only. Left of rank.
+CONSUMED BY: `render/shape_line.py`, which renders it for the model.
 """
 
 from __future__ import annotations
 
 import collections
-import datetime as dt
 import statistics
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
+
+from quantamind.ingest.review_window import ending_at
 
 GIT_TIMEOUT_S = 120
 RECENT_DAYS = 30
@@ -65,9 +67,13 @@ def _run(clone: Path, args: list[str]) -> str:
     return done.stdout if done.returncode == 0 else ""
 
 
-def _norms(clone: Path) -> tuple[int, int]:
-    """(median files, median lines) over the repository's recent changes."""
-    text = _run(clone, ["log", f"-{SAMPLE}", "--no-merges", "--format=%x00", "--numstat"])
+def _norms(clone: Path, sha: str) -> tuple[int, int]:
+    """(median files, median lines) over the SAMPLE changes preceding `sha`.
+
+    **WALKS BACK FROM THE CHANGE, NOT FROM HEAD**, which would draw the repository's "normal" from
+    work not yet written when the change landed.
+    """
+    text = _run(clone, ["log", f"-{SAMPLE}", "--no-merges", "--format=%x00", "--numstat", sha])
     files: list[int] = []
     lines: list[int] = []
     for chunk in text.split("\x00"):
@@ -96,45 +102,59 @@ def shape(clone: Path, sha: str, changed: list[str]) -> Shape:
         for x in row.split("\t")[:2]
         if x.isdigit()
     )
-    median_files, median_lines = _norms(clone)
+    median_files, median_lines = _norms(clone, sha)
 
-    since = f"--since={RECENT_DAYS}.days.ago"
-    author = _run(clone, ["show", "-s", "--format=%ae", sha]).strip()
+    # **EVERY WINDOW BELOW ENDS AT THE CHANGE**, the bound `serve/run_review.py` calls the whole
+    # correctness argument: at review time the future does not exist.
+    # → `tests/live/shape/test_change_shape_live.py`, which holds both numbers this was wrong by.
+    stamp = _run(clone, ["show", "-s", "--format=%cI", sha]).strip()
+    bound = ending_at(stamp, RECENT_DAYS, site=f"{clone}@{sha[:12]}")
+    window = list(bound.args)
+
+    # `--until` is inclusive, so the change is inside its own window and is dropped by identity:
+    # a change counted among its own recent churn is evidence about itself.
+    identity = _run(clone, ["show", "-s", "--format=%H %ae", sha]).strip()
+    head_sha, _, author = identity.partition(" ")
     others: collections.Counter[str] = collections.Counter()
     churn = 0
     if changed:
         log = _run(
             clone,
-            ["log", since, "--no-merges", "--format=%x00%ae", "--name-only", "--", *changed[:40]],
+            # **`sha`, NOT HEAD.** `git log` walks from HEAD by default, which admits commits on
+            # branches that were not in this change's history when it landed -- their committer
+            # dates fall inside the window, so the date bound does not exclude them. Measured on
+            # flask c17f3793: 7 commits walking from main, 3 walking from the change, and the
+            # first number moves as HEAD moves while the second is fixed forever.
+            [
+                "log",
+                *window,
+                "--no-merges",
+                "--format=%x00%H %ae",
+                "--name-only",
+                sha,
+                "--",
+                *changed[:40],
+            ],
         )
         for chunk in log.split("\x00"):
             head, _, _body = chunk.partition("\n")
-            if not head.strip():
+            commit, _, who = head.strip().partition(" ")
+            if not commit or commit == head_sha:
                 continue
             churn += 1
-            if head.strip() != author:
-                others[head.strip()] += 1
+            if who != author:
+                others[who] += 1
 
     # **CHURN AND HANDS ARE READ AS SHARES OF THE REPOSITORY'S OWN ACTIVITY, NOT AS COUNTS.**
     # The first version flagged "these files changed 25 times in 30 days" as unusual on three of
     # four consecutive werkzeug commits — because 25 is a large number and werkzeug is a busy
     # repository. That is an absolute threshold, which this module's own docstring warns against
     # two paragraphs above: the firing gate learned it the expensive way at 198 of 200.
-    all_recent = _run(clone, ["log", since, "--no-merges", "--format=%ae"]).splitlines()
+    all_recent = _run(clone, ["log", *window, "--no-merges", "--format=%ae", sha]).splitlines()
     repo_commits = len(all_recent)
     repo_hands = len({x.strip() for x in all_recent if x.strip()})
 
-    stamp = _run(clone, ["show", "-s", "--format=%cI", sha]).strip()
-    when = ""
-    if stamp:
-        # **`fromisoformat` REJECTS THE `Z` SUFFIX BEFORE PYTHON 3.11**, and git's `%cI` emits it
-        # for UTC commits. It raised on a real repository the first time this ran on live data —
-        # not in any unit test, because the fixtures all carried numeric offsets.
-        try:
-            moment = dt.datetime.fromisoformat(stamp.replace("Z", "+00:00"))
-        except ValueError:
-            moment = None
-        when = f"{moment:%A} {moment:%H:%M}" if moment else ""
+    when = f"{bound.moment:%A} {bound.moment:%H:%M}"
 
     odd: list[str] = []
     if median_files and len(changed) >= 3 * median_files:

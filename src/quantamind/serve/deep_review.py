@@ -31,6 +31,9 @@ from typing import TYPE_CHECKING
 
 from quantamind.infer import gemini
 from quantamind.infer.gemini import InferenceFailed, Unavailable
+from quantamind.ingest.change_shape import shape
+from quantamind.ingest.review_window import WindowUnreadable
+from quantamind.render.shape_line import block
 from quantamind.serve.settle import settle
 from quantamind.types.finding import Finding
 from quantamind.verify import publishable
@@ -83,12 +86,35 @@ def diff_for(clone: Path, sha: str, paths: list[str]) -> str:
     return done.stdout
 
 
-def deep(clone: Path, sha: str, ranked: list[str], *, project: str) -> Deep:
-    """Read `ranked` with the model, keep only findings a parser can place in the diff."""
+def context_for(clone: Path, sha: str, changed: list[str]) -> str:
+    """The change's shape as prompt text. Empty when git could not settle the commit's own time.
+
+    **A SHAPE THAT CANNOT BE MEASURED YIELDS NO CONTEXT, NEVER A GUESSED ONE.** `change_shape`
+    raises rather than falling back to a wall-clock window, and the honest response to that here
+    is the empty string -- the prompt the model saw before any of this was measured.
+    """
+    try:
+        return block(shape(clone, sha, changed))
+    except WindowUnreadable:
+        return ""
+
+
+def deep(
+    clone: Path, sha: str, ranked: list[str], *, project: str, changed: list[str] | None = None
+) -> Deep:
+    """Read `ranked` with the model, keep only findings a parser can place in the diff.
+
+    **THE MODEL READS ONLY `ranked`, BUT IS TOLD THE SHAPE OF THE WHOLE CHANGE.** Those are
+    different scopes on purpose: the thesis is that inference goes only where the ranker pointed,
+    while "6 files where your median is 2" is a fact about the change and would be false if
+    counted over the three files we happened to fund.
+    """
     text = diff_for(clone, sha, ranked)
     if not text.strip():
         return Deep((), 0, 0, 0, 0, tuple(ranked))
-    found = gemini.read(text, ranked, project=project)
+    found = gemini.read(
+        text, ranked, project=project, context=context_for(clone, sha, changed or ranked)
+    )
     located = [f for f in (locate(x, text) for x in found) if f is not None]
 
     # **ANCHOR, THEN ORACLE, THEN THE MODEL'S OWN SECOND LOOK.** Ordered by cost: anchoring is
@@ -128,8 +154,11 @@ def deep(clone: Path, sha: str, ranked: list[str], *, project: str) -> Deep:
 def report(clone: Path, sha: str, out: Reviewed, project: str) -> None:
     """The reviewer pass, printed with its discards. Never raises into the ranking's result."""
     ranked = [u.unit.site.path for u in out.ranking.units if u.allocation.value != "cold"]
+    # `considered` are the paths we scored and `skipped` the ones in a language we do not read.
+    # Together they are the whole change, which is the population the shape figures describe.
+    changed = list(out.considered) + list(out.skipped)
     try:
-        result = deep(clone, sha, ranked, project=project)
+        result = deep(clone, sha, ranked, project=project, changed=changed)
     except (Unavailable, InferenceFailed) as exc:
         # The ranking already printed and is not retracted by an inference failure.
         print(f"\n[deep] NOT RUN: {type(exc).__name__}: {exc}")
