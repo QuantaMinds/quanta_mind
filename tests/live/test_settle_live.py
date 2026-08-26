@@ -78,4 +78,7 @@ def test_a_semantic_claim_asks_nothing_and_survives() -> None:
         out = settle(finding, project=PROJECT, today=TODAY)
     except (InferenceFailed, Unavailable) as exc:
         pytest.skip(f"model unavailable: {exc}")
-    assert out.publishes, "withdrew a claim no authority could speak to"
+    assert out.publishes is True, "withdrew a claim no authority could speak to"
+    assert out.asked == "", f"asked an external question about pure control flow: {out.asked!r}"
+    assert out.fact == "", f"produced a fact where no authority exists: {out.fact!r}"
+    assert out.why == "rests on the code shown"
