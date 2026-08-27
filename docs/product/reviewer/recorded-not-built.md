@@ -1,5 +1,11 @@
 # Fixes recorded rather than built
 
+> **The corpus under all of this has a ±4-point noise floor, measured 2026-08-27.** Two runs of the
+> same arm, no change between them, scored 91 and 84 of 173 defects. Before revisiting any road
+> below, compare its effect to 4 points. → `corpus-noise-floor.md`
+
+
+
 Four measured improvements to the reviewer half, each with an effect size, each not built. They
 share one reason and it is not cost: **the reviewer half is closed.** Half B failed on 0 of 45 —
 the parser can refute none of the wrong findings — and the optimistic case still misses the field
@@ -111,3 +117,45 @@ ceiling misses the field floor by 37 points. A fix that improves the ratio witho
 finding leaves both of those exactly where they were.
 
 This is the fifth measurement since the closure that confirms it rather than challenges it.
+
+
+## What the noise floor does and does not change here
+
+**Measured 2026-08-27: two runs of the same arm, differing only in model nondeterminism, scored 91
+and 84 of 173 defects — a 4.0-point gap from nothing.** → `corpus-noise-floor.md`. Applied to this
+register, honestly, in both directions.
+
+**It does NOT reopen the five prompt levers, and the numbers say so plainly.** Those arms did not
+fail to move; they moved hard the wrong way. `A1_ABSTAIN` took true positives per pull request from
+2.16 to **0.61 — a 72% collapse** — and `A2_AIM` to 1.76. A floor of four points on a
+173-defect denominator does not touch a −72% move on a different metric. **REFUTED stays REFUTED.**
+
+**It DOES put a caveat on deduplication, the largest deferred fix.** `+4.0 points golden-level
+precision` sits exactly on the floor. Two things keep it from being dismissed and neither makes it
+safe:
+
+- **The metric is not the same one the floor was measured on** — golden-level precision, not
+  defects found of 173 — so the floor does not transfer arithmetically.
+- **Redundancy is a structural count within a single run** (17 of 98 comments restate a sibling),
+  not a two-arm comparison, so it is not exposed to between-arm variance in the same way.
+
+**But the run it was counted on is one sample, and comment composition is now known to be
+unstable**: two identical runs disagreed by 0.76 comments per change, up to 4 on one change, while
+totals barely moved. **A duplicate count drawn from one run inherits that.** The +4.0 should be
+re-derived across two runs before anything is built on it. That is a cheap check — the arms are
+already stored — and it is not the same as doubting the mechanism, which is model-free and sound.
+
+## Shape context — MEASURED, and it did not clear the floor
+
+| road | state | why |
+|---|---|---|
+| **shape context in the prompt** | **NULL** | +9 defects on first judging, +6 on re-judging the same comments, against a **±4.0-point floor**; McNemar 9:15, p = 0.31; 2 of 5 repositories improve, 1 worsens |
+
+**It belongs in a different row from the five prompt levers.** They were refuted by moving the
+wrong way. This one was never resolvable on this corpus — the effect and the noise are the same
+size. `PLAIN_A` scored 91, beating the 90 the treated arm scored in the run that produced the
+headline.
+
+**The mechanism is untouched.** The shape block states facts a diff cannot supply, and it is
+wired, tested and free. What failed is the attempt to show it helps, on an instrument that cannot
+resolve a six-defect effect. → `shape-context-result.md`.
