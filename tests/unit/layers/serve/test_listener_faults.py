@@ -33,7 +33,7 @@ import pytest
 from test_listener import PAYLOAD, SECRET, _headers, _post, _Server, _Settings
 from test_listener import server as server
 
-from quantamind.serve import listener
+from quantamind.serve.http import bind
 from quantamind.serve.webhook_github import MisconfiguredSecret, sign, verify
 
 
@@ -57,7 +57,7 @@ def test_a_fault_inside_the_handler_answers_500_rather_than_dropping_the_socket(
     import threading
 
     # A DIRECTORY where the store should be: what a deploy pointed at the wrong path produces.
-    built = listener.build(_Settings(str(tmp_path)), SECRET, lambda _r: None, port=0)
+    built = bind.build(_Settings(str(tmp_path)), SECRET, lambda _r: None, port=0)
     thread = threading.Thread(target=built.serve_forever, daemon=True)
     thread.start()
     try:
@@ -82,6 +82,6 @@ def test_build_refuses_every_secret_verify_would_raise_on(secret: str, tmp_path:
         # `verify()` raises on an empty secret; `.strip()` is what makes whitespace one too.
         verify(secret.strip(), b"{}", sign("k", b"{}"))
     with pytest.raises(MisconfiguredSecret) as refused:
-        listener.build(_Settings(str(tmp_path / "s.db")), secret, lambda _r: None, port=0)
+        bind.build(_Settings(str(tmp_path / "s.db")), secret, lambda _r: None, port=0)
 
     assert "open command channel" in str(refused.value)

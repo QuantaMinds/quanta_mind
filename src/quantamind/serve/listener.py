@@ -34,7 +34,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Callable
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 from typing import Any
 
@@ -44,7 +44,6 @@ from quantamind.serve.webhook_github import (
     EVENT_HEADER,
     SIGNATURE_HEADER,
     Ignore,
-    MisconfiguredSecret,
     Review,
     interpret,
     verify,
@@ -172,28 +171,3 @@ class _Handler(BaseHTTPRequestHandler):
             deliveries.complete(conn, delivery_id)
         finally:
             conn.close()
-
-
-def build(settings: Any, secret: str, work: Work, port: int = 7331) -> ThreadingHTTPServer:
-    """A server ready for `serve_forever()`. Binds immediately, so a port clash fails here.
-
-    `work` is injected rather than imported: the socket layer can then be exercised without running
-    a ranking, and it never reaches rightward into a pipeline it has no business knowing about.
-    """
-    if not secret.strip():
-        raise MisconfiguredSecret(
-            "no webhook secret: refusing to bind. An endpoint that verifies nothing is an open "
-            "command channel, and it would pass every test that supplies a secret."
-        )
-    # **`staticmethod`, and it is not decoration.** A plain function stored as a class attribute is
-    # a descriptor: Python binds it and `self.work(review)` arrives as `work(self, review)`. The
-    # first version of this failed exactly that way against `serve/cli.py`, while the unit tests
-    # passed -- because they injected `list.append`, a BUILTIN bound method, which is not a
-    # descriptor and so was never re-bound. **The test agreed for a reason unrelated to the
-    # property**, and only a plain-function caller could tell.
-    bound = type(
-        "_Bound",
-        (_Handler,),
-        {"settings": settings, "secret": secret, "work": staticmethod(work)},
-    )
-    return ThreadingHTTPServer(("127.0.0.1", port), bound)

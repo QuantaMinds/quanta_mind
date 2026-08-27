@@ -35,14 +35,10 @@ CONSUMED BY: serve, once a webhook exists.
 from __future__ import annotations
 
 import json
-import urllib.error
-import urllib.request
 from collections.abc import Sequence
-from pathlib import Path
 from typing import Any
 
-from quantamind.ingest import app_auth
-from quantamind.types.settings import load
+from quantamind.ingest import github_api
 
 API_TIMEOUT_S = 30
 PER_PAGE = 100
@@ -81,56 +77,17 @@ def already_posted(comments: Sequence[dict[str, Any]], head_sha: str) -> bool:
     return any(key in str(comment.get("body") or "") for comment in comments)
 
 
-def _token(repo: str, number: int) -> str:
-    """An installation token for `repo`, from configuration.
-
-    **CONFIGURATION IS READ HERE RATHER THAN PASSED DOWN**, matching the webhook secret in
-    `serve/run_endpoint.py`: the App id and key path are process-wide facts, and threading them
-    through `render` and `serve` to reach one HTTP call would put a credential path in four
-    signatures that have no use for it.
-    """
-    settings = load()
-    if not (settings.app_id and settings.app_key_path):
-        raise CommentFailed(
-            repo,
-            number,
-            "no GitHub App configured; set QUANTAMIND_APP_ID and QUANTAMIND_APP_KEY_PATH. "
-            "Commenting without one would post as whoever authenticated the `gh` CLI",
-        )
-    try:
-        return app_auth.token(repo, settings.app_id, Path(settings.app_key_path))
-    except app_auth.AuthFailed as exc:
-        raise CommentFailed(repo, number, f"could not mint an installation token: {exc}") from None
-
-
 def _gh(repo: str, number: int, path: str, method: str = "GET", body: str | None = None) -> Any:
     """One GitHub API call, authenticated **as the App installation**.
 
     **THIS USED TO SHELL OUT TO `gh api`, WHICH COMMENTS AS A PERSON.** Whoever ran `gh auth login`
-    owned every comment, every rate limit and every audit-log entry -- a developer tool wearing a
-    product's shape. An installation token is scoped to the repositories the App was installed on,
-    expires in an hour, and carries only the permissions the App declared.
+    owned every comment, every rate limit and every audit-log entry. An installation token is
+    scoped to the repositories the App was installed on and expires in an hour.
     """
-    request = urllib.request.Request(
-        f"https://api.github.com/{path}",
-        data=None if body is None else body.encode(),
-        method=method,
-        headers={
-            "Authorization": f"Bearer {_token(repo, number)}",
-            "Accept": "application/vnd.github+json",
-            "X-GitHub-Api-Version": "2022-11-28",
-            "User-Agent": "quantamind",
-            **({"Content-Type": "application/json"} if body is not None else {}),
-        },
-    )
     try:
-        with urllib.request.urlopen(request, timeout=API_TIMEOUT_S) as reply:
-            raw = reply.read()
-    except urllib.error.HTTPError as exc:
-        detail = (exc.read() or b"").decode("utf-8", "replace")[:160]
-        raise CommentFailed(repo, number, f"{method} {path} -> HTTP {exc.code}: {detail}") from None
-    except (urllib.error.URLError, TimeoutError) as exc:
-        raise CommentFailed(repo, number, f"{method} {path} failed: {str(exc)[:160]}") from None
+        raw = github_api.call(repo, path, method=method, body=body)
+    except github_api.ApiFailed as exc:
+        raise CommentFailed(repo, number, str(exc)) from None
     try:
         return json.loads(raw) if raw.strip() else None
     except json.JSONDecodeError as exc:

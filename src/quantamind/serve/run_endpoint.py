@@ -31,7 +31,7 @@ from quantamind.types.settings import load
 SECRET_VARIABLE = "QUANTAMIND_WEBHOOK_SECRET"
 
 
-def run(port: int) -> int:
+def run(port: int, host: str = "127.0.0.1") -> int:
     """Bind, and say plainly what this endpoint does and does not do.
 
     The work callback is deliberately not wired to a pipeline. Everything from a delivery to a
@@ -42,7 +42,7 @@ def run(port: int) -> int:
     """
     from quantamind.ingest.diff import DiffReadFailed
     from quantamind.ingest.github_comments import CommentFailed
-    from quantamind.serve.listener import build
+    from quantamind.serve.http.bind import build
     from quantamind.serve.review_delivery import deliver
     from quantamind.serve.webhook_github import MisconfiguredSecret, Review
     from quantamind.serve.working_clone import CloneFailed
@@ -72,7 +72,7 @@ def run(port: int) -> int:
         print(f"[serve] {review.repo}#{review.number}: {done.sentence()}", flush=True)
 
     try:
-        server = build(settings, secret, work, port=port)
+        server = build(settings, secret, work, port=port, host=host)
     except MisconfiguredSecret as exc:
         print(f"configuration error: {exc}\n\nSet {SECRET_VARIABLE} and try again.")
         return 1
@@ -85,12 +85,23 @@ def run(port: int) -> int:
     # `serve_forever()` then never returns, the 4 KB buffer never fills, and SIGTERM kills the
     # process without flushing: the banner is not merely late, it is LOST. Found by running the
     # command under a pipe, having passed every test that captured it in-process. The line this
-    # cost is the one that matters most -- "IT DOES NOT REVIEW", invisible to exactly the operator
-    # who needed it. `tests/unit/layers/serve/test_serve_banner.py` reads it through a real pipe.
+    # cost is the one that matters most, invisible to exactly the operator who needed it.
+    # `tests/unit/layers/serve/test_serve_banner.py` reads it through a real pipe.
+    #
+    # **THAT LINE SAID "IT DOES NOT REVIEW" LONG AFTER IT DID.** `deliver()` is wired below and has
+    # been since the delivery path was joined, but the banner kept announcing the old behaviour --
+    # so the one message an operator reads at startup told them the endpoint was inert while it
+    # cloned, ranked and rendered. It was caught by running the container and reading its log, not
+    # by any test: every test asserted the line was PRESENT, which it was, and none asked whether
+    # it was true. It now states what posting will actually do, from the setting itself.
     #
     # `server_address[0]` is bytes on some address families; `build()` binds loopback, so the
     # host is stated rather than formatted out of the tuple.
-    print(f"[serve] listening on 127.0.0.1:{server.server_address[1]}", flush=True)
+    # **THE BANNER NAMES THE ADDRESS ACTUALLY BOUND.** It hardcoded 127.0.0.1, which was true
+    # until the container asked for 0.0.0.0 -- at which point the log would have said loopback
+    # while the socket listened everywhere, and the one place an operator checks would have been
+    # the one place that lied.
+    print(f"[serve] listening on {host}:{server.server_address[1]}", flush=True)
     print(
         "[serve] POST /webhook  — verifies the signature, refuses a replay, answers 202", flush=True
     )
@@ -99,7 +110,12 @@ def run(port: int) -> int:
         flush=True,
     )
     print(
-        "[serve] IT DOES NOT REVIEW. The work callback logs and returns; see run_endpoint.py.",
+        "[serve] It REVIEWS: clone, rank, render. Posting is "
+        + (
+            "ON — comments are written to real pull requests."
+            if settings.posting_enabled
+            else "OFF — it prints the comment it would have posted and writes nothing."
+        ),
         flush=True,
     )
     print(

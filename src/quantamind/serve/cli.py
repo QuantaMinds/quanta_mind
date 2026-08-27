@@ -51,6 +51,9 @@ def build_parser() -> argparse.ArgumentParser:
         "serve", help="authenticate and de-duplicate GitHub webhooks over HTTP"
     )
     listen.add_argument("--port", type=int, default=7331)
+    # **`--host` MUST BE ASKED FOR.** Loopback by default so a developer does not expose an
+    # endpoint to their network by omission; the container passes 0.0.0.0 deliberately.
+    listen.add_argument("--host", default="127.0.0.1", help="bind address; 0.0.0.0 in a container")
     look = subparsers.add_parser(
         "review", help="rank one change's files against history and print what we would say"
     )
@@ -151,7 +154,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "serve":
         from quantamind.serve.run_endpoint import run
 
-        return run(args.port)
+        return run(args.port, args.host)
 
     if args.command == "review":
         from quantamind.serve.run_commit import review_commit

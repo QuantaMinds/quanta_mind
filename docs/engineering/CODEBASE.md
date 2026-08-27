@@ -1995,3 +1995,24 @@ produce a fresh empty root and a healthy verdict. Provisioning storage is the op
 where `tenancy.tenants()` does not look — so the probe answered "no tenants, healthy" and the
 assertion still held because a missing root is also unhealthy. It now writes where a tenant store
 actually lives.
+
+### `serve/http/` — binding a server, split from deciding what a request means
+
+`serve/http/bind.py` owns `build()` and `LOOPBACK`: the address the endpoint listens on and the
+refusal when it has no webhook secret. `serve/listener.py` keeps what a REQUEST means — routes,
+signature verification, replay refusal, body limits.
+
+**It exists because `listener.py` was one line under the 200 cap.** Adding a `host` parameter had
+nowhere to go, and trimming the comments already there would have traded a recorded lesson for a
+feature: that file carries the `staticmethod` descriptor bug, the buffered-banner loss, and the
+Content-Length ceiling, each written down because it cost something.
+
+**`host` DEFAULTS TO LOOPBACK AND THE CONTAINER ASKS FOR `0.0.0.0` EXPLICITLY.** The address was
+hardcoded `127.0.0.1`, which was right while this only ran on a laptop and wrong the moment it was
+containerised: inside a container loopback IS the container, so GitHub cannot reach it and every
+delivery times out against a process whose health endpoint says it is fine. Defaulting the other
+way would be worse — a developer running `quantamind serve` would expose an endpoint to their whole
+network without asking. It must not do either by accident.
+
+**What it must not do:** know what a review is. `work` is injected, never imported, so the socket
+layer can be exercised without running a ranking.

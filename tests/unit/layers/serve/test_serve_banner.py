@@ -11,7 +11,7 @@ WHY:  **THIS IS A REGRESSION TEST FOR A BUG THAT EVERY IN-PROCESS TEST MISSES.**
       without flushing. The banner was not late. **It was lost**, and the endpoint sat there
       listening and silent.
 
-      The line that cost is the one that mattered most: "IT DOES NOT REVIEW" is the only thing
+      The line that cost is the one that mattered most: the posting state is the only thing
       telling an operator that a delivery is authenticated, acknowledged and then dropped. It was
       invisible to precisely the person who needed it.
 
@@ -32,6 +32,8 @@ from pathlib import Path
 
 import pytest
 
+from quantamind.types.settings import load
+
 # Generous: the banner is printed before serve_forever(), so a healthy start answers in
 # milliseconds. Long enough that a loaded CI box is not the reason this fails.
 BANNER_DEADLINE_SECONDS = 30.0
@@ -42,7 +44,7 @@ ENTRY_POINT = Path(sys.executable).parent / "quantamind"
 REQUIRED = (
     "[serve] POST /webhook",
     "[serve] GET  /health",
-    "[serve] IT DOES NOT REVIEW.",
+    "[serve] It REVIEWS: clone, rank, render. Posting is",
     "[serve] http.server is not a hardened edge",
 )
 
@@ -93,12 +95,21 @@ def test_the_banner_arrives_through_a_pipe_before_anything_is_sent(tmp_path: Pat
     )
 
     printed = "\n".join(seen)
-    assert "[serve] listening on 127.0.0.1:" in printed, (
+    assert "[serve] listening on 127.0.0.1:" in printed, (  # default bind is loopback
         f"the endpoint bound but announced nothing through a pipe. Buffered output is LOST when "
         f"serve_forever() never returns. Read: {printed!r}"
     )
     missing = [line for line in REQUIRED if line not in printed]
     assert not missing, (
         f"the banner is missing {missing}. These lines are quoted in docs/engineering/CLI.md, and "
-        f"'IT DOES NOT REVIEW' is the only warning an operator gets. Read: {printed!r}"
+        f"the posting line is the only warning an operator gets. Read: {printed!r}"
+    )
+    # **AND IT MUST BE TRUE, NOT MERELY PRESENT.** The banner announced "IT DOES NOT REVIEW" long
+    # after `deliver()` was wired, and this test passed throughout -- because it asked whether the
+    # line existed and never whether it described the process. Asserting against the SETTING is
+    # what makes the banner unable to drift from the behaviour again.
+    assert ("Posting is OFF" in printed) is not load().posting_enabled, (
+        f"the banner's posting state disagrees with settings.posting_enabled. A startup line that "
+        f"misreports what the endpoint will do to a customer's pull requests is worse than none. "
+        f"Read: {printed!r}"
     )
