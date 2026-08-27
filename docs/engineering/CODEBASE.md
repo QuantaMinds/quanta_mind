@@ -1820,3 +1820,30 @@ records because it could not fire.
 **Schema 3 -> 4, new table only.** The golden was regenerated and its diff read: the version and
 `touch_watermark`, with no existing table's DDL or column order disturbed. `check_schema_shape.py`
 fired first and named the order — bump, migrate, golden, and only then the digest.
+
+### The touch index walks HEAD, and always did — what that costs, measured
+
+The touch-index cache walks `<watermark>..HEAD`, so history reachable from a pull request's base but
+not from HEAD is not counted. **This predates the cache**: `ingest/commits.py` with no `since`
+passes no revision at all, and `git log` defaults to HEAD, so the full read had the same horizon.
+
+**And so does the research.** `research/phase0/external/git_reads.py` passes no revision either.
+The product matches the harness that produced `1.21% against 3.12%, p < 1e-6` — so switching to
+`--all` would index history that claim never counted, and gate 2a requires the productionised
+ordering to reproduce `defect_return.py`'s. **A correctness fix that silently re-bases the one
+validated claim is not a fix.**
+
+**The cost is real and repo-dependent.** Three commits to a file on `main`, four more on an unmerged
+`release/1.0`: the product sees 3 where the branch has 7. Share of the last 100 closed pull requests
+targeting a non-default branch — home-assistant/core **0**, django **3**, **apache/airflow 27**.
+
+**The right revision is already computed and discarded.** `serve/review_delivery.py:99` gets a
+`Base` carrying `sha` and `committed_at`, passes the timestamp to `review()` and drops the sha.
+Walking `git log <base.sha>` is the population the ranking is actually about — **but it is not
+equivalent to walking HEAD and filtering by `as_of`**, and the difference is the same
+non-monotonicity the watermark design turns on: a commit dated before `as_of` that landed after it
+is counted by one and unreachable to the other.
+
+**So this stays open on purpose.** The next step is a measurement — on a repository with real
+release-branch traffic, does base-walking ever change the top-three selection? — not a quiet edit to
+a `git log` invocation. → `docs/plans/feat-touch-index-cache.md`, the investigation section.

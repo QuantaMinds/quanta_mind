@@ -1,6 +1,7 @@
 # Caching the touch index — 32 seconds a pull request, and the one way it goes wrong silently
 
-**Branch:** `feat/touch-index-cache`. **Status: PLAN, not built.** Written first because this is
+**Branch:** `feat/touch-index-cache`. **Status: BUILT and verified. The one open question at the
+bottom was investigated on 2026-08-27 — see the section after the rule.** Written first because this is
 `rank/`-adjacent: the index decides where we look, and the failure mode produces a normal-looking
 ranking computed against the wrong past.
 
@@ -101,11 +102,9 @@ unobservable is a cache nobody can debug.
 
 ## What could still silently fail
 
-**A commit reachable from the review's base but not from `HEAD`.** The incremental read walks to
-`HEAD`; a pull request opened from a branch that `HEAD` has not merged may have base history outside
-that walk. `as_of` bounds the *review*, but the *index* is built to `HEAD`. Whether this can produce
-a short count needs deciding before build, not after — it is the one case where over-indexing does
-not save us.
+**A commit reachable from the review's base but not from `HEAD`.** → **INVESTIGATED below.** It is
+real, it predates the cache, it reaches 27 of 100 pull requests on `apache/airflow`, and `--all` is
+not the fix because the research this reproduces walks HEAD too.
 
 **The watermark and the rows can disagree.** They are written in one transaction, but nothing
 recomputes the index against git to confirm they still match. The digest comparison catches it in
@@ -120,3 +119,75 @@ of the same name would share a watermark. Not new, but caching makes it conseque
 It does not make the first review faster — a cold index still reads everything. It moves a 32-second
 cost from every pull request to the first one, which is the right shape for a webhook and does
 nothing for a one-shot CLI run.
+
+---
+
+# INVESTIGATED — 2026-08-27. It is real, it predates the cache, and `--all` is not the fix.
+
+## 1. The cache did not introduce it
+
+`read_commits()` with no `since` passes **no revision**, so `git log` defaults to HEAD. The full
+read was always HEAD-bounded. The cache walks `<watermark>..HEAD` and inherits exactly the same
+horizon — it neither widened nor narrowed it.
+
+## 2. It is real, and the size is easy to show
+
+A repository with three commits to `a.py` on `main` and four more on an unmerged `release/1.0`:
+
+```
+git log main       -- a.py   3
+git log release/1.0 -- a.py  7
+read_touches(...)            3      <- what the product sees
+```
+
+A pull request opened against `release/1.0` is ranked with `a.py` scored **3**, on a branch that has
+touched it **7** times. The ranking is comparative, so this only moves an outcome when the missing
+commits are **concentrated in some changed files and not others** — which is the normal case, since
+a release branch touches a particular set of files.
+
+## 3. It is not rare, and it is repo-dependent
+
+Last 100 closed pull requests, share targeting a non-default branch:
+
+| repository | |
+|---|---|
+| home-assistant/core | **0 / 100** |
+| django/django | 3 / 100 |
+| **apache/airflow** | **27 / 100** |
+
+**Nothing here is an edge case for a customer who works on release branches.**
+
+## 4. `--all` is not the fix, and this is the part that matters
+
+`research/phase0/external/git_reads.py` — the harness that produced the claim this company rests on
+— **also passes no revision, and also walks HEAD.** The product matches the research exactly.
+
+Switching the product to `--all` would index history the research never counted, changing the
+touch counts that carry `1.21% against 3.12%, p < 1e-6`. Gate 2a requires the productionised
+ordering to reproduce `defect_return.py`'s. **A correctness improvement that silently re-bases the
+one validated claim is not an improvement.**
+
+## 5. The right revision is already computed, and thrown away
+
+`serve/review_delivery.py:99` calls `base_commit()` and gets a `Base` carrying **both** `sha` and
+`committed_at`. It passes `as_of=committed_at` to `review()` and **discards the sha**. The history
+that should be walked is `git log <base.sha>` — everything reachable from the change's own base,
+which is precisely the population the ranking is about.
+
+**But base-walking is NOT equivalent to HEAD-walking plus the `as_of` filter, and the difference is
+the same non-monotonicity this whole design turns on.** A commit dated before `as_of` that *landed*
+after it — a rebase, a cherry-pick — is counted by HEAD-walk-plus-timestamp and is **not** reachable
+from the base. So the two policies disagree on exactly the histories where time and reachability
+disagree, and switching is a change to the measured policy, not a bug fix.
+
+## What follows
+
+**Not fixed, and now for a stated reason rather than an unexamined one.** Walking from the base is
+probably more correct and is certainly not free: it changes the counts, it needs re-validation
+against gate 2a, and it breaks the single-watermark cache, since different bases need different
+walks.
+
+**What should happen first is a measurement, not a patch**: on a repository with real release-branch
+traffic, how often does base-walking change the top-three selection at all? If it never moves the
+ranking, this is a documented horizon and nothing more. If it does, it is a pre-registered arm with
+gate 2a re-run, not a quiet edit to a `git log` invocation.
