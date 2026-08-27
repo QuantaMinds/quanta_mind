@@ -41,7 +41,7 @@ from pathlib import Path
 from quantamind.store import drift
 
 # Bump on ANY change to the DDL below, and write a migration. There is no in-place edit.
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 
 # `finding` and `claim` exist because adding a table later is a migration, and the schema is
 # append-only. NOTHING WRITES TO THEM: `infer/` is closed on evidence and publishes no findings.
@@ -122,6 +122,16 @@ TABLES: tuple[str, ...] = (
         repo_id INTEGER NOT NULL REFERENCES repo(id), path TEXT NOT NULL,
         committed_at INTEGER NOT NULL)""",
     "CREATE INDEX IF NOT EXISTS touch_lookup ON touch (repo_id, path, committed_at)",
+    # How far the touch index was built, so the next review can extend it instead of re-reading
+    # 338,907 touches. **`head_sha` IS A COMMIT, NOT A TIMESTAMP**: git history is not
+    # chronologically ordered, so a rebase or cherry-pick lands commits whose committer date is
+    # OLDER than rows already indexed, and a time watermark would skip them and read low forever.
+    # `languages` is here because a suffix added to the product leaves every existing index
+    # incomplete for it, and an incremental read would never backfill it -- the one staleness with
+    # no natural symptom.
+    """CREATE TABLE IF NOT EXISTS touch_watermark (
+        repo_id INTEGER PRIMARY KEY REFERENCES repo(id), head_sha TEXT NOT NULL,
+        languages TEXT NOT NULL, indexed_at INTEGER NOT NULL)""",
 )
 
 

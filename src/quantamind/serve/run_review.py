@@ -35,6 +35,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
+from quantamind.ingest import reachability
 from quantamind.ingest.history import read_touches
 from quantamind.rank import firing
 from quantamind.rank.order import NothingToRank, rank
@@ -72,17 +73,56 @@ class Reviewed:
     6.3% to 31.0% across five repositories. None when nothing was indexed."""
 
 
+LANGUAGES = ",".join(sorted(REVIEWABLE_SUFFIXES))
+
+
 def _index(clone: Path, repo: str, store_path: Path) -> tuple[sqlite3.Connection, int]:
-    """Build the touch index for this repository. The index is derived, never durable."""
-    touches = read_touches(clone, pathspec=PATHSPEC)
-    if not touches:
-        raise NoHistory(
-            f"{clone}: no history in any language we read ({', '.join(REVIEWABLE_SUFFIXES)}). "
-            f"A ranking needs prior commits; a repository with none is a real answer, not an error."
-        )
+    """Bring the touch index up to HEAD, extending it when that is provably safe.
+
+    **THE INDEX IS DERIVED, AND EXTENDING IT IS AN OPTIMISATION THAT MUST NOT CHANGE THE ANSWER.**
+    Reading the whole history cost 32.1 seconds and 338,907 touches on a 115,776-commit repository,
+    on EVERY review, into a store that already held it. The CLI throws its store away so re-reading
+    was honest there; the webhook does not.
+
+    **THE CORRECTNESS CONDITION IS ONE-SIDED.** `touches.counts()` filters by `as_of`, so an index
+    that reaches further than needed is harmless and one that stops short is invisible — the
+    ranking looks entirely normal and is computed against a history that ended early. Every branch
+    below therefore prefers a full read when it cannot prove the short one is complete.
+
+    Three outcomes, all reported rather than inferred:
+
+    - no watermark, or the language set changed -> full read. **A suffix added to the product
+      leaves every existing index blind to it, and an incremental read would never backfill.**
+    - the watermark is no longer an ancestor of HEAD -> full read, history was rewritten.
+    - otherwise -> read `<watermark>..HEAD` and append.
+    """
     conn = schema.open_store(store_path)
     repo_id = touch_store.ensure_repo(conn, "github.com", repo)
-    touch_store.index(conn, repo_id, touches)
+    head = reachability.head_sha(clone)
+    mark = touch_store.watermark(conn, repo_id)
+
+    fresh = mark is None or mark[1] != LANGUAGES or not reachability.is_ancestor(clone, mark[0])
+    since = "" if fresh else mark[0] if mark else ""
+    touches = read_touches(clone, pathspec=PATHSPEC, since=since)
+
+    if fresh:
+        if not touches:
+            raise NoHistory(
+                f"{clone}: no history in any language we read ({', '.join(REVIEWABLE_SUFFIXES)}). "
+                f"A ranking needs prior commits; a repository with none is a real answer, "
+                f"not an error."
+            )
+        touch_store.index(conn, repo_id, touches)
+        if head:
+            touch_store.extend(
+                conn, repo_id, (), head_sha=head, languages=LANGUAGES, stamped_at=int(time.time())
+            )
+    elif head:
+        # An empty range is the common case -- nothing new since the last review -- and it still
+        # moves the watermark, so a no-op review does not re-read the world next time.
+        touch_store.extend(
+            conn, repo_id, touches, head_sha=head, languages=LANGUAGES, stamped_at=int(time.time())
+        )
     return conn, repo_id
 
 

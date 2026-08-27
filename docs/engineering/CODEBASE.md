@@ -1771,3 +1771,52 @@ looks entirely normal. → the rule in `AGENTS.md` that `rank/` changes carry a 
 ranker declines, so the reviewer only ever runs on the ~10% of changes the ranker speaks on. That is
 the thesis — inference goes where the ranker pointed — and it also means any live measurement of the
 reviewer is drawn from a tenth of traffic, selected by fix history rather than at random.
+
+### `touch_watermark` — the index is extended instead of rebuilt, 31s to 0.43s
+
+The ranker re-read the whole repository on every review. Measured on `home-assistant/core`,
+115,776 commits: 37.0s and 339,537 touches, every time, into a store that already held them.
+
+```
+review() against a persistent store   first 30.92s   second 0.43s
+the index alone                       cold  37.0s    warm   0.08s   (489x)
+`quantamind review` CLI               31.09s         31.06s          unchanged, correctly
+```
+
+**The CLI gains nothing on purpose.** `run_commit.py` hands `review()` a `TemporaryDirectory` — the
+command a sceptic runs before granting access leaves nothing behind, and a durable store there would
+be a different promise. The webhook passes `settings.database_path` and is where the cost lived.
+
+**THE BAR WAS NEVER SPEED.** `touches.counts()` filters by `as_of`, so an index reaching too far is
+harmless and one stopping short is invisible: a normal-looking ranking computed against a history
+that ended early. The bar was that the comment be byte-identical, and it is — same sha256 cold and
+warm, same firing forecast.
+
+**The watermark is a COMMIT, not a timestamp, and that is the whole design.** Git history is not
+chronologically ordered: a rebase or cherry-pick lands commits dated OLDER than ones already
+indexed, so `--since=<date>` would skip them silently and every count downstream would read low
+forever. `ingest/reachability.py` answers the two questions that replace it — what is HEAD, and is
+the stored watermark still an ancestor of it.
+
+**`languages` is stored beside the sha** because a suffix added to the product leaves every existing
+index blind to it and an incremental read would never backfill — the one staleness with no natural
+symptom. A changed language set invalidates the cache.
+
+**`extend()` appends and `index()` still replaces.** A touch row carries `(path, committed_at)` and
+no commit identity, so re-appending an already-indexed commit doubles its count silently. Appending
+is safe only because the caller read a commit RANGE, and the rows and the watermark move in one
+transaction — a crash between them would leave an index disagreeing with its own record of how far
+it reaches, which looks exactly like a quiet repository.
+
+**The fixture had to be made hostile before the tests proved anything.** A chronologically ordered
+history cannot distinguish a SHA bound from a timestamp bound, so the first version of
+`tests/live/index/test_touch_cache_live.py` passed under both and proved less than it appeared to. It
+now backdates a commit by a day after later ones — what a rebase does — and requires the range read
+to find it. Sabotaging the bound to a timestamp, and to nothing at all, each turns 3 of 5 red. The
+rewrite case runs `git commit --amend` so the watermark is genuinely unreachable rather than
+asserted to be; this project has shipped a `history_rewritten` check that read zero across 515
+records because it could not fire.
+
+**Schema 3 -> 4, new table only.** The golden was regenerated and its diff read: the version and
+`touch_watermark`, with no existing table's DDL or column order disturbed. `check_schema_shape.py`
+fired first and named the order — bump, migrate, golden, and only then the digest.

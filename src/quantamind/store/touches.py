@@ -76,6 +76,48 @@ def index(conn: sqlite3.Connection, repo_id: int, touches: Iterable[Touch]) -> i
     return len(rows)
 
 
+def watermark(conn: sqlite3.Connection, repo_id: int) -> tuple[str, str] | None:
+    """`(head_sha, languages)` the index was built to, or None when it never was."""
+    row = conn.execute(
+        "SELECT head_sha, languages FROM touch_watermark WHERE repo_id = ?", (repo_id,)
+    ).fetchone()
+    return (str(row[0]), str(row[1])) if row else None
+
+
+def extend(
+    conn: sqlite3.Connection,
+    repo_id: int,
+    touches: Iterable[Touch],
+    *,
+    head_sha: str,
+    languages: str,
+    stamped_at: int,
+) -> int:
+    """Append `touches` and move the watermark to `head_sha` in ONE transaction. Returns rows.
+
+    **APPEND IS ONLY SAFE BECAUSE THE CALLER READ A COMMIT RANGE, AND THAT IS THE WHOLE CONTRACT.**
+    A touch row carries `(path, committed_at)` and no commit identity, so two commits touching one
+    path in the same second are indistinguishable and re-appending a commit already indexed doubles
+    its count silently. `index()` replaces for exactly that reason. This may only be handed the
+    touches of commits in `<watermark>..head_sha`, which the caller establishes by reachability.
+
+    **THE ROWS AND THE WATERMARK MOVE TOGETHER OR NEITHER DOES.** A crash between them would leave
+    an index that disagrees with its own record of how far it goes -- and the disagreement is
+    invisible, because a short index looks exactly like a quiet repository.
+    """
+    rows = [(repo_id, t.path, t.committed_at) for t in touches]
+    with conn:
+        conn.executemany("INSERT INTO touch (repo_id, path, committed_at) VALUES (?, ?, ?)", rows)
+        conn.execute(
+            "INSERT INTO touch_watermark (repo_id, head_sha, languages, indexed_at) "
+            "VALUES (?, ?, ?, ?) ON CONFLICT(repo_id) DO UPDATE SET "
+            "head_sha = excluded.head_sha, languages = excluded.languages, "
+            "indexed_at = excluded.indexed_at",
+            (repo_id, head_sha, languages, stamped_at),
+        )
+    return len(rows)
+
+
 def counts(
     conn: sqlite3.Connection,
     repo_id: int,

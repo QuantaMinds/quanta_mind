@@ -117,8 +117,16 @@ def assert_readable(repo_dir: Path) -> None:
         )
 
 
-def read_commits(repo_dir: Path, pathspec: str | Sequence[str] | None = None) -> list[Commit]:
+def read_commits(
+    repo_dir: Path, pathspec: str | Sequence[str] | None = None, *, since: str = ""
+) -> list[Commit]:
     """Every non-merge commit touching `pathspec`, OLDEST FIRST, with its subject and files.
+
+    `since` narrows the read to `<since>..HEAD`, excluding `since` itself.
+
+    **THE BOUND IS A COMMIT, NOT A TIME.** Git history is not chronologically ordered -- a rebase
+    lands commits dated OLDER than ones already read -- so a `--since=<date>` bound would skip them
+    silently and every count downstream would be low. Reachability cannot be fooled that way.
 
     Returns `[]` for a repository with no commits — detected structurally rather than by matching
     git's wording. Raises for a read that did not complete.
@@ -143,7 +151,11 @@ def read_commits(repo_dir: Path, pathspec: str | Sequence[str] | None = None) ->
         # which is indistinguishable from a repository that has none. Caught by running it against a
         # real clone rather than trusting the syntax.
         specs = [pathspec] if isinstance(pathspec, str) else list(pathspec)
+        if since:
+            args.append(f"{since}..HEAD")
         args += ["--full-history", "--", *specs]
+    elif since:
+        args.append(f"{since}..HEAD")
     result = _git(repo_dir, args, HISTORY_TIMEOUT_S)
     if result.returncode != 0:
         raise HistoryReadFailed(

@@ -37,12 +37,16 @@ SCHEMA = "src/quantamind/store/schema.py"
 # The digest of the DDL as it stands. **Change this ONLY together with a SCHEMA_VERSION bump, a
 # migration, and the golden described above** -- never to make the build green again.
 #
-# Updated once, on 2026-08-24, when version 3 added `lifecycle` and `prod_signal`. That change is
-# what the guard was built for and it worked: it fired, named the three things required, and the
-# golden it demanded caught a two-column swap that ten value-level schema tests passed straight
-# through. -> tests/unit/layers/store/test_schema_golden.py
-RECORDED_DIGEST = "333408d97780558c"
-RECORDED_VERSION = 3
+# Updated on 2026-08-24, when version 3 added `lifecycle` and `prod_signal`. That change is what
+# the guard was built for and it worked: it fired, named the three things required, and the golden
+# it demanded caught a two-column swap that ten value-level schema tests passed straight through.
+# -> tests/unit/layers/store/test_schema_golden.py
+#
+# Updated again on 2026-08-27 for version 4, `touch_watermark`. The guard fired in the same order
+# and each thing it named was done before this line moved: SCHEMA_VERSION bumped, `_to_4` written,
+# golden regenerated AND ITS DIFF READ -- one new table, no existing column order disturbed.
+RECORDED_DIGEST = "3fdcb32085d03e5b"
+RECORDED_VERSION = 4
 
 
 def ddl_of(text: str) -> str:
