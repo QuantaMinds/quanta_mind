@@ -1740,3 +1740,34 @@ and each failure discarded cal.com's and discourse's already-paid-for contexts b
 only in memory. Contexts are facts about a commit and do not go stale, so a re-run skips what is
 banked. Driving it one repository at a time is also what isolated the grafana cause in a single
 clone instead of three.
+
+### The ranker re-ingests the whole repository on every review — 32s per pull request at 115k commits
+
+Measured on `home-assistant/core`, 115,776 commits, 893 MB:
+
+| repository | commits | Half A, end to end | of which `read_touches` |
+|---|---|---|---|
+| pallets/flask | ~1,500 | 0.6s | — |
+| django/django | ~34,000 | 4.6s | — |
+| **home-assistant/core** | **115,776** | **32.7s** | **32.1s, 338,907 touches** |
+
+**The ranking is not slow. The ingest is.** 32.1 of the 32.7 seconds is one call — everything else,
+ranking and rendering and the firing forecast, is the remaining 0.6.
+
+**And it repeats.** `run_review._index()` calls `read_touches()` unconditionally on every review,
+with the docstring "The index is derived, never durable." That is true of the CLI, which hands it a
+`TemporaryDirectory`. It is **not** true of the webhook, which passes `settings.database_path` — a
+durable store. So a large-monorepo customer pays a full history read on every pull request, into a
+store that already holds the answer.
+
+**Nothing caught this because every live test runs against flask**, where the whole cost is 0.6s.
+Scale-dependent costs are invisible to a corpus that has no scale.
+
+**NOT FIXED.** Skipping the re-read means deciding when the index is stale, which is a correctness
+question — a stale index ranks a change against a history that stopped before it, and the output
+looks entirely normal. → the rule in `AGENTS.md` that `rank/` changes carry a plan first.
+
+**Half B is bounded by Half A.** `serve/run_commit.py` returns before the deep pass whenever the
+ranker declines, so the reviewer only ever runs on the ~10% of changes the ranker speaks on. That is
+the thesis — inference goes where the ranker pointed — and it also means any live measurement of the
+reviewer is drawn from a tenth of traffic, selected by fix history rather than at random.
