@@ -191,3 +191,62 @@ walks.
 traffic, how often does base-walking change the top-three selection at all? If it never moves the
 ranking, this is a documented horizon and nothing more. If it does, it is a pre-registered arm with
 gate 2a re-run, not a quiet edit to a `git log` invocation.
+
+
+---
+
+# MEASURED — 2026-08-27. The horizon moves the counts and almost never moves the reading.
+
+`research/phase0/external/walk_horizon.py`, on `apache/airflow` — the repository with the most
+release-branch traffic of the three sampled (27 of 100 recent pull requests target a non-default
+branch). **78 merged release-branch pull requests**, each scored twice: touches reachable from HEAD
+(what the product does) and from the pull request's own merge-base (what arguably it should).
+
+| reading | result |
+|---|---|
+| counts differ at all | **63 / 78 — 81%** |
+| **which three files are read** | **0 / 78** |
+| which file is rank 1 | 3 / 78 |
+| **which file gets the DEEP read** | **2 / 78 — 2.6%** |
+
+**The horizon is real and it is nearly always invisible.** Four fifths of these pull requests are
+scored from a different number under the two walks, and in none of them did that change which files
+the product would read. The ranking is comparative, the shortfall is broadly spread, and a
+uniformly lower count selects the same three files.
+
+**Rank 1 is the exception, and it is separate** because the allocator funds rank 1 with a deep read
+and ranks 2 and 3 shallow. Of the three order changes, one keeps rank 1 and merely reorders two
+shallow slots. Two swap the deep-read target. The clearest is #71042, a two-file change:
+
+```
+HEAD-walk rank 1:  task-sdk/tests/task_sdk/definitions/test_callback.py
+base-walk rank 1:  task-sdk/src/airflow/sdk/definitions/callback.py
+```
+
+The test file wins on the default branch's history; the source file wins on the branch the change
+was actually opened against. **A 2.6% chance of pointing the expensive read at the wrong one of two
+files** is the whole measured cost of the horizon.
+
+## The verdict, against the cost of changing it
+
+**Not worth changing on this evidence.** Switching to a base-walk changes the touch counts that
+carry `1.21% against 3.12%, p < 1e-6`, requires gate 2a to be re-run, and breaks the
+single-watermark cache because different bases need different walks. It buys a 2.6% correction to
+which file is read deeply, in a repository chosen for having unusually heavy release-branch traffic.
+In `home-assistant/core` the rate would be zero, because 0 of 100 pull requests target a non-default
+branch at all.
+
+**The HEAD horizon is now a documented property with a number on it, not an unexamined risk.**
+
+## What this measurement does NOT establish
+
+**One repository, one kind of divergence.** Airflow's release branches are cut from main and live
+briefly. A long-lived fork whose history diverges for months is the case that would move the set,
+and it is not represented here.
+
+**88 of 166 candidates were skipped for changing fewer than two reviewable files** — a one-file
+ranking cannot differ, so excluding them is conservative rather than convenient, but it means the
+measured population is the larger changes.
+
+**0 of 78 is not zero.** The rule of three puts the 95% upper bound on the set-difference rate at
+about 3.8%. "Not observed in 78" is the claim; "cannot happen" is not.

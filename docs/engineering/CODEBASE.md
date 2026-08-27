@@ -1847,3 +1847,30 @@ is counted by one and unreachable to the other.
 **So this stays open on purpose.** The next step is a measurement — on a repository with real
 release-branch traffic, does base-walking ever change the top-three selection? — not a quiet edit to
 a `git log` invocation. → `docs/plans/feat-touch-index-cache.md`, the investigation section.
+
+### The HEAD horizon, measured: 81% of counts move, 0% of readings, 2.6% of deep reads
+
+`research/phase0/external/walk_horizon.py` scored **78 merged release-branch pull requests** on
+`apache/airflow` twice — touches reachable from HEAD, and from the pull request's own merge-base.
+
+```
+counts differ at all              63/78   81%
+which three files are read         0/78
+which file gets the DEEP read      2/78   2.6%
+```
+
+**Four fifths are scored from a different number, and it changes what we read almost never.** The
+ranking is comparative and the shortfall is broadly spread, so a uniformly lower count selects the
+same three files. Rank 1 is the exception because the allocator funds it deep and 2-3 shallow: on
+airflow #71042 the HEAD walk ranks a test file first and the base walk ranks the source file it
+tests, which is a 2.6% chance of pointing the expensive read at the wrong one of two.
+
+**Not worth changing on this evidence.** A base-walk changes the touch counts carrying
+`1.21% against 3.12%, p < 1e-6`, needs gate 2a re-run, and breaks the single-watermark cache. It
+buys 2.6% in the repository sampled *for* heavy release-branch traffic; in `home-assistant/core` the
+rate is zero, because none of its recent pull requests target a non-default branch.
+
+**The horizon is now a documented property with a number on it.** What the measurement does not
+cover: one repository, one kind of divergence — short-lived release branches cut from main. A
+long-lived fork is the case that could move the set, and 0 of 78 has a 95% upper bound near 3.8%.
+→ `docs/plans/feat-touch-index-cache.md`.
