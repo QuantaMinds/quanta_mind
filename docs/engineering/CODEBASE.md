@@ -1914,3 +1914,47 @@ files, while the product counts `.py .pyi .ts .tsx .js`. On a Python repository 
 coincide; on a polyglot one **more changes bind than the study's population predicts**, so 4.11% and
 50.3% must be quoted as Python-only. Re-deriving them over the full reviewable set is a separate
 measurement and is not done. → `docs/plans/feat-gate-on-binding-changes.md`.
+
+### The product comments as itself — GitHub App auth, no new dependency
+
+`ingest/github_comments.post()` shelled out to the `gh` CLI, so every comment was posted by whoever
+ran `gh auth login`: one identity, one account's rate limit, one person's name on every review. That
+is a developer tool wearing a product's shape.
+
+`ingest/app_auth.py` mints an **installation access token** — scoped to the repositories the App was
+installed on, expiring in an hour, carrying only the permissions the App declared. Verified live on
+`QuantaMinds/QuantaMind`:
+
+```
+1. before        : 0 comment(s)
+2. post()        : True
+3. read back     : 1 comment(s)   author: quanminds[bot]  type: Bot
+4. marker found  : True
+5. post() again  : False          <- idempotent, no duplicate
+6. cleaned up    : 0 comment(s)
+```
+
+**`dependencies = []` HOLDS.** A GitHub App JWT is RS256 and stdlib cannot sign it — `hmac` is
+HS256 and there is no RSA in the standard library. Rather than take this project's first runtime
+dependency for one signature, `app_jwt()` signs with `openssl`, the same choice `infer/gemini.py`
+already makes minting a Vertex token with `gcloud`.
+
+**THE CACHE WAS BROKEN IN A WAY NOTHING WOULD HAVE CAUGHT.** `expires_at` is UTC and the first
+version parsed it with `time.mktime(...) - time.timezone`, which reads a struct as LOCAL time and
+ignores daylight saving. It was **exactly one hour out**, putting every expiry two minutes in the
+past, so the cache never hit once: valid tokens every time, an API round trip every time, no error
+anywhere. It surfaced only because the live test asserted the second call returned the SAME token
+rather than merely a working one. `calendar.timegm` is the correct conversion.
+
+**THE KEY PATH IS CONFIGURATION; THE KEY IS NOT.** `Settings` carries `app_id` and `app_key_path`,
+and `app_auth` reads the file at the moment it signs — the same reasoning as the webhook secret in
+`serve/run_endpoint.py`. `quantamind config` prints the path and never the key.
+
+**`Settings` REFUSES TO CONSTRUCT IF POSTING IS ENABLED WITHOUT AN APP.** The only way to comment
+without one is as whoever authenticated `gh`, which is the behaviour this replaced. Failing at
+startup beats discovering it on a customer's first delivery.
+
+**`.env` MOVED OUT OF THE PACKAGE.** It was at `src/quantamind/.env` — inside the package, where a
+wheel build carries it as package data and publishes a webhook secret to anyone who installs.
+Gitignore governs git, not `build`. It is at the repository root now, and
+`types/settings.from_file()` reads it with the real environment taking precedence.

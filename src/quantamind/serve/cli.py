@@ -91,6 +91,10 @@ def render_config(settings: Settings) -> str:
         f"model                      {settings.model}",
         f"subprocess_timeout_seconds {settings.subprocess_timeout_seconds}",
         f"clone_root                 {settings.clone_root}",
+        f"app_id                     {settings.app_id or '(unset)'}",
+        # The PATH, never the key. `app_auth` reads the file when it signs; a credential printed
+        # by a `config` command is a credential in somebody's terminal scrollback.
+        f"app_key_path               {settings.app_key_path or '(unset)'}",
         # **The one line here that says whether this process writes to somebody else's project.**
         f"posting_enabled            {settings.posting_enabled}",
         "",

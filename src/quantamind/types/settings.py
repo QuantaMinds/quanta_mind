@@ -15,6 +15,7 @@ from __future__ import annotations
 import os
 from collections.abc import Mapping
 from dataclasses import dataclass
+from pathlib import Path
 
 PREFIX = "QUANTAMIND_"
 
@@ -53,6 +54,15 @@ class Settings:
     model: str = "claude-opus-5"
     subprocess_timeout_seconds: int = 30
     clone_root: str = ".quantamind-clones"
+    app_id: str = ""
+    """The GitHub App's numeric id. Public: it identifies the App, it authorises nothing."""
+
+    app_key_path: str = ""
+    """Where the App's private key lives. **THE PATH IS CONFIGURATION; THE KEY IS NOT.** The key is
+    read from disk at the moment it signs and never held here, for the same reason the webhook
+    secret is read in `serve/run_endpoint.py` rather than stored: a credential in a settings object
+    reaches a log or a config dump the first time anybody prints one."""
+
     posting_enabled: bool = False
     """**False on purpose, and it is the one default that writes to somebody else's project.**
     With it off the endpoint runs the whole pipeline and prints the comment it would have posted,
@@ -75,6 +85,16 @@ class Settings:
             )
         if not self.database_path:
             raise SettingsError("DATABASE_PATH", "is empty")
+        # **POSTING WITHOUT AN APP IS NOT A DEGRADED MODE, IT IS A MISCONFIGURATION.** Without an
+        # App the only way to comment is as whoever authenticated the `gh` CLI, which is the
+        # developer-tool behaviour this replaced. Refusing at construction beats discovering it on
+        # the first delivery a customer sees.
+        if self.posting_enabled and not (self.app_id and self.app_key_path):
+            raise SettingsError(
+                "APP_ID",
+                "posting is enabled but no GitHub App is configured; set QUANTAMIND_APP_ID and "
+                "QUANTAMIND_APP_KEY_PATH, or leave QUANTAMIND_POSTING_ENABLED off",
+            )
 
     @property
     def runs_model(self) -> bool:
@@ -113,13 +133,44 @@ def _read_bool(env: Mapping[str, str], name: str, fallback: bool) -> bool:
     raise SettingsError(name, f"expected a boolean, got {raw!r}")
 
 
+def from_file(path: Path) -> dict[str, str]:
+    """`KEY=VALUE` lines from a file, as a mapping. Missing file is an empty mapping, not an error.
+
+    **IT DOES NOT TOUCH `os.environ`.** A loader that mutates the process environment makes every
+    later reader depend on import order, and the effect outlives the test that caused it. This
+    returns a value and `load()` decides what to do with it.
+
+    **THE REAL ENVIRONMENT WINS.** A file checked into a working tree must never override what an
+    operator exported for this process.
+    """
+    if not path.is_file():
+        return {}
+    out: dict[str, str] = {}
+    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#") or "=" not in stripped:
+            continue
+        key, _, value = stripped.partition("=")
+        out[key.strip()] = value.strip().strip("'\"")
+    return out
+
+
+DOTENV = Path(__file__).resolve().parents[3] / ".env"
+"""The repository root, NOT the package directory.
+
+**A `.env` INSIDE `src/quantamind/` IS PACKAGE DATA.** It was there, and a wheel build can carry
+package data into a published artefact -- which would ship a webhook secret and a client secret to
+anyone who installs it. Being gitignored does not help: gitignore governs git, not `build`. The
+root is both the convention and outside the package."""
+
+
 def load(env: Mapping[str, str] | None = None) -> Settings:
     """Build settings from a mapping, defaulting to the process environment.
 
     Takes the mapping as an argument so tests configure it by passing a dict rather than by
     mutating global state -- a test that sets os.environ leaks into whatever runs next.
     """
-    source: Mapping[str, str] = os.environ if env is None else env
+    source: Mapping[str, str] = {**from_file(DOTENV), **os.environ} if env is None else env
     return Settings(
         database_path=source.get(PREFIX + "DATABASE_PATH", "quantamind.db"),
         max_requests=_read_int(source, "MAX_REQUESTS", DEFAULT_MAX_REQUESTS),
@@ -131,4 +182,6 @@ def load(env: Mapping[str, str] | None = None) -> Settings:
         subprocess_timeout_seconds=_read_int(source, "SUBPROCESS_TIMEOUT_SECONDS", 30),
         clone_root=source.get(PREFIX + "CLONE_ROOT", ".quantamind-clones"),
         posting_enabled=_read_bool(source, "POSTING_ENABLED", False),
+        app_id=source.get(PREFIX + "APP_ID", ""),
+        app_key_path=source.get(PREFIX + "APP_KEY_PATH", ""),
     )
