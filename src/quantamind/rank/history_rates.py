@@ -49,13 +49,19 @@ def earlier_rates(
             "  SELECT COUNT(*) FROM touch prior"
             "  WHERE prior.repo_id = ? AND prior.path = changed.path"
             "    AND prior.committed_at >= ? AND prior.committed_at < ?"
-            ")) AS top "
+            ")) AS top, COUNT(DISTINCT changed.path) AS files "
             "FROM recent JOIN touch changed"
             "  ON changed.repo_id = ? AND changed.committed_at = recent.committed_at "
             "GROUP BY recent.committed_at",
             (repo_id, end, end - window, over, repo_id, end - window, end, repo_id),
         ).fetchall()
+        # **THE SAME GATE AS THE HEADLINE RATE, INCLUDING THE BUDGET.** These two replays are
+        # printed in ONE sentence -- "would have spoken 4%... across your history it ran 11% to
+        # 13%" -- so a gate applied to one and not the other reports two different rules as a
+        # trend. That is exactly what shipped for the length of one command when the budget test
+        # was added to `firing.estimate` and not here.
         tops = [int(r[0]) for r in rows]
+        counts = [int(r[1]) for r in rows]
         if len(tops) < MIN_WINDOW:
             continue
         # **EACH WINDOW AGAINST ITS OWN FLOOR, AND THE ALTERNATIVE WAS BUG 2 IN A THIRD COSTUME.**
@@ -63,5 +69,10 @@ def earlier_rates(
         # a bar derived from another: `trpc/trpc` read 70%, 68%, 62%, 54% on periods when it was
         # simply busier, against 12% now. That measures ACTIVITY, not selectivity.
         own = cut(tops, 0.9)
-        out.append(sum(1 for top in tops if fires({"unit": top}, own)) / len(tops))
+        out.append(
+            sum(
+                1 for top, n in zip(tops, counts, strict=True) if fires({"unit": top}, own, files=n)
+            )
+            / len(tops)
+        )
     return tuple(out)

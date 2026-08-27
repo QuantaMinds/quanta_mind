@@ -1,0 +1,1239 @@
+{
+ "rows": [
+  {
+   "number": 72136,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/ui/src/pages/ReactPlugin.tsx",
+    "airflow-core/src/airflow/ui/src/pages/ReactPlugin.test.tsx"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/ui/src/pages/ReactPlugin.tsx",
+    "airflow-core/src/airflow/ui/src/pages/ReactPlugin.test.tsx"
+   ],
+   "head_total": 9,
+   "base_total": 4
+  },
+  {
+   "number": 71956,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/utils/dag_version_inflation_checker.py",
+    "airflow-core/tests/unit/utils/test_dag_version_inflation_checker.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/utils/dag_version_inflation_checker.py",
+    "airflow-core/tests/unit/utils/test_dag_version_inflation_checker.py"
+   ],
+   "head_total": 5,
+   "base_total": 5
+  },
+  {
+   "number": 71953,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/ui/src/pages/Variables/ManageVariable/VariableForm.tsx",
+    "airflow-core/src/airflow/ui/src/pages/Variables/ManageVariable/VariableForm.test.tsx"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/ui/src/pages/Variables/ManageVariable/VariableForm.tsx",
+    "airflow-core/src/airflow/ui/src/pages/Variables/ManageVariable/VariableForm.test.tsx"
+   ],
+   "head_total": 7,
+   "base_total": 7
+  },
+  {
+   "number": 71951,
+   "base_ref": "v3-3-test",
+   "files": 3,
+   "head_top3": [
+    "airflow-core/src/airflow/ui/src/layouts/Details/Grid/Bar.tsx",
+    "airflow-core/src/airflow/ui/src/layouts/Details/Grid/GridButton.tsx",
+    "airflow-core/src/airflow/ui/src/layouts/Details/Grid/GridButton.test.tsx"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/ui/src/layouts/Details/Grid/Bar.tsx",
+    "airflow-core/src/airflow/ui/src/layouts/Details/Grid/GridButton.tsx",
+    "airflow-core/src/airflow/ui/src/layouts/Details/Grid/GridButton.test.tsx"
+   ],
+   "head_total": 12,
+   "base_total": 12
+  },
+  {
+   "number": 71937,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/public/test_assets.py",
+    "airflow-core/src/airflow/api_fastapi/core_api/routes/public/assets.py"
+   ],
+   "base_top3": [
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/public/test_assets.py",
+    "airflow-core/src/airflow/api_fastapi/core_api/routes/public/assets.py"
+   ],
+   "head_total": 71,
+   "base_total": 58
+  },
+  {
+   "number": 71935,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/jobs/scheduler_job_runner.py",
+    "airflow-core/tests/unit/jobs/test_scheduler_job.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/jobs/scheduler_job_runner.py",
+    "airflow-core/tests/unit/jobs/test_scheduler_job.py"
+   ],
+   "head_total": 260,
+   "base_total": 240
+  },
+  {
+   "number": 71910,
+   "base_ref": "v3-3-test",
+   "files": 7,
+   "head_top3": [
+    "dev/breeze/src/airflow_breeze/global_constants.py",
+    "dev/breeze/src/airflow_breeze/utils/docker_command_utils.py",
+    "dev/breeze/src/airflow_breeze/commands/ci_image_commands.py"
+   ],
+   "base_top3": [
+    "dev/breeze/src/airflow_breeze/global_constants.py",
+    "dev/breeze/src/airflow_breeze/utils/docker_command_utils.py",
+    "dev/breeze/src/airflow_breeze/commands/ci_image_commands.py"
+   ],
+   "head_total": 207,
+   "base_total": 191
+  },
+  {
+   "number": 71904,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/models/variable.py",
+    "airflow-core/tests/unit/models/test_variable.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/models/variable.py",
+    "airflow-core/tests/unit/models/test_variable.py"
+   ],
+   "head_total": 41,
+   "base_total": 41
+  },
+  {
+   "number": 71889,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/api/common/delete_dag.py",
+    "airflow-core/tests/unit/api/common/test_delete_dag.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/api/common/delete_dag.py",
+    "airflow-core/tests/unit/api/common/test_delete_dag.py"
+   ],
+   "head_total": 4,
+   "base_total": 4
+  },
+  {
+   "number": 71876,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/ui/src/components/FlexibleForm/FieldObject.tsx",
+    "airflow-core/src/airflow/ui/src/components/FlexibleForm/FieldObject.test.tsx"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/ui/src/components/FlexibleForm/FieldObject.tsx",
+    "airflow-core/src/airflow/ui/src/components/FlexibleForm/FieldObject.test.tsx"
+   ],
+   "head_total": 1,
+   "base_total": 1
+  },
+  {
+   "number": 71865,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/tests/unit/dag_processing/test_processor.py",
+    "airflow-core/src/airflow/dag_processing/processor.py"
+   ],
+   "base_top3": [
+    "airflow-core/tests/unit/dag_processing/test_processor.py",
+    "airflow-core/src/airflow/dag_processing/processor.py"
+   ],
+   "head_total": 69,
+   "base_total": 66
+  },
+  {
+   "number": 71860,
+   "base_ref": "v3-3-test",
+   "files": 8,
+   "head_top3": [
+    "airflow-core/src/airflow/ui/openapi-gen/requests/types.gen.ts",
+    "airflow-core/src/airflow/ui/openapi-gen/requests/services.gen.ts",
+    "airflow-core/src/airflow/ui/openapi-gen/queries/queries.ts"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/ui/openapi-gen/requests/types.gen.ts",
+    "airflow-core/src/airflow/ui/openapi-gen/requests/services.gen.ts",
+    "airflow-core/src/airflow/ui/openapi-gen/queries/queries.ts"
+   ],
+   "head_total": 739,
+   "base_total": 637
+  },
+  {
+   "number": 71845,
+   "base_ref": "v3-3-test",
+   "files": 4,
+   "head_top3": [
+    "airflow-core/src/airflow/models/dagbag.py",
+    "airflow-core/src/airflow/api_fastapi/common/dagbag.py",
+    "airflow-core/tests/unit/models/test_dagbag.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/models/dagbag.py",
+    "airflow-core/src/airflow/api_fastapi/common/dagbag.py",
+    "airflow-core/tests/unit/models/test_dagbag.py"
+   ],
+   "head_total": 34,
+   "base_total": 33
+  },
+  {
+   "number": 71828,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/public/test_assets.py",
+    "airflow-core/src/airflow/api_fastapi/core_api/routes/public/assets.py"
+   ],
+   "base_top3": [
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/public/test_assets.py",
+    "airflow-core/src/airflow/api_fastapi/core_api/routes/public/assets.py"
+   ],
+   "head_total": 67,
+   "base_total": 56
+  },
+  {
+   "number": 71821,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/jobs/scheduler_job_runner.py",
+    "airflow-core/tests/unit/jobs/test_scheduler_job.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/jobs/scheduler_job_runner.py",
+    "airflow-core/tests/unit/jobs/test_scheduler_job.py"
+   ],
+   "head_total": 259,
+   "base_total": 239
+  },
+  {
+   "number": 71788,
+   "base_ref": "v3-3-test",
+   "files": 7,
+   "head_top3": [
+    "airflow-core/src/airflow/ui/tests/e2e/pages/BackfillPage.ts",
+    "airflow-core/src/airflow/ui/src/components/DagActions/RunBackfillForm.tsx",
+    "airflow-core/src/airflow/ui/tests/e2e/specs/backfill.spec.ts"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/ui/tests/e2e/pages/BackfillPage.ts",
+    "airflow-core/src/airflow/ui/src/components/DagActions/RunBackfillForm.tsx",
+    "airflow-core/src/airflow/ui/tests/e2e/specs/backfill.spec.ts"
+   ],
+   "head_total": 55,
+   "base_total": 51
+  },
+  {
+   "number": 71785,
+   "base_ref": "v3-3-test",
+   "files": 3,
+   "head_top3": [
+    "airflow-core/src/airflow/api_fastapi/core_api/security.py",
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/public/test_assets.py",
+    "airflow-core/src/airflow/api_fastapi/core_api/routes/public/assets.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/api_fastapi/core_api/security.py",
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/public/test_assets.py",
+    "airflow-core/src/airflow/api_fastapi/core_api/routes/public/assets.py"
+   ],
+   "head_total": 101,
+   "base_total": 91
+  },
+  {
+   "number": 71781,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/cli/commands/scheduler_command.py",
+    "airflow-core/tests/unit/cli/commands/test_scheduler_command.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/cli/commands/scheduler_command.py",
+    "airflow-core/tests/unit/cli/commands/test_scheduler_command.py"
+   ],
+   "head_total": 10,
+   "base_total": 10
+  },
+  {
+   "number": 71764,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/dag_processing/manager.py",
+    "airflow-core/tests/unit/dag_processing/test_manager.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/dag_processing/manager.py",
+    "airflow-core/tests/unit/dag_processing/test_manager.py"
+   ],
+   "head_total": 120,
+   "base_total": 114
+  },
+  {
+   "number": 71726,
+   "base_ref": "v3-3-test",
+   "files": 8,
+   "head_top3": [
+    "airflow-core/src/airflow/models/deadline.py",
+    "airflow-core/tests/unit/models/test_deadline.py",
+    "airflow-core/src/airflow/serialization/decoders.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/models/deadline.py",
+    "airflow-core/tests/unit/models/test_deadline.py",
+    "airflow-core/src/airflow/serialization/decoders.py"
+   ],
+   "head_total": 103,
+   "base_total": 102
+  },
+  {
+   "number": 71715,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/executors/base_executor.py",
+    "airflow-core/tests/unit/executors/test_base_executor.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/executors/base_executor.py",
+    "airflow-core/tests/unit/executors/test_base_executor.py"
+   ],
+   "head_total": 51,
+   "base_total": 45
+  },
+  {
+   "number": 71714,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/dag_processing/manager.py",
+    "airflow-core/tests/unit/dag_processing/test_manager.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/dag_processing/manager.py",
+    "airflow-core/tests/unit/dag_processing/test_manager.py"
+   ],
+   "head_total": 120,
+   "base_total": 114
+  },
+  {
+   "number": 71708,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/api_fastapi/gunicorn_app.py",
+    "airflow-core/tests/unit/cli/commands/test_gunicorn_monitor.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/api_fastapi/gunicorn_app.py",
+    "airflow-core/tests/unit/cli/commands/test_gunicorn_monitor.py"
+   ],
+   "head_total": 10,
+   "base_total": 8
+  },
+  {
+   "number": 71682,
+   "base_ref": "chart/v1-2x-test",
+   "files": 2,
+   "head_top3": [
+    "helm-tests/tests/helm_tests/airflow_aux/test_pod_template_file.py",
+    "helm-tests/tests/helm_tests/security/test_kerberos.py"
+   ],
+   "base_top3": [
+    "helm-tests/tests/helm_tests/airflow_aux/test_pod_template_file.py",
+    "helm-tests/tests/helm_tests/security/test_kerberos.py"
+   ],
+   "head_total": 39,
+   "base_total": 37
+  },
+  {
+   "number": 71651,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/cli/commands/config_command.py",
+    "airflow-core/tests/unit/cli/commands/test_config_command.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/cli/commands/config_command.py",
+    "airflow-core/tests/unit/cli/commands/test_config_command.py"
+   ],
+   "head_total": 10,
+   "base_total": 10
+  },
+  {
+   "number": 71640,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "dev/breeze/src/airflow_breeze/commands/kubernetes_commands.py",
+    "dev/breeze/tests/test_kubernetes_lang_sdk_commands.py"
+   ],
+   "base_top3": [
+    "dev/breeze/src/airflow_breeze/commands/kubernetes_commands.py",
+    "dev/breeze/tests/test_kubernetes_lang_sdk_commands.py"
+   ],
+   "head_total": 27,
+   "base_total": 26
+  },
+  {
+   "number": 71638,
+   "base_ref": "v3-3-test",
+   "files": 5,
+   "head_top3": [
+    "providers/amazon/src/airflow/providers/amazon/get_provider_info.py",
+    "dev/breeze/tests/test_packages.py",
+    "devel-common/src/sphinx_exts/operators_and_hooks_ref.py"
+   ],
+   "base_top3": [
+    "providers/amazon/src/airflow/providers/amazon/get_provider_info.py",
+    "dev/breeze/tests/test_packages.py",
+    "devel-common/src/sphinx_exts/operators_and_hooks_ref.py"
+   ],
+   "head_total": 46,
+   "base_total": 32
+  },
+  {
+   "number": 71622,
+   "base_ref": "v3-3-test",
+   "files": 9,
+   "head_top3": [
+    "airflow-core/src/airflow/ui/openapi-gen/requests/types.gen.ts",
+    "airflow-core/src/airflow/ui/openapi-gen/requests/services.gen.ts",
+    "airflow-core/src/airflow/api_fastapi/core_api/routes/public/dag_run.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/ui/openapi-gen/requests/types.gen.ts",
+    "airflow-core/src/airflow/ui/openapi-gen/requests/services.gen.ts",
+    "airflow-core/src/airflow/api_fastapi/core_api/routes/public/dag_run.py"
+   ],
+   "head_total": 502,
+   "base_total": 452
+  },
+  {
+   "number": 71609,
+   "base_ref": "v3-3-test",
+   "files": 4,
+   "head_top3": [
+    "task-sdk/src/airflow/sdk/execution_time/supervisor.py",
+    "task-sdk/tests/task_sdk/execution_time/test_supervisor.py",
+    "task-sdk/src/airflow/sdk/execution_time/comms.py"
+   ],
+   "base_top3": [
+    "task-sdk/src/airflow/sdk/execution_time/supervisor.py",
+    "task-sdk/tests/task_sdk/execution_time/test_supervisor.py",
+    "task-sdk/src/airflow/sdk/execution_time/comms.py"
+   ],
+   "head_total": 208,
+   "base_total": 192
+  },
+  {
+   "number": 71608,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/tests/unit/dag_processing/test_processor.py",
+    "airflow-core/src/airflow/dag_processing/processor.py"
+   ],
+   "base_top3": [
+    "airflow-core/tests/unit/dag_processing/test_processor.py",
+    "airflow-core/src/airflow/dag_processing/processor.py"
+   ],
+   "head_total": 70,
+   "base_total": 65
+  },
+  {
+   "number": 71588,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "dev/breeze/src/airflow_breeze/commands/kubernetes_commands.py",
+    "dev/breeze/tests/test_kubernetes_lang_sdk_commands.py"
+   ],
+   "base_top3": [
+    "dev/breeze/src/airflow_breeze/commands/kubernetes_commands.py",
+    "dev/breeze/tests/test_kubernetes_lang_sdk_commands.py"
+   ],
+   "head_total": 25,
+   "base_total": 24
+  },
+  {
+   "number": 71573,
+   "base_ref": "v3-3-test",
+   "files": 5,
+   "head_top3": [
+    "airflow-core/src/airflow/ui/src/components/FlexibleForm/FieldSelector.tsx",
+    "airflow-core/src/airflow/ui/src/components/FlexibleForm/FieldPassword.test.tsx",
+    "airflow-core/src/airflow/ui/src/components/FlexibleForm/FieldPassword.tsx"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/ui/src/components/FlexibleForm/FieldSelector.tsx",
+    "airflow-core/src/airflow/ui/src/components/FlexibleForm/FieldPassword.test.tsx",
+    "airflow-core/src/airflow/ui/src/components/FlexibleForm/FieldPassword.tsx"
+   ],
+   "head_total": 10,
+   "base_total": 5
+  },
+  {
+   "number": 71559,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/public/test_task_instances.py",
+    "airflow-core/src/airflow/api_fastapi/core_api/datamodels/task_instances.py"
+   ],
+   "base_top3": [
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/public/test_task_instances.py",
+    "airflow-core/src/airflow/api_fastapi/core_api/datamodels/task_instances.py"
+   ],
+   "head_total": 81,
+   "base_total": 76
+  },
+  {
+   "number": 71553,
+   "base_ref": "v3-3-test",
+   "files": 5,
+   "head_top3": [
+    "scripts/ci/prek/common_prek_utils.py",
+    "scripts/ci/prek/check_providers_subpackages_all_have_init.py",
+    "scripts/ci/prek/mypy_folder.py"
+   ],
+   "base_top3": [
+    "scripts/ci/prek/common_prek_utils.py",
+    "scripts/ci/prek/check_providers_subpackages_all_have_init.py",
+    "scripts/ci/prek/mypy_folder.py"
+   ],
+   "head_total": 57,
+   "base_total": 51
+  },
+  {
+   "number": 71547,
+   "base_ref": "v3-3-test",
+   "files": 13,
+   "head_top3": [
+    "airflow-core/src/airflow/ui/openapi-gen/requests/types.gen.ts",
+    "airflow-core/src/airflow/ui/openapi-gen/requests/schemas.gen.ts",
+    "airflow-ctl/src/airflowctl/api/datamodels/generated.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/ui/openapi-gen/requests/types.gen.ts",
+    "airflow-core/src/airflow/ui/openapi-gen/requests/schemas.gen.ts",
+    "airflow-ctl/src/airflowctl/api/datamodels/generated.py"
+   ],
+   "head_total": 669,
+   "base_total": 591
+  },
+  {
+   "number": 71526,
+   "base_ref": "v3-3-test",
+   "files": 5,
+   "head_top3": [
+    "airflow-core/src/airflow/models/variable.py",
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/public/test_variables.py",
+    "airflow-core/tests/unit/models/test_variable.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/models/variable.py",
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/public/test_variables.py",
+    "airflow-core/tests/unit/models/test_variable.py"
+   ],
+   "head_total": 75,
+   "base_total": 70
+  },
+  {
+   "number": 71501,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/ui/src/components/SearchBar.tsx",
+    "airflow-core/src/airflow/ui/src/components/AdvancedSearchToggle.tsx"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/ui/src/components/SearchBar.tsx",
+    "airflow-core/src/airflow/ui/src/components/AdvancedSearchToggle.tsx"
+   ],
+   "head_total": 13,
+   "base_total": 13
+  },
+  {
+   "number": 71491,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "task-sdk/src/airflow/sdk/api/client.py",
+    "task-sdk/tests/task_sdk/api/test_client.py"
+   ],
+   "base_top3": [
+    "task-sdk/src/airflow/sdk/api/client.py",
+    "task-sdk/tests/task_sdk/api/test_client.py"
+   ],
+   "head_total": 83,
+   "base_total": 78
+  },
+  {
+   "number": 71481,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/cli/commands/dag_command.py",
+    "airflow-core/tests/unit/cli/commands/test_dag_command.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/cli/commands/dag_command.py",
+    "airflow-core/tests/unit/cli/commands/test_dag_command.py"
+   ],
+   "head_total": 58,
+   "base_total": 57
+  },
+  {
+   "number": 71438,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/api_fastapi/execution_api/versions/v2026_06_30.py",
+    "airflow-core/tests/unit/api_fastapi/execution_api/versions/v2026_06_30/test_dag_runs.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/api_fastapi/execution_api/versions/v2026_06_30.py",
+    "airflow-core/tests/unit/api_fastapi/execution_api/versions/v2026_06_30/test_dag_runs.py"
+   ],
+   "head_total": 9,
+   "base_total": 7
+  },
+  {
+   "number": 71435,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/api_fastapi/core_api/services/ui/calendar.py",
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/ui/test_calendar.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/api_fastapi/core_api/services/ui/calendar.py",
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/ui/test_calendar.py"
+   ],
+   "head_total": 17,
+   "base_total": 13
+  },
+  {
+   "number": 71428,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/public/test_connections.py",
+    "airflow-core/src/airflow/api_fastapi/core_api/routes/public/connections.py"
+   ],
+   "base_top3": [
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/public/test_connections.py",
+    "airflow-core/src/airflow/api_fastapi/core_api/routes/public/connections.py"
+   ],
+   "head_total": 34,
+   "base_total": 32
+  },
+  {
+   "number": 71398,
+   "base_ref": "v3-3-test",
+   "files": 7,
+   "head_top3": [
+    "scripts/ci/prek/common_prek_utils.py",
+    "scripts/ci/prek/check_new_airflow_exception_usage.py",
+    "scripts/ci/prek/check_provide_session_kwargs.py"
+   ],
+   "base_top3": [
+    "scripts/ci/prek/common_prek_utils.py",
+    "scripts/ci/prek/check_new_airflow_exception_usage.py",
+    "scripts/ci/prek/check_provide_session_kwargs.py"
+   ],
+   "head_total": 42,
+   "base_total": 34
+  },
+  {
+   "number": 71383,
+   "base_ref": "v3-3-stable",
+   "files": 11,
+   "head_top3": [
+    "airflow-core/src/airflow/api_fastapi/common/parameters.py",
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/ui/test_dags.py",
+    "airflow-core/src/airflow/ui/src/pages/TaskInstance/Logs/TaskLogContent.tsx"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/api_fastapi/common/parameters.py",
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/ui/test_dags.py",
+    "airflow-core/src/airflow/ui/src/pages/TaskInstance/Logs/TaskLogContent.tsx"
+   ],
+   "head_total": 152,
+   "base_total": 138
+  },
+  {
+   "number": 71371,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/api_fastapi/common/parameters.py",
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/ui/test_dags.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/api_fastapi/common/parameters.py",
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/ui/test_dags.py"
+   ],
+   "head_total": 89,
+   "base_total": 77
+  },
+  {
+   "number": 71363,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/dag_processing/manager.py",
+    "airflow-core/tests/unit/dag_processing/test_manager.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/dag_processing/manager.py",
+    "airflow-core/tests/unit/dag_processing/test_manager.py"
+   ],
+   "head_total": 118,
+   "base_total": 110
+  },
+  {
+   "number": 71340,
+   "base_ref": "v3-3-test",
+   "files": 3,
+   "head_top3": [
+    "scripts/in_container/run_generate_constraints.py",
+    "scripts/tests/in_container/test_run_generate_constraints.py",
+    "dev/breeze/src/airflow_breeze/utils/release_constraints.py"
+   ],
+   "base_top3": [
+    "scripts/in_container/run_generate_constraints.py",
+    "scripts/tests/in_container/test_run_generate_constraints.py",
+    "dev/breeze/src/airflow_breeze/utils/release_constraints.py"
+   ],
+   "head_total": 14,
+   "base_total": 14
+  },
+  {
+   "number": 71326,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/dag_processing/manager.py",
+    "airflow-core/tests/unit/dag_processing/test_manager.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/dag_processing/manager.py",
+    "airflow-core/tests/unit/dag_processing/test_manager.py"
+   ],
+   "head_total": 118,
+   "base_total": 110
+  },
+  {
+   "number": 71288,
+   "base_ref": "v3-3-test",
+   "files": 3,
+   "head_top3": [
+    "airflow-core/src/airflow/jobs/scheduler_job_runner.py",
+    "airflow-core/src/airflow/utils/event_scheduler.py",
+    "airflow-core/tests/unit/utils/test_event_scheduler.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/jobs/scheduler_job_runner.py",
+    "airflow-core/src/airflow/utils/event_scheduler.py",
+    "airflow-core/tests/unit/utils/test_event_scheduler.py"
+   ],
+   "head_total": 145,
+   "base_total": 130
+  },
+  {
+   "number": 71262,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/jobs/scheduler_job_runner.py",
+    "airflow-core/tests/unit/jobs/test_scheduler_job.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/jobs/scheduler_job_runner.py",
+    "airflow-core/tests/unit/jobs/test_scheduler_job.py"
+   ],
+   "head_total": 261,
+   "base_total": 238
+  },
+  {
+   "number": 71240,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/ui/src/i18n/config.ts",
+    "airflow-core/src/airflow/ui/src/i18n/config.test.ts"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/ui/src/i18n/config.ts",
+    "airflow-core/src/airflow/ui/src/i18n/config.test.ts"
+   ],
+   "head_total": 15,
+   "base_total": 15
+  },
+  {
+   "number": 71233,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "dev/breeze/src/airflow_breeze/utils/gh_workflow_utils.py",
+    "dev/breeze/tests/test_gh_workflow_utils.py"
+   ],
+   "base_top3": [
+    "dev/breeze/src/airflow_breeze/utils/gh_workflow_utils.py",
+    "dev/breeze/tests/test_gh_workflow_utils.py"
+   ],
+   "head_total": 3,
+   "base_total": 3
+  },
+  {
+   "number": 71208,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "task-sdk/src/airflow/sdk/__init__.py",
+    "task-sdk/src/airflow/sdk/definitions/deadline.py"
+   ],
+   "base_top3": [
+    "task-sdk/src/airflow/sdk/__init__.py",
+    "task-sdk/src/airflow/sdk/definitions/deadline.py"
+   ],
+   "head_total": 65,
+   "base_total": 62
+  },
+  {
+   "number": 71200,
+   "base_ref": "v3-3-test",
+   "files": 4,
+   "head_top3": [
+    "airflow-core/src/airflow/ui/src/pages/TaskInstance/Logs/TaskLogContent.tsx",
+    "airflow-core/src/airflow/ui/src/pages/TaskInstance/Logs/Logs.test.tsx",
+    "airflow-core/src/airflow/ui/src/pages/TaskInstance/Logs/logSelection.test.ts"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/ui/src/pages/TaskInstance/Logs/TaskLogContent.tsx",
+    "airflow-core/src/airflow/ui/src/pages/TaskInstance/Logs/Logs.test.tsx",
+    "airflow-core/src/airflow/ui/src/pages/TaskInstance/Logs/logSelection.test.ts"
+   ],
+   "head_total": 31,
+   "base_total": 31
+  },
+  {
+   "number": 71197,
+   "base_ref": "v3-3-stable",
+   "files": 538,
+   "head_top3": [
+    "airflow-core/src/airflow/ui/openapi-gen/requests/types.gen.ts",
+    "dev/breeze/src/airflow_breeze/commands/release_management_commands.py",
+    "dev/breeze/src/airflow_breeze/global_constants.py"
+   ],
+   "base_top3": [
+    "dev/breeze/src/airflow_breeze/commands/release_management_commands.py",
+    "airflow-core/src/airflow/ui/openapi-gen/requests/types.gen.ts",
+    "dev/breeze/src/airflow_breeze/global_constants.py"
+   ],
+   "head_total": 7514,
+   "base_total": 6883
+  },
+  {
+   "number": 71183,
+   "base_ref": "v3-3-test",
+   "files": 4,
+   "head_top3": [
+    "airflow-core/src/airflow/jobs/scheduler_job_runner.py",
+    "airflow-core/tests/unit/jobs/test_scheduler_job.py",
+    "airflow-core/src/airflow/models/trigger.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/jobs/scheduler_job_runner.py",
+    "airflow-core/tests/unit/jobs/test_scheduler_job.py",
+    "airflow-core/src/airflow/models/trigger.py"
+   ],
+   "head_total": 326,
+   "base_total": 300
+  },
+  {
+   "number": 71182,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "task-sdk/tests/task_sdk/serde/test_serializers.py",
+    "task-sdk/src/airflow/sdk/serde/serializers/pandas.py"
+   ],
+   "base_top3": [
+    "task-sdk/tests/task_sdk/serde/test_serializers.py",
+    "task-sdk/src/airflow/sdk/serde/serializers/pandas.py"
+   ],
+   "head_total": 13,
+   "base_total": 9
+  },
+  {
+   "number": 71169,
+   "base_ref": "v3-3-test",
+   "files": 4,
+   "head_top3": [
+    "task-sdk/tests/task_sdk/serde/test_serializers.py",
+    "providers/amazon/tests/unit/amazon/aws/transfers/test_sql_to_s3.py",
+    "providers/salesforce/tests/unit/salesforce/hooks/test_salesforce.py"
+   ],
+   "base_top3": [
+    "task-sdk/tests/task_sdk/serde/test_serializers.py",
+    "providers/amazon/tests/unit/amazon/aws/transfers/test_sql_to_s3.py",
+    "providers/salesforce/tests/unit/salesforce/hooks/test_salesforce.py"
+   ],
+   "head_total": 23,
+   "base_total": 17
+  },
+  {
+   "number": 71167,
+   "base_ref": "v3-3-test",
+   "files": 5,
+   "head_top3": [
+    "dev/breeze/tests/test_selective_checks.py",
+    "scripts/ci/prek/common_prek_utils.py",
+    "scripts/ci/prek/update_airflow_pyproject_toml.py"
+   ],
+   "base_top3": [
+    "dev/breeze/tests/test_selective_checks.py",
+    "scripts/ci/prek/common_prek_utils.py",
+    "scripts/ci/prek/update_airflow_pyproject_toml.py"
+   ],
+   "head_total": 157,
+   "base_total": 141
+  },
+  {
+   "number": 71163,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/models/trigger.py",
+    "airflow-core/tests/unit/models/test_trigger.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/models/trigger.py",
+    "airflow-core/tests/unit/models/test_trigger.py"
+   ],
+   "head_total": 51,
+   "base_total": 49
+  },
+  {
+   "number": 71146,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "task-sdk/src/airflow/sdk/execution_time/supervisor.py",
+    "task-sdk/tests/task_sdk/execution_time/test_supervisor.py"
+   ],
+   "base_top3": [
+    "task-sdk/src/airflow/sdk/execution_time/supervisor.py",
+    "task-sdk/tests/task_sdk/execution_time/test_supervisor.py"
+   ],
+   "head_total": 162,
+   "base_total": 151
+  },
+  {
+   "number": 71142,
+   "base_ref": "v3-3-test",
+   "files": 3,
+   "head_top3": [
+    "airflow-core/src/airflow/secrets/environment_variables.py",
+    "airflow-core/tests/unit/always/test_secrets.py",
+    "airflow-core/tests/unit/always/test_secrets_environment_variables.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/secrets/environment_variables.py",
+    "airflow-core/tests/unit/always/test_secrets.py",
+    "airflow-core/tests/unit/always/test_secrets_environment_variables.py"
+   ],
+   "head_total": 15,
+   "base_total": 12
+  },
+  {
+   "number": 71133,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/serialization/serialized_objects.py",
+    "airflow-core/tests/unit/serialization/test_dag_serialization.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/serialization/serialized_objects.py",
+    "airflow-core/tests/unit/serialization/test_dag_serialization.py"
+   ],
+   "head_total": 152,
+   "base_total": 149
+  },
+  {
+   "number": 71128,
+   "base_ref": "v3-3-test",
+   "files": 3,
+   "head_top3": [
+    "airflow-core/src/airflow/ui/openapi-gen/requests/types.gen.ts",
+    "airflow-core/src/airflow/ui/openapi-gen/requests/services.gen.ts",
+    "airflow-core/src/airflow/api_fastapi/core_api/routes/public/xcom.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/ui/openapi-gen/requests/types.gen.ts",
+    "airflow-core/src/airflow/ui/openapi-gen/requests/services.gen.ts",
+    "airflow-core/src/airflow/api_fastapi/core_api/routes/public/xcom.py"
+   ],
+   "head_total": 340,
+   "base_total": 305
+  },
+  {
+   "number": 71127,
+   "base_ref": "v3-3-test",
+   "files": 3,
+   "head_top3": [
+    "airflow-core/src/airflow/ui/src/pages/TaskInstance/Logs/TaskLogContent.tsx",
+    "airflow-core/src/airflow/ui/src/pages/TaskInstance/Logs/utils.test.ts",
+    "airflow-core/src/airflow/ui/src/pages/TaskInstance/Logs/utils.ts"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/ui/src/pages/TaskInstance/Logs/TaskLogContent.tsx",
+    "airflow-core/src/airflow/ui/src/pages/TaskInstance/Logs/utils.test.ts",
+    "airflow-core/src/airflow/ui/src/pages/TaskInstance/Logs/utils.ts"
+   ],
+   "head_total": 30,
+   "base_total": 27
+  },
+  {
+   "number": 71126,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/ui/src/components/TaskTrySelect.tsx",
+    "airflow-core/src/airflow/ui/src/components/TaskTrySelect.test.tsx"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/ui/src/components/TaskTrySelect.tsx",
+    "airflow-core/src/airflow/ui/src/components/TaskTrySelect.test.tsx"
+   ],
+   "head_total": 8,
+   "base_total": 6
+  },
+  {
+   "number": 71119,
+   "base_ref": "airflow-ctl/v0-1-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-ctl/tests/airflow_ctl/api/test_operations.py",
+    "airflow-ctl/src/airflowctl/api/operations.py"
+   ],
+   "base_top3": [
+    "airflow-ctl/tests/airflow_ctl/api/test_operations.py",
+    "airflow-ctl/src/airflowctl/api/operations.py"
+   ],
+   "head_total": 69,
+   "base_total": 49
+  },
+  {
+   "number": 71107,
+   "base_ref": "v3-3-test",
+   "files": 4,
+   "head_top3": [
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/public/test_dag_run.py",
+    "airflow-core/src/airflow/api_fastapi/core_api/routes/public/dag_run.py",
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/public/test_assets.py"
+   ],
+   "base_top3": [
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/public/test_dag_run.py",
+    "airflow-core/src/airflow/api_fastapi/core_api/routes/public/dag_run.py",
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/public/test_assets.py"
+   ],
+   "head_total": 170,
+   "base_total": 156
+  },
+  {
+   "number": 71099,
+   "base_ref": "v3-3-test",
+   "files": 5,
+   "head_top3": [
+    "shared/configuration/src/airflow_shared/configuration/parser.py",
+    "shared/configuration/tests/configuration/test_parser.py",
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/public/test_config.py"
+   ],
+   "base_top3": [
+    "shared/configuration/src/airflow_shared/configuration/parser.py",
+    "shared/configuration/tests/configuration/test_parser.py",
+    "airflow-core/tests/unit/api_fastapi/core_api/routes/public/test_config.py"
+   ],
+   "head_total": 38,
+   "base_total": 38
+  },
+  {
+   "number": 71090,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/api_fastapi/core_api/security.py",
+    "airflow-core/tests/unit/api_fastapi/core_api/test_security.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/api_fastapi/core_api/security.py",
+    "airflow-core/tests/unit/api_fastapi/core_api/test_security.py"
+   ],
+   "head_total": 63,
+   "base_total": 59
+  },
+  {
+   "number": 71083,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "task-sdk/src/airflow/sdk/execution_time/task_runner.py",
+    "task-sdk/tests/task_sdk/execution_time/test_task_runner.py"
+   ],
+   "base_top3": [
+    "task-sdk/src/airflow/sdk/execution_time/task_runner.py",
+    "task-sdk/tests/task_sdk/execution_time/test_task_runner.py"
+   ],
+   "head_total": 199,
+   "base_total": 192
+  },
+  {
+   "number": 71082,
+   "base_ref": "v3-3-test",
+   "files": 3,
+   "head_top3": [
+    "scripts/in_container/run_generate_constraints.py",
+    "scripts/tests/in_container/test_run_generate_constraints.py",
+    "scripts/tests/in_container/__init__.py"
+   ],
+   "base_top3": [
+    "scripts/in_container/run_generate_constraints.py",
+    "scripts/tests/in_container/__init__.py",
+    "scripts/tests/in_container/test_run_generate_constraints.py"
+   ],
+   "head_total": 12,
+   "base_total": 7
+  },
+  {
+   "number": 71081,
+   "base_ref": "v3-3-test",
+   "files": 11,
+   "head_top3": [
+    "dev/breeze/src/airflow_breeze/commands/release_management_commands.py",
+    "dev/breeze/src/airflow_breeze/commands/release_management_commands_config.py",
+    "dev/breeze/src/airflow_breeze/commands/release_candidate_command.py"
+   ],
+   "base_top3": [
+    "dev/breeze/src/airflow_breeze/commands/release_management_commands.py",
+    "dev/breeze/src/airflow_breeze/commands/release_management_commands_config.py",
+    "dev/breeze/src/airflow_breeze/commands/release_candidate_command.py"
+   ],
+   "head_total": 281,
+   "base_total": 267
+  },
+  {
+   "number": 71069,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "task-sdk/src/airflow/sdk/execution_time/context.py",
+    "task-sdk/tests/task_sdk/execution_time/test_context.py"
+   ],
+   "base_top3": [
+    "task-sdk/src/airflow/sdk/execution_time/context.py",
+    "task-sdk/tests/task_sdk/execution_time/test_context.py"
+   ],
+   "head_total": 83,
+   "base_total": 77
+  },
+  {
+   "number": 71065,
+   "base_ref": "v3-3-test",
+   "files": 5,
+   "head_top3": [
+    "airflow-core/src/airflow/models/taskinstance.py",
+    "airflow-core/src/airflow/api_fastapi/execution_api/routes/task_instances.py",
+    "airflow-core/tests/unit/api_fastapi/execution_api/versions/head/test_task_instances.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/models/taskinstance.py",
+    "airflow-core/src/airflow/api_fastapi/execution_api/routes/task_instances.py",
+    "airflow-core/tests/unit/api_fastapi/execution_api/versions/head/test_task_instances.py"
+   ],
+   "head_total": 273,
+   "base_total": 264
+  },
+  {
+   "number": 71043,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/api_fastapi/logging/decorators.py",
+    "airflow-core/tests/unit/api_fastapi/logging/test_decorators.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/api_fastapi/logging/decorators.py",
+    "airflow-core/tests/unit/api_fastapi/logging/test_decorators.py"
+   ],
+   "head_total": 15,
+   "base_total": 11
+  },
+  {
+   "number": 71042,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "task-sdk/tests/task_sdk/definitions/test_callback.py",
+    "task-sdk/src/airflow/sdk/definitions/callback.py"
+   ],
+   "base_top3": [
+    "task-sdk/src/airflow/sdk/definitions/callback.py",
+    "task-sdk/tests/task_sdk/definitions/test_callback.py"
+   ],
+   "head_total": 9,
+   "base_total": 8
+  },
+  {
+   "number": 71041,
+   "base_ref": "v3-3-test",
+   "files": 2,
+   "head_top3": [
+    "airflow-core/src/airflow/secrets/environment_variables.py",
+    "airflow-core/tests/unit/always/test_secrets_environment_variables.py"
+   ],
+   "base_top3": [
+    "airflow-core/src/airflow/secrets/environment_variables.py",
+    "airflow-core/tests/unit/always/test_secrets_environment_variables.py"
+   ],
+   "head_total": 5,
+   "base_total": 5
+  }
+ ],
+ "skipped": {
+  "fewer than two reviewable files": 88
+ }
+}

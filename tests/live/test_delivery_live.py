@@ -29,6 +29,7 @@ from pathlib import Path
 import pytest
 
 from quantamind.serve.review_delivery import Outcome, deliver
+from quantamind.store import tenancy
 from quantamind.store.reviews import recent
 from quantamind.store.schema import open_store
 from quantamind.types.settings import Settings
@@ -52,7 +53,12 @@ pytestmark = pytest.mark.skipif(
 def test_the_join_runs_end_to_end_and_posts_nothing(tmp_path: Path) -> None:
     settings = replace(
         Settings(),
-        database_path=str(tmp_path / "live.db"),
+        # **A DIRECTORY, NOT A FILE.** `QUANTAMIND_DATABASE_PATH` became a TENANT ROOT when
+        # per-repository stores landed; `store/tenancy.py` derives `<root>/<owner>/<name>.db`
+        # from it. This test still passed a file, so `store_for` created `live.db` as a
+        # DIRECTORY and the assertion below then opened a directory as a database. The unit
+        # tests never caught it because they pass a file where production passes a root.
+        database_path=str(tmp_path / "stores"),
         clone_root=str(tmp_path / "clones"),
         posting_enabled=False,
     )
@@ -82,7 +88,12 @@ def test_the_join_runs_end_to_end_and_posts_nothing(tmp_path: Path) -> None:
     # **The review must be ON DISK, not merely computed.** `review` and `ranked_unit` sat in the
     # schema with zero writers, so the pipeline ran and left no trace it had; a dashboard has
     # nothing to draw on until this row exists.
-    conn = open_store(Path(settings.database_path))
+    tenant = tenancy.store_for(Path(settings.database_path), *REPO.split("/", 1))
+    assert tenant.is_file(), (
+        f"no store at {tenant}. The delivery must write into the tenant's own file, not the "
+        f"root: one corrupt page or one bad migration would otherwise take every tenant."
+    )
+    conn = open_store(tenant)
     try:
         repo_id = int(conn.execute("SELECT id FROM repo").fetchone()[0])
         stored = recent(conn, repo_id)

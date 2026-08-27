@@ -1,5 +1,11 @@
 # Why Greptile and Qodo score higher, what the metric actually rewards, and whether our thesis closes it
 
+> **The corpus this rests on has a ±4-point noise floor**, measured 2026-08-26 by running the same
+> arm twice: 91 against 84 of 173 defects from nothing but model nondeterminism. Compare any effect
+> below to 4 points before believing it; large effects survive, small ones were never resolvable.
+> → `corpus-noise-floor.md`
+
+
 > **INTERNAL.** Figures governed by `docs/product/publishing-rules.md`. Recomputed from
 > `research/phase0/bench/results/` — not read off the prose.
 

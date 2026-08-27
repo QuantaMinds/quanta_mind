@@ -79,6 +79,26 @@ class Review:
 
 
 @dataclass(frozen=True, slots=True)
+class Installed:
+    """An App installation, or a change to which repositories it covers.
+
+    **A THIRD OUTCOME, NOT AN `Ignore` WITH A FLAG.** Until now `interpret` answered "review this"
+    or "not ours", and an installation is neither: nothing is being reviewed, and it is very much
+    ours to act on. Folding it into `Ignore` would make the reason string load-bearing, which is
+    how a log line becomes a control flow.
+
+    `repos` is what the installation covers NOW, not what changed. GitHub sends
+    `installation_repositories` with `repositories_added` and `repositories_removed`, but acting on
+    a delta means a missed delivery leaves a tenant permanently unprovisioned; acting on the full
+    list is idempotent and self-healing.
+    """
+
+    account: str
+    repos: tuple[str, ...]
+    action: str
+
+
+@dataclass(frozen=True, slots=True)
 class Ignore:
     """A delivery that authenticated and is not ours to act on. Carries why, for the log."""
 
@@ -114,18 +134,42 @@ def sign(secret: str, body: bytes) -> str:
     return PREFIX + hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
 
 
-def interpret(event: str | None, body: bytes) -> Review | Ignore:
+INSTALL_EVENTS = ("installation", "installation_repositories")
+
+
+def _installed(payload: dict[str, Any]) -> Installed | Ignore:
+    """An installation delivery, or why it could not be read."""
+    account = str(((payload.get("installation") or {}).get("account") or {}).get("login", ""))
+    if not account:
+        return Ignore("installation payload names no account")
+    listed: list[str] = []
+    for key in ("repositories", "repositories_added"):
+        for entry in payload.get(key) or []:
+            if isinstance(entry, dict) and entry.get("full_name"):
+                listed.append(str(entry["full_name"]))
+    action = str(payload.get("action", ""))
+    if not listed and action not in ("deleted", "removed"):
+        # **AN INSTALLATION THAT LISTS NOTHING IS NOT A TENANT WITH NO REPOSITORIES.** GitHub omits
+        # the list on some actions, and provisioning from an empty list would look identical to a
+        # customer who selected none. Said, not assumed away.
+        return Ignore(f"installation {action!r} for {account} lists no repositories")
+    return Installed(account, tuple(sorted(set(listed))), action)
+
+
+def interpret(event: str | None, body: bytes) -> Review | Installed | Ignore:
     """What to do with an AUTHENTICATED delivery. Never called before `verify()` returns None.
 
     Returns `Ignore` with a reason rather than raising: a ping, a label change and a comment are all
     normal traffic, and an endpoint that errors on them fills a log with things nobody should read.
     """
-    if event != REVIEWABLE_EVENT:
-        return Ignore(f"event {event!r} is not {REVIEWABLE_EVENT!r}")
+    if event not in (REVIEWABLE_EVENT, *INSTALL_EVENTS):
+        return Ignore(f"event {event!r} is not {REVIEWABLE_EVENT!r} or an installation")
     try:
         payload: Any = json.loads(body)
     except json.JSONDecodeError as exc:
         return Ignore(f"body is not JSON: {exc}")
+    if event in INSTALL_EVENTS:
+        return _installed(payload) if isinstance(payload, dict) else Ignore("body is not an object")
     if not isinstance(payload, dict):
         return Ignore(f"body is {type(payload).__name__}, not an object")
 

@@ -51,7 +51,7 @@ valid and useful answer.
 
 For each defect quote the EXACT line from the diff that is wrong. Do not give a line number.
 
-Unified diff:
+{context}Unified diff:
 ```
 {diff}
 ```
@@ -140,11 +140,18 @@ def read(
     paths: list[str],
     *,
     project: str,
+    context: str = "",
     location: str = "us-central1",
     gcloud: str = "/opt/homebrew/share/google-cloud-sdk/bin/gcloud",
     model: str = MODEL,
 ) -> list[Finding]:
-    """Findings about `paths` only. Raises `Unavailable` when there are no credentials."""
+    """Findings about `paths` only. Raises `Unavailable` when there are no credentials.
+
+    `context` is prose about the change's shape, already rendered by `render/shape_line.py` and
+    passed in by `serve/`. **IT IS A STRING THIS LAYER DOES NOT BUILD**, because `render/` sits to
+    the right of `infer/` and rule 7 forbids reaching for it. Empty is the supported case and
+    leaves the prompt exactly as it was before shape was measured.
+    """
     if not paths:
         return []
     token = _token(gcloud)
@@ -152,7 +159,7 @@ def read(
         f"https://{location}-aiplatform.googleapis.com/v1/projects/{project}"
         f"/locations/{location}/publishers/google/models/{model}:generateContent"
     )
-    prompt = PROMPT.format(max_findings=MAX_FINDINGS, diff=diff[:MAX_DIFF_CHARS])
+    prompt = PROMPT.format(max_findings=MAX_FINDINGS, diff=diff[:MAX_DIFF_CHARS], context=context)
     answer = _post(
         url,
         token,

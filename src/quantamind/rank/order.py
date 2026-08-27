@@ -67,7 +67,9 @@ def percentiles(scores: Mapping[str, int]) -> dict[str, float]:
     return out
 
 
-def fires(scores: Mapping[str, int], baseline: int | None = None) -> bool:
+def fires(
+    scores: Mapping[str, int], baseline: int | None = None, *, files: int | None = None
+) -> bool:
     """Whether this change is worth speaking on.
 
     **`baseline` IS THIS REPOSITORY'S TOP-DECILE TOUCH COUNT, AND WITHOUT IT THIS RULE IS THE ONE
@@ -87,6 +89,22 @@ def fires(scores: Mapping[str, int], baseline: int | None = None) -> bool:
     honest behaviour, and the caller can still tell WHY -- `Ranking.discrimination` separates
     NO_HISTORY from FLAT_NONZERO, so silence is never a bare absence.
 
+    **`files` IS THE CHANGE'S FILE COUNT AND IT MUST BE PASSED EXPLICITLY, NOT DERIVED FROM
+    `scores`.** `rank/firing.py` replays the gate with ONE synthetic unit per change -- its query
+    produces the top touch count and no file count -- so `len(scores)` there is 1 for every change
+    and a budget test built on it would forecast zero for every repository, silently. The forecast
+    is what a customer is shown before the contract, so it must apply the same gate the product
+    does. `None` skips the test, which is the behaviour every caller had before the budget existed.
+
+    **BELOW THE BUDGET WE SAY NOTHING, BECAUSE THERE IS NOTHING TO SAY.** `read = min(budget,
+    files)`, so on a change of three files or fewer a three-file budget asks the reader for
+    everything they already have, in an order: **effort saved is zero by construction on 66.0% of
+    changes**, which is why `roi-preregistration.md` failed B1 at 28.9% against a 50% bar. Where it
+    binds, the same policy saves 50.3% at a 4.11% miss against alphabetical's 9.20%.
+
+    **This is a narrowing of WHEN we speak and not a change to the ordering** -- the ordering is
+    what carries 1.21% against 3.12%, p < 1e-6, and nothing here touches it.
+
     **This is the 4.61% of changes the ranker cannot help with**, and the number has a source:
     `research/phase0/external/degenerate_rate.json` classifies 9,600 out-of-sample events as 157
     no-history and 286 flat-history, and (157 + 286) / 9,600 = 4.61%. A previous edit of this
@@ -95,6 +113,8 @@ def fires(scores: Mapping[str, int], baseline: int | None = None) -> bool:
     inventing one, and it was committed here.
     """
     if discriminate(scores) is Discrimination.NO_HISTORY:
+        return False
+    if files is not None and files <= BUDGET:
         return False
     top = max(scores.values(), default=0)
     if baseline is None:
@@ -167,7 +187,7 @@ def rank(
         )
     return Ranking(
         units=tuple(units),
-        fired=fires(scores, baseline),
+        fired=fires(scores, baseline, files=len(scores)),
         threshold_percentile=threshold,
         discrimination=split,
     )

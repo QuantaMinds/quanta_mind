@@ -31,6 +31,7 @@ from pathlib import Path
 import pytest
 
 from quantamind.serve import listener
+from quantamind.serve.http import bind
 from quantamind.serve.webhook_github import MisconfiguredSecret, Review, sign
 
 SECRET = "a-real-secret"
@@ -65,7 +66,7 @@ def server(tmp_path: Path) -> Iterator[_Server]:
     def record(review: Review) -> None:
         seen.append(review)
 
-    built = listener.build(_Settings(str(tmp_path / "store.db")), SECRET, record, port=0)
+    built = bind.build(_Settings(str(tmp_path)), SECRET, record, port=0)
     thread = threading.Thread(target=built.serve_forever, daemon=True)
     thread.start()
     yield _Server(port=built.server_address[1], seen=seen)
@@ -184,6 +185,6 @@ def test_health_reports_the_store_and_an_unknown_path_is_a_404(server: _Server) 
 def test_binding_without_a_secret_refuses_rather_than_serving(tmp_path: Path) -> None:
     """An endpoint that verifies nothing is an open command channel, and it fails at bind time."""
     with pytest.raises(MisconfiguredSecret) as caught:
-        listener.build(_Settings(str(tmp_path / "s.db")), "   ", lambda _r: None, port=0)
+        bind.build(_Settings(str(tmp_path)), "   ", lambda _r: None, port=0)
 
     assert "open command channel" in str(caught.value)

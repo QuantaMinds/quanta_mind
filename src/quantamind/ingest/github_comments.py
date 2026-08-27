@@ -35,9 +35,10 @@ CONSUMED BY: serve, once a webhook exists.
 from __future__ import annotations
 
 import json
-import subprocess
 from collections.abc import Sequence
 from typing import Any
+
+from quantamind.ingest import github_api
 
 API_TIMEOUT_S = 30
 PER_PAGE = 100
@@ -76,18 +77,21 @@ def already_posted(comments: Sequence[dict[str, Any]], head_sha: str) -> bool:
     return any(key in str(comment.get("body") or "") for comment in comments)
 
 
-def _gh(repo: str, number: int, args: list[str]) -> Any:
-    done = subprocess.run(
-        ["gh", "api", *args], capture_output=True, text=True, timeout=API_TIMEOUT_S
-    )
-    if done.returncode != 0:
-        raise CommentFailed(
-            repo, number, f"gh api {args[0]} exited {done.returncode}: {done.stderr.strip()[:160]}"
-        )
+def _gh(repo: str, number: int, path: str, method: str = "GET", body: str | None = None) -> Any:
+    """One GitHub API call, authenticated **as the App installation**.
+
+    **THIS USED TO SHELL OUT TO `gh api`, WHICH COMMENTS AS A PERSON.** Whoever ran `gh auth login`
+    owned every comment, every rate limit and every audit-log entry. An installation token is
+    scoped to the repositories the App was installed on and expires in an hour.
+    """
     try:
-        return json.loads(done.stdout) if done.stdout.strip() else None
+        raw = github_api.call(repo, path, method=method, body=body)
+    except github_api.ApiFailed as exc:
+        raise CommentFailed(repo, number, str(exc)) from None
+    try:
+        return json.loads(raw) if raw.strip() else None
     except json.JSONDecodeError as exc:
-        raise CommentFailed(repo, number, f"gh api {args[0]} returned non-JSON: {exc}") from None
+        raise CommentFailed(repo, number, f"{method} {path} returned non-JSON: {exc}") from None
 
 
 def existing(repo: str, number: int) -> list[dict[str, Any]]:
@@ -95,7 +99,7 @@ def existing(repo: str, number: int) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for page in range(1, MAX_PAGES + 1):
         got = _gh(
-            repo, number, [f"repos/{repo}/issues/{number}/comments?per_page={PER_PAGE}&page={page}"]
+            repo, number, f"repos/{repo}/issues/{number}/comments?per_page={PER_PAGE}&page={page}"
         )
         if not isinstance(got, list):
             raise CommentFailed(repo, number, f"comments page {page} was {type(got).__name__}")
@@ -126,13 +130,9 @@ def post(repo: str, number: int, head_sha: str, body: str) -> bool:
     created = _gh(
         repo,
         number,
-        [
-            f"repos/{repo}/issues/{number}/comments",
-            "-f",
-            f"body={stamped}",
-            "--method",
-            "POST",
-        ],
+        f"repos/{repo}/issues/{number}/comments",
+        method="POST",
+        body=json.dumps({"body": stamped}),
     )
     if not isinstance(created, dict) or not created.get("id"):
         raise CommentFailed(repo, number, f"the post returned no comment id: {created!r}")

@@ -1,5 +1,5 @@
 {
- "__version__": 3,
+ "__version__": 4,
  "claim": {
   "columns": [
    [
@@ -760,6 +760,43 @@
    ]
   ],
   "sql": "CREATE TABLE touch (\n        repo_id INTEGER NOT NULL REFERENCES repo(id), path TEXT NOT NULL,\n        committed_at INTEGER NOT NULL)"
+ },
+ "touch_watermark": {
+  "columns": [
+   [
+    0,
+    "repo_id",
+    "INTEGER",
+    0,
+    null,
+    1
+   ],
+   [
+    1,
+    "head_sha",
+    "TEXT",
+    1,
+    null,
+    0
+   ],
+   [
+    2,
+    "languages",
+    "TEXT",
+    1,
+    null,
+    0
+   ],
+   [
+    3,
+    "indexed_at",
+    "INTEGER",
+    1,
+    null,
+    0
+   ]
+  ],
+  "sql": "CREATE TABLE touch_watermark (\n        repo_id INTEGER PRIMARY KEY REFERENCES repo(id), head_sha TEXT NOT NULL,\n        languages TEXT NOT NULL, indexed_at INTEGER NOT NULL)"
  },
  "unresolved": {
   "columns": [

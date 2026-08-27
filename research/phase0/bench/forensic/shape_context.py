@@ -34,7 +34,6 @@ from __future__ import annotations
 
 import json
 import pathlib
-import subprocess
 import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -47,71 +46,71 @@ import judge  # noqa: E402
 import martian_corpus as mc  # noqa: E402
 from borrowed_clones import root as clone_root  # noqa: E402
 from client import Client  # noqa: E402
-from quantamind.ingest.change_shape import shape  # noqa: E402
-from quantamind.serve.working_clone import CloneFailed, ensure  # noqa: E402
+from shape.pulls import OutOfDisk, gather  # noqa: E402
+from shape.tally import coverage  # noqa: E402
 
 OUT = HERE.parent / "results" / "shape_context.json"
+CONTEXTS = HERE.parent / "results" / "shape_contexts.json"
+"""Phase one's output, banked per repository so a later failure does not discard it."""
 
 
-def context_for(clone: pathlib.Path, sha: str, changed: list[str]) -> str:
-    """The shape sentence the model would be given. Facts only, no instruction on what to do."""
-    got = shape(clone, sha, changed)
-    parts = [
-        f"This change touches {got.files} file(s) and {got.lines} line(s). "
-        f"This repository's median change is {got.median_files} file(s) and "
-        f"{got.median_lines} line(s)."
-    ]
-    if got.churn:
-        parts.append(f"These files changed {got.churn} times in the last 30 days.")
-    if got.hands:
-        parts.append(f"{got.hands} other people have edited them in that time.")
-    if got.unusual:
-        parts.append("Unusual for this repository: " + "; ".join(got.unusual) + ".")
-    return " ".join(parts)
+def resolve(repo: str) -> int:
+    """Gather ONE repository's contexts and merge them into `CONTEXTS`, then give the disk back.
+
+    **PHASE ONE IS RESUMABLE BECAUSE IT KEEPS FAILING PART-WAY THROUGH.** grafana timed out twice
+    and each time took cal.com and discourse's clones down with it -- 20 contexts already paid
+    for, discarded because they lived only in memory. Contexts are facts about a commit and do not
+    go stale, so they are written to disk as each repository finishes and a re-run skips what is
+    already there.
+    """
+    pulls = [p for p in mc.pulls() if p.get("golden") and f"/{repo}/" in str(p["original"])]
+    if not pulls:
+        print(f"no golden changes for {repo!r} -- check the name against the corpus")
+        return 1
+    have = json.loads(CONTEXTS.read_text()) if CONTEXTS.exists() else {}
+    try:
+        got = gather(pulls, clone_root())
+    except OutOfDisk as exc:
+        print(f"\n  ABORTING: {exc}")
+        return 1
+    have.update(got)
+    CONTEXTS.write_text(json.dumps(have, indent=1))
+    n, _, _ = coverage(pulls, got)
+    print(f"\n  {repo}: {n}/{len(pulls)} resolved. {len(have)} change(s) banked in {CONTEXTS.name}")
+    return 0 if n else 1
 
 
 def main() -> int:
     mc._assert_intact()
     client = Client("gemini-2.5-pro")
     pulls = [p for p in mc.pulls() if p.get("golden")]
-    # **THE SHARED ROOT, NOT A FRESH ONE PER RUN.** A new mkdtemp every time is what put
-    # 11 GB of duplicate clones on the disk; this reuses them and bounds the total.
     root = clone_root()
     arms: dict[str, dict[str, list[str]]] = {"PLAIN": {}, "WITH_SHAPE": {}}
-    contexts: dict[str, str] = {}
+
+    # **PHASE ONE TOUCHES THE DISK, PHASE TWO TOUCHES THE MODEL.** Contexts are gathered first,
+    # one clone resident at a time, and every clone is given back before any model call is made.
+    # Anything already banked by `--resolve` is reused rather than re-cloned.
+    banked = json.loads(CONTEXTS.read_text()) if CONTEXTS.exists() else {}
+    missing = [p for p in pulls if not banked.get(str(p["key"]))]
+    if banked:
+        print(f"  {len(banked)} context(s) banked; {len(missing)} change(s) still to resolve")
+    try:
+        contexts = {**banked, **(gather(missing, root) if missing else {})}
+    except OutOfDisk as exc:
+        print(f"\n  ABORTING: {exc}")
+        print("  Free space or set QUANTAMIND_BENCH_CLONES to a volume with room.")
+        OUT.write_text(json.dumps({"aborted": "insufficient disk", "why": str(exc)}, indent=1))
+        return 1
+    CONTEXTS.write_text(json.dumps(contexts, indent=1))
 
     for pull in pulls:
         key = str(pull["key"])
         url = str(pull["original"])
-        repo = "/".join(url.split("/")[3:5])
         try:
             diff = mc.diff(url)
         except mc.FetchFailed:
             continue
-        note = ""
-        try:
-            clone = ensure(repo, root)
-            sha = subprocess.run(
-                ["git", "-C", str(clone), "log", "--format=%H", "-1"],
-                capture_output=True,
-                text=True,
-                timeout=120,
-            ).stdout.strip()
-            changed = [
-                x
-                for x in subprocess.run(
-                    ["git", "-C", str(clone), "show", "--name-only", "--format=", sha],
-                    capture_output=True,
-                    text=True,
-                    timeout=120,
-                ).stdout.split()
-                if x.strip()
-            ]
-            note = context_for(clone, sha, changed)
-        except (CloneFailed, subprocess.TimeoutExpired) as exc:
-            print(f"  {repo}: {str(exc)[:60]}", flush=True)
-        contexts[key] = note
-
+        note = contexts.get(key, "")
         for arm in ("PLAIN", "WITH_SHAPE"):
             body = diff if arm == "PLAIN" or not note else f"{note}\n\n{diff}"
             try:
@@ -124,6 +123,33 @@ def main() -> int:
             f"shape {len(arms['WITH_SHAPE'].get(key, [])):>2}",
             flush=True,
         )
+
+    # **AN EMPTY CONTEXT MAKES WITH_SHAPE BYTE-IDENTICAL TO PLAIN**, so a run where every clone
+    # failed produces a perfect null and reads as a clean negative result. The count is printed
+    # and stored, and the run refuses rather than reporting a verdict it cannot support.
+    # **A CHANGE WITH NO CONTEXT MAKES ITS WITH_SHAPE ARM BYTE-IDENTICAL TO PLAIN**, so every
+    # missing context is a change contributing exactly zero signal and pulling the result toward
+    # null. The arithmetic lives in `shape.pulls.coverage`, a pure function, so the gate can be
+    # given a known answer without running the experiment behind it.
+    with_context, by_repo, empty = coverage(pulls, contexts)
+    print(f"\n  context resolved for {with_context} of {len(pulls)} change(s)", flush=True)
+    for repo, (got, total) in sorted(by_repo.items()):
+        print(f"    {repo:<40} {got}/{total}", flush=True)
+
+    if empty:
+        print(f"\n  REFUSING TO SCORE: {', '.join(empty)} contributed NO context at all.")
+        print("  A whole repository missing is a systematic gap, not sampling noise: those")
+        print("  changes' WITH_SHAPE arm is byte-identical to PLAIN and would dilute the result")
+        print("  toward null. Fix the clone and re-run; do not score around it.")
+        OUT.write_text(json.dumps({"aborted": "repository missing", "empty": empty}, indent=1))
+        return 1
+    if with_context <= len(pulls) * 0.8:
+        print("\n  REFUSING TO SCORE: 80% or fewer of changes carry context, so the arms are")
+        print("  largely the same prompt and any verdict would be about the clone step, not shape.")
+        OUT.write_text(
+            json.dumps({"aborted": "insufficient context", "contexts": contexts}, indent=1)
+        )
+        return 1
 
     scored: dict[str, dict[str, int]] = {}
     for arm, cands in arms.items():
@@ -139,7 +165,18 @@ def main() -> int:
         scored[arm] = {"defects_found": covered, "comments": emitted}
         print(f"\n  {arm:<12} {covered} of 173 defects, {emitted} comments", flush=True)
 
-    OUT.write_text(json.dumps({"scored": scored, "contexts": contexts, "arms": arms}, indent=1))
+    OUT.write_text(
+        json.dumps(
+            {
+                "scored": scored,
+                "with_context": with_context,
+                "of_pulls": len(pulls),
+                "contexts": contexts,
+                "arms": arms,
+            },
+            indent=1,
+        )
+    )
     a, b = scored.get("PLAIN", {}), scored.get("WITH_SHAPE", {})
     if a and b:
         d = (b["defects_found"] - a["defects_found"]) / 173 * 100
@@ -156,4 +193,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    # `--resolve <repo>` does ONE repository and stops, which is how this is driven on a machine
+    # that cannot hold two of these clones at once. No argument runs everything still outstanding.
+    if len(sys.argv) == 3 and sys.argv[1] == "--resolve":
+        raise SystemExit(resolve(sys.argv[2]))
     raise SystemExit(main())

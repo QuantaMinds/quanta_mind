@@ -34,7 +34,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Callable
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 from typing import Any
 
@@ -44,12 +44,12 @@ from quantamind.serve.webhook_github import (
     EVENT_HEADER,
     SIGNATURE_HEADER,
     Ignore,
-    MisconfiguredSecret,
+    Installed,
     Review,
     interpret,
     verify,
 )
-from quantamind.store import deliveries, schema
+from quantamind.store import deliveries, schema, tenancy
 
 # GitHub's documented maximum payload is 25 MB. A read with no ceiling is memory exhaustion handed
 # to anyone who can reach the port, and Content-Length is attacker-controlled.
@@ -148,10 +148,36 @@ class _Handler(BaseHTTPRequestHandler):
         event = self.headers.get(EVENT_HEADER, "")
         decision = interpret(event, body)
         if isinstance(decision, Ignore):
+            # **THE REASON IS PRINTED, NOT ONLY RETURNED.** It went into the HTTP body, which
+            # GitHub reads and discards, so an operator watching the log saw `200` and could not
+            # tell an ignored ping from a completed review. `Ignore` has carried a reason all
+            # along; nothing was showing it to the person who needed it.
+            print(f"[serve] ignored {event!r}: {decision.reason}", flush=True)
             self._say(200, {"ignored": decision.reason})
             return
 
-        conn = schema.open_store(Path(self.settings.database_path))
+        if isinstance(decision, Installed):
+            # Provisioned here so a first review pays no cold index. → `store/tenancy.provision`.
+            made, refused = tenancy.provision(Path(self.settings.database_path), decision.repos)
+            for full in refused:
+                print(f"[serve] {full}: NOT provisioned", flush=True)
+            print(
+                f"[serve] installation {decision.action!r} for {decision.account}: "
+                f"provisioned {len(made)} of {len(decision.repos)} repository(ies)",
+                flush=True,
+            )
+            self._say(200, {"provisioned": made})
+            return
+
+        # **THE DELIVERY LEDGER IS ITS OWN STORE, BESIDE THE TENANTS AND NOT INSIDE ONE.**
+        # `database_path` became a ROOT when each repository got its own file, and this line still
+        # opened it as though it were a database: the first real pull request would have died on
+        # `unable to open database file`. It survived every test because the tests never drive the
+        # listener's store, and survived three live deliveries because a ping returns above.
+        # Delivery ids are global -- the same id must not be processed twice for any tenant -- so
+        # the ledger cannot live in a tenant's file. `tenancy.tenants()` globs `<root>/<owner>/*.db`
+        # and so does not mistake this for a customer.
+        conn = schema.open_store(Path(self.settings.database_path) / "deliveries.db")
         try:
             try:
                 fresh = deliveries.begin(conn, delivery_id, event)
@@ -172,28 +198,3 @@ class _Handler(BaseHTTPRequestHandler):
             deliveries.complete(conn, delivery_id)
         finally:
             conn.close()
-
-
-def build(settings: Any, secret: str, work: Work, port: int = 7331) -> ThreadingHTTPServer:
-    """A server ready for `serve_forever()`. Binds immediately, so a port clash fails here.
-
-    `work` is injected rather than imported: the socket layer can then be exercised without running
-    a ranking, and it never reaches rightward into a pipeline it has no business knowing about.
-    """
-    if not secret.strip():
-        raise MisconfiguredSecret(
-            "no webhook secret: refusing to bind. An endpoint that verifies nothing is an open "
-            "command channel, and it would pass every test that supplies a secret."
-        )
-    # **`staticmethod`, and it is not decoration.** A plain function stored as a class attribute is
-    # a descriptor: Python binds it and `self.work(review)` arrives as `work(self, review)`. The
-    # first version of this failed exactly that way against `serve/cli.py`, while the unit tests
-    # passed -- because they injected `list.append`, a BUILTIN bound method, which is not a
-    # descriptor and so was never re-bound. **The test agreed for a reason unrelated to the
-    # property**, and only a plain-function caller could tell.
-    bound = type(
-        "_Bound",
-        (_Handler,),
-        {"settings": settings, "secret": secret, "work": staticmethod(work)},
-    )
-    return ThreadingHTTPServer(("127.0.0.1", port), bound)

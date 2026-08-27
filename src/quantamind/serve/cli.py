@@ -51,6 +51,9 @@ def build_parser() -> argparse.ArgumentParser:
         "serve", help="authenticate and de-duplicate GitHub webhooks over HTTP"
     )
     listen.add_argument("--port", type=int, default=7331)
+    # **`--host` MUST BE ASKED FOR.** Loopback by default so a developer does not expose an
+    # endpoint to their network by omission; the container passes 0.0.0.0 deliberately.
+    listen.add_argument("--host", default="127.0.0.1", help="bind address; 0.0.0.0 in a container")
     look = subparsers.add_parser(
         "review", help="rank one change's files against history and print what we would say"
     )
@@ -91,6 +94,10 @@ def render_config(settings: Settings) -> str:
         f"model                      {settings.model}",
         f"subprocess_timeout_seconds {settings.subprocess_timeout_seconds}",
         f"clone_root                 {settings.clone_root}",
+        f"app_id                     {settings.app_id or '(unset)'}",
+        # The PATH, never the key. `app_auth` reads the file when it signs; a credential printed
+        # by a `config` command is a credential in somebody's terminal scrollback.
+        f"app_key_path               {settings.app_key_path or '(unset)'}",
         # **The one line here that says whether this process writes to somebody else's project.**
         f"posting_enabled            {settings.posting_enabled}",
         "",
@@ -147,7 +154,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "serve":
         from quantamind.serve.run_endpoint import run
 
-        return run(args.port)
+        return run(args.port, args.host)
 
     if args.command == "review":
         from quantamind.serve.run_commit import review_commit

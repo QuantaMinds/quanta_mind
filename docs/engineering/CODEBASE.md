@@ -1560,3 +1560,563 @@ could not have helped.
 **The bound is `keep + 1`, not `keep`** — `root()` sweeps and then the caller adds one. Measured
 1, 2, 3, 4, 4, 4 across six borrows at keep=3, and the docstring says so because the first version
 claimed the wrong invariant.
+
+### `ingest/review_window.py` + `render/shape_line.py` — the shape reaches the model, in a window that ends at the change
+
+`ingest/change_shape.py` measured the facts a reviewer wants before reading anything — files and
+lines against the repository's median, how many other people have been in these files, how often
+they change, when it landed. **It was consumed by nothing.** Its docstring named
+`render/shape_line.py` as its consumer and that file did not exist, so a finished measurement sat
+dead in the tree with a promise in its header as the only evidence it was meant to be used.
+
+**It was also wrong in three ways, all the same way: it read a window that ends now.**
+
+| defect | what it did | measured |
+|---|---|---|
+| wall-clock window | `--since=30.days.ago`, relative to the run | django `2936a0a9` reported churn 6 where **3 of the 6 landed after the change**; flask `c17f3793` reported churn 0 against a true 2 on a clone whose history ended six months before the run |
+| the change counted itself | `--until` is inclusive | every figure was one too high |
+| `git log` walks from HEAD | no revision given | flask `c17f3793`: **7 commits from `main`, 3 from the change**, and the first number moves as HEAD moves |
+
+The empty-window case is the dangerous one. A stale clone returns **0 people, 0 changes** for every
+file — which reads as a quiet, untouched file and is the exact opposite of what a silent instrument
+means. → `docs/CORRECTIONS.md`, the clean-zero rule.
+
+**`review_window.py` exists because bounding time and counting files are two concerns**, and
+because bounding time is the half that was wrong. `ending_at(stamp, days, site)` is a pure function
+over a timestamp, so it can be given a known answer; the same logic inlined beside four git calls
+could not. **It raises rather than falling back to wall-clock** — the fallback is the original
+defect, and a default that reintroduces it is worse than an error.
+
+**`render/shape_line.py` is the promised consumer, finally written.** `block()` renders the shape
+for `serve/deep_review.py`, which passes it to `infer/gemini.read(..., context=...)`. The string is
+built in `render/` and never in `infer/`: rule 7 puts `render/` to the right, so the model layer
+cannot reach for it and is handed it instead. **Empty context is supported and leaves the prompt
+byte-identical to what it was before any of this was measured.**
+
+**The model reads only the ranked files but is told the shape of the whole change.** Different
+scopes on purpose — inference goes where the ranker pointed, but "6 files where your median is 2"
+is a fact about the change and would be false counted over the three files we funded.
+
+**The block tells the model the shape is not a defect.** A model shown "23 files against a median
+of 2" with no instruction reports the size as the finding, which the prompt already forbids.
+Verified live on flask `c17f3793`: the model returned the same finding it returned without the
+context and did not comment on the change's size.
+
+→ `tests/live/shape/test_change_shape_live.py`, which names the answer (churn 2, hands 0),
+recomputes the window from git, and carries **two negative controls** — one requiring the
+wall-clock window to disagree, one requiring HEAD-walking to admit commits the change never saw.
+Without them the assertions pass on any clone where the two windows happen to agree. Sabotaging the
+whole defect back in turns 3 of the 6 red.
+
+### `types/deep.py` + `render/deep_report.py` — the discards conserve, and each one names its mechanism
+
+`serve/deep_review.py` counted what the reviewer pass discarded and then reported one of the four
+numbers. Both halves were wrong.
+
+**The count was wrong.** `unanchored` was computed as `len(found) - len(surviving)`, which is
+quote-not-in-diff **plus** oracle-refuted, so every refuted finding was counted twice — once in
+`unanchored` and once in `refuted`. A trailing `- refuted + refuted` cancelled to nothing and made
+the expression read as deliberate.
+
+**Nothing in the tree asserted on it.** `grep unanchored tests/` returned nothing at all. The field
+was printed to an operator and checked by no one, which is why an expression that cannot be read
+without simplifying it on paper survived.
+
+**The report was wrong independently of the count.** `refuted` and `withdrawn` were correct on the
+record and never printed. Given four findings with one of each fate, an operator saw:
+
+```
+[deep] 4 raw finding(s); 2 dropped — quote not in the diff
+```
+
+Three discards, three different mechanisms, one number — and it was the wrong number. Worse,
+`(nothing survived the anchor check)` printed over findings that **had** survived the anchor check
+and were dropped two stages later by an oracle or by the model's own retraction. Now:
+
+```
+[deep] 4 raw finding(s) from the model:
+[deep]     1 anchored and surviving every check
+[deep]     1 dropped — the quoted code is not in the diff
+[deep]     1 dropped — an oracle refuted it or could not settle it
+[deep]     1 withdrawn — the model retracted it, given a fact
+```
+
+**The fix is an invariant, not a test.** `Deep.__post_init__` requires
+`anchored + unanchored + refuted + withdrawn == raw` and raises naming both totals. A field nobody
+asserts on can drift; an arithmetic identity checked at construction cannot.
+
+**`Deep.consulted` separates two states that printed identically.** When the ranked files carry no
+diff the model is never asked, and `raw = 0` then meant the same as `raw = 0` after a clean review.
+Rule 3: an instrument that did not run and a result are different values on the wire.
+
+**Both moved out of `serve/`, and the layering decided where to.** `render/` prints the record and
+may not import `serve/`, so the vocabulary sits left of both in `types/` — the same reason `Finding`
+is not in `infer/`. What pushed the split was `serve/deep_review.py` crossing the 200-line cap while
+`serve/` sat at its 15-file directory cap; what decided its shape was rule 6.
+
+→ `tests/unit/layers/serve/test_deep_counts.py`, which asserts the arithmetic AND the text. The
+counts being right on a record that never reaches the operator is the same failure as a wrong count.
+
+### `working_clone.ensure()` could not clone a repository with a `pr/` branch
+
+Pull heads were fetched into `refs/remotes/origin/pr/*`. That is the same destination git computes
+for a branch named `pr/1`, and git refuses the **entire** fetch rather than the one ref:
+
+```
+fatal: Cannot fetch both refs/heads/pr/1 and refs/pull/1/head to refs/remotes/origin/pr/1
+```
+
+`ensure()` turns a non-zero fetch into `CloneFailed` and never falls back to a stale clone — which
+is correct, and which means such a repository could not be reviewed **at all**. Not degraded: no
+clone, so no history, so no ranking. Pull heads now land in `refs/remotes/pull/*`, a namespace no
+branch name can reach.
+
+**It was found by running something, not by reading anything.** The first live run of the shape
+harness hit it on discourse/discourse, which has such a branch. Six guards, a strict type check and
+a live suite had all passed over it, because nothing had ever asked this code to clone that
+repository.
+
+**And it left 997 MB behind on a machine with 2 GB free.** The harness bound its cleanup path to
+`ensure()`'s return value, so a raised `CloneFailed` left the variable unset and the `finally`
+cleaned up nothing. The path is now computed with `path_for()` before the clone is attempted. **A
+cleanup that only runs on the success path is not a cleanup** — the same lesson as `sweep()`
+returning its count, relearned in the failure branch this time.
+
+→ `tests/unit/layers/serve/test_clone_refspec.py` builds a local repository carrying both refs and
+pins the collision, with a negative control requiring the OLD refspec to still fail. It guards git's
+behaviour, not the call site: `ensure()` builds a `github.com` URL and cannot be pointed at a local
+path, and the test says so rather than implying coverage it does not have.
+
+### The shape harness holds one clone at a time
+
+`ensure()` was called per pull request against a root swept once at the start, so every repository
+the run touched stayed resident — about 4.5 GB for this corpus. It now groups the pulls by
+repository, drops each clone before the next, and **checks free space before every clone**, aborting
+with the number rather than filling the disk. Model calls need no clone and run afterwards, once the
+disk is given back. Peak is the largest single repository (grafana, ~1.9 GB) instead of the sum.
+
+### The shape experiment is NULL, and it exposed a ±4-point noise floor under the whole corpus
+
+`shape_context.py` was pre-registered with its bars in its own docstring and never run. It has now
+run three times, and each pass made the result smaller.
+
+```
+first judging      PLAIN 81   WITH_SHAPE 90    +9  (+5.2 points)   -> cleared both bars
+re-judge, same     PLAIN 81   WITH_SHAPE 87    +6  (+3.5 points)
+same-arm replicate PLAIN_A 91 PLAIN_B    84    ±7  (±4.0 points)   -> FROM NOTHING AT ALL
+McNemar b:c = 9:15, exact p = 0.31; per repository 2 of 5 improve, 1 worsens, 2 flat
+```
+
+**THE EFFECT IS SMALLER THAN THE INSTRUMENT'S OWN WOBBLE, AND `PLAIN_A` SCORED 91 — BEATING THE 90
+THAT THE TREATED ARM SCORED.** A no-context run beat the treated arm inside the same experiment.
+
+**The bar was set below the noise it existed to exclude.** `> +2.1 points` was the JUDGE's replicate
+spread, from re-scoring the same outputs. It omitted generation variance, which is roughly double:
+two identical runs disagreed by 0.76 comments per change, up to 4 on one, and a sentry change drew
+2 comments in one run and 6 in the other. Aggregate volume moved barely at all (221 vs 224), so **a
+stable total hid an unstable composition** — which is why the volume bar looked so healthy.
+
+**This is a corpus finding and it travels.** Any reviewer arm scored on the 50-change golden set
+against a bar under ~4 points can be passed by noise, whatever its recorded status. The floor is
+written up once in `docs/product/reviewer/corpus-noise-floor.md`, and every result resting on that
+corpus now carries a pointer to it. **It does not touch the ranker**, which is a different corpus, a
+different method and model-free.
+
+**What survives:** comments fell 2% while the arms stayed matched change by change, so nothing was
+bought with volume — a fact about how the arm behaved, not evidence that it worked. And the seven
+instrument defects were all attenuating; that argument holds and rescues nothing, because a sound
+instrument pointed at 173 defects with ±4 points of noise still cannot resolve an effect of six.
+
+**Fixing the instrument was necessary and insufficient.** Both halves of that sentence are load
+bearing.
+
+**This licenses nothing to ship. It does not license publishing model findings, which stays gated on
+a different-family judge that has never run.** Those two sentences belong together and should not be
+separated.
+
+**Phase one is resumable, and that is not a convenience.** `--resolve <repo>` gathers one
+repository's contexts and banks them to `results/shape_contexts.json`. grafana failed three times,
+and each failure discarded cal.com's and discourse's already-paid-for contexts because they lived
+only in memory. Contexts are facts about a commit and do not go stale, so a re-run skips what is
+banked. Driving it one repository at a time is also what isolated the grafana cause in a single
+clone instead of three.
+
+### The ranker re-ingests the whole repository on every review — 32s per pull request at 115k commits
+
+Measured on `home-assistant/core`, 115,776 commits, 893 MB:
+
+| repository | commits | Half A, end to end | of which `read_touches` |
+|---|---|---|---|
+| pallets/flask | ~1,500 | 0.6s | — |
+| django/django | ~34,000 | 4.6s | — |
+| **home-assistant/core** | **115,776** | **32.7s** | **32.1s, 338,907 touches** |
+
+**The ranking is not slow. The ingest is.** 32.1 of the 32.7 seconds is one call — everything else,
+ranking and rendering and the firing forecast, is the remaining 0.6.
+
+**And it repeats.** `run_review._index()` calls `read_touches()` unconditionally on every review,
+with the docstring "The index is derived, never durable." That is true of the CLI, which hands it a
+`TemporaryDirectory`. It is **not** true of the webhook, which passes `settings.database_path` — a
+durable store. So a large-monorepo customer pays a full history read on every pull request, into a
+store that already holds the answer.
+
+**Nothing caught this because every live test runs against flask**, where the whole cost is 0.6s.
+Scale-dependent costs are invisible to a corpus that has no scale.
+
+**NOT FIXED.** Skipping the re-read means deciding when the index is stale, which is a correctness
+question — a stale index ranks a change against a history that stopped before it, and the output
+looks entirely normal. → the rule in `AGENTS.md` that `rank/` changes carry a plan first.
+
+**Half B is bounded by Half A.** `serve/run_commit.py` returns before the deep pass whenever the
+ranker declines, so the reviewer only ever runs on the ~10% of changes the ranker speaks on. That is
+the thesis — inference goes where the ranker pointed — and it also means any live measurement of the
+reviewer is drawn from a tenth of traffic, selected by fix history rather than at random.
+
+### `touch_watermark` — the index is extended instead of rebuilt, 31s to 0.43s
+
+The ranker re-read the whole repository on every review. Measured on `home-assistant/core`,
+115,776 commits: 37.0s and 339,537 touches, every time, into a store that already held them.
+
+```
+review() against a persistent store   first 30.92s   second 0.43s
+the index alone                       cold  37.0s    warm   0.08s   (489x)
+`quantamind review` CLI               31.09s         31.06s          unchanged, correctly
+```
+
+**The CLI gains nothing on purpose.** `run_commit.py` hands `review()` a `TemporaryDirectory` — the
+command a sceptic runs before granting access leaves nothing behind, and a durable store there would
+be a different promise. The webhook passes `settings.database_path` and is where the cost lived.
+
+**THE BAR WAS NEVER SPEED.** `touches.counts()` filters by `as_of`, so an index reaching too far is
+harmless and one stopping short is invisible: a normal-looking ranking computed against a history
+that ended early. The bar was that the comment be byte-identical, and it is — same sha256 cold and
+warm, same firing forecast.
+
+**The watermark is a COMMIT, not a timestamp, and that is the whole design.** Git history is not
+chronologically ordered: a rebase or cherry-pick lands commits dated OLDER than ones already
+indexed, so `--since=<date>` would skip them silently and every count downstream would read low
+forever. `ingest/reachability.py` answers the two questions that replace it — what is HEAD, and is
+the stored watermark still an ancestor of it.
+
+**`languages` is stored beside the sha** because a suffix added to the product leaves every existing
+index blind to it and an incremental read would never backfill — the one staleness with no natural
+symptom. A changed language set invalidates the cache.
+
+**`extend()` appends and `index()` still replaces.** A touch row carries `(path, committed_at)` and
+no commit identity, so re-appending an already-indexed commit doubles its count silently. Appending
+is safe only because the caller read a commit RANGE, and the rows and the watermark move in one
+transaction — a crash between them would leave an index disagreeing with its own record of how far
+it reaches, which looks exactly like a quiet repository.
+
+**The fixture had to be made hostile before the tests proved anything.** A chronologically ordered
+history cannot distinguish a SHA bound from a timestamp bound, so the first version of
+`tests/live/index/test_touch_cache_live.py` passed under both and proved less than it appeared to. It
+now backdates a commit by a day after later ones — what a rebase does — and requires the range read
+to find it. Sabotaging the bound to a timestamp, and to nothing at all, each turns 3 of 5 red. The
+rewrite case runs `git commit --amend` so the watermark is genuinely unreachable rather than
+asserted to be; this project has shipped a `history_rewritten` check that read zero across 515
+records because it could not fire.
+
+**Schema 3 -> 4, new table only.** The golden was regenerated and its diff read: the version and
+`touch_watermark`, with no existing table's DDL or column order disturbed. `check_schema_shape.py`
+fired first and named the order — bump, migrate, golden, and only then the digest.
+
+### The touch index walks HEAD, and always did — what that costs, measured
+
+The touch-index cache walks `<watermark>..HEAD`, so history reachable from a pull request's base but
+not from HEAD is not counted. **This predates the cache**: `ingest/commits.py` with no `since`
+passes no revision at all, and `git log` defaults to HEAD, so the full read had the same horizon.
+
+**And so does the research.** `research/phase0/external/git_reads.py` passes no revision either.
+The product matches the harness that produced `1.21% against 3.12%, p < 1e-6` — so switching to
+`--all` would index history that claim never counted, and gate 2a requires the productionised
+ordering to reproduce `defect_return.py`'s. **A correctness fix that silently re-bases the one
+validated claim is not a fix.**
+
+**The cost is real and repo-dependent.** Three commits to a file on `main`, four more on an unmerged
+`release/1.0`: the product sees 3 where the branch has 7. Share of the last 100 closed pull requests
+targeting a non-default branch — home-assistant/core **0**, django **3**, **apache/airflow 27**.
+
+**The right revision is already computed and discarded.** `serve/review_delivery.py:99` gets a
+`Base` carrying `sha` and `committed_at`, passes the timestamp to `review()` and drops the sha.
+Walking `git log <base.sha>` is the population the ranking is actually about — **but it is not
+equivalent to walking HEAD and filtering by `as_of`**, and the difference is the same
+non-monotonicity the watermark design turns on: a commit dated before `as_of` that landed after it
+is counted by one and unreachable to the other.
+
+**So this stays open on purpose.** The next step is a measurement — on a repository with real
+release-branch traffic, does base-walking ever change the top-three selection? — not a quiet edit to
+a `git log` invocation. → `docs/plans/feat-touch-index-cache.md`, the investigation section.
+
+### The HEAD horizon, measured: 81% of counts move, 0% of readings, 2.6% of deep reads
+
+`research/phase0/external/walk_horizon.py` scored **78 merged release-branch pull requests** on
+`apache/airflow` twice — touches reachable from HEAD, and from the pull request's own merge-base.
+
+```
+counts differ at all              63/78   81%
+which three files are read         0/78
+which file gets the DEEP read      2/78   2.6%
+```
+
+**Four fifths are scored from a different number, and it changes what we read almost never.** The
+ranking is comparative and the shortfall is broadly spread, so a uniformly lower count selects the
+same three files. Rank 1 is the exception because the allocator funds it deep and 2-3 shallow: on
+airflow #71042 the HEAD walk ranks a test file first and the base walk ranks the source file it
+tests, which is a 2.6% chance of pointing the expensive read at the wrong one of two.
+
+**Not worth changing on this evidence.** A base-walk changes the touch counts carrying
+`1.21% against 3.12%, p < 1e-6`, needs gate 2a re-run, and breaks the single-watermark cache. It
+buys 2.6% in the repository sampled *for* heavy release-branch traffic; in `home-assistant/core` the
+rate is zero, because none of its recent pull requests target a non-default branch.
+
+**The horizon is now a documented property with a number on it.** What the measurement does not
+cover: one repository, one kind of divergence — short-lived release branches cut from main. A
+long-lived fork is the case that could move the set, and 0 of 78 has a 95% upper bound near 3.8%.
+→ `docs/plans/feat-touch-index-cache.md`.
+
+### The gate now requires the budget to bind — product-readiness item 2
+
+`roi-preregistration.md` failed B1 at **28.9% effort reduction against a 50% bar**, and named the
+mechanism: `read = min(budget, files)`, so on the **66.0% of changes touching three files or fewer**
+a three-file budget asks the reader for everything they already have, in an order. Effort saved is
+zero there by construction.
+
+`rank/order.fires()` now takes `files` and returns False at or below `BUDGET`. Measured firing rates
+fall accordingly:
+
+| repository | before | after | changes that bind |
+|---|---|---|---|
+| pallets/flask | 21% | **5%** | 18.7% |
+| home-assistant/core | 10% | **4%** | 30.8% |
+| apache/airflow | — | — | 38.1% |
+
+The binding shares bracket the study's 34.0%, which is the external check on the definition.
+
+**`files` IS PASSED EXPLICITLY AND NOT DERIVED FROM `len(scores)`, AND THAT IS THE WHOLE TRAP.**
+`rank/firing.py` and `rank/history_rates.py` both replay the gate with ONE synthetic unit per
+change — their queries produce a top touch count and no file count — so a budget test read off the
+mapping would have seen one file every time and **forecast zero for every repository, silently, in
+the number a customer is shown before signing**. Both queries now emit
+`COUNT(DISTINCT changed.path)` and pass it through.
+
+**THE TWO REPLAYS MUST AGREE BECAUSE THEY PRINT IN ONE SENTENCE.** Applying the gate to
+`firing.estimate` and not to `history_rates.earlier_rates` produced *"would have spoken 4%. Across
+your history it ran 11% to 10% to 10% to 13%"* — a headline under the new rule and a trend under
+the old one, in the same line, for the length of one command. Caught by running it, not reading it.
+
+**It is a narrowing of WHEN we speak, not a change to the ordering** — the ordering carries
+`1.21% against 3.12%, p < 1e-6` and is untouched. Where the budget binds, the same policy saves
+**50.3% of effort at a 4.11% miss** against alphabetical's 9.20%.
+
+**The measured figures are Python-only.** `research/phase0/external/commit_stream.py` yields `.py`
+files, while the product counts `.py .pyi .ts .tsx .js`. On a Python repository the populations
+coincide; on a polyglot one **more changes bind than the study's population predicts**, so 4.11% and
+50.3% must be quoted as Python-only. Re-deriving them over the full reviewable set is a separate
+measurement and is not done. → `docs/plans/feat-gate-on-binding-changes.md`.
+
+### The product comments as itself — GitHub App auth, no new dependency
+
+`ingest/github_comments.post()` shelled out to the `gh` CLI, so every comment was posted by whoever
+ran `gh auth login`: one identity, one account's rate limit, one person's name on every review. That
+is a developer tool wearing a product's shape.
+
+`ingest/app_auth.py` mints an **installation access token** — scoped to the repositories the App was
+installed on, expiring in an hour, carrying only the permissions the App declared. Verified live on
+`QuantaMinds/QuantaMind`:
+
+```
+1. before        : 0 comment(s)
+2. post()        : True
+3. read back     : 1 comment(s)   author: quanminds[bot]  type: Bot
+4. marker found  : True
+5. post() again  : False          <- idempotent, no duplicate
+6. cleaned up    : 0 comment(s)
+```
+
+**`dependencies = []` HOLDS.** A GitHub App JWT is RS256 and stdlib cannot sign it — `hmac` is
+HS256 and there is no RSA in the standard library. Rather than take this project's first runtime
+dependency for one signature, `app_jwt()` signs with `openssl`, the same choice `infer/gemini.py`
+already makes minting a Vertex token with `gcloud`.
+
+**THE CACHE WAS BROKEN IN A WAY NOTHING WOULD HAVE CAUGHT.** `expires_at` is UTC and the first
+version parsed it with `time.mktime(...) - time.timezone`, which reads a struct as LOCAL time and
+ignores daylight saving. It was **exactly one hour out**, putting every expiry two minutes in the
+past, so the cache never hit once: valid tokens every time, an API round trip every time, no error
+anywhere. It surfaced only because the live test asserted the second call returned the SAME token
+rather than merely a working one. `calendar.timegm` is the correct conversion.
+
+**THE KEY PATH IS CONFIGURATION; THE KEY IS NOT.** `Settings` carries `app_id` and `app_key_path`,
+and `app_auth` reads the file at the moment it signs — the same reasoning as the webhook secret in
+`serve/run_endpoint.py`. `quantamind config` prints the path and never the key.
+
+**`Settings` REFUSES TO CONSTRUCT IF POSTING IS ENABLED WITHOUT AN APP.** The only way to comment
+without one is as whoever authenticated `gh`, which is the behaviour this replaced. Failing at
+startup beats discovering it on a customer's first delivery.
+
+**`.env` MOVED OUT OF THE PACKAGE.** It was at `src/quantamind/.env` — inside the package, where a
+wheel build carries it as package data and publishes a webhook secret to anyone who installs.
+Gitignore governs git, not `build`. It is at the repository root now, and
+`types/settings.from_file()` reads it with the real environment taking precedence.
+
+### One store per repository — product-readiness item 4
+
+`database_path` was a single `quantamind.db` shared by every installation. The schema already
+separated tenants **logically** — `repo` is `UNIQUE (host, name)` and five tables key on `repo_id` —
+and that is not the same as isolating them:
+
+- **a shared blast radius**: one corrupt page, one bad migration, one `rm`, and every tenant is gone
+- **a shared SQLite writer lock**: one long index build blocks every other installation's delivery
+- **offboarding by cascade**: ending a contract becomes a DELETE across five tables that has to get
+  every foreign key right, on live data, against `rm one/path.db`
+
+`store/tenancy.py` gives each repository `<root>/<owner>/<name>.db`. **The unit is the repository,
+not the installation**: an installation's repository selection changes when somebody ticks a box,
+and keying files by installation would move a tenant's data when they did.
+
+**THE PATH IS DERIVED AND NEVER TAKEN FROM THE PAYLOAD.** Owner and name arrive from a webhook.
+HMAC makes them not-arbitrary, which is not the same as well-formed — `..` or a separator in either
+would place a store outside the root or over another tenant's. Refused, the same shapes
+`serve/working_clone.path_for` already refuses.
+
+**`health()` NOW TAKES THE ROOT AND OPENS EVERY TENANT.** A probe that opened one file would check
+one tenant and report for all of them; a version mismatch in any tenant is a tenant this build must
+not write to, and the verdict names which. **No tenants is healthy and says so** — a fresh install
+has no stores and is working, and reporting that as a failure would make "nobody has installed us
+yet" and "our storage is broken" the same alarm.
+
+**AND HEALTH DOES NOT CREATE THE ROOT.** The single-store version deliberately refused to create a
+missing file, so a process pointed at the wrong path could not look like a working one. The first
+version of this change called `mkdir` and lost that: a typo in `QUANTAMIND_DATABASE_PATH` would
+produce a fresh empty root and a healthy verdict. Provisioning storage is the operator's step.
+
+**One test was passing for the wrong reason and it took a neighbouring failure to notice.**
+`test_a_file_that_is_not_a_database_is_not_healthy` wrote its junk file directly into the root,
+where `tenancy.tenants()` does not look — so the probe answered "no tenants, healthy" and the
+assertion still held because a missing root is also unhealthy. It now writes where a tenant store
+actually lives.
+
+### `serve/http/` — binding a server, split from deciding what a request means
+
+`serve/http/bind.py` owns `build()` and `LOOPBACK`: the address the endpoint listens on and the
+refusal when it has no webhook secret. `serve/listener.py` keeps what a REQUEST means — routes,
+signature verification, replay refusal, body limits.
+
+**It exists because `listener.py` was one line under the 200 cap.** Adding a `host` parameter had
+nowhere to go, and trimming the comments already there would have traded a recorded lesson for a
+feature: that file carries the `staticmethod` descriptor bug, the buffered-banner loss, and the
+Content-Length ceiling, each written down because it cost something.
+
+**`host` DEFAULTS TO LOOPBACK AND THE CONTAINER ASKS FOR `0.0.0.0` EXPLICITLY.** The address was
+hardcoded `127.0.0.1`, which was right while this only ran on a laptop and wrong the moment it was
+containerised: inside a container loopback IS the container, so GitHub cannot reach it and every
+delivery times out against a process whose health endpoint says it is fine. Defaulting the other
+way would be worse — a developer running `quantamind serve` would expose an endpoint to their whole
+network without asking. It must not do either by accident.
+
+**What it must not do:** know what a review is. `work` is injected, never imported, so the socket
+layer can be exercised without running a ranking.
+
+### Install provisions a tenant — product-readiness item 6, and what it does NOT do
+
+`webhook_github.interpret()` gained a third outcome. `installation` and `installation_repositories`
+now return `Installed`, and `serve/listener.py` calls `store/tenancy.provision()`. Verified against
+real GitHub deliveries replayed at a live endpoint:
+
+```
+[serve] installation 'created' for QuantaMinds: provisioned 7 of 7 repository(ies)
+[serve] installation 'added'   for QuantaMinds: provisioned 6 of 6 repository(ies)
+/health -> {"ok": true, "detail": "7 tenant store(s) under /data/stores readable at schema v4"}
+```
+
+**`Installed` IS A THIRD OUTCOME, NOT AN `Ignore` WITH A FLAG.** `interpret` answered "review this"
+or "not ours"; an installation is neither — nothing is being reviewed and it is very much ours to
+act on. Folding it in would make a log string load-bearing, which is how a message becomes control
+flow.
+
+**IT ACTS ON THE FULL REPOSITORY LIST, NOT THE DELTA.** GitHub sends `repositories_added` and
+`repositories_removed`, and acting on a delta means one missed delivery leaves a tenant permanently
+unprovisioned. The full list is idempotent and self-healing — visible above, where the second event
+re-provisioned six existing tenants with no effect.
+
+**AN INSTALLATION LISTING NO REPOSITORIES IS REFUSED, NOT PROVISIONED AS EMPTY.** GitHub omits the
+list on some actions, and "the customer selected none" would look identical to it.
+
+**WHAT THIS DOES NOT DO: WARM THE INDEX.** A provisioned store is an EMPTY store —
+`touches indexed: 0, watermark: None` — so a tenant's first pull request still pays the full clone
+and index build, measured at **37 seconds on 115,776 commits**. The claim that provisioning removes
+the cold start is FALSE and was written down before it was checked.
+
+**It cannot be fixed inline.** GitHub expects a prompt 2xx from a webhook, so a 37-second build
+inside the handler would time out the delivery and GitHub would retry it — turning one slow install
+into several. Warming needs a background worker, which is separate work and is not begun.
+
+### The clone never authenticated — found by the first genuine pull request, not by any test
+
+The first real `pull_request` event to reach the running container failed, and it failed at the
+first step:
+
+```
+[serve] accepted QuantaMinds/quanta_mind#84 at 208e9017c6fe
+[serve] QuantaMinds/quanta_mind#84 FAILED: clone exited 128: Cloning into '/data/clones/...'
+fatal: could not read Username for 'https://github.com': No such device or address
+```
+
+`serve/working_clone.ensure()` cloned `https://github.com/<repo>.git` with **no credential at
+all**. On a developer's machine that works and looks like proof — git finds a credential helper, a
+keychain entry or a `gh` login, and authenticates as a *person* who happens to have access. In a
+container there is no helper and no person, so git asks a terminal for a username and exits 128.
+
+**This failed 100% of real deliveries and 0% of tests.** Customer repositories are private; that is
+what a code reviewer is for. The unauthenticated clone could never have read one. It is the same
+illusion the `gh` CLI dependency created — packaging caught that one at build time, and this one
+needed a delivery to expose, because every test either used a local fixture repository or ran where
+the developer's own credentials silently answered.
+
+`ingest/git_credentials.environment(token)` builds the environment for each git command:
+
+- **The token goes in a header, not in the URL.** `git clone` writes the URL it was given into
+  `.git/config` as `remote.origin.url`, so `https://x-access-token:<token>@github.com/...` persists
+  the secret into the clone root — where it outlives the delivery by months and is dead within the
+  hour. The next fetch would then authenticate with an expired secret read off disk.
+- **It is passed through the environment, not on the command line.** `git -c http.extraheader=...`
+  puts the credential in `argv`, readable through `ps`. `GIT_CONFIG_COUNT`/`KEY_0`/`VALUE_0` sets
+  configuration for one invocation and is not shared with every process on the box.
+- **The header is scoped to `http.https://github.com/.extraheader`.** Unscoped, git would attach a
+  customer's installation token to whatever host their repository names — a submodule, a mirror.
+- **`GIT_TERMINAL_PROMPT=0`.** Without a terminal a missing credential produced the message above;
+  *with* one git BLOCKS on the prompt and the delivery never returns, holding the listener thread
+  until the clone timeout.
+
+`tests/unit/layers/test_git_credentials.py` runs **real git** against the environment rather than
+asserting the dict has the right keys — the original bug was precisely a gap between what we
+intended and what git does. All four assertions were verified by sabotage: removing the credential,
+unscoping the header, and writing the token into `remote.origin.url` each fail their own test.
+
+`serve/working_clone.py` also stopped recursing after a fresh clone and now falls through into the
+fetch, so the credential and the refspecs cannot be applied to one path and forgotten on the other;
+the refspec machinery moved to `ingest/pull_refs.py`, which is where its reasoning now lives.
+
+### Two more the same delivery exposed, both hidden behind a green `just check`
+
+**`just verify` had been red since the App landed, and nobody ran it.** Replacing the `gh` CLI with
+App-only auth removed the ability to read a **public** repository, because an installation token
+requires an installation. `tests/live/test_delivery_live.py` reads `psf/requests`, which we are not
+installed on — so it failed with App credentials *and* without them, under every configuration.
+`ingest/github_api._authorization()` now returns an empty header when no token can be minted and
+carries the reason into the failure message, so a public read works and a private repository we
+cannot see reports `HTTP 404 (unauthenticated: ...)` rather than a bare 404. The property the App
+was introduced for survives: what it replaced was acting as whoever ran `gh auth login`, and an
+unauthenticated read is not a person.
+
+**The same test opened a tenant root as a database file.** `QUANTAMIND_DATABASE_PATH` became a
+*directory* when per-repository stores landed, and the test still passed `live.db` — so
+`tenancy.store_for()` created `live.db` as a directory and the later `open_store()` on it raised
+`unable to open database file`. This is the second time this exact confusion has shipped; the first
+was `serve/listener.py`. Both times the unit tests passed a FILE where production passes a ROOT. The
+test now derives the tenant path through `tenancy.store_for()` and asserts it is a file, which is
+the shape production actually uses.
+
+Neither was visible to `just check`. The gate that would have caught both is the one the definition
+of done already names first, and the lesson is not "add a guard" — it is that `just check` being
+green was reported as done.

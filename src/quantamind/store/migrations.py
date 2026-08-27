@@ -53,7 +53,20 @@ def _to_3(conn: sqlite3.Connection) -> None:
             conn.execute(statement)
 
 
-STEPS: dict[int, Callable[[sqlite3.Connection], None]] = {3: _to_3}
+def _to_4(conn: sqlite3.Connection) -> None:
+    """Add `touch_watermark`. Nothing is backfilled, and that is what keeps it safe.
+
+    A store migrated from 3 has a touch index but no watermark, which `run_review` reads as "no
+    watermark, read everything" -- the behaviour it had before this table existed. Inventing a
+    watermark from the newest `committed_at` would be the timestamp bug this table exists to
+    prevent, written into the migration.
+    """
+    for statement in TABLES:
+        if "touch_watermark" in statement:
+            conn.execute(statement)
+
+
+STEPS: dict[int, Callable[[sqlite3.Connection], None]] = {3: _to_3, 4: _to_4}
 
 
 @dataclass(frozen=True, slots=True)

@@ -1,5 +1,11 @@
 # The pipeline against Qodo, Greptile and CodeRabbit, stage by stage
 
+> **The corpus this rests on has a ±4-point noise floor**, measured 2026-08-26 by running the same
+> arm twice: 91 against 84 of 173 defects from nothing but model nondeterminism. Compare any effect
+> below to 4 points before believing it; large effects survive, small ones were never resolvable.
+> → `corpus-noise-floor.md`
+
+
 > **INTERNAL. Every figure here is governed by `docs/product/publishing-rules.md`** — our own
 > precision, recall and miss rate do not go on a public page, and a competitor's ONLINE precision is
 > never a backdrop for one of our numbers. The offline-layer comparison below is permitted because

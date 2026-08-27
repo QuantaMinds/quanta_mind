@@ -1,5 +1,11 @@
 # Why Greptile beats us — the gap, measured
 
+> **The corpus this rests on has a ±4-point noise floor**, measured 2026-08-26 by running the same
+> arm twice: 91 against 84 of 173 defects from nothing but model nondeterminism. Compare any effect
+> below to 4 points before believing it; large effects survive, small ones were never resolvable.
+> → `corpus-noise-floor.md`
+
+
 **The question:** Greptile leads us by 12.9 precision points on Martian's offline layer,
 p = 0.0228. The hypothesis put to me was that they index the whole repository first and we read
 one diff. **This is what the data says, and the hypothesis is not what it shows.**

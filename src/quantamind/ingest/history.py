@@ -28,8 +28,12 @@ from quantamind.types.touch import Touch
 __all__ = ["HistoryReadFailed", "assert_readable", "read_touches"]
 
 
-def read_touches(repo_dir: Path, pathspec: str | Sequence[str] | None = None) -> list[Touch]:
+def read_touches(
+    repo_dir: Path, pathspec: str | Sequence[str] | None = None, *, since: str = ""
+) -> list[Touch]:
     """Every (file, commit-time) pair in this repository's history.
+
+    `since` narrows it to `<since>..HEAD`, for extending an index rather than rebuilding it.
 
     `pathspec` narrows the read the way git does — `"*.py"` for the Python surface. Merge commits
     are excluded upstream: a merge touches every file of both sides and would swamp the counts with
@@ -37,6 +41,6 @@ def read_touches(repo_dir: Path, pathspec: str | Sequence[str] | None = None) ->
     """
     return [
         Touch(path=path, committed_at=commit.committed_at)
-        for commit in read_commits(repo_dir, pathspec)
+        for commit in read_commits(repo_dir, pathspec, since=since)
         for path in sorted(commit.paths)
     ]

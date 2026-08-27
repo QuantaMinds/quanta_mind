@@ -1,0 +1,22 @@
+# Everything the runtime does not need, and two things it must never contain.
+#
+# **THE SECRETS.** `.env` holds a webhook secret and a client secret, and `*.pem` is the App's
+# private key. A secret copied into a layer is a secret in every registry that pulls the image.
+.env
+.env.*
+*.pem
+
+# Research is a separate uv project on a different interpreter and imports pandas. Rule 11 says it
+# must not reach the product; not shipping it is the strongest form of that.
+research/
+tests/
+docs/
+.git/
+.venv/
+**/__pycache__/
+*.db
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.hypothesis/
+.verify-clone/

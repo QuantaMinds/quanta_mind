@@ -28,6 +28,7 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
+from quantamind.ingest import github_api
 from quantamind.types.change import REVIEWABLE_SUFFIXES
 
 # Declared, not defaulted: a GitHub read is a network call and 30s is the house default.
@@ -61,18 +62,26 @@ class Base:
     committed_at: int
 
 
-def _gh(repo: str, number: int, path: str) -> object:
-    done = subprocess.run(
-        ["gh", "api", path], capture_output=True, text=True, timeout=API_TIMEOUT_S
-    )
-    if done.returncode != 0:
-        raise DiffReadFailed(
-            repo, number, f"gh api {path} exited {done.returncode}: {done.stderr.strip()[:160]}"
-        )
+def _read(repo: str, number: int, path: str, accept: str = github_api.JSON) -> bytes:
+    """One authenticated read, with the failure re-raised as this module's own error.
+
+    **THIS USED TO BE `gh api`, AND THAT IS WHY THE ENDPOINT ONLY EVER RAN ON A LAPTOP.**
+    `changed_files()` and `base_commit()` are on the webhook's delivery path, so the product needed
+    a `gh` CLI authenticated as a PERSON to read a pull request. In a container there is no
+    `gh auth login` and every delivery would have failed.
+    """
     try:
-        return json.loads(done.stdout)
+        return github_api.call(repo, path, accept=accept)
+    except github_api.ApiFailed as exc:
+        raise DiffReadFailed(repo, number, str(exc)) from None
+
+
+def _gh(repo: str, number: int, path: str) -> object:
+    raw = _read(repo, number, path)
+    try:
+        return json.loads(raw)
     except json.JSONDecodeError as exc:
-        raise DiffReadFailed(repo, number, f"gh api {path} returned non-JSON: {exc}") from None
+        raise DiffReadFailed(repo, number, f"GET {path} returned non-JSON: {exc}") from None
 
 
 def changed_files(
@@ -119,30 +128,18 @@ def unified_diff(repo: str, number: int) -> str:
     non-zero AND emits a truncated patch, and the same shape of failure through the API would
     otherwise read as a change that touched nothing.
     """
-    done = subprocess.run(
-        [
-            "gh",
-            "api",
-            f"repos/{repo}/pulls/{number}",
-            "-H",
-            "Accept: application/vnd.github.v3.diff",
-        ],
-        capture_output=True,
-        text=True,
-        timeout=API_TIMEOUT_S,
-    )
-    if done.returncode != 0:
-        raise DiffReadFailed(
-            repo, number, f"patch read exited {done.returncode}: {done.stderr.strip()[:160]}"
-        )
-    if not done.stdout.strip():
+    # `_read` raises on any non-2xx, so reaching here means the request succeeded. The emptiness
+    # check below is the one that matters and it survives the move off the `gh` CLI unchanged.
+    patch = _read(repo, number, f"repos/{repo}/pulls/{number}", "application/vnd.github.v3.diff")
+    text = patch.decode("utf-8", "replace")
+    if not text.strip():
         raise DiffReadFailed(
             repo,
             number,
-            "the patch was empty at exit 0, which a real change "
+            "the patch was empty on a successful read, which a real change "
             "never is — treat this as a failed read, not a no-op",
         )
-    return done.stdout
+    return text
 
 
 def base_commit(repo: str, number: int, clone: Path) -> Base:

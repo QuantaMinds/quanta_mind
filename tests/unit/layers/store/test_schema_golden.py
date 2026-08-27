@@ -81,7 +81,10 @@ def test_a_store_migrated_from_version_2_is_identical_to_a_fresh_one() -> None:
 
     done = migrate(old)
     assert done.version == SCHEMA_VERSION
-    assert done.steps == (3,), f"expected exactly the 2->3 step, got {done.steps}"
+    # Hardcoded, not derived from the ledger: deriving it would make the test agree with whatever
+    # `STEPS` says, including a step that was forgotten. The next schema bump breaks this line on
+    # purpose, so somebody has to look at the migration path from a real old store.
+    assert done.steps == (3, 4), f"expected the 2->3 and 3->4 steps, got {done.steps}"
     assert normalise(shape_of(old)) == normalise(golden()), (
         "a migrated store differs from a freshly created one. This is the failure that produces "
         "a database whose version says one thing and whose tables say another."
