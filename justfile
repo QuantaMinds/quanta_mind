@@ -170,6 +170,51 @@ verify-determinism:
     uv run python scripts/verify/assert_deterministic.py --runs 3 \
         --clone .verify-clone --out .verify-pack.db
 
+# ---------------------------------------------------------------- reclaim
+
+# Delete the regenerable heavy directories and REPORT what went, in bytes.
+#
+# ⚠️  EVERY PATH HERE IS RECONSTRUCTIBLE, AND THE COMMENT SAYS HOW. Nothing measured,
+# reviewed or hand-written is listed, and nothing is globbed -- a wildcard here would be a
+# rule 14 violation waiting for the day it matches something that took a week to produce.
+#
+#   tests/fixtures/repos           -> `just fixtures` (pinned SHAs, tests/fixtures/pinned.json)
+#   research/phase0/data/incident_clones -> re-cloned by the incident harness on demand
+#   ~/.cache/quantamind-bench-clones     -> re-cloned by the bench harnesses on demand
+#   .mypy_cache .ruff_cache .pytest_cache .hypothesis -> rebuilt by the tools themselves
+#   .verify-pack.db                -> rebuilt by `just verify`
+#
+# **IT PRINTS THE BYTES IT FREED RATHER THAN CLAIMING A CLEANUP HAPPENED.** `working_clone.sweep()`
+# returns its count for the same reason: a cleanup path in this repo once asserted a leftover was
+# caught next attempt, nothing checked, and 1.6 GB accumulated.
+#
+# `.claude/settings.json` denies `Bash(rm -rf*)` outright, deliberately. This recipe is the
+# reviewed, named alternative -- the deletion is version-controlled and readable, not typed live.
+#
+# Delete regenerable caches and corpora, printing the bytes freed.
+clean:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    before=$(df -k ~ | tail -1 | awk '{print $4}')
+    for target in \
+        tests/fixtures/repos \
+        research/phase0/data/incident_clones \
+        "$HOME/.cache/quantamind-bench-clones" \
+        .mypy_cache .ruff_cache .pytest_cache .hypothesis .verify-pack.db
+    do
+        if [ -e "$target" ]; then
+            size=$(du -sh "$target" 2>/dev/null | cut -f1)
+            rm -rf "$target"
+            echo "  removed $target ($size)"
+        else
+            echo "  absent  $target"
+        fi
+    done
+    after=$(df -k ~ | tail -1 | awk '{print $4}')
+    echo ""
+    echo "✅ freed $(( (after - before) / 1024 )) MB. $(( after / 1024 / 1024 )) GB now free."
+    echo "   Restore the pinned corpus with 'just fixtures' when gate 2b is next needed."
+
 # ---------------------------------------------------------------- setup
 
 # Fetch the pinned real repositories used by live tests. Large; run once.

@@ -1694,3 +1694,36 @@ the run touched stayed resident — about 4.5 GB for this corpus. It now groups 
 repository, drops each clone before the next, and **checks free space before every clone**, aborting
 with the number rather than filling the disk. Model calls need no clone and run afterwards, once the
 disk is given back. Peak is the largest single repository (grafana, ~1.9 GB) instead of the sum.
+
+### The shape experiment ran, and passed — the first context lever that moved anything
+
+`research/phase0/bench/forensic/shape_context.py` was written, pre-registered with its bars in its
+own docstring, and **never run**. It has now run.
+
+```
+PLAIN        81 of 173 defects, 210 comments
+WITH_SHAPE   90 of 173 defects, 206 comments
+             +5.2 points, −2% comments        -> PASS
+```
+
+**Nine more real defects while emitting four fewer comments.** The bar was >+2.1 points — the
+judge's replicate spread — with comment volume capped at +15%. It cleared the first by two and a
+half times and moved the second the right way. Five prompt levers before it moved nothing.
+
+→ `docs/product/reviewer/shape-context-result.md` for the bars, the caveats and what the result does
+not say. The short version of the caveats: it is recall against a gold set rather than precision,
+the judge is same-family, and the mechanism is not localised to individual findings.
+
+**The instrument was wrong in seven ways before it produced this number**, and all seven are
+recorded above in the sections on `ingest/review_window.py`, `types/deep.py` and
+`working_clone.ensure()`. Every one of them destroys signal rather than creating it — a broken
+instrument makes a real effect vanish, it does not manufacture one across 49 changes and five
+repositories. That is the reason the number is believable, and the reason the fixes are documented
+at more length than the result.
+
+**Phase one is resumable, and that is not a convenience.** `--resolve <repo>` gathers one
+repository's contexts and banks them to `results/shape_contexts.json`. grafana failed three times,
+and each failure discarded cal.com's and discourse's already-paid-for contexts because they lived
+only in memory. Contexts are facts about a commit and do not go stale, so a re-run skips what is
+banked. Driving it one repository at a time is also what isolated the grafana cause in a single
+clone instead of three.
