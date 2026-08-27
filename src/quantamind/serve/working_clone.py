@@ -1,11 +1,16 @@
 """Obtain a local clone for a repository, and keep it current without re-cloning it.
 
-WHAT: `ensure(repo, root)` returns a path to a full clone of `repo`, cloning on first use and
-      fetching on every use after. `sweep(root, keep)` deletes the least recently used clones and
-      RETURNS how many it removed.
+WHAT: `ensure(repo, root, token=...)` returns a path to a full clone of `repo`, cloning on first
+      use and fetching on every use after, authenticated when a token is given. `sweep(root, keep)`
+      deletes the least recently used clones and RETURNS how many it removed.
 WHY:  **A REVIEW READS HISTORY, SO THE ENDPOINT NEEDS A CLONE AND THE CLI GETS ONE FROM ITS
       OPERATOR.** `run_review.review()` takes `clone` as an argument precisely so the socket layer
       decides where it comes from. This is that decision for the endpoint.
+
+      **EVERY GIT COMMAND HERE RUNS WITH A SUPPLIED ENVIRONMENT, NEVER THE AMBIENT ONE.** The
+      clone was unauthenticated and passed every test, because on a developer's machine a
+      credential helper answered for them and a container has none -- so no customer's private
+      repository could ever be read. `ingest/git_credentials.py` holds the whole account.
 
       **A BLOB-FILTERED CLONE IS NOT USED, AND THAT IS DELIBERATE.** `--filter=blob:none` would
       make the first clone far faster and is exactly the wrong trade here: `git log -p` exits
@@ -21,7 +26,7 @@ WHY:  **A REVIEW READS HISTORY, SO THE ENDPOINT NEEDS A CLONE AND THE CLI GETS O
       history scores a pull request on commits that predate it, and the output looks entirely
       normal -- same shape, same coverage line, a ranking drawn from the wrong past. Neither
       `ingest/` nor the reader can tell.
-IMPORTS: stdlib only. Rightmost layer.
+IMPORTS: stdlib, plus `ingest.{git_credentials,pull_refs}` -- leftward, which is allowed.
 CONSUMED BY: `serve/review_delivery.py`.
 """
 
@@ -31,6 +36,9 @@ import shutil
 import subprocess
 from collections.abc import Sequence
 from pathlib import Path
+
+from quantamind.ingest.git_credentials import environment
+from quantamind.ingest.pull_refs import present, refspecs
 
 CLONE_TIMEOUT_S = 900
 FETCH_TIMEOUT_S = 300
@@ -61,45 +69,6 @@ def path_for(repo: str, root: Path) -> Path:
     return root / parts[0] / parts[1]
 
 
-def _present(where: Path, pull_refs: Sequence[int], timeout_s: int) -> list[int]:
-    """The subset of `pull_refs` the remote actually has.
-
-    **AN EXPLICIT REFSPEC IS STRICT AND A WILDCARD IS NOT.** A pull head that does not exist fails
-    the WHOLE fetch -- `fatal: couldn't find remote ref`, exit 128 -- where the wildcard matched
-    whatever was there. So this asks first, in one `ls-remote` that moves no objects.
-    """
-    if not pull_refs:
-        return []
-    done = subprocess.run(
-        [
-            "git",
-            "-C",
-            str(where),
-            "ls-remote",
-            "origin",
-            *(f"refs/pull/{n}/head" for n in pull_refs),
-        ],
-        capture_output=True,
-        text=True,
-        timeout=timeout_s,
-    )
-    if done.returncode != 0:
-        return list(pull_refs)  # let the fetch report the real failure rather than guessing here
-    have = {
-        line.split("refs/pull/")[1].split("/")[0]
-        for line in done.stdout.splitlines()
-        if "refs/pull/" in line
-    }
-    return [n for n in pull_refs if str(n) in have]
-
-
-def _pull_refspecs(pull_refs: Sequence[int] | None) -> list[str]:
-    """Refspecs for the pull heads asked for. None means every one, which is the old behaviour."""
-    if pull_refs is None:
-        return ["+refs/pull/*/head:refs/remotes/pull/*"]
-    return [f"+refs/pull/{n}/head:refs/remotes/pull/{n}" for n in pull_refs]
-
-
 def ensure(
     repo: str,
     root: Path,
@@ -107,8 +76,18 @@ def ensure(
     clone_timeout_s: int = CLONE_TIMEOUT_S,
     fetch_timeout_s: int = FETCH_TIMEOUT_S,
     pull_refs: Sequence[int] | None = None,
+    token: str | None = None,
 ) -> Path:
     """A current full clone of `repo`. Clones on first use, fetches thereafter.
+
+    **`token` IS THE INSTALLATION TOKEN AND WITHOUT IT ONLY PUBLIC REPOSITORIES WORK.** It is
+    threaded into the environment of every git command rather than into the URL, because a URL is
+    persisted into `.git/config` and a token expires in an hour; `ingest/git_credentials.py` gives
+    the full reasoning. `None` is correct for the bench, which reads public repositories only.
+
+    **THE CLONE FALLS THROUGH INTO THE FETCH RATHER THAN RECURSING.** A fresh clone still needs the
+    pull heads, which live outside `refs/heads/*`; doing that as one pass makes the credential and
+    the refspecs impossible to apply to one path and forget on the other.
 
     **THE TIMEOUTS ARE ARGUMENTS BECAUSE THE DEFAULT IS A PRODUCT DECISION AND A BENCH RUN IS
     NOT.** 900 seconds is not enough for grafana -- 1.9 GB plus every `refs/pull/*` ref timed out
@@ -119,66 +98,50 @@ def ensure(
     **A LONGER CEILING IS NOT FREE.** `review_delivery` blocks on this, so the default bounds how
     long a webhook can sit on one delivery.
 
-    **`pull_refs` NARROWS THE FETCH, AND THE WILDCARD IS NOT A ROUNDING ERROR.** grafana carries
-    **83,202** pull-head refs and home-assistant/core 105,913; a review needs ONE. Fetching all of
-    them timed out at 900s, then ran 25 minutes and exited 1 at 2700s. `None` keeps the wildcard so
-    nothing changes for a caller that does not ask; an empty sequence fetches branches only.
-
-    Fetches `+refs/pull/*/head` as well as the branches, because the head of a pull request opened
-    from a fork is on no branch of the upstream repository and a plain fetch will not have it.
-
-    **PULL HEADS LAND IN `refs/remotes/pull/*`, NOT UNDER `refs/remotes/origin/`.** They used to
-    map to `refs/remotes/origin/pr/*`, which collides with any branch actually named `pr/<x>`:
-    git refuses the whole fetch with `fatal: Cannot fetch both refs/heads/pr/1 and
-    refs/pull/1/head to refs/remotes/origin/pr/1`. It is not hypothetical -- discourse/discourse
-    has such a branch, and `ensure()` raised `CloneFailed` on it every time. A separate namespace
-    cannot collide with a branch whatever the customer names it.
+    **`pull_refs` NARROWS THE FETCH, AND WHY IS IN `ingest/pull_refs.py`:** grafana carries 83,202
+    pull-head refs and a review needs ONE. That module also explains why the heads are fetched at
+    all and why they land outside `refs/remotes/origin/`.
     """
     where = path_for(repo, root)
-    if (where / ".git").is_dir():
+    env = environment(token)
+    if not (where / ".git").is_dir():
+        where.parent.mkdir(parents=True, exist_ok=True)
         done = subprocess.run(
-            [
-                "git",
-                "-C",
-                str(where),
-                "fetch",
-                "--prune",
-                "origin",
-                "+refs/heads/*:refs/remotes/origin/*",
-                *_pull_refspecs(
-                    None if pull_refs is None else _present(where, pull_refs, fetch_timeout_s)
-                ),
-            ],
+            ["git", "clone", "--no-checkout", f"https://github.com/{repo}.git", str(where)],
             capture_output=True,
             text=True,
-            timeout=fetch_timeout_s,
+            timeout=clone_timeout_s,
+            env=env,
         )
         if done.returncode != 0:
-            # NOT a fallback to the stale clone. See the module docstring.
-            # **THE TAIL, NOT THE HEAD.** git writes "From <url>" first and the real failure
-            # last, so the leading characters are reliably the part that says nothing.
-            tail = done.stderr.strip()[-300:]
-            raise CloneFailed(repo, f"fetch exited {done.returncode}: ...{tail}")
-        return where
-
-    where.parent.mkdir(parents=True, exist_ok=True)
+            # A half-written directory would be taken for a good clone on the next delivery.
+            shutil.rmtree(where, ignore_errors=True)
+            raise CloneFailed(repo, f"clone exited {done.returncode}: {done.stderr.strip()[:160]}")
     done = subprocess.run(
-        ["git", "clone", "--no-checkout", f"https://github.com/{repo}.git", str(where)],
+        [
+            "git",
+            "-C",
+            str(where),
+            "fetch",
+            "--prune",
+            "origin",
+            "+refs/heads/*:refs/remotes/origin/*",
+            *refspecs(
+                None if pull_refs is None else present(where, pull_refs, fetch_timeout_s, env)
+            ),
+        ],
         capture_output=True,
         text=True,
-        timeout=clone_timeout_s,
+        timeout=fetch_timeout_s,
+        env=env,
     )
     if done.returncode != 0:
-        # A half-written directory would be taken for a good clone on the next delivery.
-        shutil.rmtree(where, ignore_errors=True)
-        raise CloneFailed(repo, f"clone exited {done.returncode}: {done.stderr.strip()[:160]}")
-    return ensure(
-        repo,
-        root,
-        clone_timeout_s=clone_timeout_s,
-        fetch_timeout_s=fetch_timeout_s,
-        pull_refs=pull_refs,
-    )
+        # NOT a fallback to the stale clone. See the module docstring.
+        # **THE TAIL, NOT THE HEAD.** git writes "From <url>" first and the real failure
+        # last, so the leading characters are reliably the part that says nothing.
+        tail = done.stderr.strip()[-300:]
+        raise CloneFailed(repo, f"fetch exited {done.returncode}: ...{tail}")
+    return where
 
 
 def sweep(root: Path, keep: int = DEFAULT_KEEP) -> int:

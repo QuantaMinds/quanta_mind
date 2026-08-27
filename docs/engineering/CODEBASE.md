@@ -2050,3 +2050,73 @@ the cold start is FALSE and was written down before it was checked.
 **It cannot be fixed inline.** GitHub expects a prompt 2xx from a webhook, so a 37-second build
 inside the handler would time out the delivery and GitHub would retry it — turning one slow install
 into several. Warming needs a background worker, which is separate work and is not begun.
+
+### The clone never authenticated — found by the first genuine pull request, not by any test
+
+The first real `pull_request` event to reach the running container failed, and it failed at the
+first step:
+
+```
+[serve] accepted QuantaMinds/quanta_mind#84 at 208e9017c6fe
+[serve] QuantaMinds/quanta_mind#84 FAILED: clone exited 128: Cloning into '/data/clones/...'
+fatal: could not read Username for 'https://github.com': No such device or address
+```
+
+`serve/working_clone.ensure()` cloned `https://github.com/<repo>.git` with **no credential at
+all**. On a developer's machine that works and looks like proof — git finds a credential helper, a
+keychain entry or a `gh` login, and authenticates as a *person* who happens to have access. In a
+container there is no helper and no person, so git asks a terminal for a username and exits 128.
+
+**This failed 100% of real deliveries and 0% of tests.** Customer repositories are private; that is
+what a code reviewer is for. The unauthenticated clone could never have read one. It is the same
+illusion the `gh` CLI dependency created — packaging caught that one at build time, and this one
+needed a delivery to expose, because every test either used a local fixture repository or ran where
+the developer's own credentials silently answered.
+
+`ingest/git_credentials.environment(token)` builds the environment for each git command:
+
+- **The token goes in a header, not in the URL.** `git clone` writes the URL it was given into
+  `.git/config` as `remote.origin.url`, so `https://x-access-token:<token>@github.com/...` persists
+  the secret into the clone root — where it outlives the delivery by months and is dead within the
+  hour. The next fetch would then authenticate with an expired secret read off disk.
+- **It is passed through the environment, not on the command line.** `git -c http.extraheader=...`
+  puts the credential in `argv`, readable through `ps`. `GIT_CONFIG_COUNT`/`KEY_0`/`VALUE_0` sets
+  configuration for one invocation and is not shared with every process on the box.
+- **The header is scoped to `http.https://github.com/.extraheader`.** Unscoped, git would attach a
+  customer's installation token to whatever host their repository names — a submodule, a mirror.
+- **`GIT_TERMINAL_PROMPT=0`.** Without a terminal a missing credential produced the message above;
+  *with* one git BLOCKS on the prompt and the delivery never returns, holding the listener thread
+  until the clone timeout.
+
+`tests/unit/layers/test_git_credentials.py` runs **real git** against the environment rather than
+asserting the dict has the right keys — the original bug was precisely a gap between what we
+intended and what git does. All four assertions were verified by sabotage: removing the credential,
+unscoping the header, and writing the token into `remote.origin.url` each fail their own test.
+
+`serve/working_clone.py` also stopped recursing after a fresh clone and now falls through into the
+fetch, so the credential and the refspecs cannot be applied to one path and forgotten on the other;
+the refspec machinery moved to `ingest/pull_refs.py`, which is where its reasoning now lives.
+
+### Two more the same delivery exposed, both hidden behind a green `just check`
+
+**`just verify` had been red since the App landed, and nobody ran it.** Replacing the `gh` CLI with
+App-only auth removed the ability to read a **public** repository, because an installation token
+requires an installation. `tests/live/test_delivery_live.py` reads `psf/requests`, which we are not
+installed on — so it failed with App credentials *and* without them, under every configuration.
+`ingest/github_api._authorization()` now returns an empty header when no token can be minted and
+carries the reason into the failure message, so a public read works and a private repository we
+cannot see reports `HTTP 404 (unauthenticated: ...)` rather than a bare 404. The property the App
+was introduced for survives: what it replaced was acting as whoever ran `gh auth login`, and an
+unauthenticated read is not a person.
+
+**The same test opened a tenant root as a database file.** `QUANTAMIND_DATABASE_PATH` became a
+*directory* when per-repository stores landed, and the test still passed `live.db` — so
+`tenancy.store_for()` created `live.db` as a directory and the later `open_store()` on it raised
+`unable to open database file`. This is the second time this exact confusion has shipped; the first
+was `serve/listener.py`. Both times the unit tests passed a FILE where production passes a ROOT. The
+test now derives the tenant path through `tenancy.store_for()` and asserts it is a file, which is
+the shape production actually uses.
+
+Neither was visible to `just check`. The gate that would have caught both is the one the definition
+of done already names first, and the lesson is not "add a guard" — it is that `just check` being
+green was reported as done.

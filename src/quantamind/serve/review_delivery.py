@@ -25,7 +25,8 @@ WHY:  **THE ENDPOINT AUTHENTICATED DELIVERIES AND REVIEWED NOTHING.** `run_endpo
 
       **THE BASE COMMIT'S TIMESTAMP BOUNDS THE HISTORY, AND IT IS NOT `now`.** A ranking that reads
       commits made after the pull request opened is scoring the change against its own future.
-IMPORTS: ingest.{diff,github_comments}, serve.{run_review,working_clone}, types.settings.
+IMPORTS: ingest.{diff,github_api,github_comments}, serve.{run_review,working_clone},
+      types.settings.
       Rightmost layer.
 CONSUMED BY: `serve/run_endpoint.py`.
 """
@@ -37,6 +38,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from quantamind.ingest.diff import base_commit, changed_files
+from quantamind.ingest.github_api import token_for
 from quantamind.ingest.github_comments import post
 from quantamind.render.pin_block import block
 from quantamind.serve import pin_check
@@ -80,7 +82,18 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     Takes the three fields rather than the `Review` record so this never imports the webhook
     parser: the join has no business knowing what shape GitHub's payload arrives in.
     """
-    clone = ensure(delivery_repo, Path(settings.clone_root))
+    # **THE CLONE MUST AUTHENTICATE, BECAUSE EVERY CUSTOMER REPOSITORY IS PRIVATE.** That is
+    # what a code reviewer is for. Without a credential git asks a terminal for a username and
+    # exits 128, which is exactly what the first genuine `pull_request` delivery did -- after
+    # every test passed, because a developer's machine has a credential helper and a container
+    # does not. The token is minted only when an App is configured: an endpoint without one can
+    # still read public repositories, and `token_for` would refuse rather than return nothing.
+    app = bool(settings.app_id and settings.app_key_path)
+    clone = ensure(
+        delivery_repo,
+        Path(settings.clone_root),
+        token=token_for(delivery_repo) if app else None,
+    )
     # **BOUND THE ROOT ON EVERY DELIVERY, AND PRINT THE COUNT RATHER THAN ASSUME IT.** `sweep()`
     # was written with a docstring explaining why it returns a number instead of claiming a
     # cleanup happened -- and was then never called from anywhere, for the whole of its existence.
