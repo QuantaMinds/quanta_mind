@@ -2016,3 +2016,37 @@ network without asking. It must not do either by accident.
 
 **What it must not do:** know what a review is. `work` is injected, never imported, so the socket
 layer can be exercised without running a ranking.
+
+### Install provisions a tenant — product-readiness item 6, and what it does NOT do
+
+`webhook_github.interpret()` gained a third outcome. `installation` and `installation_repositories`
+now return `Installed`, and `serve/listener.py` calls `store/tenancy.provision()`. Verified against
+real GitHub deliveries replayed at a live endpoint:
+
+```
+[serve] installation 'created' for QuantaMinds: provisioned 7 of 7 repository(ies)
+[serve] installation 'added'   for QuantaMinds: provisioned 6 of 6 repository(ies)
+/health -> {"ok": true, "detail": "7 tenant store(s) under /data/stores readable at schema v4"}
+```
+
+**`Installed` IS A THIRD OUTCOME, NOT AN `Ignore` WITH A FLAG.** `interpret` answered "review this"
+or "not ours"; an installation is neither — nothing is being reviewed and it is very much ours to
+act on. Folding it in would make a log string load-bearing, which is how a message becomes control
+flow.
+
+**IT ACTS ON THE FULL REPOSITORY LIST, NOT THE DELTA.** GitHub sends `repositories_added` and
+`repositories_removed`, and acting on a delta means one missed delivery leaves a tenant permanently
+unprovisioned. The full list is idempotent and self-healing — visible above, where the second event
+re-provisioned six existing tenants with no effect.
+
+**AN INSTALLATION LISTING NO REPOSITORIES IS REFUSED, NOT PROVISIONED AS EMPTY.** GitHub omits the
+list on some actions, and "the customer selected none" would look identical to it.
+
+**WHAT THIS DOES NOT DO: WARM THE INDEX.** A provisioned store is an EMPTY store —
+`touches indexed: 0, watermark: None` — so a tenant's first pull request still pays the full clone
+and index build, measured at **37 seconds on 115,776 commits**. The claim that provisioning removes
+the cold start is FALSE and was written down before it was checked.
+
+**It cannot be fixed inline.** GitHub expects a prompt 2xx from a webhook, so a 37-second build
+inside the handler would time out the delivery and GitHub would retry it — turning one slow install
+into several. Warming needs a background worker, which is separate work and is not begun.

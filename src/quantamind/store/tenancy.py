@@ -23,14 +23,18 @@ WHY:  **THE SCHEMA ALREADY SEPARATES TENANTS LOGICALLY AND THAT IS NOT THE SAME 
       webhook. They are HMAC-authenticated, which makes them not-arbitrary and not the same as
       well-formed: `..` or a separator in either would place a store outside the root or overwrite
       another tenant's. `serve/working_clone.path_for` refuses the same shapes for the same reason.
-IMPORTS: stdlib only (pathlib, re). Nothing to its right.
-CONSUMED BY: `serve/review_delivery.py`, `serve/health.py`.
+IMPORTS: stdlib, plus `store.schema` to create a tenant's file. Nothing to its right.
+CONSUMED BY: `serve/review_delivery.py`, `serve/health.py`, `serve/listener.py`.
 """
 
 from __future__ import annotations
 
 import re
+import sqlite3
+from collections.abc import Iterable
 from pathlib import Path
+
+from quantamind.store import schema
 
 SAFE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 
@@ -77,3 +81,31 @@ def tenants(root: Path) -> list[tuple[str, str]]:
         if owner.is_dir()
         for store in owner.glob("*.db")
     )
+
+
+def provision(root: Path, repos: Iterable[str]) -> tuple[list[str], list[str]]:
+    """Create a store for each `owner/name`. Returns `(made, refused)`, both named.
+
+    **PROVISIONED ON INSTALL, NOT ON THE FIRST PULL REQUEST.** Without this a new tenant has no
+    store until somebody opens one, and that first review pays a full clone and index build -- 37
+    seconds on a 115,776-commit repository. Doing it at install moves the cost to the moment a
+    human is watching an install page rather than waiting on a review.
+
+    **IDEMPOTENT.** `store_for` creates the directory and `open_store` creates the file, so a
+    redelivered installation event provisions the same tenants again with no effect. GitHub
+    redelivers; a provisioning step that could not be repeated would be a bug waiting for a retry.
+
+    **REFUSALS ARE RETURNED, NOT LOGGED AND DROPPED.** A repository that failed to provision is a
+    customer whose first review will be slow or broken, and a caller that cannot see the list
+    cannot say so.
+    """
+    made: list[str] = []
+    refused: list[str] = []
+    for full in repos:
+        owner, _, name = str(full).partition("/")
+        try:
+            schema.open_store(store_for(root, owner, name)).close()
+            made.append(str(full))
+        except (sqlite3.Error, OSError, TenantRefused):
+            refused.append(str(full))
+    return made, refused

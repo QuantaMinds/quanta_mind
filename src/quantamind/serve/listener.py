@@ -44,11 +44,12 @@ from quantamind.serve.webhook_github import (
     EVENT_HEADER,
     SIGNATURE_HEADER,
     Ignore,
+    Installed,
     Review,
     interpret,
     verify,
 )
-from quantamind.store import deliveries, schema
+from quantamind.store import deliveries, schema, tenancy
 
 # GitHub's documented maximum payload is 25 MB. A read with no ceiling is memory exhaustion handed
 # to anyone who can reach the port, and Content-Length is attacker-controlled.
@@ -153,6 +154,19 @@ class _Handler(BaseHTTPRequestHandler):
             # along; nothing was showing it to the person who needed it.
             print(f"[serve] ignored {event!r}: {decision.reason}", flush=True)
             self._say(200, {"ignored": decision.reason})
+            return
+
+        if isinstance(decision, Installed):
+            # Provisioned here so a first review pays no cold index. → `store/tenancy.provision`.
+            made, refused = tenancy.provision(Path(self.settings.database_path), decision.repos)
+            for full in refused:
+                print(f"[serve] {full}: NOT provisioned", flush=True)
+            print(
+                f"[serve] installation {decision.action!r} for {decision.account}: "
+                f"provisioned {len(made)} of {len(decision.repos)} repository(ies)",
+                flush=True,
+            )
+            self._say(200, {"provisioned": made})
             return
 
         # **THE DELIVERY LEDGER IS ITS OWN STORE, BESIDE THE TENANTS AND NOT INSIDE ONE.**
