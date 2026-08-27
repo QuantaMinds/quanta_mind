@@ -144,12 +144,22 @@ def test_a_single_file_change_is_not_described_as_a_failed_ranking() -> None:
     assert "nothing to rank" in line
 
 
-def test_a_single_file_comment_omits_the_equally_worth_reading_note() -> None:
-    body = comment(rank({"src/only.py": 11}))
-    assert body is not None
-    assert "equally worth reading" not in body, (
-        "that note reads as a malfunction when there is only one file"
-    )
+def test_a_change_the_budget_cannot_help_with_is_not_spoken_on() -> None:
+    """**A one-file change no longer produces a comment at all, and that is the product change.**
+
+    `read = min(budget, files)`, so at or below the budget we would be telling the reader to read
+    everything they already have, in an order — effort saved is zero by construction. This
+    previously rendered a comment; `roi-preregistration.md` failed B1 at 28.9% because 66.0% of
+    changes are like this one. The earlier version of this test asserted that such a comment omits
+    the "equally worth reading" note. There is no such comment now.
+    """
+    assert not rank({"src/only.py": 11}).fired
+    assert comment(rank({"src/only.py": 11})) is None
+
+    # And the ordering is untouched where the budget DOES bind: four files still speak.
+    wide = rank({"a.py": 11, "b.py": 7, "c.py": 3, "d.py": 1})
+    assert wide.fired
+    assert comment(wide) is not None
 
 
 def test_a_tie_at_the_budget_edge_is_disclosed() -> None:

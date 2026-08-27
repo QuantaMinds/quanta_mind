@@ -1874,3 +1874,43 @@ rate is zero, because none of its recent pull requests target a non-default bran
 cover: one repository, one kind of divergence — short-lived release branches cut from main. A
 long-lived fork is the case that could move the set, and 0 of 78 has a 95% upper bound near 3.8%.
 → `docs/plans/feat-touch-index-cache.md`.
+
+### The gate now requires the budget to bind — product-readiness item 2
+
+`roi-preregistration.md` failed B1 at **28.9% effort reduction against a 50% bar**, and named the
+mechanism: `read = min(budget, files)`, so on the **66.0% of changes touching three files or fewer**
+a three-file budget asks the reader for everything they already have, in an order. Effort saved is
+zero there by construction.
+
+`rank/order.fires()` now takes `files` and returns False at or below `BUDGET`. Measured firing rates
+fall accordingly:
+
+| repository | before | after | changes that bind |
+|---|---|---|---|
+| pallets/flask | 21% | **5%** | 18.7% |
+| home-assistant/core | 10% | **4%** | 30.8% |
+| apache/airflow | — | — | 38.1% |
+
+The binding shares bracket the study's 34.0%, which is the external check on the definition.
+
+**`files` IS PASSED EXPLICITLY AND NOT DERIVED FROM `len(scores)`, AND THAT IS THE WHOLE TRAP.**
+`rank/firing.py` and `rank/history_rates.py` both replay the gate with ONE synthetic unit per
+change — their queries produce a top touch count and no file count — so a budget test read off the
+mapping would have seen one file every time and **forecast zero for every repository, silently, in
+the number a customer is shown before signing**. Both queries now emit
+`COUNT(DISTINCT changed.path)` and pass it through.
+
+**THE TWO REPLAYS MUST AGREE BECAUSE THEY PRINT IN ONE SENTENCE.** Applying the gate to
+`firing.estimate` and not to `history_rates.earlier_rates` produced *"would have spoken 4%. Across
+your history it ran 11% to 10% to 10% to 13%"* — a headline under the new rule and a trend under
+the old one, in the same line, for the length of one command. Caught by running it, not reading it.
+
+**It is a narrowing of WHEN we speak, not a change to the ordering** — the ordering carries
+`1.21% against 3.12%, p < 1e-6` and is untouched. Where the budget binds, the same policy saves
+**50.3% of effort at a 4.11% miss** against alphabetical's 9.20%.
+
+**The measured figures are Python-only.** `research/phase0/external/commit_stream.py` yields `.py`
+files, while the product counts `.py .pyi .ts .tsx .js`. On a Python repository the populations
+coincide; on a polyglot one **more changes bind than the study's population predicts**, so 4.11% and
+50.3% must be quoted as Python-only. Re-deriving them over the full reviewable set is a separate
+measurement and is not done. → `docs/plans/feat-gate-on-binding-changes.md`.

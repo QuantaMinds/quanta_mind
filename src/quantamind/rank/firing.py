@@ -162,7 +162,7 @@ def estimate(
         "  SELECT COUNT(*) FROM touch prior"
         "  WHERE prior.repo_id = ? AND prior.path = changed.path"
         "    AND prior.committed_at >= ? AND prior.committed_at < ?"
-        ")) AS top "
+        ")) AS top, COUNT(DISTINCT changed.path) AS files "
         "FROM recent JOIN touch changed"
         "  ON changed.repo_id = ? AND changed.committed_at = recent.committed_at "
         # **ORDERED, BECAUSE THESE ARE A SEQUENCE AND NOT A BAG.** Without it SQLite returns the
@@ -172,11 +172,14 @@ def estimate(
         "GROUP BY recent.committed_at ORDER BY recent.committed_at",
         (repo_id, as_of, as_of - window, over, repo_id, as_of - window, as_of, repo_id),
     ).fetchall()
-    tops = [int(r[0]) for r in rows]
+    # File count from the QUERY -- the replay passes one unit, so len(scores) would read 1.
+    tops, counts = [int(r[0]) for r in rows], [int(r[1]) for r in rows]
     if not tops or max(tops) == 0:
         return Estimate(len(tops), 0, floor, Selectivity.NO_HISTORY, calibrated)
 
-    fired = sum(1 for top in tops if fires({"unit": top}, floor))
+    fired = sum(
+        1 for top, n in zip(tops, counts, strict=True) if fires({"unit": top}, floor, files=n)
+    )
     rate = fired / len(tops)
     # **THE EARLIER WINDOWS MUST BE DISJOINT FROM THE CALIBRATION SET, AND THE FIRST VERSION WAS
     # NOT.** Slicing `tops` — the very changes the floor was derived from — measures which quarter
