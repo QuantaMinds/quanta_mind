@@ -56,8 +56,14 @@ def test_a_fault_inside_the_handler_answers_500_rather_than_dropping_the_socket(
     """An unhandled exception closes the connection with no status at all. That must not happen."""
     import threading
 
-    # A DIRECTORY where the store should be: what a deploy pointed at the wrong path produces.
-    built = bind.build(_Settings(str(tmp_path)), SECRET, lambda _r: None, port=0)
+    # **A FILE where the store ROOT should be**, which is what a deploy pointed at the wrong path
+    # produces. This used to pass a DIRECTORY, because `database_path` was once a single database
+    # file -- and once each repository got its own store the directory became CORRECT, so the test
+    # provoked no fault at all and asserted 500 against a healthy 202. The fault has to be
+    # something the current contract still rejects: `<file>/deliveries.db` cannot be opened.
+    wrong = tmp_path / "not-a-directory"
+    wrong.write_text("")
+    built = bind.build(_Settings(str(wrong)), SECRET, lambda _r: None, port=0)
     thread = threading.Thread(target=built.serve_forever, daemon=True)
     thread.start()
     try:
@@ -82,6 +88,6 @@ def test_build_refuses_every_secret_verify_would_raise_on(secret: str, tmp_path:
         # `verify()` raises on an empty secret; `.strip()` is what makes whitespace one too.
         verify(secret.strip(), b"{}", sign("k", b"{}"))
     with pytest.raises(MisconfiguredSecret) as refused:
-        bind.build(_Settings(str(tmp_path / "s.db")), secret, lambda _r: None, port=0)
+        bind.build(_Settings(str(tmp_path)), secret, lambda _r: None, port=0)
 
     assert "open command channel" in str(refused.value)

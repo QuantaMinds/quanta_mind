@@ -147,10 +147,23 @@ class _Handler(BaseHTTPRequestHandler):
         event = self.headers.get(EVENT_HEADER, "")
         decision = interpret(event, body)
         if isinstance(decision, Ignore):
+            # **THE REASON IS PRINTED, NOT ONLY RETURNED.** It went into the HTTP body, which
+            # GitHub reads and discards, so an operator watching the log saw `200` and could not
+            # tell an ignored ping from a completed review. `Ignore` has carried a reason all
+            # along; nothing was showing it to the person who needed it.
+            print(f"[serve] ignored {event!r}: {decision.reason}", flush=True)
             self._say(200, {"ignored": decision.reason})
             return
 
-        conn = schema.open_store(Path(self.settings.database_path))
+        # **THE DELIVERY LEDGER IS ITS OWN STORE, BESIDE THE TENANTS AND NOT INSIDE ONE.**
+        # `database_path` became a ROOT when each repository got its own file, and this line still
+        # opened it as though it were a database: the first real pull request would have died on
+        # `unable to open database file`. It survived every test because the tests never drive the
+        # listener's store, and survived three live deliveries because a ping returns above.
+        # Delivery ids are global -- the same id must not be processed twice for any tenant -- so
+        # the ledger cannot live in a tenant's file. `tenancy.tenants()` globs `<root>/<owner>/*.db`
+        # and so does not mistake this for a customer.
+        conn = schema.open_store(Path(self.settings.database_path) / "deliveries.db")
         try:
             try:
                 fresh = deliveries.begin(conn, delivery_id, event)
