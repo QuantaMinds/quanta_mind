@@ -1958,3 +1958,40 @@ startup beats discovering it on a customer's first delivery.
 wheel build carries it as package data and publishes a webhook secret to anyone who installs.
 Gitignore governs git, not `build`. It is at the repository root now, and
 `types/settings.from_file()` reads it with the real environment taking precedence.
+
+### One store per repository — product-readiness item 4
+
+`database_path` was a single `quantamind.db` shared by every installation. The schema already
+separated tenants **logically** — `repo` is `UNIQUE (host, name)` and five tables key on `repo_id` —
+and that is not the same as isolating them:
+
+- **a shared blast radius**: one corrupt page, one bad migration, one `rm`, and every tenant is gone
+- **a shared SQLite writer lock**: one long index build blocks every other installation's delivery
+- **offboarding by cascade**: ending a contract becomes a DELETE across five tables that has to get
+  every foreign key right, on live data, against `rm one/path.db`
+
+`store/tenancy.py` gives each repository `<root>/<owner>/<name>.db`. **The unit is the repository,
+not the installation**: an installation's repository selection changes when somebody ticks a box,
+and keying files by installation would move a tenant's data when they did.
+
+**THE PATH IS DERIVED AND NEVER TAKEN FROM THE PAYLOAD.** Owner and name arrive from a webhook.
+HMAC makes them not-arbitrary, which is not the same as well-formed — `..` or a separator in either
+would place a store outside the root or over another tenant's. Refused, the same shapes
+`serve/working_clone.path_for` already refuses.
+
+**`health()` NOW TAKES THE ROOT AND OPENS EVERY TENANT.** A probe that opened one file would check
+one tenant and report for all of them; a version mismatch in any tenant is a tenant this build must
+not write to, and the verdict names which. **No tenants is healthy and says so** — a fresh install
+has no stores and is working, and reporting that as a failure would make "nobody has installed us
+yet" and "our storage is broken" the same alarm.
+
+**AND HEALTH DOES NOT CREATE THE ROOT.** The single-store version deliberately refused to create a
+missing file, so a process pointed at the wrong path could not look like a working one. The first
+version of this change called `mkdir` and lost that: a typo in `QUANTAMIND_DATABASE_PATH` would
+produce a fresh empty root and a healthy verdict. Provisioning storage is the operator's step.
+
+**One test was passing for the wrong reason and it took a neighbouring failure to notice.**
+`test_a_file_that_is_not_a_database_is_not_healthy` wrote its junk file directly into the root,
+where `tenancy.tenants()` does not look — so the probe answered "no tenants, healthy" and the
+assertion still held because a missing root is also unhealthy. It now writes where a tenant store
+actually lives.

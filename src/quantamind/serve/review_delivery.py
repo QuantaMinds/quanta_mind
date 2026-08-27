@@ -42,6 +42,7 @@ from quantamind.render.pin_block import block
 from quantamind.serve import pin_check
 from quantamind.serve.run_review import review as run_ranking
 from quantamind.serve.working_clone import ensure, sweep
+from quantamind.store import tenancy
 from quantamind.types.settings import Settings
 
 
@@ -101,7 +102,11 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
         clone,
         delivery_repo,
         changed,
-        Path(settings.database_path),
+        # **ONE STORE PER REPOSITORY, NOT ONE FOR EVERYBODY.** `database_path` is now the root
+        # under which each tenant gets its own file: the schema already separated them logically,
+        # but a shared file means a shared blast radius and a shared SQLite writer lock, and
+        # offboarding a customer means hand-written cascades across five tables instead of `rm`.
+        tenancy.store_for(Path(settings.database_path), *delivery_repo.split("/", 1)),
         as_of=base.committed_at,
         # **Passed so the review is RECORDED.** Without these the ranking runs and leaves no row,
         # which is how `review` and `ranked_unit` sat in the schema with zero writers.
