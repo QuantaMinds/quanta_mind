@@ -99,6 +99,10 @@ def render_config(settings: Settings) -> str:
         # by a `config` command is a credential in somebody's terminal scrollback.
         f"app_key_path               {settings.app_key_path or '(unset)'}",
         # **The one line here that says whether this process writes to somebody else's project.**
+        # **REPORTED AS SET OR UNSET, NEVER PRINTED.** It is a credential, and `config` output
+        # lands in terminal scrollback and CI logs. The operator needs to know whether public
+        # reads are rate-limited; nobody needs the token itself on screen to learn that.
+        f"public_read_token          {'set' if settings.public_read_token else '(unset)'}",
         f"posting_enabled            {settings.posting_enabled}",
         "",
         f"runs a model on a review:  {settings.runs_model}",

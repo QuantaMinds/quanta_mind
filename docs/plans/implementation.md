@@ -43,7 +43,7 @@ three months stale.
 | `ingest/` | **11** | `app_auth.py`, `change_shape.py`, `commits.py`, `diff.py`, `git_credentials.py`, `github_api.py`, `github_comments.py`, `history.py`, `pull_refs.py`, `reachability.py`, `review_window.py` |
 | `parse/` | **2** | `languages.py`, `units.py` |
 | `rank/` | **6** | `baseline.py`, `events.py`, `firing.py`, `history_rates.py`, `order.py`, `score.py` |
-| `allocate/` | **0** | **NOT BUILT — its work is done inside `rank/order.py`, which emits the labels** |
+| `allocate/` | **1** | `depth.py` |
 | `infer/` | **2** | `gemini.py`, `prompt_once.py` |
 | `verify/` | **6** | `anchor.py`, `external_facts.py`, `pin_mismatch.py`, `publishable.py`, `release_claims.py`, `releases.py` |
 | `render/` | **7** | `comment.py`, `coverage_line.py`, `dashboard.py`, `deep_report.py`, `pin_block.py`, `replay_report.py`, `shape_line.py` |

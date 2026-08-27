@@ -57,6 +57,15 @@ class Settings:
     app_id: str = ""
     """The GitHub App's numeric id. Public: it identifies the App, it authorises nothing."""
 
+    public_read_token: str = ""
+    """A token used ONLY where we are NOT installed. Never a customer -- see `github_api`.
+
+    **UNAUTHENTICATED IS 60 REQUESTS AN HOUR AND ONE LIVE RUN EXHAUSTS IT.** App-only auth removed
+    public reads at any volume, and the live suite and research bench read public pull requests by
+    the thousand. `_authorization()` tries the installation token FIRST, so this is unreachable for
+    any repository the App is installed on. Empty by default: correct, and slow.
+    """
+
     app_key_path: str = ""
     """Where the App's private key lives. **THE PATH IS CONFIGURATION; THE KEY IS NOT.** The key is
     read from disk at the moment it signs and never held here, for the same reason the webhook
@@ -184,4 +193,5 @@ def load(env: Mapping[str, str] | None = None) -> Settings:
         posting_enabled=_read_bool(source, "POSTING_ENABLED", False),
         app_id=source.get(PREFIX + "APP_ID", ""),
         app_key_path=source.get(PREFIX + "APP_KEY_PATH", ""),
+        public_read_token=source.get(PREFIX + "PUBLIC_READ_TOKEN", ""),
     )
