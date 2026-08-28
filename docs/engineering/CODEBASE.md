@@ -2544,3 +2544,28 @@ separating them is how a trail comes to hold fewer checks than ran: the second h
 at a call site and impossible to notice afterwards, since a missing row and a check that never
 happened look identical. A recording failure does not take the review down — the comment is worth
 posting whether or not the trail accepted it — and the count is compared, never assumed.
+
+### `.quantamind/rules.toml` — this repository's own standards, and the scope they needed
+
+The audit trail had no rows because nothing declared any rules. Four now exist, each mirroring a
+rule already written in AGENTS.md — a rule here that AGENTS.md does not state would be a standard
+nobody agreed to.
+
+**Running them before declaring them found a defect in the rule engine.** "No pandas in the
+product" is AGENTS.md rule 11, and it is true of `src/` and **false of `research/`**, which is a
+separate uv project the same rule permits to use pandas. Unscoped, the rule flagged
+`research/phase0/tests/pipeline/test_assemble.py` — correct by the rule's own terms and wrong by
+the standard it came from. On a pull request touching research, every such file would have been
+reported as violating a rule that was never meant to govern it.
+
+`Rule.paths` is the fix: prefixes a rule governs, empty meaning everywhere.
+
+**A file outside the scope produces NO ROW, which is not a skip.** There is no question to answer,
+the way a deleted file has no code to check. A `PASSED` row would be worse than nothing: it inflates
+the denominator of a compliance rate with a pair nobody agreed to. Sabotage covers both directions —
+ignoring the scope, and letting an empty scope mean empty coverage, which would silently disable
+every plain rule.
+
+**A rule that fires on deliberate code is worse than no rule**, because it teaches a reviewer to
+scroll past the section. That is why `print` is not among these: this product prints on purpose, and
+`serve/run_endpoint.py` explains why at length.

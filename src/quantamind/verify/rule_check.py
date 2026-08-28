@@ -98,7 +98,9 @@ def check(rule: Rule, path: str, source: str) -> Checked:
 
 def check_all(rules: Sequence[Rule], path: str, source: str) -> tuple[Checked, ...]:
     """One row per rule. **The count is the denominator of any compliance rate over this file.**"""
-    return tuple(check(rule, path, source) for rule in rules)
+    # A rule that does not govern this path produces no row: there is no question to answer, and
+    # a PASSED row would inflate the denominator with a pair nobody agreed to.
+    return tuple(check(rule, path, source) for rule in rules if rule.applies_to(path))
 
 
 def check_change(

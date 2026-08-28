@@ -55,6 +55,7 @@ def _one(entry: object, index: int, where: str) -> tuple[Rule | None, Unresolved
                 severity=Severity(str(entry.get("severity", "")).lower()),
                 check=CheckKind(str(entry.get("check", "")).lower()),
                 target=str(entry.get("target", "")),
+                paths=tuple(str(p) for p in entry.get("paths", []) if str(p).strip()),
             ),
             None,
         )

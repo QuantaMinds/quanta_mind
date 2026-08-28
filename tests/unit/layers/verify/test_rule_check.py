@@ -119,3 +119,43 @@ def test_a_violation_without_evidence_cannot_be_constructed() -> None:
 def test_an_unchecked_row_without_a_reason_cannot_be_constructed() -> None:
     with pytest.raises(ValueError, match="indistinguishable from one that passed"):
         Checked("r", Site("a.py"), Outcome.UNCHECKABLE)
+
+
+SCOPED = Rule(
+    id="no-pandas-in-product",
+    description="research/ is a separate uv project and MAY use pandas; the product may not.",
+    severity=Severity.HIGH,
+    check=CheckKind.FORBID_IMPORT,
+    target="pandas",
+    paths=("src/", "scripts/"),
+)
+
+
+def test_a_scoped_rule_produces_no_row_outside_its_scope() -> None:
+    """**FOUND BY RUNNING THE RULES OVER THIS REPOSITORY BEFORE DECLARING THEM.**
+
+    "No pandas in the product" is true of `src/` and false of `research/`, which the same
+    AGENTS.md rule permits to use it. Unscoped, the rule flagged a research test — correct by its
+    own terms and wrong by the standard it came from.
+
+    A file outside the scope yields NO row, which is not a skip: there is no question to answer,
+    the way a deleted file has no code to check. A PASSED row would be worse than nothing, because
+    it inflates the denominator of a compliance rate with a pair nobody agreed to.
+    """
+    source = "import pandas as pd\n"
+
+    inside = check_all([SCOPED], "src/quantamind/thing.py", source)
+    outside = check_all([SCOPED], "research/phase0/tests/test_thing.py", source)
+
+    assert [r.outcome for r in inside] == [Outcome.VIOLATED], "the product is still governed"
+    assert outside == (), (
+        f"a rule scoped to src/ produced {len(outside)} row(s) for a research file. research/ is "
+        "permitted to import pandas, so this is the rule firing where it was never meant to"
+    )
+
+
+def test_an_unscoped_rule_still_governs_everything() -> None:
+    """Empty scope must not mean empty coverage — that would silently disable every plain rule."""
+    everywhere = check_all([NO_PICKLE], "anywhere/at/all.py", "import pickle\n")
+
+    assert [r.outcome for r in everywhere] == [Outcome.VIOLATED]
