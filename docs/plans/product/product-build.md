@@ -14,13 +14,17 @@ file is the state.
 The product. Everything after this is packaging, and is worth nothing until A produces a review
 worth selling.
 
-- [~] **A1 `allocate/depth.py`** — BUILT, `just check` green, awaiting `just verify`.
+- [x] **A1 `allocate/depth.py`** — `just check` AND `just verify` green (34 passed, 8 skipped,
+      1 deselected). **The 8 skips do not bear on A1**: nothing imports `allocate.depth` yet, and
+      the skipped tests read PUBLIC repositories through the API, where the unauthenticated limit
+      is 60/hour. A1's own 12 unit tests all ran.
       `plan(ranking, changed) -> Reading(depth, paths, unread, why)` with three depths —
       `FULL` / `FOCUSED` / `UNRANKED` — and the conservation invariant `paths + unread == changed`
       asserted on the value. 12 tests, three sabotages caught (dropping `unread`, relabelling
       `UNRANKED` as `FOCUSED`, restoring the small-change mute). Nothing consumes it yet.
-      *Not ticked:* `just verify` is blocked on GitHub's 60/hour unauthenticated rate limit —
-      see "What I need from you".
+      **From A2 onward those skips DO matter**: `tests/live/test_delivery_live.py` is one of the
+      eight, and it is the test that covers the path A2 changes. The token stops being a
+      convenience there and becomes the difference between verifying and assuming.
 - [ ] **A2 Wire the model into the webhook.** `deep_review.deep()` is CLI-only today
       (`--deep`, `argparse.SUPPRESS`); `serve/review_delivery.py` never calls it. Behind the
       allocation, with a hard per-pull-request cost cap.
