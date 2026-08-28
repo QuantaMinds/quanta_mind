@@ -106,52 +106,80 @@ already carries `Confidence` (where `RESOLVED` requires two independent resolver
 `UNPARSEABLE_SYNTAX`. Non-negotiables 2 and 3 in `AGENTS.md` are ABOUT edges. Nothing has ever
 emitted one.
 
-### D1 — code relationships, deterministically
+### D1 — the rules engine (the spine: audit and dashboard are views over it)
 
-- [ ] **D1a Labelled import edges.** `parse/imports.py` over Python's stdlib `ast`: no dependency,
-      no model. Every edge carries `Confidence` and `Provenance`; an import that cannot be
-      resolved emits `Unresolved(site, reason, construct)` and never nothing — `importlib` is
-      `DYNAMIC_DISPATCH`, a third-party name is `EXTERNAL_SYMBOL`, a broken file is
-      `UNPARSEABLE_SYNTAX`. `RESOLVED` only where two independent resolvers agree: the syntax says
-      the import exists AND the target is a file in the tree.
-- [ ] **D1b The graph, stored.** A whole-repo pass into a `dependency` table, incremental against
+A compliance rate cannot be reported without rules to be compliant with. Built first because D4
+and D5 read what it records.
+
+- [ ] **D1a Rules as code, in the customer's repository.** `.quantamind/rules.toml` — `tomllib` is
+      stdlib and rule 11 bans `pyyaml` from `src/`. Versioned with their code, reviewed like their
+      code, diffable. Documentation is what this replaces: standards nobody reads and every
+      reviewer interprets differently.
+- [ ] **D1b Deterministic checks FIRST, and most rules are.** From the competitor's own examples:
+      `async-error-handling`, `typed-catch-block`, `no-console-log-in-prod`,
+      `input-validation-required`. **Every one is an AST pattern, not a semantic judgement.** A
+      parser can answer them, so a model must not — and a deterministic check is the only kind
+      that can be re-run later to prove an audit entry was right.
+- [ ] **D1c Model-checked rules, clearly separated.** For rules a parser genuinely cannot answer.
+      Each result carries `Provenance.PARSER` or `Provenance.MODEL` so an auditor can see which
+      claims are reproducible. **They must never render alike.**
+- [ ] **D1d Mine rules from past review comments.** Senior engineers repeat themselves, and the
+      repetition IS the standard. **This is the one model use where being wrong is cheap:** the
+      output is a PROPOSED rule a human approves, not a published finding — a different risk
+      profile entirely from the path that measured 66.7-82.1% wrong.
+
+**OPEN DECISION — which languages.** Python checks are free: `ast` is stdlib. JS/TS are not, and
+`AGENTS.md` states plainly that **tree-sitter is NOT a dependency** while `pyproject.toml` declares
+`dependencies = []`. Either the rules engine ships Python-only at first, or that constraint is
+spent deliberately. It must not be spent by accident.
+
+### D2 — code relationships, deterministically
+
+- [ ] **D2a Labelled import edges.** `parse/imports.py` over stdlib `ast`: no dependency, no
+      model. Every edge carries `Confidence` and `Provenance`; an unresolvable import emits
+      `Unresolved(site, reason, construct)` and never nothing — `importlib` is `DYNAMIC_DISPATCH`,
+      a third-party name `EXTERNAL_SYMBOL`, a broken file `UNPARSEABLE_SYNTAX`. `RESOLVED` only
+      where two independent resolvers agree: the syntax says the import exists AND the target is a
+      file in the tree.
+- [ ] **D2b The graph, stored.** A whole-repo pass into a `dependency` table, incremental against
       the same commit watermark the touch index uses.
-- [ ] **D1c Blast radius in the review.** "This module is imported by 14 others, two of them entry
+- [ ] **D2c Blast radius in the review.** "This module is imported by 14 others, two of them entry
       points." A new signal, testable against the same fix-return outcome the touch index uses.
 
-### D2 — cross-repo, by declaration rather than discovery
+### D3 — cross-repo, by declaration rather than discovery
 
-- [ ] **D2a The business declares its links.** `.quantamind/links.toml` in the customer's repo
-      (`tomllib` is stdlib; `pyyaml` is banned in `src/` by rule 11). **Declared beats discovered:**
-      it needs no org-wide crawl, no broad permissions, and a link a customer stated is provenance
-      an auditor can be shown — where an inferred one is our guess about their architecture.
-- [ ] **D2b Edges that cross a repository boundary.** A changed exported symbol against the linked
+- [ ] **D3a The business declares its links.** `.quantamind/links.toml`. **Declared beats
+      discovered:** no org-wide crawl, no broad permissions, and a link a customer stated is
+      provenance an auditor can be shown, where an inferred one is our guess about their
+      architecture.
+- [ ] **D3b Edges that cross a repository boundary.** A changed exported symbol against the linked
       repositories that import it.
 
-### D3 — audit trail
+### D4 — audit trail
 
-- [ ] **D3 Append-only, exportable.** Every review: what fired, on which commit, what we said,
-      whether it posted, and the provenance of each claim. Partly present — `store/reviews.py`
-      already records rankings — and no export exists.
+- [ ] **D4 Append-only, exportable.** Every check on every pull request: which rule, the outcome,
+      the commit, the provenance, whether it posted. Partly present — `store/reviews.py` records
+      rankings — and no export exists. **This is the artefact a compliance team buys**, and it is
+      worth more when the checks behind it are reproducible, which is why D1b precedes D1c.
 
-### D4 — compliance dashboard, PER REPOSITORY
+### D5 — compliance dashboard, PER REPOSITORY
 
-- [ ] **D4 Per repo, not per developer.** Rule compliance, violation hotspots, trend.
-      **Deliberately not a per-developer scoreboard**: the competitor screenshot ranks named
-      engineers, which is a cultural decision rather than a feature, and this one is declined
-      until somebody asks for it on purpose.
+- [ ] **D5 Per repo, not per developer.** Rule compliance, violation hotspots, trend. A view over
+      D4. **Deliberately not a per-developer scoreboard**: the competitor screenshot ranks named
+      engineers, which is a cultural decision rather than a feature, and it is declined here until
+      somebody asks for it on purpose.
 
-### D5 — the context a human wrote
+### D6 — the context a human wrote
 
 Pulled in as **two separate uses**, because they succeed or fail independently:
 
-- [ ] **D5a Retrieval for the READER.** The ticket and discussion behind the files being changed,
+- [ ] **D6a Retrieval for the READER.** The ticket and discussion behind the files being changed,
       shown in the comment. Deterministic, and worth something whatever the model does.
-- [ ] **D5b The same text as MODEL input.** **Pre-register a bar.** Shape-context went
+- [ ] **D6b The same text as MODEL input.** **Pre-register a bar.** Shape-context went
       PASS to NULL under McNemar and a same-arm replicate, and five prompt levers moved nothing.
       Human context is a DIFFERENT variable — it carries why a change exists, which no diff shape
       contains — so the null does not condemn it. It does mean measuring rather than assuming.
-- [ ] **D5c Sources, cheapest first.** GitHub PR and issue comments need no new credential and no
+- [ ] **D6c Sources, cheapest first.** GitHub PR and issue comments need no new credential and no
       new dependency. Jira and Slack are REST and JSON over HTTPS, so `urllib` reaches both and
       `dependencies = []` holds; what they need is the customer's auth. **Egress is a decision,
       not a detail:** quoting a private Slack thread into a GitHub comment moves their data
