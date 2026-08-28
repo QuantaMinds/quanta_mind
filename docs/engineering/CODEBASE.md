@@ -2268,3 +2268,33 @@ writing that rule means.
 
 Verified by sabotage: an unparseable language reporting as passed, broken Python reporting as
 passed, a substring match on call names, and silently dropping the deferred rows.
+
+### The declared standards reach the pull request — `ingest/blob.py`, `render/rule_block.py`
+
+D1b could check a file; nothing called it from a delivery. `deliver()` now reads
+`.quantamind/rules.toml` from the clone, runs `check_change()` over every changed file, and renders
+the result beside the ranking.
+
+**The file is read as the change LEAVES it, not as the clone happens to sit.** `ingest/blob.at()`
+runs `git show <sha>:<path>`, because the working tree of a shared clone is whatever the last fetch
+left, and a review of that would be judging a commit nobody proposed. Absent and unreadable are
+different answers: a path the change deleted returns `None` — there is no code left for a standard
+to apply to — while a git failure raises, so a broken clone cannot read as a repository full of
+deletions with every rule quietly passing.
+
+**The denominator is printed, not implied.** "1 violation" invites a reader to assume everything
+else was checked and passed. Only Python is parsed, so a TypeScript repository produces rows we
+could not decide, and `render/rule_block.py` states checks decided, violations found, and how many
+were left undecided with the reason — followed by the words "those are not passes". Without that
+line the section reports our parser coverage as the customer's compliance, and it looks best
+exactly where we can read least.
+
+**Violations are asserted where model findings are not.** A forbidden call either appears in the
+syntax tree or it does not, and anyone can re-run the check on the same commit. That is why this
+block names the rule, the file and the line, while `render/comment.py` continues to claim nothing
+about correctness.
+
+Verified by sabotage: dropping the undecided count, and counting undecided rows as decided, each
+fail their own test. Run live against this repository's own HEAD, a two-rule file produced 3
+passed, 1 violated (`print` at `run_endpoint.py:104`) and 2 uncheckable (`README.md`,
+`language_unsupported`) — the markdown correctly not counted as a pass.

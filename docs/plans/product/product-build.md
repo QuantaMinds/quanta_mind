@@ -214,7 +214,11 @@ spent deliberately. It must not be spent by accident.
 
 ### D4 — audit trail
 
-- [ ] **D4 Append-only, exportable.** Every check on every pull request: which rule, the outcome,
+- [~] **D4a Wired into the delivery.** `deliver()` reads `.quantamind/rules.toml`, runs
+      `check_change()` over every changed file (`git show <sha>:<path>`, so the code is read AS
+      THE CHANGE LEAVES IT), and renders the result with the denominator printed. Live on this
+      repository: 3 passed, 1 violated, 2 uncheckable — the markdown correctly NOT a pass.
+- [ ] **D4b Append-only, exportable.** Every check on every pull request: which rule, the outcome,
       the commit, the provenance, whether it posted. Partly present — `store/reviews.py` records
       rankings — and no export exists. **This is the artefact a compliance team buys**, and it is
       worth more when the checks behind it are reproducible, which is why D1b precedes D1c.
