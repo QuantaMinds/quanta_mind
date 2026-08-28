@@ -73,7 +73,13 @@ blocks Half B in production, and it was invisible until the deep half ran for th
       the SAME pattern — sign a JWT with the SA key, POST to `oauth2.googleapis.com/token`,
       receive an access token. One sibling module, zero new dependencies; `gcloud_path` stays for
       laptop development.~~
-- [ ] **G2 Prove Half B from inside the container.** It has run exactly once, by hand, through the
+- [x] **G2 Half B proven from a container on GCP.** Deployed to Cloud Run as
+      `quantamind-reviewer`; PR #85 reviewed end to end with `[infer] access token from metadata`
+      — no credential on disk. **Found: Cloud Run's default CPU throttling silently starves the
+      background review**, returning a 202 GitHub accepts while nothing runs — indistinguishable
+      from working. Also: the filesystem is ephemeral so the touch index dies with the instance,
+      which makes Cloud Run the wrong long-term home and a queue plus worker (B1) the real answer.
+      ~~Original: It has run exactly once, by hand, through the
       CLI on a laptop. Never from a webhook delivery, never in Docker, never with a service
       account. Until that runs, "the endpoint reviews with a model" is a claim about a code path
       rather than an observation.

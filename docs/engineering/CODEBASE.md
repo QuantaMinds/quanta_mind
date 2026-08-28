@@ -2332,3 +2332,37 @@ refusal names the path it tried. And `QUANTAMIND_GCLOUD_PATH=`, set but empty, w
 executable: `source.get(key, "gcloud")` returns `""` for a variable that exists and is blank, which
 is exactly what commenting out a line in a `.env` produces. **This product's own deep review found
 the second one**, on the commit that introduced the setting.
+
+### Cloud Run — the endpoint reviews in production, and what deploying it exposed
+
+`quantamind-reviewer` runs on Cloud Run in `quantamind-oss`, as the service account of the same
+name, with the webhook secret and the App private key from Secret Manager. **The whole chain has
+now run there**, on pull request #85:
+
+```
+[serve]   accepted QuantaMinds/quanta_mind#85 at 7b77a084e156
+[infer]   access token from metadata
+[deliver] full: 1 file(s), at or under the 10-file ceiling — the whole change is read
+[deliver] model: 1 finding(s) kept of 1 raw (0 unanchored, 0 refuted, 0 withdrawn), consulted=True
+[serve]   #85: rehearsed — posting is off
+```
+
+`access token from metadata` is G1's claim made observable: **no credential on disk**, the token
+comes from the instance identity.
+
+**CLOUD RUN'S DEFAULT CPU THROTTLING SILENTLY STARVES THE REVIEW.** CPU is de-allocated once the
+response is sent, and this endpoint answers `202` and then reviews on a background thread — which
+GitHub requires, because a webhook must not wait 40 seconds. The first delivery logged `accepted`
+and then nothing: a 202 GitHub was satisfied with, and no review. **From outside that is
+indistinguishable from a working system**, which is the failure class this product exists to
+refuse. Fixed with `--no-cpu-throttling`; the real answer is a queue and a worker (B1), because
+paying for an always-on instance to do background work is renting the wrong shape.
+
+**The filesystem is ephemeral, so the touch index does not survive an instance.** Every cold start
+re-clones and re-indexes — 37 seconds on a large repository — and the clones live in memory against
+the instance's 2 GiB. Cloud Run is the wrong home for a product whose asset is an index that
+accumulates over months; it is the right home for proving the code path, which is what it was used
+for here.
+
+**`.gcloudignore` did not exist**, so a source deploy uploaded every tracked research file, every
+test and the whole of `.git` — 497 MB of `research/` alone, none of which the image copies.
