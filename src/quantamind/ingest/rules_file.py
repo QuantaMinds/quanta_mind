@@ -29,6 +29,7 @@ CONSUMED BY: the checks that enforce these (D1b in docs/plans/product/product-bu
 from __future__ import annotations
 
 import tomllib
+from collections import Counter
 from pathlib import Path
 
 from quantamind.types.rule import CheckKind, Rule, RuleRefused, Severity
@@ -79,20 +80,27 @@ def read(clone: Path) -> tuple[tuple[Rule, ...], tuple[Unresolved, ...]]:
     if not isinstance(declared, list):
         return (), (_refusal(where, Reason.MALFORMED_DECLARATION),)
 
-    rules: list[Rule] = []
+    parsed: list[Rule] = []
     refused: list[Unresolved] = []
-    seen: set[str] = set()
     for index, entry in enumerate(declared):
         rule, refusal = _one(entry, index, where)
         if refusal is not None:
             refused.append(refusal)
             continue
         assert rule is not None  # _one returns exactly one of the two; mypy cannot see it
-        if rule.id in seen:
-            # **A DUPLICATE ID IS A REFUSAL, NOT A LAST-ONE-WINS.** Audit rows key on the id, so
-            # two rules sharing one would make the trail ambiguous about which was applied.
-            refused.append(_refusal(rule.id, Reason.MALFORMED_DECLARATION))
-            continue
-        seen.add(rule.id)
-        rules.append(rule)
+        parsed.append(rule)
+
+    # **EVERY DECLARATION SHARING A DUPLICATED ID IS REFUSED, INCLUDING THE FIRST.** This kept the
+    # first and rejected the rest, which is the same ambiguity the refusal exists to prevent: if
+    # two declarations share an id and differ, enforcing whichever appeared first is arbitrary, and
+    # the audit row would name a rule the reader cannot identify. Keeping none is the only answer
+    # that cannot be wrong. Found by this product's own deep review on its first real run, against
+    # a comment of mine that asserted the property the code did not have.
+    counts = Counter(rule.id for rule in parsed)
+    rules = [rule for rule in parsed if counts[rule.id] == 1]
+    refused.extend(
+        _refusal(rule_id, Reason.MALFORMED_DECLARATION)
+        for rule_id in sorted(counts)
+        if counts[rule_id] > 1
+    )
     return tuple(rules), tuple(refused)

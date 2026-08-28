@@ -114,11 +114,38 @@ def test_one_bad_declaration_does_not_take_the_good_ones_with_it(tmp_path: Path)
     assert len(refused) == 1 and refused[0].site.path == "broken"
 
 
-def test_a_duplicate_id_is_refused_rather_than_last_one_winning(tmp_path: Path) -> None:
-    """Audit rows key on the id; two rules sharing one makes the trail ambiguous."""
+def test_every_declaration_sharing_a_duplicated_id_is_refused_including_the_first(
+    tmp_path: Path,
+) -> None:
+    """**THIS TEST ASSERTED FIRST-ONE-WINS, AND THIS PRODUCT'S OWN REVIEWER CAUGHT IT.**
+
+    On the first real run of the deep half, against the commit that added this module, the model
+    said: accepting the first rule and rejecting the rest "can be misleading if the rule
+    definitions differ; all rules with a duplicated ID should be rejected to avoid ambiguity about
+    which rule is being enforced." It was right, and it was arguing against a comment of mine that
+    claimed the refusal existed to prevent exactly the ambiguity the code then produced.
+
+    If two declarations share an id and differ, enforcing whichever appeared first is arbitrary,
+    and the audit row names a rule the reader cannot identify. Keeping none cannot be wrong.
+    """
     rules, refused = read(_write(tmp_path, GOOD + GOOD))
 
-    assert len(rules) == 2, f"a duplicate id was enforced twice: {[r.id for r in rules]}"
+    assert rules == (), (
+        f"a duplicated id was still enforced: {[r.id for r in rules]}. Which of the two "
+        "declarations that is, nobody reading the audit trail can tell"
+    )
+    assert len(refused) == 2, "one refusal per duplicated id, naming it"
+    assert {u.site.path for u in refused} == {"no-console-log-in-prod", "async-error-handling"}
+
+
+def test_a_unique_id_alongside_a_duplicated_one_still_survives(tmp_path: Path) -> None:
+    """Refusing the duplicates must not take the well-formed rules with them."""
+    extra = GOOD.replace("no-console-log-in-prod", "unique-rule").replace(
+        "async-error-handling", "other-unique"
+    )
+    rules, refused = read(_write(tmp_path, GOOD + GOOD + extra))
+
+    assert {r.id for r in rules} == {"unique-rule", "other-unique"}
     assert len(refused) == 2
 
 

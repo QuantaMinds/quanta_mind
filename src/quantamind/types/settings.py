@@ -68,6 +68,14 @@ class Settings:
     FIRST, so this cannot reach a repository the App is installed on.
     """
 
+    gcloud_path: str = "gcloud"
+    """How to invoke gcloud. **A HOMEBREW PATH WAS COMPILED INTO THE PRODUCT.**
+
+    `infer/gemini.py` defaulted to `/opt/homebrew/share/google-cloud-sdk/bin/gcloud` — correct on
+    one laptop and absent in the container, where Half B would have failed the way the clone did.
+    The default is now the bare name, resolved from PATH like any other tool.
+    """
+
     inference_project: str = ""
     """The GCP project the model is billed to. Empty means the webhook runs NO inference.
 
@@ -174,4 +182,5 @@ def load(env: Mapping[str, str] | None = None) -> Settings:
         app_key_path=source.get(PREFIX + "APP_KEY_PATH", ""),
         public_read_token=source.get(PREFIX + "PUBLIC_READ_TOKEN", ""),
         inference_project=source.get(PREFIX + "INFERENCE_PROJECT", ""),
+        gcloud_path=source.get(PREFIX + "GCLOUD_PATH", "gcloud"),
     )
