@@ -14,17 +14,15 @@ file is the state.
 The product. Everything after this is packaging, and is worth nothing until A produces a review
 worth selling.
 
-- [x] **A1 `allocate/depth.py`** — `just check` AND `just verify` green (34 passed, 8 skipped,
-      1 deselected). **The 8 skips do not bear on A1**: nothing imports `allocate.depth` yet, and
-      the skipped tests read PUBLIC repositories through the API, where the unauthenticated limit
-      is 60/hour. A1's own 12 unit tests all ran.
+- [x] **A1 `allocate/depth.py`** — `just check` AND `just verify` green, **42 passed, 0 skipped**
+      with `QUANTAMIND_PUBLIC_READ_TOKEN` set. The first fully-verified green: the same gate read
+      34 passed / 8 skipped without the token, and was green BECAUSE eight tests did not run.
       `plan(ranking, changed) -> Reading(depth, paths, unread, why)` with three depths —
       `FULL` / `FOCUSED` / `UNRANKED` — and the conservation invariant `paths + unread == changed`
       asserted on the value. 12 tests, three sabotages caught (dropping `unread`, relabelling
       `UNRANKED` as `FOCUSED`, restoring the small-change mute). Nothing consumes it yet.
-      **From A2 onward those skips DO matter**: `tests/live/test_delivery_live.py` is one of the
-      eight, and it is the test that covers the path A2 changes. The token stops being a
-      convenience there and becomes the difference between verifying and assuming.
+      Those eight included `tests/live/test_delivery_live.py` — the test covering the path A2
+      changes — so A2 now lands verified rather than assumed.
 - [ ] **A2 Wire the model into the webhook.** `deep_review.deep()` is CLI-only today
       (`--deep`, `argparse.SUPPRESS`); `serve/review_delivery.py` never calls it. Behind the
       allocation, with a hard per-pull-request cost cap.
@@ -65,8 +63,7 @@ worth selling.
 |---|---|
 | **B3** | A **Stripe account** (test-mode keys are enough to build against): publishable key, secret key, and a webhook signing secret. Say the word and I'll list the exact steps. |
 | **B2/C1** | A **domain** and somewhere to host — the endpoint is a container today, reachable only through a temporary tunnel. |
-| **now** | A **GitHub token with public read access** (a fine-grained PAT with no scopes is
-enough) for `QUANTAMIND_PUBLIC_READ_TOKEN`. Unauthenticated reads are 60/hour and one `just verify`
-run exhausts them, so the live suite skips rather than verifies. This token is used ONLY where the
-App is not installed — never on a customer repository. |
+| ~~now~~ | ~~GitHub public-read token~~ — **DONE.** In the gitignored root `.env`; limit is
+5,000/hour and `just verify` runs 42/42 with none skipped. `config` reports it `set`, never its
+value. Used only where the App is not installed, so it can never touch a customer repository. |
 | **A6** | **One design partner.** Tier 0 item 1 — minutes-per-file on binding changes — is still the item that decides whether any of this is worth building. |
