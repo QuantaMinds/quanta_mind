@@ -2786,19 +2786,30 @@ a different unit, with the same discipline: blind sheet, sealed key, and an arm 
 constant answer fail. `pack.py` draws, `audit.py` disbelieves the draw, `sample.py` and
 `scoring.py` are the two commands, wired as `just findings-draw` and `just findings-score`.
 
-**The control arm is a genuine claim shown beside code it is not about.** A one-armed sheet
-cannot detect an inattentive labeller — marking everything TRUE would score 100%. Half the pack
-is planted, so a constant answer scores 50% and `scoring.py` **withholds the rate entirely**
-rather than printing it under a warning: a number that was not evidence is otherwise quoted
-without its caveat. `test_scoring_gate.py` asserts the rate is ABSENT from the output, not that
-a warning is present.
+**THE PLANTED-CONTROL ARM WAS BUILT, AUDITED CLEAN, AND REMOVED.** Half the pack used to be a
+genuine claim shown beside code it was not about, so that marking everything TRUE scored 50%.
+It was separable by a surface cue orthogonal to the construct: **a rater scores full marks by
+checking whether the claim's filename appears in the diff header, without ever assessing whether
+a finding is correct.** The separability was measured and reported as a caveat — real claims'
+named symbols appeared in their diff 93% of the time against 5% for planted ones — and treating
+it as a caveat was the error. It is disqualifying.
 
-**Falsity is established by construction.** A planted claim must name something — an identifier,
-a dotted attribute — that is ABSENT from the host diff. A claim generic enough to be accidentally
-true would mark a *correct* labeller wrong and withhold a real result. The cost is stated where
-it is measured: real claims overlap their diff 93%, planted 5%, so the controls are mechanically
-separable. **Catching them proves the labeller read, not that they judged well.** Closing that
-gap means authoring subtly-false claims, which is the judgement the instrument exists to exclude.
+**An isolated different-family judge then demonstrated it.** Run over the 24-item pack it
+returned FALSE on all 24: 12 of 12 controls "caught", every one with a reason of the form *"the
+diff contains no X at all"*. It scored 100% on the control arm **while never performing the
+task**, and the resulting 0-of-12 correctness figure measures pairing detection. It is retracted.
+Four authored positive controls confirmed the judge was not simply always-FALSE — it answered
+TRUE to all four — and a spot-check found one of its confident FALSE verdicts resting on a
+backwards claim about where Flask defines `PROVIDE_AUTOMATIC_OPTIONS`, which is why `UNKNOWN`
+is now a first-class verdict.
+
+**Attention is checked by the deciding line instead**, which is this project's own precedent:
+`adjudication-preregistration.md` recorded every verdict "with the specific line of code that
+decides it". For TRUE and FALSE the rater pastes the line from the diff that settles it, and
+`scoring.py` refuses to compute any rate if a cited line is not in the code that item showed.
+A quoted line cannot be produced without reading, cannot be faked by a filename cue, and is
+checkable. **Removing the arm also removed the sealed key** — with nothing to leak, auditing a
+pack can no longer burn the draw, which is what A57 warns about and what happened here.
 
 **Four leaks reached a built pack before any was noticed, and every one came from the same
 place: donors drawn from a pool that still held the real items.** One claim used three times;
@@ -2810,7 +2821,11 @@ quoting `len(args) == 1` yields none. `overlap()` now returns **-1 for untestabl
 below the arm size is a failure rather than a footnote — rule 14, and the shape of
 `bench/forensic/population.py:assert_intersects`.
 
-**The first pack drawn here is BURNED and preserved at `data/labelling.BURNED_20260828/`.**
+**Two earlier packs are preserved rather than deleted: `data/labelling.BURNED_20260828/` and
+`data/labelling.SUPERSEDED_planted/`.** The first is burned for the leak below; the second is
+the planted-arm design the paragraphs above retired.
+
+**The burned pack.**
 Auditing it printed per-item arms into an assistant transcript — `item 01, item 02 -> ['PLANTED',
 'REAL']` — and the labeller reads that transcript, so blindness for those item numbers is gone
 and cannot be restored by care from here. This is `PHASE0_PREREGISTRATION.md` A57 repeated by the

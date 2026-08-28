@@ -98,18 +98,18 @@ label-score:
 
 # ------------------------------- the findings-correctness pack (human, different unit)
 
-# Draw a blind pack asking whether PUBLISHED findings are TRUE of the code they point at.
-# Half the pack is a genuine claim shown beside code it is not about, so marking everything
-# TRUE scores 50% and yields no result. KEY must be a path OUTSIDE the working tree: A57
-# voided a draw whose key reached a transcript. SEED is required for the same reason as
-# above, and a redraw after a leak needs a NEW one, recorded in the preregistration.
-findings-draw HARVEST KEY SEED:
-    cd research/phase0 && uv run python -m phase0.findings.sample --harvest {{HARVEST}} --out data/labelling --key {{KEY}} --seed {{SEED}}
+# Draw a pack asking whether PUBLISHED findings are TRUE of the code they point at. Every
+# item is a real finding and THERE IS NO KEY -- the planted-control arm was removed because a
+# rater could score full marks on it by checking whether the claim's filename appears in the
+# diff header, without ever assessing a finding. Attention is checked by the deciding line
+# instead. SEED is required so a draw is reproducible and cannot be quietly redrawn.
+findings-draw HARVEST SEED:
+    cd research/phase0 && uv run python -m phase0.findings.sample --harvest {{HARVEST}} --out data/labelling --seed {{SEED}}
 
-# Score the findings labels against their sealed key. Withholds the rate entirely — does
-# not compute it — if the planted controls were not caught.
-findings-score KEY:
-    cd research/phase0 && uv run python -m phase0.findings.scoring --labels data/labelling/findings_labels.csv --key {{KEY}}
+# Score the findings labels. Withholds the rate entirely — does not compute it — if any
+# TRUE/FALSE verdict cites a deciding line that is not in the code that item showed.
+findings-score:
+    cd research/phase0 && uv run python -m phase0.findings.scoring --labels data/labelling/findings_labels.md --pack data/labelling/findings_pack.md
 
 # Branch naming needs a branch, so it runs in CI rather than on every local check.
 check-branch:

@@ -1,23 +1,21 @@
-"""Score a labelled findings pack against its sealed key. Run this last.
+"""Score a labelled findings pack. The deciding line is what makes a verdict admissible.
 
-WHAT: `python -m phase0.score_findings --labels <csv> --key <csv>` prints the share of
+WHAT: `python -m phase0.findings.scoring --labels <md> --pack <md>` prints the share of
       PUBLISHED findings a human judged correct, with a Wilson interval.
-WHY:  Kept separate from drawing so the two are commands run in order, and so the labels
-      exist before anything computes a number from them.
+WHY:  **A VERDICT WITHOUT A DECIDING LINE IS NOT SCORED.** For TRUE and FALSE the rater must
+      quote a line that is actually in that item's diff. This replaces the planted control arm,
+      which a rater could pass by checking filenames without ever assessing a finding -- an
+      isolated judge scored 12 of 12 on it while doing exactly that. A quoted line cannot be
+      produced without reading the code, and whether it is really there is checkable.
 
-      **THE CONTROLS GATE THE RESULT AND THE GATE IS ARITHMETIC, NOT ADVICE.** If the
-      planted items were not caught, the reading did not discriminate, and the findings
-      rate is not a measurement of the findings -- so it is NOT COMPUTED. An earlier
-      version printed the rate beneath a warning, which is how a number that was not
-      evidence ends up quoted without its warning.
+      **UNKNOWN IS A FIRST-CLASS VERDICT AND NEEDS NO LINE.** It is the honest answer when
+      deciding would require code or library behaviour outside the diff, and the judge run
+      showed why it must exist: with only TRUE/FALSE available, confident FALSEs were returned
+      on recalled facts, one of which was verifiably backwards.
 
-      **UNSURE SCORES AS DISAGREEMENT**, as `HAND_LABELLING_PROTOCOL.md` requires: not
-      knowing is information and its honest cost is a point.
-
-      What this measures is narrow and the printout says so: one repository, one language,
-      findings from consecutive commits, no stratification. The interval covers sampling
-      error alone. It is also an estimate of correctness AFTER the anchor gate and the
-      refutation pass, which is a different quantity from the raw model error rate.
+      **TWO RATES ARE PRINTED AND NEITHER IS "THE" NUMBER.** Correct over all items counts
+      UNKNOWN against the finding; correct over decided items does not. They answer different
+      questions and quoting one without the other is how a rate loses its denominator.
 IMPORTS: stdlib only.
 CONSUMED BY: an operator, by hand, after the labels are committed.
 """
@@ -25,16 +23,16 @@ CONSUMED BY: an operator, by hand, after the labels are committed.
 from __future__ import annotations
 
 import argparse
+import re
 from pathlib import Path
 
-VERDICTS = {"TRUE", "FALSE", "UNSURE"}
-# Below this share of controls caught, the labelling did not discriminate and no rate is shown.
-CONTROL_BAR = 0.8
+VERDICTS = {"TRUE", "FALSE", "UNKNOWN"}
+NEEDS_LINE = {"TRUE", "FALSE"}
 Z = 1.96
 
 
 def wilson(hits: int, n: int) -> tuple[float, float]:
-    """Wilson score interval. The normal approximation is wrong at this n and near 1.0."""
+    """Wilson score interval. The normal approximation is wrong at this n and near the ends."""
     if n == 0:
         return (0.0, 1.0)
     p = hits / n
@@ -43,63 +41,95 @@ def wilson(hits: int, n: int) -> tuple[float, float]:
     return (max(0.0, mid - half), min(1.0, mid + half))
 
 
-def read_pairs(path: Path, header: bool) -> dict[str, str]:
-    rows = [r for r in path.read_text().splitlines() if r.strip()]
-    if header:
-        rows = rows[1:]
+def read_blocks(text: str, *, fields: tuple[str, ...]) -> dict[str, dict[str, str]]:
+    """Parse `## item NN` sections into `{item: {FIELD: value}}`. Missing fields come back empty."""
+    out: dict[str, dict[str, str]] = {}
+    parts = re.split(r"^## (item \d\d)\s*$", text, flags=re.M)[1:]
+    for name, body in zip(parts[::2], parts[1::2], strict=True):
+        got = dict.fromkeys(fields, "")
+        for field in fields:
+            found = re.search(rf"^{field}:[ \t]*(.*)$", body, flags=re.M)
+            if found:
+                got[field] = found.group(1).strip()
+        out[name] = got
+    return out
+
+
+def diffs_of(pack_text: str) -> dict[str, str]:
+    """The code shown for each item, so a cited line can be checked against it."""
     out: dict[str, str] = {}
-    for row in rows:
-        name, _, value = row.partition(",")
-        out[name.strip()] = value.strip().upper()
+    parts = re.split(r"^## (item \d\d)\s*$", pack_text, flags=re.M)[1:]
+    for name, body in zip(parts[::2], parts[1::2], strict=True):
+        block = re.search(r"```diff\n(.*?)```", body, flags=re.S)
+        out[name] = block.group(1) if block else ""
     return out
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--labels", type=Path, required=True)
-    parser.add_argument("--key", type=Path, required=True)
+    parser.add_argument("--pack", type=Path, required=True)
     args = parser.parse_args()
 
-    key = read_pairs(args.key, header=False)
-    labels = read_pairs(args.labels, header=True)
+    shown = diffs_of(args.pack.read_text())
+    labels = read_blocks(args.labels.read_text(), fields=("VERDICT", "LINE"))
 
-    if set(key) != set(labels):
-        print(f"labels cover {len(labels)} items, key has {len(key)} -- refusing to score")
+    if set(labels) != set(shown):
+        print(f"labels cover {len(labels)} items, the pack has {len(shown)} -- refusing to score")
         return 1
-    blank = sorted(i for i, v in labels.items() if not v)
+    blank = sorted(i for i, v in labels.items() if not v["VERDICT"])
     if blank:
         print(f"unlabelled, refusing to score: {', '.join(blank)}")
         return 1
-    bad = set(labels.values()) - VERDICTS
+    bad = {v["VERDICT"] for v in labels.values()} - VERDICTS
     if bad:
         print(f"not a verdict: {sorted(bad)}")
         return 1
 
-    real = [i for i, arm in key.items() if arm == "REAL"]
-    planted = [i for i, arm in key.items() if arm == "PLANTED"]
-    caught = sum(labels[i] == "FALSE" for i in planted)
-    correct = sum(labels[i] == "TRUE" for i in real)
-    unsure = sum(v == "UNSURE" for v in labels.values())
-
-    print(f"CONTROLS CAUGHT   {caught} of {len(planted)}")
-    if caught < len(planted) * CONTROL_BAR:
+    # **THE ATTENTION CHECK.** A cited line that is not in the code shown means the verdict was
+    # not read off that code. Inadmissible, and named per item rather than summarised away.
+    unquoted: list[str] = []
+    for name, got in sorted(labels.items()):
+        if got["VERDICT"] not in NEEDS_LINE:
+            continue
+        line = got["LINE"].strip().strip("`")
+        if not line or line not in shown[name]:
+            unquoted.append(
+                f"{name} ({got['VERDICT']}, line {'missing' if not line else 'not in the diff'})"
+            )
+    if unquoted:
+        print(f"VERDICTS WITHOUT AN ADMISSIBLE DECIDING LINE   {len(unquoted)} of {len(labels)}")
         print()
-        print("  A claim shown beside code it is not about was accepted, so the reading did")
-        print("  not discriminate and the findings rate is not a measurement of the findings.")
-        print("  IT IS WITHHELD -- not computed, not printed beneath a caveat.")
+        for u in unquoted:
+            print(f"  {u}")
         print()
-        print(f"  {len(planted) - caught} of {len(planted)} controls missed. Re-label, or find")
-        print("  out why: a control that is genuinely true would be a defect in the pack.")
+        print("  A verdict whose deciding line is not in the code shown was not read off that")
+        print("  code. The rate is NOT computed -- fix these, or record why the line is absent.")
         return 2
 
-    low, high = wilson(correct, len(real))
-    print(f"FINDINGS CORRECT  {correct} of {len(real)}  = {correct / len(real):.1%}")
-    print(f"UNSURE            {unsure} of {len(labels)}  (scored as disagreement)")
-    print(f"95% INTERVAL      {low:.1%} to {high:.1%}  (Wilson, n={len(real)})")
+    counts = {v: sum(g["VERDICT"] == v for g in labels.values()) for v in sorted(VERDICTS)}
+    decided = counts["TRUE"] + counts["FALSE"]
+    print(f"TRUE {counts['TRUE']}   FALSE {counts['FALSE']}   UNKNOWN {counts['UNKNOWN']}")
+    print(f"every verdict cites a line present in its own diff  ({len(labels)} of {len(labels)})")
     print()
-    print("The rate at which a PUBLISHED finding is correct -- after the anchor gate and the")
-    print("refutation pass, not the raw model error rate. One repository, one language,")
-    print("consecutive commits, unstratified. The interval is sampling error alone.")
+    n = len(labels)
+    low, high = wilson(counts["TRUE"], n)
+    rate = counts["TRUE"] / n
+    print(
+        f"CORRECT, over all items      {counts['TRUE']}/{n} = {rate:.1%}"
+        f"   95% {low:.1%} to {high:.1%}   (UNKNOWN counts against)"
+    )
+    if decided:
+        lo_d, hi_d = wilson(counts["TRUE"], decided)
+        rate_d = counts["TRUE"] / decided
+        print(
+            f"CORRECT, over decided items  {counts['TRUE']}/{decided} = {rate_d:.1%}"
+            f"   95% {lo_d:.1%} to {hi_d:.1%}   (UNKNOWN excluded)"
+        )
+    print()
+    print("Correctness of a PUBLISHED finding -- after the anchor gate and the refutation pass,")
+    print("not the raw model error rate. One repository, one language, consecutive commits,")
+    print("unstratified. The intervals are sampling error alone.")
     return 0
 
 

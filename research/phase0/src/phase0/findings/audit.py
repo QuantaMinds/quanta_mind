@@ -1,125 +1,93 @@
-"""Refuse a findings pack that leaks its own key, and say what each check examined.
+"""Refuse a findings pack a rater could answer without reading it, and report each check's reach.
 
-WHAT: `audit(pack)` returns every leak found, empty when there are none. `PackRejected` is
-      raised by `require_clean` for callers that must not proceed.
-WHY:  Split from `findings.py`, which owns building a pack. This owns disbelieving one. The
-      separation is the point: the code that constructs the arms is the last code that should
-      certify them, and every leak found so far was invisible to the constructor.
+WHAT: `audit(pack)` returns every defect found, empty when there are none. `require_clean` raises.
+WHY:  Split from `pack.py`, which builds a pack. This owns disbelieving one, because the code
+      that constructs a thing is the last code that should certify it.
 
-      **EVERY CHECK REPORTS ITS OWN COVERAGE.** The first version of this audit announced "no
-      planted item's named symbols appear in the code shown" while having examined 7 of 12 --
-      the five it skipped were the generic claims most at risk of being accidentally true, and
-      the clean result came from not looking. A count that does not equal the arm size is a
-      failure here, never a footnote. This is AGENTS.md rule 14 and the same shape as
-      `bench/forensic/population.py:assert_intersects`.
+      **THERE IS NO LONGER A KEY TO LEAK, AND THAT REMOVED MOST OF THIS MODULE.** The planted
+      arm is gone (see `pack.py`), so the checks that mattered -- claims appearing in both arms,
+      arms separable by file kind, controls that might be accidentally true -- are gone with it.
+      What remains is what still lets a rater answer without reading: a repeated diff or a
+      repeated claim, either of which is answered once and copied.
 
-      What each check defends against, in the order they were found by breaking them:
-        - a claim repeated ANYWHERE: the labeller reads one sentence twice and both answers
-          arrive together, which is worse when the repeats share an arm;
-        - a diff repeated: same, in the other direction;
-        - a lopsided test/source split: a rule learnable instead of reading;
-        - a planted claim whose named entities DO appear in its host: a control that may be
-          accidentally TRUE, marking a correct labeller wrong and withholding a real result;
-        - a planted claim naming nothing at all: falsity never established.
-IMPORTS: stdlib, phase0.handlabel.findings.
-CONSUMED BY: `phase0/findings/sample.py`; tests/findings/test_pack_leaks.py.
+      **EVERY CHECK REPORTS ITS OWN COVERAGE.** An earlier version of this file announced a
+      clean result over the 7 of 12 items it had examined, having silently skipped the five most
+      at risk. A count that does not equal the pack size is a failure here, never a footnote --
+      AGENTS.md rule 14, and the shape of `bench/forensic/population.py:assert_intersects`.
+IMPORTS: stdlib, phase0.findings.pack.
+CONSUMED BY: `findings/sample.py`; tests/findings/test_pack_leaks.py.
 """
 
 from __future__ import annotations
 
 from collections import defaultdict
 
-from phase0.findings.pack import Pack, overlap
+from phase0.findings.pack import Item, Pack
 
-# Above this share of a planted claim's named entities appearing in its host diff, the claim
-# may be describing the code shown, and the key's answer is no longer safe.
-ACCIDENTAL_TRUTH = 0.5
-# Test-file diffs may differ between arms by at most this, beyond which the split is learnable.
-KIND_SKEW = 2
+
+def anchored(item: Item) -> bool:
+    """Whether a deciding line could be quoted for this item at all.
+
+    Named rather than inlined because it is asked in two places, and an item where the answer
+    is False is one the rater would be blamed for -- the pack's truncation, not their reading.
+    """
+    quote = item.quote.strip()
+    return bool(quote) and quote in item.diff
 
 
 class PackRejected(RuntimeError):
-    """A pack that would hand the labeller its key. Carries every leak found, not the first."""
+    """A pack a rater could answer without reading. Carries every defect, not just the first."""
 
 
 def _repeats(pack: Pack, of: str) -> list[str]:
-    """Items sharing a claim or a diff, named with the arms they fall in."""
+    """Items sharing a claim or a diff. Either is answered once and copied to the other."""
     groups: dict[str, list[int]] = defaultdict(list)
-    for item in pack.blind:
+    for item in pack.items:
         groups[getattr(item, of)].append(item.label_id)
-    return [
-        f"{of} repeated across items {ids} -> arms {sorted(pack.arm_of(i) for i in ids)}"
-        for ids in groups.values()
-        if len(ids) > 1
-    ]
+    return [f"{of} repeated across items {ids}" for ids in groups.values() if len(ids) > 1]
 
 
 def coverage(pack: Pack) -> dict[str, int]:
-    """How many items each arm holds, and how many of the planted arm were assessable.
+    """Pack size, and how many items carry an anchor that is actually inside the code shown.
 
-    Returned rather than printed so a caller can assert on it. `planted_examined` below
-    `planted` is the defect this module exists to make impossible to miss.
+    `anchored` below `items` means the sheet contains a question the rater cannot fairly answer,
+    which would be recorded as the finding's error rather than the pack's.
     """
-    planted = [i for i in pack.blind if pack.arm_of(i.label_id) == "PLANTED"]
-    real = [i for i in pack.blind if pack.arm_of(i.label_id) == "REAL"]
     return {
-        "real": len(real),
-        "planted": len(planted),
-        "planted_examined": sum(overlap(i.claim, i.diff) >= 0.0 for i in planted),
-        "real_examined": sum(overlap(i.claim, i.diff) >= 0.0 for i in real),
+        "items": len(pack.items),
+        "anchored": sum(anchored(i) for i in pack.items),
+        "distinct_diffs": len({i.diff for i in pack.items}),
+        "distinct_claims": len({i.claim for i in pack.items}),
     }
 
 
 def audit(pack: Pack) -> list[str]:
-    """Every leak in `pack`, empty when it is clean. Never stops at the first."""
+    """Every defect in `pack`, empty when it is clean. Never stops at the first."""
     found: list[str] = []
     found += _repeats(pack, "claim")
     found += _repeats(pack, "diff")
 
-    arms: dict[str, list[str]] = defaultdict(list)
-    for item in pack.blind:
-        arms[pack.arm_of(item.label_id)].append(item.path)
-    if (
-        abs(sum("test" in p for p in arms["REAL"]) - sum("test" in p for p in arms["PLANTED"]))
-        > KIND_SKEW
-    ):
+    unanchored = [
+        i.label_id for i in pack.items if not (i.quote.strip() and i.quote.strip() in i.diff)
+    ]
+    if unanchored:
         found.append(
-            f"test-file diffs are lopsided: REAL {sum('test' in p for p in arms['REAL'])}, "
-            f"PLANTED {sum('test' in p for p in arms['PLANTED'])} -- learnable without reading"
-        )
-
-    untestable: list[int] = []
-    for item in pack.blind:
-        if pack.arm_of(item.label_id) != "PLANTED":
-            continue
-        share = overlap(item.claim, item.diff)
-        if share < 0.0:
-            untestable.append(item.label_id)
-        elif share > ACCIDENTAL_TRUTH:
-            found.append(
-                f"item {item.label_id}: {share:.0%} of the claim's named entities DO appear in "
-                f"the code shown -- this control may be accidentally TRUE"
-            )
-    if untestable:
-        found.append(
-            f"planted items naming nothing checkable, so falsity is unverified: {untestable}"
+            f"items whose anchor is not inside the code shown, so no deciding line can be "
+            f"quoted for them: {unanchored}"
         )
 
     seen = coverage(pack)
-    if seen["planted_examined"] != seen["planted"]:
+    if seen["anchored"] != seen["items"]:
         found.append(
-            f"the accidental-truth check examined {seen['planted_examined']} of "
-            f"{seen['planted']} planted items; the rest were never assessed"
+            f"the anchor check reached {seen['anchored']} of {seen['items']} items; "
+            f"the rest were never assessed"
         )
-    # The REAL arm is deliberately NOT filtered on being assessable. Excluding published
-    # findings that happen to name no symbol would bias the sample toward specific claims and
-    # quietly change what the measurement is of. Its coverage is reported, never enforced.
     return found
 
 
 def require_clean(pack: Pack) -> dict[str, int]:
-    """Coverage counts, or `PackRejected` naming every leak. Use before showing anyone a sheet."""
-    leaks = audit(pack)
-    if leaks:
-        raise PackRejected(f"{len(leaks)} leak(s): " + "; ".join(leaks))
+    """Coverage counts, or `PackRejected` naming every defect. Use before showing anyone a sheet."""
+    defects = audit(pack)
+    if defects:
+        raise PackRejected(f"{len(defects)} defect(s): " + "; ".join(defects))
     return coverage(pack)

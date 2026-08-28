@@ -1,12 +1,13 @@
-"""Verification that the findings scorer withholds a number it cannot justify.
+"""Verification that a verdict without an admissible deciding line is not scored.
 
-WHAT: Pins the control gate, the refusal to score a partial sheet, and that UNSURE costs a
-      point rather than being quietly dropped.
-WHY:  The gate's whole value is that it fires on the one input where a result would be most
-      tempting: a sheet where everything was marked TRUE, which yields a 100% correctness
-      rate. **The test therefore asserts the rate is ABSENT from the output**, not merely
-      that a warning is present -- an earlier version printed both, and a number printed
-      beneath a caveat is a number that gets quoted without one.
+WHAT: Pins the attention check that replaced the planted control arm, the refusal to score a
+      partial sheet, and that both rates are printed with UNKNOWN handled explicitly.
+WHY:  The control arm was passable without doing the task -- an isolated judge scored 12 of 12
+      on it by checking filenames. The deciding line cannot be produced without reading the
+      code, and whether it is really in that code is checkable.
+
+      **THE TESTS ASSERT THE RATE IS ABSENT when a line is inadmissible**, not merely that a
+      warning appears: a number printed beneath a caveat is a number quoted without one.
 IMPORTS: pytest, phase0.findings.scoring.
 CONSUMED BY: `just test-phase0`.
 """
@@ -17,90 +18,104 @@ from pathlib import Path
 
 import pytest
 
-from phase0.findings.scoring import main, wilson
+from phase0.findings.scoring import main, read_blocks, wilson
+
+DIFF = "@@\n+    value_{n} = compute_{n}(arg)\n+    return value_{n}\n"
 
 
-def _files(tmp: Path, verdicts: dict[str, str], arms: dict[str, str]) -> tuple[Path, Path]:
-    key = tmp / "key.csv"
-    key.write_text("\n".join(f"{i},{a}" for i, a in arms.items()) + "\n")
-    labels = tmp / "labels.csv"
-    labels.write_text(
-        "label_id,verdict\n" + "\n".join(f"{i},{v}" for i, v in verdicts.items()) + "\n"
+def _pack(n: int) -> str:
+    out = ["# pack", ""]
+    for i in range(1, n + 1):
+        out += [f"## item {i:02d}", "", "**Code:**", "", "```diff", DIFF.format(n=i), "```", ""]
+    return "\n".join(out)
+
+
+def _labels(verdicts: dict[int, tuple[str, str]]) -> str:
+    out = ["# Verdicts", ""]
+    for i, (verdict, line) in sorted(verdicts.items()):
+        out += [f"## item {i:02d}", "", f"VERDICT: {verdict}", f"LINE: {line}", ""]
+    return "\n".join(out)
+
+
+def _run(tmp: Path, monkeypatch, pack: str, labels: str) -> int:
+    (tmp / "p.md").write_text(pack)
+    (tmp / "l.md").write_text(labels)
+    monkeypatch.setattr(
+        "sys.argv", ["scoring", "--labels", str(tmp / "l.md"), "--pack", str(tmp / "p.md")]
     )
-    return labels, key
-
-
-def _arms(real: int, planted: int) -> dict[str, str]:
-    ids = {f"item {i:02d}": "REAL" for i in range(1, real + 1)}
-    ids.update({f"item {i:02d}": "PLANTED" for i in range(real + 1, real + planted + 1)})
-    return ids
-
-
-def _run(monkeypatch, labels: Path, key: Path) -> int:
-    monkeypatch.setattr("sys.argv", ["score_findings", "--labels", str(labels), "--key", str(key)])
     return main()
 
 
-def test_marking_everything_true_yields_no_number_at_all(tmp_path, monkeypatch, capsys) -> None:
-    """The failure the controls exist for. 100% must not appear anywhere in the output."""
-    arms = _arms(6, 6)
-    labels, key = _files(tmp_path, dict.fromkeys(arms, "TRUE"), arms)
-    code = _run(monkeypatch, labels, key)
+def _good(n: int, true_upto: int) -> dict[int, tuple[str, str]]:
+    return {
+        i: (("TRUE" if i <= true_upto else "FALSE"), f"    value_{i} = compute_{i}(arg)")
+        for i in range(1, n + 1)
+    }
+
+
+def test_a_line_not_in_the_diff_blocks_the_rate(tmp_path, monkeypatch, capsys) -> None:
+    """The attention check. A verdict read off nothing must not produce a number."""
+    labels = _good(6, 3)
+    labels[2] = ("TRUE", "    this line is nowhere in the pack")
+    code = _run(tmp_path, monkeypatch, _pack(6), _labels(labels))
     out = capsys.readouterr().out
     assert code == 2, out
-    assert "WITHHELD" in out, out
-    assert "100" not in out and "FINDINGS CORRECT" not in out, f"the rate leaked anyway: {out}"
+    assert "item 02" in out and "not in the diff" in out, out
+    assert "CORRECT" not in out, f"the rate was printed anyway: {out}"
 
 
-def test_catching_the_controls_produces_the_rate(tmp_path, monkeypatch, capsys) -> None:
-    arms = _arms(6, 6)
-    verdicts = {i: ("FALSE" if a == "PLANTED" else "TRUE") for i, a in arms.items()}
-    verdicts["item 01"] = "FALSE"
-    labels, key = _files(tmp_path, verdicts, arms)
-    code = _run(monkeypatch, labels, key)
+def test_a_missing_line_on_a_decided_verdict_blocks_the_rate(tmp_path, monkeypatch, capsys) -> None:
+    labels = _good(6, 3)
+    labels[5] = ("FALSE", "")
+    assert _run(tmp_path, monkeypatch, _pack(6), _labels(labels)) == 2
     out = capsys.readouterr().out
-    assert code == 0, out
-    assert "FINDINGS CORRECT  5 of 6" in out, out
+    assert "line missing" in out and "CORRECT" not in out, out
 
 
-def test_unsure_costs_a_point_rather_than_being_dropped(tmp_path, monkeypatch, capsys) -> None:
-    arms = _arms(6, 6)
-    verdicts = {i: ("FALSE" if a == "PLANTED" else "TRUE") for i, a in arms.items()}
-    verdicts["item 02"] = "UNSURE"
-    labels, key = _files(tmp_path, verdicts, arms)
-    _run(monkeypatch, labels, key)
+def test_unknown_needs_no_line_and_still_scores(tmp_path, monkeypatch, capsys) -> None:
+    """UNKNOWN is the honest answer when the diff cannot settle it, so it must not be blocked."""
+    labels = _good(6, 3)
+    labels[6] = ("UNKNOWN", "")
+    assert _run(tmp_path, monkeypatch, _pack(6), _labels(labels)) == 0
     out = capsys.readouterr().out
-    assert "FINDINGS CORRECT  5 of 6" in out, out
-    assert "UNSURE            1 of 12" in out, out
+    assert "TRUE 3   FALSE 2   UNKNOWN 1" in out, out
+
+
+def test_both_rates_are_printed_and_differ_on_unknown(tmp_path, monkeypatch, capsys) -> None:
+    """Over all items UNKNOWN counts against; over decided items it is excluded."""
+    labels = _good(6, 3)
+    labels[6] = ("UNKNOWN", "")
+    _run(tmp_path, monkeypatch, _pack(6), _labels(labels))
+    out = capsys.readouterr().out
+    assert "3/6 = 50.0%" in out, out
+    assert "3/5 = 60.0%" in out, out
 
 
 def test_a_partial_sheet_is_refused(tmp_path, monkeypatch, capsys) -> None:
-    """Committing to every answer is what stops a labeller peeking after half."""
-    arms = _arms(6, 6)
-    verdicts = {i: ("TRUE" if n else "") for n, i in enumerate(arms)}
-    labels, key = _files(tmp_path, verdicts, arms)
-    assert _run(monkeypatch, labels, key) == 1
+    labels = _good(6, 3)
+    labels[4] = ("", "")
+    assert _run(tmp_path, monkeypatch, _pack(6), _labels(labels)) == 1
     assert "refusing to score" in capsys.readouterr().out
 
 
-def test_a_key_and_sheet_that_disagree_are_refused(tmp_path, monkeypatch, capsys) -> None:
-    arms = _arms(6, 6)
-    labels, key = _files(tmp_path, dict.fromkeys(list(arms)[:-1], "TRUE"), arms)
-    assert _run(monkeypatch, labels, key) == 1
+def test_a_sheet_that_does_not_cover_the_pack_is_refused(tmp_path, monkeypatch, capsys) -> None:
+    assert _run(tmp_path, monkeypatch, _pack(6), _labels(_good(5, 2))) == 1
     assert "refusing to score" in capsys.readouterr().out
 
 
 def test_a_junk_verdict_is_refused(tmp_path, monkeypatch, capsys) -> None:
-    arms = _arms(6, 6)
-    verdicts = dict.fromkeys(arms, "TRUE")
-    verdicts["item 03"] = "PROBABLY"
-    labels, key = _files(tmp_path, verdicts, arms)
-    assert _run(monkeypatch, labels, key) == 1
+    labels = _good(6, 3)
+    labels[3] = ("PROBABLY", "    value_3 = compute_3(arg)")
+    assert _run(tmp_path, monkeypatch, _pack(6), _labels(labels)) == 1
     assert "not a verdict" in capsys.readouterr().out
 
 
-@pytest.mark.parametrize("hits,n", [(0, 12), (12, 12), (6, 12)])
+def test_blocks_parse_back_the_fields_they_were_written_with() -> None:
+    got = read_blocks("## item 01\n\nVERDICT: TRUE\nLINE: x = 1\n", fields=("VERDICT", "LINE"))
+    assert got == {"item 01": {"VERDICT": "TRUE", "LINE": "x = 1"}}, got
+
+
+@pytest.mark.parametrize("hits,n", [(0, 24), (24, 24), (12, 24)])
 def test_the_interval_stays_inside_zero_and_one(hits: int, n: int) -> None:
-    """A normal approximation goes outside the unit interval exactly at the ends we hit."""
     low, high = wilson(hits, n)
     assert 0.0 <= low <= high <= 1.0, (low, high)
