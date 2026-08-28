@@ -157,6 +157,30 @@ Pulled in as **two separate uses**, because they succeed or fail independently:
       not a detail:** quoting a private Slack thread into a GitHub comment moves their data
       between systems, and that must be opt-in per source.
 
+## Phase E — shift left: review before the pull request exists
+
+`quantamind review <clone> --sha <sha>` already runs Half A locally and prints the same comment
+the webhook would post — verified on this repository. What it cannot do is review work that has
+no commit yet, and it prints prose for a human rather than something a coding agent can act on.
+
+- [ ] **E1 Review the working tree and the unpushed branch.** `--sha` requires a commit; a
+      developer about to open a pull request has uncommitted edits, or commits not yet pushed.
+      Diff against the merge-base with the default branch, and against the index for uncommitted
+      work. **Nothing leaves the machine on this path**, which is also the honest answer to
+      "can we run it in an air-gapped environment".
+- [ ] **E2 Machine-readable output.** `--json`: the ranking, the allocation with `unread` named,
+      and any findings with their provenance. This is what makes `/qm-review` useful inside
+      Cursor, Claude Code or Copilot — the agent reads it and fixes, rather than a human
+      re-typing prose.
+- [ ] **E3 `/qm-review` as an editor command.** A thin wrapper over E1 and E2. It is last on
+      purpose: the value is entirely in what E1 and E2 return, and a wrapper over a weak answer
+      is a faster way to be unhelpful.
+
+**Why this is worth building before the enterprise surface:** it is the only path where a
+developer sees output before anyone else does, so a wrong finding costs them ten seconds instead
+of a public comment on their pull request. It is the cheapest place to be wrong, which makes it
+the right place to find out whether the findings are worth anything.
+
 ---
 
 ## What I need from you, and when
