@@ -182,5 +182,9 @@ def load(env: Mapping[str, str] | None = None) -> Settings:
         app_key_path=source.get(PREFIX + "APP_KEY_PATH", ""),
         public_read_token=source.get(PREFIX + "PUBLIC_READ_TOKEN", ""),
         inference_project=source.get(PREFIX + "INFERENCE_PROJECT", ""),
-        gcloud_path=source.get(PREFIX + "GCLOUD_PATH", "gcloud"),
+        # **`or`, NOT A `get` DEFAULT.** `QUANTAMIND_GCLOUD_PATH=` — set but empty, which is
+        # what commenting a line out in a `.env` produces — returns "" from `get`, and
+        # `subprocess.run([""])` then fails with something that names no cause. Found by this
+        # product's own deep review, on the commit that introduced the setting.
+        gcloud_path=source.get(PREFIX + "GCLOUD_PATH") or "gcloud",
     )

@@ -148,14 +148,20 @@ def deep(
     )
 
 
-def report(clone: Path, sha: str, out: Reviewed, project: str) -> None:
-    """The reviewer pass, printed with its discards. Never raises into the ranking's result."""
+def report(clone: Path, sha: str, out: Reviewed, project: str, gcloud: str = "gcloud") -> None:
+    """The reviewer pass, printed with its discards. Never raises into the ranking's result.
+
+    **`gcloud` IS THREADED HERE BECAUSE IT WAS THREADED EVERYWHERE ELSE AND MISSED HERE.**
+    `examine()` took it from settings for the webhook; this path kept the bare default, so a
+    developer whose SDK is not on PATH got "no access token" from the CLI while the endpoint
+    worked. Found by running it, and only because the failure named both sources it tried.
+    """
     ranked = [u.unit.site.path for u in out.ranking.units if u.allocation.value != "cold"]
     # `considered` are the paths we scored and `skipped` the ones in a language we do not read.
     # Together they are the whole change, which is the population the shape figures describe.
     changed = list(out.considered) + list(out.skipped)
     try:
-        result = deep(clone, sha, ranked, project=project, changed=changed)
+        result = deep(clone, sha, ranked, project=project, changed=changed, gcloud=gcloud)
     except (Unavailable, InferenceFailed) as exc:
         # The ranking already printed and is not retracted by an inference failure.
         print(f"\n[deep] NOT RUN: {type(exc).__name__}: {exc}")

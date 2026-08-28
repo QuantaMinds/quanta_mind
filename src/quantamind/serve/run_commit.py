@@ -23,6 +23,7 @@ from quantamind.rank import firing
 from quantamind.serve.deep_review import report
 from quantamind.serve.run_review import review
 from quantamind.types.change import REVIEWABLE_SUFFIXES
+from quantamind.types.settings import load
 
 
 def review_commit(clone: Path, repo: str, sha: str, *, deep_project: str = "") -> int:
@@ -54,7 +55,7 @@ def review_commit(clone: Path, repo: str, sha: str, *, deep_project: str = "") -
         return 0
     print(out.body)
     if deep_project:
-        report(clone, sha, out, deep_project)
+        report(clone, sha, out, deep_project, load().gcloud_path)
     return 0
 
 

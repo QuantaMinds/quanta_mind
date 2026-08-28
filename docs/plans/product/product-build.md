@@ -58,14 +58,21 @@ worth selling.
 **Direction 2026-08-27: product and traffic first, payments later.** This is the gap that actually
 blocks Half B in production, and it was invisible until the deep half ran for the first time.
 
-- [ ] **G1 Service-account auth for Vertex, with no `gcloud` and no dependency.** `infer/gemini.py`
+- [x] **G1 A Vertex token with no `gcloud` and NO KEY.** `ingest/google_auth.py`. `just verify`
+      green, 42 passed, 0 skipped. **The org policy refused to issue a service-account key**
+      (`constraints/iam.disableServiceAccountKeyCreation`) and that produced a better design than
+      the plan: metadata server first, so a container on GCP holds no credential on disk at all;
+      `gcloud` only for laptop development. Probe bounded at 1s — a test that was VACUOUS in its
+      first form until sabotage caught it. Service account `quantamind-reviewer` created with
+      `roles/aiplatform.user` only. Real Vertex call verified through the new path. ~~Original
+      plan: `infer/gemini.py`
       shells out to `gcloud auth print-access-token`. There is no `gcloud` in the container and
       there should never be — a 200 MB SDK to fetch a bearer token is the dependency this product
       refuses. **The machinery already exists:** `ingest/app_auth.py` signs an RS256 JWT with
       `openssl` and exchanges it for a GitHub installation token, and a Google service account is
       the SAME pattern — sign a JWT with the SA key, POST to `oauth2.googleapis.com/token`,
       receive an access token. One sibling module, zero new dependencies; `gcloud_path` stays for
-      laptop development.
+      laptop development.~~
 - [ ] **G2 Prove Half B from inside the container.** It has run exactly once, by hand, through the
       CLI on a laptop. Never from a webhook delivery, never in Docker, never with a service
       account. Until that runs, "the endpoint reviews with a model" is a claim about a code path
