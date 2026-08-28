@@ -2231,3 +2231,40 @@ rules sharing one makes the trail ambiguous about which was applied.
 Four sabotages verified the tests: a broken file reporting as "none declared", silently skipping
 unreadable declarations, a model-judged rule claiming parser provenance, and last-one-wins on a
 duplicate id.
+
+### `parse/python_names.py` + `verify/rule_check.py` + `types/checked.py` — rules, enforced
+
+D1a read rules and nothing applied them. `check(rule, path, source)` now returns exactly one
+`Checked` per rule per file — including for the rules that found nothing, and the ones we could
+not decide.
+
+**Four outcomes, because three of them look like a pass from outside.**
+
+| outcome | when | in the compliance denominator? |
+|---|---|---|
+| `PASSED` | the parser looked and found nothing | yes |
+| `VIOLATED` | it found something, with the name and line | yes |
+| `UNCHECKABLE` | a language we cannot parse, or a file that will not parse | **no** |
+| `DEFERRED` | a model-judged rule; a parser did not decide it | **no** |
+
+**The clean zero here would have been a compliance dashboard reporting our parser coverage as the
+customer's code quality.** Only Python is parsed — `AGENTS.md` states tree-sitter is not a
+dependency and `pyproject.toml` declares `dependencies = []` — so a TypeScript file yields
+`UNCHECKABLE` with `LANGUAGE_UNSUPPORTED`. Had it returned "no violations", a JS repository would
+read 100% compliant with checks that never ran. That is the fourth appearance of this defect class
+in this codebase, and the first one caught before it shipped.
+
+**`counts_toward_compliance` excludes the undecided rows**, so a rate moves when the customer's
+code changes rather than when our parser coverage does.
+
+**`Checked` refuses to be constructed dishonestly.** `VIOLATED` without evidence is an accusation a
+developer cannot act on; `UNCHECKABLE` without a reason is silence wearing a result's clothes. Both
+raise.
+
+**Dotted names are reconstructed, not matched on the last segment.** A rule forbidding
+`subprocess.run` does not fire on `runner.run`. An import rule matches its target and everything
+beneath it, so forbidding `pickle` also forbids `from pickle import loads` — which is what somebody
+writing that rule means.
+
+Verified by sabotage: an unparseable language reporting as passed, broken Python reporting as
+passed, a substring match on call names, and silently dropping the deferred rows.

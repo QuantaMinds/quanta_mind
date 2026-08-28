@@ -120,11 +120,17 @@ and D5 read what it records.
       stdlib and rule 11 bans `pyyaml` from `src/`. Versioned with their code, reviewed like their
       code, diffable.~~ Documentation is what this replaces: standards nobody reads and every
       reviewer interprets differently.
-- [ ] **D1b Deterministic checks FIRST, and most rules are.** From the competitor's own examples:
+- [x] **D1b Deterministic checks FIRST, and most rules are.** `parse/python_names.py` +
+      `verify/rule_check.py` + `types/checked.py`. `just verify` green, 42 passed, 0 skipped.
+      One `Checked` per rule per file, **four outcomes** because three of them look like a pass
+      from outside: PASSED / VIOLATED / UNCHECKABLE / DEFERRED. A TypeScript file is UNCHECKABLE,
+      never passed — otherwise a JS repository reads 100% compliant with checks that never ran.
+      `counts_toward_compliance` excludes undecided rows so a rate moves with the customer's code,
+      not our parser coverage. 9 tests, 4 sabotages caught. ~~From the competitor's own examples: From the competitor's own examples:
       `async-error-handling`, `typed-catch-block`, `no-console-log-in-prod`,
       `input-validation-required`. **Every one is an AST pattern, not a semantic judgement.** A
       parser can answer them, so a model must not — and a deterministic check is the only kind
-      that can be re-run later to prove an audit entry was right.
+      that can be re-run later to prove an audit entry was right.~~
 - [ ] **D1c Model-checked rules, clearly separated.** For rules a parser genuinely cannot answer.
       Each result carries `Provenance.PARSER` or `Provenance.MODEL` so an auditor can see which
       claims are reproducible. **They must never render alike.**
