@@ -59,6 +59,32 @@ worth selling.
       115k-commit repository. Cannot be inline — GitHub needs a prompt 2xx.
 - [ ] **B2 Accounts + sign in with GitHub.** No user model exists today.
 - [ ] **B3 Stripe checkout + subscription webhooks.** 🔑 *needs your Stripe account*
+- [ ] **B7 BYOK — the customer brings their own model key.** Inference cost moves to them, which
+      makes per-review cost somebody else's ceiling rather than our margin. Needs per-tenant
+      credentials rather than one `inference_project`, and a stored key is a liability: it belongs
+      encrypted at rest and must never reach `quantamind config`, a log, or a comment.
+- [ ] **B8 Free tier, and it is a QUALIFICATION not a discount.** Every rule below is checkable
+      from the GitHub API at install time, so it can be enforced rather than advertised:
+
+      | rule | check |
+      |---|---|
+      | public only | `repo.private is False` |
+      | 1,000–5,000+ stars | `stargazers_count` — **is 5K a ceiling or just "and above"? unresolved** |
+      | 50+ contributors | contributors API, counted not estimated |
+      | 6+ months of recent activity | commits spanning ≥180 days AND `pushed_at` recent — both, because either alone passes for a repo that was busy once |
+      | one free repo per account | keyed on the owner, not the installation, which changes when somebody ticks a box |
+      | until 40 unique repos | a global counter, and the offer closes on it |
+
+      **THESE CRITERIA ALSO SELECT FOR REPOSITORIES WHERE THE PRODUCT WORKS.** The ranker needs
+      fix history; 50 contributors over six months is exactly what produces it. A repository that
+      fails these would likely have got a weak review, so the qualification is honest rather than
+      arbitrary.
+
+      **AND WE CAN ALREADY TELL A PROSPECT BEFORE THEY INSTALL.** `rank/firing.estimate()` returns
+      `NO_HISTORY` ("this repository cannot be ranked yet") and `CONCENTRATED` ("a few files
+      dominate; almost nothing will be flagged"). Running it during onboarding turns eligibility
+      into a measured answer about their repository instead of a sales rule — and refusing a
+      repository we would serve badly is worth more than the install.
 - [ ] **B4 Installation → customer mapping.** The App install flow already provisions a store; it
       does not know whose it is.
 - [ ] **B5 Entitlement check at delivery.** Today any installation is reviewed, paid or not.
@@ -72,37 +98,64 @@ worth selling.
 - [ ] **C3 IDE integration.** Only when a deal asks.
 - [ ] **C4 SSO.** Procurement gate — only when a deal asks.
 
-## Phase D — the gaps a competitor demo makes obvious
+## Phase D — relationships, linked repos, audit, and the context a human wrote
 
-From Qodo's own enterprise pitch: deep codebase context, a centralised rules engine, specialised
-agents, and a compliance dashboard. What we already have, what we do not, and what is cheap.
+Direction set 2026-08-27. **This is the codebase's founding design, unbuilt.** `types/verdict.py`
+already carries `Confidence` (where `RESOLVED` requires two independent resolvers agreeing),
+`Provenance.PARSER`, and a closed `Reason` set with `DYNAMIC_DISPATCH`, `EXTERNAL_SYMBOL` and
+`UNPARSEABLE_SYNTAX`. Non-negotiables 2 and 3 in `AGENTS.md` are ABOUT edges. Nothing has ever
+emitted one.
 
-- [ ] **D1 Deterministic blast radius.** An import graph over the changed files: "this module is
-      imported by 14 others, two of them entry points." Python's `ast` is **stdlib**, so this costs
-      no dependency and no model — which is the "breaking changes" and "duplicate code" claim
-      answered the way this codebase prefers: *deterministic beats clever*. It is also a new
-      ranking signal, testable against the same fix-return outcome the touch index uses.
-- [ ] **D2 A rules file, enforced.** `.quantamind/rules.yml` in the customer's repo: their
-      standards, versioned with their code, checked on every pull request, with the violation and
-      the rule that fired both named. This is the "manage rules like code" claim, and it is the
-      one that produces an audit trail a buyer can show a regulator.
-- [ ] **D3 Cross-repository index.** The expensive one. Requires org-wide indexing and a place to
-      keep it. **Not before a design partner has more than one repository that matters.**
-- [ ] **D4 Specialised passes** (bugs / security / duplication / breaking changes) instead of one
-      generic reviewer. **Pre-register a bar first.** Five prompt levers have now moved nothing,
-      and shape-context went PASS → NULL under McNemar and a same-arm replicate. "More context
-      improves findings" is not an assumption we are entitled to — it is the hypothesis our own
-      experiment failed to confirm.
+### D1 — code relationships, deterministically
 
-**What we already have that the pitch charges for:** "past pull requests indexed" IS the touch
-index, and it is the half that replicated out-of-sample. What we do not have is "code
-relationships mapped" or multi-repo — D1 is the cheap first bite of that.
+- [ ] **D1a Labelled import edges.** `parse/imports.py` over Python's stdlib `ast`: no dependency,
+      no model. Every edge carries `Confidence` and `Provenance`; an import that cannot be
+      resolved emits `Unresolved(site, reason, construct)` and never nothing — `importlib` is
+      `DYNAMIC_DISPATCH`, a third-party name is `EXTERNAL_SYMBOL`, a broken file is
+      `UNPARSEABLE_SYNTAX`. `RESOLVED` only where two independent resolvers agree: the syntax says
+      the import exists AND the target is a file in the tree.
+- [ ] **D1b The graph, stored.** A whole-repo pass into a `dependency` table, incremental against
+      the same commit watermark the touch index uses.
+- [ ] **D1c Blast radius in the review.** "This module is imported by 14 others, two of them entry
+      points." A new signal, testable against the same fix-return outcome the touch index uses.
 
-**A note on the compliance dashboard.** Theirs measures rule compliance per developer, by name.
-Ours (`render/dashboard.py`) measures what we commented on, whether it merged, and what production
-said. Theirs is more legible to a manager; ours is harder to fake and is the only one of the two
-that can be wrong in public. A per-developer scoreboard is also a cultural decision, not just a
-feature — worth deciding deliberately rather than by copying a screenshot.
+### D2 — cross-repo, by declaration rather than discovery
+
+- [ ] **D2a The business declares its links.** `.quantamind/links.toml` in the customer's repo
+      (`tomllib` is stdlib; `pyyaml` is banned in `src/` by rule 11). **Declared beats discovered:**
+      it needs no org-wide crawl, no broad permissions, and a link a customer stated is provenance
+      an auditor can be shown — where an inferred one is our guess about their architecture.
+- [ ] **D2b Edges that cross a repository boundary.** A changed exported symbol against the linked
+      repositories that import it.
+
+### D3 — audit trail
+
+- [ ] **D3 Append-only, exportable.** Every review: what fired, on which commit, what we said,
+      whether it posted, and the provenance of each claim. Partly present — `store/reviews.py`
+      already records rankings — and no export exists.
+
+### D4 — compliance dashboard, PER REPOSITORY
+
+- [ ] **D4 Per repo, not per developer.** Rule compliance, violation hotspots, trend.
+      **Deliberately not a per-developer scoreboard**: the competitor screenshot ranks named
+      engineers, which is a cultural decision rather than a feature, and this one is declined
+      until somebody asks for it on purpose.
+
+### D5 — the context a human wrote
+
+Pulled in as **two separate uses**, because they succeed or fail independently:
+
+- [ ] **D5a Retrieval for the READER.** The ticket and discussion behind the files being changed,
+      shown in the comment. Deterministic, and worth something whatever the model does.
+- [ ] **D5b The same text as MODEL input.** **Pre-register a bar.** Shape-context went
+      PASS to NULL under McNemar and a same-arm replicate, and five prompt levers moved nothing.
+      Human context is a DIFFERENT variable — it carries why a change exists, which no diff shape
+      contains — so the null does not condemn it. It does mean measuring rather than assuming.
+- [ ] **D5c Sources, cheapest first.** GitHub PR and issue comments need no new credential and no
+      new dependency. Jira and Slack are REST and JSON over HTTPS, so `urllib` reaches both and
+      `dependencies = []` holds; what they need is the customer's auth. **Egress is a decision,
+      not a detail:** quoting a private Slack thread into a GitHub comment moves their data
+      between systems, and that must be opt-in per source.
 
 ---
 
