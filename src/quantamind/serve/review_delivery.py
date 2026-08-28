@@ -39,10 +39,12 @@ from pathlib import Path
 
 from quantamind.allocate.depth import Reading
 from quantamind.allocate.depth import plan as allocate
+from quantamind.ingest import rules_file
 from quantamind.ingest.diff import base_commit, changed_files
 from quantamind.ingest.github_api import token_for
 from quantamind.ingest.github_comments import post
 from quantamind.render.pin_block import block
+from quantamind.render.rule_block import block as rules_block
 from quantamind.serve import pin_check
 from quantamind.serve.deep_review import examine
 from quantamind.serve.run_review import review as run_ranking
@@ -50,6 +52,7 @@ from quantamind.serve.working_clone import ensure, sweep
 from quantamind.store import tenancy
 from quantamind.types.deep import Deep
 from quantamind.types.settings import Settings
+from quantamind.verify.rule_check import check_change
 
 
 class Outcome(enum.Enum):
@@ -155,8 +158,15 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     # **THE PIN CHECK RUNS ON THE RAW CHANGED LIST, NOT THE RANKED ONE.** Workflows are not a
     # reviewable suffix, so they never appear in `reviewed.considered` — which is exactly why the
     # detector sat unreachable behind the reviewer until now. It needs no model and no ranking.
+    # **THE DECLARED STANDARDS, CHECKED DETERMINISTICALLY.** These verdicts are reproducible on
+    # the same commit by anyone, which is why they may be asserted where a model finding may not.
+    declared, unreadable = rules_file.read(clone)
+    if unreadable:
+        print(f"[deliver] {len(unreadable)} rule declaration(s) could not be read", flush=True)
+    checks = check_change(declared, clone, head_sha, list(changed)) if declared else ()
+
     mismatched, _unresolved = pin_check.check(clone, head_sha, changed)
-    pins = block(mismatched)
+    pins = block(mismatched) + rules_block(checks)
 
     if reviewed.body is None and not pins:
         quiet = Outcome.NO_READABLE_FILES if not reviewed.considered else Outcome.NOTHING_TO_SAY

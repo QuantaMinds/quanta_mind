@@ -20,7 +20,7 @@ WHY:  **A RULE THAT CANNOT BE CHECKED MUST NOT READ AS A RULE THAT PASSED.** Onl
       **EXACT MATCH ON DOTTED NAMES, NOT A SUBSTRING.** `subprocess.run` must not fire on
       `runner.run`. An import matches its target or anything beneath it, so forbidding `subprocess`
       also forbids `subprocess.run`, which is what somebody writing that rule means.
-IMPORTS: parse.python_names, types.{change,checked,rule,verdict}. Leftward only.
+IMPORTS: ingest.blob, parse.python_names, types.{change,checked,rule,verdict}. Leftward only.
 CONSUMED BY: the audit trail and the compliance dashboard (D4, D5).
 """
 
@@ -28,7 +28,9 @@ from __future__ import annotations
 
 import re
 from collections.abc import Sequence
+from pathlib import Path
 
+from quantamind.ingest.blob import at
 from quantamind.parse.python_names import Mention, Names, UnparseableSource, names_in
 from quantamind.types.change import Language, language_of
 from quantamind.types.checked import Checked, Outcome
@@ -94,3 +96,27 @@ def check(rule: Rule, path: str, source: str) -> Checked:
 def check_all(rules: Sequence[Rule], path: str, source: str) -> tuple[Checked, ...]:
     """One row per rule. **The count is the denominator of any compliance rate over this file.**"""
     return tuple(check(rule, path, source) for rule in rules)
+
+
+def check_change(
+    rules: Sequence[Rule], clone: Path, sha: str, paths: Sequence[str]
+) -> tuple[Checked, ...]:
+    """Every rule against every changed file, read AS THE CHANGE LEAVES IT.
+
+    **A PATH THE CHANGE DELETED PRODUCES NO ROWS, AND THAT IS NOT A SKIP.** There is no code left
+    for a standard to apply to, so there is no question to answer — unlike a file we could not
+    parse, which IS a question we failed to answer and gets an `UNCHECKABLE` row. `ingest/blob.at`
+    distinguishes the two: absent returns `None`, and anything else raises rather than pretending
+    a broken clone is a repository full of deletions.
+
+    **THE COST IS ONE `git show` PER CHANGED FILE AND NO MODEL CALL AT ALL.** That is the point of
+    doing the deterministic half first: it is affordable on every pull request, and its verdicts
+    are reproducible, which is what makes an audit row worth reading.
+    """
+    rows: list[Checked] = []
+    for path in paths:
+        source = at(clone, sha, path)
+        if source is None:
+            continue
+        rows.extend(check_all(rules, path, source))
+    return tuple(rows)
