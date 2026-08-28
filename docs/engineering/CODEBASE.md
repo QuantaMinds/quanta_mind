@@ -2366,3 +2366,40 @@ for here.
 
 **`.gcloudignore` did not exist**, so a source deploy uploaded every tracked research file, every
 test and the whole of `.git` — 497 MB of `research/` alone, none of which the image copies.
+
+### The comment stopped explaining the product
+
+The posted body carried a paragraph of method — "ranked by prior-fix history", "the budget cut
+through a tie", "4.46% against 1.21% overall" — a sentence about the repository's top decile, and a
+footer disclaiming what the product is. All true, none of it actionable by a developer waiting to
+merge.
+
+**The golden rule the product is now judged against:** *did this pull request achieve the goal it
+set out to achieve, without disturbing anything else?* Everything gathered is an input to that —
+the changed lines, how many files, how often those files have changed before, the human context
+(previous comments, Jira, Slack), and the stated goal. Anything that does not feed it does not
+belong in the comment.
+
+So the body is now two things: **where to look**, and **how much was not reviewed**.
+
+```
+### QuantaMind
+
+**Look here first**
+- `src/quantamind/serve/cli.py`
+- `src/quantamind/serve/deep_review.py`
+
+_3 of 6 changed file(s) reviewed; 3 not reviewed._
+```
+
+**The counts and the method left the comment, not the product.** They still drive the ordering and
+still reach `quantamind dashboard`; what changed is the audience. An operator deciding whether to
+keep paying is who a firing rate is for.
+
+**The unreviewed count stays, in one clause**, because it is the single piece of self-description a
+reader acts on: it tells them where human attention is still required, and dropping it would let a
+partial review read as a complete one.
+
+`tests/unit/layers/render/test_render_comment.py` now records that these assertions have encoded
+**three** different product decisions in one session — silence below the decile, then a salience
+sentence on every change, then neither — each rewritten in place rather than deleted.

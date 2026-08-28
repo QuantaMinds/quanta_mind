@@ -5,6 +5,20 @@
 is green — not `just check`. Design reasoning lives in `docs/plans/delivered/feat-review-every-pr.md`; this
 file is the state.
 
+## The golden rule every item is judged against
+
+**Did this pull request achieve the goal it set out to achieve, WITHOUT disturbing anything else?**
+
+That is the question a review exists to answer, and everything the product gathers is an input to
+it: the changed lines, how many files were touched, **how often those files have changed before**,
+the context a human wrote (previous comments, Jira, Slack), and the stated goal of the change.
+Anything that does not feed that question does not belong in the comment — which is why the body
+no longer explains how we rank.
+
+**Delivery is INLINE, on the lines.** Line-level correctness is what a linter already covers; the
+goal-versus-collateral question is the one a human currently has to hold in their head, and it is
+what the touch index and the cross-file relationships are actually evidence for.
+
 **Nothing below is ticked on a promise.** Each tick names the evidence next to it.
 
 ---

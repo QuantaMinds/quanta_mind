@@ -20,7 +20,7 @@ from pathlib import Path
 import pytest
 from pipeline import Skips, clone_all, ranked_pulls
 
-from quantamind.render.comment import LOUD, QUIET, comment
+from quantamind.render.comment import comment
 from quantamind.render.coverage_line import coverage_line
 from quantamind.types.ranking import Discrimination
 
@@ -50,20 +50,16 @@ def test_the_coverage_line_is_computed_from_each_change_and_differs_by_case(
         )
 
         body = comment(case.ranking, ())
-        # **EVERY REVIEWABLE CHANGE IS SPOKEN ON, AND SAYS WHICH KIND IT IS.** This asserted
-        # `body is None` below the threshold, when the product spoke on about a tenth of pull
-        # requests. Salience moved from whether a comment exists into a sentence inside it, so
-        # what is checked on real data is that the two branches are DISTINGUISHABLE — a comment
-        # on everything that did not mark the loud ones would delete the signal, not move it.
-        assert (LOUD in body) is case.ranking.fired, (
-            f"{where}: fired={case.ranking.fired} but the salience sentence disagrees. "
-            f"Read: {body[:200]!r}"
-        )
-        assert (QUIET in body) is not case.ranking.fired, f"{where}: both or neither marker"
-        if case.ranking.fired:
-            assert body.index(line) < body.index("| # | file |"), (
-                f"{where}: the coverage line is not above the table. A reader who sees the list "
-                "first weighs it against nothing"
+        # **WHAT IS CHECKED ON REAL DATA CHANGED WITH THE PRODUCT, TWICE.** It asserted silence
+        # below the decile, then that the two salience branches were DISTINGUISHABLE. The comment
+        # now says neither: a developer waiting to merge does not act on our firing rate. What
+        # must still hold on real repositories is that the body is about THEIR change — it names
+        # files, states how much was reviewed, and explains nothing about us.
+        assert body, f"{where}: every reviewable change must still be commented on"
+        assert "reviewed" in body, f"{where}: the reader is not told how much was read: {body!r}"
+        for ours in ("prior-fix", "top decile", "%", "Ranked"):
+            assert ours not in body, (
+                f"{where}: the comment is explaining the product again ({ours!r}): {body[:200]!r}"
             )
             for claim in ("bug", "vulnerabilit", "incorrect", "you should fix"):
                 assert claim not in body.lower(), (
