@@ -26,38 +26,45 @@ CONSUMED BY: `serve/deep_review.py`.
 from __future__ import annotations
 
 import json
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
 from quantamind.infer import gemini
 from quantamind.ingest.diff import Stated
 
 MAX_DIFF_CHARS = 60_000
-PROMPT = """Review this change for the developer about to merge it. Plain words. Be brief: a
-sentence or two each, never a paragraph. They are waiting.
+PROMPT = """FACTS. Each block below is measured, not opinion. Do not restate them.
 
-WHAT THE AUTHOR SAYS IT IS FOR:
+[PR_DESCRIPTION]
 {goal}
 
-THE DIFF:
-{diff}
+[FILES_TOUCHED]
+{files}
 
-WHAT IMPORTS THE CHANGED FILES (static Python imports only; dynamic imports and other languages
-are invisible to this list, so absence is not proof nothing depends on them):
+[PRIOR_FIXES] number of later commits that returned to each file
+{history}
+
+[STATIC_IMPORTERS] files whose Python imports resolve to the changed modules
 {importers}
 
-Reply with ONLY a JSON object, no markdown fence:
+[DIFF]
+{diff}
+
+TASK. Answer only from the facts above. Reply with ONLY a JSON object, no markdown fence:
 {{
-  "what_changed": "ONE OR TWO sentences, plain words, naming the function or file. What the code
-                   now does differently. Not a restatement of the diff.",
+  "what_changed": "one or two sentences, plain words, naming the function or file",
   "achieves_goal": true | false | null,
-  "reasoning": "One sentence. If false, name exactly what is missing or contradicted. If null,
-                say the author stated no goal.",
-  "impact": "ONE sentence on whether the callers listed above are affected — say plainly if they
-             are not, and say so cautiously if the list is empty, because an empty list means no
-             static import was found rather than that nothing depends on this."
+  "reasoning": "one sentence; if false name what is missing or contradicted",
+  "impact": "one sentence on the files in STATIC_IMPORTERS",
+  "breaks": true | false | null,
+  "breaks_why": "one sentence; if true name what breaks and for whom"
 }}
-Set achieves_goal to null if and only if the goal section is empty or states no purpose."""
+
+achieves_goal is null when PR_DESCRIPTION is empty or states no purpose.
+breaks is true when the diff shows something that fails for a file in STATIC_IMPORTERS: a changed
+signature, a removed name, an altered return. It is false when those files are checked and the
+change is additive or internal. It is null when the deciding fact is absent from the blocks above.
+"""
 
 
 @dataclass(frozen=True, slots=True)
@@ -70,6 +77,35 @@ class Summary:
     impact: str = ""
     """One sentence on the callers. Empty when the model was not given an importer list."""
 
+    breaks: bool | None = None
+    """Whether this change breaks an existing caller. **THREE-VALUED, AND `None` IS THE DEFAULT.**
+
+    "It will not break anything" is the most expensive sentence this product can print, because it
+    is the one a reviewer acts on by not looking. `None` means the decisive information was not in
+    front of the model — an empty importer list, a language we do not parse, a runtime behaviour a
+    diff does not show — and it must render as "cannot tell", never as reassurance.
+    """
+
+    breaks_why: str = ""
+
+    goal: str = ""
+    """**THE PR DESCRIPTION, VERBATIM. A FACT, NOT A READING.**
+
+    The goal is not something to infer or paraphrase: the author wrote it down, and it is the
+    thing the change is measured against. Letting a model restate it would put a second author
+    between the reviewer and what was actually promised, and a summary of a promise is where the
+    promise quietly changes. It is quoted, and `achieves_goal` is judged against the quote.
+    """
+
+    dependents: tuple[str, ...] = ()
+    """Files that statically import the changed code. **MEASURED, NOT SAID BY THE MODEL.**
+
+    The prose fields above are a model's reading and carry its error rate. This is the output of
+    `parse/importers`, which a parser produced and anyone can re-run on the same commit. They sit
+    on one record because they describe one change, and they are rendered differently on purpose:
+    a count of dependents is a fact, and a sentence about impact is a claim.
+    """
+
     def __post_init__(self) -> None:
         if not self.what_changed.strip():
             raise ValueError("a summary with nothing in it is not a summary; raise instead")
@@ -81,6 +117,7 @@ def summarise(
     *,
     project: str,
     importers: Sequence[str] = (),
+    history: Mapping[str, int] | None = None,
     gcloud: str = "gcloud",
     location: str = "us-central1",
 ) -> Summary:
@@ -96,8 +133,12 @@ def summarise(
     # **AN EMPTY LIST IS SAID IN WORDS, NOT LEFT AS A BLANK.** A blank section reads to a
     # model as "no information", and it would fill the gap; the sentence makes the absence
     # itself the fact, which is what `parse/importers` can actually support.
+    touched = "\n".join(f"- {name}" for name in sorted(history or {})) or "- (none recorded)"
     imports = "\n".join(f"- {name}" for name in importers) or (
         "(no static Python import of these files was found anywhere in the repository)"
+    )
+    past = "\n".join(f"- {p}: {n} prior fix(es)" for p, n in sorted((history or {}).items())) or (
+        "(no fix history for these files in this repository)"
     )
     answer = gemini._post(
         url,
@@ -109,7 +150,11 @@ def summarise(
                     "parts": [
                         {
                             "text": PROMPT.format(
-                                goal=goal, diff=diff[:MAX_DIFF_CHARS], importers=imports
+                                goal=goal,
+                                diff=diff[:MAX_DIFF_CHARS],
+                                files=touched,
+                                importers=imports,
+                                history=past,
                             )
                         }
                     ],
@@ -135,5 +180,8 @@ def summarise(
         what_changed=str(payload.get("what_changed", "")).strip(),
         achieves_goal=achieved if isinstance(achieved, bool) else None,
         reasoning=str(payload.get("reasoning", "")).strip(),
+        goal=stated.text(),
         impact=str(payload.get("impact", "")).strip(),
+        breaks=payload.get("breaks") if isinstance(payload.get("breaks"), bool) else None,
+        breaks_why=str(payload.get("breaks_why", "")).strip(),
     )

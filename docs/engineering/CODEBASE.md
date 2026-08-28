@@ -2449,3 +2449,39 @@ checker cannot see across a `Sequence` boundary.
 measured the other one. Comparing a diff to a paragraph the author wrote has both halves in the
 prompt. It may be more reliable — **and it is not yet measured, so nothing states it as though it
 were.**
+
+### The review's job, and the shape of the comment
+
+**The job:** answer, from the facts, whether the change achieved its stated goal without breaking
+anything — and say what it found.
+
+The comment is ordered so a reader can tell what kind of statement each line is:
+
+| section | what it is |
+|---|---|
+| **Goal** | the PR description, **quoted verbatim** |
+| **What changed / does it do what the PR says / will it break anything** | a model's reading |
+| **N files import this code** | `parse/importers` output, re-runnable |
+| **Found by a parser** | rule violations — the call is in the syntax tree or it is not |
+| **Found by the model** | findings that cleared `publishable.gate()`, labelled as readings |
+| **Facts** | files touched, prior fixes per file, importer count, rule-check denominator |
+| **Not checked / reviewed** | the limits, stated |
+
+**The goal is quoted, never summarised.** It is the sentence the change is measured against, and a
+model restating it puts a second author between the reviewer and what was actually promised — which
+is where a promise quietly changes.
+
+**The prompt passes FACTS, not commentary.** It carried lines like *"higher means this file has
+repeatedly needed correcting, so it deserves more suspicion"* — an instruction to be suspicious,
+written by us, dressed as an input. It is now labelled blocks: `[PR_DESCRIPTION]`,
+`[FILES_TOUCHED]`, `[PRIOR_FIXES]`, `[STATIC_IMPORTERS]`, `[DIFF]`, and a `TASK` that says
+*"answer only from the facts above"*.
+
+**`breaks` is three-valued and `None` renders as "Cannot tell".** *"It will not break anything"* is
+the most expensive sentence this product can print, because a reviewer acts on it by not looking. An
+unknown rendered as reassurance is a clean bill of health for a check that never ran.
+
+**Parser verdicts and model readings never share a list.** Averaging their credibility down to the
+weaker one is what makes an audit trail worthless, and the parser half is the half worth keeping.
+A repository declaring no rules gets no rule section at all — "no violations" would imply rules
+existed to violate.

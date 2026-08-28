@@ -27,11 +27,15 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import Protocol
 
+from quantamind.render.found_block import found
+from quantamind.types.checked import Checked
 from quantamind.types.finding import Finding
 from quantamind.types.ranking import Ranking
 from quantamind.types.verdict import Unresolved
 
 HEADER = "### QuantaMind"
+MAX_DEPENDENTS = 5
+GOAL_LINES = 8
 LOOK = "**Look here first**"
 NOT_CHECKED = (
     "_Callers are found by static Python import only: a dynamic import, a re-export, or another "
@@ -50,6 +54,14 @@ class Stated(Protocol):
     def reasoning(self) -> str: ...
     @property
     def impact(self) -> str: ...
+    @property
+    def breaks(self) -> bool | None: ...
+    @property
+    def breaks_why(self) -> str: ...
+    @property
+    def dependents(self) -> tuple[str, ...]: ...
+    @property
+    def goal(self) -> str: ...
 
 
 def _goal(summary: Stated) -> list[str]:
@@ -58,7 +70,31 @@ def _goal(summary: Stated) -> list[str]:
         return ["**Does it do what the PR says?** The PR description states no goal to check."]
     verdict = "Yes" if summary.achieves_goal else "**No**"
     said = [f"**Does it do what the PR says?** {verdict} — {summary.reasoning}"]
-    return [*said, f"**Effect on callers:** {summary.impact}"] if summary.impact else said
+    if summary.impact:
+        said.append(f"**Effect on callers:** {summary.impact}")
+    # **THE VERDICT IS THREE-VALUED AND "CANNOT TELL" IS PRINTED AS PLAINLY AS THE OTHER TWO.**
+    # "It will not break anything" is the most expensive sentence here, because a reviewer acts on
+    # it by not looking. An unknown rendered as reassurance would be the clean bill of health for
+    # a check that never ran, which is the failure this product exists to refuse.
+    if summary.breaks is True:
+        breaks = "**Yes — this can break existing callers**"
+    elif summary.breaks is False:
+        breaks = "No"
+    else:
+        breaks = "**Cannot tell**"
+    said.append(f"**Will it break anything?** {breaks} — {summary.breaks_why}")
+    # **A COUNT AND NAMES, BECAUSE A PARSER PRODUCED THEM.** The sentences above are a model's
+    # reading; this line is `parse/importers` output, re-runnable on the same commit by anyone.
+    # It is stated separately so a reader can tell which of the two they are trusting.
+    if summary.dependents:
+        shown = ", ".join(f"`{name}`" for name in summary.dependents[:MAX_DEPENDENTS])
+        more = len(summary.dependents) - MAX_DEPENDENTS
+        tail = f" and {more} more" if more > 0 else ""
+        said.append(
+            f"**{len(summary.dependents)} file(s) import this code** — {shown}{tail}. "
+            "Symbol-level use inside them is not checked, so these are where a deeper look pays."
+        )
+    return said
 
 
 def comment(
@@ -66,6 +102,7 @@ def comment(
     *,
     summary: Stated | None = None,
     findings: Sequence[Finding] = (),
+    checks: Sequence[Checked] = (),
     unresolved: Sequence[Unresolved] = (),
 ) -> str:
     # **KEYWORD-ONLY, BECAUSE THE SECOND POSITIONAL ARGUMENT ALREADY CHANGED MEANING ONCE.**
@@ -77,20 +114,50 @@ def comment(
     lines = [HEADER, ""]
 
     if summary is not None:
+        # **THE GOAL IS QUOTED, NOT SUMMARISED.** It is the sentence the change is measured
+        # against, and a model restating it would put a second author between the reviewer and
+        # what was actually promised. Everything under it is a reading; this is the record.
+        if summary.goal.strip():
+            quoted = "\n".join(f"> {ln}" for ln in summary.goal.strip().splitlines()[:GOAL_LINES])
+            lines += ["**Goal — from the PR description**", "", quoted, ""]
+        else:
+            lines += ["**Goal — the PR description states none.**", ""]
         lines += ["**What changed**", "", summary.what_changed, "", *_goal(summary), ""]
 
-    if findings:
-        lines.append("**Worth checking**")
-        lines += [
-            f"- `{f.path}:{f.line}` — {f.claim}" if f.line else f"- `{f.path}` — {f.claim}"
-            for f in findings
-        ]
-        lines.append("")
+    defects = found(checks, findings)
+    if defects:
+        lines += [defects, ""]
 
     funded = ranking.funded()
     if funded and not summary:
         lines.append(LOOK)
         lines += [f"- `{unit.unit.qualified_name}`" for unit in funded]
+        lines.append("")
+
+    # **THE FACTS ARE LISTED SEPARATELY FROM THE READING, AND THAT SEPARATION IS THE PRODUCT.**
+    # Everything above this line is a model's account of the change and carries its error rate.
+    # Everything below came from git and a parser: the files, how often a later fix has returned
+    # to each, and who imports them. A reader who cannot tell which half they are trusting is
+    # being asked to trust both equally, and only one of them can be re-run on the same commit.
+    if ranking.units:
+        lines.append("**Facts** — from git and a parser, not from a model")
+        lines.append(f"- {len(ranking.units)} file(s) touched")
+        busiest = sorted(ranking.units, key=lambda u: -u.score.value)[:MAX_DEPENDENTS]
+        for unit in busiest:
+            fixes = int(unit.score.value)
+            been = f"{fixes} later fix(es) have returned here" if fixes else "no prior fixes here"
+            lines.append(f"  - `{unit.unit.qualified_name}` — {been}")
+        if summary is not None and summary.dependents:
+            lines.append(f"- {len(summary.dependents)} file(s) statically import this code")
+        # **THE DENOMINATOR MOVED HERE WHEN THE RULE SECTION WAS FOLDED INTO "FOUND".** Only
+        # violations are listed there, and a list of violations with no count behind it invites
+        # the reader to assume everything else was checked and passed. Undecided rows are the
+        # ones our parser could not read at all, and they are not passes.
+        if checks:
+            decided = sum(1 for c in checks if c.counts_toward_compliance)
+            undecided = len(checks) - decided
+            tail = f", {undecided} could not be decided" if undecided else ""
+            lines.append(f"- {decided} declared rule check(s) decided{tail}")
         lines.append("")
 
     lines.append(NOT_CHECKED)

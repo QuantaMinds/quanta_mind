@@ -46,7 +46,6 @@ from quantamind.ingest.github_api import token_for
 from quantamind.ingest.github_comments import post
 from quantamind.render.comment import comment as rendered
 from quantamind.render.pin_block import block
-from quantamind.render.rule_block import block as rules_block
 from quantamind.serve import pin_check
 from quantamind.serve.deep_review import examine
 from quantamind.serve.run_review import review as run_ranking
@@ -150,7 +149,10 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     examined = examine(clone, head_sha, reading, list(changed), settings)
     # **RE-RENDERED HERE WITH WHAT ONLY THIS LAYER HAS.** `run_review` renders a ranking-only
     # body for the CLI, which has no pull request to read a goal from. A delivery does.
-    told = explain(clone, head_sha, delivery_repo, number, reading.paths, settings)
+    # The ranking already carries each file's prior-fix count, so the summary reads the same
+    # numbers rather than querying the store twice and risking two answers.
+    past = {u.unit.site.path: int(u.score.value) for u in reviewed.ranking.units}
+    told = explain(clone, head_sha, delivery_repo, number, reading.paths, settings, history=past)
     if examined is not None:
         print(f"[deliver] {reading.depth.value}: {reading.why}", flush=True)
         print(
@@ -171,18 +173,15 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     checks = check_change(declared, clone, head_sha, list(changed)) if declared else ()
 
     mismatched, _unresolved = pin_check.check(clone, head_sha, changed)
-    pins = block(mismatched) + rules_block(checks)
+    pins = block(mismatched)
 
     if reviewed.body is None and not pins:
         quiet = Outcome.NO_READABLE_FILES if not reviewed.considered else Outcome.NOTHING_TO_SAY
         return Delivered(quiet, reviewed.considered, reviewed.skipped, None, reading, examined)
 
     kept = examined.anchored if examined is not None else ()
-    body = (
-        rendered(reviewed.ranking, summary=told, findings=kept)
-        if told is not None or kept
-        else (reviewed.body or "")
-    ) + pins
+    fuller = rendered(reviewed.ranking, summary=told, findings=kept, checks=checks)
+    body = (fuller if told is not None or kept or checks else (reviewed.body or "")) + pins
 
     if not settings.posting_enabled:
         return Delivered(

@@ -21,7 +21,8 @@ CONSUMED BY: `serve/review_delivery.py`.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
+from dataclasses import replace
 from pathlib import Path
 
 from quantamind.infer.change_summary import Summary, summarise
@@ -38,6 +39,7 @@ def explain(
     number: int,
     paths: Sequence[str],
     settings: Settings,
+    history: Mapping[str, int] | None = None,
 ) -> Summary | None:
     """What the change does, whether it did what the author said, and who it affects.
 
@@ -59,13 +61,17 @@ def explain(
         for path in paths:
             found, _ = importers(clone, head_sha, path)
             callers.extend(found)
-        return summarise(
+        told = summarise(
             diff,
             stated,
             project=settings.inference_project,
             importers=sorted(set(callers)),
+            history=history,
             gcloud=settings.gcloud_path,
         )
     except (InferenceFailed, Unavailable, DiffReadFailed) as exc:
         print(f"[deliver] no summary: {type(exc).__name__}: {exc}", flush=True)
         return None
+    # **THE DEPENDENTS ARE ATTACHED HERE, NOT ASKED OF THE MODEL.** They came from a parser and
+    # anyone can re-run them; the prose came from a model and carries its error rate.
+    return replace(told, dependents=tuple(sorted(set(callers))))

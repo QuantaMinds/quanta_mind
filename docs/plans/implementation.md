@@ -46,7 +46,7 @@ three months stale.
 | `allocate/` | **1** | `depth.py` |
 | `infer/` | **4** | `change_review.py`, `change_summary.py`, `gemini.py`, `prompt_once.py` |
 | `verify/` | **7** | `anchor.py`, `external_facts.py`, `pin_mismatch.py`, `publishable.py`, `release_claims.py`, `releases.py`, `rule_check.py` |
-| `render/` | **8** | `comment.py`, `coverage_line.py`, `dashboard.py`, `deep_report.py`, `pin_block.py`, `replay_report.py`, `rule_block.py`, `shape_line.py` |
+| `render/` | **9** | `comment.py`, `coverage_line.py`, `dashboard.py`, `deep_report.py`, `found_block.py`, `pin_block.py`, `replay_report.py`, `rule_block.py`, `shape_line.py` |
 | `serve/` | **15** | `cli.py`, `deep_review.py`, `health.py`, `listener.py`, `pin_check.py`, `retrospective.py`, `review_delivery.py`, `run_commit.py`, `run_dashboard.py`, `run_endpoint.py`, `run_migrate.py`, `run_review.py`, `settle.py`, `webhook_github.py`, `working_clone.py` |
 
 <!-- plan-state:end -->
