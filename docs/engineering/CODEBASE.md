@@ -2648,3 +2648,28 @@ developer's own rules are checked before anyone else reads the code.
 
 Sabotage covers both: truncating prose instead of extracting rules drops the last rule, and dropping
 the `(uncommitted)` label presents a laptop rule as the team's.
+
+### `quantamind review` without a commit — the review before the pull request
+
+`--sha` is now optional. Without it, `ingest/worktree.pending()` reviews **what the developer has
+not committed**, and failing that, **the commits on this branch that are not on the default one**.
+
+**By the time a pull request exists, the review has arrived too late to be cheap.** The developer
+has stopped, context-switched, and asked other people to look. The cheapest place to be wrong about
+a change is the machine that made it, seconds after writing it, where a wrong finding costs ten
+seconds and a right one costs one edit.
+
+**Untracked files are included, and they are the ones `git diff` omits.** On a feature branch most
+of what a developer wrote is in files git has never seen. A review built on `git diff` alone would
+skip every one of them and still read as a complete review of a smaller change.
+
+**`git diff --no-index` exits 1 when the files differ**, which for a diff is success. Treating that
+as failure listed each untracked file by name and showed the model none of its code — a clean review
+of a file nobody looked at. A test caught it, not reading.
+
+**Nothing leaves the machine on this path.** No API call, no pull request, no clone. That is the
+honest answer to "can this run air-gapped", and it is why the local path can read an uncommitted
+`CLAUDE.md` that the endpoint structurally cannot.
+
+Run on this repository's own uncommitted work it ranked 5 changed files — including the untracked
+module and test that implement the feature itself.

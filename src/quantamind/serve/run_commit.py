@@ -16,9 +16,11 @@ CONSUMED BY: `serve/cli.py`.
 from __future__ import annotations
 
 import subprocess
+import time
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+from quantamind.ingest.worktree import NothingPending, pending
 from quantamind.rank import firing
 from quantamind.serve.deep_review import report
 from quantamind.serve.run_review import review
@@ -26,7 +28,7 @@ from quantamind.types.change import REVIEWABLE_SUFFIXES
 from quantamind.types.settings import load
 
 
-def review_commit(clone: Path, repo: str, sha: str, *, deep_project: str = "") -> int:
+def review_commit(clone: Path, repo: str, sha: str = "", *, deep_project: str = "") -> int:
     """`quantamind review` — rank one commit's files against history strictly before it.
 
     Prints the comment body, or says plainly that the change is not worth speaking on. **It posts
@@ -36,11 +38,29 @@ def review_commit(clone: Path, repo: str, sha: str, *, deep_project: str = "") -
     if not (clone / ".git").exists():
         print(f"{clone} is not a git clone; a review reads history and nothing else")
         return 1
-    stamp = _timestamp(clone, sha)
-    if stamp is None:
-        print(f"{sha[:12]} is not in {clone}, or has no reviewable files")
-        return 1
-    changed, as_of = stamp
+    if sha:
+        stamp = _timestamp(clone, sha)
+        if stamp is None:
+            print(f"{sha[:12]} is not in {clone}, or has no reviewable files")
+            return 1
+        changed, as_of = stamp
+    else:
+        # **NO COMMIT MEANS THE REVIEW WORTH HAVING: WHAT IS NOT COMMITTED, OR NOT PUSHED.** By the
+        # time a pull request exists the developer has stopped and asked other people to look. The
+        # cheapest place to be wrong is the machine that made the change.
+        try:
+            work = pending(clone)
+        except NothingPending as why:
+            print(f"[review] nothing to review — {why}")
+            return 0
+        print(f"[review] reviewing {work.origin}")
+        changed = [p for p in work.paths if p.endswith(REVIEWABLE_SUFFIXES)]
+        if not changed:
+            print(f"[review] {len(work.paths)} file(s) changed, none in a language we read")
+            return 0
+        # Scored against history up to now: the change has no commit, so there is no committer
+        # date to bound it by, and the honest bound is the moment the review runs.
+        as_of = int(time.time())
     with TemporaryDirectory() as scratch:
         out = review(clone, repo, changed, Path(scratch) / "review.db", as_of=as_of)
     print(

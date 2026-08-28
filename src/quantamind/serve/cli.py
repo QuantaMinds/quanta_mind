@@ -60,7 +60,11 @@ def build_parser() -> argparse.ArgumentParser:
     look.add_argument("clone", type=Path, help="a full clone; nothing is sent anywhere")
     look.add_argument("--repo", default="local/clone", help="owner/name, for the store key")
     look.add_argument(
-        "--sha", required=True, help="the commit to review, scored against history BEFORE it"
+        "--sha",
+        default="",
+        help="the commit to review. Omit it to review what you have NOT committed yet, or "
+        "the commits on this branch that are not on the default one — which is the review "
+        "worth having before you open a pull request",
     )
     # **SUPPRESSED FROM `--help`, NOT REMOVED, AND OFF UNLESS ASKED FOR BY NAME.**
     # `docs/product/QUANTAMIND.md` says the product publishes no model findings. A flag advertised
