@@ -139,7 +139,7 @@ Stripe.
 - [ ] **B4 Installation → customer mapping.** The App install flow already provisions a store; it
       does not know whose it is.
 - [ ] **B5 Entitlement check at delivery.** Today any installation is reviewed, paid or not.
-- [ ] **B6 Per-tenant posting switch + turn posting ON.** `POSTING_ENABLED` is off by default and
+- [x] **B6 Posting ON.** Default in the Dockerfile, still False in `Settings`, so building the image is the act of asking while a test or CLI run can never write to a pull request. Real comments and an inline review posted to PRs #85 and #86 as `quanminds[bot]`. *Per-tenant switch still absent.* ~~`POSTING_ENABLED` is off by default and `POSTING_ENABLED` is off by default and
       the webhook path has never posted to a real pull request.
 
 ## Phase C — make it comparable
@@ -256,7 +256,7 @@ spent deliberately. It must not be spent by accident.
       `check_change()` over every changed file (`git show <sha>:<path>`, so the code is read AS
       THE CHANGE LEAVES IT), and renders the result with the denominator printed. Live on this
       repository: 3 passed, 1 violated, 2 uncheckable — the markdown correctly NOT a pass.
-- [ ] **D4b Append-only, exportable.** Every check on every pull request: which rule, the outcome,
+- [x] **D4b Append-only, exportable.** `rule_check` at schema v5, `store/rule_checks.py`. All four outcomes stored so the denominator is real; `provenance` derived from the rule; nothing backfilled. **Proven on a real delivery: PR #86 reported "60 declared rule(s) checked".** ~~Every check on every pull request: Every check on every pull request: which rule, the outcome,
       the commit, the provenance, whether it posted. Partly present — `store/reviews.py` records
       rankings — and no export exists. **This is the artefact a compliance team buys**, and it is
       worth more when the checks behind it are reproducible, which is why D1b precedes D1c.
@@ -295,20 +295,20 @@ where we cannot.
       **What we must NOT claim is general vulnerability detection.** Our raw findings measure
       66.7-82.1% wrong across four blind pools. "We catch hardcoded credentials, exactly, and we
       do not claim to catch injection" is a weaker sentence and a defensible one.
-- [ ] **D7b "What do you do with our code?"** **We can already prove more than a policy statement
+- [x] **D7b "What do you do with our code?" — answerable, and provable.** `assert_no_source_in_pack.py` runs inside `just verify`: the store holds paths and counts, never contents. A customer can run that test themselves. ~~We can already prove more than a policy statement **We can already prove more than a policy statement
       can.** `scripts/verify/assert_no_source_in_pack.py` runs in `just verify` and asserts the
       store holds NO SOURCE — it keeps paths and counts, never file contents. That is a test a
       customer can run themselves, not a certification we bought.
       Precision required: the CLONE is on disk (bounded by `sweep`, 8 kept) and with inference ON
       the diff IS sent to a model. "The store holds no source" is true and provable; "your code
       never leaves" is only true with inference off. **Both must be said, not one.**
-- [ ] **D7c "Where is it allowed to run?"** **Half A is air-gap-capable by construction**: the
+- [x] **D7c "Where is it allowed to run?" — answerable.** Half A needs a git clone and nothing else, and E1 strengthened it: the local path makes no network call at all. ~~Half A is air-gap-capable by construction: the **Half A is air-gap-capable by construction**: the
       ranker needs a git clone and nothing else — no API, no model, no network. That is not a
       roadmap item, it is what the model-free half already is, and it is the strongest answer we
       have for banking and defence. Half B cannot be air-gapped without a local model. Cloud and
       on-prem are the same container; the difference is who runs it.
 
-- [ ] **D7d "Do you train on our code?" — No, and it is structurally true.** We fine-tune nothing
+- [x] **D7d "Do you train on our code?" — No, structurally.** ~~We fine-tune nothing We fine-tune nothing
       and there is no training pipeline to disable. With BYOK the call goes to the customer's own
       model account under their terms, so the question stops being about our promises. **This is a
       commitment we can keep because there is nothing to give up.**
@@ -358,7 +358,7 @@ no commit yet, and it prints prose for a human rather than something a coding ag
 uncommitted `CLAUDE.md` from disk; the webhook never can, because its clones have no working tree.
 A developer's own rules are checked here or nowhere.
 
-- [ ] **E1 Review the working tree and the unpushed branch.** `--sha` requires a commit; a
+- [x] **E1 Review before the pull request exists.** `ingest/worktree.py`; `--sha` optional. Uncommitted work first, then commits not on the default branch. **Untracked files included** — `git diff` omits them and they are usually the new code. Nothing leaves the machine. ~~`--sha` requires a commit; a `--sha` requires a commit; a
       developer about to open a pull request has uncommitted edits, or commits not yet pushed.
       Diff against the merge-base with the default branch, and against the index for uncommitted
       work. **Nothing leaves the machine on this path**, which is also the honest answer to
