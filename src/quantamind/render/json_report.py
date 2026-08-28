@@ -38,6 +38,7 @@ from typing import Any, Protocol
 from quantamind.types.checked import Checked
 from quantamind.types.finding import Finding
 from quantamind.types.ranking import Ranking
+from quantamind.types.review import NotReviewed
 
 SCHEMA = 1
 
@@ -77,6 +78,9 @@ def report(
     body: dict[str, Any] = {
         "schema": SCHEMA,
         "origin": origin,
+        # **ALWAYS PRESENT, `null` WHEN A RANKING RAN.** Same rule as `unread`: a key that is
+        # sometimes absent makes "we ranked nothing" indistinguishable from an older writer.
+        "not_reviewed_because": None,
         "files": {
             "changed": every,
             "reviewed": read,
@@ -115,3 +119,33 @@ def report(
         },
     }
     return json.dumps(body, indent=2, sort_keys=True)
+
+
+def unreviewed(reason: NotReviewed, *, changed: Sequence[str] = (), origin: str = "") -> str:
+    """The same object when there was no ranking to report, carrying WHY as a value.
+
+    **THIS EXISTS BECAUSE THE ALTERNATIVE WAS A HUMAN SENTENCE AND EXIT 0.** Under `--json` the
+    two early exits in `serve/run_commit.py` printed prose to stdout, so a tool got a decode
+    error and a success code -- a change touching only Markdown looked exactly like a broken
+    install. The keys are those of `report`, so one consumer parses both without branching.
+
+    `files.changed` is passed in rather than derived: there is no ranking here, and reporting an
+    empty changed-list when files did change would be a second lie in place of the first.
+    """
+    every = list(changed)
+    return json.dumps(
+        {
+            "schema": SCHEMA,
+            "origin": origin,
+            "not_reviewed_because": reason.value,
+            # Everything that changed went unread, by definition. `reviewed` is empty and
+            # `unread` is the whole list -- the residual is still the product here.
+            "files": {"changed": every, "reviewed": [], "unread": every},
+            "history": {},
+            "findings": [],
+            "rule_checks": [],
+            "verdicts": None,
+        },
+        indent=2,
+        sort_keys=False,
+    )

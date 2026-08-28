@@ -1,7 +1,8 @@
 """The review itself: what we checked, what we did not, and what it cost.
 
-WHAT: `CoverageLine`, `RequestLedger` and `Review` -- the record posted to a pull request and
-      written to the store, carrying its own coverage and its own spend.
+WHAT: `CoverageLine`, `Review`, `Outcome`, `Delivered` and `NotReviewed` -- the record posted
+      to a pull request and written to the store, carrying its own coverage and its own spend,
+      plus the typed reasons a run can end without one.
 WHY:  Two things have to be observable rather than asserted. Coverage, because the product's
       whole claim is that silence is readable. And spend, because a request ceiling that is
       never hit and one that was never wired up print the same thing -- so the ledger records
@@ -170,3 +171,27 @@ class Delivered:
             f"{self.outcome.value} — {len(self.considered)} file(s) ranked, "
             f"{len(self.skipped)} skipped as unreadable"
         )
+
+
+class NotReviewed(enum.Enum):
+    """Why a run ended with no ranking. A value, because prose on stdout is not an answer.
+
+    **"NOTHING TO REVIEW" AND "THE COMMAND BROKE" MUST NOT BE THE SAME THING ON THE WIRE.**
+    Under `--json`, `serve/run_commit.py` took two early exits that printed a human sentence and
+    returned 0, so a tool got a decode error and a success code -- a change touching only
+    Markdown looked exactly like a broken install. This is rule 3, typed silence, applied to the
+    CLI's machine-readable surface rather than to a resolver.
+    """
+
+    NOTHING_PENDING = "nothing_pending"
+    """No uncommitted work and no commits off the default branch. The tree is clean."""
+
+    NO_SUPPORTED_LANGUAGE = "no_supported_language"
+    """Files changed, but none with a `REVIEWABLE_SUFFIXES` extension. A result, not a failure."""
+
+    def sentence(self) -> str:
+        """One line for a human, so the CLI's two surfaces cannot drift into disagreeing."""
+        return {
+            NotReviewed.NOTHING_PENDING: "nothing to review",
+            NotReviewed.NO_SUPPORTED_LANGUAGE: "none in a language we read",
+        }[self]

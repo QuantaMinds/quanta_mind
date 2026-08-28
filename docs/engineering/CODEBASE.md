@@ -2832,3 +2832,38 @@ and cannot be restored by care from here. This is `PHASE0_PREREGISTRATION.md` A5
 tooling built after it, which is why `sample.py` now reports **counts only**: a rejected pack
 prints how many leaks, never which items. A57's own lesson was that the protection which failed
 was an instruction rather than a check; the redraw under seed `20260828` is the check.
+
+### `/qm-review` — E3, and the `--json` path that did not emit JSON
+
+`.claude/commands/qm-review.md` is the whole of E3: it runs `quantamind review . --json` and
+tells the agent which keys to read. No new Python, no wrapper script, no new flags — each would
+be a second place for the contract to drift from `serve/cli.py`.
+
+**Building it found that `--json` was not machine-readable on two of its three paths.**
+`serve/run_commit.py` took two early exits — a clean tree, and a change whose files are in no
+language `parse/` reads — that printed a human sentence to stdout and returned 0 **regardless of
+`--json`**. A tool got a JSON decode error and an exit code of success, so a developer whose
+change touched only Markdown saw exactly what a developer with a broken install saw. That is the
+common case for this command, not an edge.
+
+**`render/json_report.py` carried a comment promising the opposite** — *"ONE OBJECT ON STDOUT AND
+NOTHING ELSE... the human-facing prints are skipped entirely"* — written about the path below it
+while two paths above it did the other thing. A comment asserting a property the code does not
+have is rule 14 in miniature, and it is why the fix is a value rather than a better sentence.
+
+`types/review.py` gives the reason a type, `NotReviewed`: `NOTHING_PENDING` and `NO_SUPPORTED_LANGUAGE`.
+`json_report.unreviewed()` emits the **same envelope** as `report()` — verified key-for-key by a
+test — with `files.unread` holding everything that changed, because the residual is still the
+product on a path where nothing was read. `not_reviewed_because` is always present, `null` when a
+ranking ran, for the reason `unread` is always present: an absent key and a real answer must not
+be the same thing.
+
+**The wrapper's own risk is drift, so it is tested in both directions.** `test_review_json_always.py`
+requires the command file to name the keys an agent must read, *and* requires the review to emit
+every key the command names. The first version only validated whatever keys the file happened to
+name — so renaming one in the command file made the check smaller and it passed. A check that
+admits less when the thing it guards is broken is not a check.
+
+**`--deep` stays out**, and that is tested rather than trusted: `serve/cli.py` suppresses it from
+`--help` because `docs/product/QUANTAMIND.md` says the product publishes no model findings, and a
+slash command turning it on would be that drift with a friendlier entry point.

@@ -27,9 +27,11 @@ from quantamind.rank import firing
 # model pass; this renders the whole review as data. Two functions of one name in one file is the
 # collision rule 13 is about, and here it shadowed silently until the call failed at runtime.
 from quantamind.render.json_report import report as json_review
+from quantamind.render.json_report import unreviewed
 from quantamind.serve.deep_review import report
 from quantamind.serve.run_review import review
 from quantamind.types.change import REVIEWABLE_SUFFIXES
+from quantamind.types.review import NotReviewed
 from quantamind.types.settings import load
 
 
@@ -59,14 +61,27 @@ def review_commit(
         try:
             work = pending(clone)
         except NothingPending as why:
-            print(f"[review] nothing to review — {why}")
+            # **JSON EVEN HERE.** A tool asked for JSON; prose plus exit 0 gave it a decode
+            # error indistinguishable from a broken install. The reason travels as a value.
+            if as_json:
+                print(unreviewed(NotReviewed.NOTHING_PENDING, origin=str(why)))
+            else:
+                print(f"[review] nothing to review — {why}")
             return 0
         origin = work.origin
         if not as_json:
             print(f"[review] reviewing {origin}")
         changed = [p for p in work.paths if p.endswith(REVIEWABLE_SUFFIXES)]
         if not changed:
-            print(f"[review] {len(work.paths)} file(s) changed, none in a language we read")
+            if as_json:
+                print(
+                    unreviewed(NotReviewed.NO_SUPPORTED_LANGUAGE, changed=work.paths, origin=origin)
+                )
+            else:
+                print(
+                    f"[review] {len(work.paths)} file(s) changed, "
+                    f"{NotReviewed.NO_SUPPORTED_LANGUAGE.sentence()}"
+                )
             return 0
         # Scored against history up to now: the change has no commit, so there is no committer
         # date to bound it by, and the honest bound is the moment the review runs.

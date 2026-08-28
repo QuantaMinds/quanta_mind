@@ -407,11 +407,13 @@ A developer's own rules are checked here or nowhere.
       Diff against the merge-base with the default branch, and against the index for uncommitted
       work. **Nothing leaves the machine on this path**, which is also the honest answer to
       "can we run it in an air-gapped environment".
-- [ ] **E2 Machine-readable output.** `--json`: the ranking, the allocation with `unread` named,
+- [x] **E2 Machine-readable output.** `--json`: the ranking, the allocation with `unread` named,
       and any findings with their provenance. This is what makes `/qm-review` useful inside
       Cursor, Claude Code or Copilot — the agent reads it and fixes, rather than a human
       re-typing prose.
-- [ ] **E3 `/qm-review` as an editor command.** A thin wrapper over E1 and E2. It is last on
+- [x] **E3 `/qm-review` as an editor command.** `.claude/commands/qm-review.md`. Building it
+      found `--json` emitting prose on two of three paths; see `CODEBASE.md` “`/qm-review` — E3”.
+      A thin wrapper over E1 and E2. It is last on
       purpose: the value is entirely in what E1 and E2 return, and a wrapper over a weak answer
       is a faster way to be unhelpful.
 
