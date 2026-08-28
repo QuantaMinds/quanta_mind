@@ -2198,3 +2198,36 @@ check is the same defect this project chases in code.
 
 Findings are **not** rendered into the comment body yet. That is deliberate: the number worth
 knowing first is findings-per-pull-request, and A6 reads it before anything is published.
+
+### `types/rule.py` + `ingest/rules_file.py` — standards a repository declares for itself
+
+A compliance rate cannot be reported without rules to be compliant with, so the rules engine is
+built before the audit trail and the dashboard that read it. `read(clone)` returns
+`(rules, refused)` from `.quantamind/rules.toml`.
+
+**No rules and unreadable rules must never produce the same answer.** A repository with no file
+has declared none; a repository whose file will not parse has declared some and we cannot read
+them. Both end with zero enforceable rules — and if they returned the same value, the compliance
+dashboard would show a clean sheet for a customer at the exact moment their standards stopped
+being checked. The refusal list is what separates them, and it is the first thing the tests assert.
+
+**A malformed declaration is returned, not skipped.** Dropping entries we do not understand
+narrows what a customer believes is enforced, invisibly, in exactly the artefact built to make it
+visible. Each comes back as `Unresolved(site, reason, construct)` — the same shape the resolver
+layer uses for a call site it cannot place. `Reason` gained `MALFORMED_DECLARATION`, which its own
+docstring says must be a deliberate act.
+
+**Provenance is derived from the check, never set by a caller.** `CheckKind.MODEL_JUDGED` yields
+`Provenance.MODEL`; everything else yields `PARSER`. `Rule.reproducible` reads off that, because
+the audit trail is worth exactly what the distinction is worth: a parser's verdict can be re-run
+on the same commit and shown to produce the same answer, and a model's cannot. A rule that could
+declare itself parser-verified while a model decided it would make the trail worthless, so the
+field does not exist to be set.
+
+**Duplicate ids are refused rather than last-one-wins**, because audit rows key on the id and two
+rules sharing one makes the trail ambiguous about which was applied.
+
+`tomllib` is stdlib, so this costs no dependency, and rule 11 bans `pyyaml` from `src/` outright.
+Four sabotages verified the tests: a broken file reporting as "none declared", silently skipping
+unreadable declarations, a model-judged rule claiming parser provenance, and last-one-wins on a
+duplicate id.

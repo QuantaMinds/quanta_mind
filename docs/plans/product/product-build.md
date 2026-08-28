@@ -111,9 +111,14 @@ emitted one.
 A compliance rate cannot be reported without rules to be compliant with. Built first because D4
 and D5 read what it records.
 
-- [ ] **D1a Rules as code, in the customer's repository.** `.quantamind/rules.toml` — `tomllib` is
+- [x] **D1a Rules as code, in the customer's repository.** `types/rule.py` +
+      `ingest/rules_file.py`. **No rules and unreadable rules return different answers** — the
+      failure that would report a customer compliant at the moment enforcement stopped. Malformed
+      declarations come back as `Unresolved`, never dropped; provenance is DERIVED from the check
+      so a model-judged rule cannot claim a parser verified it; duplicate ids refused. 10 tests,
+      4 sabotages caught. ~~`.quantamind/rules.toml` — `tomllib` is
       stdlib and rule 11 bans `pyyaml` from `src/`. Versioned with their code, reviewed like their
-      code, diffable. Documentation is what this replaces: standards nobody reads and every
+      code, diffable.~~ Documentation is what this replaces: standards nobody reads and every
       reviewer interprets differently.
 - [ ] **D1b Deterministic checks FIRST, and most rules are.** From the competitor's own examples:
       `async-error-handling`, `typed-catch-block`, `no-console-log-in-prod`,
@@ -143,7 +148,11 @@ spent deliberately. It must not be spent by accident.
       file in the tree.
 - [ ] **D2b The graph, stored.** A whole-repo pass into a `dependency` table, incremental against
       the same commit watermark the touch index uses.
-- [ ] **D2c Blast radius in the review.** "This module is imported by 14 others, two of them entry
+- [ ] **D2c Duplicated logic, without a model.** Normalised AST hashing of function bodies —
+      rename-insensitive, comment-insensitive, stdlib only. "The same logic is written in multiple
+      places, and a fix to one leaves the others wrong" is a real cost, and it is a structural
+      question a parser answers exactly rather than a judgement a model guesses at.
+- [ ] **D2d Blast radius in the review.** "This module is imported by 14 others, two of them entry
       points." A new signal, testable against the same fix-return outcome the touch index uses.
 
 ### D3 — cross-repo, by declaration rather than discovery
@@ -184,6 +193,34 @@ Pulled in as **two separate uses**, because they succeed or fail independently:
       `dependencies = []` holds; what they need is the customer's auth. **Egress is a decision,
       not a detail:** quoting a private Slack thread into a GitHub comment moves their data
       between systems, and that must be opt-in per source.
+
+### D7 — the three questions a security team asks
+
+Their answers, given our thesis: say what is true, prove it where we can, and refuse the claim
+where we cannot.
+
+- [ ] **D7a "What does it catch?"** AI-written code carries more hardcoded secrets, and a
+      hardcoded key is **deterministically** detectable — pattern plus entropy, no model, no
+      judgement. It ships as a `CheckKind`, high precision, reproducible in the audit trail.
+      **What we must NOT claim is general vulnerability detection.** Our raw findings measure
+      66.7-82.1% wrong across four blind pools. "We catch hardcoded credentials, exactly, and we
+      do not claim to catch injection" is a weaker sentence and a defensible one.
+- [ ] **D7b "What do you do with our code?"** **We can already prove more than a policy statement
+      can.** `scripts/verify/assert_no_source_in_pack.py` runs in `just verify` and asserts the
+      store holds NO SOURCE — it keeps paths and counts, never file contents. That is a test a
+      customer can run themselves, not a certification we bought.
+      Precision required: the CLONE is on disk (bounded by `sweep`, 8 kept) and with inference ON
+      the diff IS sent to a model. "The store holds no source" is true and provable; "your code
+      never leaves" is only true with inference off. **Both must be said, not one.**
+- [ ] **D7c "Where is it allowed to run?"** **Half A is air-gap-capable by construction**: the
+      ranker needs a git clone and nothing else — no API, no model, no network. That is not a
+      roadmap item, it is what the model-free half already is, and it is the strongest answer we
+      have for banking and defence. Half B cannot be air-gapped without a local model. Cloud and
+      on-prem are the same container; the difference is who runs it.
+
+**The framing for all of Phase D:** build what the competitor sells, but with the thesis —
+deterministic where a parser can answer, provenance on every verdict, refusals returned rather
+than dropped, and no claim published that we cannot defend when someone checks it.
 
 ## Phase E — shift left: review before the pull request exists
 
