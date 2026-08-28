@@ -14,7 +14,7 @@ by decision, not by difficulty.
 | # | item | why it is here and not later |
 |---|---|---|
 | **1** | **A5** record depth, cost and gate outcomes | Nothing measures what a review costs or how often the gate fires. Everything after this is decided on numbers we do not have yet, so it comes first and is small. |
-| **2** | **A6** read those numbers — findings per PR, coverage, gate rejection rate | **The result may change everything below it.** If gated findings are ~0.03 per pull request, the model half is not worth its cost and D1c/D1f are wasted work. Measure before building more on it. |
+| ~~2~~ | ~~**A6** read those numbers~~ **DONE** | 0.686 published per change, gate rejection 14.3%, 6,321 output tokens each. **The model half was not ruled out**, so the items below it stand. But the correctness rate behind that 0.686 is still the 2024 figure, and re-measuring it is now the highest-value open question — see the finding. |
 | **3** | **E2** `--json` output | Small, and the only thing standing between E1 and a coding agent that can act on a review. A human re-typing prose is not an integration. |
 | **4** | **E3** `/qm-review` editor command | A thin wrapper over E1+E2. Last of Phase E on purpose: a wrapper over a weak answer is a faster way to be unhelpful. |
 | **5** | **D2a/D2b** import edges, stored | The deterministic half of "without disturbing anything else". `parse/importers.py` already answers it per file; this makes it a graph that persists. |
@@ -100,7 +100,14 @@ worth selling.
       undercount on a dashboard gets priced from. *Depth is derivable from `ranked_unit`; the gate
       outcome is already `review.fire_decision`.* ~~Depth, cost and gate outcomes into the store; Depth, cost and gate outcomes into the store; surfaced by
       `render/dashboard.py`.
-- [ ] **A6 Read the numbers.** Coverage 100%, gate rejection strictly between 0% and 100%,
+- [x] **A6 Read the numbers.** Run 2026-08-28 on `pallets/flask`, 35 changes, model on —
+      `docs/findings/A6_WHAT_A_REVIEW_PRODUCES_2026-08.md`. **Coverage 100%: PASS.
+      Gate rejection 14.3%: PASS** (the bar was strictly between 0 and 100). Reported without a
+      bar: **0.686 findings published per change**, 77% of changes ≤3 files, and **6,321 output
+      tokens and 60s per change** — the first cost figure this product has ever had.
+      **0.686 is PUBLISHED, not CORRECT**, and must not be compared to the 0.013–0.037 in
+      AGENTS.md until the error rate is re-measured on this pipeline. One repository,
+      unreplicated. ~~Coverage 100%, gate rejection strictly between 0% and 100%, Coverage 100%, gate rejection strictly between 0% and 100%,
       FULL/FOCUSED split, and **published findings per pull request** — the number that decides
       whether coverage is sellable. Comparable today: 0.013–0.037 correct findings per PR.
 
