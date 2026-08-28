@@ -2298,3 +2298,37 @@ Verified by sabotage: dropping the undecided count, and counting undecided rows 
 fail their own test. Run live against this repository's own HEAD, a two-rule file produced 3
 passed, 1 violated (`print` at `run_endpoint.py:104`) and 2 uncheckable (`README.md`,
 `language_unsupported`) — the markdown correctly not counted as a pass.
+
+### `ingest/google_auth.py` — a Vertex token with no key on disk, and no `gcloud` in the container
+
+`infer/gemini.py` shelled out to `gcloud auth print-access-token`, at a **Homebrew absolute path
+compiled into the product**. Correct on one laptop, absent in the container — so the model half
+could only ever have worked where a human had installed an SDK and logged in.
+
+**The plan was a service-account key, and the org policy refused to issue one.**
+`constraints/iam.disableServiceAccountKeyCreation` is set on `quantamind-oss`. The account has
+owner and could disable it; it was not disabled, because a long-lived downloadable credential is
+worse than the inconvenience it removes. **That refusal produced a better design than the plan
+had:** a container on GCP reads a token from the metadata server, so there is **no credential on
+disk at all** — a stronger answer to "what do you do with our code?" than any key-handling policy.
+
+`token()` tries the metadata server, then `gcloud`, and returns which one answered so an operator
+debugging a permission error knows *which identity* was used without the token ever being logged.
+
+**The metadata probe is bounded at one second, and that is correctness rather than tuning.**
+`metadata.google.internal` does not resolve off GCP; unbounded, every review on a laptop would
+stall before falling through, and a product that takes ten seconds to decide it is not on GCP looks
+broken rather than unconfigured.
+
+**The test for that bound was vacuous in its first form, and sabotage is what caught it.** Timing
+`token()` here proves nothing — DNS fails instantly, so widening the timeout to 15s still passed in
+0.10s. It now points the probe at a real socket that accepts and never replies, on a bounded
+thread, which is the same technique `test_serve_banner.py` uses for the same reason: an unbounded
+probe must fail the test rather than hang the suite.
+
+**Two defects fell out of running it.** The CLI path never received `gcloud_path` while the webhook
+path did, so `quantamind review --deep` failed where the endpoint worked — found only because the
+refusal names the path it tried. And `QUANTAMIND_GCLOUD_PATH=`, set but empty, was used as the
+executable: `source.get(key, "gcloud")` returns `""` for a variable that exists and is blank, which
+is exactly what commenting out a line in a `.env` produces. **This product's own deep review found
+the second one**, on the commit that introduced the setting.

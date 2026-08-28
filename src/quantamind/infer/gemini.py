@@ -13,8 +13,9 @@ WHY:  **THE MODEL IS ONLY EVER SHOWN WHAT THE RANKER SELECTED.** That is the pro
       ZERO of 86.**
 
       **STDLIB ONLY, BECAUSE `pyproject.toml` DECLARES `dependencies = []`.** The endpoint was
-      written on `http.server` to hold that line and this holds it too — `urllib` and a token minted
-      from `gcloud`. A vendor SDK here would be the first runtime dependency this product takes.
+      written on `http.server` to hold that line and this holds it too — `urllib` and a token from
+      `ingest/google_auth` (the metadata server, or `gcloud` on a laptop). A vendor SDK here
+      would be the first runtime dependency this product takes.
 
       **NOTHING HERE IS PUBLISHED.** These findings are 66.7-82.1% wrong raw across four blind
       rater pools. `verify/` decides what reaches a pull request, and it may not import this module.
@@ -26,10 +27,10 @@ from __future__ import annotations
 
 import json
 import re
-import subprocess
 import urllib.error
 import urllib.request
 
+from quantamind.ingest import google_auth
 from quantamind.types.finding import Finding
 
 MODEL = "gemini-2.5-pro"
@@ -70,15 +71,18 @@ class InferenceFailed(RuntimeError):
 
 
 def _token(gcloud: str) -> str:
-    done = subprocess.run(
-        [gcloud, "auth", "print-access-token"],
-        capture_output=True,
-        text=True,
-        timeout=TOKEN_TIMEOUT_S,
-    )
-    if done.returncode != 0:
-        raise Unavailable(f"no access token: {done.stderr.strip()[:120]}")
-    return done.stdout.strip()
+    """A bearer token from wherever we are running.
+
+    **THIS SHELLED OUT TO `gcloud` AND NOTHING ELSE**, which meant the model half could only work
+    on a machine with the SDK installed and a human logged in — never in the container, which is
+    where the product actually runs. `ingest/google_auth` tries the GCP metadata server first, so
+    a deployed container needs no credential on disk at all, and falls back to `gcloud` for
+    laptop development.
+    """
+    try:
+        return google_auth.token(gcloud).value
+    except google_auth.Unavailable as exc:
+        raise Unavailable(str(exc)) from None
 
 
 def _post(url: str, token: str, body: dict[str, object]) -> dict[str, object]:
