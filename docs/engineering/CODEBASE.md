@@ -2569,3 +2569,26 @@ every plain rule.
 **A rule that fires on deliberate code is worse than no rule**, because it teaches a reviewer to
 scroll past the section. That is why `print` is not among these: this product prints on purpose, and
 `serve/run_endpoint.py` explains why at length.
+
+### The rules were read from a directory that has no files in it
+
+`working_clone.ensure()` clones with `--no-checkout`, so a customer's repository exists only as git
+objects. `rules_file.read()` looked at the filesystem, found nothing, and returned **"no rules
+declared" — for every repository, forever**, indistinguishable from one that had declared none.
+That is precisely the confusion the module's own docstring exists to prevent, defeated by looking
+in a directory that has no files in it.
+
+It reads from git now, at the commit under review — not the default branch, because a pull request
+that ADDS a rule must be checked against the rule as it stands in that change.
+
+**Every test in that file passed throughout**, because each wrote a loose file into a temp
+directory: a situation that never occurs in production. They now build real repositories, and one
+of them clones `--no-checkout` and asserts the working tree is absent *before* reading, so the
+fixture cannot quietly stop testing the thing it was written for.
+
+**A clone git cannot read is a third answer, not an absence.** Not "this customer declared no
+standards" and not "their file is malformed" — a refusal. Reporting it as the first would show a
+clean compliance sheet for a repository we could not read at all.
+
+**Sabotage found the missing test, not review.** Breaking that refusal path passed all twelve tests;
+only deliberately reverting it revealed there was no test for it. The thirteenth was written then.

@@ -140,7 +140,7 @@ def enforce(
     **A REFUSED DECLARATION IS REPORTED, NOT DROPPED**, and a recording failure does not take the
     review with it — the comment is already worth posting whether or not the trail accepted it.
     """
-    declared, unreadable = rules_file.read(clone)
+    declared, unreadable = rules_file.read(clone, sha)
     if unreadable:
         print(f"[rules] {len(unreadable)} declaration(s) could not be read", flush=True)
     if not declared:
