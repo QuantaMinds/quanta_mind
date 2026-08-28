@@ -2120,3 +2120,81 @@ the shape production actually uses.
 Neither was visible to `just check`. The gate that would have caught both is the one the definition
 of done already names first, and the lesson is not "add a guard" — it is that `just check` being
 green was reported as done.
+
+### `allocate/depth.py` — the layer that was an empty directory
+
+`AGENTS.md` names the order `rank → allocate → infer`. `allocate/` held nothing but `__init__.py`,
+which is why the ranking had no consumer that spent anything and inference was reachable only from
+the CLI (`--deep`, hidden behind `argparse.SUPPRESS`).
+
+`plan(ranking, changed)` returns a `Reading` — the paths the model is shown, the paths it is not,
+and why. Three depths, none of them an absence:
+
+| depth | when | what it reads |
+|---|---|---|
+| `FULL` | at or under `FULL_CEILING` files | the whole change |
+| `FOCUSED` | larger, and fix history discriminates | the funded paths |
+| `UNRANKED` | larger, and there is no history to rank by | a bounded slice in diff order, said so |
+
+**The old gate muted the reviews we could most afford.** `rank.order.fires()` returns False when
+`files <= BUDGET` (3), because on three files an *ordering* saves the reader nothing. Correct for a
+ranking; inverted for a reviewer — a three-file change is the cheapest possible deep read and the
+whole diff fits in one prompt, and it produced no comment at all.
+
+**The ranking becomes the cost lever, which is the honest use of the claim that replicated.**
+Top-three-by-fix-history misses 1.21% against alphabetical's 3.12% on six unseen repositories. That
+is a claim about *which files to read first* — exactly what an inference budget needs. It is not,
+and never was, a claim about when to stay silent, which is what it had been wired to decide.
+
+**`UNRANKED` is a third value rather than a fallback in `FOCUSED`'s clothes.** `Ranking.funded()`
+returns empty on `NO_HISTORY` deliberately: every score ties, `(-score, path)` degenerates to
+alphabetical, and publishing `sort(filenames)` as a judgement about risk is the failure it refuses.
+This layer must still read something, so it reads a bounded slice and labels it on the value.
+
+**`unread` is carried, not inferred from a subtraction elsewhere.** The conservation invariant —
+`paths + unread` is exactly what was handed in — is asserted in `Reading.__post_init__` and
+parametrised over five change sizes in `tests/unit/layers/test_allocate_depth.py`. Verified by
+sabotage: dropping the unread list, relabelling `UNRANKED` as `FOCUSED`, and restoring the
+small-change mute each fail their own test.
+
+Nothing consumes this yet — wiring it into `serve/review_delivery.py` is A2 in
+`docs/plans/product/product-build.md`.
+
+### The webhook consults the model — A2, and what it costs
+
+`serve/review_delivery.deliver()` ranked, rendered and stopped. The model existed only behind the
+CLI's hidden `--deep <project>`, so a customer's pull request never reached it. `deliver()` now
+builds a `Reading` from `allocate/depth.plan()` and hands it to `serve/deep_review.examine()`.
+
+**Nothing costs money by default, and that takes two deliberate acts.** `Settings.runs_model` now
+requires `inference_enabled` **and** `inference_project` — the GCP project the calls are billed to,
+which the CLI took as an argument and a webhook has no way to receive. Either alone stays silent.
+`runs_model` gained the project because `quantamind config` prints it: a line reading
+`runs a model on a review: True` with nothing to bill would be this codebase's lying-banner defect
+in a smaller place.
+
+**Three outcomes that look identical from outside are three distinguishable values:**
+
+| situation | value |
+|---|---|
+| never asked | `examined is None` |
+| asked, unreachable | `Deep(consulted=False)` |
+| asked, nothing to say | `Deep(consulted=True)` with empty `anchored` |
+
+An outage returns a record rather than raising, so the ranking half still ships — it never needed
+the model — and rather than an empty success, so an outage cannot read like a clean review.
+Verified by sabotage: returning `consulted=True`, returning `None`, and dropping the project
+requirement each fail their own test in `tests/unit/layers/serve/test_examine_policy.py`.
+
+**The cost is bounded by the allocation, not by hope.** `reading.paths` is at most `FULL_CEILING`
+files, and `settings.max_requests` bounds the calls inside `deep()`.
+
+**A3 turned out to be already done, and a docstring said otherwise.** `verify/publishable.py`
+claimed the oracles "were built and measured and never wired in" — but `deep_review.deep()` has
+called `publishable.gate()` since `978bbda`. The prose went on describing a gap for several commits
+after it closed. The checklist item was written from that stale claim; the docstring now records
+both the gap and its closing, because a docstring asserting a state of the world a reader cannot
+check is the same defect this project chases in code.
+
+Findings are **not** rendered into the comment body yet. That is deliberate: the number worth
+knowing first is findings-per-pull-request, and A6 reads it before anything is published.

@@ -38,12 +38,12 @@ three months stale.
 
 | layer | modules | files |
 |---|---|---|
-| `types/` | **11** | `change.py`, `commit.py`, `deep.py`, `finding.py`, `pooled_outcome.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `settings.py`, `touch.py`, `verdict.py` |
+| `types/` | **12** | `change.py`, `commit.py`, `deep.py`, `env_values.py`, `finding.py`, `pooled_outcome.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `settings.py`, `touch.py`, `verdict.py` |
 | `store/` | **9** | `calibration.py`, `deliveries.py`, `drift.py`, `lifecycle.py`, `migrations.py`, `reviews.py`, `schema.py`, `tenancy.py`, `touches.py` |
 | `ingest/` | **11** | `app_auth.py`, `change_shape.py`, `commits.py`, `diff.py`, `git_credentials.py`, `github_api.py`, `github_comments.py`, `history.py`, `pull_refs.py`, `reachability.py`, `review_window.py` |
 | `parse/` | **2** | `languages.py`, `units.py` |
 | `rank/` | **6** | `baseline.py`, `events.py`, `firing.py`, `history_rates.py`, `order.py`, `score.py` |
-| `allocate/` | **0** | **NOT BUILT — its work is done inside `rank/order.py`, which emits the labels** |
+| `allocate/` | **1** | `depth.py` |
 | `infer/` | **2** | `gemini.py`, `prompt_once.py` |
 | `verify/` | **6** | `anchor.py`, `external_facts.py`, `pin_mismatch.py`, `publishable.py`, `release_claims.py`, `releases.py` |
 | `render/` | **7** | `comment.py`, `coverage_line.py`, `dashboard.py`, `deep_report.py`, `pin_block.py`, `replay_report.py`, `shape_line.py` |

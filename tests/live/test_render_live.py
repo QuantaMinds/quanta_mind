@@ -20,7 +20,7 @@ from pathlib import Path
 import pytest
 from pipeline import Skips, clone_all, ranked_pulls
 
-from quantamind.render.comment import comment
+from quantamind.render.comment import LOUD, QUIET, comment
 from quantamind.render.coverage_line import coverage_line
 from quantamind.types.ranking import Discrimination
 
@@ -50,8 +50,17 @@ def test_the_coverage_line_is_computed_from_each_change_and_differs_by_case(
         )
 
         body = comment(case.ranking, ())
+        # **EVERY REVIEWABLE CHANGE IS SPOKEN ON, AND SAYS WHICH KIND IT IS.** This asserted
+        # `body is None` below the threshold, when the product spoke on about a tenth of pull
+        # requests. Salience moved from whether a comment exists into a sentence inside it, so
+        # what is checked on real data is that the two branches are DISTINGUISHABLE — a comment
+        # on everything that did not mark the loud ones would delete the signal, not move it.
+        assert (LOUD in body) is case.ranking.fired, (
+            f"{where}: fired={case.ranking.fired} but the salience sentence disagrees. "
+            f"Read: {body[:200]!r}"
+        )
+        assert (QUIET in body) is not case.ranking.fired, f"{where}: both or neither marker"
         if case.ranking.fired:
-            assert body is not None, f"{where}: fired but rendered no comment"
             assert body.index(line) < body.index("| # | file |"), (
                 f"{where}: the coverage line is not above the table. A reader who sees the list "
                 "first weighs it against nothing"
@@ -61,10 +70,10 @@ def test_the_coverage_line_is_computed_from_each_change_and_differs_by_case(
                     f"{where}: the comment claimed something about correctness ({claim!r}). "
                     "infer/ is closed on evidence and we publish no findings"
                 )
-        else:
-            assert body is None, (
-                f"{where}: a change below the threshold produced a comment. A cheerful "
-                "'nothing to report' is a claim we did not earn"
+        for claim in ("bug", "vulnerabilit", "incorrect", "you should fix"):
+            assert claim not in body.lower(), (
+                f"{where}: the comment claimed something about correctness ({claim!r}) on a "
+                "change we did not fire on. Speaking on everything must not loosen what we claim"
             )
 
     print(f"\n  discriminations seen live: {dict(seen)}")

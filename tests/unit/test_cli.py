@@ -75,6 +75,11 @@ def test_review_is_built_and_no_longer_exits_two() -> None:
 def test_render_config_reports_whether_a_model_will_run() -> None:
     """The one line an operator actually needs: is this install going to spend money."""
     quiet = render_config(Settings(inference_enabled=False))
-    loud = render_config(Settings(inference_enabled=True))
+    # **ENABLED IS NOT ENOUGH, AND THE LINE MUST NOT SAY IT IS.** Without a project to bill, the
+    # webhook cannot call a model at all; a config that reported True here would be announcing
+    # behaviour the process does not have, which this codebase has already shipped once.
+    unbilled = render_config(Settings(inference_enabled=True))
+    loud = render_config(Settings(inference_enabled=True, inference_project="a-gcp-project"))
     assert "runs a model on a review:  False" in quiet
+    assert "runs a model on a review:  False" in unbilled
     assert "runs a model on a review:  True" in loud

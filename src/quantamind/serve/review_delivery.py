@@ -37,14 +37,18 @@ import enum
 from dataclasses import dataclass
 from pathlib import Path
 
+from quantamind.allocate.depth import Reading
+from quantamind.allocate.depth import plan as allocate
 from quantamind.ingest.diff import base_commit, changed_files
 from quantamind.ingest.github_api import token_for
 from quantamind.ingest.github_comments import post
 from quantamind.render.pin_block import block
 from quantamind.serve import pin_check
+from quantamind.serve.deep_review import examine
 from quantamind.serve.run_review import review as run_ranking
 from quantamind.serve.working_clone import ensure, sweep
 from quantamind.store import tenancy
+from quantamind.types.deep import Deep
 from quantamind.types.settings import Settings
 
 
@@ -67,6 +71,13 @@ class Delivered:
     considered: tuple[str, ...]
     skipped: tuple[str, ...]
     body: str | None
+    reading: Reading | None = None
+    """What the model was given and what it was not. `None` before the ranking has run."""
+
+    examined: Deep | None = None
+    """The model's pass, or `None` when no model was consulted. **NOT the same as finding
+    nothing**: `Deep.consulted` distinguishes "asked and it said nothing" from "never asked",
+    and a delivery that could not reach the model must not read like a clean review."""
 
     def sentence(self) -> str:
         """One line for the log, stating what happened and what it was computed from."""
@@ -127,6 +138,20 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
         head_sha=head_sha,
     )
 
+    # **THE ALLOCATION DECIDES WHERE INFERENCE GOES.** The measured claim -- top three by fix
+    # history misses 1.21% against alphabetical's 3.12% -- is about which files to read FIRST,
+    # and a budget is the only consumer that claim ever fitted.
+    reading = allocate(reviewed.ranking, list(changed))
+    examined = examine(clone, head_sha, reading, list(changed), settings)
+    if examined is not None:
+        print(f"[deliver] {reading.depth.value}: {reading.why}", flush=True)
+        print(
+            f"[deliver] model: {len(examined.anchored)} finding(s) kept of {examined.raw} raw "
+            f"({examined.unanchored} unanchored, {examined.refuted} refuted, "
+            f"{examined.withdrawn} withdrawn), consulted={examined.consulted}",
+            flush=True,
+        )
+
     # **THE PIN CHECK RUNS ON THE RAW CHANGED LIST, NOT THE RANKED ONE.** Workflows are not a
     # reviewable suffix, so they never appear in `reviewed.considered` — which is exactly why the
     # detector sat unreachable behind the reviewer until now. It needs no model and no ranking.
@@ -135,12 +160,14 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
 
     if reviewed.body is None and not pins:
         quiet = Outcome.NO_READABLE_FILES if not reviewed.considered else Outcome.NOTHING_TO_SAY
-        return Delivered(quiet, reviewed.considered, reviewed.skipped, None)
+        return Delivered(quiet, reviewed.considered, reviewed.skipped, None, reading, examined)
 
     body = (reviewed.body or "") + pins
 
     if not settings.posting_enabled:
-        return Delivered(Outcome.REHEARSED, reviewed.considered, reviewed.skipped, body)
+        return Delivered(
+            Outcome.REHEARSED, reviewed.considered, reviewed.skipped, body, reading, examined
+        )
 
     wrote = post(delivery_repo, number, head_sha, body)
     return Delivered(
@@ -148,4 +175,6 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
         reviewed.considered,
         reviewed.skipped,
         reviewed.body,
+        reading,
+        examined,
     )

@@ -86,6 +86,14 @@ def _authorization(repo: str) -> tuple[dict[str, str], str]:
     try:
         return {"Authorization": f"Bearer {token_for(repo)}"}, "as the App installation"
     except ApiFailed as exc:
+        # **THE FALLBACK ORDER IS THE WHOLE SAFETY ARGUMENT.** The installation token is tried
+        # first and always wins, so this is unreachable for any repository the App is installed
+        # on -- which is every customer. What is left is public repositories the live suite and
+        # the research bench read, where unauthenticated means 60 requests an hour and one suite
+        # run exhausts it.
+        public = load().public_read_token
+        if public:
+            return {"Authorization": f"Bearer {public}"}, "with the public-read token"
         return {}, f"unauthenticated ({exc.reason})"
 
 
