@@ -133,6 +133,18 @@ and D5 read what it records.
       output is a PROPOSED rule a human approves, not a published finding — a different risk
       profile entirely from the path that measured 66.7-82.1% wrong.
 
+- [ ] **D1e One definition, every repository.** "Define a standard once and it is checked on every
+      pull request across all repositories" is the actual enterprise claim, and a per-repo
+      `rules.toml` does not make it. Org-level rules live in a `.quantamind` repository the
+      installation owns; a repository's own file EXTENDS them and may tighten a severity, never
+      silently drop an inherited rule. **A dropped inheritance must appear in the audit trail**,
+      because a standard that can be disabled invisibly is not a standard.
+- [ ] **D1f Blocking, not just commenting.** The claim is that code meets standards *before a human
+      reviewer sees the pull request*. That requires a **required status check that fails**, not a
+      comment somebody may scroll past. **Only reproducible checks may block** — a `Provenance.MODEL`
+      verdict at our measured error rate must never hold somebody's merge, and the split already
+      exists on `Rule.reproducible`.
+
 **OPEN DECISION — which languages.** Python checks are free: `ast` is stdlib. JS/TS are not, and
 `AGENTS.md` states plainly that **tree-sitter is NOT a dependency** while `pyproject.toml` declares
 `dependencies = []`. Either the rules engine ships Python-only at first, or that constraint is
@@ -154,6 +166,12 @@ spent deliberately. It must not be spent by accident.
       question a parser answers exactly rather than a judgement a model guesses at.
 - [ ] **D2d Blast radius in the review.** "This module is imported by 14 others, two of them entry
       points." A new signal, testable against the same fix-return outcome the touch index uses.
+
+- [ ] **D2e Architectural drift, measured rather than asserted.** "Team members implement parts of
+      the system differently from the original design" is a claim about DIVERGENCE, and divergence
+      is measurable: the import graph plus rule violations over time, per module. We have the
+      history to do it retrospectively — `retrospective` already replays the ranker over a clone's
+      own past, which is the instrument for showing drift happened rather than saying it does.
 
 ### D3 — cross-repo, by declaration rather than discovery
 
@@ -218,9 +236,45 @@ where we cannot.
       have for banking and defence. Half B cannot be air-gapped without a local model. Cloud and
       on-prem are the same container; the difference is who runs it.
 
+- [ ] **D7d "Do you train on our code?" — No, and it is structurally true.** We fine-tune nothing
+      and there is no training pipeline to disable. With BYOK the call goes to the customer's own
+      model account under their terms, so the question stops being about our promises. **This is a
+      commitment we can keep because there is nothing to give up.**
+- [ ] **D7e SOC 2 Type II.** External, expensive, months of evidence collection, and no code we
+      can write substitutes for it. Recorded so nobody plans around its absence. **Until it
+      exists, say so** — a buyer discovering it mid-procurement costs more than the deal.
+- [ ] **D7f Three deployment shapes, one container.** Cloud (we run it), on-prem (they run the
+      same image), air-gapped (Half A only, no network beyond the clone). The image already
+      exists; what is missing is on-prem installation docs and an air-gapped mode that REFUSES to
+      make a network call rather than merely not making one — an outbound call that fails quietly
+      in a bank is a finding against us, not a bug.
+
 **The framing for all of Phase D:** build what the competitor sells, but with the thesis —
 deterministic where a parser can answer, provenance on every verdict, refusals returned rather
 than dropped, and no claim published that we cannot defend when someone checks it.
+
+### Traceability — every competitor claim, and where it is answered
+
+| their claim | ours |
+|---|---|
+| Centralised rules engine, defined once | D1a ✅, D1e (org-wide) |
+| Enforced on every PR, identically | D1b (deterministic), D1f (blocking) |
+| Learns rules from senior reviewers | D1d — the one model use where being wrong is cheap |
+| Evidence and audit trail | D4, and `Rule.reproducible` is what makes it worth reading |
+| Standards met before a human reviewer sees it | D1f + E1 (pre-PR, local) |
+| Duplicated code | D2c — normalised AST hashing, exact not guessed |
+| Breaking changes | D2b/D2d (blast radius), D3b (cross-repo) |
+| Harder maintenance / architectural drift | D2e — measured with `retrospective`, not asserted |
+| Deep codebase context, multi-repo | D2, D3 — **declared** links, not an org-wide crawl |
+| Catches hardcoded keys and passwords | D7a — deterministic. General vuln detection: **refused** |
+| Does not retain source | D7b — already PROVEN by `just verify`, not a policy |
+| Does not train on client code | D7d — structurally true; nothing to train |
+| SOC 2 Type II | D7e — absent, and said out loud |
+| Cloud / on-prem / air-gapped | D7f — Half A is air-gap-capable by construction |
+| IDE / shift left | Phase E |
+
+**What we deliberately do NOT copy:** the per-developer compliance scoreboard (D5), and any claim
+to general vulnerability detection (D7a). Both are things we could ship and could not defend.
 
 ## Phase E — shift left: review before the pull request exists
 
