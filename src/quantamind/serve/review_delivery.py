@@ -40,7 +40,6 @@ from pathlib import Path
 from quantamind.allocate.depth import Reading
 from quantamind.allocate.depth import plan as allocate
 from quantamind.infer.change_review import explain
-from quantamind.ingest import rules_file
 from quantamind.ingest.diff import base_commit, changed_files
 from quantamind.ingest.github_api import token_for
 from quantamind.ingest.github_reviews import publish
@@ -53,7 +52,7 @@ from quantamind.serve.working_clone import ensure, sweep
 from quantamind.store import tenancy
 from quantamind.types.deep import Deep
 from quantamind.types.settings import Settings
-from quantamind.verify.rule_check import check_change
+from quantamind.verify.rule_check import enforce
 
 
 class Outcome(enum.Enum):
@@ -120,6 +119,7 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     if swept:
         print(f"[deliver] removed {swept} stale clone(s)", flush=True)
 
+    store = tenancy.store_for(Path(settings.database_path), *delivery_repo.split("/", 1))
     changed = changed_files(delivery_repo, number)
     if not changed:
         return Delivered(Outcome.NO_FILES, (), (), None)
@@ -134,7 +134,7 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
         # under which each tenant gets its own file: the schema already separated them logically,
         # but a shared file means a shared blast radius and a shared SQLite writer lock, and
         # offboarding a customer means hand-written cascades across five tables instead of `rm`.
-        tenancy.store_for(Path(settings.database_path), *delivery_repo.split("/", 1)),
+        store,
         as_of=base.committed_at,
         # **Passed so the review is RECORDED.** Without these the ranking runs and leaves no row,
         # which is how `review` and `ranked_unit` sat in the schema with zero writers.
@@ -167,10 +167,7 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     # detector sat unreachable behind the reviewer until now. It needs no model and no ranking.
     # **THE DECLARED STANDARDS, CHECKED DETERMINISTICALLY.** These verdicts are reproducible on
     # the same commit by anyone, which is why they may be asserted where a model finding may not.
-    declared, unreadable = rules_file.read(clone)
-    if unreadable:
-        print(f"[deliver] {len(unreadable)} rule declaration(s) could not be read", flush=True)
-    checks = check_change(declared, clone, head_sha, list(changed)) if declared else ()
+    checks = enforce(clone, head_sha, list(changed), store, delivery_repo, number)
 
     mismatched, _unresolved = pin_check.check(clone, head_sha, changed)
     pins = block(mismatched)

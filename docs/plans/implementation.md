@@ -39,7 +39,7 @@ three months stale.
 | layer | modules | files |
 |---|---|---|
 | `types/` | **14** | `change.py`, `checked.py`, `commit.py`, `deep.py`, `env_values.py`, `finding.py`, `pooled_outcome.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `rule.py`, `settings.py`, `touch.py`, `verdict.py` |
-| `store/` | **9** | `calibration.py`, `deliveries.py`, `drift.py`, `lifecycle.py`, `migrations.py`, `reviews.py`, `schema.py`, `tenancy.py`, `touches.py` |
+| `store/` | **10** | `calibration.py`, `deliveries.py`, `drift.py`, `lifecycle.py`, `migrations.py`, `reviews.py`, `rule_checks.py`, `schema.py`, `tenancy.py`, `touches.py` |
 | `ingest/` | **15** | `app_auth.py`, `blob.py`, `change_shape.py`, `commits.py`, `diff.py`, `git_credentials.py`, `github_api.py`, `github_comments.py`, `github_reviews.py`, `google_auth.py`, `history.py`, `pull_refs.py`, `reachability.py`, `review_window.py`, `rules_file.py` |
 | `parse/` | **4** | `importers.py`, `languages.py`, `python_names.py`, `units.py` |
 | `rank/` | **6** | `baseline.py`, `events.py`, `firing.py`, `history_rates.py`, `order.py`, `score.py` |

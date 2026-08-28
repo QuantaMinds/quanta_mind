@@ -2512,3 +2512,35 @@ sections with "found by a parser" and "found by the model" — a developer decid
 line 90 does not act on which component produced it. `Rule.provenance`, `Checked` and the stored
 rows still carry it, which is where a compliance reader queries it. Rule violations still print
 first, because they are exact; the ordering says so without a paragraph explaining our internals.
+
+### The audit trail — `rule_check`, schema v5
+
+`verify/rule_check.py` produced one `Checked` per rule per file and nothing kept them. A compliance
+reader asking *"was this rule enforced on every pull request last quarter, and what did it say"* had
+no table to ask. That artefact is what a compliance team buys, and it is why D1b was built before
+D1c.
+
+**All four outcomes are stored, or the denominator is a guess.** A table holding only violations
+answers "did it fire", not "was it enforced" — and a rate computed from it is over whatever
+population the reader assumed. `passed`, `violated`, `uncheckable` and `deferred` all land.
+
+**`provenance` is the column that makes the trail worth reading**, and it is DERIVED from the rule
+rather than accepted from a caller. A parser's verdict can be re-run on the same commit and shown to
+agree; a model's cannot. A row that could declare itself parser-verified while a model decided it
+would make every other row worth what the least reliable row is worth.
+
+**Nothing is backfilled.** A review from before the rule engine existed has no rows, and inventing
+`passed` ones would manufacture a compliance history — precisely the artefact somebody might later
+show a regulator. An absent row means we did not check.
+
+**The schema guard drove the order and it was worth following.** It failed on the digest with the
+sequence spelled out: bump `SCHEMA_VERSION`, write the migration, **add the byte-level golden**, and
+only then update `RECORDED_DIGEST`. The golden diff was read by hand — 71 lines, all of them the new
+table and `__version__` 4 → 5. `test_schema_golden.py` hardcodes the migration steps `(3, 4, 5)` on
+purpose, so a schema bump forces somebody to look at the path from a real old store.
+
+**Applying a standard and recording that you applied it are one job.** `enforce()` does both, because
+separating them is how a trail comes to hold fewer checks than ran: the second half is easy to forget
+at a call site and impossible to notice afterwards, since a missing row and a check that never
+happened look identical. A recording failure does not take the review down — the comment is worth
+posting whether or not the trail accepted it — and the count is compared, never assumed.
