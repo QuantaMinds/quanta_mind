@@ -105,4 +105,15 @@ def test_settings_are_read_from_the_mapping_given_not_the_process() -> None:
     """Tests configure by argument. A test that mutates os.environ leaks into the next one."""
     settings = load({"QUANTAMIND_MAX_REQUESTS": "1", "QUANTAMIND_INFERENCE_ENABLED": "true"})
     assert settings.max_requests == 1
-    assert settings.runs_model is True
+    assert settings.runs_model is False, (
+        "inference is enabled and budgeted but no project is configured — a webhook cannot bill "
+        "a model to nothing, and `quantamind config` prints this line to an operator"
+    )
+    billed = load(
+        {
+            "QUANTAMIND_MAX_REQUESTS": "1",
+            "QUANTAMIND_INFERENCE_ENABLED": "true",
+            "QUANTAMIND_INFERENCE_PROJECT": "some-gcp-project",
+        }
+    )
+    assert billed.runs_model is True

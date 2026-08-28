@@ -2,9 +2,12 @@
 
 WHAT: `gate(finding, diff)` runs the external-fact oracles over a finding's claim and returns a
       `Ruling` saying whether it publishes, which oracle spoke, and what the authority said.
-WHY:  **THE ORACLES WERE BUILT AND MEASURED AND NEVER WIRED IN.** `serve/deep_review.py` keeps a
-      finding when a parser can locate its quote in the diff and nothing else, so a finding whose
-      quote is real and whose CLAIM is false about a fact GitHub or PyPI holds still publishes.
+WHY:  **THE ORACLES WERE BUILT AND MEASURED AND FOR A WHILE NOT WIRED IN.** `serve/deep_review.py`
+      kept a finding when a parser could locate its quote in the diff and nothing else, so a
+      finding whose quote was real and whose CLAIM was false about a fact GitHub or PyPI holds
+      still published. It has called `gate()` since `978bbda`; this paragraph went on describing
+      the gap for several commits after it closed, which is the same defect in prose — a docstring
+      asserting a state of the world that a reader has no way to check.
       Measured live: shown twelve real actions pinned to SHAs fetched from the API during the run,
       the reviewer objected to 6 of 12 CORRECT pin/tag pairings -- discrimination -8.3%, a coin
       flip -- and in 7 of 24 trials said a SHA did not exist that had just been fetched.

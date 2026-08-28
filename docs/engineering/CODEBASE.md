@@ -2159,3 +2159,42 @@ small-change mute each fail their own test.
 
 Nothing consumes this yet — wiring it into `serve/review_delivery.py` is A2 in
 `docs/plans/product/product-build.md`.
+
+### The webhook consults the model — A2, and what it costs
+
+`serve/review_delivery.deliver()` ranked, rendered and stopped. The model existed only behind the
+CLI's hidden `--deep <project>`, so a customer's pull request never reached it. `deliver()` now
+builds a `Reading` from `allocate/depth.plan()` and hands it to `serve/deep_review.examine()`.
+
+**Nothing costs money by default, and that takes two deliberate acts.** `Settings.runs_model` now
+requires `inference_enabled` **and** `inference_project` — the GCP project the calls are billed to,
+which the CLI took as an argument and a webhook has no way to receive. Either alone stays silent.
+`runs_model` gained the project because `quantamind config` prints it: a line reading
+`runs a model on a review: True` with nothing to bill would be this codebase's lying-banner defect
+in a smaller place.
+
+**Three outcomes that look identical from outside are three distinguishable values:**
+
+| situation | value |
+|---|---|
+| never asked | `examined is None` |
+| asked, unreachable | `Deep(consulted=False)` |
+| asked, nothing to say | `Deep(consulted=True)` with empty `anchored` |
+
+An outage returns a record rather than raising, so the ranking half still ships — it never needed
+the model — and rather than an empty success, so an outage cannot read like a clean review.
+Verified by sabotage: returning `consulted=True`, returning `None`, and dropping the project
+requirement each fail their own test in `tests/unit/layers/serve/test_examine_policy.py`.
+
+**The cost is bounded by the allocation, not by hope.** `reading.paths` is at most `FULL_CEILING`
+files, and `settings.max_requests` bounds the calls inside `deep()`.
+
+**A3 turned out to be already done, and a docstring said otherwise.** `verify/publishable.py`
+claimed the oracles "were built and measured and never wired in" — but `deep_review.deep()` has
+called `publishable.gate()` since `978bbda`. The prose went on describing a gap for several commits
+after it closed. The checklist item was written from that stale claim; the docstring now records
+both the gap and its closing, because a docstring asserting a state of the world a reader cannot
+check is the same defect this project chases in code.
+
+Findings are **not** rendered into the comment body yet. That is deliberate: the number worth
+knowing first is findings-per-pull-request, and A6 reads it before anything is published.

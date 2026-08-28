@@ -91,6 +91,8 @@ def render_config(settings: Settings) -> str:
         f"max_requests               {settings.max_requests}",
         f"threshold_percentile       {settings.threshold_percentile}",
         f"inference_enabled          {settings.inference_enabled}",
+        # Not a secret: a GCP project id identifies a billing target, it authorises nothing.
+        f"inference_project          {settings.inference_project or '(unset)'}",
         f"model                      {settings.model}",
         f"subprocess_timeout_seconds {settings.subprocess_timeout_seconds}",
         f"clone_root                 {settings.clone_root}",

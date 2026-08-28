@@ -23,11 +23,20 @@ worth selling.
       `UNRANKED` as `FOCUSED`, restoring the small-change mute). Nothing consumes it yet.
       Those eight included `tests/live/test_delivery_live.py` — the test covering the path A2
       changes — so A2 now lands verified rather than assumed.
-- [ ] **A2 Wire the model into the webhook.** `deep_review.deep()` is CLI-only today
-      (`--deep`, `argparse.SUPPRESS`); `serve/review_delivery.py` never calls it. Behind the
-      allocation, with a hard per-pull-request cost cap.
-- [ ] **A3 Wire `verify/publishable.gate()`** before anything publishes. Built and measured, never
-      connected — today a finding ships if a parser can place its quote and nothing else.
+- [x] **A2 Wire the model into the webhook.** `just verify` green, **42 passed, 0 skipped** —
+      including `test_delivery_live.py`, which covers the changed path. `deliver()` builds a
+      `Reading` and hands it to `deep_review.examine()`. **Nothing costs money by default:**
+      `runs_model` now requires `inference_enabled` AND `inference_project`, two deliberate acts,
+      and `config` reports it truthfully rather than claiming a model will run with nothing to
+      bill. Never-asked / unreachable / asked-and-silent are three distinguishable values
+      (`None`, `consulted=False`, empty `anchored`). Cost bounded by `FULL_CEILING` and
+      `max_requests`. Three sabotages caught; the weak `is None` assertions were replaced with a
+      spy proving no billed call happens.
+- [x] **A3 Wire `verify/publishable.gate()`** — **already done, and a docstring hid it.**
+      `deep_review.deep()` has called `gate()` since `978bbda`; `verify/publishable.py` went on
+      claiming the oracles were "never wired in" for several commits after the gap closed, and
+      this checklist item was written from that stale claim. The docstring now records both.
+      No code change was needed; the false statement was the defect.
 - [ ] **A4 Open the gate.** Replace the mute with depth so every reviewable pull request gets a
       comment. Rewrite — never delete — the tests that encode the old ~11% decision.
 - [ ] **A5 Record it.** Depth, cost and gate outcomes into the store; surfaced by

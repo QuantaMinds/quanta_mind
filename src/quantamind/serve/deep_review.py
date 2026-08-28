@@ -1,6 +1,8 @@
 """The reviewer pass: read the ranked files with a model, then keep only what a parser can anchor.
 
-WHAT: `deep(clone, sha, ranked, project)` runs `infer/` over the diff restricted to the files the
+WHAT: `examine(...)` is the delivery-facing entry point: it applies the allocation and the
+      settings policy, then calls `deep(clone, sha, ranked, project)`, which runs `infer/` over
+      the diff restricted to the files the
       ranker selected, then `verify/anchor.locate()` over every finding it returns. Reports what
       survived and what was dropped, and by which mechanism.
 WHY:  **THIS IS THE HALF THE EVIDENCE SAYS IS BAD, AND THE COUNTS ARE PRINTED FOR THAT REASON.**
@@ -34,6 +36,7 @@ from datetime import date
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from quantamind.allocate.depth import Reading
 from quantamind.infer import gemini
 from quantamind.infer.gemini import InferenceFailed, Unavailable
 from quantamind.ingest.change_shape import shape
@@ -42,6 +45,7 @@ from quantamind.render.deep_report import lines
 from quantamind.render.shape_line import block
 from quantamind.serve.settle import settle
 from quantamind.types.deep import Deep
+from quantamind.types.settings import Settings
 from quantamind.verify import publishable
 from quantamind.verify.anchor import locate
 
@@ -149,3 +153,31 @@ def report(clone: Path, sha: str, out: Reviewed, project: str) -> None:
     print("")
     for line in lines(result):
         print(line)
+
+
+def examine(
+    clone: Path, head_sha: str, reading: Reading, changed: list[str], settings: Settings
+) -> Deep | None:
+    """Run the model over what the allocation funded, or say plainly it was never asked.
+
+    **`None` IS NOT-CONSULTED, NOT A FINDING OF NOTHING.** `runs_model` needs inference enabled
+    AND a project to bill -- two deliberate acts, so no delivery costs money by default.
+
+    **AN OUTAGE RETURNS `consulted=False`, NOT AN EXCEPTION AND NOT SILENCE.** A model that could
+    not be reached must not read like one that read the diff and approved it. The ranking ships
+    regardless; it never needed the model. Cost is bounded by `reading.paths` (at most
+    `FULL_CEILING`) and by `settings.max_requests` inside.
+    """
+    if not settings.runs_model or not reading.paths:
+        return None
+    try:
+        return deep(
+            clone,
+            head_sha,
+            list(reading.paths),
+            project=settings.inference_project,
+            changed=changed,
+        )
+    except (InferenceFailed, Unavailable) as exc:
+        print(f"[deliver] the model was unreachable, ranking still stands: {exc}", flush=True)
+        return Deep((), 0, 0, 0, 0, tuple(reading.paths), consulted=False)

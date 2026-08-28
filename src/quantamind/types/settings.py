@@ -8,6 +8,7 @@ WHY:  No module reads the environment directly. A service that picks up configur
       startup failure with a name in it.
 IMPORTS: stdlib only (dataclasses, os). No project imports -- this must load before anything.
 CONSUMED BY: serve constructs it at startup and hands it down; nothing else reads os.environ.
+      `SettingsError` is re-exported from `types/env_values.py` so its callers are unchanged.
 """
 
 from __future__ import annotations
@@ -17,7 +18,19 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
-PREFIX = "QUANTAMIND_"
+from quantamind.types.env_values import (
+    PREFIX,
+    SettingsError,
+    read_bool,
+    read_float,
+    read_int,
+)
+
+# **RE-EXPORTED, NOT RELOCATED-AND-FORGOTTEN.** `SettingsError` moved to `types/env_values.py` when
+# this file hit the 200-line cap. Six modules import it from here, and the failure they catch has
+# not changed, so the name stays reachable where it has always been rather than editing every
+# `except` clause in the tree to chase a refactor.
+__all__ = ["DOTENV", "PREFIX", "Settings", "SettingsError", "from_file", "load"]
 
 # Three requests: a deep read of rank 1 at one pass, and one shallow read each for ranks 2
 # and 3. One pass at rank 1 is a decision, not a default -- at two passes allocation costs
@@ -27,15 +40,6 @@ DEFAULT_MAX_REQUESTS = 3
 # A top-decile rule fires on 10-12% of pull requests across an eighty-fold range of
 # repository velocity, where "twelve prior touches" fired on 11% of one and 53% of another.
 DEFAULT_THRESHOLD_PERCENTILE = 0.9
-
-
-class SettingsError(Exception):
-    """Raised when configuration is missing or unusable. Carries the variable name."""
-
-    def __init__(self, name: str, reason: str) -> None:
-        super().__init__(f"{PREFIX}{name}: {reason}")
-        self.name = name
-        self.reason = reason
 
 
 @dataclass(frozen=True, slots=True)
@@ -58,12 +62,17 @@ class Settings:
     """The GitHub App's numeric id. Public: it identifies the App, it authorises nothing."""
 
     public_read_token: str = ""
-    """A token used ONLY where we are NOT installed. Never a customer -- see `github_api`.
+    """Used ONLY where we are NOT installed, never a customer -- see `ingest/github_api`.
 
-    **UNAUTHENTICATED IS 60 REQUESTS AN HOUR AND ONE LIVE RUN EXHAUSTS IT.** App-only auth removed
-    public reads at any volume, and the live suite and research bench read public pull requests by
-    the thousand. `_authorization()` tries the installation token FIRST, so this is unreachable for
-    any repository the App is installed on. Empty by default: correct, and slow.
+    Unauthenticated is 60/hour and one live run exhausts it. The installation token is tried
+    FIRST, so this cannot reach a repository the App is installed on.
+    """
+
+    inference_project: str = ""
+    """The GCP project the model is billed to. Empty means the webhook runs NO inference.
+
+    The CLI takes it as `--deep <project>`; a webhook has no argv. Two deliberate acts before a
+    delivery costs anybody money, rather than one forgotten default.
     """
 
     app_key_path: str = ""
@@ -107,39 +116,9 @@ class Settings:
 
     @property
     def runs_model(self) -> bool:
-        return self.inference_enabled and self.max_requests > 0
-
-
-def _read_int(env: Mapping[str, str], name: str, fallback: int) -> int:
-    raw = env.get(PREFIX + name)
-    if raw is None:
-        return fallback
-    try:
-        return int(raw)
-    except ValueError as exc:
-        raise SettingsError(name, f"expected an integer, got {raw!r}") from exc
-
-
-def _read_float(env: Mapping[str, str], name: str, fallback: float) -> float:
-    raw = env.get(PREFIX + name)
-    if raw is None:
-        return fallback
-    try:
-        return float(raw)
-    except ValueError as exc:
-        raise SettingsError(name, f"expected a number, got {raw!r}") from exc
-
-
-def _read_bool(env: Mapping[str, str], name: str, fallback: bool) -> bool:
-    raw = env.get(PREFIX + name)
-    if raw is None:
-        return fallback
-    lowered = raw.strip().lower()
-    if lowered in ("1", "true", "yes", "on"):
-        return True
-    if lowered in ("0", "false", "no", "off"):
-        return False
-    raise SettingsError(name, f"expected a boolean, got {raw!r}")
+        """**AND THE PROJECT:** `quantamind config` prints this, and a banner here already
+        announced behaviour it did not have. Without a project the webhook cannot call a model."""
+        return self.inference_enabled and self.max_requests > 0 and bool(self.inference_project)
 
 
 def from_file(path: Path) -> dict[str, str]:
@@ -182,16 +161,17 @@ def load(env: Mapping[str, str] | None = None) -> Settings:
     source: Mapping[str, str] = {**from_file(DOTENV), **os.environ} if env is None else env
     return Settings(
         database_path=source.get(PREFIX + "DATABASE_PATH", "quantamind.db"),
-        max_requests=_read_int(source, "MAX_REQUESTS", DEFAULT_MAX_REQUESTS),
-        threshold_percentile=_read_float(
+        max_requests=read_int(source, "MAX_REQUESTS", DEFAULT_MAX_REQUESTS),
+        threshold_percentile=read_float(
             source, "THRESHOLD_PERCENTILE", DEFAULT_THRESHOLD_PERCENTILE
         ),
-        inference_enabled=_read_bool(source, "INFERENCE_ENABLED", False),
+        inference_enabled=read_bool(source, "INFERENCE_ENABLED", False),
         model=source.get(PREFIX + "MODEL", "claude-opus-5"),
-        subprocess_timeout_seconds=_read_int(source, "SUBPROCESS_TIMEOUT_SECONDS", 30),
+        subprocess_timeout_seconds=read_int(source, "SUBPROCESS_TIMEOUT_SECONDS", 30),
         clone_root=source.get(PREFIX + "CLONE_ROOT", ".quantamind-clones"),
-        posting_enabled=_read_bool(source, "POSTING_ENABLED", False),
+        posting_enabled=read_bool(source, "POSTING_ENABLED", False),
         app_id=source.get(PREFIX + "APP_ID", ""),
         app_key_path=source.get(PREFIX + "APP_KEY_PATH", ""),
         public_read_token=source.get(PREFIX + "PUBLIC_READ_TOKEN", ""),
+        inference_project=source.get(PREFIX + "INFERENCE_PROJECT", ""),
     )

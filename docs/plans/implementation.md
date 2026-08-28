@@ -38,7 +38,7 @@ three months stale.
 
 | layer | modules | files |
 |---|---|---|
-| `types/` | **11** | `change.py`, `commit.py`, `deep.py`, `finding.py`, `pooled_outcome.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `settings.py`, `touch.py`, `verdict.py` |
+| `types/` | **12** | `change.py`, `commit.py`, `deep.py`, `env_values.py`, `finding.py`, `pooled_outcome.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `settings.py`, `touch.py`, `verdict.py` |
 | `store/` | **9** | `calibration.py`, `deliveries.py`, `drift.py`, `lifecycle.py`, `migrations.py`, `reviews.py`, `schema.py`, `tenancy.py`, `touches.py` |
 | `ingest/` | **11** | `app_auth.py`, `change_shape.py`, `commits.py`, `diff.py`, `git_credentials.py`, `github_api.py`, `github_comments.py`, `history.py`, `pull_refs.py`, `reachability.py`, `review_window.py` |
 | `parse/` | **2** | `languages.py`, `units.py` |
