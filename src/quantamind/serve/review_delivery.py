@@ -43,7 +43,7 @@ from quantamind.infer.change_review import explain
 from quantamind.ingest import rules_file
 from quantamind.ingest.diff import base_commit, changed_files
 from quantamind.ingest.github_api import token_for
-from quantamind.ingest.github_comments import post
+from quantamind.ingest.github_reviews import publish
 from quantamind.render.comment import comment as rendered
 from quantamind.render.pin_block import block
 from quantamind.serve import pin_check
@@ -188,7 +188,7 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
             Outcome.REHEARSED, reviewed.considered, reviewed.skipped, body, reading, examined
         )
 
-    wrote = post(delivery_repo, number, head_sha, body)
+    wrote = publish(delivery_repo, number, head_sha, body, kept)
     return Delivered(
         Outcome.POSTED if wrote else Outcome.DUPLICATE,
         reviewed.considered,

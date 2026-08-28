@@ -140,15 +140,13 @@ def comment(
     # to each, and who imports them. A reader who cannot tell which half they are trusting is
     # being asked to trust both equally, and only one of them can be re-run on the same commit.
     if ranking.units:
-        lines.append("**Facts** — from git and a parser, not from a model")
-        lines.append(f"- {len(ranking.units)} file(s) touched")
+        lines.append(f"{len(ranking.units)} file(s) touched.")
         busiest = sorted(ranking.units, key=lambda u: -u.score.value)[:MAX_DEPENDENTS]
         for unit in busiest:
             fixes = int(unit.score.value)
-            been = f"{fixes} later fix(es) have returned here" if fixes else "no prior fixes here"
-            lines.append(f"  - `{unit.unit.qualified_name}` — {been}")
-        if summary is not None and summary.dependents:
-            lines.append(f"- {len(summary.dependents)} file(s) statically import this code")
+            been = f"{fixes} later fix(es) have returned to it" if fixes else "no prior fixes"
+            lines.append(f"- `{unit.unit.qualified_name}` — {been}")
+
         # **THE DENOMINATOR MOVED HERE WHEN THE RULE SECTION WAS FOLDED INTO "FOUND".** Only
         # violations are listed there, and a list of violations with no count behind it invites
         # the reader to assume everything else was checked and passed. Undecided rows are the
@@ -156,8 +154,8 @@ def comment(
         if checks:
             decided = sum(1 for c in checks if c.counts_toward_compliance)
             undecided = len(checks) - decided
-            tail = f", {undecided} could not be decided" if undecided else ""
-            lines.append(f"- {decided} declared rule check(s) decided{tail}")
+            tail = f", {undecided} could not be checked" if undecided else ""
+            lines.append(f"- {decided} declared rule(s) checked{tail}")
         lines.append("")
 
     lines.append(NOT_CHECKED)

@@ -2,17 +2,20 @@
 
 WHAT: `found(checks, findings)` renders the defects section: rule violations first, model findings
       second, each labelled by what produced it. Empty string when there is nothing to report.
-WHY:  **A REVIEWER MUST BE ABLE TO TELL WHICH HALF THEY ARE TRUSTING.** A rule violation is a fact
-      about the syntax tree: the call is there or it is not, and anyone can re-run the check on the
-      same commit and get the same answer. A model finding is a reading, and four blind pools put
-      raw ones 66.7-82.1% wrong. Printing them in one undifferentiated list would average the
-      credibility of both down to the weaker, and it is the parser half that makes an audit trail
-      worth keeping.
+WHY:  **THE PROVENANCE SPLIT MOVED TO THE AUDIT TRAIL, IT WAS NOT DROPPED.** This printed two
+      headed sections — "found by a parser, these are facts" and "found by the model, a reading" —
+      because a rule violation is re-runnable and a model finding is not. That distinction is real
+      and still lives where it is used: `Rule.provenance`, `Checked`, and the rows a compliance
+      reader queries. It left the COMMENT because a developer deciding whether to look at line 84
+      does not act on which of our components produced the line, and a heading explaining our
+      internals is the thing they scroll past.
 
-      **"NOTHING FOUND" IS PRINTED ONLY FOR THE HALF THAT LOOKED.** A repository declaring no rules
-      gets no rule section at all, because "no violations" would imply rules existed to violate.
-      Silence about a check that never ran is the failure this product exists to refuse, and it is
-      cheapest to make impossible here, in the renderer.
+      **RULE VIOLATIONS STILL COME FIRST**, without saying why: they are exact, so they are the
+      ones worth reading first, and ordering carries that without a paragraph about it.
+
+      **A REPOSITORY THAT DECLARED NO RULES STILL GETS NO RULE LINES.** "No violations" would imply
+      rules existed to violate, and silence about a check that never ran is the failure this
+      product refuses. The renderer is the cheapest place to make that impossible.
 IMPORTS: types.{checked,finding}. Nothing to its right.
 CONSUMED BY: `render/comment.py`.
 """
@@ -24,8 +27,7 @@ from collections.abc import Sequence
 from quantamind.types.checked import Checked, Outcome
 from quantamind.types.finding import Finding
 
-PARSER = "**Found by a parser** — re-runnable on this commit, so these are facts"
-MODEL = "**Found by the model** — a reading, not a fact; check before acting"
+WORTH_CHECKING = "**Worth checking**"
 
 
 def _where(path: str, line: int) -> str:
@@ -38,14 +40,12 @@ def found(checks: Sequence[Checked] = (), findings: Sequence[Finding] = ()) -> s
     if not violations and not findings:
         return ""
 
-    lines: list[str] = []
-    if violations:
-        lines += ["", PARSER, ""]
-        lines += [
-            f"- {_where(v.site.path, v.site.line)} — `{v.rule_id}`: {v.evidence}"
-            for v in violations
-        ]
-    if findings:
-        lines += ["", MODEL, ""]
-        lines += [f"- {_where(f.path, f.line)} — {f.claim}" for f in findings]
+    lines: list[str] = ["", WORTH_CHECKING, ""]
+    # Exact checks first: they are the ones that cannot be wrong, and the ordering says so
+    # without a heading that explains our machinery to somebody who did not ask.
+    lines += [
+        f"- {_where(v.site.path, v.site.line)} — {v.rule_id.replace('-', ' ')}: {v.evidence}"
+        for v in violations
+    ]
+    lines += [f"- {_where(f.path, f.line)} — {f.claim}" for f in findings]
     return "\n".join(lines)

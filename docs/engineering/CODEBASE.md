@@ -2485,3 +2485,30 @@ unknown rendered as reassurance is a clean bill of health for a check that never
 weaker one is what makes an audit trail worthless, and the parser half is the half worth keeping.
 A repository declaring no rules gets no rule section at all — "no violations" would imply rules
 existed to violate.
+
+### Findings land on the line — `ingest/github_reviews.py`
+
+A line number inside a summary is a reference; a review comment is on the code. `publish()` posts a
+single pull-request review with each finding anchored to its file and line, so the developer reading
+the Files-changed tab sees the claim beside the line rather than scrolling to a comment and back.
+
+**One review, not N comments.** Posting each finding separately floods the timeline and notifies the
+author once per line. A single `COMMENT` review reads as one act, which is what a human does.
+
+**`event: COMMENT`, never `REQUEST_CHANGES`.** Blocking a merge on a model's reading is a claim the
+evidence does not support at 66.7–82.1% wrong. Blocking belongs to the deterministic rule checks,
+and it is a separate decision.
+
+**An unplaceable finding is returned, never dropped.** GitHub answers 422 when a comment names a
+line outside the diff, and it refuses the *whole call* if any single one is out of range. So the
+review retries with the body alone and **every finding comes back to the caller** to be folded into
+the summary. A finding silently lost would leave a review that looks complete and is quietly
+narrower. An empty return means all were placed — never that none were tried. Three sabotages
+confirm it: dropping the unplaceable ones, skipping the retry, and swallowing unrelated failures
+each fail their own test.
+
+**The provenance labels left the comment and stayed in the data.** The body no longer heads two
+sections with "found by a parser" and "found by the model" — a developer deciding whether to look at
+line 90 does not act on which component produced it. `Rule.provenance`, `Checked` and the stored
+rows still carry it, which is where a compliance reader queries it. Rule violations still print
+first, because they are exact; the ordering says so without a paragraph explaining our internals.
