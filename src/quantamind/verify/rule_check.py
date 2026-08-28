@@ -31,8 +31,8 @@ import re
 from collections.abc import Sequence
 from pathlib import Path
 
-from quantamind.ingest import rules_file
 from quantamind.ingest.blob import at
+from quantamind.ingest.standards import rules_file
 from quantamind.parse.python_names import Mention, Names, UnparseableSource, names_in
 from quantamind.store.rule_checks import persist
 from quantamind.types.change import Language, language_of

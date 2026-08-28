@@ -185,6 +185,17 @@ and D5 read what it records.
 - [ ] **D1c Model-checked rules, clearly separated.** For rules a parser genuinely cannot answer.
       Each result carries `Provenance.PARSER` or `Provenance.MODEL` so an auditor can see which
       claims are reproducible. **They must never render alike.**
+- [x] **D1g The team's OWN written standards, read and enforced.** `ingest/conventions.py` reads
+      `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.github/copilot-instructions.md`, `CONVENTIONS.md`  <!-- citation:allow — these are filenames `ingest/standards/conventions.py` SEARCHES FOR in a customer's repository, not documents in this one -->
+      and `CONTRIBUTING.md` from git at the commit under review, and the review names any rule the
+      change contradicts — quoting the customer's own sentence. **A team that wrote its rules down
+      should not have to write them again for us**, and `.quantamind/rules.toml` asking them to
+      restate the same standards creates two documents that drift.
+      **Context, not enforcement:** prose cannot be re-run on a commit and shown to give the same
+      verdict, so nothing read here becomes a `Checked` row or enters the audit trail — that stays
+      the parser's territory. Known-answer tested: a diff with a bare `except` and no docstring was
+      caught against this repository's own rule 8. **A local-only file this repo never pushes is
+      invisible to it**, because the reviewer reads the clone.
 - [ ] **D1d Mine rules from past review comments.** Senior engineers repeat themselves, and the
       repetition IS the standard. **This is the one model use where being wrong is cheap:** the
       output is a PROPOSED rule a human approves, not a published finding — a different risk

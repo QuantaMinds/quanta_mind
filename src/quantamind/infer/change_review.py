@@ -28,6 +28,7 @@ from pathlib import Path
 from quantamind.infer.change_summary import Summary, summarise
 from quantamind.infer.gemini import InferenceFailed, Unavailable
 from quantamind.ingest.diff import DiffReadFailed, stated_goal, unified_diff
+from quantamind.ingest.standards.conventions import written
 from quantamind.parse.importers import importers
 from quantamind.types.settings import Settings
 
@@ -67,6 +68,7 @@ def explain(
             project=settings.inference_project,
             importers=sorted(set(callers)),
             history=history,
+            conventions=written(clone, head_sha),
             gcloud=settings.gcloud_path,
         )
     except (InferenceFailed, Unavailable, DiffReadFailed) as exc:

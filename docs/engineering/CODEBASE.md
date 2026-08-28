@@ -2592,3 +2592,33 @@ clean compliance sheet for a repository we could not read at all.
 
 **Sabotage found the missing test, not review.** Breaking that refusal path passed all twelve tests;
 only deliberately reverting it revealed there was no test for it. The thirteenth was written then.
+
+### `ingest/standards/` — the two places a repository states what it holds itself to
+
+| module | what it owns | what it must not do |
+|---|---|---|
+| `rules_file.py` | rules a customer declares FOR us in `.quantamind/rules.toml`, in a form a parser enforces and the audit trail records | never accept a malformed declaration silently, and never let "no rules" and "unreadable rules" be the same answer |
+| `conventions.py` | what the team already wrote for itself — `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.github/copilot-instructions.md`, `CONVENTIONS.md`, `CONTRIBUTING.md` |  <!-- citation:allow — these are filenames `ingest/standards/conventions.py` SEARCHES FOR in a customer's repository, not documents in this one --> never produce a `Checked` row: prose cannot be re-run on a commit, so it is context and must not enter the audit trail |
+
+**A team that wrote its rules down should not have to write them again for us.** Asking a customer
+to restate documented standards in a second format creates two documents that drift, and the one
+they maintain is the one they wrote for themselves. The review now quotes their own sentence back:
+*"⚠️ Breaks a rule you wrote down — the new file violates the rule that 'Every file opens with a
+docstring'."*
+
+**Known-answer tested rather than assumed.** A synthetic diff with a bare `except` and no docstring
+was checked against this repository's own `AGENTS.md`, and the violation it named is rule 8. Without
+that test, "no convention contradicted" would have been indistinguishable from a feature that never
+ran — the failure this codebase keeps finding.
+
+**Both are read from git at the commit under review**, not from a working tree that does not exist,
+and not from the default branch: a change that EDITS the conventions must be judged against the
+version it proposes.
+
+**Bounded at 6,000 characters each.** At 12,000 the two documents in this repository alone pushed a
+real review to `MAX_TOKENS` — a convention file competes with the diff for the same budget, and the
+diff is the thing being reviewed. The truncation is stated in the text, so a review can never claim
+it considered a document it only half read.
+
+**A local-only file the repository never pushes is invisible to this.** The reviewer reads the
+clone; a rule that exists solely on somebody's laptop cannot be enforced by anything.

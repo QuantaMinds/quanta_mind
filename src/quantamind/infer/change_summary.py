@@ -30,41 +30,10 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
 from quantamind.infer import gemini
+from quantamind.infer.summary_prompt import PROMPT
 from quantamind.ingest.diff import Stated
 
 MAX_DIFF_CHARS = 60_000
-PROMPT = """FACTS. Each block below is measured, not opinion. Do not restate them.
-
-[PR_DESCRIPTION]
-{goal}
-
-[FILES_TOUCHED]
-{files}
-
-[PRIOR_FIXES] number of later commits that returned to each file
-{history}
-
-[STATIC_IMPORTERS] files whose Python imports resolve to the changed modules
-{importers}
-
-[DIFF]
-{diff}
-
-TASK. Answer only from the facts above. Reply with ONLY a JSON object, no markdown fence:
-{{
-  "what_changed": "one or two sentences, plain words, naming the function or file",
-  "achieves_goal": true | false | null,
-  "reasoning": "one sentence; if false name what is missing or contradicted",
-  "impact": "one sentence on the files in STATIC_IMPORTERS",
-  "breaks": true | false | null,
-  "breaks_why": "one sentence; if true name what breaks and for whom"
-}}
-
-achieves_goal is null when PR_DESCRIPTION is empty or states no purpose.
-breaks is true when the diff shows something that fails for a file in STATIC_IMPORTERS: a changed
-signature, a removed name, an altered return. It is false when those files are checked and the
-change is additive or internal. It is null when the deciding fact is absent from the blocks above.
-"""
 
 
 @dataclass(frozen=True, slots=True)
@@ -87,6 +56,14 @@ class Summary:
     """
 
     breaks_why: str = ""
+
+    convention: str = ""
+    """A rule from the team's own documents that this change contradicts. Empty when none is.
+
+    **CONTEXT, NOT ENFORCEMENT.** Prose cannot be re-run on a commit and shown to give the same
+    verdict, so this never becomes a `Checked` row and never enters the audit trail — that stays
+    the parser's territory. What it can do is point a reader at a sentence they wrote themselves.
+    """
 
     goal: str = ""
     """**THE PR DESCRIPTION, VERBATIM. A FACT, NOT A READING.**
@@ -118,6 +95,7 @@ def summarise(
     project: str,
     importers: Sequence[str] = (),
     history: Mapping[str, int] | None = None,
+    conventions: Sequence[tuple[str, str]] = (),
     gcloud: str = "gcloud",
     location: str = "us-central1",
 ) -> Summary:
@@ -137,6 +115,9 @@ def summarise(
     imports = "\n".join(f"- {name}" for name in importers) or (
         "(no static Python import of these files was found anywhere in the repository)"
     )
+    told_us = "\n\n".join(f"--- {name} ---\n{text}" for name, text in conventions) or (
+        "(this repository keeps no convention document we recognise)"
+    )
     past = "\n".join(f"- {p}: {n} prior fix(es)" for p, n in sorted((history or {}).items())) or (
         "(no fix history for these files in this repository)"
     )
@@ -155,12 +136,17 @@ def summarise(
                                 files=touched,
                                 importers=imports,
                                 history=past,
+                                conventions=told_us,
                             )
                         }
                     ],
                 }
             ],
-            "generationConfig": {"temperature": 0.0, "maxOutputTokens": 2048},
+            # **RAISED FROM 2048 WHEN CONVENTIONS ENTERED THE PROMPT.** The reply is six short
+            # fields, but the model's own reasoning counts against this budget, and a larger
+            # input buys longer thinking. It failed as MAX_TOKENS rather than returning half a
+            # review, which is `gemini._post`'s existing refusal working as designed.
+            "generationConfig": {"temperature": 0.0, "maxOutputTokens": 8192},
         },
     )
     candidates = answer.get("candidates")
@@ -184,4 +170,5 @@ def summarise(
         impact=str(payload.get("impact", "")).strip(),
         breaks=payload.get("breaks") if isinstance(payload.get("breaks"), bool) else None,
         breaks_why=str(payload.get("breaks_why", "")).strip(),
+        convention=str(payload.get("convention", "")).strip(),
     )

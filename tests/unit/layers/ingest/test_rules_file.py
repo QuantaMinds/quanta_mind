@@ -20,7 +20,7 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
-from quantamind.ingest.rules_file import RULES_PATH, read
+from quantamind.ingest.standards.rules_file import RULES_PATH, read
 from quantamind.types.rule import CheckKind, Severity
 from quantamind.types.verdict import Provenance, Reason
 

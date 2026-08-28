@@ -62,6 +62,8 @@ class Stated(Protocol):
     def dependents(self) -> tuple[str, ...]: ...
     @property
     def goal(self) -> str: ...
+    @property
+    def convention(self) -> str: ...
 
 
 def _goal(summary: Stated) -> list[str]:
@@ -83,6 +85,11 @@ def _goal(summary: Stated) -> list[str]:
     else:
         breaks = "**Cannot tell**"
     said.append(f"**Will it break anything?** {breaks} — {summary.breaks_why}")
+    # **THEIR OWN WORDS, NOT OURS, AND IT LEADS.** A reviewer can check this against a document
+    # they wrote, in one click — a different kind of claim from anything else here, and the one
+    # most likely to be acted on. It sits above the break verdict for that reason.
+    if summary.convention:
+        said.insert(0, f"⚠️ **Breaks a rule you wrote down** — {summary.convention}")
     # **A COUNT AND NAMES, BECAUSE A PARSER PRODUCED THEM.** The sentences above are a model's
     # reading; this line is `parse/importers` output, re-runnable on the same commit by anyone.
     # It is stated separately so a reader can tell which of the two they are trusting.
