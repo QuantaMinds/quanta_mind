@@ -44,11 +44,11 @@ from quantamind.render.comment import comment as rendered
 from quantamind.render.pin_block import block
 from quantamind.serve import pin_check
 from quantamind.serve.deep_review import examine
-from quantamind.serve.delivery.outcome import Delivered, Outcome
 from quantamind.serve.run_review import review as run_ranking
 from quantamind.serve.working_clone import ensure, sweep
 from quantamind.store import tenancy
 from quantamind.store.reviews import bank
+from quantamind.types.review import Delivered, Outcome
 from quantamind.types.settings import Settings
 from quantamind.types.spend import Spend
 from quantamind.verify.rule_check import enforce
@@ -152,7 +152,7 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
 
     if reviewed.body is None and not pins:
         quiet = Outcome.NO_READABLE_FILES if not reviewed.considered else Outcome.NOTHING_TO_SAY
-        return Delivered(quiet, reviewed.considered, reviewed.skipped, None, reading, examined)
+        return Delivered(quiet, reviewed.considered, reviewed.skipped, None)
 
     kept = examined.anchored if examined is not None else ()
     fuller = rendered(
@@ -161,9 +161,7 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     body = (fuller if told is not None or kept or checks else (reviewed.body or "")) + pins
 
     if not settings.posting_enabled:
-        return Delivered(
-            Outcome.REHEARSED, reviewed.considered, reviewed.skipped, body, reading, examined
-        )
+        return Delivered(Outcome.REHEARSED, reviewed.considered, reviewed.skipped, body)
 
     wrote = publish(delivery_repo, number, head_sha, body, kept)
     return Delivered(
@@ -171,6 +169,4 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
         reviewed.considered,
         reviewed.skipped,
         reviewed.body,
-        reading,
-        examined,
     )

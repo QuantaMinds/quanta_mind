@@ -1,6 +1,11 @@
 """What one review cost, in the units a bill is written in.
 
 WHAT: `Spend(requests, tokens_in, tokens_out, ms)` and `plus()` to add two together.
+      **THIS ABSORBED `RequestLedger`, WHICH MEANT THE SAME THING.** That type carried requests,
+      tokens in and tokens out and was read only by the budget gate; this one was written without
+      noticing it. Two types for one idea is how two numbers come to disagree about one review, so
+      there is now one — with `within()` moved across, and `ms` and `complete` added.
+
 WHY:  **THE COLUMNS FOR THIS HAVE EXISTED SINCE THE SCHEMA WAS WRITTEN AND NOTHING EVER WROTE
       THEM.** `review.request_count`, `tokens_in`, `tokens_out` and `latency_ms` have sat at their
       defaults through every delivery — the same "tables with zero writers" defect this codebase
@@ -27,6 +32,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from quantamind.types.ranking import Budget
+
 
 @dataclass(frozen=True, slots=True)
 class Spend:
@@ -36,6 +43,9 @@ class Spend:
     tokens_in: int = 0
     tokens_out: int = 0
     ms: int = 0
+    cache_read_tokens: int = 0
+    """Tokens served from cache. Cheaper, still real, and counted apart so they can be seen."""
+
     complete: bool = True
     """False when some call in this review was not metered, making the total a FLOOR.
 
@@ -47,7 +57,7 @@ class Spend:
     """
 
     def __post_init__(self) -> None:
-        for name in ("requests", "tokens_in", "tokens_out", "ms"):
+        for name in ("requests", "tokens_in", "tokens_out", "ms", "cache_read_tokens"):
             if getattr(self, name) < 0:
                 raise ValueError(f"Spend.{name} is negative: a cost cannot be refunded here")
         if self.requests == 0 and (self.tokens_in or self.tokens_out):
@@ -56,6 +66,21 @@ class Spend:
                 "the count that reaches a dashboard would then disagree"
             )
 
+    def within(self, budget: Budget) -> bool:
+        """Whether this review stayed inside its request ceiling."""
+        return self.requests <= budget.max_requests
+
+    @property
+    def used_cache(self) -> bool:
+        """False after a multi-request review means the prompt prefix is not caching.
+
+        A persistent zero here with more than one request is the signature of an invalidator in
+        the cached prefix -- a clock, a request id -- which produces no error and simply costs full
+        price on every call. **It came across with `RequestLedger` and was nearly lost in the
+        merge; a test caught it**, which is the only reason this paragraph still exists.
+        """
+        return self.cache_read_tokens > 0
+
     def plus(self, other: Spend) -> Spend:
         """Two calls, added. A review makes several and pays for all of them."""
         return Spend(
@@ -63,6 +88,7 @@ class Spend:
             self.tokens_in + other.tokens_in,
             self.tokens_out + other.tokens_out,
             self.ms + other.ms,
+            self.cache_read_tokens + other.cache_read_tokens,
             # Incomplete is contagious: a total containing one unmetered call is itself a floor.
             self.complete and other.complete,
         )

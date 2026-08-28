@@ -2719,7 +2719,22 @@ mis-reading a renamed field.
 model pass; the collision shadowed silently until the call failed at runtime. It is aliased now —
 the same defect rule 13 is about, in an import rather than a file.
 
-### `serve/delivery/` — what a delivery produced, apart from the code that produces it
+### `serve/delivery/` — deleted, because the reason for it was two fields nobody read
+
+**This subpackage existed for about an hour and should never have.** `Delivered` carried `reading`
+and `examined`, which pulled a dependency on `allocate` — to the right of `types` — so rule 7 pushed
+the type out of the layer it belongs to, and a subpackage under `serve/` was built to hold it.
+
+Both fields were **written on every delivery and read by nothing**: a table with no writers, seen
+from the other end. Deleting them removed the dependency, the subpackage, and the reason for both.
+`Outcome` and `Delivered` live in `types/review.py`, where the guard pointed in the first place.
+
+**The lesson is about which of the guard's two suggestions to take.** It offered "move the shared
+type into `quantamind.types`, or invert the dependency". The second was cheaper and produced a
+package that existed to route around a rule; the first required asking whether the dependency was
+needed at all, and it was not.
+
+### What `serve/delivery/` used to hold
 
 `review_delivery.py` outgrew one file: it clones, ranks, allocates, consults a model, enforces
 rules, banks a cost, renders and posts. The **result** of all that is a separate concern from the
@@ -2752,3 +2767,13 @@ which reports no usage. `record_spend` **refuses to write an incomplete spend** 
 it down: a floor written as a total would put a quietly low number on a dashboard and get priced
 from. Incompleteness is contagious through `plus()`, because a total containing one unmetered call
 is itself a floor.
+
+### `Spend` absorbed `RequestLedger`, which meant the same thing
+
+`types/review.RequestLedger` carried `requests`, `tokens_in`, `tokens_out` and `cache_read_tokens`,
+and was read by the budget gate. `types/spend.Spend` was written days later without noticing it.
+
+**Two types for one idea is how two numbers come to disagree about one review.** They are now one:
+`within()` and `used_cache` moved across, `ms` and `complete` came from `Spend`. `used_cache` was
+nearly lost in the merge — a test caught it, and its paragraph about an invalidator in the cached
+prefix survives only because of that.
