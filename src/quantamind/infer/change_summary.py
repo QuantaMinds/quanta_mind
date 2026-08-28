@@ -27,11 +27,12 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from quantamind.infer import gemini
 from quantamind.infer.summary_prompt import PROMPT
 from quantamind.ingest.diff import Stated
+from quantamind.types.spend import Spend, measured
 
 # **CUT FROM 60,000 WHEN A REAL 27-FILE DELIVERY HIT MAX_TOKENS.** The diff shares the prompt
 # with the conventions and the fact blocks, and a review that fails is worth less than a
@@ -61,6 +62,9 @@ class Summary:
     breaks_why: str = ""
 
     convention: str = ""
+
+    spend: Spend = field(default_factory=Spend)
+    """What producing this summary cost. Added to the deep pass by the caller."""
     """A rule from the team's own documents that this change contradicts. Empty when none is.
 
     **CONTEXT, NOT ENFORCEMENT.** Prose cannot be re-run on a commit and shown to give the same
@@ -158,6 +162,7 @@ def summarise(
     first = candidates[0]
     if first.get("finishReason") != "STOP":
         raise gemini.InferenceFailed(f"finishReason {first.get('finishReason')!r}, not STOP")
+    elapsed = answer.get("_ms", 0)
     text = str(first.get("content", {}).get("parts", [{}])[0].get("text", "")).strip()
     text = text.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
     try:
@@ -174,4 +179,5 @@ def summarise(
         breaks=payload.get("breaks") if isinstance(payload.get("breaks"), bool) else None,
         breaks_why=str(payload.get("breaks_why", "")).strip(),
         convention=str(payload.get("convention", "")).strip(),
+        spend=measured(answer, elapsed if isinstance(elapsed, int) else 0),
     )

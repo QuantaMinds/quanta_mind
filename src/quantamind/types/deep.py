@@ -17,9 +17,10 @@ CONSUMED BY: `serve/deep_review.py` produces it, `render/deep_report.py` prints 
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from quantamind.types.finding import Finding
+from quantamind.types.spend import Spend
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,6 +47,9 @@ class Deep:
     """The files the model was actually shown."""
 
     consulted: bool = True
+
+    spend: Spend = field(default_factory=Spend)
+    """What this pass cost. `complete=False` means some call in it was not metered."""
     """Whether the model was asked at all.
 
     **`raw = 0` BECAUSE THERE WAS NO DIFF AND `raw = 0` BECAUSE THE MODEL FOUND NOTHING MUST NOT

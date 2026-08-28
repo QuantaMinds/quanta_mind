@@ -29,8 +29,12 @@ from __future__ import annotations
 
 import sqlite3
 from dataclasses import dataclass
+from pathlib import Path
 
+from quantamind.store import schema, touches
+from quantamind.store.schema import SchemaVersionMismatch
 from quantamind.types.ranking import Ranking
+from quantamind.types.spend import Spend
 
 
 @dataclass(frozen=True, slots=True)
@@ -108,3 +112,67 @@ def recent(conn: sqlite3.Connection, repo_id: int, limit: int = 50) -> list[Reco
         Recorded(int(a), int(b), str(c), int(d), bool(e), int(f), int(g))
         for a, b, c, d, e, f, g in rows
     ]
+
+
+def record_spend(conn: sqlite3.Connection, review_id: int, spend: Spend) -> bool:
+    """Write what a review cost onto its row. True when a row was updated.
+
+    **THESE COLUMNS HAVE EXISTED SINCE THE SCHEMA WAS WRITTEN AND NOTHING EVER WROTE THEM.**
+    `request_count`, `tokens_in`, `tokens_out` and `latency_ms` sat at their defaults through every
+    delivery — the same "tables with zero writers" defect this file already carries a comment
+    about, one column deeper. Until they are written, every pricing decision is arithmetic over a
+    number nobody has measured.
+
+    **AN UNMEASURED CALL IS NOT WRITTEN AS ZERO.** `Spend.complete` is False when part of the
+    review went unmetered, and a floor recorded as a total would put a quietly low number on a
+    dashboard and price from it. An incomplete spend is refused here rather than rounded down; the
+    caller logs it. **Returning a boolean rather than nothing** is what lets a caller notice.
+    """
+    if spend.requests == 0:
+        return False
+    if not spend.complete:
+        print(
+            f"[store] review {review_id}: cost not recorded — part of it was never metered, and a "
+            f"floor written as a total would be priced from",
+            flush=True,
+        )
+        return False
+    conn.execute(
+        "UPDATE review SET request_count = ?, tokens_in = ?, tokens_out = ?, latency_ms = ? "
+        "WHERE id = ?",
+        (spend.requests, spend.tokens_in, spend.tokens_out, spend.ms, review_id),
+    )
+    conn.commit()
+    return True
+
+
+def bank(store_path: Path, repo: str, pr_number: int, head_sha: str, spend: Spend) -> bool:
+    """Open the tenant's store and record what this review cost. True when a row was updated.
+
+    **A FAILURE HERE MUST NOT COST THE REVIEW.** The comment is already rendered and worth posting
+    whether or not the cost was banked; trading the developer's answer for the operator's metric
+    would be the wrong way round. The reason is printed and False returned, so a caller can see the
+    gap rather than infer it from silence.
+    """
+    if spend.requests == 0:
+        return False
+    try:
+        conn = schema.open_store(store_path)
+    except (sqlite3.Error, SchemaVersionMismatch) as exc:
+        print(f"[store] cost not recorded: {exc}", flush=True)
+        return False
+    try:
+        repo_id = touches.ensure_repo(conn, "github.com", repo)
+        row = conn.execute(
+            "SELECT id FROM review WHERE repo_id = ? AND pr_number = ? AND head_sha = ?",
+            (repo_id, pr_number, head_sha),
+        ).fetchone()
+        if row is None:
+            print(f"[store] no review row for {repo}#{pr_number}; cost not recorded", flush=True)
+            return False
+        return record_spend(conn, int(row[0]), spend)
+    except sqlite3.Error as exc:
+        print(f"[store] cost not recorded: {exc}", flush=True)
+        return False
+    finally:
+        conn.close()

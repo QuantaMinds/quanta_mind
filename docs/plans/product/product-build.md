@@ -91,7 +91,14 @@ worth selling.
       render a body. **Found on that real output:** the coverage line still read "below the
       threshold **to comment on**" — while commenting — so the golden was regenerated and reviewed
       by hand for that one line.
-- [ ] **A5 Record it.** Depth, cost and gate outcomes into the store; surfaced by
+- [x] **A5 Record what it cost.** `types/spend.py` + `store/reviews.record_spend()`. The four
+      cost columns had existed since the schema was written and **nothing ever wrote them**.
+      `tokens_out` includes the model's own reasoning, which Vertex bills and reports separately —
+      one real summary measured **422 in, 1,631 out, 16s**, the output four times the input and
+      almost all of it thinking. `Spend.complete` marks a total as a FLOOR when part of the review
+      went unmetered, and an incomplete spend is **refused rather than rounded down**, because an
+      undercount on a dashboard gets priced from. *Depth is derivable from `ranked_unit`; the gate
+      outcome is already `review.fire_decision`.* ~~Depth, cost and gate outcomes into the store; Depth, cost and gate outcomes into the store; surfaced by
       `render/dashboard.py`.
 - [ ] **A6 Read the numbers.** Coverage 100%, gate rejection strictly between 0% and 100%,
       FULL/FOCUSED split, and **published findings per pull request** — the number that decides

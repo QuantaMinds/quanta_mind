@@ -1,0 +1,81 @@
+"""What one review cost, in the units a bill is written in.
+
+WHAT: `Spend(requests, tokens_in, tokens_out, ms)` and `plus()` to add two together.
+WHY:  **THE COLUMNS FOR THIS HAVE EXISTED SINCE THE SCHEMA WAS WRITTEN AND NOTHING EVER WROTE
+      THEM.** `review.request_count`, `tokens_in`, `tokens_out` and `latency_ms` have sat at their
+      defaults through every delivery — the same "tables with zero writers" defect this codebase
+      already found once, in `review` and `ranked_unit`.
+
+      **UNTIL THIS EXISTS, EVERY PRICING DECISION IS A GUESS.** BYOK, the free-tier cap, whether
+      the model half earns its cost — all of them are arithmetic over a number nobody has measured.
+      That is why recording comes before reading it: the answer decides what is worth building.
+
+      **`tokens_out` INCLUDES THE MODEL'S OWN REASONING.** Vertex reports `thoughtsTokenCount`
+      separately from the answer, and both are billed. A count of only the visible reply would
+      understate a review's cost by most of it — the failure that produced `MAX_TOKENS` on a real
+      delivery was a thinking budget nobody was measuring.
+
+      **ADDITION IS EXPLICIT, BECAUSE A REVIEW MAKES SEVERAL CALLS.** The summary and the deep pass
+      are separate requests, and a total that silently kept only the last would report a fraction
+      of what was spent.
+IMPORTS: stdlib only.
+CONSUMED BY: `infer/`, and `store/reviews.py`, which writes it.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any
+
+
+@dataclass(frozen=True, slots=True)
+class Spend:
+    """One review's cost. Zero means "no model was asked", never "we did not measure"."""
+
+    requests: int = 0
+    tokens_in: int = 0
+    tokens_out: int = 0
+    ms: int = 0
+    complete: bool = True
+    """False when some call in this review was not metered, making the total a FLOOR.
+
+    **A COST THAT MIGHT BE AN UNDERCOUNT MUST SAY SO ON THE VALUE.** `serve/settle.py` asks the
+    model once or twice per surviving finding through `infer/prompt_once`, which does not report
+    usage yet. Recording the rest as though it were the whole would put a number on a dashboard
+    that is quietly low, and pricing decided from it would be wrong in the expensive direction.
+    A floor a reader can see beats a total a reader cannot check.
+    """
+
+    def __post_init__(self) -> None:
+        for name in ("requests", "tokens_in", "tokens_out", "ms"):
+            if getattr(self, name) < 0:
+                raise ValueError(f"Spend.{name} is negative: a cost cannot be refunded here")
+        if self.requests == 0 and (self.tokens_in or self.tokens_out):
+            raise ValueError(
+                "tokens were spent with no request recorded; the count that reaches a bill and "
+                "the count that reaches a dashboard would then disagree"
+            )
+
+    def plus(self, other: Spend) -> Spend:
+        """Two calls, added. A review makes several and pays for all of them."""
+        return Spend(
+            self.requests + other.requests,
+            self.tokens_in + other.tokens_in,
+            self.tokens_out + other.tokens_out,
+            self.ms + other.ms,
+            # Incomplete is contagious: a total containing one unmetered call is itself a floor.
+            self.complete and other.complete,
+        )
+
+
+def measured(reply: dict[str, Any], ms: int) -> Spend:
+    """One Vertex reply's usage. **Absent usage is zero requests, not zero cost pretending to be
+    a measurement** — a reply without `usageMetadata` was still paid for, so it records the call
+    and leaves the tokens at zero rather than inventing them."""
+    usage = reply.get("usageMetadata")
+    if not isinstance(usage, dict):
+        return Spend(requests=1, ms=ms)
+    prompt = int(usage.get("promptTokenCount", 0) or 0)
+    total = int(usage.get("totalTokenCount", 0) or 0)
+    # total - prompt covers the answer AND `thoughtsTokenCount`, both of which are billed.
+    return Spend(requests=1, tokens_in=prompt, tokens_out=max(0, total - prompt), ms=ms)

@@ -33,11 +33,8 @@ CONSUMED BY: `serve/run_endpoint.py`.
 
 from __future__ import annotations
 
-import enum
-from dataclasses import dataclass
 from pathlib import Path
 
-from quantamind.allocate.depth import Reading
 from quantamind.allocate.depth import plan as allocate
 from quantamind.infer.change_review import explain
 from quantamind.ingest.diff import base_commit, changed_files
@@ -47,47 +44,14 @@ from quantamind.render.comment import comment as rendered
 from quantamind.render.pin_block import block
 from quantamind.serve import pin_check
 from quantamind.serve.deep_review import examine
+from quantamind.serve.delivery.outcome import Delivered, Outcome
 from quantamind.serve.run_review import review as run_ranking
 from quantamind.serve.working_clone import ensure, sweep
 from quantamind.store import tenancy
-from quantamind.types.deep import Deep
+from quantamind.store.reviews import bank
 from quantamind.types.settings import Settings
+from quantamind.types.spend import Spend
 from quantamind.verify.rule_check import enforce
-
-
-class Outcome(enum.Enum):
-    """What became of one delivery. Six values, none of them silence."""
-
-    POSTED = "posted"
-    REHEARSED = "rehearsed — posting is off; the comment above was not sent"
-    DUPLICATE = "already commented on this commit"
-    NOTHING_TO_SAY = "ranked, and no file stood out enough to be worth a comment"
-    NO_READABLE_FILES = "every changed file is in a language this product does not read"
-    NO_FILES = "the pull request changed no files we could read from the API"
-
-
-@dataclass(frozen=True, slots=True)
-class Delivered:
-    """The outcome, and the counts behind it. Never a bare success."""
-
-    outcome: Outcome
-    considered: tuple[str, ...]
-    skipped: tuple[str, ...]
-    body: str | None
-    reading: Reading | None = None
-    """What the model was given and what it was not. `None` before the ranking has run."""
-
-    examined: Deep | None = None
-    """The model's pass, or `None` when no model was consulted. **NOT the same as finding
-    nothing**: `Deep.consulted` distinguishes "asked and it said nothing" from "never asked",
-    and a delivery that could not reach the model must not read like a clean review."""
-
-    def sentence(self) -> str:
-        """One line for the log, stating what happened and what it was computed from."""
-        return (
-            f"{self.outcome.value} — {len(self.considered)} file(s) ranked, "
-            f"{len(self.skipped)} skipped as unreadable"
-        )
 
 
 def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) -> Delivered:
@@ -170,6 +134,18 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     # **THE DECLARED STANDARDS, CHECKED DETERMINISTICALLY.** These verdicts are reproducible on
     # the same commit by anyone, which is why they may be asserted where a model finding may not.
     checks = enforce(clone, head_sha, list(changed), store, delivery_repo, number)
+
+    # **WHAT THIS REVIEW COST, ON THE RECORD.** The columns have existed since the schema was
+    # written and nothing ever wrote them, so every pricing question so far has been arithmetic
+    # over a number nobody measured. A spend that is only a floor is refused rather than rounded.
+    spent = Spend()
+    for part in (told, examined):
+        if part is not None:
+            spent = spent.plus(part.spend)
+    if bank(store, delivery_repo, number, head_sha, spent):
+        print(
+            f"[deliver] cost: {spent.requests} call(s), {spent.tokens_out} tokens out", flush=True
+        )
 
     mismatched, _unresolved = pin_check.check(clone, head_sha, changed)
     pins = block(mismatched)

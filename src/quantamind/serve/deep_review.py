@@ -32,6 +32,7 @@ CONSUMED BY: `serve/cli.py` behind `--deep`.
 from __future__ import annotations
 
 import subprocess
+from dataclasses import replace
 from datetime import date
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -105,7 +106,7 @@ def deep(
     if not text.strip():
         # Not "the model found nothing" -- it was never asked, because those paths carry no diff.
         return Deep((), 0, 0, 0, 0, tuple(ranked), consulted=False)
-    found = gemini.read(
+    found, spent = gemini.read(
         text,
         ranked,
         project=project,
@@ -145,6 +146,9 @@ def deep(
         refuted,
         withdrawn,
         tuple(ranked),
+        # **A FLOOR WHEN ANYTHING WAS SETTLED.** `settle()` asks the model per surviving finding
+        # through `infer/prompt_once`, which reports no usage — so this is a floor, and says so.
+        spend=spent if not surviving else replace(spent, complete=False),
     )
 
 
@@ -176,13 +180,9 @@ def examine(
 ) -> Deep | None:
     """Run the model over what the allocation funded, or say plainly it was never asked.
 
-    **`None` IS NOT-CONSULTED, NOT A FINDING OF NOTHING.** `runs_model` needs inference enabled
-    AND a project to bill -- two deliberate acts, so no delivery costs money by default.
-
-    **AN OUTAGE RETURNS `consulted=False`, NOT AN EXCEPTION AND NOT SILENCE.** A model that could
-    not be reached must not read like one that read the diff and approved it. The ranking ships
-    regardless; it never needed the model. Cost is bounded by `reading.paths` (at most
-    `FULL_CEILING`) and by `settings.max_requests` inside.
+    **`None` IS NOT-CONSULTED, NOT A FINDING OF NOTHING**, and `runs_model` needs two deliberate
+    acts, so no delivery costs money by default. **An outage returns `consulted=False`**, because a
+    model that could not be reached must not read like one that read the diff and approved it.
     """
     if not settings.runs_model or not reading.paths:
         return None

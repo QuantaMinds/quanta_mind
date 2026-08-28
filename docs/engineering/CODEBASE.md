@@ -2718,3 +2718,37 @@ mis-reading a renamed field.
 **`report` was imported under a name this module already used.** `deep_review.report` prints the
 model pass; the collision shadowed silently until the call failed at runtime. It is aliased now —
 the same defect rule 13 is about, in an import rather than a file.
+
+### `serve/delivery/` — what a delivery produced, apart from the code that produces it
+
+`review_delivery.py` outgrew one file: it clones, ranks, allocates, consults a model, enforces
+rules, banks a cost, renders and posts. The **result** of all that is a separate concern from the
+doing of it, and it is what callers and tests import.
+
+| module | what it owns | what it must not do |
+|---|---|---|
+| `outcome.py` | `Outcome` — the six things a delivery can end as — and `Delivered`, which carries them with the allocation and the model pass | never reduce to a boolean: a change with no readable files and one we posted on are different answers |
+
+**These types could not move to `types/`, and the guard is what said so.** `Delivered` holds a
+`Reading`, which belongs to `allocate` — to the right of `types` — so putting them there was a rule
+7 violation. mypy passed; `check_conventions` caught it. A subpackage under `serve/` keeps the
+dependency flowing left, the way `serve/http/` already does for the socket layer.
+
+### `types/spend.py` — what a review cost, and when that number is only a floor
+
+`review.request_count`, `tokens_in`, `tokens_out` and `latency_ms` have existed since the schema was
+written and **nothing ever wrote them** — the same "tables with zero writers" defect this codebase
+already found in `review` and `ranked_unit`, one column deeper. Until they are written, every
+pricing decision is arithmetic over a number nobody measured.
+
+**`tokens_out` includes the model's own reasoning.** Vertex reports `thoughtsTokenCount` separately
+and both are billed; a count of only the visible reply understates a review by most of it. Measured
+on a real summary call: **422 tokens in, 1,631 out, 16 seconds** — the output four times the input,
+almost all of it thinking. That is also what produced the `MAX_TOKENS` failure nobody was measuring.
+
+**`Spend.complete` is False when part of the review went unmetered, making the total a FLOOR.**
+`serve/settle.py` asks the model once or twice per surviving finding through `infer/prompt_once`,
+which reports no usage. `record_spend` **refuses to write an incomplete spend** rather than rounding
+it down: a floor written as a total would put a quietly low number on a dashboard and get priced
+from. Incompleteness is contagious through `plus()`, because a total containing one unmetered call
+is itself a floor.

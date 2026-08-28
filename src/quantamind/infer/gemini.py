@@ -27,11 +27,13 @@ from __future__ import annotations
 
 import json
 import re
+import time
 import urllib.error
 import urllib.request
 
 from quantamind.ingest import google_auth
 from quantamind.types.finding import Finding
+from quantamind.types.spend import Spend, measured
 
 MODEL = "gemini-2.5-pro"
 MAX_FINDINGS = 8
@@ -92,6 +94,9 @@ def _token(gcloud: str) -> str:
 
 
 def _post(url: str, token: str, body: dict[str, object]) -> dict[str, object]:
+    """One call. **The elapsed time is attached to the reply**: a caller timing it separately would
+    be timing its own parsing too, and a cost that drifts from the bill is worse than none."""
+    started = time.monotonic()
     request = urllib.request.Request(
         url,
         data=json.dumps(body).encode(),
@@ -104,6 +109,7 @@ def _post(url: str, token: str, body: dict[str, object]) -> dict[str, object]:
         raise InferenceFailed(f"HTTP {exc.code}: {exc.read()[:200]!r}") from None
     if not isinstance(parsed, dict):
         raise InferenceFailed(f"expected an object, got {type(parsed).__name__}")
+    parsed["_ms"] = int((time.monotonic() - started) * 1000)
     return parsed
 
 
@@ -154,7 +160,7 @@ def read(
     location: str = "us-central1",
     gcloud: str = "gcloud",
     model: str = MODEL,
-) -> list[Finding]:
+) -> tuple[list[Finding], Spend]:
     """Findings about `paths` only. Raises `Unavailable` when there are no credentials.
 
     `context` is prose about the change's shape, already rendered by `render/shape_line.py` and
@@ -163,7 +169,7 @@ def read(
     leaves the prompt exactly as it was before shape was measured.
     """
     if not paths:
-        return []
+        return [], Spend()
     token = _token(gcloud)
     url = (
         f"https://{location}-aiplatform.googleapis.com/v1/projects/{project}"
@@ -188,4 +194,7 @@ def read(
         # this project keeps mistaking for a result. Raised, never trimmed and continued past.
         raise InferenceFailed(f"finishReason {finish!r}, not STOP — the review is incomplete")
     parts = first.get("content", {}).get("parts", [{}])
-    return _findings(str(parts[0].get("text", "")), set(paths))
+    elapsed = answer.get("_ms", 0)
+    return _findings(str(parts[0].get("text", "")), set(paths)), measured(
+        answer, elapsed if isinstance(elapsed, int) else 0
+    )
