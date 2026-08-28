@@ -22,7 +22,7 @@ from pathlib import Path
 import pytest
 
 from quantamind.rank.order import rank
-from quantamind.render.comment import comment
+from quantamind.render.comment import LOUD, QUIET, comment
 from quantamind.render.coverage_line import NothingToReport, coverage_line
 from quantamind.types.ranking import Discrimination, Ranking
 from quantamind.types.verdict import Construct, Reason, Site, Unresolved
@@ -90,16 +90,24 @@ def test_an_empty_ranking_raises_rather_than_reassuring(tmp_path: Path) -> None:
         coverage_line(Ranking(units=(), fired=True))
 
 
-def test_a_change_below_the_threshold_is_not_commented_on() -> None:
-    """None is a decision the caller records; a reassuring sentence would be a claim unearned."""
+def test_a_change_below_the_threshold_is_commented_on_and_told_it_is_below() -> None:
+    """**THIS TEST ASSERTED THE OPPOSITE, AND THE PRODUCT DECISION CHANGED UNDER IT.**
+
+    It required `None` below the threshold, because a ranking that had to justify interrupting
+    somebody should not send a cheerful "nothing to report" — which would be a claim we had not
+    earned, and would train readers to ignore the ones that matter. That objection was right and
+    is why the replacement is not merely "always comment": salience moved from WHETHER a comment
+    appears into a sentence inside it, where a reader can read it instead of inferring it from an
+    absence. A reviewer a business connects to a repository has to speak on every change.
+    """
     ranking = rank(CASES["no_history"])
     body = comment(ranking)
-    assert body is None, (
-        f"a change below the threshold rendered a comment: {body!r}. A cheerful 'nothing to "
-        "report' is a claim we did not earn, and it trains readers to ignore the ones that matter"
+
+    assert QUIET in body, (
+        f"a below-decile change did not say it was below decile: {body!r}. Commenting on every "
+        "change WITHOUT marking which are loud deletes the signal instead of moving it"
     )
-    # And the same ranking DOES produce a coverage line, so the silence is the comment's choice
-    # rather than the renderer having nothing to say.
+    assert LOUD not in body, "a below-decile change claimed the top decile"
     assert "No file in this change has prior history" in coverage_line(ranking)
 
 
@@ -145,16 +153,23 @@ def test_a_single_file_change_is_not_described_as_a_failed_ranking() -> None:
 
 
 def test_a_change_the_budget_cannot_help_with_is_not_spoken_on() -> None:
-    """**A one-file change no longer produces a comment at all, and that is the product change.**
+    """**A one-file change is spoken on again, and the reason is a different product.**
 
-    `read = min(budget, files)`, so at or below the budget we would be telling the reader to read
-    everything they already have, in an order — effort saved is zero by construction. This
-    previously rendered a comment; `roi-preregistration.md` failed B1 at 28.9% because 66.0% of
-    changes are like this one. The earlier version of this test asserted that such a comment omits
-    the "equally worth reading" note. There is no such comment now.
+    `read = min(budget, files)`, so at or below the budget an ORDERING tells the reader to read
+    everything they already have — effort saved is zero by construction, which is why
+    `roi-preregistration.md` failed B1 at 28.9% when 66.0% of changes are like this one. That
+    argument is about the ordering and it still holds; `fired` is still False here.
+
+    What changed is that a one-file change is the CHEAPEST possible deep read — the whole diff
+    fits in one prompt — so the old rule muted exactly the reviews we can most afford. The comment
+    now appears and says it is not in the top decile, and `allocate.depth` reads such a change in
+    full rather than ranking it.
     """
-    assert not rank({"src/only.py": 11}).fired
-    assert comment(rank({"src/only.py": 11})) is None
+    ranking = rank({"src/only.py": 11})
+    assert not ranking.fired, "the salience signal itself must survive; only the muting is gone"
+
+    body = comment(ranking)
+    assert QUIET in body and LOUD not in body
 
     # And the ordering is untouched where the budget DOES bind: four files still speak.
     wide = rank({"a.py": 11, "b.py": 7, "c.py": 3, "d.py": 1})

@@ -129,10 +129,17 @@ def test_a_diff_with_hunks_but_no_file_header_raises_rather_than_reporting_nothi
     assert "vacuously" in str(caught.value) or "nothing" in str(caught.value)
 
 
-def test_the_two_paths_that_return_by_design_still_do() -> None:
-    """Silence is a decision the caller records, and an empty diff is a real answer."""
-    assert comment(rank({"a.py": 0, "b.py": 0})) is None
+def test_the_path_that_returns_by_design_still_does() -> None:
+    """An empty diff is a real answer, and stays one.
+
+    **THE OTHER HALF OF THIS TEST WAS DELETED ON PURPOSE AND IS RECORDED HERE.** It asserted
+    `comment(...) is None` for a change with no fix history, back when the product spoke on about
+    a tenth of pull requests. `render/comment.py` now always renders and states salience in a
+    sentence; the ranking's own `fired` flag still carries the signal. Silence on a change we DID
+    rank is no longer one of the paths that returns by design.
+    """
     assert units_in("").hunks == 0
+    assert comment(rank({"a.py": 0, "b.py": 0}))
 
 
 def test_a_rejected_delivery_says_which_kind_of_wrong_it_was() -> None:

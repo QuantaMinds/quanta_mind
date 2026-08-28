@@ -104,8 +104,13 @@ def coverage_line(ranking: Ranking, unresolved: Sequence[Unresolved] = ()) -> st
             f"and which of them we read was decided alphabetically, not by history."
         )
 
+    # **THIS SENTENCE USED TO SAY "below the threshold TO COMMENT ON", WHILE COMMENTING.** It was
+    # written when `render/comment.py` returned None below the decile, so the reader never saw it
+    # in that state; once every change got a comment it became a contradiction printed on real
+    # output. `render/comment._salience()` now states the decile, so this says only what is left
+    # to say -- that the positions are ordering rather than a claim about risk.
     if not ranking.fired:
-        head += " **This change is below the threshold to comment on**, so no ranking is claimed."
+        head += " The positions below are an ordering; no risk claim is made about any of them."
 
     if unresolved:
         head += (

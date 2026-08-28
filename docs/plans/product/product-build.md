@@ -37,8 +37,16 @@ worth selling.
       claiming the oracles were "never wired in" for several commits after the gap closed, and
       this checklist item was written from that stale claim. The docstring now records both.
       No code change was needed; the false statement was the defect.
-- [ ] **A4 Open the gate.** Replace the mute with depth so every reviewable pull request gets a
-      comment. Rewrite — never delete — the tests that encode the old ~11% decision.
+- [x] **A4 Open the gate.** `just verify` green, 42 passed, 0 skipped. `render/comment.py`
+      returned `None` on `fired=False`; it now always renders and states salience in a sentence
+      (`LOUD` / `QUIET`), because the objection recorded when it muted was right — commenting on
+      everything WITHOUT marking the loud ones would delete the signal rather than move it.
+      `fired` survives as the signal; only the muting is gone. Four tests rewritten, none deleted,
+      each recording what it used to assert and why that changed. Proven on real data: PRs #58 and
+      #78 returned "no file stood out enough to be worth a comment" this morning and now both
+      render a body. **Found on that real output:** the coverage line still read "below the
+      threshold **to comment on**" — while commenting — so the golden was regenerated and reviewed
+      by hand for that one line.
 - [ ] **A5 Record it.** Depth, cost and gate outcomes into the store; surfaced by
       `render/dashboard.py`.
 - [ ] **A6 Read the numbers.** Coverage 100%, gate rejection strictly between 0% and 100%,
