@@ -72,6 +72,38 @@ worth selling.
 - [ ] **C3 IDE integration.** Only when a deal asks.
 - [ ] **C4 SSO.** Procurement gate — only when a deal asks.
 
+## Phase D — the gaps a competitor demo makes obvious
+
+From Qodo's own enterprise pitch: deep codebase context, a centralised rules engine, specialised
+agents, and a compliance dashboard. What we already have, what we do not, and what is cheap.
+
+- [ ] **D1 Deterministic blast radius.** An import graph over the changed files: "this module is
+      imported by 14 others, two of them entry points." Python's `ast` is **stdlib**, so this costs
+      no dependency and no model — which is the "breaking changes" and "duplicate code" claim
+      answered the way this codebase prefers: *deterministic beats clever*. It is also a new
+      ranking signal, testable against the same fix-return outcome the touch index uses.
+- [ ] **D2 A rules file, enforced.** `.quantamind/rules.yml` in the customer's repo: their
+      standards, versioned with their code, checked on every pull request, with the violation and
+      the rule that fired both named. This is the "manage rules like code" claim, and it is the
+      one that produces an audit trail a buyer can show a regulator.
+- [ ] **D3 Cross-repository index.** The expensive one. Requires org-wide indexing and a place to
+      keep it. **Not before a design partner has more than one repository that matters.**
+- [ ] **D4 Specialised passes** (bugs / security / duplication / breaking changes) instead of one
+      generic reviewer. **Pre-register a bar first.** Five prompt levers have now moved nothing,
+      and shape-context went PASS → NULL under McNemar and a same-arm replicate. "More context
+      improves findings" is not an assumption we are entitled to — it is the hypothesis our own
+      experiment failed to confirm.
+
+**What we already have that the pitch charges for:** "past pull requests indexed" IS the touch
+index, and it is the half that replicated out-of-sample. What we do not have is "code
+relationships mapped" or multi-repo — D1 is the cheap first bite of that.
+
+**A note on the compliance dashboard.** Theirs measures rule compliance per developer, by name.
+Ours (`render/dashboard.py`) measures what we commented on, whether it merged, and what production
+said. Theirs is more legible to a manager; ours is harder to fake and is the only one of the two
+that can be wrong in public. A per-developer scoreboard is also a cultural decision, not just a
+feature — worth deciding deliberately rather than by copying a screenshot.
+
 ---
 
 ## What I need from you, and when
