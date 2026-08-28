@@ -5,6 +5,36 @@
 is green — not `just check`. Design reasoning lives in `docs/plans/delivered/feat-review-every-pr.md`; this
 file is the state.
 
+## THE BUILD ORDER — do these in this number order
+
+**Read this first. Each number says what to build and why it comes before the next one.** The
+order is by dependency and by what would be wasted work if done later. An item marked ⏸ is parked
+by decision, not by difficulty.
+
+| # | item | why it is here and not later |
+|---|---|---|
+| **1** | **A5** record depth, cost and gate outcomes | Nothing measures what a review costs or how often the gate fires. Everything after this is decided on numbers we do not have yet, so it comes first and is small. |
+| **2** | **A6** read those numbers — findings per PR, coverage, gate rejection rate | **The result may change everything below it.** If gated findings are ~0.03 per pull request, the model half is not worth its cost and D1c/D1f are wasted work. Measure before building more on it. |
+| **3** | **E2** `--json` output | Small, and the only thing standing between E1 and a coding agent that can act on a review. A human re-typing prose is not an integration. |
+| **4** | **E3** `/qm-review` editor command | A thin wrapper over E1+E2. Last of Phase E on purpose: a wrapper over a weak answer is a faster way to be unhelpful. |
+| **5** | **D2a/D2b** import edges, stored | The deterministic half of "without disturbing anything else". `parse/importers.py` already answers it per file; this makes it a graph that persists. |
+| **6** | **D2d** blast radius in the review | The payoff of 5. Testable against the same fix-return outcome the touch index uses. |
+| **7** | **D5** per-repo compliance dashboard | A view over `rule_check`, which exists and has real rows. Cheap now, and it is what a buyer asks to see. |
+| **8** | **B1** background warm-up worker | The cold start is a full clone plus ~31s index build, and Cloud Run's ephemeral disk means every instance pays it. Needed before real traffic, not after. |
+| **9** | **B8** free-tier qualification checks | The traffic path, and **it needs no payment rail** — a free tier is free. Every rule is a GitHub API check that can be enforced rather than advertised. |
+| **10** | **B2/B4/B5** accounts, installation→customer, entitlement | Only meaningful once there is traffic to attribute. |
+| **11** | **D1f** blocking status check | Requires the confidence that only 2 can give. Only reproducible checks may ever block. |
+| **12** | **D6a** the ticket and discussion behind the change | Retrieval for the reader; worth something whatever the model does. |
+| **13** | **C1** web dashboard | A surface over 7. |
+| **14** | **D2c/D2e** duplicate logic, architectural drift | Real, and neither blocks anything else. |
+| **15** | **D3a/D3b** cross-repo by declaration | **Not before a design partner has more than one repository that matters.** |
+| ⏸ | **B3/B7** Stripe, BYOK | Parked by decision 2026-08-27: product and traffic first. |
+| ⏸ | **D7e** SOC 2 Type II | External, months, and no code substitutes for it. |
+
+**When picking up work: take the lowest number that is not ticked.** If it is blocked, say why in
+the plan rather than skipping silently — a number jumped without a reason is how a checklist stops
+describing the product.
+
 ## The golden rule every item is judged against
 
 **Did this pull request achieve the goal it set out to achieve, WITHOUT disturbing anything else?**
