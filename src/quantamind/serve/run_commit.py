@@ -22,13 +22,20 @@ from tempfile import TemporaryDirectory
 
 from quantamind.ingest.worktree import NothingPending, pending
 from quantamind.rank import firing
+
+# **ALIASED, BECAUSE `report` IS ALREADY TAKEN IN THIS MODULE.** `deep_review.report` prints the
+# model pass; this renders the whole review as data. Two functions of one name in one file is the
+# collision rule 13 is about, and here it shadowed silently until the call failed at runtime.
+from quantamind.render.json_report import report as json_review
 from quantamind.serve.deep_review import report
 from quantamind.serve.run_review import review
 from quantamind.types.change import REVIEWABLE_SUFFIXES
 from quantamind.types.settings import load
 
 
-def review_commit(clone: Path, repo: str, sha: str = "", *, deep_project: str = "") -> int:
+def review_commit(
+    clone: Path, repo: str, sha: str = "", *, deep_project: str = "", as_json: bool = False
+) -> int:
     """`quantamind review` — rank one commit's files against history strictly before it.
 
     Prints the comment body, or says plainly that the change is not worth speaking on. **It posts
@@ -38,6 +45,7 @@ def review_commit(clone: Path, repo: str, sha: str = "", *, deep_project: str = 
     if not (clone / ".git").exists():
         print(f"{clone} is not a git clone; a review reads history and nothing else")
         return 1
+    origin = f"commit {sha[:12]}" if sha else ""
     if sha:
         stamp = _timestamp(clone, sha)
         if stamp is None:
@@ -53,7 +61,9 @@ def review_commit(clone: Path, repo: str, sha: str = "", *, deep_project: str = 
         except NothingPending as why:
             print(f"[review] nothing to review — {why}")
             return 0
-        print(f"[review] reviewing {work.origin}")
+        origin = work.origin
+        if not as_json:
+            print(f"[review] reviewing {origin}")
         changed = [p for p in work.paths if p.endswith(REVIEWABLE_SUFFIXES)]
         if not changed:
             print(f"[review] {len(work.paths)} file(s) changed, none in a language we read")
@@ -63,6 +73,12 @@ def review_commit(clone: Path, repo: str, sha: str = "", *, deep_project: str = 
         as_of = int(time.time())
     with TemporaryDirectory() as scratch:
         out = review(clone, repo, changed, Path(scratch) / "review.db", as_of=as_of)
+    if as_json:
+        # **ONE OBJECT ON STDOUT AND NOTHING ELSE.** A tool parsing this must not have to strip
+        # progress lines out of it first, so the human-facing prints are skipped entirely rather
+        # than sent to stderr and hoped about.
+        print(json_review(out.ranking, origin=origin))
+        return 0
     print(
         f"[review] {len(out.considered)} file(s) ranked, {len(out.skipped)} skipped as unsupported"
     )

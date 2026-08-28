@@ -33,6 +33,16 @@ from quantamind.parse.importers import importers
 from quantamind.types.settings import Settings
 
 
+def _plainly(exc: Exception) -> str:
+    """Why the review could not run, in words a developer can act on rather than a class name."""
+    text = str(exc)
+    if "MAX_TOKENS" in text:
+        return "the change was too large to read in one pass."
+    if "no access token" in text:
+        return "the reviewer has no credentials configured."
+    return f"the reviewer could not run: {text[:120]}"
+
+
 def explain(
     clone: Path,
     head_sha: str,
@@ -41,7 +51,7 @@ def explain(
     paths: Sequence[str],
     settings: Settings,
     history: Mapping[str, int] | None = None,
-) -> Summary | None:
+) -> tuple[Summary | None, str]:
     """What the change does, whether it did what the author said, and who it affects.
 
     **THE TWO HALVES OF THE REVIEW'S ONE QUESTION.** "Did what it said" needs the author's own
@@ -54,7 +64,7 @@ def explain(
     claims nothing either way. The reason is printed for the operator.
     """
     if not settings.runs_model or not paths:
-        return None
+        return None, ""
     try:
         stated = stated_goal(repo, number)
         diff = unified_diff(repo, number)
@@ -72,8 +82,11 @@ def explain(
             gcloud=settings.gcloud_path,
         )
     except (InferenceFailed, Unavailable, DiffReadFailed) as exc:
+        # **THE REASON IS RETURNED, NOT ONLY LOGGED.** A delivery hit MAX_TOKENS, the summary was
+        # dropped, and the comment degraded into a file list with no verdict — indistinguishable
+        # from a clean review to the developer reading it. The caller renders this as a refusal.
         print(f"[deliver] no summary: {type(exc).__name__}: {exc}", flush=True)
-        return None
+        return None, _plainly(exc)
     # **THE DEPENDENTS ARE ATTACHED HERE, NOT ASKED OF THE MODEL.** They came from a parser and
     # anyone can re-run them; the prose came from a model and carries its error rate.
-    return replace(told, dependents=tuple(sorted(set(callers))))
+    return replace(told, dependents=tuple(sorted(set(callers)))), ""

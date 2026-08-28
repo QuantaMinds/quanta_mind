@@ -152,7 +152,9 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     # The ranking already carries each file's prior-fix count, so the summary reads the same
     # numbers rather than querying the store twice and risking two answers.
     past = {u.unit.site.path: int(u.score.value) for u in reviewed.ranking.units}
-    told = explain(clone, head_sha, delivery_repo, number, reading.paths, settings, history=past)
+    told, unreadable = explain(
+        clone, head_sha, delivery_repo, number, reading.paths, settings, history=past
+    )
     if examined is not None:
         print(f"[deliver] {reading.depth.value}: {reading.why}", flush=True)
         print(
@@ -177,7 +179,9 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
         return Delivered(quiet, reviewed.considered, reviewed.skipped, None, reading, examined)
 
     kept = examined.anchored if examined is not None else ()
-    fuller = rendered(reviewed.ranking, summary=told, findings=kept, checks=checks)
+    fuller = rendered(
+        reviewed.ranking, summary=told, findings=kept, checks=checks, blind=unreadable
+    )
     body = (fuller if told is not None or kept or checks else (reviewed.body or "")) + pins
 
     if not settings.posting_enabled:

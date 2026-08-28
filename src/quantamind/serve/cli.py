@@ -75,6 +75,9 @@ def build_parser() -> argparse.ArgumentParser:
     # **0.013-0.037 correct per pull request**, and the parser gate in front of it has adjudicated
     # exactly ONE live finding — which it dropped. That is not a capability to put in front of a
     # customer; it is an instrument for finding out whether it could ever be one.
+    look.add_argument(
+        "--json", action="store_true", dest="as_json", help="print the review as JSON for a tool"
+    )
     look.add_argument("--deep", metavar="GCP_PROJECT", default="", help=argparse.SUPPRESS)
     walk = subparsers.add_parser(
         "retrospective", help="replay the ranker over a clone's own history and report"
@@ -170,7 +173,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "review":
         from quantamind.serve.run_commit import review_commit
 
-        return review_commit(args.clone, args.repo, args.sha, deep_project=args.deep)
+        return review_commit(
+            args.clone, args.repo, args.sha, deep_project=args.deep, as_json=args.as_json
+        )
 
     if args.command == "retrospective":
         return _retrospective(args.clone, args.repo)

@@ -2673,3 +2673,48 @@ honest answer to "can this run air-gapped", and it is why the local path can rea
 
 Run on this repository's own uncommitted work it ranked 5 changed files — including the untracked
 module and test that implement the feature itself.
+
+### The comment leads with a verdict, and the golden-rule sections are mandatory
+
+A real delivery on PR #86 hit `MAX_TOKENS`, the summary was dropped, and the comment **degraded
+into a list of files with no verdict** — indistinguishable, to the developer reading it, from a
+clean review. That is the failure this product exists to refuse, appearing in its own output.
+
+Three things changed.
+
+**A verdict first.** `✅ Looks good` / `⚠️ Needs a human` / `🐛 Found N thing(s) worth fixing`, or
+`⚠️ I could not review this change — <why>`. The ordering is by what the reader must do: something
+to fix outranks something to think about, which outranks nothing to do. **"Cannot tell" is a reason
+to look, not a reassurance.**
+
+**The golden-rule sections are mandatory and a test enforces it.** `render/verdict_block.SECTIONS`
+names them — the goal quoted from the PR, what changed, does it do what the PR says, will it break
+anything — and `tests/unit/layers/render/` asserts each appears. A redesign collapsed all of them
+into a single headline and the review became an opinion with no stated basis; **it lasted about an
+hour, because nothing checked it.** Removing one now fails the build.
+
+**Our own fix history left the comment.** It listed how many times a later fix had returned to each
+changed file: true, ours, and not something a developer waiting to merge acts on. It still decides
+the ordering and still reaches the dashboard, where an operator is the right audience for it.
+
+`MAX_DIFF_CHARS` dropped from 60,000 to 30,000, because the diff now shares the prompt with the
+conventions and the fact blocks.
+
+### `render/json_report.py` — the review as data, behind `--json`
+
+A human re-typing prose is not an integration. `quantamind review --json` emits one object and
+nothing else on stdout, so a tool need not strip progress lines out of it.
+
+**Three keys an agent would act on wrongly if they lied.** `unread` is always present — an absent
+key and an empty list must not be the same answer, or a partial review is reported as whole.
+`breaks: null` is never `false` — null is "could not tell", false is "we checked the callers", and a
+tool collapsing them merges on a check that never ran. **`provenance` survives, though it left the
+comment**: a developer does not act on which component produced a line, but an agent applying a fix
+unattended must weigh a parser's verdict differently from a model's reading.
+
+`schema` is a version number so a consumer built on these keys breaks loudly rather than
+mis-reading a renamed field.
+
+**`report` was imported under a name this module already used.** `deep_review.report` prints the
+model pass; the collision shadowed silently until the call failed at runtime. It is aliased now —
+the same defect rule 13 is about, in an import rather than a file.

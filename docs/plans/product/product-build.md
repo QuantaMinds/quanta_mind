@@ -282,13 +282,13 @@ spent deliberately. It must not be spent by accident.
 
 ### D4 — audit trail
 
-- [~] **D4a Wired into the delivery.** `deliver()` reads `.quantamind/rules.toml`, runs
-      `check_change()` over every changed file (`git show <sha>:<path>`, so the code is read AS
-      THE CHANGE LEAVES IT), and renders the result with the denominator printed. Live on this
-      repository: 3 passed, 1 violated, 2 uncheckable — the markdown correctly NOT a pass.
-- [x] **D4b Append-only, exportable.** `rule_check` at schema v5, `store/rule_checks.py`. All four outcomes stored so the denominator is real; `provenance` derived from the rule; nothing backfilled. **Proven on a real delivery: PR #86 reported "60 declared rule(s) checked".** ~~Every check on every pull request: Every check on every pull request: which rule, the outcome,
-      the commit, the provenance, whether it posted. Partly present — `store/reviews.py` records
-      rankings — and no export exists. **This is the artefact a compliance team buys**, and it is
+- [x] **D4a Wired into the delivery.** `deliver()` reads `.quantamind/rules.toml` via
+      `verify/rule_check.enforce()`, checks every changed file (`git show <sha>:<path>`, so the
+      code is read AS THE CHANGE LEAVES IT), and renders the result with the denominator printed.
+      **Proven on PR #86: "60 declared rule(s) checked".** The per-tenant posting switch that was
+      once listed here belongs to B6 and is recorded there; it was never part of this item.
+- [x] **D4b Append-only, exportable.** `rule_check` at schema v5, `store/rule_checks.py`. All four outcomes stored so the denominator is real; `provenance` derived from the rule; nothing backfilled. **Proven on a real delivery: PR #86 reported "60 declared rule(s) checked".** ~~Every check on
+      every pull request: which rule, the outcome, the commit, the provenance, whether it posted.~~ **This is the artefact a compliance team buys**, and it is
       worth more when the checks behind it are reproducible, which is why D1b precedes D1c.
 
 ### D5 — compliance dashboard, PER REPOSITORY

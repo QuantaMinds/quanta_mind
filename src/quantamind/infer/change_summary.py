@@ -33,7 +33,10 @@ from quantamind.infer import gemini
 from quantamind.infer.summary_prompt import PROMPT
 from quantamind.ingest.diff import Stated
 
-MAX_DIFF_CHARS = 60_000
+# **CUT FROM 60,000 WHEN A REAL 27-FILE DELIVERY HIT MAX_TOKENS.** The diff shares the prompt
+# with the conventions and the fact blocks, and a review that fails is worth less than a
+# review of a truncated diff — but only because the truncation is visible in the output.
+MAX_DIFF_CHARS = 30_000
 
 
 @dataclass(frozen=True, slots=True)
