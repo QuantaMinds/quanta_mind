@@ -2,7 +2,7 @@
 
 **How to read this.** One line per deliverable. `[ ]` not built, `[x]` built AND verified by
 `just verify`, `[~]` in progress. A line is only ticked when the gate the definition of done names
-is green — not `just check`. Design reasoning lives in `docs/plans/feat-review-every-pr.md`; this
+is green — not `just check`. Design reasoning lives in `docs/plans/delivered/feat-review-every-pr.md`; this
 file is the state.
 
 **Nothing below is ticked on a promise.** Each tick names the evidence next to it.
@@ -53,12 +53,62 @@ worth selling.
       FULL/FOCUSED split, and **published findings per pull request** — the number that decides
       whether coverage is sellable. Comparable today: 0.013–0.037 correct findings per PR.
 
-## Phase B — make it buyable
+## Phase G — GCP integration (the container cannot run `gcloud`)
+
+**Direction 2026-08-27: product and traffic first, payments later.** This is the gap that actually
+blocks Half B in production, and it was invisible until the deep half ran for the first time.
+
+- [ ] **G1 Service-account auth for Vertex, with no `gcloud` and no dependency.** `infer/gemini.py`
+      shells out to `gcloud auth print-access-token`. There is no `gcloud` in the container and
+      there should never be — a 200 MB SDK to fetch a bearer token is the dependency this product
+      refuses. **The machinery already exists:** `ingest/app_auth.py` signs an RS256 JWT with
+      `openssl` and exchanges it for a GitHub installation token, and a Google service account is
+      the SAME pattern — sign a JWT with the SA key, POST to `oauth2.googleapis.com/token`,
+      receive an access token. One sibling module, zero new dependencies; `gcloud_path` stays for
+      laptop development.
+- [ ] **G2 Prove Half B from inside the container.** It has run exactly once, by hand, through the
+      CLI on a laptop. Never from a webhook delivery, never in Docker, never with a service
+      account. Until that runs, "the endpoint reviews with a model" is a claim about a code path
+      rather than an observation.
+- [ ] **G3 Cost per review, measured.** Every delivery that consults a model records what it
+      spent. Without it, BYOK pricing and the free-tier cap are both guesses.
+
+## Phase B — make it buyable  ⏸ **PAYMENTS PARKED 2026-08-27**
+
+**Parked:** B3 (Stripe), B7 (BYOK billing). **Not parked:** the items below that produce TRAFFIC,
+which need no payment rail — a free tier is free, so onboarding real repositories does not wait on
+Stripe.
 
 - [ ] **B1 Background warm-up worker.** Kills the cold start: full clone + ~31s index build on a
       115k-commit repository. Cannot be inline — GitHub needs a prompt 2xx.
 - [ ] **B2 Accounts + sign in with GitHub.** No user model exists today.
-- [ ] **B3 Stripe checkout + subscription webhooks.** 🔑 *needs your Stripe account*
+- [ ] **B3 Stripe checkout + subscription webhooks.** ⏸ PARKED. 🔑 *needs `claude mcp login plugin:stripe:stripe` run in a REAL terminal (my Bash tool has no tty), and a `STRIPE_WEBHOOK_SECRET`, absent from `.env`. Present: `STRIPE_Publishable_key`, `STRIPE_Secret_key`, `STRIPE_LIVE_SECRET_KEY`, `STRIPE_LIVE_PUBLISHABLE_KEY`.*
+- [ ] **B7 BYOK — the customer brings their own model key.** ⏸ PARKED with B3. Inference cost moves to them, which
+      makes per-review cost somebody else's ceiling rather than our margin. Needs per-tenant
+      credentials rather than one `inference_project`, and a stored key is a liability: it belongs
+      encrypted at rest and must never reach `quantamind config`, a log, or a comment.
+- [ ] **B8 Free tier — NOT parked; this IS the traffic path and needs no payment rail.** Every rule below is checkable
+      from the GitHub API at install time, so it can be enforced rather than advertised:
+
+      | rule | check |
+      |---|---|
+      | public only | `repo.private is False` |
+      | 1,000–5,000+ stars | `stargazers_count` — **is 5K a ceiling or just "and above"? unresolved** |
+      | 50+ contributors | contributors API, counted not estimated |
+      | 6+ months of recent activity | commits spanning ≥180 days AND `pushed_at` recent — both, because either alone passes for a repo that was busy once |
+      | one free repo per account | keyed on the owner, not the installation, which changes when somebody ticks a box |
+      | until 40 unique repos | a global counter, and the offer closes on it |
+
+      **THESE CRITERIA ALSO SELECT FOR REPOSITORIES WHERE THE PRODUCT WORKS.** The ranker needs
+      fix history; 50 contributors over six months is exactly what produces it. A repository that
+      fails these would likely have got a weak review, so the qualification is honest rather than
+      arbitrary.
+
+      **AND WE CAN ALREADY TELL A PROSPECT BEFORE THEY INSTALL.** `rank/firing.estimate()` returns
+      `NO_HISTORY` ("this repository cannot be ranked yet") and `CONCENTRATED` ("a few files
+      dominate; almost nothing will be flagged"). Running it during onboarding turns eligibility
+      into a measured answer about their repository instead of a sales rule — and refusing a
+      repository we would serve badly is worth more than the install.
 - [ ] **B4 Installation → customer mapping.** The App install flow already provisions a store; it
       does not know whose it is.
 - [ ] **B5 Entitlement check at delivery.** Today any installation is reviewed, paid or not.
@@ -72,37 +122,217 @@ worth selling.
 - [ ] **C3 IDE integration.** Only when a deal asks.
 - [ ] **C4 SSO.** Procurement gate — only when a deal asks.
 
-## Phase D — the gaps a competitor demo makes obvious
+## Phase D — relationships, linked repos, audit, and the context a human wrote
 
-From Qodo's own enterprise pitch: deep codebase context, a centralised rules engine, specialised
-agents, and a compliance dashboard. What we already have, what we do not, and what is cheap.
+Direction set 2026-08-27. **This is the codebase's founding design, unbuilt.** `types/verdict.py`
+already carries `Confidence` (where `RESOLVED` requires two independent resolvers agreeing),
+`Provenance.PARSER`, and a closed `Reason` set with `DYNAMIC_DISPATCH`, `EXTERNAL_SYMBOL` and
+`UNPARSEABLE_SYNTAX`. Non-negotiables 2 and 3 in `AGENTS.md` are ABOUT edges. Nothing has ever
+emitted one.
 
-- [ ] **D1 Deterministic blast radius.** An import graph over the changed files: "this module is
-      imported by 14 others, two of them entry points." Python's `ast` is **stdlib**, so this costs
-      no dependency and no model — which is the "breaking changes" and "duplicate code" claim
-      answered the way this codebase prefers: *deterministic beats clever*. It is also a new
-      ranking signal, testable against the same fix-return outcome the touch index uses.
-- [ ] **D2 A rules file, enforced.** `.quantamind/rules.yml` in the customer's repo: their
-      standards, versioned with their code, checked on every pull request, with the violation and
-      the rule that fired both named. This is the "manage rules like code" claim, and it is the
-      one that produces an audit trail a buyer can show a regulator.
-- [ ] **D3 Cross-repository index.** The expensive one. Requires org-wide indexing and a place to
-      keep it. **Not before a design partner has more than one repository that matters.**
-- [ ] **D4 Specialised passes** (bugs / security / duplication / breaking changes) instead of one
-      generic reviewer. **Pre-register a bar first.** Five prompt levers have now moved nothing,
-      and shape-context went PASS → NULL under McNemar and a same-arm replicate. "More context
-      improves findings" is not an assumption we are entitled to — it is the hypothesis our own
-      experiment failed to confirm.
+### D1 — the rules engine (the spine: audit and dashboard are views over it)
 
-**What we already have that the pitch charges for:** "past pull requests indexed" IS the touch
-index, and it is the half that replicated out-of-sample. What we do not have is "code
-relationships mapped" or multi-repo — D1 is the cheap first bite of that.
+A compliance rate cannot be reported without rules to be compliant with. Built first because D4
+and D5 read what it records.
 
-**A note on the compliance dashboard.** Theirs measures rule compliance per developer, by name.
-Ours (`render/dashboard.py`) measures what we commented on, whether it merged, and what production
-said. Theirs is more legible to a manager; ours is harder to fake and is the only one of the two
-that can be wrong in public. A per-developer scoreboard is also a cultural decision, not just a
-feature — worth deciding deliberately rather than by copying a screenshot.
+- [x] **D1a Rules as code, in the customer's repository.** `types/rule.py` +
+      `ingest/rules_file.py`. **No rules and unreadable rules return different answers** — the
+      failure that would report a customer compliant at the moment enforcement stopped. Malformed
+      declarations come back as `Unresolved`, never dropped; provenance is DERIVED from the check
+      so a model-judged rule cannot claim a parser verified it; duplicate ids refused. 10 tests,
+      4 sabotages caught. ~~`.quantamind/rules.toml` — `tomllib` is
+      stdlib and rule 11 bans `pyyaml` from `src/`. Versioned with their code, reviewed like their
+      code, diffable.~~ Documentation is what this replaces: standards nobody reads and every
+      reviewer interprets differently.
+- [x] **D1b Deterministic checks FIRST, and most rules are.** `parse/python_names.py` +
+      `verify/rule_check.py` + `types/checked.py`. `just verify` green, 42 passed, 0 skipped.
+      One `Checked` per rule per file, **four outcomes** because three of them look like a pass
+      from outside: PASSED / VIOLATED / UNCHECKABLE / DEFERRED. A TypeScript file is UNCHECKABLE,
+      never passed — otherwise a JS repository reads 100% compliant with checks that never ran.
+      `counts_toward_compliance` excludes undecided rows so a rate moves with the customer's code,
+      not our parser coverage. 9 tests, 4 sabotages caught. ~~From the competitor's own examples: From the competitor's own examples:
+      `async-error-handling`, `typed-catch-block`, `no-console-log-in-prod`,
+      `input-validation-required`. **Every one is an AST pattern, not a semantic judgement.** A
+      parser can answer them, so a model must not — and a deterministic check is the only kind
+      that can be re-run later to prove an audit entry was right.~~
+- [ ] **D1c Model-checked rules, clearly separated.** For rules a parser genuinely cannot answer.
+      Each result carries `Provenance.PARSER` or `Provenance.MODEL` so an auditor can see which
+      claims are reproducible. **They must never render alike.**
+- [ ] **D1d Mine rules from past review comments.** Senior engineers repeat themselves, and the
+      repetition IS the standard. **This is the one model use where being wrong is cheap:** the
+      output is a PROPOSED rule a human approves, not a published finding — a different risk
+      profile entirely from the path that measured 66.7-82.1% wrong.
+
+- [ ] **D1e One definition, every repository.** "Define a standard once and it is checked on every
+      pull request across all repositories" is the actual enterprise claim, and a per-repo
+      `rules.toml` does not make it. Org-level rules live in a `.quantamind` repository the
+      installation owns; a repository's own file EXTENDS them and may tighten a severity, never
+      silently drop an inherited rule. **A dropped inheritance must appear in the audit trail**,
+      because a standard that can be disabled invisibly is not a standard.
+- [ ] **D1f Blocking, not just commenting.** The claim is that code meets standards *before a human
+      reviewer sees the pull request*. That requires a **required status check that fails**, not a
+      comment somebody may scroll past. **Only reproducible checks may block** — a `Provenance.MODEL`
+      verdict at our measured error rate must never hold somebody's merge, and the split already
+      exists on `Rule.reproducible`.
+
+**OPEN DECISION — which languages.** Python checks are free: `ast` is stdlib. JS/TS are not, and
+`AGENTS.md` states plainly that **tree-sitter is NOT a dependency** while `pyproject.toml` declares
+`dependencies = []`. Either the rules engine ships Python-only at first, or that constraint is
+spent deliberately. It must not be spent by accident.
+
+### D2 — code relationships, deterministically
+
+- [ ] **D2a Labelled import edges.** `parse/imports.py` over stdlib `ast`: no dependency, no
+      model. Every edge carries `Confidence` and `Provenance`; an unresolvable import emits
+      `Unresolved(site, reason, construct)` and never nothing — `importlib` is `DYNAMIC_DISPATCH`,
+      a third-party name `EXTERNAL_SYMBOL`, a broken file `UNPARSEABLE_SYNTAX`. `RESOLVED` only
+      where two independent resolvers agree: the syntax says the import exists AND the target is a
+      file in the tree.
+- [ ] **D2b The graph, stored.** A whole-repo pass into a `dependency` table, incremental against
+      the same commit watermark the touch index uses.
+- [ ] **D2c Duplicated logic, without a model.** Normalised AST hashing of function bodies —
+      rename-insensitive, comment-insensitive, stdlib only. "The same logic is written in multiple
+      places, and a fix to one leaves the others wrong" is a real cost, and it is a structural
+      question a parser answers exactly rather than a judgement a model guesses at.
+- [ ] **D2d Blast radius in the review.** "This module is imported by 14 others, two of them entry
+      points." A new signal, testable against the same fix-return outcome the touch index uses.
+
+- [ ] **D2e Architectural drift, measured rather than asserted.** "Team members implement parts of
+      the system differently from the original design" is a claim about DIVERGENCE, and divergence
+      is measurable: the import graph plus rule violations over time, per module. We have the
+      history to do it retrospectively — `retrospective` already replays the ranker over a clone's
+      own past, which is the instrument for showing drift happened rather than saying it does.
+
+### D3 — cross-repo, by declaration rather than discovery
+
+- [ ] **D3a The business declares its links.** `.quantamind/links.toml`. **Declared beats
+      discovered:** no org-wide crawl, no broad permissions, and a link a customer stated is
+      provenance an auditor can be shown, where an inferred one is our guess about their
+      architecture.
+- [ ] **D3b Edges that cross a repository boundary.** A changed exported symbol against the linked
+      repositories that import it.
+
+### D4 — audit trail
+
+- [~] **D4a Wired into the delivery.** `deliver()` reads `.quantamind/rules.toml`, runs
+      `check_change()` over every changed file (`git show <sha>:<path>`, so the code is read AS
+      THE CHANGE LEAVES IT), and renders the result with the denominator printed. Live on this
+      repository: 3 passed, 1 violated, 2 uncheckable — the markdown correctly NOT a pass.
+- [ ] **D4b Append-only, exportable.** Every check on every pull request: which rule, the outcome,
+      the commit, the provenance, whether it posted. Partly present — `store/reviews.py` records
+      rankings — and no export exists. **This is the artefact a compliance team buys**, and it is
+      worth more when the checks behind it are reproducible, which is why D1b precedes D1c.
+
+### D5 — compliance dashboard, PER REPOSITORY
+
+- [ ] **D5 Per repo, not per developer.** Rule compliance, violation hotspots, trend. A view over
+      D4. **Deliberately not a per-developer scoreboard**: the competitor screenshot ranks named
+      engineers, which is a cultural decision rather than a feature, and it is declined here until
+      somebody asks for it on purpose.
+
+### D6 — the context a human wrote
+
+Pulled in as **two separate uses**, because they succeed or fail independently:
+
+- [ ] **D6a Retrieval for the READER.** The ticket and discussion behind the files being changed,
+      shown in the comment. Deterministic, and worth something whatever the model does.
+- [ ] **D6b The same text as MODEL input.** **Pre-register a bar.** Shape-context went
+      PASS to NULL under McNemar and a same-arm replicate, and five prompt levers moved nothing.
+      Human context is a DIFFERENT variable — it carries why a change exists, which no diff shape
+      contains — so the null does not condemn it. It does mean measuring rather than assuming.
+- [ ] **D6c Sources, cheapest first.** GitHub PR and issue comments need no new credential and no
+      new dependency. Jira and Slack are REST and JSON over HTTPS, so `urllib` reaches both and
+      `dependencies = []` holds; what they need is the customer's auth. **Egress is a decision,
+      not a detail:** quoting a private Slack thread into a GitHub comment moves their data
+      between systems, and that must be opt-in per source.
+
+### D7 — the three questions a security team asks
+
+Their answers, given our thesis: say what is true, prove it where we can, and refuse the claim
+where we cannot.
+
+- [ ] **D7a "What does it catch?"** AI-written code carries more hardcoded secrets, and a
+      hardcoded key is **deterministically** detectable — pattern plus entropy, no model, no
+      judgement. It ships as a `CheckKind`, high precision, reproducible in the audit trail.
+      **What we must NOT claim is general vulnerability detection.** Our raw findings measure
+      66.7-82.1% wrong across four blind pools. "We catch hardcoded credentials, exactly, and we
+      do not claim to catch injection" is a weaker sentence and a defensible one.
+- [ ] **D7b "What do you do with our code?"** **We can already prove more than a policy statement
+      can.** `scripts/verify/assert_no_source_in_pack.py` runs in `just verify` and asserts the
+      store holds NO SOURCE — it keeps paths and counts, never file contents. That is a test a
+      customer can run themselves, not a certification we bought.
+      Precision required: the CLONE is on disk (bounded by `sweep`, 8 kept) and with inference ON
+      the diff IS sent to a model. "The store holds no source" is true and provable; "your code
+      never leaves" is only true with inference off. **Both must be said, not one.**
+- [ ] **D7c "Where is it allowed to run?"** **Half A is air-gap-capable by construction**: the
+      ranker needs a git clone and nothing else — no API, no model, no network. That is not a
+      roadmap item, it is what the model-free half already is, and it is the strongest answer we
+      have for banking and defence. Half B cannot be air-gapped without a local model. Cloud and
+      on-prem are the same container; the difference is who runs it.
+
+- [ ] **D7d "Do you train on our code?" — No, and it is structurally true.** We fine-tune nothing
+      and there is no training pipeline to disable. With BYOK the call goes to the customer's own
+      model account under their terms, so the question stops being about our promises. **This is a
+      commitment we can keep because there is nothing to give up.**
+- [ ] **D7e SOC 2 Type II.** External, expensive, months of evidence collection, and no code we
+      can write substitutes for it. Recorded so nobody plans around its absence. **Until it
+      exists, say so** — a buyer discovering it mid-procurement costs more than the deal.
+- [ ] **D7f Three deployment shapes, one container.** Cloud (we run it), on-prem (they run the
+      same image), air-gapped (Half A only, no network beyond the clone). The image already
+      exists; what is missing is on-prem installation docs and an air-gapped mode that REFUSES to
+      make a network call rather than merely not making one — an outbound call that fails quietly
+      in a bank is a finding against us, not a bug.
+
+**The framing for all of Phase D:** build what the competitor sells, but with the thesis —
+deterministic where a parser can answer, provenance on every verdict, refusals returned rather
+than dropped, and no claim published that we cannot defend when someone checks it.
+
+### Traceability — every competitor claim, and where it is answered
+
+| their claim | ours |
+|---|---|
+| Centralised rules engine, defined once | D1a ✅, D1e (org-wide) |
+| Enforced on every PR, identically | D1b (deterministic), D1f (blocking) |
+| Learns rules from senior reviewers | D1d — the one model use where being wrong is cheap |
+| Evidence and audit trail | D4, and `Rule.reproducible` is what makes it worth reading |
+| Standards met before a human reviewer sees it | D1f + E1 (pre-PR, local) |
+| Duplicated code | D2c — normalised AST hashing, exact not guessed |
+| Breaking changes | D2b/D2d (blast radius), D3b (cross-repo) |
+| Harder maintenance / architectural drift | D2e — measured with `retrospective`, not asserted |
+| Deep codebase context, multi-repo | D2, D3 — **declared** links, not an org-wide crawl |
+| Catches hardcoded keys and passwords | D7a — deterministic. General vuln detection: **refused** |
+| Does not retain source | D7b — already PROVEN by `just verify`, not a policy |
+| Does not train on client code | D7d — structurally true; nothing to train |
+| SOC 2 Type II | D7e — absent, and said out loud |
+| Cloud / on-prem / air-gapped | D7f — Half A is air-gap-capable by construction |
+| IDE / shift left | Phase E |
+
+**What we deliberately do NOT copy:** the per-developer compliance scoreboard (D5), and any claim
+to general vulnerability detection (D7a). Both are things we could ship and could not defend.
+
+## Phase E — shift left: review before the pull request exists
+
+`quantamind review <clone> --sha <sha>` already runs Half A locally and prints the same comment
+the webhook would post — verified on this repository. What it cannot do is review work that has
+no commit yet, and it prints prose for a human rather than something a coding agent can act on.
+
+- [ ] **E1 Review the working tree and the unpushed branch.** `--sha` requires a commit; a
+      developer about to open a pull request has uncommitted edits, or commits not yet pushed.
+      Diff against the merge-base with the default branch, and against the index for uncommitted
+      work. **Nothing leaves the machine on this path**, which is also the honest answer to
+      "can we run it in an air-gapped environment".
+- [ ] **E2 Machine-readable output.** `--json`: the ranking, the allocation with `unread` named,
+      and any findings with their provenance. This is what makes `/qm-review` useful inside
+      Cursor, Claude Code or Copilot — the agent reads it and fixes, rather than a human
+      re-typing prose.
+- [ ] **E3 `/qm-review` as an editor command.** A thin wrapper over E1 and E2. It is last on
+      purpose: the value is entirely in what E1 and E2 return, and a wrapper over a weak answer
+      is a faster way to be unhelpful.
+
+**Why this is worth building before the enterprise surface:** it is the only path where a
+developer sees output before anyone else does, so a wrong finding costs them ten seconds instead
+of a public comment on their pull request. It is the cheapest place to be wrong, which makes it
+the right place to find out whether the findings are worth anything.
 
 ---
 

@@ -1416,7 +1416,7 @@ answers why no filter has helped:
 
 **It is a generation failure and every mechanism tried has been a filter.**
 
-### `docs/plans/feat-execution-corpus.md` — the one road that is UNTESTED, and its price
+### `docs/plans/delivered/feat-execution-corpus.md` — the one road that is UNTESTED, and its price
 
 The Aug 2026 field: best published research on LLM code review is **28.0% RefineEM** (behavioural),
 best tool against planted ground truth is **F1 47%**, and **no strict-adjudication rate is published
@@ -1846,7 +1846,7 @@ is counted by one and unreachable to the other.
 
 **So this stays open on purpose.** The next step is a measurement — on a repository with real
 release-branch traffic, does base-walking ever change the top-three selection? — not a quiet edit to
-a `git log` invocation. → `docs/plans/feat-touch-index-cache.md`, the investigation section.
+a `git log` invocation. → `docs/plans/delivered/feat-touch-index-cache.md`, the investigation section.
 
 ### The HEAD horizon, measured: 81% of counts move, 0% of readings, 2.6% of deep reads
 
@@ -1873,7 +1873,7 @@ rate is zero, because none of its recent pull requests target a non-default bran
 **The horizon is now a documented property with a number on it.** What the measurement does not
 cover: one repository, one kind of divergence — short-lived release branches cut from main. A
 long-lived fork is the case that could move the set, and 0 of 78 has a 95% upper bound near 3.8%.
-→ `docs/plans/feat-touch-index-cache.md`.
+→ `docs/plans/delivered/feat-touch-index-cache.md`.
 
 ### The gate now requires the budget to bind — product-readiness item 2
 
@@ -1913,7 +1913,7 @@ the old one, in the same line, for the length of one command. Caught by running 
 files, while the product counts `.py .pyi .ts .tsx .js`. On a Python repository the populations
 coincide; on a polyglot one **more changes bind than the study's population predicts**, so 4.11% and
 50.3% must be quoted as Python-only. Re-deriving them over the full reviewable set is a separate
-measurement and is not done. → `docs/plans/feat-gate-on-binding-changes.md`.
+measurement and is not done. → `docs/plans/delivered/feat-gate-on-binding-changes.md`.
 
 ### The product comments as itself — GitHub App auth, no new dependency
 
@@ -2198,3 +2198,103 @@ check is the same defect this project chases in code.
 
 Findings are **not** rendered into the comment body yet. That is deliberate: the number worth
 knowing first is findings-per-pull-request, and A6 reads it before anything is published.
+
+### `types/rule.py` + `ingest/rules_file.py` — standards a repository declares for itself
+
+A compliance rate cannot be reported without rules to be compliant with, so the rules engine is
+built before the audit trail and the dashboard that read it. `read(clone)` returns
+`(rules, refused)` from `.quantamind/rules.toml`.
+
+**No rules and unreadable rules must never produce the same answer.** A repository with no file
+has declared none; a repository whose file will not parse has declared some and we cannot read
+them. Both end with zero enforceable rules — and if they returned the same value, the compliance
+dashboard would show a clean sheet for a customer at the exact moment their standards stopped
+being checked. The refusal list is what separates them, and it is the first thing the tests assert.
+
+**A malformed declaration is returned, not skipped.** Dropping entries we do not understand
+narrows what a customer believes is enforced, invisibly, in exactly the artefact built to make it
+visible. Each comes back as `Unresolved(site, reason, construct)` — the same shape the resolver
+layer uses for a call site it cannot place. `Reason` gained `MALFORMED_DECLARATION`, which its own
+docstring says must be a deliberate act.
+
+**Provenance is derived from the check, never set by a caller.** `CheckKind.MODEL_JUDGED` yields
+`Provenance.MODEL`; everything else yields `PARSER`. `Rule.reproducible` reads off that, because
+the audit trail is worth exactly what the distinction is worth: a parser's verdict can be re-run
+on the same commit and shown to produce the same answer, and a model's cannot. A rule that could
+declare itself parser-verified while a model decided it would make the trail worthless, so the
+field does not exist to be set.
+
+**Duplicate ids are refused rather than last-one-wins**, because audit rows key on the id and two
+rules sharing one makes the trail ambiguous about which was applied.
+
+`tomllib` is stdlib, so this costs no dependency, and rule 11 bans `pyyaml` from `src/` outright.
+Four sabotages verified the tests: a broken file reporting as "none declared", silently skipping
+unreadable declarations, a model-judged rule claiming parser provenance, and last-one-wins on a
+duplicate id.
+
+### `parse/python_names.py` + `verify/rule_check.py` + `types/checked.py` — rules, enforced
+
+D1a read rules and nothing applied them. `check(rule, path, source)` now returns exactly one
+`Checked` per rule per file — including for the rules that found nothing, and the ones we could
+not decide.
+
+**Four outcomes, because three of them look like a pass from outside.**
+
+| outcome | when | in the compliance denominator? |
+|---|---|---|
+| `PASSED` | the parser looked and found nothing | yes |
+| `VIOLATED` | it found something, with the name and line | yes |
+| `UNCHECKABLE` | a language we cannot parse, or a file that will not parse | **no** |
+| `DEFERRED` | a model-judged rule; a parser did not decide it | **no** |
+
+**The clean zero here would have been a compliance dashboard reporting our parser coverage as the
+customer's code quality.** Only Python is parsed — `AGENTS.md` states tree-sitter is not a
+dependency and `pyproject.toml` declares `dependencies = []` — so a TypeScript file yields
+`UNCHECKABLE` with `LANGUAGE_UNSUPPORTED`. Had it returned "no violations", a JS repository would
+read 100% compliant with checks that never ran. That is the fourth appearance of this defect class
+in this codebase, and the first one caught before it shipped.
+
+**`counts_toward_compliance` excludes the undecided rows**, so a rate moves when the customer's
+code changes rather than when our parser coverage does.
+
+**`Checked` refuses to be constructed dishonestly.** `VIOLATED` without evidence is an accusation a
+developer cannot act on; `UNCHECKABLE` without a reason is silence wearing a result's clothes. Both
+raise.
+
+**Dotted names are reconstructed, not matched on the last segment.** A rule forbidding
+`subprocess.run` does not fire on `runner.run`. An import rule matches its target and everything
+beneath it, so forbidding `pickle` also forbids `from pickle import loads` — which is what somebody
+writing that rule means.
+
+Verified by sabotage: an unparseable language reporting as passed, broken Python reporting as
+passed, a substring match on call names, and silently dropping the deferred rows.
+
+### The declared standards reach the pull request — `ingest/blob.py`, `render/rule_block.py`
+
+D1b could check a file; nothing called it from a delivery. `deliver()` now reads
+`.quantamind/rules.toml` from the clone, runs `check_change()` over every changed file, and renders
+the result beside the ranking.
+
+**The file is read as the change LEAVES it, not as the clone happens to sit.** `ingest/blob.at()`
+runs `git show <sha>:<path>`, because the working tree of a shared clone is whatever the last fetch
+left, and a review of that would be judging a commit nobody proposed. Absent and unreadable are
+different answers: a path the change deleted returns `None` — there is no code left for a standard
+to apply to — while a git failure raises, so a broken clone cannot read as a repository full of
+deletions with every rule quietly passing.
+
+**The denominator is printed, not implied.** "1 violation" invites a reader to assume everything
+else was checked and passed. Only Python is parsed, so a TypeScript repository produces rows we
+could not decide, and `render/rule_block.py` states checks decided, violations found, and how many
+were left undecided with the reason — followed by the words "those are not passes". Without that
+line the section reports our parser coverage as the customer's compliance, and it looks best
+exactly where we can read least.
+
+**Violations are asserted where model findings are not.** A forbidden call either appears in the
+syntax tree or it does not, and anyone can re-run the check on the same commit. That is why this
+block names the rule, the file and the line, while `render/comment.py` continues to claim nothing
+about correctness.
+
+Verified by sabotage: dropping the undecided count, and counting undecided rows as decided, each
+fail their own test. Run live against this repository's own HEAD, a two-rule file produced 3
+passed, 1 violated (`print` at `run_endpoint.py:104`) and 2 uncheckable (`README.md`,
+`language_unsupported`) — the markdown correctly not counted as a pass.

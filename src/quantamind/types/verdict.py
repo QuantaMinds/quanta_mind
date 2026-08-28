@@ -52,6 +52,7 @@ class Reason(Enum):
     DYNAMIC_DISPATCH = "dynamic_dispatch"
     RUNTIME_REGISTRATION = "runtime_registration"
     UNPARSEABLE_SYNTAX = "unparseable_syntax"
+    MALFORMED_DECLARATION = "malformed_declaration"
     LANGUAGE_UNSUPPORTED = "language_unsupported"
     GENERATED_FILE = "generated_file"
     EXTERNAL_SYMBOL = "external_symbol"

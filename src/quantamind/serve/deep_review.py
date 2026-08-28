@@ -86,7 +86,13 @@ def context_for(clone: Path, sha: str, changed: list[str]) -> str:
 
 
 def deep(
-    clone: Path, sha: str, ranked: list[str], *, project: str, changed: list[str] | None = None
+    clone: Path,
+    sha: str,
+    ranked: list[str],
+    *,
+    project: str,
+    changed: list[str] | None = None,
+    gcloud: str = "gcloud",
 ) -> Deep:
     """Read `ranked` with the model, keep only findings a parser can place in the diff.
 
@@ -100,7 +106,11 @@ def deep(
         # Not "the model found nothing" -- it was never asked, because those paths carry no diff.
         return Deep((), 0, 0, 0, 0, tuple(ranked), consulted=False)
     found = gemini.read(
-        text, ranked, project=project, context=context_for(clone, sha, changed or ranked)
+        text,
+        ranked,
+        project=project,
+        context=context_for(clone, sha, changed or ranked),
+        gcloud=gcloud,
     )
     located = [f for f in (locate(x, text) for x in found) if f is not None]
 
@@ -177,6 +187,7 @@ def examine(
             list(reading.paths),
             project=settings.inference_project,
             changed=changed,
+            gcloud=settings.gcloud_path,
         )
     except (InferenceFailed, Unavailable) as exc:
         print(f"[deliver] the model was unreachable, ranking still stands: {exc}", flush=True)

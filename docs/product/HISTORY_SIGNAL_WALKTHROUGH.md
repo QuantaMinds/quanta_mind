@@ -5,7 +5,7 @@
 > this is the bug.
 
 **Rewritten 2026-08-13.** This replaces an earlier draft built on a design the measurements
-falsified. The build plan is `docs/plans/gravity-reviewer-build-plan.md`; the evidence is in
+falsified. The build plan is `docs/plans/delivered/gravity-reviewer-build-plan.md`; the evidence is in
 `docs/findings/SIGNAL_SEARCH_LOG_2026-08.md` and
 `docs/findings/HISTORY_SIGNAL_BACKTEST_2026-08.md`.
 

@@ -96,7 +96,7 @@ sentence is written here, before the number exists, so it cannot be reached for 
 
 ## Adjudication
 
-Blind, per `docs/plans/adjudication-preregistration.md`: arm labels stripped, findings shuffled,
+Blind, per `docs/plans/preregistrations/reviewer/adjudication-preregistration.md`: arm labels stripped, findings shuffled,
 raters out-of-family, sabotaged controls (a real quote paired with a claim from a different pull
 request) mixed in at a known rate. **A rater pool that does not catch the controls is discarded
 before its ratings are read.**

@@ -105,25 +105,25 @@ class Estimate:
         return self.fired / self.changes if self.changes else 0.0
 
     def sentence(self) -> str:
-        """One line for a human, naming the number rather than a claimed band."""
+        """How often a change reaches the top decile; it said "would have spoken" after A4."""
         if self.selectivity is Selectivity.NO_HISTORY:
             return "No history to calibrate on: this repository cannot be ranked yet."
         if self.selectivity is Selectivity.CONCENTRATED:
             return (
-                f"On your last {self.changes} changes this would have spoken {self.fired} time(s). "
+                f"{self.fired} of your last {self.changes} changes reached your top decile. "
                 f"A few files dominate your history, so a top-decile rule cannot separate them — "
-                f"it would be almost always silent here. That is a property of the repository, and "
-                f"you should know it before installing rather than after."
+                f"almost nothing here will be marked as standing out. That is a property of the "
+                f"repository, and you should know it before installing rather than after."
             )
         if self.selectivity is Selectivity.ALWAYS:
             return (
-                f"On your last {self.changes} changes this would have spoken {self.fired} time(s) "
-                f"— {self.rate:.0%}. That is close to every change, which is the noise this "
-                f"product exists to reduce. It should not be installed here as configured."
+                f"{self.fired} of your last {self.changes} changes reached your top decile "
+                f"— {self.rate:.0%}. Marking close to every change as standing out is the noise "
+                f"this product exists to reduce. It should not be installed here as configured."
             )
         line = (
-            f"On your last {self.changes} changes this would have spoken {self.fired} time(s) "
-            f"— {self.rate:.0%}."
+            f"{self.fired} of your last {self.changes} changes reached your top decile "
+            f"— {self.rate:.0%}. Every change is reviewed; that fraction is flagged."
         )
         if self.spread:
             track = " to ".join(f"{r:.0%}" for r in self.spread)

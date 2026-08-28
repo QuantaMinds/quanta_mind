@@ -142,7 +142,7 @@ def read(
     project: str,
     context: str = "",
     location: str = "us-central1",
-    gcloud: str = "/opt/homebrew/share/google-cloud-sdk/bin/gcloud",
+    gcloud: str = "gcloud",
     model: str = MODEL,
 ) -> list[Finding]:
     """Findings about `paths` only. Raises `Unavailable` when there are no credentials.
