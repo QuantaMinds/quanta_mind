@@ -2403,3 +2403,49 @@ partial review read as a complete one.
 `tests/unit/layers/render/test_render_comment.py` now records that these assertions have encoded
 **three** different product decisions in one session — silence below the decile, then a salience
 sentence on every change, then neither — each rewritten in place rather than deleted.
+
+### The review answers the question, not the method — `infer/change_review.py`, `parse/importers.py`
+
+The golden rule: **did this pull request achieve the goal it set out to achieve, without disturbing
+anything else?** The comment now answers both halves, in a sentence each.
+
+**"Did what it said" needs the author's own words**, so `ingest.diff.stated_goal()` fetches the
+title and body. A goal inferred from the diff makes the question circular — a diff always achieves
+what the diff does — and an empty description yields `achieves_goal=None`, because grading against
+an invented goal manufactures agreement.
+
+**"Without disturbing anything else" needs the callers**, which `parse/importers.py` finds:
+`git grep` shortlists, `parse/python_names` decides. Neither alone is honest — scanning every file
+with `ast` costs a parse of the repository per review, and grepping alone matches the module name
+in a comment, a string, or a longer name that contains it. Verified by sabotage: trusting the grep,
+and prefix-matching instead of module-boundary matching, both make `pkg.target_helper` a false
+dependent of `pkg.target`.
+
+**An empty importer list means "no static Python import found", never "nothing depends on this."**
+A dynamic `importlib`, a re-export through `__init__`, and any other language are invisible. The
+comment says so, and a file that will not parse comes back as `Unresolved` rather than vanishing —
+otherwise an empty result would mean both "nothing imports this" and "we could not tell".
+
+What a developer sees, on a real pull request:
+
+```
+### QuantaMind
+
+**What changed**
+The `_token` function now logs the source of the authentication token. A new `.gcloudignore`
+prevents large directories from being uploaded during deployment.
+
+**Does it do what the PR says?** Yes — the code adds the logging and the file, as described.
+**Effect on callers:** The listed callers are not affected, but they will now trigger a log
+message to standard output when they cause a token to be fetched.
+```
+
+**`comment()`'s arguments are keyword-only, because its second positional already changed meaning
+once.** `unresolved` sat there, `summary` took the slot, and a live caller passing `()` bound an
+empty tuple to a summary. A signature whose positions shift under callers is a defect a type
+checker cannot see across a `Sequence` boundary.
+
+**Summarising a diff is a different task from finding defects**, and the 66.7–82.1% wrong figure
+measured the other one. Comparing a diff to a paragraph the author wrote has both halves in the
+prompt. It may be more reliable — **and it is not yet measured, so nothing states it as though it
+were.**

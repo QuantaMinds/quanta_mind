@@ -49,7 +49,7 @@ def test_the_coverage_line_is_computed_from_each_change_and_differs_by_case(
             f"string rather than a report. files={named} line={line!r}"
         )
 
-        body = comment(case.ranking, ())
+        body = comment(case.ranking)
         # **WHAT IS CHECKED ON REAL DATA CHANGED WITH THE PRODUCT, TWICE.** It asserted silence
         # below the decile, then that the two salience branches were DISTINGUISHABLE. The comment
         # now says neither: a developer waiting to merge does not act on our firing rate. What

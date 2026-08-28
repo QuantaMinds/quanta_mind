@@ -39,10 +39,12 @@ from pathlib import Path
 
 from quantamind.allocate.depth import Reading
 from quantamind.allocate.depth import plan as allocate
+from quantamind.infer.change_review import explain
 from quantamind.ingest import rules_file
 from quantamind.ingest.diff import base_commit, changed_files
 from quantamind.ingest.github_api import token_for
 from quantamind.ingest.github_comments import post
+from quantamind.render.comment import comment as rendered
 from quantamind.render.pin_block import block
 from quantamind.render.rule_block import block as rules_block
 from quantamind.serve import pin_check
@@ -146,6 +148,9 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     # and a budget is the only consumer that claim ever fitted.
     reading = allocate(reviewed.ranking, list(changed))
     examined = examine(clone, head_sha, reading, list(changed), settings)
+    # **RE-RENDERED HERE WITH WHAT ONLY THIS LAYER HAS.** `run_review` renders a ranking-only
+    # body for the CLI, which has no pull request to read a goal from. A delivery does.
+    told = explain(clone, head_sha, delivery_repo, number, reading.paths, settings)
     if examined is not None:
         print(f"[deliver] {reading.depth.value}: {reading.why}", flush=True)
         print(
@@ -172,7 +177,12 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
         quiet = Outcome.NO_READABLE_FILES if not reviewed.considered else Outcome.NOTHING_TO_SAY
         return Delivered(quiet, reviewed.considered, reviewed.skipped, None, reading, examined)
 
-    body = (reviewed.body or "") + pins
+    kept = examined.anchored if examined is not None else ()
+    body = (
+        rendered(reviewed.ranking, summary=told, findings=kept)
+        if told is not None or kept
+        else (reviewed.body or "")
+    ) + pins
 
     if not settings.posting_enabled:
         return Delivered(

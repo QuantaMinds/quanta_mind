@@ -1,62 +1,103 @@
-"""The comment we post: what to look at, and what we did not look at. Nothing about ourselves.
+"""The comment we post: what changed, whether it did what it said, and what nobody checked.
 
-WHAT: `comment(ranking, unresolved)` renders the body posted on a pull request.
-WHY:  **THIS USED TO EXPLAIN HOW THE PRODUCT WORKS, AND A DEVELOPER READING A PULL REQUEST DOES
-      NOT CARE.** The previous body carried a paragraph of method ("ranked by prior-fix history",
-      "the budget cut through a tie", "4.46% against 1.21% overall"), a sentence about whether the
-      change was in the repository's top decile, and a footer disclaiming what the product is. All
-      of it was true and none of it was actionable. A reviewer wants the two facts that change what
-      they do: **where to look, and what nobody looked at.**
+WHAT: `comment(ranking, summary, findings, unresolved)` renders the body posted on a pull request.
+WHY:  **THE ONE QUESTION A REVIEW ANSWERS IS WHETHER THE CHANGE DID WHAT IT SAID WITHOUT
+      DISTURBING ANYTHING ELSE.** An earlier version listed files to read and nothing more, which
+      told a developer where to look without telling them anything about their own change. Before
+      that it explained our ranking method, which told them about us. Both were things the reader
+      does not act on.
 
-      **THE COUNTS AND THE METHOD ARE GONE FROM THE COMMENT, NOT FROM THE PRODUCT.** They still
-      exist on `Ranking`, still drive the ordering, and `quantamind dashboard` still reports them.
-      What changed is who they are shown to: an operator deciding whether to keep paying for this
-      is the audience for a firing rate, and the developer waiting to merge is not.
+      **THE SECTION ABOUT WHAT WE DID NOT CHECK IS NOT MODESTY, IT IS THE OTHER HALF OF THE
+      QUESTION.** "Without disturbing anything else" needs cross-file evidence — what imports this,
+      what breaks downstream — and that is not built. A comment that answered the first half and
+      stayed silent on the second would read as a clean bill of health for a check that never ran,
+      which is the failure this product exists to refuse. So it is stated, in one line, until
+      `allocate`/`parse` can answer it.
 
-      **WHAT WAS NOT REVIEWED STAYS, IN ONE CLAUSE.** It is the one piece of self-description that
-      is also a fact the reader acts on — "three of thirteen files were reviewed" tells them where
-      human attention is still required. Dropping it would let a partial review read as a complete
-      one, which is the failure this product exists to refuse. It is stated as a count, not as an
-      argument for the count.
-IMPORTS: types.ranking, types.verdict. Nothing to its right.
+      **A FINDING IS PRINTED WITH ITS LINE AND NOTHING ELSE.** No severity we cannot calibrate, no
+      confidence we have not measured. Raw findings ran 66.7-82.1% wrong across four blind pools,
+      so what publishes here has passed `verify/publishable.gate()` and is still shown as a claim
+      to check rather than a defect to fix.
+IMPORTS: types.{finding,ranking,verdict}. Nothing to its right, and nothing from `infer/`.
 CONSUMED BY: serve, which posts it; the live tests, which diff it against a golden file.
 """
 
 from __future__ import annotations
 
 from collections.abc import Sequence
+from typing import Protocol
 
+from quantamind.types.finding import Finding
 from quantamind.types.ranking import Ranking
 from quantamind.types.verdict import Unresolved
 
 HEADER = "### QuantaMind"
 LOOK = "**Look here first**"
+NOT_CHECKED = (
+    "_Callers are found by static Python import only: a dynamic import, a re-export, or another "
+    "language is invisible to it, and cross-repository impact is not checked at all._"
+)
 
 
-def _reviewed(ranking: Ranking) -> tuple[int, int]:
-    """How many units were read, and how many the change touched. Both are counts, never a rate."""
-    return len(ranking.funded()), len(ranking.units)
+class Stated(Protocol):
+    """What `infer.change_summary.Summary` provides, without importing rightward into `infer/`."""
+
+    @property
+    def what_changed(self) -> str: ...
+    @property
+    def achieves_goal(self) -> bool | None: ...
+    @property
+    def reasoning(self) -> str: ...
+    @property
+    def impact(self) -> str: ...
 
 
-def comment(ranking: Ranking, unresolved: Sequence[Unresolved] = ()) -> str:
-    """The comment body. Short, and about the reader's change rather than about us."""
-    read, total = _reviewed(ranking)
+def _goal(summary: Stated) -> list[str]:
+    """Whether it did what the author said, in the author's terms."""
+    if summary.achieves_goal is None:
+        return ["**Does it do what the PR says?** The PR description states no goal to check."]
+    verdict = "Yes" if summary.achieves_goal else "**No**"
+    said = [f"**Does it do what the PR says?** {verdict} — {summary.reasoning}"]
+    return [*said, f"**Effect on callers:** {summary.impact}"] if summary.impact else said
+
+
+def comment(
+    ranking: Ranking,
+    *,
+    summary: Stated | None = None,
+    findings: Sequence[Finding] = (),
+    unresolved: Sequence[Unresolved] = (),
+) -> str:
+    # **KEYWORD-ONLY, BECAUSE THE SECOND POSITIONAL ARGUMENT ALREADY CHANGED MEANING ONCE.**
+    # `unresolved` sat there; `summary` took the slot, and a live caller passing `()` bound an
+    # empty tuple to a summary and reached for `.what_changed` on it. A signature whose positions
+    # shift under callers is a defect the type checker cannot see across a `Sequence` boundary.
+    """The comment body. About the reader's change, and honest about its own gaps."""
+    read, total = len(ranking.funded()), len(ranking.units)
     lines = [HEADER, ""]
 
-    funded = ranking.funded()
-    if funded:
-        lines.append(LOOK)
-        lines.extend(f"- `{unit.unit.qualified_name}`" for unit in funded)
+    if summary is not None:
+        lines += ["**What changed**", "", summary.what_changed, "", *_goal(summary), ""]
+
+    if findings:
+        lines.append("**Worth checking**")
+        lines += [
+            f"- `{f.path}:{f.line}` — {f.claim}" if f.line else f"- `{f.path}` — {f.claim}"
+            for f in findings
+        ]
         lines.append("")
 
-    # **THE UNREVIEWED COUNT IS NOT OPTIONAL.** Without it a review of 3 files out of 13 reads as
-    # a review of the change. `unresolved` is folded into the same sentence rather than given a
-    # paragraph: a reader needs to know something was unreadable, not why our parser said so.
-    unread = total - read
+    funded = ranking.funded()
+    if funded and not summary:
+        lines.append(LOOK)
+        lines += [f"- `{unit.unit.qualified_name}`" for unit in funded]
+        lines.append("")
+
+    lines.append(NOT_CHECKED)
     parts = [f"{read} of {total} changed file(s) reviewed" if total else "Nothing to review"]
-    if unread > 0:
-        parts.append(f"{unread} not reviewed")
+    if total - read > 0:
+        parts.append(f"{total - read} not reviewed")
     if unresolved:
         parts.append(f"{len(unresolved)} construct(s) could not be parsed")
-    lines.append(f"_{'; '.join(parts)}._")
+    lines += ["", f"_{'; '.join(parts)}._"]
     return "\n".join(lines)

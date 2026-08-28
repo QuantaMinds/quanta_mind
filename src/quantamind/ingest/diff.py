@@ -142,6 +142,33 @@ def unified_diff(repo: str, number: int) -> str:
     return text
 
 
+@dataclass(frozen=True, slots=True)
+class Stated:
+    """What the author SAYS the change is for. The claim a review is measured against."""
+
+    title: str
+    body: str
+
+    def text(self) -> str:
+        """Title and body as one block, or an empty string when the author wrote neither."""
+        return f"{self.title}\n\n{self.body}".strip()
+
+
+def stated_goal(repo: str, number: int) -> Stated:
+    """The pull request's own description of its purpose.
+
+    **THE REVIEW IS MEASURED AGAINST THIS, SO IT COMES FROM THE AUTHOR AND NOT FROM THE DIFF.**
+    "Did this change do what it set out to do" has no meaning without the second half, and
+    inferring the intent from the code makes the question circular: a diff always achieves what
+    the diff does. An empty description is a real answer — it means the author stated no goal, and
+    the review must say so rather than invent one.
+    """
+    payload = _gh(repo, number, f"repos/{repo}/pulls/{number}")
+    if not isinstance(payload, dict):
+        raise DiffReadFailed(repo, number, "the pull request payload was not an object")
+    return Stated(str(payload.get("title") or ""), str(payload.get("body") or ""))
+
+
 def base_commit(repo: str, number: int, clone: Path) -> Base:
     """The commit the pull request was opened against, resolved in `clone`.
 
