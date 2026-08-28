@@ -8,7 +8,7 @@ evidence and it is not the commercial plan. Those were moved out so this reads a
 | why the ranker's unit is the file and its budget is three — gate 3c, the variants, the two tuned-on-noise diagnoses | `docs/findings/ALLOCATION_EVIDENCE_2026-08.md` |
 | the schema, retention, and what the database enforces | `docs/plans/design/storage.md` |
 | tiers, tracking, integrations, identity, procurement | `docs/plans/design/commercial-surface.md` |
-| the ranker as measured, with its pre-registered bar | `docs/plans/feat-rank-fix-history.md` |
+| the ranker as measured, with its pre-registered bar | `docs/plans/delivered/feat-rank-fix-history.md` |
 | every number quoted here, recomputed from its artefact | `research/phase0/claims/verify.py` |
 
 ---
@@ -40,13 +40,13 @@ three months stale.
 |---|---|---|
 | `types/` | **14** | `change.py`, `checked.py`, `commit.py`, `deep.py`, `env_values.py`, `finding.py`, `pooled_outcome.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `rule.py`, `settings.py`, `touch.py`, `verdict.py` |
 | `store/` | **9** | `calibration.py`, `deliveries.py`, `drift.py`, `lifecycle.py`, `migrations.py`, `reviews.py`, `schema.py`, `tenancy.py`, `touches.py` |
-| `ingest/` | **12** | `app_auth.py`, `change_shape.py`, `commits.py`, `diff.py`, `git_credentials.py`, `github_api.py`, `github_comments.py`, `history.py`, `pull_refs.py`, `reachability.py`, `review_window.py`, `rules_file.py` |
+| `ingest/` | **13** | `app_auth.py`, `blob.py`, `change_shape.py`, `commits.py`, `diff.py`, `git_credentials.py`, `github_api.py`, `github_comments.py`, `history.py`, `pull_refs.py`, `reachability.py`, `review_window.py`, `rules_file.py` |
 | `parse/` | **3** | `languages.py`, `python_names.py`, `units.py` |
 | `rank/` | **6** | `baseline.py`, `events.py`, `firing.py`, `history_rates.py`, `order.py`, `score.py` |
 | `allocate/` | **1** | `depth.py` |
 | `infer/` | **2** | `gemini.py`, `prompt_once.py` |
 | `verify/` | **7** | `anchor.py`, `external_facts.py`, `pin_mismatch.py`, `publishable.py`, `release_claims.py`, `releases.py`, `rule_check.py` |
-| `render/` | **7** | `comment.py`, `coverage_line.py`, `dashboard.py`, `deep_report.py`, `pin_block.py`, `replay_report.py`, `shape_line.py` |
+| `render/` | **8** | `comment.py`, `coverage_line.py`, `dashboard.py`, `deep_report.py`, `pin_block.py`, `replay_report.py`, `rule_block.py`, `shape_line.py` |
 | `serve/` | **15** | `cli.py`, `deep_review.py`, `health.py`, `listener.py`, `pin_check.py`, `retrospective.py`, `review_delivery.py`, `run_commit.py`, `run_dashboard.py`, `run_endpoint.py`, `run_migrate.py`, `run_review.py`, `settle.py`, `webhook_github.py`, `working_clone.py` |
 
 <!-- plan-state:end -->
@@ -249,7 +249,7 @@ previous sabotage here disabled only the entry point and left the suite green.
 
 **This is the stage that decides whether the research is the product.**
 
-Read `docs/plans/design/storage.md` before step 1 and `docs/plans/feat-rank-fix-history.md` before
+Read `docs/plans/design/storage.md` before step 1 and `docs/plans/delivered/feat-rank-fix-history.md` before
 step 3. The schema is versioned and append-only: a column that must exist from the first row cannot
 be backfilled.
 

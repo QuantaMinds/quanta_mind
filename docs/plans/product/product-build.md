@@ -2,7 +2,7 @@
 
 **How to read this.** One line per deliverable. `[ ]` not built, `[x]` built AND verified by
 `just verify`, `[~]` in progress. A line is only ticked when the gate the definition of done names
-is green — not `just check`. Design reasoning lives in `docs/plans/feat-review-every-pr.md`; this
+is green — not `just check`. Design reasoning lives in `docs/plans/delivered/feat-review-every-pr.md`; this
 file is the state.
 
 **Nothing below is ticked on a promise.** Each tick names the evidence next to it.
@@ -53,17 +53,41 @@ worth selling.
       FULL/FOCUSED split, and **published findings per pull request** — the number that decides
       whether coverage is sellable. Comparable today: 0.013–0.037 correct findings per PR.
 
-## Phase B — make it buyable
+## Phase G — GCP integration (the container cannot run `gcloud`)
+
+**Direction 2026-08-27: product and traffic first, payments later.** This is the gap that actually
+blocks Half B in production, and it was invisible until the deep half ran for the first time.
+
+- [ ] **G1 Service-account auth for Vertex, with no `gcloud` and no dependency.** `infer/gemini.py`
+      shells out to `gcloud auth print-access-token`. There is no `gcloud` in the container and
+      there should never be — a 200 MB SDK to fetch a bearer token is the dependency this product
+      refuses. **The machinery already exists:** `ingest/app_auth.py` signs an RS256 JWT with
+      `openssl` and exchanges it for a GitHub installation token, and a Google service account is
+      the SAME pattern — sign a JWT with the SA key, POST to `oauth2.googleapis.com/token`,
+      receive an access token. One sibling module, zero new dependencies; `gcloud_path` stays for
+      laptop development.
+- [ ] **G2 Prove Half B from inside the container.** It has run exactly once, by hand, through the
+      CLI on a laptop. Never from a webhook delivery, never in Docker, never with a service
+      account. Until that runs, "the endpoint reviews with a model" is a claim about a code path
+      rather than an observation.
+- [ ] **G3 Cost per review, measured.** Every delivery that consults a model records what it
+      spent. Without it, BYOK pricing and the free-tier cap are both guesses.
+
+## Phase B — make it buyable  ⏸ **PAYMENTS PARKED 2026-08-27**
+
+**Parked:** B3 (Stripe), B7 (BYOK billing). **Not parked:** the items below that produce TRAFFIC,
+which need no payment rail — a free tier is free, so onboarding real repositories does not wait on
+Stripe.
 
 - [ ] **B1 Background warm-up worker.** Kills the cold start: full clone + ~31s index build on a
       115k-commit repository. Cannot be inline — GitHub needs a prompt 2xx.
 - [ ] **B2 Accounts + sign in with GitHub.** No user model exists today.
-- [ ] **B3 Stripe checkout + subscription webhooks.** 🔑 *needs your Stripe account*
-- [ ] **B7 BYOK — the customer brings their own model key.** Inference cost moves to them, which
+- [ ] **B3 Stripe checkout + subscription webhooks.** ⏸ PARKED. 🔑 *needs `claude mcp login plugin:stripe:stripe` run in a REAL terminal (my Bash tool has no tty), and a `STRIPE_WEBHOOK_SECRET`, absent from `.env`. Present: `STRIPE_Publishable_key`, `STRIPE_Secret_key`, `STRIPE_LIVE_SECRET_KEY`, `STRIPE_LIVE_PUBLISHABLE_KEY`.*
+- [ ] **B7 BYOK — the customer brings their own model key.** ⏸ PARKED with B3. Inference cost moves to them, which
       makes per-review cost somebody else's ceiling rather than our margin. Needs per-tenant
       credentials rather than one `inference_project`, and a stored key is a liability: it belongs
       encrypted at rest and must never reach `quantamind config`, a log, or a comment.
-- [ ] **B8 Free tier, and it is a QUALIFICATION not a discount.** Every rule below is checkable
+- [ ] **B8 Free tier — NOT parked; this IS the traffic path and needs no payment rail.** Every rule below is checkable
       from the GitHub API at install time, so it can be enforced rather than advertised:
 
       | rule | check |

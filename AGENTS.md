@@ -162,7 +162,7 @@ you remember to obey — the machine will stop you either way.
   print the distribution, then make the suspected cause a mechanical check and cross-tabulate it
   against the outcome — **a cause that does not separate outcomes is a story.** Three fixes moved
   nothing (p = 0.53); one deep-dive found the mechanism. **Diagnosis or detector — say which.**
-- **Reference `file.py:42`, never paste code** into plans or PR descriptions.
+- **Reference `file.py:42`, never paste code** into plans or PR descriptions.  <!-- citation:allow — `file.py` is the SHAPE of a citation, not one. It resolved for months against a file of that name inside a gitignored research corpus, so this rule's own example was passing because of downloaded data rather than because it named anything real. -->
 - **Scope investigations.** "Read the resolve layer" not "understand the codebase".
 - **When you disagree with a rule here, say so in the PR.** Do not silently work around it.
 

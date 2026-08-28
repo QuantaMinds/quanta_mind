@@ -4,7 +4,7 @@
 produces when run on real repositories, the firing rule that survived, and the reason the
 headline number cannot yet be sold.
 
-Companion to `docs/plans/gravity-reviewer-build-plan.md`. Every number below comes from one
+Companion to `docs/plans/delivered/gravity-reviewer-build-plan.md`. Every number below comes from one
 code path with the git exit code asserted; the defect that made an earlier attempt void is
 recorded at the end rather than deleted.
 

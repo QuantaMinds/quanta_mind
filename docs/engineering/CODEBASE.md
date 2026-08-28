@@ -1416,7 +1416,7 @@ answers why no filter has helped:
 
 **It is a generation failure and every mechanism tried has been a filter.**
 
-### `docs/plans/feat-execution-corpus.md` — the one road that is UNTESTED, and its price
+### `docs/plans/delivered/feat-execution-corpus.md` — the one road that is UNTESTED, and its price
 
 The Aug 2026 field: best published research on LLM code review is **28.0% RefineEM** (behavioural),
 best tool against planted ground truth is **F1 47%**, and **no strict-adjudication rate is published
@@ -1846,7 +1846,7 @@ is counted by one and unreachable to the other.
 
 **So this stays open on purpose.** The next step is a measurement — on a repository with real
 release-branch traffic, does base-walking ever change the top-three selection? — not a quiet edit to
-a `git log` invocation. → `docs/plans/feat-touch-index-cache.md`, the investigation section.
+a `git log` invocation. → `docs/plans/delivered/feat-touch-index-cache.md`, the investigation section.
 
 ### The HEAD horizon, measured: 81% of counts move, 0% of readings, 2.6% of deep reads
 
@@ -1873,7 +1873,7 @@ rate is zero, because none of its recent pull requests target a non-default bran
 **The horizon is now a documented property with a number on it.** What the measurement does not
 cover: one repository, one kind of divergence — short-lived release branches cut from main. A
 long-lived fork is the case that could move the set, and 0 of 78 has a 95% upper bound near 3.8%.
-→ `docs/plans/feat-touch-index-cache.md`.
+→ `docs/plans/delivered/feat-touch-index-cache.md`.
 
 ### The gate now requires the budget to bind — product-readiness item 2
 
@@ -1913,7 +1913,7 @@ the old one, in the same line, for the length of one command. Caught by running 
 files, while the product counts `.py .pyi .ts .tsx .js`. On a Python repository the populations
 coincide; on a polyglot one **more changes bind than the study's population predicts**, so 4.11% and
 50.3% must be quoted as Python-only. Re-deriving them over the full reviewable set is a separate
-measurement and is not done. → `docs/plans/feat-gate-on-binding-changes.md`.
+measurement and is not done. → `docs/plans/delivered/feat-gate-on-binding-changes.md`.
 
 ### The product comments as itself — GitHub App auth, no new dependency
 
