@@ -80,9 +80,15 @@ def _token(gcloud: str) -> str:
     laptop development.
     """
     try:
-        return google_auth.token(gcloud).value
+        got = google_auth.token(gcloud)
     except google_auth.Unavailable as exc:
         raise Unavailable(str(exc)) from None
+    # **THE SOURCE IS LOGGED AND THE TOKEN IS NOT.** `Token` was built carrying its source "so it
+    # can be logged" and then nothing logged it, which left no way to tell a container using the
+    # metadata server from one that had somehow found a `gcloud` — the exact difference a
+    # deployment is trying to prove. The value never appears; only which identity answered.
+    print(f"[infer] access token from {got.source}", flush=True)
+    return got.value
 
 
 def _post(url: str, token: str, body: dict[str, object]) -> dict[str, object]:

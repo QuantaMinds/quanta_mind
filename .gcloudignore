@@ -1,0 +1,23 @@
+# What a source deploy must NOT upload.
+#
+# The Dockerfile copies pyproject.toml, README.md and src/ and nothing else, so everything here is
+# weight on the wire rather than anything the image could use. `research/` alone is 497 MB and is
+# a separate uv project on a different interpreter that rule 11 forbids the product to import.
+#
+# Without this file gcloud synthesises one from .gitignore, which keeps the gitignored corpora out
+# but still ships every tracked research file, every test and the whole of .git.
+.git/
+.gitignore
+research/
+tests/
+docs/
+.venv/
+.verify-clone/
+.verify-pack.db
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.hypothesis/
+**/__pycache__/
+*.pyc
+.env
