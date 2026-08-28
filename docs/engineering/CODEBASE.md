@@ -2622,3 +2622,29 @@ it considered a document it only half read.
 
 **A local-only file the repository never pushes is invisible to this.** The reviewer reads the
 clone; a rule that exists solely on somebody's laptop cannot be enforced by anything.
+
+### Conventions: keep the rules, not the prose — and read the laptop's own
+
+Two losses in the first version, both fixed.
+
+**A character cap drops rules 9 through 15.** Cutting this repository's own `AGENTS.md` at 6,000
+characters removed the end of a numbered list, so the review would have enforced the first half of a
+standard and reported it as the standard — with nobody able to see which half was applied. The
+rule-shaped lines are kept and the argument between them discarded: **12,583 characters of prose
+became 4,436 of rules, and rule 15 survives.** A document with no list structure has nothing to
+extract and falls back to the cap, with the truncation stated.
+
+**A convention on one laptop is now read, and labelled.** A developer's checkout may carry a
+gitignored `CLAUDE.md`, and on that machine it is a real standard they work to. It is read from disk
+when git does not have it, and its name carries `(uncommitted)` — because a rule living on one
+laptop binds nobody else, and a review presenting it as the team's standard would be inventing
+consensus.
+
+**This is what makes the IDE path worth building.** The endpoint never sees an uncommitted file: its
+clones are `--no-checkout`, so there is no working tree, which is the honest outcome there. A local
+`quantamind review` does see one — so **Phase E's `/qm-review` enforces standards the webhook
+cannot**, which is a reason to build it beyond convenience. It is also the only path where a
+developer's own rules are checked before anyone else reads the code.
+
+Sabotage covers both: truncating prose instead of extracting rules drops the last rule, and dropping
+the `(uncommitted)` label presents a laptop rule as the team's.

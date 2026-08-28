@@ -78,14 +78,53 @@ def test_an_empty_convention_file_is_not_a_convention(tmp_path: Path) -> None:
     assert written(clone, "HEAD") == ()
 
 
-def test_a_long_document_is_truncated_and_says_so(tmp_path: Path) -> None:
-    """**A SILENT TRUNCATION LETS A REVIEW CLAIM IT READ A CONVENTION IT NEVER SAW.**"""
-    clone = _repo(tmp_path / "d", {"AGENTS.md": "rule\n" * (MAX_CHARS // 2)})
+def test_the_last_rule_survives_a_long_document(tmp_path: Path) -> None:
+    """**A CHARACTER CAP DROPS RULES 9 THROUGH 15, AND NOBODY SEES WHICH HALF WAS APPLIED.**
+
+    Truncating at 6,000 characters cut this repository's own AGENTS.md mid-list. Keeping the
+    rule-shaped lines and discarding the argument between them fits several times as many actual
+    rules in the same budget: 12,583 characters of prose became 4,436 of rules, and the last rule
+    survived where truncation had removed it.
+    """
+    padding = "This paragraph explains why the rule exists and is not itself a rule. " * 30
+    doc = "\n\n".join(f"{n}. rule number {n}\n\n{padding}" for n in range(1, 16))
+    clone = _repo(tmp_path / "d", {"AGENTS.md": doc})
+
+    ((_, text),) = written(clone, "HEAD")
+
+    assert "rule number 15" in text, (
+        "the LAST rule was dropped. A review that enforces the first half of a standard and "
+        "reports it as the standard is worse than one that read none of it"
+    )
+    assert "This paragraph explains" not in text, "the argument was kept instead of the rules"
+
+
+def test_prose_with_no_rule_lines_is_still_bounded_and_says_so(tmp_path: Path) -> None:
+    """Nothing rule-shaped to keep, so it falls back to the cap — with the marker."""
+    clone = _repo(tmp_path / "e", {"AGENTS.md": "word " * (MAX_CHARS // 2)})
 
     ((_, text),) = written(clone, "HEAD")
 
     assert text.endswith(TRUNCATED), "the document was cut without saying it had been"
     assert len(text) <= MAX_CHARS + len(TRUNCATED)
+
+
+def test_an_uncommitted_local_document_is_read_and_labelled(tmp_path: Path) -> None:
+    """**A RULE ON ONE LAPTOP BINDS NOBODY ELSE.**
+
+    A developer running this on their own checkout may keep a gitignored CLAUDE.md, and on that
+    machine it is a real standard. It is read, and its name says it is uncommitted, because a
+    review presenting it as the team's standard would be inventing consensus. The endpoint never
+    sees one: its clones have no working tree.
+    """
+    clone = _repo(tmp_path / "f", {"AGENTS.md": "- one\n- two\n- three\n"})
+    (clone / "CLAUDE.md").write_text("- local one\n- local two\n- local three\n", encoding="utf-8")
+
+    names = [name for name, _ in written(clone, "HEAD")]
+
+    assert names == ["AGENTS.md", "CLAUDE.md (uncommitted)"], (
+        f"an uncommitted local convention was lost or unlabelled: {names}"
+    )
 
 
 def test_they_are_read_from_git_not_from_a_working_tree(tmp_path: Path) -> None:

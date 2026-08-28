@@ -354,6 +354,10 @@ to general vulnerability detection (D7a). Both are things we could ship and coul
 the webhook would post — verified on this repository. What it cannot do is review work that has
 no commit yet, and it prints prose for a human rather than something a coding agent can act on.
 
+**And it enforces standards the endpoint cannot.** `ingest/standards/conventions.py` reads an
+uncommitted `CLAUDE.md` from disk; the webhook never can, because its clones have no working tree.
+A developer's own rules are checked here or nowhere.
+
 - [ ] **E1 Review the working tree and the unpushed branch.** `--sha` requires a commit; a
       developer about to open a pull request has uncommitted edits, or commits not yet pushed.
       Diff against the merge-base with the default branch, and against the index for uncommitted
