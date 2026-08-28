@@ -2777,3 +2777,43 @@ and was read by the budget gate. `types/spend.Spend` was written days later with
 `within()` and `used_cache` moved across, `ms` and `complete` came from `Spend`. `used_cache` was
 nearly lost in the merge — a test caught it, and its paragraph about an invalidator in the cached
 prefix survives only because of that.
+
+### `research/phase0/src/phase0/findings/` — is a PUBLISHED finding true?
+
+A6 measured **0.686 findings published per change** and could not say how many of them were
+right. `handlabel/` asks whether a PR broke something; this package asks a different question of
+a different unit, with the same discipline: blind sheet, sealed key, and an arm that makes a
+constant answer fail. `pack.py` draws, `audit.py` disbelieves the draw, `sample.py` and
+`scoring.py` are the two commands, wired as `just findings-draw` and `just findings-score`.
+
+**The control arm is a genuine claim shown beside code it is not about.** A one-armed sheet
+cannot detect an inattentive labeller — marking everything TRUE would score 100%. Half the pack
+is planted, so a constant answer scores 50% and `scoring.py` **withholds the rate entirely**
+rather than printing it under a warning: a number that was not evidence is otherwise quoted
+without its caveat. `test_scoring_gate.py` asserts the rate is ABSENT from the output, not that
+a warning is present.
+
+**Falsity is established by construction.** A planted claim must name something — an identifier,
+a dotted attribute — that is ABSENT from the host diff. A claim generic enough to be accidentally
+true would mark a *correct* labeller wrong and withhold a real result. The cost is stated where
+it is measured: real claims overlap their diff 93%, planted 5%, so the controls are mechanically
+separable. **Catching them proves the labeller read, not that they judged well.** Closing that
+gap means authoring subtly-false claims, which is the judgement the instrument exists to exclude.
+
+**Four leaks reached a built pack before any was noticed, and every one came from the same
+place: donors drawn from a pool that still held the real items.** One claim used three times;
+six claims present in BOTH arms, once beside their own diff and once beside a foreign one;
+repeated diffs homogeneous by arm; and — worst — an audit that announced "no planted item's
+symbols appear in the code shown" having examined **7 of 12**. The five it skipped were the
+generic claims most at risk, because the regex wanted identifier-shaped backticks and a claim
+quoting `len(args) == 1` yields none. `overlap()` now returns **-1 for untestable**, and coverage
+below the arm size is a failure rather than a footnote — rule 14, and the shape of
+`bench/forensic/population.py:assert_intersects`.
+
+**The first pack drawn here is BURNED and preserved at `data/labelling.BURNED_20260828/`.**
+Auditing it printed per-item arms into an assistant transcript — `item 01, item 02 -> ['PLANTED',
+'REAL']` — and the labeller reads that transcript, so blindness for those item numbers is gone
+and cannot be restored by care from here. This is `PHASE0_PREREGISTRATION.md` A57 repeated by the
+tooling built after it, which is why `sample.py` now reports **counts only**: a rejected pack
+prints how many leaks, never which items. A57's own lesson was that the protection which failed
+was an instruction rather than a check; the redraw under seed `20260828` is the check.
