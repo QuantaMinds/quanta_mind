@@ -91,3 +91,30 @@ def test_a_temp_tree_outside_the_project_is_still_not_the_project(tmp_path) -> N
     deep = tmp_path / "a" / "b" / "c"
     deep.mkdir(parents=True)
     assert is_project(deep) is False
+
+
+def test_a_repository_cloned_inside_the_project_is_not_the_project(tmp_path) -> None:
+    """**FOUND BY RUNNING THE GUARDS AGAINST FOUR EXTERNAL REPOSITORIES.**
+
+    `.verify-clone` holds pallets/flask and lives inside this working tree. The upward walk
+    found the project's own `AGENTS.md` above it and applied the floor, so a guard pointed at a
+    foreign repository reported a coverage breach for a tree with nothing to do with us — while
+    the same four repositories cloned OUTSIDE correctly waived. The walk now stops at the first
+    `.git`, which is the enclosing repository.
+    """
+    outer = tmp_path / "project"
+    (outer / ".git").mkdir(parents=True)
+    (outer / "AGENTS.md").write_text("x")
+    (outer / "justfile").write_text("x")
+    assert is_project(outer) is True
+
+    inner = outer / "vendored-clone"
+    (inner / ".git").mkdir(parents=True)
+    (inner / "src").mkdir()
+    assert is_project(inner) is False, "a nested clone counted as the project"
+    assert is_project(inner / "src") is False, "a directory inside a nested clone counted too"
+
+
+def test_a_subdirectory_with_no_git_of_its_own_still_counts() -> None:
+    """The ordinary case must survive the stop-at-git rule: `tests/` has no `.git`."""
+    assert is_project(ROOT / "tests") is True

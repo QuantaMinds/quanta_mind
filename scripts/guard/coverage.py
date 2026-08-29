@@ -42,6 +42,12 @@ def is_project(root: Path) -> bool:
     """
     here = root.resolve()
     for candidate in (here, *here.parents):
+        # **THE WALK STOPS AT THE FIRST `.git`.** Without this, any repository CLONED INSIDE the
+        # project counts as the project: `.verify-clone` holds pallets/flask, and pointing a
+        # guard at it produced a floor breach for a tree that has nothing to do with us. Found by
+        # running the suite against four external repositories, not by any test.
+        if (candidate / ".git").exists():
+            return all((candidate / marker).exists() for marker in MARKERS)
         if all((candidate / marker).exists() for marker in MARKERS):
             return True
     return False

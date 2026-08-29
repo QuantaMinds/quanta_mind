@@ -18,9 +18,9 @@ producer.
 |---|---|
 | guard scripts | **27** — 23 executable, 4 library helpers |
 | **pass clean, fire on their violation, ignore the near-miss** | **23 of 23** |
-| real defects found in a guard | **3**, fixed |
+| real defects found in a guard | **4**, fixed |
 | real defects found elsewhere by this work | **3**, fixed |
-| **defects only a live foreign repository exposed** | **2** |
+| **defects only a real repository exposed** | **3** — two by flask, one by a nested clone |
 | **probes of mine that were wrong** | **9** |
 | report how much they examined | 6 of 23 |
 | pass without saying what they examined | 17 of 23 |
@@ -39,6 +39,43 @@ can would report success having examined nothing.
 
 
 
+
+## Run against five real repositories, not one
+
+`pallets/flask` alone is a mid-size pure-Python project and stresses very little. The suite was
+run against four more, chosen to differ in language, size and shape:
+
+| repository | files | what it stresses |
+|---|---|---|
+| `expressjs/express` | 213 | JavaScript — almost no Python for the guards to find |
+| `pallets/click` | 166 | small Python, different layout |
+| `psf/requests` | 128 | small Python, flat package |
+| `tiangolo/fastapi` | 3,139 | large tree, deep nesting |
+| `pallets/flask` | 83 py | the original subject, cloned INSIDE this project |
+
+**The fifth found a defect the other four could not.** `.verify-clone` lives inside this working
+tree, so `is_project`'s upward walk met this project's own `AGENTS.md` above it and applied the
+coverage floor — **a guard pointed at pallets/flask reported a floor breach for a tree that has
+nothing to do with us**, while the same kind of repository cloned outside correctly waived.
+
+The walk now stops at the first `.git`, which is the enclosing repository: a clone nested inside
+the project is not the project. Removing that stop fails a named test. This is the second defect
+in my own `is_project` — the first was testing the markers IN the root, so subdirectory-rooted
+guards never saw them — and both were invisible until a real tree had the awkward shape.
+
+**After the fix: 0 tracebacks and 0 spurious breaches across all five.**
+
+The guards do real work on foreign code rather than merely surviving it:
+
+| guard | express | click | requests | fastapi | flask |
+|---|---|---|---|---|---|
+| `check_structure` | 2 | 34 | 12 | **168** | 27 |
+| `check_assert_quality` | 0 | 26 | 38 | 37 | 21 |
+| `check_subprocess_timeouts` | 0 | 8 | 0 | 33 | 0 |
+| `citations/resolve` | 1 | 0 | 0 | 17 | 0 |
+
+Twenty-three guards over 3,139 files completes in **3.0 seconds**, so the pruning that exists to
+keep the pre-edit hook inside its budget holds at that size.
 
 ## Run against a live external repository
 
