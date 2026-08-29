@@ -24,6 +24,61 @@ where a rule stops being a rule without anyone noticing.
 can would report success having examined nothing.
 
 
+
+## Final sweep — every guard, after every change
+
+Re-run end to end after the floors, the scoped exclusions, the `assert True` fix, the move to
+`scripts/measure/` and the `pulls.py` split. Nothing regressed.
+
+| # | guard | clean | fires | near-miss | empty |
+|---|---|---|---|---|---|
+| 1 | `check_agents_md.py` | pass ✓ | fires ✓ | — | refuses ✓ |
+| 2 | `check_assert_quality.py` | pass ✓ | fires ✓ | silent ✓ | refuses ✓ |
+| 3 | `check_branch_name.py` | pass ✓ | fires ✓ | — | **silent** |
+| 4 | `check_constant_time_compare.py` | pass ✓ | fires ✓ | — | refuses ✓ |
+| 5 | `check_conventions.py` | pass ✓ | fires ✓ | silent ✓ | refuses ✓ |
+| 6 | `check_enforcement_map.py` | pass ✓ | fires ✓ | — | refuses ✓ |
+| 7 | `check_module_identity.py` | pass ✓ | fires ✓ | — | refuses ✓ |
+| 8 | `check_no_partial_clone.py` | pass ✓ | fires ✓ | silent ✓ | refuses ✓ |
+| 9 | `check_no_research_imports.py` | pass ✓ | fires ✓ | silent ✓ | refuses ✓ |
+| 10 | `check_structure.py` | pass ✓ | fires ✓ | silent ✓ | refuses ✓ |
+| 11 | `check_subprocess_timeouts.py` | pass ✓ | fires ✓ | silent ✓ | refuses ✓ |
+| 12 | `citations/freshness.py` | pass ✓ | fires ✓ | silent ✓ | **silent** |
+| 13 | `citations/resolve.py` | pass ✓ | fires ✓ | silent ✓ | refuses ✓ |
+| 14 | `records/check_burned_corpora.py` | pass ✓ | fires ✓ | silent ✓ | **silent** |
+| 15 | `records/check_decided_vocabulary.py` | pass ✓ | fires ✓ | silent ✓ | refuses ✓ |
+| 16 | `records/check_docs_sync.py` | pass ✓ | fires ✓ | — | **silent** |
+| 17 | `records/check_documented_commands.py` | pass ✓ | fires ✓ | silent ✓ | **silent** |
+| 18 | `records/check_documented_recipes.py` | pass ✓ | fires ✓ | silent ✓ | refuses ✓ |
+| 19 | `records/check_no_vague_refs.py` | pass ✓ | fires ✓ | silent ✓ | refuses ✓ |
+| 20 | `records/check_plan_state.py` | pass ✓ | fires ✓ | — | refuses ✓ |
+| 21 | `records/check_schema_shape.py` | pass ✓ | fires ✓ | — | refuses ✓ |
+| 22 | `records/check_stage_table.py` | pass ✓ | fires ✓ | — | refuses ✓ |
+| 23 | `records/check_withdrawn_amendments.py` | pass ✓ | fires ✓ | silent ✓ | refuses ✓ |
+
+**0 of 23 wrong on any graded dimension.** Every guard passes on the real repository, fires on
+the violation it exists for, and ignores the near-miss that resembles one.
+
+**Silent-at-zero: 5, from 17 when this audit began.** Eighteen guards now refuse to report
+success on an empty population. The five left have populations too small for a floor to be
+anything but theatre — one branch name, one dated figure, six REPOS literals, six documented
+invocations, eleven directories — and the report names them rather than implying coverage.
+
+### The score across the whole investigation
+
+| | |
+|---|---|
+| guards examined | 23 executable, plus `coverage.py` and `plan_claims.py` |
+| real defects found in guards | **1** — `check_assert_quality` accepted `assert True` |
+| real defects found elsewhere | **3** — a hardcoded home directory twice, a missing `py.typed`, two unchecked imports it exposed |
+| my probes that were wrong | **9** |
+
+**The ratio is the finding.** Nine times a guard looked broken and the probe was at fault: the
+losing side of a decision inverted, a violation written into the wrong file, one mention removed
+of eleven, a substitution that produced an identical line, a diff header cited as code, an exit
+code read after a `printf`, a clean baseline given the violating argument. **When a check looks
+wrong, the probe is the likelier culprit** — and only opening the file settles it.
+
 ## Every guard, four dimensions
 
 Each guard was run against: the real repository (**clean**), a violation it must catch

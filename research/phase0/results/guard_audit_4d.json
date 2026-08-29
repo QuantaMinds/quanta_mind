@@ -99,8 +99,8 @@
   "vwhat": "a blob-filtered clone",
   "near": 0,
   "nwhat": "a clone with no filter",
-  "empty": 0,
-  "floor": false,
+  "empty": 1,
+  "floor": true,
   "msg": "[no-partial-clone] 1 violation(s): src/quantamind/_probe.py:13: [partial-clone] git clone carries a --filter. "
  },
  {
@@ -140,7 +140,7 @@
   "nwhat": "with a timeout",
   "empty": 1,
   "floor": true,
-  "msg": "[subprocess-timeouts] 36 subprocess call site(s) checked [subprocess-timeouts] 1 violation(s): src/quantamind/"
+  "msg": "[subprocess-timeouts] 49 subprocess call site(s) checked [subprocess-timeouts] 1 violation(s): src/quantamind/"
  },
  {
   "n": 12,
@@ -153,7 +153,7 @@
   "nwhat": "a date in the future",
   "empty": 0,
   "floor": false,
-  "msg": "[citation-freshness] 1 violation(s): docs/engineering/CODEBASE.md:2990: [citation-stale] re-check was due Janu"
+  "msg": "[citation-freshness] 1 violation(s): docs/engineering/CODEBASE.md:3040: [citation-stale] re-check was due Janu"
  },
  {
   "n": 13,
@@ -166,7 +166,7 @@
   "nwhat": "a citation that resolves",
   "empty": 1,
   "floor": true,
-  "msg": "[citations] 1 violation(s): docs/engineering/CODEBASE.md:2990: [citation-unresolved] cites 'docs/engineering/N"
+  "msg": "[citations] 1 violation(s): docs/engineering/CODEBASE.md:3040: [citation-unresolved] cites 'docs/engineering/N"
  },
  {
   "n": 14,
@@ -231,7 +231,7 @@
   "nwhat": "a recipe that exists",
   "empty": 1,
   "floor": true,
-  "msg": "[documented-recipes] 83 documented invocation(s) checked [documented-recipes] 5 documented command(s) NOT BUIL"
+  "msg": "[documented-recipes] 84 documented invocation(s) checked [documented-recipes] 5 documented command(s) NOT BUIL"
  },
  {
   "n": 19,
@@ -242,9 +242,9 @@
   "vwhat": "a section-number citation",
   "near": 0,
   "nwhat": "the same form, suppressed",
-  "empty": 0,
-  "floor": false,
-  "msg": "[no-vague-refs] 1 violation(s): docs/engineering/CODEBASE.md:2990: [section-ref] `\u00a7` cites a number that renum"
+  "empty": 1,
+  "floor": true,
+  "msg": "[no-vague-refs] 1 violation(s): docs/engineering/CODEBASE.md:3040: [section-ref] `\u00a7` cites a number that renum"
  },
  {
   "n": 20,
@@ -294,8 +294,8 @@
   "vwhat": "naming no mechanism",
   "near": 0,
   "nwhat": "naming one",
-  "empty": 0,
-  "floor": false,
+  "empty": 1,
+  "floor": true,
   "msg": "[withdrawn-amendments] 1 violation(s): docs/findings/PHASE0_PREREGISTRATION.md:2016: [withdrawal-without-enfor"
  }
 ]
