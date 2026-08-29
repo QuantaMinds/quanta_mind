@@ -9,16 +9,28 @@ where a rule stops being a rule without anyone noticing.
 
 ## Summary
 
+**Every number below was re-measured after the last change on 2026-08-29.** An earlier version of
+this table was left behind by its own later sections; the counts are now produced by a script
+rather than edited by hand, and the script is `research/phase0/results/guard_audit_4d.json`'s
+producer.
+
 | | count |
 |---|---|
-| guard scripts | 24 |
-| **fire correctly on a real violation — ALL tested end to end** | **23 of 23 executable** |
-| defects found by that testing | **1**, fixed |
-| "silent" results that were MY probe being wrong | **5 of 5** |
-| report how much they examined | **6 of 24** |
-| pass without saying what they examined | **15 of 24** |
-| **report a count AND still exit 0 at zero coverage** | **5** |
-| exit 0 when pointed at a path that does not exist | 15 |
+| guard scripts | **27** — 23 executable, 4 library helpers |
+| **pass clean, fire on their violation, ignore the near-miss** | **23 of 23** |
+| real defects found in a guard | **1**, fixed |
+| real defects found elsewhere by this work | **3**, fixed |
+| **probes of mine that were wrong** | **9** |
+| report how much they examined | 6 of 23 |
+| pass without saying what they examined | 17 of 23 |
+| **carry a coverage floor** | **12 of 23** — was 0 |
+| **silent on an empty population** | **5 of 23** — was 17 |
+
+**One row was deleted rather than updated.** It read *"exit 0 when pointed at a path that does not
+exist: 15"*, and it was a bad measure: **10 guards ignore `argv` entirely and scan a fixed root**,
+so handing them a missing path tests nothing about them. The replacement — silent on an empty
+population — runs each guard by the method its own root demands, an argument for the ones that
+take one and a different working directory for the ones that do not.
 
 **The guards work. The gap is that most cannot tell you they worked**, and five of the six that
 can would report success having examined nothing.
