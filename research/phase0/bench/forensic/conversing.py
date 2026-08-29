@@ -16,8 +16,11 @@ WHY:  **AN ANSWERER IS NOT A VERIFIER, AND CONFLATING THEM MADE THE FIRST RUN ME
       **AND THE RE-DECIDE STEP DOES NOT ASK THE MODEL TO GRADE ITSELF.** It supplies a fact the
       model did not have and asks only whether the finding stands on it. Asking a model to assess
       its own output is the lever measured five times at 8.5-16.8% retained discrimination.
-      **TWIN, EDIT BOTH:** `research/phase0/bench/forensic/conversing.py`
-      → `scripts/measure/README.md` “Duplicated across the boundary”
+      **A TWIN EXISTS AND MUST BE EDITED WITH THIS ONE.** `scripts/measure/conversing.py`
+      carries the same code. They are duplicated rather than shared because the two
+      projects are on different interpreters -- PyCG caps research at 3.10, the product
+      needs >=3.12 for `sys.monitoring`, and a shared environment cannot satisfy both.
+      An import across that boundary is impossible, so a copy is the honest cost.
 IMPORTS: stdlib; the product's `verify` oracles; the Vertex `client` type only for typing.
 CONSUMED BY: `conversational_arm.py`.
 """
@@ -31,7 +34,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "src"))
 
 from quantamind.verify.external_facts import (
     Verdict,

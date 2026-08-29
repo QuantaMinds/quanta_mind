@@ -19,8 +19,11 @@ WHY:  **ELEVEN GIGABYTES ACCUMULATED IN ONE WORKING SESSION AND FILLED A 228 GB 
 
       **THE ROOT LIVES UNDER THE JOB DIRECTORY, not `/var/folders`.** A path somebody can find, and
       delete, without being told which of nine random suffixes belongs to which experiment.
-      **TWIN, EDIT BOTH:** `research/phase0/bench/forensic/borrowed_clones.py`
-      → `scripts/measure/README.md` “Duplicated across the boundary”
+      **A TWIN EXISTS AND MUST BE EDITED WITH THIS ONE.** `scripts/measure/borrowed_clones.py`
+      carries the same code. They are duplicated rather than shared because the two
+      projects are on different interpreters -- PyCG caps research at 3.10, the product
+      needs >=3.12 for `sys.monitoring`, and a shared environment cannot satisfy both.
+      An import across that boundary is impossible, so a copy is the honest cost.
 IMPORTS: the product's `working_clone`. stdlib otherwise.
 CONSUMED BY: every harness in this package that needs a repository.
 """
@@ -31,7 +34,7 @@ import os
 import pathlib
 import sys
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "src"))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[4] / "src"))
 
 from quantamind.serve.working_clone import ensure, sweep
 

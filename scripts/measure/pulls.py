@@ -2,14 +2,13 @@
 
 WHAT: `gather(pulls, root)` returns `{key: context}` for every pull request, holding ONE clone at
       a time. `head_of` places a pull request's head and base; `context_for` renders it.
-WHY:  This is the half that touches the disk, and the half that kept being wrong: it read the
-      clone's HEAD instead of the pull request, kept every repository resident, and leaked a
-      failed clone. Each is fixed and each is recorded in `docs/engineering/CODEBASE.md`.
+WHY:  The half that touches the disk, and the half that kept being wrong: it read the clone's
+      HEAD not the pull request, kept every repository resident, and leaked a failed clone.
 
       **PEAK DISK IS ONE REPOSITORY, NOT THEIR SUM**, free space is checked BEFORE each clone
       rather than after, and the cleanup runs from `finally` so it does not depend on the clone
       succeeding -- that last one left 997 MB of a half-fetched discourse on a 2 GB machine.
-      **TWIN, EDIT BOTH:** `scripts/measure/pulls.py`
+      **TWIN, EDIT BOTH:** `research/phase0/bench/forensic/shape/pulls.py`
       → `scripts/measure/README.md` “Duplicated across the boundary”
 IMPORTS: stdlib; the product's `ingest.change_shape`, `render.shape_line`, `serve.working_clone`.
 CONSUMED BY: `bench/forensic/shape_context.py`.
@@ -24,12 +23,13 @@ import subprocess
 import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE.parents[4] / "src"))
+sys.path[:0] = [str(HERE.parents[2] / "src"), str(HERE)]  # product, then siblings
+
+from tally import pull_numbers  # noqa: E402  -- sibling; see README
 
 from quantamind.ingest.change_shape import shape  # noqa: E402
 from quantamind.render.shape_line import block  # noqa: E402
 from quantamind.serve.working_clone import CloneFailed, ensure, path_for  # noqa: E402
-from shape.tally import pull_numbers  # noqa: E402
 
 
 class OutOfDisk(RuntimeError):

@@ -53,3 +53,30 @@ be: what they produce is checked by the findings they feed, each of which states
 not — it is research analysis. Moving it here would drag a research package product-side, so it
 stayed, and it still needs the root interpreter to run. That is a known rough edge, recorded
 rather than papered over.
+
+## Duplicated across the boundary
+
+Three modules exist twice, and the copies must be edited together:
+
+| product-side | research-side |
+|---|---|
+| `scripts/measure/borrowed_clones.py` | `research/phase0/bench/forensic/borrowed_clones.py` |
+| `scripts/measure/conversing.py` | `research/phase0/bench/forensic/conversing.py` |
+| `scripts/measure/pulls.py` + `tally.py` | `research/phase0/bench/forensic/shape/pulls.py` + `shape/tally.py` |
+
+**This is duplication chosen over a broken import, and the reason is a hard one.** The two
+projects run different interpreters: PyCG caps `research/` at Python 3.10, the product needs
+`>=3.12` for `sys.monitoring`, and `research/phase0/pyproject.toml` records that a shared
+environment cannot satisfy both. **An import across that boundary cannot be made to work** —
+declaring `quantamind` as a research dependency fails on exactly that version conflict.
+
+Research still needs these three: `shape_context.py` imports `borrowed_clones` and `pulls`,
+`conversational_arm.py` imports `conversing`. Moving them without leaving copies broke those two
+files, and nothing caught it — research is not import-checked by `just check`.
+
+**Both of those research files already required the root interpreter before any of this**, since
+they transitively import `quantamind`. The move changed which import fails first, not whether
+they run. That is why the copies are copies rather than an attempt to make research self-sufficient.
+
+Every duplicated file names its twin in its own docstring, so an edit to one is a visible
+prompt to edit the other.
