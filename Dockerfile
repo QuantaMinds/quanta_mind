@@ -46,7 +46,8 @@ USER quantamind
 # the asset -- `store/schema.py` says the outcome history accumulates over months and there is no
 # re-index path in production. Losing it on redeploy would silently cost every customer their
 # history and the endpoint would look healthy afterwards.
-ENV QUANTAMIND_DATABASE_PATH=/data/stores \
+ENV QUANTAMIND_POSTING_ENABLED=1 \
+    QUANTAMIND_DATABASE_PATH=/data/stores \
     QUANTAMIND_CLONE_ROOT=/data/clones \
     QUANTAMIND_APP_KEY_PATH=/run/secrets/app.pem \
     PYTHONUNBUFFERED=1
@@ -58,8 +59,14 @@ VOLUME ["/data"]
 # refuses to construct when posting is enabled without an App -- so a container missing either
 # fails loudly at startup rather than serving something that cannot work.
 #
-# **POSTING IS OFF UNLESS ASKED FOR.** With it off the endpoint runs the whole pipeline and prints
-# the comment it would have posted, which is a complete rehearsal that touches nobody's repository.
+# **POSTING IS ON IN THIS IMAGE, AND OFF EVERYWHERE ELSE.** `Settings.posting_enabled` still
+# defaults to False, so a test, a CLI run, or an import can never write to somebody's pull request
+# by accident. What changed is that BUILDING THIS IMAGE IS THE ACT OF ASKING: nobody deploys a
+# review endpoint intending it to stay silent, and setting the flag by hand on every deploy meant
+# the one revision somebody forgot would rehearse forever while looking healthy.
+#
+# `types/settings.py` still refuses to construct when posting is on without a GitHub App
+# configured, so this cannot post as nobody. To rehearse in the container, set it back to 0.
 
 EXPOSE 7331
 

@@ -1,7 +1,8 @@
 """The review itself: what we checked, what we did not, and what it cost.
 
-WHAT: `CoverageLine`, `RequestLedger` and `Review` -- the record posted to a pull request and
-      written to the store, carrying its own coverage and its own spend.
+WHAT: `CoverageLine`, `Review`, `Outcome`, `Delivered` and `NotReviewed` -- the record posted
+      to a pull request and written to the store, carrying its own coverage and its own spend,
+      plus the typed reasons a run can end without one.
 WHY:  Two things have to be observable rather than asserted. Coverage, because the product's
       whole claim is that silence is readable. And spend, because a request ceiling that is
       never hit and one that was never wired up print the same thing -- so the ledger records
@@ -20,10 +21,12 @@ CONSUMED BY: render turns this into a comment; store persists it; telemetry quer
 
 from __future__ import annotations
 
+import enum
 from dataclasses import dataclass, field
 
 from quantamind.types.change import PullRequest
 from quantamind.types.ranking import Budget, RankedUnit, Ranking
+from quantamind.types.spend import Spend
 from quantamind.types.verdict import Unresolved
 
 
@@ -105,39 +108,6 @@ class CoverageLine:
 
 
 @dataclass(frozen=True, slots=True)
-class RequestLedger:
-    """What this review actually spent. Observed, never inferred from configuration.
-
-    Every field here is read back out in the gate. A ledger that always reports zero is how
-    a disconnected ceiling looks, and it is indistinguishable from a quiet week unless the
-    number is recorded per review and compared.
-    """
-
-    requests: int = 0
-    tokens_in: int = 0
-    tokens_out: int = 0
-    cache_read_tokens: int = 0
-
-    def __post_init__(self) -> None:
-        for name in ("requests", "tokens_in", "tokens_out", "cache_read_tokens"):
-            if getattr(self, name) < 0:
-                raise ValueError(f"RequestLedger.{name} cannot be negative")
-
-    def within(self, budget: Budget) -> bool:
-        return self.requests <= budget.max_requests
-
-    @property
-    def used_cache(self) -> bool:
-        """False after a multi-request review means the prompt prefix is not caching.
-
-        A persistent zero here with more than one request is the signature of an invalidator
-        in the cached prefix -- a clock, a request id -- which produces no error and simply
-        costs full price on every call.
-        """
-        return self.cache_read_tokens > 0
-
-
-@dataclass(frozen=True, slots=True)
 class Review:
     """One review of one commit: the unit of work, of record, and of measurement.
 
@@ -156,7 +126,7 @@ class Review:
     pull_request: PullRequest
     coverage: CoverageLine
     budget: Budget
-    ledger: RequestLedger = field(default_factory=RequestLedger)
+    ledger: Spend = field(default_factory=Spend)
 
     @property
     def key(self) -> str:
@@ -169,3 +139,59 @@ class Review:
     @property
     def ran_model(self) -> bool:
         return self.ledger.requests > 0
+
+
+class Outcome(enum.Enum):
+    """What became of one delivery. Six values, none of them silence.
+
+    **`Delivered` ONCE CARRIED TWO FIELDS NOBODY READ**, which pulled a dependency on `allocate`
+    and pushed this type out of the layer it belongs to. Written every delivery, read by nothing.
+    """
+
+    POSTED = "posted"
+    REHEARSED = "rehearsed — posting is off; the comment above was not sent"
+    DUPLICATE = "already commented on this commit"
+    NOTHING_TO_SAY = "ranked, and no file stood out enough to be worth a comment"
+    NO_READABLE_FILES = "every changed file is in a language this product does not read"
+    NO_FILES = "the pull request changed no files we could read from the API"
+
+
+@dataclass(frozen=True, slots=True)
+class Delivered:
+    """The outcome, and the counts behind it. Never a bare success."""
+
+    outcome: Outcome
+    considered: tuple[str, ...]
+    skipped: tuple[str, ...]
+    body: str | None
+
+    def sentence(self) -> str:
+        """One line for the log, stating what happened and what it was computed from."""
+        return (
+            f"{self.outcome.value} — {len(self.considered)} file(s) ranked, "
+            f"{len(self.skipped)} skipped as unreadable"
+        )
+
+
+class NotReviewed(enum.Enum):
+    """Why a run ended with no ranking. A value, because prose on stdout is not an answer.
+
+    **"NOTHING TO REVIEW" AND "THE COMMAND BROKE" MUST NOT BE THE SAME THING ON THE WIRE.**
+    Under `--json`, `serve/run_commit.py` took two early exits that printed a human sentence and
+    returned 0, so a tool got a decode error and a success code -- a change touching only
+    Markdown looked exactly like a broken install. This is rule 3, typed silence, applied to the
+    CLI's machine-readable surface rather than to a resolver.
+    """
+
+    NOTHING_PENDING = "nothing_pending"
+    """No uncommitted work and no commits off the default branch. The tree is clean."""
+
+    NO_SUPPORTED_LANGUAGE = "no_supported_language"
+    """Files changed, but none with a `REVIEWABLE_SUFFIXES` extension. A result, not a failure."""
+
+    def sentence(self) -> str:
+        """One line for a human, so the CLI's two surfaces cannot drift into disagreeing."""
+        return {
+            NotReviewed.NOTHING_PENDING: "nothing to review",
+            NotReviewed.NO_SUPPORTED_LANGUAGE: "none in a language we read",
+        }[self]

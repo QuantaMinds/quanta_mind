@@ -150,6 +150,17 @@ def adjudicate(
             Verdict.NO_CLAIM, "no commit SHA is named and the diff pins none it disputes"
         )
 
+    # **A HEX TOKEN IS NOT A CLAIM ABOUT A COMMIT.** A cache key or a colour constant reached
+    # here and `publishable.gate` DROPPED the finding -- its only demonstrated behaviour over 38
+    # real findings. An external claim we cannot settle still drops.
+    # → `docs/findings/oracles/WHY_THE_ORACLES_NEVER_FIRE_2026-08.md`
+    disputes = bool(DENIES_EXISTENCE.search(finding) or ASSERTS_TAG.search(finding))
+    if not repo and not disputes:
+        return Adjudicated(
+            Verdict.NO_CLAIM,
+            f"names {shas[0][:8]}, but disputes nothing about it -- a hex token is not a claim",
+        )
+
     if not repo:
         return Adjudicated(
             Verdict.UNRESOLVABLE, f"names {shas[0][:8]} but no repository to resolve it in"

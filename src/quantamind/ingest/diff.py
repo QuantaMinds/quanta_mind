@@ -85,11 +85,12 @@ def _gh(repo: str, number: int, path: str) -> object:
 
 
 def changed_files(
-    repo: str, number: int, suffixes: tuple[str, ...] = REVIEWABLE_SUFFIXES
+    repo: str, number: int, suffixes: tuple[str, ...] | None = REVIEWABLE_SUFFIXES
 ) -> list[str]:
     """Paths the pull request changed that still exist afterwards, sorted.
 
     Returns `[]` only when the change genuinely touches no matching file. Every failure raises.
+    **`suffixes=None` means no filter; `()` would filter everything** (`endswith(())` is False).
     """
     out: list[str] = []
     for page in range(1, MAX_PAGES + 1):
@@ -107,7 +108,7 @@ def changed_files(
             status = str(entry.get("status") or "")
             if not name or not status:
                 raise DiffReadFailed(repo, number, f"a files entry lacked filename/status: {entry}")
-            if name.endswith(suffixes) and status in KEPT_STATUSES:
+            if (suffixes is None or name.endswith(suffixes)) and status in KEPT_STATUSES:
                 out.append(name)
         if len(got) < PER_PAGE:
             break
@@ -140,6 +141,33 @@ def unified_diff(repo: str, number: int) -> str:
             "never is — treat this as a failed read, not a no-op",
         )
     return text
+
+
+@dataclass(frozen=True, slots=True)
+class Stated:
+    """What the author SAYS the change is for. The claim a review is measured against."""
+
+    title: str
+    body: str
+
+    def text(self) -> str:
+        """Title and body as one block, or an empty string when the author wrote neither."""
+        return f"{self.title}\n\n{self.body}".strip()
+
+
+def stated_goal(repo: str, number: int) -> Stated:
+    """The pull request's own description of its purpose.
+
+    **THE REVIEW IS MEASURED AGAINST THIS, SO IT COMES FROM THE AUTHOR AND NOT FROM THE DIFF.**
+    "Did this change do what it set out to do" has no meaning without the second half, and
+    inferring the intent from the code makes the question circular: a diff always achieves what
+    the diff does. An empty description is a real answer — it means the author stated no goal, and
+    the review must say so rather than invent one.
+    """
+    payload = _gh(repo, number, f"repos/{repo}/pulls/{number}")
+    if not isinstance(payload, dict):
+        raise DiffReadFailed(repo, number, "the pull request payload was not an object")
+    return Stated(str(payload.get("title") or ""), str(payload.get("body") or ""))
 
 
 def base_commit(repo: str, number: int, clone: Path) -> Base:

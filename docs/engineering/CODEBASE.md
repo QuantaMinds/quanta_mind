@@ -2332,3 +2332,580 @@ refusal names the path it tried. And `QUANTAMIND_GCLOUD_PATH=`, set but empty, w
 executable: `source.get(key, "gcloud")` returns `""` for a variable that exists and is blank, which
 is exactly what commenting out a line in a `.env` produces. **This product's own deep review found
 the second one**, on the commit that introduced the setting.
+
+### Cloud Run — the endpoint reviews in production, and what deploying it exposed
+
+`quantamind-reviewer` runs on Cloud Run in `quantamind-oss`, as the service account of the same
+name, with the webhook secret and the App private key from Secret Manager. **The whole chain has
+now run there**, on pull request #85:
+
+```
+[serve]   accepted QuantaMinds/quanta_mind#85 at 7b77a084e156
+[infer]   access token from metadata
+[deliver] full: 1 file(s), at or under the 10-file ceiling — the whole change is read
+[deliver] model: 1 finding(s) kept of 1 raw (0 unanchored, 0 refuted, 0 withdrawn), consulted=True
+[serve]   #85: rehearsed — posting is off
+```
+
+`access token from metadata` is G1's claim made observable: **no credential on disk**, the token
+comes from the instance identity.
+
+**CLOUD RUN'S DEFAULT CPU THROTTLING SILENTLY STARVES THE REVIEW.** CPU is de-allocated once the
+response is sent, and this endpoint answers `202` and then reviews on a background thread — which
+GitHub requires, because a webhook must not wait 40 seconds. The first delivery logged `accepted`
+and then nothing: a 202 GitHub was satisfied with, and no review. **From outside that is
+indistinguishable from a working system**, which is the failure class this product exists to
+refuse. Fixed with `--no-cpu-throttling`; the real answer is a queue and a worker (B1), because
+paying for an always-on instance to do background work is renting the wrong shape.
+
+**The filesystem is ephemeral, so the touch index does not survive an instance.** Every cold start
+re-clones and re-indexes — 37 seconds on a large repository — and the clones live in memory against
+the instance's 2 GiB. Cloud Run is the wrong home for a product whose asset is an index that
+accumulates over months; it is the right home for proving the code path, which is what it was used
+for here.
+
+**`.gcloudignore` did not exist**, so a source deploy uploaded every tracked research file, every
+test and the whole of `.git` — 497 MB of `research/` alone, none of which the image copies.
+
+### The comment stopped explaining the product
+
+The posted body carried a paragraph of method — "ranked by prior-fix history", "the budget cut
+through a tie", "4.46% against 1.21% overall" — a sentence about the repository's top decile, and a
+footer disclaiming what the product is. All true, none of it actionable by a developer waiting to
+merge.
+
+**The golden rule the product is now judged against:** *did this pull request achieve the goal it
+set out to achieve, without disturbing anything else?* Everything gathered is an input to that —
+the changed lines, how many files, how often those files have changed before, the human context
+(previous comments, Jira, Slack), and the stated goal. Anything that does not feed it does not
+belong in the comment.
+
+So the body is now two things: **where to look**, and **how much was not reviewed**.
+
+```
+### QuantaMind
+
+**Look here first**
+- `src/quantamind/serve/cli.py`
+- `src/quantamind/serve/deep_review.py`
+
+_3 of 6 changed file(s) reviewed; 3 not reviewed._
+```
+
+**The counts and the method left the comment, not the product.** They still drive the ordering and
+still reach `quantamind dashboard`; what changed is the audience. An operator deciding whether to
+keep paying is who a firing rate is for.
+
+**The unreviewed count stays, in one clause**, because it is the single piece of self-description a
+reader acts on: it tells them where human attention is still required, and dropping it would let a
+partial review read as a complete one.
+
+`tests/unit/layers/render/test_render_comment.py` now records that these assertions have encoded
+**three** different product decisions in one session — silence below the decile, then a salience
+sentence on every change, then neither — each rewritten in place rather than deleted.
+
+### The review answers the question, not the method — `infer/change_review.py`, `parse/importers.py`
+
+The golden rule: **did this pull request achieve the goal it set out to achieve, without disturbing
+anything else?** The comment now answers both halves, in a sentence each.
+
+**"Did what it said" needs the author's own words**, so `ingest.diff.stated_goal()` fetches the
+title and body. A goal inferred from the diff makes the question circular — a diff always achieves
+what the diff does — and an empty description yields `achieves_goal=None`, because grading against
+an invented goal manufactures agreement.
+
+**"Without disturbing anything else" needs the callers**, which `parse/importers.py` finds:
+`git grep` shortlists, `parse/python_names` decides. Neither alone is honest — scanning every file
+with `ast` costs a parse of the repository per review, and grepping alone matches the module name
+in a comment, a string, or a longer name that contains it. Verified by sabotage: trusting the grep,
+and prefix-matching instead of module-boundary matching, both make `pkg.target_helper` a false
+dependent of `pkg.target`.
+
+**An empty importer list means "no static Python import found", never "nothing depends on this."**
+A dynamic `importlib`, a re-export through `__init__`, and any other language are invisible. The
+comment says so, and a file that will not parse comes back as `Unresolved` rather than vanishing —
+otherwise an empty result would mean both "nothing imports this" and "we could not tell".
+
+What a developer sees, on a real pull request:
+
+```
+### QuantaMind
+
+**What changed**
+The `_token` function now logs the source of the authentication token. A new `.gcloudignore`
+prevents large directories from being uploaded during deployment.
+
+**Does it do what the PR says?** Yes — the code adds the logging and the file, as described.
+**Effect on callers:** The listed callers are not affected, but they will now trigger a log
+message to standard output when they cause a token to be fetched.
+```
+
+**`comment()`'s arguments are keyword-only, because its second positional already changed meaning
+once.** `unresolved` sat there, `summary` took the slot, and a live caller passing `()` bound an
+empty tuple to a summary. A signature whose positions shift under callers is a defect a type
+checker cannot see across a `Sequence` boundary.
+
+**Summarising a diff is a different task from finding defects**, and the 66.7–82.1% wrong figure
+measured the other one. Comparing a diff to a paragraph the author wrote has both halves in the
+prompt. It may be more reliable — **and it is not yet measured, so nothing states it as though it
+were.**
+
+### The review's job, and the shape of the comment
+
+**The job:** answer, from the facts, whether the change achieved its stated goal without breaking
+anything — and say what it found.
+
+The comment is ordered so a reader can tell what kind of statement each line is:
+
+| section | what it is |
+|---|---|
+| **Goal** | the PR description, **quoted verbatim** |
+| **What changed / does it do what the PR says / will it break anything** | a model's reading |
+| **N files import this code** | `parse/importers` output, re-runnable |
+| **Found by a parser** | rule violations — the call is in the syntax tree or it is not |
+| **Found by the model** | findings that cleared `publishable.gate()`, labelled as readings |
+| **Facts** | files touched, prior fixes per file, importer count, rule-check denominator |
+| **Not checked / reviewed** | the limits, stated |
+
+**The goal is quoted, never summarised.** It is the sentence the change is measured against, and a
+model restating it puts a second author between the reviewer and what was actually promised — which
+is where a promise quietly changes.
+
+**The prompt passes FACTS, not commentary.** It carried lines like *"higher means this file has
+repeatedly needed correcting, so it deserves more suspicion"* — an instruction to be suspicious,
+written by us, dressed as an input. It is now labelled blocks: `[PR_DESCRIPTION]`,
+`[FILES_TOUCHED]`, `[PRIOR_FIXES]`, `[STATIC_IMPORTERS]`, `[DIFF]`, and a `TASK` that says
+*"answer only from the facts above"*.
+
+**`breaks` is three-valued and `None` renders as "Cannot tell".** *"It will not break anything"* is
+the most expensive sentence this product can print, because a reviewer acts on it by not looking. An
+unknown rendered as reassurance is a clean bill of health for a check that never ran.
+
+**Parser verdicts and model readings never share a list.** Averaging their credibility down to the
+weaker one is what makes an audit trail worthless, and the parser half is the half worth keeping.
+A repository declaring no rules gets no rule section at all — "no violations" would imply rules
+existed to violate.
+
+### Findings land on the line — `ingest/github_reviews.py`
+
+A line number inside a summary is a reference; a review comment is on the code. `publish()` posts a
+single pull-request review with each finding anchored to its file and line, so the developer reading
+the Files-changed tab sees the claim beside the line rather than scrolling to a comment and back.
+
+**One review, not N comments.** Posting each finding separately floods the timeline and notifies the
+author once per line. A single `COMMENT` review reads as one act, which is what a human does.
+
+**`event: COMMENT`, never `REQUEST_CHANGES`.** Blocking a merge on a model's reading is a claim the
+evidence does not support at 66.7–82.1% wrong. Blocking belongs to the deterministic rule checks,
+and it is a separate decision.
+
+**An unplaceable finding is returned, never dropped.** GitHub answers 422 when a comment names a
+line outside the diff, and it refuses the *whole call* if any single one is out of range. So the
+review retries with the body alone and **every finding comes back to the caller** to be folded into
+the summary. A finding silently lost would leave a review that looks complete and is quietly
+narrower. An empty return means all were placed — never that none were tried. Three sabotages
+confirm it: dropping the unplaceable ones, skipping the retry, and swallowing unrelated failures
+each fail their own test.
+
+**The provenance labels left the comment and stayed in the data.** The body no longer heads two
+sections with "found by a parser" and "found by the model" — a developer deciding whether to look at
+line 90 does not act on which component produced it. `Rule.provenance`, `Checked` and the stored
+rows still carry it, which is where a compliance reader queries it. Rule violations still print
+first, because they are exact; the ordering says so without a paragraph explaining our internals.
+
+### The audit trail — `rule_check`, schema v5
+
+`verify/rule_check.py` produced one `Checked` per rule per file and nothing kept them. A compliance
+reader asking *"was this rule enforced on every pull request last quarter, and what did it say"* had
+no table to ask. That artefact is what a compliance team buys, and it is why D1b was built before
+D1c.
+
+**All four outcomes are stored, or the denominator is a guess.** A table holding only violations
+answers "did it fire", not "was it enforced" — and a rate computed from it is over whatever
+population the reader assumed. `passed`, `violated`, `uncheckable` and `deferred` all land.
+
+**`provenance` is the column that makes the trail worth reading**, and it is DERIVED from the rule
+rather than accepted from a caller. A parser's verdict can be re-run on the same commit and shown to
+agree; a model's cannot. A row that could declare itself parser-verified while a model decided it
+would make every other row worth what the least reliable row is worth.
+
+**Nothing is backfilled.** A review from before the rule engine existed has no rows, and inventing
+`passed` ones would manufacture a compliance history — precisely the artefact somebody might later
+show a regulator. An absent row means we did not check.
+
+**The schema guard drove the order and it was worth following.** It failed on the digest with the
+sequence spelled out: bump `SCHEMA_VERSION`, write the migration, **add the byte-level golden**, and
+only then update `RECORDED_DIGEST`. The golden diff was read by hand — 71 lines, all of them the new
+table and `__version__` 4 → 5. `test_schema_golden.py` hardcodes the migration steps `(3, 4, 5)` on
+purpose, so a schema bump forces somebody to look at the path from a real old store.
+
+**Applying a standard and recording that you applied it are one job.** `enforce()` does both, because
+separating them is how a trail comes to hold fewer checks than ran: the second half is easy to forget
+at a call site and impossible to notice afterwards, since a missing row and a check that never
+happened look identical. A recording failure does not take the review down — the comment is worth
+posting whether or not the trail accepted it — and the count is compared, never assumed.
+
+### `.quantamind/rules.toml` — this repository's own standards, and the scope they needed
+
+The audit trail had no rows because nothing declared any rules. Four now exist, each mirroring a
+rule already written in AGENTS.md — a rule here that AGENTS.md does not state would be a standard
+nobody agreed to.
+
+**Running them before declaring them found a defect in the rule engine.** "No pandas in the
+product" is AGENTS.md rule 11, and it is true of `src/` and **false of `research/`**, which is a
+separate uv project the same rule permits to use pandas. Unscoped, the rule flagged
+`research/phase0/tests/pipeline/test_assemble.py` — correct by the rule's own terms and wrong by
+the standard it came from. On a pull request touching research, every such file would have been
+reported as violating a rule that was never meant to govern it.
+
+`Rule.paths` is the fix: prefixes a rule governs, empty meaning everywhere.
+
+**A file outside the scope produces NO ROW, which is not a skip.** There is no question to answer,
+the way a deleted file has no code to check. A `PASSED` row would be worse than nothing: it inflates
+the denominator of a compliance rate with a pair nobody agreed to. Sabotage covers both directions —
+ignoring the scope, and letting an empty scope mean empty coverage, which would silently disable
+every plain rule.
+
+**A rule that fires on deliberate code is worse than no rule**, because it teaches a reviewer to
+scroll past the section. That is why `print` is not among these: this product prints on purpose, and
+`serve/run_endpoint.py` explains why at length.
+
+### The rules were read from a directory that has no files in it
+
+`working_clone.ensure()` clones with `--no-checkout`, so a customer's repository exists only as git
+objects. `rules_file.read()` looked at the filesystem, found nothing, and returned **"no rules
+declared" — for every repository, forever**, indistinguishable from one that had declared none.
+That is precisely the confusion the module's own docstring exists to prevent, defeated by looking
+in a directory that has no files in it.
+
+It reads from git now, at the commit under review — not the default branch, because a pull request
+that ADDS a rule must be checked against the rule as it stands in that change.
+
+**Every test in that file passed throughout**, because each wrote a loose file into a temp
+directory: a situation that never occurs in production. They now build real repositories, and one
+of them clones `--no-checkout` and asserts the working tree is absent *before* reading, so the
+fixture cannot quietly stop testing the thing it was written for.
+
+**A clone git cannot read is a third answer, not an absence.** Not "this customer declared no
+standards" and not "their file is malformed" — a refusal. Reporting it as the first would show a
+clean compliance sheet for a repository we could not read at all.
+
+**Sabotage found the missing test, not review.** Breaking that refusal path passed all twelve tests;
+only deliberately reverting it revealed there was no test for it. The thirteenth was written then.
+
+### `ingest/standards/` — the two places a repository states what it holds itself to
+
+| module | what it owns | what it must not do |
+|---|---|---|
+| `rules_file.py` | rules a customer declares FOR us in `.quantamind/rules.toml`, in a form a parser enforces and the audit trail records | never accept a malformed declaration silently, and never let "no rules" and "unreadable rules" be the same answer |
+| `conventions.py` | what the team already wrote for itself — `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.github/copilot-instructions.md`, `CONVENTIONS.md`, `CONTRIBUTING.md` |  <!-- citation:allow — these are filenames `ingest/standards/conventions.py` SEARCHES FOR in a customer's repository, not documents in this one --> never produce a `Checked` row: prose cannot be re-run on a commit, so it is context and must not enter the audit trail |
+
+**A team that wrote its rules down should not have to write them again for us.** Asking a customer
+to restate documented standards in a second format creates two documents that drift, and the one
+they maintain is the one they wrote for themselves. The review now quotes their own sentence back:
+*"⚠️ Breaks a rule you wrote down — the new file violates the rule that 'Every file opens with a
+docstring'."*
+
+**Known-answer tested rather than assumed.** A synthetic diff with a bare `except` and no docstring
+was checked against this repository's own `AGENTS.md`, and the violation it named is rule 8. Without
+that test, "no convention contradicted" would have been indistinguishable from a feature that never
+ran — the failure this codebase keeps finding.
+
+**Both are read from git at the commit under review**, not from a working tree that does not exist,
+and not from the default branch: a change that EDITS the conventions must be judged against the
+version it proposes.
+
+**Bounded at 6,000 characters each.** At 12,000 the two documents in this repository alone pushed a
+real review to `MAX_TOKENS` — a convention file competes with the diff for the same budget, and the
+diff is the thing being reviewed. The truncation is stated in the text, so a review can never claim
+it considered a document it only half read.
+
+**A local-only file the repository never pushes is invisible to this.** The reviewer reads the
+clone; a rule that exists solely on somebody's laptop cannot be enforced by anything.
+
+### Conventions: keep the rules, not the prose — and read the laptop's own
+
+Two losses in the first version, both fixed.
+
+**A character cap drops rules 9 through 15.** Cutting this repository's own `AGENTS.md` at 6,000
+characters removed the end of a numbered list, so the review would have enforced the first half of a
+standard and reported it as the standard — with nobody able to see which half was applied. The
+rule-shaped lines are kept and the argument between them discarded: **12,583 characters of prose
+became 4,436 of rules, and rule 15 survives.** A document with no list structure has nothing to
+extract and falls back to the cap, with the truncation stated.
+
+**A convention on one laptop is now read, and labelled.** A developer's checkout may carry a
+gitignored `CLAUDE.md`, and on that machine it is a real standard they work to. It is read from disk
+when git does not have it, and its name carries `(uncommitted)` — because a rule living on one
+laptop binds nobody else, and a review presenting it as the team's standard would be inventing
+consensus.
+
+**This is what makes the IDE path worth building.** The endpoint never sees an uncommitted file: its
+clones are `--no-checkout`, so there is no working tree, which is the honest outcome there. A local
+`quantamind review` does see one — so **Phase E's `/qm-review` enforces standards the webhook
+cannot**, which is a reason to build it beyond convenience. It is also the only path where a
+developer's own rules are checked before anyone else reads the code.
+
+Sabotage covers both: truncating prose instead of extracting rules drops the last rule, and dropping
+the `(uncommitted)` label presents a laptop rule as the team's.
+
+### `quantamind review` without a commit — the review before the pull request
+
+`--sha` is now optional. Without it, `ingest/worktree.pending()` reviews **what the developer has
+not committed**, and failing that, **the commits on this branch that are not on the default one**.
+
+**By the time a pull request exists, the review has arrived too late to be cheap.** The developer
+has stopped, context-switched, and asked other people to look. The cheapest place to be wrong about
+a change is the machine that made it, seconds after writing it, where a wrong finding costs ten
+seconds and a right one costs one edit.
+
+**Untracked files are included, and they are the ones `git diff` omits.** On a feature branch most
+of what a developer wrote is in files git has never seen. A review built on `git diff` alone would
+skip every one of them and still read as a complete review of a smaller change.
+
+**`git diff --no-index` exits 1 when the files differ**, which for a diff is success. Treating that
+as failure listed each untracked file by name and showed the model none of its code — a clean review
+of a file nobody looked at. A test caught it, not reading.
+
+**Nothing leaves the machine on this path.** No API call, no pull request, no clone. That is the
+honest answer to "can this run air-gapped", and it is why the local path can read an uncommitted
+`CLAUDE.md` that the endpoint structurally cannot.
+
+Run on this repository's own uncommitted work it ranked 5 changed files — including the untracked
+module and test that implement the feature itself.
+
+### The comment leads with a verdict, and the golden-rule sections are mandatory
+
+A real delivery on PR #86 hit `MAX_TOKENS`, the summary was dropped, and the comment **degraded
+into a list of files with no verdict** — indistinguishable, to the developer reading it, from a
+clean review. That is the failure this product exists to refuse, appearing in its own output.
+
+Three things changed.
+
+**A verdict first.** `✅ Looks good` / `⚠️ Needs a human` / `🐛 Found N thing(s) worth fixing`, or
+`⚠️ I could not review this change — <why>`. The ordering is by what the reader must do: something
+to fix outranks something to think about, which outranks nothing to do. **"Cannot tell" is a reason
+to look, not a reassurance.**
+
+**The golden-rule sections are mandatory and a test enforces it.** `render/verdict_block.SECTIONS`
+names them — the goal quoted from the PR, what changed, does it do what the PR says, will it break
+anything — and `tests/unit/layers/render/` asserts each appears. A redesign collapsed all of them
+into a single headline and the review became an opinion with no stated basis; **it lasted about an
+hour, because nothing checked it.** Removing one now fails the build.
+
+**Our own fix history left the comment.** It listed how many times a later fix had returned to each
+changed file: true, ours, and not something a developer waiting to merge acts on. It still decides
+the ordering and still reaches the dashboard, where an operator is the right audience for it.
+
+`MAX_DIFF_CHARS` dropped from 60,000 to 30,000, because the diff now shares the prompt with the
+conventions and the fact blocks.
+
+### `render/json_report.py` — the review as data, behind `--json`
+
+A human re-typing prose is not an integration. `quantamind review --json` emits one object and
+nothing else on stdout, so a tool need not strip progress lines out of it.
+
+**Three keys an agent would act on wrongly if they lied.** `unread` is always present — an absent
+key and an empty list must not be the same answer, or a partial review is reported as whole.
+`breaks: null` is never `false` — null is "could not tell", false is "we checked the callers", and a
+tool collapsing them merges on a check that never ran. **`provenance` survives, though it left the
+comment**: a developer does not act on which component produced a line, but an agent applying a fix
+unattended must weigh a parser's verdict differently from a model's reading.
+
+`schema` is a version number so a consumer built on these keys breaks loudly rather than
+mis-reading a renamed field.
+
+**`report` was imported under a name this module already used.** `deep_review.report` prints the
+model pass; the collision shadowed silently until the call failed at runtime. It is aliased now —
+the same defect rule 13 is about, in an import rather than a file.
+
+### `serve/delivery/` — deleted, because the reason for it was two fields nobody read
+
+**This subpackage existed for about an hour and should never have.** `Delivered` carried `reading`
+and `examined`, which pulled a dependency on `allocate` — to the right of `types` — so rule 7 pushed
+the type out of the layer it belongs to, and a subpackage under `serve/` was built to hold it.
+
+Both fields were **written on every delivery and read by nothing**: a table with no writers, seen
+from the other end. Deleting them removed the dependency, the subpackage, and the reason for both.
+`Outcome` and `Delivered` live in `types/review.py`, where the guard pointed in the first place.
+
+**The lesson is about which of the guard's two suggestions to take.** It offered "move the shared
+type into `quantamind.types`, or invert the dependency". The second was cheaper and produced a
+package that existed to route around a rule; the first required asking whether the dependency was
+needed at all, and it was not.
+
+### What `serve/delivery/` used to hold
+
+`review_delivery.py` outgrew one file: it clones, ranks, allocates, consults a model, enforces
+rules, banks a cost, renders and posts. The **result** of all that is a separate concern from the
+doing of it, and it is what callers and tests import.
+
+| module | what it owns | what it must not do |
+|---|---|---|
+| `outcome.py` | `Outcome` — the six things a delivery can end as — and `Delivered`, which carries them with the allocation and the model pass | never reduce to a boolean: a change with no readable files and one we posted on are different answers |
+
+**These types could not move to `types/`, and the guard is what said so.** `Delivered` holds a
+`Reading`, which belongs to `allocate` — to the right of `types` — so putting them there was a rule
+7 violation. mypy passed; `check_conventions` caught it. A subpackage under `serve/` keeps the
+dependency flowing left, the way `serve/http/` already does for the socket layer.
+
+### `types/spend.py` — what a review cost, and when that number is only a floor
+
+`review.request_count`, `tokens_in`, `tokens_out` and `latency_ms` have existed since the schema was
+written and **nothing ever wrote them** — the same "tables with zero writers" defect this codebase
+already found in `review` and `ranked_unit`, one column deeper. Until they are written, every
+pricing decision is arithmetic over a number nobody measured.
+
+**`tokens_out` includes the model's own reasoning.** Vertex reports `thoughtsTokenCount` separately
+and both are billed; a count of only the visible reply understates a review by most of it. Measured
+on a real summary call: **422 tokens in, 1,631 out, 16 seconds** — the output four times the input,
+almost all of it thinking. That is also what produced the `MAX_TOKENS` failure nobody was measuring.
+
+**`Spend.complete` is False when part of the review went unmetered, making the total a FLOOR.**
+`serve/settle.py` asks the model once or twice per surviving finding through `infer/prompt_once`,
+which reports no usage. `record_spend` **refuses to write an incomplete spend** rather than rounding
+it down: a floor written as a total would put a quietly low number on a dashboard and get priced
+from. Incompleteness is contagious through `plus()`, because a total containing one unmetered call
+is itself a floor.
+
+### `Spend` absorbed `RequestLedger`, which meant the same thing
+
+`types/review.RequestLedger` carried `requests`, `tokens_in`, `tokens_out` and `cache_read_tokens`,
+and was read by the budget gate. `types/spend.Spend` was written days later without noticing it.
+
+**Two types for one idea is how two numbers come to disagree about one review.** They are now one:
+`within()` and `used_cache` moved across, `ms` and `complete` came from `Spend`. `used_cache` was
+nearly lost in the merge — a test caught it, and its paragraph about an invalidator in the cached
+prefix survives only because of that.
+
+### `research/phase0/src/phase0/findings/` — is a PUBLISHED finding true?
+
+A6 measured **0.686 findings published per change** and could not say how many of them were
+right. `handlabel/` asks whether a PR broke something; this package asks a different question of
+a different unit, with the same discipline: blind sheet, sealed key, and an arm that makes a
+constant answer fail. `pack.py` draws, `audit.py` disbelieves the draw, `sample.py` and
+`scoring.py` are the two commands, wired as `just findings-draw` and `just findings-score`.
+
+**THE PLANTED-CONTROL ARM WAS BUILT, AUDITED CLEAN, AND REMOVED.** Half the pack used to be a
+genuine claim shown beside code it was not about, so that marking everything TRUE scored 50%.
+It was separable by a surface cue orthogonal to the construct: **a rater scores full marks by
+checking whether the claim's filename appears in the diff header, without ever assessing whether
+a finding is correct.** The separability was measured and reported as a caveat — real claims'
+named symbols appeared in their diff 93% of the time against 5% for planted ones — and treating
+it as a caveat was the error. It is disqualifying.
+
+**An isolated different-family judge then demonstrated it.** Run over the 24-item pack it
+returned FALSE on all 24: 12 of 12 controls "caught", every one with a reason of the form *"the
+diff contains no X at all"*. It scored 100% on the control arm **while never performing the
+task**, and the resulting 0-of-12 correctness figure measures pairing detection. It is retracted.
+Four authored positive controls confirmed the judge was not simply always-FALSE — it answered
+TRUE to all four — and a spot-check found one of its confident FALSE verdicts resting on a
+backwards claim about where Flask defines `PROVIDE_AUTOMATIC_OPTIONS`, which is why `UNKNOWN`
+is now a first-class verdict.
+
+**Attention is checked by the deciding line instead**, which is this project's own precedent:
+`adjudication-preregistration.md` recorded every verdict "with the specific line of code that
+decides it". For TRUE and FALSE the rater pastes the line from the diff that settles it, and
+`scoring.py` refuses to compute any rate if a cited line is not in the code that item showed.
+A quoted line cannot be produced without reading, cannot be faked by a filename cue, and is
+checkable. **Removing the arm also removed the sealed key** — with nothing to leak, auditing a
+pack can no longer burn the draw, which is what A57 warns about and what happened here.
+
+**Four leaks reached a built pack before any was noticed, and every one came from the same
+place: donors drawn from a pool that still held the real items.** One claim used three times;
+six claims present in BOTH arms, once beside their own diff and once beside a foreign one;
+repeated diffs homogeneous by arm; and — worst — an audit that announced "no planted item's
+symbols appear in the code shown" having examined **7 of 12**. The five it skipped were the
+generic claims most at risk, because the regex wanted identifier-shaped backticks and a claim
+quoting `len(args) == 1` yields none. `overlap()` now returns **-1 for untestable**, and coverage
+below the arm size is a failure rather than a footnote — rule 14, and the shape of
+`bench/forensic/population.py:assert_intersects`.
+
+**Two earlier packs are preserved rather than deleted: `data/labelling.BURNED_20260828/` and
+`data/labelling.SUPERSEDED_planted/`.** The first is burned for the leak below; the second is
+the planted-arm design the paragraphs above retired.
+
+**The burned pack.**
+Auditing it printed per-item arms into an assistant transcript — `item 01, item 02 -> ['PLANTED',
+'REAL']` — and the labeller reads that transcript, so blindness for those item numbers is gone
+and cannot be restored by care from here. This is `PHASE0_PREREGISTRATION.md` A57 repeated by the
+tooling built after it, which is why `sample.py` now reports **counts only**: a rejected pack
+prints how many leaks, never which items. A57's own lesson was that the protection which failed
+was an instruction rather than a check; the redraw under seed `20260828` is the check.
+
+### `/qm-review` — E3, and the `--json` path that did not emit JSON
+
+`.claude/commands/qm-review.md` is the whole of E3: it runs `quantamind review . --json` and
+tells the agent which keys to read. No new Python, no wrapper script, no new flags — each would
+be a second place for the contract to drift from `serve/cli.py`.
+
+**Building it found that `--json` was not machine-readable on two of its three paths.**
+`serve/run_commit.py` took two early exits — a clean tree, and a change whose files are in no
+language `parse/` reads — that printed a human sentence to stdout and returned 0 **regardless of
+`--json`**. A tool got a JSON decode error and an exit code of success, so a developer whose
+change touched only Markdown saw exactly what a developer with a broken install saw. That is the
+common case for this command, not an edge.
+
+**`render/json_report.py` carried a comment promising the opposite** — *"ONE OBJECT ON STDOUT AND
+NOTHING ELSE... the human-facing prints are skipped entirely"* — written about the path below it
+while two paths above it did the other thing. A comment asserting a property the code does not
+have is rule 14 in miniature, and it is why the fix is a value rather than a better sentence.
+
+`types/review.py` gives the reason a type, `NotReviewed`: `NOTHING_PENDING` and `NO_SUPPORTED_LANGUAGE`.
+`json_report.unreviewed()` emits the **same envelope** as `report()` — verified key-for-key by a
+test — with `files.unread` holding everything that changed, because the residual is still the
+product on a path where nothing was read. `not_reviewed_because` is always present, `null` when a
+ranking ran, for the reason `unread` is always present: an absent key and a real answer must not
+be the same thing.
+
+**The wrapper's own risk is drift, so it is tested in both directions.** `test_review_json_always.py`
+requires the command file to name the keys an agent must read, *and* requires the review to emit
+every key the command names. The first version only validated whatever keys the file happened to
+name — so renaming one in the command file made the check smaller and it passed. A check that
+admits less when the thing it guards is broken is not a check.
+
+**`--deep` stays out**, and that is tested rather than trusted: `serve/cli.py` suppresses it from
+`--help` because `docs/product/QUANTAMIND.md` says the product publishes no model findings, and a
+slash command turning it on would be that drift with a friendlier entry point.
+
+### The oracles, made reachable — issue #87
+
+`docs/findings/oracles/WHY_THE_ORACLES_NEVER_FIRE_2026-08.md` found that across 65 changes the gate had
+dropped 8 findings for a missing anchor and one for anything else, and that the one was probably
+not a refutation. Four fixes.
+
+**1. The pin detector is handed the unfiltered changed-file list.** `changed_files()` takes
+`suffixes: tuple[...] | None`, where `None` means no filter — **not `()`**, because
+`"a.py".endswith(())` is `False`, so an empty tuple filters everything out while reading like the
+opposite. `review_delivery.py` fetches once unfiltered, filters locally for ranking, and passes
+the unfiltered list to `pin_check.check()`. No extra API call, and the ranker's input is unchanged.
+
+**Proven end-to-end against the live API**, not by unit test: a repository pinning
+`actions/checkout@de0fac2e…` with the comment `# v3.0.0`, where GitHub reports that commit as
+`v6.0.2`. Handed the filtered list the detector returns 0 mismatches, as it always had; handed the
+unfiltered list it returns the mismatch with both versions named. Commented `# v6.0.2` it stays
+silent, so this is discrimination and not a detector that always fires.
+
+**2. `workflows()` matches the directory, not the substring.** It tested `"workflow" in path`, so
+`docs/not_a_workflow.yaml` qualified. Harmless while the detector was never given anything to act
+on; now that it is, a documentation page showing an example `uses: owner/action@sha # v1.0.0`
+would have been reported as a real mismatch in a real workflow. It now requires
+`.github/workflows/`, which is the only place GitHub reads them from.
+
+**3. A hex token is no longer treated as a claim about a commit.** `external_facts.SHA` matches any
+7–40 character hex run, so a cache key or a colour constant returned `UNRESOLVABLE` and
+`publishable.gate` **dropped the finding** — the gate's only demonstrated behaviour over 38 real
+findings. "Not an external claim" is now `NO_CLAIM` and publishes; "an external claim we cannot
+settle" still drops, because `docs/CORRECTIONS.md` entry 8 is a verifier that defaulted the other
+way and confirmed every false claim it existed to refute. The trigger is narrowed by requiring
+denial-or-tag phrasing, not by removing the check.
+
+**4. `refuted` and `unresolvable` are counted apart.** `Deep` gains a fifth fate, and its
+`__post_init__` conservation identity now sums five. That check earned its place immediately: it
+failed the moment the field was added and before any test was updated. `Ruling` carries
+`unresolvable` as a value, because the caller's alternative was matching the word inside `detail`,
+which is prose written for a human.
+
+**`serve/deep_review.report()` moved to `serve/run_commit.py`.** It prints a reviewer pass for a
+person at a terminal, its only caller is the CLI, and `deep_review` was over the file cap. The
+split is by concern, not to make room.

@@ -41,6 +41,10 @@ class Ruling:
     publishes: bool
     oracle: str
     detail: str
+    # **WHY IT WAS DROPPED, AS A VALUE.** A caller that had to match "unresolvable" inside
+    # `detail` would be reading prose to decide a count, and the prose is written for a human.
+    # False means an authority contradicted the claim; True means nobody could settle it.
+    unresolvable: bool = False
 
     def sentence(self) -> str:
         return f"{'kept' if self.publishes else 'dropped'} by {self.oracle}: {self.detail}"
@@ -58,12 +62,14 @@ def gate(finding: Finding, diff: str) -> Ruling:
     if sha.verdict is Verdict.REFUTED:
         return Ruling(False, "sha-oracle", sha.detail)
     if sha.verdict is Verdict.UNRESOLVABLE:
-        return Ruling(False, "sha-oracle", f"unresolvable, so not published — {sha.detail}")
+        return Ruling(False, "sha-oracle", f"unresolvable, so not published — {sha.detail}", True)
 
     release = adjudicate_release(claim, context=diff)
     if release.verdict is Verdict.REFUTED:
         return Ruling(False, "release-oracle", release.detail)
     if release.verdict is Verdict.UNRESOLVABLE:
-        return Ruling(False, "release-oracle", f"unresolvable, so not published — {release.detail}")
+        return Ruling(
+            False, "release-oracle", f"unresolvable, so not published — {release.detail}", True
+        )
 
     return Ruling(True, "no-oracle-applies", "no external claim an oracle can settle")

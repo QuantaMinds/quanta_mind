@@ -45,8 +45,19 @@ SCHEMA = "src/quantamind/store/schema.py"
 # Updated again on 2026-08-27 for version 4, `touch_watermark`. The guard fired in the same order
 # and each thing it named was done before this line moved: SCHEMA_VERSION bumped, `_to_4` written,
 # golden regenerated AND ITS DIFF READ -- one new table, no existing column order disturbed.
-RECORDED_DIGEST = "3fdcb32085d03e5b"
-RECORDED_VERSION = 4
+#
+# Updated again on 2026-08-28 for version 5, `rule_check`, the audit trail. Same order, same
+# evidence: SCHEMA_VERSION bumped, `_to_5` written in `store/migrations.py`, `STEPS` extended so
+# `test_schema_golden.py` migrates a version-2 store through (3, 4, 5) and requires the result to
+# equal a fresh one byte for byte, golden regenerated and its diff read -- one new table, no
+# existing column order disturbed.
+#
+# **ADD A PARAGRAPH HERE, NEVER EDIT ONE.** The version-4 note above was briefly rewritten in
+# place to describe version 5, which left a comment naming `_to_5` under a heading that said
+# version 4 and destroyed the only record of what the version-4 bump did. The digest line moves
+# once per bump; the reasons it moved are the thing worth keeping.
+RECORDED_DIGEST = "4a95ae6d761071bd"
+RECORDED_VERSION = 5
 
 
 def ddl_of(text: str) -> str:

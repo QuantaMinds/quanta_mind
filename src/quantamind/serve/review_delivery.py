@@ -33,61 +33,26 @@ CONSUMED BY: `serve/run_endpoint.py`.
 
 from __future__ import annotations
 
-import enum
-from dataclasses import dataclass
 from pathlib import Path
 
-from quantamind.allocate.depth import Reading
 from quantamind.allocate.depth import plan as allocate
-from quantamind.ingest import rules_file
+from quantamind.infer.change_review import explain
 from quantamind.ingest.diff import base_commit, changed_files
 from quantamind.ingest.github_api import token_for
-from quantamind.ingest.github_comments import post
+from quantamind.ingest.github_reviews import publish
+from quantamind.render.comment import comment as rendered
 from quantamind.render.pin_block import block
-from quantamind.render.rule_block import block as rules_block
 from quantamind.serve import pin_check
 from quantamind.serve.deep_review import examine
 from quantamind.serve.run_review import review as run_ranking
 from quantamind.serve.working_clone import ensure, sweep
 from quantamind.store import tenancy
-from quantamind.types.deep import Deep
+from quantamind.store.reviews import bank
+from quantamind.types.change import REVIEWABLE_SUFFIXES
+from quantamind.types.review import Delivered, Outcome
 from quantamind.types.settings import Settings
-from quantamind.verify.rule_check import check_change
-
-
-class Outcome(enum.Enum):
-    """What became of one delivery. Six values, none of them silence."""
-
-    POSTED = "posted"
-    REHEARSED = "rehearsed — posting is off; the comment above was not sent"
-    DUPLICATE = "already commented on this commit"
-    NOTHING_TO_SAY = "ranked, and no file stood out enough to be worth a comment"
-    NO_READABLE_FILES = "every changed file is in a language this product does not read"
-    NO_FILES = "the pull request changed no files we could read from the API"
-
-
-@dataclass(frozen=True, slots=True)
-class Delivered:
-    """The outcome, and the counts behind it. Never a bare success."""
-
-    outcome: Outcome
-    considered: tuple[str, ...]
-    skipped: tuple[str, ...]
-    body: str | None
-    reading: Reading | None = None
-    """What the model was given and what it was not. `None` before the ranking has run."""
-
-    examined: Deep | None = None
-    """The model's pass, or `None` when no model was consulted. **NOT the same as finding
-    nothing**: `Deep.consulted` distinguishes "asked and it said nothing" from "never asked",
-    and a delivery that could not reach the model must not read like a clean review."""
-
-    def sentence(self) -> str:
-        """One line for the log, stating what happened and what it was computed from."""
-        return (
-            f"{self.outcome.value} — {len(self.considered)} file(s) ranked, "
-            f"{len(self.skipped)} skipped as unreadable"
-        )
+from quantamind.types.spend import Spend
+from quantamind.verify.rule_check import enforce
 
 
 def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) -> Delivered:
@@ -119,9 +84,28 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     if swept:
         print(f"[deliver] removed {swept} stale clone(s)", flush=True)
 
-    changed = changed_files(delivery_repo, number)
+    store = tenancy.store_for(Path(settings.database_path), *delivery_repo.split("/", 1))
+    # **FETCHED ONCE, UNFILTERED, THEN FILTERED HERE.** The ranker must see only files we read;
+    # `pin_check` must see the workflows, which the ranker's filter removes. Two calls would cost
+    # a second page walk and could disagree if the pull request changed between them.
+    every_file = changed_files(delivery_repo, number, suffixes=None)
+    changed = [name for name in every_file if name.endswith(REVIEWABLE_SUFFIXES)]
+
+    # **THE PIN DETECTOR RUNS BEFORE THE EARLY RETURN, NOT AFTER IT.** It needs no ranking and no
+    # model, and a pull request that changes ONLY a workflow is the most common shape carrying a
+    # pin change. Returning NO_FILES first left it unreachable on exactly those changes even
+    # after it was given the unfiltered list -- found by firing at a real pull request rather
+    # than by any test. → `docs/findings/oracles/WHY_THE_ORACLES_NEVER_FIRE_2026-08.md`
+    mismatched, _unresolved = pin_check.check(clone, head_sha, every_file)
+    pins = block(mismatched)
+
     if not changed:
-        return Delivered(Outcome.NO_FILES, (), (), None)
+        if not pins:
+            return Delivered(Outcome.NO_FILES, (), (), None)
+        if not settings.posting_enabled:
+            return Delivered(Outcome.REHEARSED, (), (), pins)
+        wrote = publish(delivery_repo, number, head_sha, pins, ())
+        return Delivered(Outcome.POSTED if wrote else Outcome.DUPLICATE, (), (), pins)
 
     # **The base commit, not the head and not the clock.** See the module docstring.
     base = base_commit(delivery_repo, number, clone)
@@ -133,7 +117,7 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
         # under which each tenant gets its own file: the schema already separated them logically,
         # but a shared file means a shared blast radius and a shared SQLite writer lock, and
         # offboarding a customer means hand-written cascades across five tables instead of `rm`.
-        tenancy.store_for(Path(settings.database_path), *delivery_repo.split("/", 1)),
+        store,
         as_of=base.committed_at,
         # **Passed so the review is RECORDED.** Without these the ranking runs and leaves no row,
         # which is how `review` and `ranked_unit` sat in the schema with zero writers.
@@ -146,6 +130,14 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     # and a budget is the only consumer that claim ever fitted.
     reading = allocate(reviewed.ranking, list(changed))
     examined = examine(clone, head_sha, reading, list(changed), settings)
+    # **RE-RENDERED HERE WITH WHAT ONLY THIS LAYER HAS.** `run_review` renders a ranking-only
+    # body for the CLI, which has no pull request to read a goal from. A delivery does.
+    # The ranking already carries each file's prior-fix count, so the summary reads the same
+    # numbers rather than querying the store twice and risking two answers.
+    past = {u.unit.site.path: int(u.score.value) for u in reviewed.ranking.units}
+    told, unreadable = explain(
+        clone, head_sha, delivery_repo, number, reading.paths, settings, history=past
+    )
     if examined is not None:
         print(f"[deliver] {reading.depth.value}: {reading.why}", flush=True)
         print(
@@ -155,36 +147,39 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
             flush=True,
         )
 
-    # **THE PIN CHECK RUNS ON THE RAW CHANGED LIST, NOT THE RANKED ONE.** Workflows are not a
-    # reviewable suffix, so they never appear in `reviewed.considered` — which is exactly why the
-    # detector sat unreachable behind the reviewer until now. It needs no model and no ranking.
     # **THE DECLARED STANDARDS, CHECKED DETERMINISTICALLY.** These verdicts are reproducible on
     # the same commit by anyone, which is why they may be asserted where a model finding may not.
-    declared, unreadable = rules_file.read(clone)
-    if unreadable:
-        print(f"[deliver] {len(unreadable)} rule declaration(s) could not be read", flush=True)
-    checks = check_change(declared, clone, head_sha, list(changed)) if declared else ()
+    checks = enforce(clone, head_sha, list(changed), store, delivery_repo, number)
 
-    mismatched, _unresolved = pin_check.check(clone, head_sha, changed)
-    pins = block(mismatched) + rules_block(checks)
+    # **WHAT THIS REVIEW COST, ON THE RECORD.** The columns have existed since the schema was
+    # written and nothing ever wrote them, so every pricing question so far has been arithmetic
+    # over a number nobody measured. A spend that is only a floor is refused rather than rounded.
+    spent = Spend()
+    for part in (told, examined):
+        if part is not None:
+            spent = spent.plus(part.spend)
+    if bank(store, delivery_repo, number, head_sha, spent):
+        print(
+            f"[deliver] cost: {spent.requests} call(s), {spent.tokens_out} tokens out", flush=True
+        )
 
     if reviewed.body is None and not pins:
         quiet = Outcome.NO_READABLE_FILES if not reviewed.considered else Outcome.NOTHING_TO_SAY
-        return Delivered(quiet, reviewed.considered, reviewed.skipped, None, reading, examined)
+        return Delivered(quiet, reviewed.considered, reviewed.skipped, None)
 
-    body = (reviewed.body or "") + pins
+    kept = examined.anchored if examined is not None else ()
+    fuller = rendered(
+        reviewed.ranking, summary=told, findings=kept, checks=checks, blind=unreadable
+    )
+    body = (fuller if told is not None or kept or checks else (reviewed.body or "")) + pins
 
     if not settings.posting_enabled:
-        return Delivered(
-            Outcome.REHEARSED, reviewed.considered, reviewed.skipped, body, reading, examined
-        )
+        return Delivered(Outcome.REHEARSED, reviewed.considered, reviewed.skipped, body)
 
-    wrote = post(delivery_repo, number, head_sha, body)
+    wrote = publish(delivery_repo, number, head_sha, body, kept)
     return Delivered(
         Outcome.POSTED if wrote else Outcome.DUPLICATE,
         reviewed.considered,
         reviewed.skipped,
         reviewed.body,
-        reading,
-        examined,
     )

@@ -41,7 +41,7 @@ from pathlib import Path
 from quantamind.store import drift
 
 # Bump on ANY change to the DDL below, and write a migration. There is no in-place edit.
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 
 # `finding` and `claim` exist because adding a table later is a migration, and the schema is
 # append-only. NOTHING WRITES TO THEM: `infer/` is closed on evidence and publishes no findings.
@@ -62,6 +62,17 @@ TABLES: tuple[str, ...] = (
         review_id INTEGER NOT NULL REFERENCES review(id), unit_path TEXT NOT NULL,
         unit_name TEXT, rank INTEGER NOT NULL, score REAL NOT NULL, percentile REAL,
         allocation TEXT NOT NULL, PRIMARY KEY (review_id, unit_path, rank))""",
+    # Every declared rule against every changed file, including the ones we could not decide.
+    # **ALL FOUR OUTCOMES ARE STORED, OR THE DENOMINATOR IS A GUESS.** A trail holding only
+    # violations cannot answer "was this rule enforced", only "did it fire", and a compliance rate
+    # computed from it would be over whatever population the reader assumed.
+    # `provenance` is what makes the trail worth reading: a parser's verdict can be re-run on the
+    # same commit and shown to agree, and a model's cannot.
+    """CREATE TABLE IF NOT EXISTS rule_check (
+        review_id INTEGER NOT NULL REFERENCES review(id), rule_id TEXT NOT NULL,
+        path TEXT NOT NULL, line INTEGER NOT NULL DEFAULT 0, outcome TEXT NOT NULL,
+        evidence TEXT NOT NULL DEFAULT '', reason TEXT, provenance TEXT NOT NULL,
+        PRIMARY KEY (review_id, rule_id, path))""",
     # What happened to the change AFTER we spoke. Separate from `review` because `review` records
     # a decision we made at one instant and this records facts that arrive later and change --
     # and because adding columns to an existing table by ALTER produces DDL text that differs from

@@ -53,6 +53,22 @@ def _to_3(conn: sqlite3.Connection) -> None:
             conn.execute(statement)
 
 
+def _to_5(conn: sqlite3.Connection) -> None:
+    """Add `rule_check`. **Nothing is backfilled, and that is the whole safety argument.**
+
+    A review recorded before this step was never checked against a declared rule, because no rule
+    engine existed when it ran. Writing "passed" rows for it would manufacture a compliance history
+    that never happened — and a compliance history is precisely the artefact somebody would later
+    show a regulator. An absent row means we did not check; it must never mean the check passed.
+
+    The table is created from `TABLES` rather than written out again here, so a migrated store is
+    byte-identical to a fresh one — which `test_schema_golden.py` asserts.
+    """
+    for statement in TABLES:
+        if "rule_check" in statement:
+            conn.execute(statement)
+
+
 def _to_4(conn: sqlite3.Connection) -> None:
     """Add `touch_watermark`. Nothing is backfilled, and that is what keeps it safe.
 
@@ -66,7 +82,7 @@ def _to_4(conn: sqlite3.Connection) -> None:
             conn.execute(statement)
 
 
-STEPS: dict[int, Callable[[sqlite3.Connection], None]] = {3: _to_3, 4: _to_4}
+STEPS: dict[int, Callable[[sqlite3.Connection], None]] = {3: _to_3, 4: _to_4, 5: _to_5}
 
 
 @dataclass(frozen=True, slots=True)

@@ -73,6 +73,16 @@ class Rule:
     target: str = ""
     """What the check looks for -- a call, an import, a pattern. Empty only for MODEL_JUDGED."""
 
+    paths: tuple[str, ...] = ()
+    """Path prefixes this rule governs. Empty means every file.
+
+    **A RULE WITHOUT A SCOPE IS A RULE IN THE WRONG PLACE.** "No pandas in the product" is true of
+    `src/` and false of `research/`, which is a separate uv project that MAY use it — and a rule
+    that cannot say so fires on the code it was never meant to govern. That was found by running
+    these rules over this repository before declaring them: the pandas rule flagged a research
+    test, correctly by its own terms and wrongly by the standard it came from.
+    """
+
     def __post_init__(self) -> None:
         if not SLUG.match(self.id):
             raise RuleRefused(self.id, "id must be a lowercase slug, so it can key an audit row")
@@ -85,6 +95,16 @@ class Rule:
             raise RuleRefused(
                 self.id, f"{self.check.value} needs a target; there is nothing to look for"
             )
+
+    def applies_to(self, path: str) -> bool:
+        """Whether this rule governs `path`. An unscoped rule governs everything.
+
+        **A FILE OUTSIDE THE SCOPE PRODUCES NO ROW AT ALL**, which is not the same as a skip: there
+        is no question to answer, the way a deleted file has no code to check. What must never
+        happen is a PASSED row for a rule that was never meant to apply, because that inflates the
+        denominator of a compliance rate with pairs nobody agreed to.
+        """
+        return not self.paths or any(path.startswith(prefix) for prefix in self.paths)
 
     @property
     def provenance(self) -> Provenance:

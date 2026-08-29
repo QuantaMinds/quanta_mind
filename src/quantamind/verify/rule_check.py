@@ -20,7 +20,8 @@ WHY:  **A RULE THAT CANNOT BE CHECKED MUST NOT READ AS A RULE THAT PASSED.** Onl
       **EXACT MATCH ON DOTTED NAMES, NOT A SUBSTRING.** `subprocess.run` must not fire on
       `runner.run`. An import matches its target or anything beneath it, so forbidding `subprocess`
       also forbids `subprocess.run`, which is what somebody writing that rule means.
-IMPORTS: ingest.blob, parse.python_names, types.{change,checked,rule,verdict}. Leftward only.
+IMPORTS: ingest.{blob,rules_file}, parse.python_names, store.rule_checks,
+      types.{change,checked,rule,verdict}. Leftward only.
 CONSUMED BY: the audit trail and the compliance dashboard (D4, D5).
 """
 
@@ -31,7 +32,9 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from quantamind.ingest.blob import at
+from quantamind.ingest.standards import rules_file
 from quantamind.parse.python_names import Mention, Names, UnparseableSource, names_in
+from quantamind.store.rule_checks import persist
 from quantamind.types.change import Language, language_of
 from quantamind.types.checked import Checked, Outcome
 from quantamind.types.rule import CheckKind, Rule
@@ -95,7 +98,9 @@ def check(rule: Rule, path: str, source: str) -> Checked:
 
 def check_all(rules: Sequence[Rule], path: str, source: str) -> tuple[Checked, ...]:
     """One row per rule. **The count is the denominator of any compliance rate over this file.**"""
-    return tuple(check(rule, path, source) for rule in rules)
+    # A rule that does not govern this path produces no row: there is no question to answer, and
+    # a PASSED row would inflate the denominator with a pair nobody agreed to.
+    return tuple(check(rule, path, source) for rule in rules if rule.applies_to(path))
 
 
 def check_change(
@@ -120,3 +125,28 @@ def check_change(
             continue
         rows.extend(check_all(rules, path, source))
     return tuple(rows)
+
+
+def enforce(
+    clone: Path, sha: str, paths: Sequence[str], store: Path, repo: str, number: int
+) -> tuple[Checked, ...]:
+    """Read this repository's declared rules, check the change, and put the result on the record.
+
+    **APPLYING A STANDARD AND RECORDING THAT YOU APPLIED IT ARE ONE JOB.** Separating them is how a
+    trail comes to hold fewer checks than ran: the second half is easy to forget at a call site and
+    impossible to notice afterwards, because a missing row and a check that never happened look the
+    same. Doing both here makes them fail together or not at all.
+
+    **A REFUSED DECLARATION IS REPORTED, NOT DROPPED**, and a recording failure does not take the
+    review with it — the comment is already worth posting whether or not the trail accepted it.
+    """
+    declared, unreadable = rules_file.read(clone, sha)
+    if unreadable:
+        print(f"[rules] {len(unreadable)} declaration(s) could not be read", flush=True)
+    if not declared:
+        return ()
+    rows = check_change(declared, clone, sha, paths)
+    landed = persist(store, repo, number, sha, rows, declared)
+    if landed != len(rows):
+        print(f"[rules] audit trail took {landed} of {len(rows)} check(s)", flush=True)
+    return rows

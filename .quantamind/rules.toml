@@ -1,0 +1,39 @@
+# The standards this repository holds itself to, checked on every pull request.
+#
+# These mirror rules already written in AGENTS.md. A rule here that AGENTS.md does not state would
+# be a standard nobody agreed to; a rule that fires on deliberate code is worse than no rule at all,
+# because it teaches a reviewer to scroll past the section.
+#
+# Every entry was run against this repository's own history before being added.
+
+[[rule]]
+id = "no-research-imports-in-product"
+description = "AGENTS.md rule 11: research runs on a different interpreter. pandas in src/ means the product now depends on it, and the container does not have it."
+severity = "high"
+check = "forbid_import"
+target = "pandas"
+paths = ["src/", "scripts/"]
+
+[[rule]]
+id = "no-scipy-in-product"
+description = "AGENTS.md rule 11: scipy belongs to research/, which is a separate uv project. An import here makes it a runtime dependency of the endpoint."
+severity = "high"
+check = "forbid_import"
+target = "scipy"
+paths = ["src/", "scripts/"]
+
+[[rule]]
+id = "no-yaml-in-product"
+description = "AGENTS.md rule 11 names pyyaml specifically. Configuration in this product is TOML, which is stdlib and needs no dependency."
+severity = "high"
+check = "forbid_import"
+target = "yaml"
+paths = ["src/", "scripts/"]
+
+[[rule]]
+id = "no-eval"
+description = "eval turns data into code. Nothing in this product needs it, and a review is a bad place to find out something did."
+severity = "high"
+check = "forbid_call"
+target = "eval"
+paths = ["src/", "scripts/"]

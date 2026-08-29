@@ -17,8 +17,9 @@ import pytest
 
 from quantamind.types.change import PullRequest, Repo
 from quantamind.types.ranking import Budget, BudgetExceeded, Ranking
-from quantamind.types.review import CoverageLine, RequestLedger, Review
+from quantamind.types.review import CoverageLine, Review
 from quantamind.types.settings import SettingsError, load
+from quantamind.types.spend import Spend
 
 REPO = Repo(host="github.com", name="acme/widget")
 PR = PullRequest(repo=REPO, number=7, head_sha="0123456789abcdef", base_sha="fedcba9876543210")
@@ -31,7 +32,7 @@ def test_overspend_is_read_from_the_ledger_not_from_the_budget() -> None:
         pull_request=PR,
         coverage=COVERAGE,
         budget=Budget(max_requests=3),
-        ledger=RequestLedger(requests=4),
+        ledger=Spend(requests=4),
     )
     assert review.overspent is True
     assert review.ran_model is True
@@ -42,7 +43,7 @@ def test_a_review_at_its_ceiling_is_not_overspent() -> None:
         pull_request=PR,
         coverage=COVERAGE,
         budget=Budget(max_requests=3),
-        ledger=RequestLedger(requests=3),
+        ledger=Spend(requests=3),
     )
     assert review.overspent is False
 
@@ -58,7 +59,7 @@ def test_a_zero_ceiling_still_produces_a_review() -> None:
         pull_request=PR,
         coverage=COVERAGE,
         budget=Budget(max_requests=0, inference_permitted=False),
-        ledger=RequestLedger(),
+        ledger=Spend(),
     )
     assert review.budget.is_free_tier is True
     assert review.ran_model is False
@@ -79,8 +80,8 @@ def test_cache_reads_are_observable_because_their_absence_is_silent() -> None:
     It produces no error. It simply costs full price on every call, which is why the counter
     exists rather than being trusted.
     """
-    assert RequestLedger(requests=3, cache_read_tokens=0).used_cache is False
-    assert RequestLedger(requests=3, cache_read_tokens=20_000).used_cache is True
+    assert Spend(requests=3, cache_read_tokens=0).used_cache is False
+    assert Spend(requests=3, cache_read_tokens=20_000).used_cache is True
 
 
 def test_settings_default_to_not_running_a_model() -> None:

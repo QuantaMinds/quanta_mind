@@ -22,7 +22,7 @@ WHY:  **NO FILE AND A BROKEN FILE MUST NOT PRODUCE THE SAME ANSWER.** A reposito
       **THE PATH IS FIXED AND NOT CONFIGURABLE.** A rules file that could live anywhere is a rules
       file an auditor has to be told the location of, and a second place for it is a second place
       to disagree with the first.
-IMPORTS: stdlib (pathlib, tomllib) plus `types.{rule,verdict}`. Leftward only.
+IMPORTS: stdlib (pathlib, tomllib), `ingest.blob` to read from git, `types.{rule,verdict}`.
 CONSUMED BY: the checks that enforce these (D1b in docs/plans/product/product-build.md).
 """
 
@@ -32,6 +32,7 @@ import tomllib
 from collections import Counter
 from pathlib import Path
 
+from quantamind.ingest.blob import BlobUnreadable, at
 from quantamind.types.rule import CheckKind, Rule, RuleRefused, Severity
 from quantamind.types.verdict import Construct, Reason, Site, Unresolved
 
@@ -55,6 +56,7 @@ def _one(entry: object, index: int, where: str) -> tuple[Rule | None, Unresolved
                 severity=Severity(str(entry.get("severity", "")).lower()),
                 check=CheckKind(str(entry.get("check", "")).lower()),
                 target=str(entry.get("target", "")),
+                paths=tuple(str(p) for p in entry.get("paths", []) if str(p).strip()),
             ),
             None,
         )
@@ -65,15 +67,34 @@ def _one(entry: object, index: int, where: str) -> tuple[Rule | None, Unresolved
         return None, _refusal(named, Reason.MALFORMED_DECLARATION)
 
 
-def read(clone: Path) -> tuple[tuple[Rule, ...], tuple[Unresolved, ...]]:
-    """Every rule this repository declares, and every declaration that could not be read."""
-    path = clone / RULES_PATH
+def read(clone: Path, sha: str = "HEAD") -> tuple[tuple[Rule, ...], tuple[Unresolved, ...]]:
+    """Every rule this repository declares at `sha`, and every declaration that could not be read.
+
+    **READ FROM GIT, NOT FROM THE WORKING TREE, BECAUSE THERE IS NO WORKING TREE.**
+    `serve/working_clone.ensure()` clones with `--no-checkout`, so the customer's files exist only
+    as objects. This read the filesystem, found nothing, and returned "no rules declared" — for
+    EVERY repository, forever, indistinguishable from one that had declared none. The module's
+    whole argument is that those two answers must differ, and it was defeated by looking in a
+    directory that has no files in it. Caught before a delivery, by asking what the clone actually
+    contains rather than assuming a checkout.
+
+    **AND AT THE COMMIT UNDER REVIEW, NOT AT THE DEFAULT BRANCH.** A pull request that ADDS or
+    changes a rule must be checked against the rule as it stands in that change, or the first
+    review of a new standard would silently apply the old one.
+    """
     where = str(RULES_PATH)
-    if not path.is_file():
+    try:
+        raw = at(clone, sha, RULES_PATH.as_posix())
+    except BlobUnreadable:
+        # **A CLONE WE CANNOT READ IS NOT A REPOSITORY WITH NO RULES.** That is the same confusion
+        # this module exists to prevent, one level up: git failing and a customer declaring nothing
+        # would otherwise produce the same answer, and the compliance view would show a clean sheet.
+        return (), (_refusal(where, Reason.UNPARSEABLE_SYNTAX),)
+    if raw is None:
         return (), ()
     try:
-        document = tomllib.loads(path.read_text(encoding="utf-8"))
-    except (tomllib.TOMLDecodeError, OSError, UnicodeDecodeError):
+        document = tomllib.loads(raw)
+    except (tomllib.TOMLDecodeError, ValueError):
         return (), (_refusal(where, Reason.UNPARSEABLE_SYNTAX),)
 
     declared = document.get(TABLE, [])

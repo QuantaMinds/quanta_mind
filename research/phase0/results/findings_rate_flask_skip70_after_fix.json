@@ -1,0 +1,302 @@
+[
+ {
+  "sha": "17e146ad949b3d80438faf95e81b53c543cb50f5",
+  "outcome": "measured",
+  "raw": 0,
+  "kept": 0,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "bda295d37fa3809c95a93d01dd605d0222109889",
+  "outcome": "measured",
+  "raw": 2,
+  "kept": 1,
+  "unanchored": 1,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "84e11a1e827c0f55f9b9ee15952eddcf8a6492e0",
+  "outcome": "measured",
+  "raw": 2,
+  "kept": 2,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "367e1df785a71e9004d9a87a221652bfc5a964ac",
+  "outcome": "measured",
+  "raw": 0,
+  "kept": 0,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "2abb7513dc52e9d9f2c73dde91f3b89d8f9492e4",
+  "outcome": "measured",
+  "raw": 1,
+  "kept": 0,
+  "unanchored": 1,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "0a00e1b6085f62fb776a95ef676ea661bff565f6",
+  "outcome": "measured",
+  "raw": 0,
+  "kept": 0,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "1d7281fe0770a97229a2a75189a712cff866b448",
+  "outcome": "measured",
+  "raw": 0,
+  "kept": 0,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "f3b8f570545200c87465d18386f3fc9f2258307a",
+  "outcome": "measured",
+  "raw": 0,
+  "kept": 0,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "e1aedecdc689cc9a79131851dbdabf6c3bc49c9e",
+  "outcome": "measured",
+  "raw": 0,
+  "kept": 0,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "8705dd39c4fa563ea0fe0bf84c85da8fcc98b88d",
+  "outcome": "measured",
+  "raw": 1,
+  "kept": 1,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "9532cba45d2339e90ebf04f178b1e4f2064e7328",
+  "outcome": "measured",
+  "raw": 1,
+  "kept": 1,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "0bc7356ce1ae11e633426902aba76d525f4523da",
+  "outcome": "measured",
+  "raw": 1,
+  "kept": 1,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "721abdc3810057269503a72d2db80fb826f3c85c",
+  "outcome": "measured",
+  "raw": 0,
+  "kept": 0,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "0ec9192cf25f5187d6521f2539489fa8d55336bb",
+  "outcome": "measured",
+  "raw": 1,
+  "kept": 0,
+  "unanchored": 1,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "345f18442ceb29f9e365af99fc85bdc5986323d2",
+  "outcome": "measured",
+  "raw": 0,
+  "kept": 0,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "8728c3e4cd4e929a4327d917acd4b96c75f963d0",
+  "outcome": "measured",
+  "raw": 0,
+  "kept": 0,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "79ebf6c39cba01b240a926b899b7d0828e63fc4b",
+  "outcome": "measured",
+  "raw": 0,
+  "kept": 0,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "83d777bebfb3031de51d458b47d06e8e612f3a3d",
+  "outcome": "measured",
+  "raw": 0,
+  "kept": 0,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "2e8fe7b2f2b541a60c90c625446647b22c5cacc2",
+  "outcome": "measured",
+  "raw": 0,
+  "kept": 0,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "f139024b1ca637cc6df694f49817bdb8ec294561",
+  "outcome": "measured",
+  "raw": 0,
+  "kept": 0,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "44ffe6c6d6c90a414de32db1b03d5978f8770271",
+  "outcome": "measured",
+  "raw": 2,
+  "kept": 2,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "84c007d34f7f0b8737310fe4d67be12c463e0130",
+  "outcome": "measured",
+  "raw": 1,
+  "kept": 0,
+  "unanchored": 1,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "8239765a4410d13d489e299a99e4a4c6951e190b",
+  "outcome": "measured",
+  "raw": 8,
+  "kept": 8,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "9cb1a7a52d7927071e2b737d52f902f006969e82",
+  "outcome": "measured",
+  "raw": 0,
+  "kept": 0,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "b626a9387900a9f717eb42765275adc0bf0875e3",
+  "outcome": "measured",
+  "raw": 0,
+  "kept": 0,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "c24f8c8199f8ceda7a7cfb5e91773eba595f5b67",
+  "outcome": "measured",
+  "raw": 0,
+  "kept": 0,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "04c21387dbc454fb59cae9c9bb21a13358cb5a34",
+  "outcome": "measured",
+  "raw": 2,
+  "kept": 2,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "b8b410014d85f9861acc87c5f21c9a55a42d09c9",
+  "outcome": "measured",
+  "raw": 0,
+  "kept": 0,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "c4b39ba2f3fede0555f18fc03b0f2499bb0d424b",
+  "outcome": "measured",
+  "raw": 1,
+  "kept": 1,
+  "unanchored": 0,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ },
+ {
+  "sha": "b10b6d4af1127fdfb0a74221af0c020ced71fece",
+  "outcome": "measured",
+  "raw": 2,
+  "kept": 0,
+  "unanchored": 2,
+  "refuted": 0,
+  "unresolvable": 0,
+  "withdrawn": 0
+ }
+]

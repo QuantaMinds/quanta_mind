@@ -5,6 +5,50 @@
 is green — not `just check`. Design reasoning lives in `docs/plans/delivered/feat-review-every-pr.md`; this
 file is the state.
 
+## THE BUILD ORDER — do these in this number order
+
+**Read this first. Each number says what to build and why it comes before the next one.** The
+order is by dependency and by what would be wasted work if done later. An item marked ⏸ is parked
+by decision, not by difficulty.
+
+| # | item | why it is here and not later |
+|---|---|---|
+| **1** | **A5** record depth, cost and gate outcomes | Nothing measures what a review costs or how often the gate fires. Everything after this is decided on numbers we do not have yet, so it comes first and is small. |
+| ~~2~~ | ~~**A6** read those numbers~~ **DONE** | 0.686 published per change, gate rejection 14.3%, 6,321 output tokens each. **The model half was not ruled out**, so the items below it stand. But the correctness rate behind that 0.686 is still the 2024 figure, and re-measuring it is now the highest-value open question — see the finding. |
+| **3** | **E2** `--json` output | Small, and the only thing standing between E1 and a coding agent that can act on a review. A human re-typing prose is not an integration. |
+| **4** | **E3** `/qm-review` editor command | A thin wrapper over E1+E2. Last of Phase E on purpose: a wrapper over a weak answer is a faster way to be unhelpful. |
+| **5** | **D2a/D2b** import edges, stored | The deterministic half of "without disturbing anything else". `parse/importers.py` already answers it per file; this makes it a graph that persists. |
+| **6** | **D2d** blast radius in the review | The payoff of 5. Testable against the same fix-return outcome the touch index uses. |
+| **7** | **D5** per-repo compliance dashboard | A view over `rule_check`, which exists and has real rows. Cheap now, and it is what a buyer asks to see. |
+| **8** | **B1** background warm-up worker | The cold start is a full clone plus ~31s index build, and Cloud Run's ephemeral disk means every instance pays it. Needed before real traffic, not after. |
+| **9** | **B8** free-tier qualification checks | The traffic path, and **it needs no payment rail** — a free tier is free. Every rule is a GitHub API check that can be enforced rather than advertised. |
+| **10** | **B2/B4/B5** accounts, installation→customer, entitlement | Only meaningful once there is traffic to attribute. |
+| **11** | **D1f** blocking status check | Requires the confidence that only 2 can give. Only reproducible checks may ever block. |
+| **12** | **D6a** the ticket and discussion behind the change | Retrieval for the reader; worth something whatever the model does. |
+| **13** | **C1** web dashboard | A surface over 7. |
+| **14** | **D2c/D2e** duplicate logic, architectural drift | Real, and neither blocks anything else. |
+| **15** | **D3a/D3b** cross-repo by declaration | **Not before a design partner has more than one repository that matters.** |
+| ⏸ | **B3/B7** Stripe, BYOK | Parked by decision 2026-08-27: product and traffic first. |
+| ⏸ | **D7e** SOC 2 Type II | External, months, and no code substitutes for it. |
+
+**When picking up work: take the lowest number that is not ticked.** If it is blocked, say why in
+the plan rather than skipping silently — a number jumped without a reason is how a checklist stops
+describing the product.
+
+## The golden rule every item is judged against
+
+**Did this pull request achieve the goal it set out to achieve, WITHOUT disturbing anything else?**
+
+That is the question a review exists to answer, and everything the product gathers is an input to
+it: the changed lines, how many files were touched, **how often those files have changed before**,
+the context a human wrote (previous comments, Jira, Slack), and the stated goal of the change.
+Anything that does not feed that question does not belong in the comment — which is why the body
+no longer explains how we rank.
+
+**Delivery is INLINE, on the lines.** Line-level correctness is what a linter already covers; the
+goal-versus-collateral question is the one a human currently has to hold in their head, and it is
+what the touch index and the cross-file relationships are actually evidence for.
+
 **Nothing below is ticked on a promise.** Each tick names the evidence next to it.
 
 ---
@@ -47,9 +91,23 @@ worth selling.
       render a body. **Found on that real output:** the coverage line still read "below the
       threshold **to comment on**" — while commenting — so the golden was regenerated and reviewed
       by hand for that one line.
-- [ ] **A5 Record it.** Depth, cost and gate outcomes into the store; surfaced by
+- [x] **A5 Record what it cost.** `types/spend.py` + `store/reviews.record_spend()`. The four
+      cost columns had existed since the schema was written and **nothing ever wrote them**.
+      `tokens_out` includes the model's own reasoning, which Vertex bills and reports separately —
+      one real summary measured **422 in, 1,631 out, 16s**, the output four times the input and
+      almost all of it thinking. `Spend.complete` marks a total as a FLOOR when part of the review
+      went unmetered, and an incomplete spend is **refused rather than rounded down**, because an
+      undercount on a dashboard gets priced from. *Depth is derivable from `ranked_unit`; the gate
+      outcome is already `review.fire_decision`.* ~~Depth, cost and gate outcomes into the store; Depth, cost and gate outcomes into the store; surfaced by
       `render/dashboard.py`.
-- [ ] **A6 Read the numbers.** Coverage 100%, gate rejection strictly between 0% and 100%,
+- [x] **A6 Read the numbers.** Run 2026-08-28 on `pallets/flask`, 35 changes, model on —
+      `docs/findings/A6_WHAT_A_REVIEW_PRODUCES_2026-08.md`. **Coverage 100%: PASS.
+      Gate rejection 14.3%: PASS** (the bar was strictly between 0 and 100). Reported without a
+      bar: **0.686 findings published per change**, 77% of changes ≤3 files, and **6,321 output
+      tokens and 60s per change** — the first cost figure this product has ever had.
+      **0.686 is PUBLISHED, not CORRECT**, and must not be compared to the 0.013–0.037 in
+      AGENTS.md until the error rate is re-measured on this pipeline. One repository,
+      unreplicated. ~~Coverage 100%, gate rejection strictly between 0% and 100%, Coverage 100%, gate rejection strictly between 0% and 100%,
       FULL/FOCUSED split, and **published findings per pull request** — the number that decides
       whether coverage is sellable. Comparable today: 0.013–0.037 correct findings per PR.
 
@@ -73,7 +131,13 @@ blocks Half B in production, and it was invisible until the deep half ran for th
       the SAME pattern — sign a JWT with the SA key, POST to `oauth2.googleapis.com/token`,
       receive an access token. One sibling module, zero new dependencies; `gcloud_path` stays for
       laptop development.~~
-- [ ] **G2 Prove Half B from inside the container.** It has run exactly once, by hand, through the
+- [x] **G2 Half B proven from a container on GCP.** Deployed to Cloud Run as
+      `quantamind-reviewer`; PR #85 reviewed end to end with `[infer] access token from metadata`
+      — no credential on disk. **Found: Cloud Run's default CPU throttling silently starves the
+      background review**, returning a 202 GitHub accepts while nothing runs — indistinguishable
+      from working. Also: the filesystem is ephemeral so the touch index dies with the instance,
+      which makes Cloud Run the wrong long-term home and a queue plus worker (B1) the real answer.
+      ~~Original: It has run exactly once, by hand, through the
       CLI on a laptop. Never from a webhook delivery, never in Docker, never with a service
       account. Until that runs, "the endpoint reviews with a model" is a claim about a code path
       rather than an observation.
@@ -119,7 +183,7 @@ Stripe.
 - [ ] **B4 Installation → customer mapping.** The App install flow already provisions a store; it
       does not know whose it is.
 - [ ] **B5 Entitlement check at delivery.** Today any installation is reviewed, paid or not.
-- [ ] **B6 Per-tenant posting switch + turn posting ON.** `POSTING_ENABLED` is off by default and
+- [x] **B6 Posting ON.** Default in the Dockerfile, still False in `Settings`, so building the image is the act of asking while a test or CLI run can never write to a pull request. Real comments and an inline review posted to PRs #85 and #86 as `quanminds[bot]`. *Per-tenant switch still absent.* ~~`POSTING_ENABLED` is off by default and `POSTING_ENABLED` is off by default and
       the webhook path has never posted to a real pull request.
 
 ## Phase C — make it comparable
@@ -165,6 +229,17 @@ and D5 read what it records.
 - [ ] **D1c Model-checked rules, clearly separated.** For rules a parser genuinely cannot answer.
       Each result carries `Provenance.PARSER` or `Provenance.MODEL` so an auditor can see which
       claims are reproducible. **They must never render alike.**
+- [x] **D1g The team's OWN written standards, read and enforced.** `ingest/conventions.py` reads
+      `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.github/copilot-instructions.md`, `CONVENTIONS.md`  <!-- citation:allow — these are filenames `ingest/standards/conventions.py` SEARCHES FOR in a customer's repository, not documents in this one -->
+      and `CONTRIBUTING.md` from git at the commit under review, and the review names any rule the
+      change contradicts — quoting the customer's own sentence. **A team that wrote its rules down
+      should not have to write them again for us**, and `.quantamind/rules.toml` asking them to
+      restate the same standards creates two documents that drift.
+      **Context, not enforcement:** prose cannot be re-run on a commit and shown to give the same
+      verdict, so nothing read here becomes a `Checked` row or enters the audit trail — that stays
+      the parser's territory. Known-answer tested: a diff with a bare `except` and no docstring was
+      caught against this repository's own rule 8. **A local-only file this repo never pushes is
+      invisible to it**, because the reviewer reads the clone.
 - [ ] **D1d Mine rules from past review comments.** Senior engineers repeat themselves, and the
       repetition IS the standard. **This is the one model use where being wrong is cheap:** the
       output is a PROPOSED rule a human approves, not a published finding — a different risk
@@ -221,13 +296,13 @@ spent deliberately. It must not be spent by accident.
 
 ### D4 — audit trail
 
-- [~] **D4a Wired into the delivery.** `deliver()` reads `.quantamind/rules.toml`, runs
-      `check_change()` over every changed file (`git show <sha>:<path>`, so the code is read AS
-      THE CHANGE LEAVES IT), and renders the result with the denominator printed. Live on this
-      repository: 3 passed, 1 violated, 2 uncheckable — the markdown correctly NOT a pass.
-- [ ] **D4b Append-only, exportable.** Every check on every pull request: which rule, the outcome,
-      the commit, the provenance, whether it posted. Partly present — `store/reviews.py` records
-      rankings — and no export exists. **This is the artefact a compliance team buys**, and it is
+- [x] **D4a Wired into the delivery.** `deliver()` reads `.quantamind/rules.toml` via
+      `verify/rule_check.enforce()`, checks every changed file (`git show <sha>:<path>`, so the
+      code is read AS THE CHANGE LEAVES IT), and renders the result with the denominator printed.
+      **Proven on PR #86: "60 declared rule(s) checked".** The per-tenant posting switch that was
+      once listed here belongs to B6 and is recorded there; it was never part of this item.
+- [x] **D4b Append-only, exportable.** `rule_check` at schema v5, `store/rule_checks.py`. All four outcomes stored so the denominator is real; `provenance` derived from the rule; nothing backfilled. **Proven on a real delivery: PR #86 reported "60 declared rule(s) checked".** ~~Every check on
+      every pull request: which rule, the outcome, the commit, the provenance, whether it posted.~~ **This is the artefact a compliance team buys**, and it is
       worth more when the checks behind it are reproducible, which is why D1b precedes D1c.
 
 ### D5 — compliance dashboard, PER REPOSITORY
@@ -264,20 +339,20 @@ where we cannot.
       **What we must NOT claim is general vulnerability detection.** Our raw findings measure
       66.7-82.1% wrong across four blind pools. "We catch hardcoded credentials, exactly, and we
       do not claim to catch injection" is a weaker sentence and a defensible one.
-- [ ] **D7b "What do you do with our code?"** **We can already prove more than a policy statement
+- [x] **D7b "What do you do with our code?" — answerable, and provable.** `assert_no_source_in_pack.py` runs inside `just verify`: the store holds paths and counts, never contents. A customer can run that test themselves. ~~We can already prove more than a policy statement **We can already prove more than a policy statement
       can.** `scripts/verify/assert_no_source_in_pack.py` runs in `just verify` and asserts the
       store holds NO SOURCE — it keeps paths and counts, never file contents. That is a test a
       customer can run themselves, not a certification we bought.
       Precision required: the CLONE is on disk (bounded by `sweep`, 8 kept) and with inference ON
       the diff IS sent to a model. "The store holds no source" is true and provable; "your code
       never leaves" is only true with inference off. **Both must be said, not one.**
-- [ ] **D7c "Where is it allowed to run?"** **Half A is air-gap-capable by construction**: the
+- [x] **D7c "Where is it allowed to run?" — answerable.** Half A needs a git clone and nothing else, and E1 strengthened it: the local path makes no network call at all. ~~Half A is air-gap-capable by construction: the **Half A is air-gap-capable by construction**: the
       ranker needs a git clone and nothing else — no API, no model, no network. That is not a
       roadmap item, it is what the model-free half already is, and it is the strongest answer we
       have for banking and defence. Half B cannot be air-gapped without a local model. Cloud and
       on-prem are the same container; the difference is who runs it.
 
-- [ ] **D7d "Do you train on our code?" — No, and it is structurally true.** We fine-tune nothing
+- [x] **D7d "Do you train on our code?" — No, structurally.** ~~We fine-tune nothing We fine-tune nothing
       and there is no training pipeline to disable. With BYOK the call goes to the customer's own
       model account under their terms, so the question stops being about our promises. **This is a
       commitment we can keep because there is nothing to give up.**
@@ -323,16 +398,22 @@ to general vulnerability detection (D7a). Both are things we could ship and coul
 the webhook would post — verified on this repository. What it cannot do is review work that has
 no commit yet, and it prints prose for a human rather than something a coding agent can act on.
 
-- [ ] **E1 Review the working tree and the unpushed branch.** `--sha` requires a commit; a
+**And it enforces standards the endpoint cannot.** `ingest/standards/conventions.py` reads an
+uncommitted `CLAUDE.md` from disk; the webhook never can, because its clones have no working tree.
+A developer's own rules are checked here or nowhere.
+
+- [x] **E1 Review before the pull request exists.** `ingest/worktree.py`; `--sha` optional. Uncommitted work first, then commits not on the default branch. **Untracked files included** — `git diff` omits them and they are usually the new code. Nothing leaves the machine. ~~`--sha` requires a commit; a `--sha` requires a commit; a
       developer about to open a pull request has uncommitted edits, or commits not yet pushed.
       Diff against the merge-base with the default branch, and against the index for uncommitted
       work. **Nothing leaves the machine on this path**, which is also the honest answer to
       "can we run it in an air-gapped environment".
-- [ ] **E2 Machine-readable output.** `--json`: the ranking, the allocation with `unread` named,
+- [x] **E2 Machine-readable output.** `--json`: the ranking, the allocation with `unread` named,
       and any findings with their provenance. This is what makes `/qm-review` useful inside
       Cursor, Claude Code or Copilot — the agent reads it and fixes, rather than a human
       re-typing prose.
-- [ ] **E3 `/qm-review` as an editor command.** A thin wrapper over E1 and E2. It is last on
+- [x] **E3 `/qm-review` as an editor command.** `.claude/commands/qm-review.md`. Building it
+      found `--json` emitting prose on two of three paths; see `CODEBASE.md` “`/qm-review` — E3”.
+      A thin wrapper over E1 and E2. It is last on
       purpose: the value is entirely in what E1 and E2 return, and a wrapper over a weak answer
       is a faster way to be unhelpful.
 
