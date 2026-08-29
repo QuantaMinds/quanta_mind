@@ -334,7 +334,7 @@ module stops being able to carry the field it needs next. `PRRecord` needed two.
 | `discovery.py` | shared walker, exclusion list, `LAYER_ORDER` — **imported, not invoked** |
 | `check_structure.py` | ≤200 lines/file, ≤15 files/dir |
 | `check_conventions.py` | layering, module docstrings, banned name tokens |
-| `check_assert_quality.py` | tests that are green without verifying anything |
+| `check_assert_quality.py` | tests that are green without verifying anything — enumerates through `discovery.walk`, never `rglob`, which descended into `.venv` |
 | `check_agents_md.py` | AGENTS.md line cap; named guards exist; rules name a mechanism |
 | `check_enforcement_map.py` | `$enforcement_map` tokens resolve; no orphan guards |
 | `check_docs_sync.py` | this file stays honest |
