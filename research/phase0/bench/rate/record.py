@@ -36,6 +36,7 @@ class ChangeRecord:
     kept: int = 0
     unanchored: int = 0
     refuted: int = 0
+    unresolvable: int = 0
     withdrawn: int = 0
 
     def __post_init__(self) -> None:
@@ -86,6 +87,7 @@ def report(records: list[ChangeRecord]) -> str:
             f"GATE REJECTION     {(raw - kept) / raw:.1%} of raw dropped — "
             f"unanchored {sum(r.unanchored for r in measured)}, "
             f"refuted {sum(r.refuted for r in measured)}, "
+            f"unresolvable {sum(r.unresolvable for r in measured)}, "
             f"withdrawn {sum(r.withdrawn for r in measured)}",
         ]
     return "\n".join(lines)

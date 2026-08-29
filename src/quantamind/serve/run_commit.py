@@ -20,16 +20,18 @@ import time
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+from quantamind.infer.gemini import InferenceFailed, Unavailable
 from quantamind.ingest.worktree import NothingPending, pending
 from quantamind.rank import firing
+from quantamind.render.deep_report import lines
 
 # **ALIASED, BECAUSE `report` IS ALREADY TAKEN IN THIS MODULE.** `deep_review.report` prints the
 # model pass; this renders the whole review as data. Two functions of one name in one file is the
 # collision rule 13 is about, and here it shadowed silently until the call failed at runtime.
 from quantamind.render.json_report import report as json_review
 from quantamind.render.json_report import unreviewed
-from quantamind.serve.deep_review import report
-from quantamind.serve.run_review import review
+from quantamind.serve.deep_review import deep
+from quantamind.serve.run_review import Reviewed, review
 from quantamind.types.change import REVIEWABLE_SUFFIXES
 from quantamind.types.review import NotReviewed
 from quantamind.types.settings import load
@@ -125,3 +127,29 @@ def _timestamp(clone: Path, sha: str) -> tuple[list[str], int] | None:
         return None
     changed = [p for p in lines[1:] if p.endswith(REVIEWABLE_SUFFIXES)]
     return changed, int(lines[0])
+
+
+def report(clone: Path, sha: str, out: Reviewed, project: str, gcloud: str = "gcloud") -> None:
+    """The reviewer pass, printed with its discards. Never raises into the ranking's result.
+
+    **LIVES HERE, NOT IN `deep_review`, BECAUSE IT IS THE CLI'S PRESENTATION.** `deep()` produces
+    a reviewer pass; this prints one for a person at a terminal, and the only caller is below.
+
+    **`gcloud` IS THREADED HERE BECAUSE IT WAS THREADED EVERYWHERE ELSE AND MISSED HERE.**
+    `examine()` took it from settings for the webhook; this path kept the bare default, so a
+    developer whose SDK is not on PATH got "no access token" from the CLI while the endpoint
+    worked. Found by running it, and only because the failure named both sources it tried.
+    """
+    ranked = [u.unit.site.path for u in out.ranking.units if u.allocation.value != "cold"]
+    # `considered` are the paths we scored and `skipped` the ones in a language we do not read.
+    # Together they are the whole change, which is the population the shape figures describe.
+    changed = list(out.considered) + list(out.skipped)
+    try:
+        result = deep(clone, sha, ranked, project=project, changed=changed, gcloud=gcloud)
+    except (Unavailable, InferenceFailed) as exc:
+        # The ranking already printed and is not retracted by an inference failure.
+        print(f"\n[deep] NOT RUN: {type(exc).__name__}: {exc}")
+        return
+    print("")
+    for line in lines(result):
+        print(line)

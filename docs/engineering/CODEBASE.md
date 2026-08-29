@@ -2867,3 +2867,45 @@ admits less when the thing it guards is broken is not a check.
 **`--deep` stays out**, and that is tested rather than trusted: `serve/cli.py` suppresses it from
 `--help` because `docs/product/QUANTAMIND.md` says the product publishes no model findings, and a
 slash command turning it on would be that drift with a friendlier entry point.
+
+### The oracles, made reachable — issue #87
+
+`docs/findings/WHY_THE_ORACLES_NEVER_FIRE_2026-08.md` found that across 65 changes the gate had
+dropped 8 findings for a missing anchor and one for anything else, and that the one was probably
+not a refutation. Four fixes.
+
+**1. The pin detector is handed the unfiltered changed-file list.** `changed_files()` takes
+`suffixes: tuple[...] | None`, where `None` means no filter — **not `()`**, because
+`"a.py".endswith(())` is `False`, so an empty tuple filters everything out while reading like the
+opposite. `review_delivery.py` fetches once unfiltered, filters locally for ranking, and passes
+the unfiltered list to `pin_check.check()`. No extra API call, and the ranker's input is unchanged.
+
+**Proven end-to-end against the live API**, not by unit test: a repository pinning
+`actions/checkout@de0fac2e…` with the comment `# v3.0.0`, where GitHub reports that commit as
+`v6.0.2`. Handed the filtered list the detector returns 0 mismatches, as it always had; handed the
+unfiltered list it returns the mismatch with both versions named. Commented `# v6.0.2` it stays
+silent, so this is discrimination and not a detector that always fires.
+
+**2. `workflows()` matches the directory, not the substring.** It tested `"workflow" in path`, so
+`docs/not_a_workflow.yaml` qualified. Harmless while the detector was never given anything to act
+on; now that it is, a documentation page showing an example `uses: owner/action@sha # v1.0.0`
+would have been reported as a real mismatch in a real workflow. It now requires
+`.github/workflows/`, which is the only place GitHub reads them from.
+
+**3. A hex token is no longer treated as a claim about a commit.** `external_facts.SHA` matches any
+7–40 character hex run, so a cache key or a colour constant returned `UNRESOLVABLE` and
+`publishable.gate` **dropped the finding** — the gate's only demonstrated behaviour over 38 real
+findings. "Not an external claim" is now `NO_CLAIM` and publishes; "an external claim we cannot
+settle" still drops, because `docs/CORRECTIONS.md` entry 8 is a verifier that defaulted the other
+way and confirmed every false claim it existed to refute. The trigger is narrowed by requiring
+denial-or-tag phrasing, not by removing the check.
+
+**4. `refuted` and `unresolvable` are counted apart.** `Deep` gains a fifth fate, and its
+`__post_init__` conservation identity now sums five. That check earned its place immediately: it
+failed the moment the field was added and before any test was updated. `Ruling` carries
+`unresolvable` as a value, because the caller's alternative was matching the word inside `detail`,
+which is prose written for a human.
+
+**`serve/deep_review.report()` moved to `serve/run_commit.py`.** It prints a reviewer pass for a
+person at a terminal, its only caller is the CLI, and `deep_review` was over the file cap. The
+split is by concern, not to make room.

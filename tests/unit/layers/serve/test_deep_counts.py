@@ -32,20 +32,38 @@ def test_counts_that_do_not_conserve_are_refused() -> None:
     with pytest.raises(ValueError) as caught:
         # 4 raw, but 1 anchored + 2 unanchored + 1 refuted + 1 withdrawn accounts for 5 --
         # which is what `len(found) - len(surviving)` produced when one finding was refuted.
-        Deep((KEPT,), 4, 2, 1, 1, ("a.py",))
+        Deep((KEPT,), 4, 2, 1, 0, 1, ("a.py",))
     assert "lost count" in str(caught.value)
     assert "4 raw" in str(caught.value) and "5 accounted for" in str(caught.value)
 
 
 def test_the_honest_counts_are_accepted() -> None:
     """The same pass counted correctly: one of each fate sums to the four the model returned."""
-    out = Deep((KEPT,), 4, 1, 1, 1, ("a.py",))
-    assert (out.raw, out.unanchored, out.refuted, out.withdrawn) == (4, 1, 1, 1)
+    out = Deep((KEPT,), 4, 1, 1, 0, 1, ("a.py",))
+    assert (out.raw, out.unanchored, out.refuted, out.unresolvable, out.withdrawn) == (
+        4,
+        1,
+        1,
+        0,
+        1,
+    )
+
+
+def test_an_unresolvable_is_conserved_separately_from_a_refutation() -> None:
+    """**THE POINT OF SPLITTING THE COUNTER.** Two drops, two mechanisms, and the sum still holds.
+
+    Before the split both landed in `refuted`, so a gate that had refuted nothing and merely
+    failed to resolve one claim reported a refutation.
+    """
+    out = Deep((KEPT,), 4, 1, 1, 1, 0, ("a.py",))
+    assert (out.refuted, out.unresolvable) == (1, 1), (out.refuted, out.unresolvable)
+    with pytest.raises(ValueError, match="unresolvable"):
+        Deep((KEPT,), 4, 1, 1, 2, 0, ("a.py",))
 
 
 def test_every_fate_is_named_in_the_report() -> None:
     """Three discards, three mechanisms, three lines. Not one number standing for all of them."""
-    text = "\n".join(lines(Deep((KEPT,), 4, 1, 1, 1, ("a.py",))))
+    text = "\n".join(lines(Deep((KEPT,), 4, 1, 1, 0, 1, ("a.py",))))
     assert "4 raw finding(s)" in text
     assert "1 anchored" in text
     assert "not in the diff" in text, "the unanchored count lost its mechanism"
@@ -56,8 +74,8 @@ def test_every_fate_is_named_in_the_report() -> None:
 
 def test_a_model_never_asked_does_not_read_as_a_model_that_found_nothing() -> None:
     """Rule 3. `raw=0` from an empty diff and `raw=0` from a clean review are different states."""
-    never = "\n".join(lines(Deep((), 0, 0, 0, 0, ("a.py",), consulted=False)))
-    clean = "\n".join(lines(Deep((), 0, 0, 0, 0, ("a.py",))))
+    never = "\n".join(lines(Deep((), 0, 0, 0, 0, 0, ("a.py",), consulted=False)))
+    clean = "\n".join(lines(Deep((), 0, 0, 0, 0, 0, ("a.py",))))
     assert "NOT ASKED" in never and "did not run" in never
     assert "reported nothing" in clean and "a result, not a failure" in clean
     assert never != clean, "an instrument that did not run printed the same as a clean review"

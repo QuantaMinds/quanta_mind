@@ -78,7 +78,14 @@ def one(clone: Path, repo: str, sha: str, *, project: str, gcloud: str) -> Chang
         # on which the model found nothing, and collapsing the two would understate the rate.
         return ChangeRecord(sha, "empty-diff")
     return ChangeRecord(
-        sha, "measured", got.raw, len(got.anchored), got.unanchored, got.refuted, got.withdrawn
+        sha,
+        "measured",
+        got.raw,
+        len(got.anchored),
+        got.unanchored,
+        got.refuted,
+        got.unresolvable,
+        got.withdrawn,
     )
 
 

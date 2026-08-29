@@ -85,11 +85,12 @@ def _gh(repo: str, number: int, path: str) -> object:
 
 
 def changed_files(
-    repo: str, number: int, suffixes: tuple[str, ...] = REVIEWABLE_SUFFIXES
+    repo: str, number: int, suffixes: tuple[str, ...] | None = REVIEWABLE_SUFFIXES
 ) -> list[str]:
     """Paths the pull request changed that still exist afterwards, sorted.
 
     Returns `[]` only when the change genuinely touches no matching file. Every failure raises.
+    **`suffixes=None` means no filter; `()` would filter everything** (`endswith(())` is False).
     """
     out: list[str] = []
     for page in range(1, MAX_PAGES + 1):
@@ -107,7 +108,7 @@ def changed_files(
             status = str(entry.get("status") or "")
             if not name or not status:
                 raise DiffReadFailed(repo, number, f"a files entry lacked filename/status: {entry}")
-            if name.endswith(suffixes) and status in KEPT_STATUSES:
+            if (suffixes is None or name.endswith(suffixes)) and status in KEPT_STATUSES:
                 out.append(name)
         if len(got) < PER_PAGE:
             break

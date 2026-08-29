@@ -48,6 +48,7 @@ from quantamind.serve.run_review import review as run_ranking
 from quantamind.serve.working_clone import ensure, sweep
 from quantamind.store import tenancy
 from quantamind.store.reviews import bank
+from quantamind.types.change import REVIEWABLE_SUFFIXES
 from quantamind.types.review import Delivered, Outcome
 from quantamind.types.settings import Settings
 from quantamind.types.spend import Spend
@@ -84,7 +85,11 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
         print(f"[deliver] removed {swept} stale clone(s)", flush=True)
 
     store = tenancy.store_for(Path(settings.database_path), *delivery_repo.split("/", 1))
-    changed = changed_files(delivery_repo, number)
+    # **FETCHED ONCE, UNFILTERED, THEN FILTERED HERE.** The ranker must see only files we read;
+    # `pin_check` must see the workflows, which the ranker's filter removes. Two calls would cost
+    # a second page walk and could disagree if the pull request changed between them.
+    every_file = changed_files(delivery_repo, number, suffixes=None)
+    changed = [name for name in every_file if name.endswith(REVIEWABLE_SUFFIXES)]
     if not changed:
         return Delivered(Outcome.NO_FILES, (), (), None)
 
@@ -147,7 +152,9 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
             f"[deliver] cost: {spent.requests} call(s), {spent.tokens_out} tokens out", flush=True
         )
 
-    mismatched, _unresolved = pin_check.check(clone, head_sha, changed)
+    # The UNFILTERED list, deliberately: `.yml` is not a reviewable suffix, and passing the
+    # ranker's list here is the defect that kept this detector silent on every pull request.
+    mismatched, _unresolved = pin_check.check(clone, head_sha, every_file)
     pins = block(mismatched)
 
     if reviewed.body is None and not pins:

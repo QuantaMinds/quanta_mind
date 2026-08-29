@@ -39,6 +39,13 @@ class Deep:
     discrimination on the largest such class is **-8.3%** — a coin flip — so this is not a
     refinement of its judgement, it is a replacement for it."""
 
+    unresolvable: int
+    """Dropped because a claim WAS external but no authority could settle it. **Counted apart from
+    `refuted` because they are opposite events.** A refutation is an authority contradicting the
+    model; an unresolvable is us being unable to ask. Summing them made a gate that had never
+    refuted anything read as a gate that refuted once -- see
+    `docs/findings/WHY_THE_ORACLES_NEVER_FIRE_2026-08.md`."""
+
     withdrawn: int
     """Dropped because the model itself withdrew the finding once handed a fact it did not have.
     Measured at **18 of 45 wrong findings for 1 of 7 correct**, against a chance null of 2.8."""
@@ -58,11 +65,14 @@ class Deep:
     """
 
     def __post_init__(self) -> None:
-        """Every finding the model returned ended somewhere, so the four fates must sum to `raw`."""
-        placed = len(self.anchored) + self.unanchored + self.refuted + self.withdrawn
+        """Every finding the model returned ended somewhere, so the five fates must sum to `raw`."""
+        placed = (
+            len(self.anchored) + self.unanchored + self.refuted + self.unresolvable + self.withdrawn
+        )
         if placed != self.raw:
             raise ValueError(
                 f"deep review lost count: {self.raw} raw finding(s) but {placed} accounted for "
                 f"({len(self.anchored)} anchored, {self.unanchored} unanchored, "
-                f"{self.refuted} refuted, {self.withdrawn} withdrawn)"
+                f"{self.refuted} refuted, {self.unresolvable} unresolvable, "
+                f"{self.withdrawn} withdrawn)"
             )

@@ -36,12 +36,20 @@ from pathlib import Path
 from quantamind.verify.pin_mismatch import Mismatch, detect
 
 GIT_TIMEOUT_S = 60
+WORKFLOW_DIR = ".github/workflows/"
 WORKFLOW_SUFFIXES = (".yml", ".yaml")
 
 
 def workflows(changed: list[str]) -> list[str]:
-    """The changed files that can carry an action pin. Empty is the common case."""
-    return [p for p in changed if p.endswith(WORKFLOW_SUFFIXES) and "workflow" in p]
+    """The changed files that can carry an action pin. Empty is the common case.
+
+    **THE DIRECTORY, NOT THE SUBSTRING.** This matched any path containing "workflow", so
+    `docs/not_a_workflow.yaml` qualified. That was harmless only while the detector was never
+    given a list it could act on; now that it is, a documentation page showing an example
+    `uses: owner/action@sha  # v1.0.0` would be reported as a real mismatch in a real workflow.
+    GitHub reads workflows from `.github/workflows/` and nowhere else, so that is the test.
+    """
+    return [p for p in changed if p.endswith(WORKFLOW_SUFFIXES) and WORKFLOW_DIR in p]
 
 
 def check(clone: Path, sha: str, changed: list[str]) -> tuple[list[Mismatch], int]:

@@ -42,7 +42,6 @@ from quantamind.infer import gemini
 from quantamind.infer.gemini import InferenceFailed, Unavailable
 from quantamind.ingest.change_shape import shape
 from quantamind.ingest.review_window import WindowUnreadable
-from quantamind.render.deep_report import lines
 from quantamind.render.shape_line import block
 from quantamind.serve.settle import settle
 from quantamind.types.deep import Deep
@@ -53,7 +52,7 @@ from quantamind.verify.anchor import locate
 GIT_TIMEOUT_S = 60
 
 if TYPE_CHECKING:  # `Reviewed` lives in run_review, which imports THIS module at runtime.
-    from quantamind.serve.run_review import Reviewed
+    pass
 
 
 def diff_for(clone: Path, sha: str, paths: list[str]) -> str:
@@ -105,7 +104,7 @@ def deep(
     text = diff_for(clone, sha, ranked)
     if not text.strip():
         # Not "the model found nothing" -- it was never asked, because those paths carry no diff.
-        return Deep((), 0, 0, 0, 0, tuple(ranked), consulted=False)
+        return Deep((), 0, 0, 0, 0, 0, tuple(ranked), consulted=False)
     found, spent = gemini.read(
         text,
         ranked,
@@ -118,10 +117,15 @@ def deep(
     # **ANCHOR, THEN ORACLE, THEN THE MODEL'S OWN SECOND LOOK.** Ordered by cost: anchoring is
     # local and free, an oracle is one network call, and settling is two model calls. A finding
     # whose quote is not in the diff never reaches GitHub.
-    surviving, refuted = [], 0
+    # **COUNTED APART.** One counter for both read as "the oracles refuted one" when nothing had
+    # been refuted and a claim was merely unaskable. → `types/deep.py:unresolvable`
+    surviving, refuted, unresolvable = [], 0, 0
     for finding in located:
-        if publishable.gate(finding, text).publishes:
+        ruling = publishable.gate(finding, text)
+        if ruling.publishes:
             surviving.append(finding)
+        elif ruling.unresolvable:
+            unresolvable += 1
         else:
             refuted += 1
 
@@ -144,35 +148,13 @@ def deep(
         len(found),
         len(found) - len(located),
         refuted,
+        unresolvable,
         withdrawn,
         tuple(ranked),
         # **A FLOOR WHEN ANYTHING WAS SETTLED.** `settle()` asks the model per surviving finding
         # through `infer/prompt_once`, which reports no usage — so this is a floor, and says so.
         spend=spent if not surviving else replace(spent, complete=False),
     )
-
-
-def report(clone: Path, sha: str, out: Reviewed, project: str, gcloud: str = "gcloud") -> None:
-    """The reviewer pass, printed with its discards. Never raises into the ranking's result.
-
-    **`gcloud` IS THREADED HERE BECAUSE IT WAS THREADED EVERYWHERE ELSE AND MISSED HERE.**
-    `examine()` took it from settings for the webhook; this path kept the bare default, so a
-    developer whose SDK is not on PATH got "no access token" from the CLI while the endpoint
-    worked. Found by running it, and only because the failure named both sources it tried.
-    """
-    ranked = [u.unit.site.path for u in out.ranking.units if u.allocation.value != "cold"]
-    # `considered` are the paths we scored and `skipped` the ones in a language we do not read.
-    # Together they are the whole change, which is the population the shape figures describe.
-    changed = list(out.considered) + list(out.skipped)
-    try:
-        result = deep(clone, sha, ranked, project=project, changed=changed, gcloud=gcloud)
-    except (Unavailable, InferenceFailed) as exc:
-        # The ranking already printed and is not retracted by an inference failure.
-        print(f"\n[deep] NOT RUN: {type(exc).__name__}: {exc}")
-        return
-    print("")
-    for line in lines(result):
-        print(line)
 
 
 def examine(
@@ -197,4 +179,4 @@ def examine(
         )
     except (InferenceFailed, Unavailable) as exc:
         print(f"[deliver] the model was unreachable, ranking still stands: {exc}", flush=True)
-        return Deep((), 0, 0, 0, 0, tuple(reading.paths), consulted=False)
+        return Deep((), 0, 0, 0, 0, 0, tuple(reading.paths), consulted=False)
