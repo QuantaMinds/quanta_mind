@@ -23,6 +23,71 @@ where a rule stops being a rule without anyone noticing.
 **The guards work. The gap is that most cannot tell you they worked**, and five of the six that
 can would report success having examined nothing.
 
+
+## Every guard, four dimensions
+
+Each guard was run against: the real repository (**clean**), a violation it must catch
+(**fires**), a near-miss it must ignore (**near**), and a tree where its population is empty
+(**empty**). Raw data: `research/phase0/results/guard_audit_4d.json`.
+
+| # | guard | reads | clean | fires | near | empty |
+|---|---|---|---|---|---|---|
+| 1 | `check_agents_md.py` | AGENTS.md: length, and every guard pointer resolves | pass ✓ | fires ✓ | — | refuses ✓ |
+| 2 | `check_assert_quality.py` | every test_*.py under the root: assertions and live purity | pass ✓ | fires ✓ | silent ✓ | refuses ✓ |
+| 3 | `check_branch_name.py` | the branch name against CONTRIBUTING.md's scheme | pass ✓ | fires ✓ | — | **silent** |
+| 4 | `check_constant_time_compare.py` | serve/webhook_github.py's HMAC comparison | pass ✓ | fires ✓ | — | refuses ✓ |
+| 5 | `check_conventions.py` | every .py in src/ and scripts/: layering, docstrings, bann | pass ✓ | fires ✓ | silent ✓ | refuses ✓ |
+| 6 | `check_enforcement_map.py` | .claude/settings.json both ways: tokens resolve, guards in | pass ✓ | fires ✓ | — | refuses ✓ |
+| 7 | `check_module_identity.py` | module basenames per package, and unreachable modules | pass ✓ | fires ✓ | — | refuses ✓ |
+| 8 | `check_no_partial_clone.py` | every git clone argument list in the source trees | pass ✓ | fires ✓ | silent ✓ | **silent** |
+| 9 | `check_no_research_imports.py` | src/ and scripts/ for research-only packages | pass ✓ | fires ✓ | silent ✓ | refuses ✓ |
+| 10 | `check_structure.py` | file lengths and per-directory file counts | pass ✓ | fires ✓ | silent ✓ | refuses ✓ |
+| 11 | `check_subprocess_timeouts.py` | every subprocess call site in the source trees | pass ✓ | fires ✓ | silent ✓ | refuses ✓ |
+| 12 | `citations/freshness.py` | every figure marked re-check <Month YYYY> | pass ✓ | fires ✓ | silent ✓ | **silent** |
+| 13 | `citations/resolve.py` | every citation in prose: .md paths and file.py:NNN | pass ✓ | fires ✓ | silent ✓ | refuses ✓ |
+| 14 | `records/check_burned_corpora.py` | every REPOS* literal in quote/corpus.py | pass ✓ | fires ✓ | silent ✓ | **silent** |
+| 15 | `records/check_decided_vocabulary.py` | QUANTAMIND.md against three recorded decisions | pass ✓ | fires ✓ | silent ✓ | refuses ✓ |
+| 16 | `records/check_docs_sync.py` | every src/quantamind/ directory vs CODEBASE.md | pass ✓ | fires ✓ | — | **silent** |
+| 17 | `records/check_documented_commands.py` | `python -m <module>` in docs vs real entry points | pass ✓ | fires ✓ | silent ✓ | **silent** |
+| 18 | `records/check_documented_recipes.py` | `just <recipe>` and `quantamind <cmd>` in the docs | pass ✓ | fires ✓ | silent ✓ | refuses ✓ |
+| 19 | `records/check_no_vague_refs.py` | tracked text files, for section and phase numbers | pass ✓ | fires ✓ | silent ✓ | **silent** |
+| 20 | `records/check_plan_state.py` | the plan-state block vs the real layer counts | pass ✓ | fires ✓ | — | refuses ✓ |
+| 21 | `records/check_schema_shape.py` | the DDL in store/schema.py against RECORDED_DIGEST | pass ✓ | fires ✓ | — | refuses ✓ |
+| 22 | `records/check_stage_table.py` | summary rows, stage headings and numbered steps vs src/ | pass ✓ | fires ✓ | — | refuses ✓ |
+| 23 | `records/check_withdrawn_amendments.py` | WITHDRAWN/ABANDONED rows in the preregistration | pass ✓ | fires ✓ | silent ✓ | **silent** |
+
+**23 of 23 correct on clean, violation and near-miss.** Not one false positive and not one
+missed violation, across every guard in the repository.
+
+**8 remain silent when their population is empty**, and for most of them a floor would be
+theatre rather than protection — the population is too small for one to mean anything:
+
+| guard | population today | floor worth having? |
+|---|---|---|
+| `check_branch_name` | 1 branch name | no — there is nothing to count |
+| `citations/freshness` | 1 dated figure | no |
+| `check_burned_corpora` | 6 REPOS literals | marginal |
+| `check_documented_commands` | 6 invocations | marginal |
+| `check_docs_sync` | 11 directories | marginal |
+| `check_no_partial_clone` | 29 files with a clone call | **yes** |
+| `check_withdrawn_amendments` | 56 amendment rows | **yes** |
+| `check_no_vague_refs` | 178 markdown files | **yes** |
+
+## What is passed between guards, and the one blind spot
+
+Every guard draws its population from `scripts/guard/discovery.py`, so an over-broad exclusion
+there shrinks all 23 at once. Measured: of **519 tracked `.py` files, 518 reach the guards.**
+
+The single exclusion is `research/phase0/external/results/__init__.py`, caught by `results`
+being an excluded directory name. **It is not a defect** — the file is five lines whose own
+docstring reads *"Data, never code"*, and the 203 tracked files under `data/` and `results/`
+directories are run outputs and golden fixtures. Reporting the path without opening it would
+have been a false alarm.
+
+**The residual risk is the mechanism, not today's file:** the exclusion matches a bare
+directory NAME at any depth, so real source placed under a directory called `data` or
+`results` would be invisible to every guard simultaneously, with nothing reporting it.
+
 ## Every guard fires — and one did not, until it was fixed
 
 All 23 executable guards were given the violation they exist for and each returned non-zero.
