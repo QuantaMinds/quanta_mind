@@ -56,34 +56,63 @@ def _shas_by_time(clone: Path) -> dict[int, str]:
     return found
 
 
-def _tree(clone: Path, sha: str) -> list[str]:
+def _tree(clone: Path, sha: str) -> list[tuple[str, str]]:
+    """`(oid, path)` for every `.py` file in the tree at `sha`."""
     out = subprocess.run(
-        ["git", "-C", str(clone), "ls-tree", "-r", "--name-only", sha],
+        ["git", "-C", str(clone), "ls-tree", "-r", sha],
         capture_output=True,
         text=True,
         timeout=GIT_TIMEOUT_S,
         check=True,
     )
-    return [p for p in out.stdout.splitlines() if p.endswith(".py")]
+    found: list[tuple[str, str]] = []
+    for line in out.stdout.splitlines():
+        meta, _, path = line.partition("\t")
+        if path.endswith(".py"):
+            found.append((meta.split()[2], path))
+    return found
 
 
-def _source(clone: Path, sha: str, path: str) -> str:
-    got = subprocess.run(
-        ["git", "-C", str(clone), "show", f"{sha}:{path}"],
+def _sources(clone: Path, blobs: list[tuple[str, str]]) -> dict[str, str]:
+    """Every blob's text in ONE `git cat-file --batch`.
+
+    **A `git show` PER FILE IS WHAT MAKES THIS UNRUNNABLE AT SCALE.** A repository with 600
+    Python files costs 600 processes per event, and this walks hundreds of events across six
+    repositories. One batched read is the difference between minutes and days.
+    """
+    if not blobs:
+        return {}
+    done = subprocess.run(
+        ["git", "-C", str(clone), "cat-file", "--batch"],
+        input="\n".join(oid for oid, _ in blobs),
         capture_output=True,
         text=True,
-        timeout=GIT_TIMEOUT_S,
+        timeout=GIT_TIMEOUT_S * 5,
+        errors="replace",
     )
-    return got.stdout if got.returncode == 0 else ""
+    out: dict[str, str] = {}
+    body = done.stdout
+    at = 0
+    for _oid, path in blobs:
+        head, _, _rest = body[at:].partition("\n")
+        parts = head.split()
+        if len(parts) != 3:
+            break
+        size = int(parts[2])
+        start_at = at + len(head) + 1
+        out[path] = body[start_at : start_at + size]
+        at = start_at + size + 1
+    return out
 
 
 def in_degree(clone: Path, sha: str) -> Counter[str]:
     """How many files in the tree import each file, AT `sha`. Empty when the tree cannot be read."""
-    paths = _tree(clone, sha)
-    tree = frozenset(paths)
+    blobs = _tree(clone, sha)
+    tree = frozenset(path for _oid, path in blobs)
+    text = _sources(clone, blobs)
     degree: Counter[str] = Counter()
-    for path in paths:
-        found, _ = edges(path, _source(clone, sha, path), tree)
+    for _oid, path in blobs:
+        found, _ = edges(path, text.get(path, ""), tree)
         for edge in found:
             if edge.target and edge.target != path:
                 degree[edge.target] += 1
