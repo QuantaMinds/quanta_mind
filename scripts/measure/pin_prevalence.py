@@ -34,7 +34,7 @@ import subprocess
 import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE.parents[3] / "src"))
+sys.path.insert(0, str(HERE.parents[2] / "src"))
 
 from quantamind.verify.external_facts import tags_at  # noqa: E402
 

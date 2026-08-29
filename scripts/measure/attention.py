@@ -36,9 +36,10 @@ import sys
 import tempfile
 
 HERE = pathlib.Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE.parents[3] / "src"))
+sys.path.insert(0, str(HERE.parents[2] / "src"))
 
 from borrowed_clones import root as clone_root  # noqa: E402
+
 from quantamind.serve.run_review import review  # noqa: E402
 from quantamind.serve.working_clone import CloneFailed, ensure  # noqa: E402
 

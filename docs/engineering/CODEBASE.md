@@ -2986,3 +2986,32 @@ a header, a blank, a bare marker, unchanged context, or a line both added and re
 **Every gate is sabotaged in the tests, not merely exercised.** Disabling any one of the four
 fails a named test. Two of them did not, when they were new and had only been demonstrated by
 hand — which is the whole argument for the rule.
+
+
+### `scripts/measure/` — harnesses that measure the product
+
+Nine modules imported `quantamind` from inside `research/`, whose **interpreter cannot import the
+product** — every one was unrunnable from the project it lived in and had to be invoked by hand
+with the root interpreter. They now live in `scripts/measure/`, with `record.py` and `run_six.py`
+that they depend on.
+
+**Not `src/quantamind/`**, which is the package a customer installs with `dependencies = []`; a
+harness that clones repositories and calls Gemini has no business shipping inside it, and the
+layer rule would bind code that crosses layers by design. `scripts/` is the seam: root
+interpreter, covered by rule 11's guard and `just check`, not shipped.
+
+**The move put them under `mypy --strict` for the first time** — `research/` is excluded from
+type-checking — and eleven errors surfaced in code that had never been checked. Two were real
+defects rather than missing annotations: `rename_blindness.py` carried a hardcoded
+`/Users/dhanu/...` root **twice**, so it ran on exactly one machine and would have failed on CI
+or any other checkout.
+
+**It also forced `src/quantamind/py.typed`.** The package is fully typed and never advertised it,
+so every external consumer had its `quantamind` imports skipped as `import-untyped`. Adding the
+marker immediately exposed two unchecked errors in `scripts/verify/build_pack.py`, which imports
+`quantamind.store` submodules in a form `no_implicit_reexport` rejects. Those had been invisible
+since the file was written.
+
+**`bench/forensic/shape/pulls.py` stayed in `research/`.** It imports `quantamind` too, but its
+sibling `shape/tally.py` does not — moving it would drag a research package product-side. It
+still needs the root interpreter, and that is recorded rather than papered over.

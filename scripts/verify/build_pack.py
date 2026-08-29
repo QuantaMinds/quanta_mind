@@ -32,9 +32,13 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "scripts" /
 
 from clone_pinned import FixtureCloneFailed, pin
 
+# **THE MODULE FORM, NOT THE ATTRIBUTE FORM.** `store/__init__.py` imports no submodules, so
+# under `--strict` (which sets `no_implicit_reexport`) `from quantamind.store import schema` is
+# not an attribute access mypy will accept. It went unchecked until `src/quantamind/py.typed`
+# was added and mypy started reading the package's types instead of skipping it.
+import quantamind.store.schema as schema
+import quantamind.store.touches as touch_store
 from quantamind.ingest.history import read_touches
-from quantamind.store import schema
-from quantamind.store import touches as touch_store
 
 MANIFEST = pathlib.Path(__file__).resolve().parent / "pinned_clone.json"
 DEFAULT_REPO = "pallets/flask"
