@@ -73,3 +73,33 @@ def test_workflows_accepts_both_yaml_spellings() -> None:
     assert workflows([".github/workflows/a.yml"]) == [".github/workflows/a.yml"]
     assert workflows([".github/workflows/b.yaml"]) == [".github/workflows/b.yaml"]
     assert workflows(["docs/not_a_workflow.yaml"]) == [], "only workflow paths count"
+
+
+def test_the_detector_runs_before_the_no_source_files_return() -> None:
+    """**A WORKFLOW-ONLY PULL REQUEST IS THE COMMON SHAPE CARRYING A PIN CHANGE.**
+
+    `deliver()` returned `NO_FILES` as soon as no source file changed, which is before the
+    detector ran — so giving it the unfiltered list fixed nothing for exactly the pull requests
+    it exists to catch. Found by firing at a real one, not by any test, which is why the order
+    is asserted here rather than trusted.
+    """
+    source = __import__("inspect").getsource(
+        __import__("quantamind.serve.review_delivery", fromlist=["review_delivery"])
+    )
+    check_at = source.index("pin_check.check(clone, head_sha, every_file)")
+    return_at = source.index("return Delivered(Outcome.NO_FILES")
+    assert check_at < return_at, (
+        "pin_check must run BEFORE the no-source-files return, or a workflow-only "
+        "pull request exits with the detector never having looked"
+    )
+
+
+def test_a_workflow_only_change_can_still_produce_a_comment() -> None:
+    """The other half: having run, a mismatch must survive to a body rather than be discarded."""
+    source = __import__("inspect").getsource(
+        __import__("quantamind.serve.review_delivery", fromlist=["review_delivery"])
+    )
+    guard = source.index("if not changed:")
+    assert "if not pins:" in source[guard : guard + 400], (
+        "with no source files, NO_FILES must be conditional on there being no pins either"
+    )

@@ -56,6 +56,43 @@ behind it, which is the worst kind this project has. It now requires `.github/wo
 
 ---
 
+## Firing at a real pull request found a sixth defect
+
+The fixes above were verified locally and looked complete. **They were not.** `deliver()` began:
+
+```python
+changed = [name for name in every_file if name.endswith(REVIEWABLE_SUFFIXES)]
+if not changed:
+    return Delivered(Outcome.NO_FILES, (), (), None)
+```
+
+and `pin_check` ran forty lines later. **A pull request that changes only a workflow — the most
+common shape carrying a pin change — returned before the detector looked.** Handing it the
+unfiltered list fixed nothing for exactly the changes it exists to catch.
+
+**No test caught this and none of the earlier ones could have**, because they all asserted on the
+detector's input rather than on whether it was reached. It was found by opening a real pull
+request against a real repository and watching nothing happen.
+
+The detector now runs before that return, and `NO_FILES` is conditional on there being no pins
+either. Two tests assert the ordering, one reading the call site directly — a weak form of test
+used deliberately, because the property that broke is an ordering that no behavioural test on the
+current code path would notice.
+
+**Proven in production on `QuantaMinds/quanta_mind#88`**, a pull request pinning
+`actions/checkout` to a real SHA with four version comments, one deliberately stale:
+
+> **Pinned action versions that disagree with the tag list** — checked against the GitHub API,
+> not inferred:
+>
+> - `actions/checkout` is pinned to `fbc6f399` and commented `# v4.2.0`, but GitHub reports that
+>   commit as **v5.1.0, v5**.
+
+One finding, the intended one, silence on the other three. Posted by the App, on a real pull
+request, from the fixed code.
+
+---
+
 ## Why the re-measurement shows nothing, and why that is correct
 
 The same 30 commits, re-run with every fix in:

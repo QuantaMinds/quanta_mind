@@ -90,8 +90,22 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     # a second page walk and could disagree if the pull request changed between them.
     every_file = changed_files(delivery_repo, number, suffixes=None)
     changed = [name for name in every_file if name.endswith(REVIEWABLE_SUFFIXES)]
+
+    # **THE PIN DETECTOR RUNS BEFORE THE EARLY RETURN, NOT AFTER IT.** It needs no ranking and no
+    # model, and a pull request that changes ONLY a workflow is the most common shape carrying a
+    # pin change. Returning NO_FILES first left it unreachable on exactly those changes even
+    # after it was given the unfiltered list -- found by firing at a real pull request rather
+    # than by any test. → `docs/findings/oracles/WHY_THE_ORACLES_NEVER_FIRE_2026-08.md`
+    mismatched, _unresolved = pin_check.check(clone, head_sha, every_file)
+    pins = block(mismatched)
+
     if not changed:
-        return Delivered(Outcome.NO_FILES, (), (), None)
+        if not pins:
+            return Delivered(Outcome.NO_FILES, (), (), None)
+        if not settings.posting_enabled:
+            return Delivered(Outcome.REHEARSED, (), (), pins)
+        wrote = publish(delivery_repo, number, head_sha, pins, ())
+        return Delivered(Outcome.POSTED if wrote else Outcome.DUPLICATE, (), (), pins)
 
     # **The base commit, not the head and not the clock.** See the module docstring.
     base = base_commit(delivery_repo, number, clone)
@@ -133,9 +147,6 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
             flush=True,
         )
 
-    # **THE PIN CHECK RUNS ON THE RAW CHANGED LIST, NOT THE RANKED ONE.** Workflows are not a
-    # reviewable suffix, so they never appear in `reviewed.considered` — which is exactly why the
-    # detector sat unreachable behind the reviewer until now. It needs no model and no ranking.
     # **THE DECLARED STANDARDS, CHECKED DETERMINISTICALLY.** These verdicts are reproducible on
     # the same commit by anyone, which is why they may be asserted where a model finding may not.
     checks = enforce(clone, head_sha, list(changed), store, delivery_repo, number)
@@ -151,11 +162,6 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
         print(
             f"[deliver] cost: {spent.requests} call(s), {spent.tokens_out} tokens out", flush=True
         )
-
-    # The UNFILTERED list, deliberately: `.yml` is not a reviewable suffix, and passing the
-    # ranker's list here is the defect that kept this detector silent on every pull request.
-    mismatched, _unresolved = pin_check.check(clone, head_sha, every_file)
-    pins = block(mismatched)
 
     if reviewed.body is None and not pins:
         quiet = Outcome.NO_READABLE_FILES if not reviewed.considered else Outcome.NOTHING_TO_SAY

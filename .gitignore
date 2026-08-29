@@ -93,3 +93,8 @@ quantamind.db
 # Martian's full benchmark tree, copied out of a dead session's scratchpad. Only the four
 # artefacts we read are kept, under research/phase0/bench/martian/data/ and checksummed.
 research/phase0/bench/martian/offline/
+
+# Working clones the delivery path creates. `serve/working_clone.py` writes one per tenant
+# under here, each a real git repository, so `git add -A` after a delivery commits a gitlink
+# into this repository. It did once.
+.quantamind-clones/
