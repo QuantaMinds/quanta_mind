@@ -23,6 +23,7 @@ import ast
 import sys
 from pathlib import Path
 
+from coverage import assert_examined
 from discovery import Violation, report
 
 MOCK_TOKENS: frozenset[str] = frozenset(
@@ -178,6 +179,7 @@ def main(argv: list[str]) -> int:
             ):
                 violations.extend(_check_function(path, node))
 
+    assert_examined("test modules", sum(1 for _ in root.rglob("test_*.py")), 20, root)
     return report(violations, root, "assert-quality")
 
 

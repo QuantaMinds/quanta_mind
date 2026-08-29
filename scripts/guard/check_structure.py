@@ -17,6 +17,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from coverage import assert_examined
 from discovery import Violation, is_excluded, iter_package_dirs, iter_source_files, report
 
 MAX_FILE_LINES = 200
@@ -93,6 +94,7 @@ def main(argv: list[str]) -> int:
         return 2
 
     violations = check_file_lengths(root) + check_dir_fanout(root)
+    assert_examined("source files", sum(1 for _ in iter_source_files(root)), 40, root)
     return report(violations, root, "structure")
 
 

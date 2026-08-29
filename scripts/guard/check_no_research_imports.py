@@ -24,6 +24,7 @@ import ast
 import sys
 from pathlib import Path
 
+from coverage import assert_examined
 from discovery import Violation, iter_python_files, report
 
 # Top-level module names owned by research/. `git` is GitPython.
@@ -96,6 +97,7 @@ def main(argv: list[str]) -> int:
         print(f"[research-imports] root {root} is not a directory", file=sys.stderr)
         return 2
 
+    assert_examined("python files", sum(1 for _ in iter_python_files(root)), 40, root)
     return report(check_product_is_clean(root), root, "research-imports")
 
 

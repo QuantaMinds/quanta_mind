@@ -74,3 +74,20 @@ def test_a_root_missing_one_marker_is_not_the_project(tmp_path) -> None:
     """Both markers are required, so half a repository does not switch the floor back on."""
     (tmp_path / "AGENTS.md").write_text("x")
     assert is_project(tmp_path) is False, "one marker must not be enough"
+
+
+def test_a_subdirectory_of_the_project_still_counts_as_the_project() -> None:
+    """**THE HOLE THE FIRST VERSION HAD.** Several guards are rooted at a subdirectory —
+    `check_assert_quality` at `tests/`. Testing the markers IN the root meant those guards never
+    saw them and had the floor waived on every run: the check silently not applying, which is
+    the defect this module exists to stop, reintroduced by its own guard clause.
+    """
+    assert is_project(ROOT / "tests") is True
+    assert is_project(ROOT / "src" / "quantamind" / "serve") is True
+
+
+def test_a_temp_tree_outside_the_project_is_still_not_the_project(tmp_path) -> None:
+    """Walking up must not walk all the way to `/` and find some unrelated repository."""
+    deep = tmp_path / "a" / "b" / "c"
+    deep.mkdir(parents=True)
+    assert is_project(deep) is False

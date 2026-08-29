@@ -27,13 +27,22 @@ MARKERS = ("AGENTS.md", "justfile")
 
 
 def is_project(root: Path) -> bool:
-    """Whether `root` is this repository rather than a test fixture or a temp tree.
+    """Whether `root` is inside this repository rather than a fixture or a temp tree.
 
     A floor is a fact about THIS repository's contents. Applied to a fixture with three files it
     fails every time, so the guards' own unit tests would have to carry twenty invocations each
     to satisfy a check that says nothing about them.
+
+    **IT WALKS UP, BECAUSE SEVERAL GUARDS ARE ROOTED AT A SUBDIRECTORY.** The first version
+    tested the markers IN `root`, so `check_assert_quality`, rooted at `tests/`, never saw them
+    and had its floor waived on every run — the check silently not applying, which is the exact
+    defect this module was written to stop, reintroduced by its own guard clause.
     """
-    return all((root / marker).exists() for marker in MARKERS)
+    here = root.resolve()
+    for candidate in (here, *here.parents):
+        if all((candidate / marker).exists() for marker in MARKERS):
+            return True
+    return False
 
 
 def assert_examined(what: str, count: int, floor: int, where: Path) -> int:

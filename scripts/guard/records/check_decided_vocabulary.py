@@ -34,6 +34,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from coverage import assert_examined
 from discovery import Violation, project_root, report
 
 SCANNED = ("docs/product/QUANTAMIND.md",)
@@ -169,6 +170,7 @@ def main() -> int:
     print(
         f"[decided-vocabulary] {scanned} paragraph(s) against {len(RULES)} decision(s)", flush=True
     )
+    assert_examined("paragraphs", scanned, 100, root)
     return report(violations, root, "decided-vocabulary")
 
 
