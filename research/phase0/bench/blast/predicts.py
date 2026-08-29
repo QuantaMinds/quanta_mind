@@ -76,31 +76,35 @@ def _tree(clone: Path, sha: str) -> list[tuple[str, str]]:
 def _sources(clone: Path, blobs: list[tuple[str, str]]) -> dict[str, str]:
     """Every blob's text in ONE `git cat-file --batch`.
 
-    **A `git show` PER FILE IS WHAT MAKES THIS UNRUNNABLE AT SCALE.** A repository with 600
-    Python files costs 600 processes per event, and this walks hundreds of events across six
-    repositories. One batched read is the difference between minutes and days.
+    **A `git show` PER FILE IS WHAT MAKES THIS UNRUNNABLE AT SCALE.** A repository with 600 Python
+    files costs 600 processes per event, and this walks hundreds of events across six repositories.
+
+    **THE STREAM IS PARSED AS BYTES, BECAUSE GIT'S SIZE IS IN BYTES.** The first version decoded
+    first and sliced a `str` by those counts, so a single non-ASCII character shifted every
+    following offset and the parser read blob contents as headers. It happened to crash on
+    sqlalchemy; had it not, the import graph would have been quietly wrong from that byte on.
     """
     if not blobs:
         return {}
     done = subprocess.run(
         ["git", "-C", str(clone), "cat-file", "--batch"],
-        input="\n".join(oid for oid, _ in blobs),
+        input="\n".join(oid for oid, _ in blobs).encode(),
         capture_output=True,
-        text=True,
         timeout=GIT_TIMEOUT_S * 5,
-        errors="replace",
     )
     out: dict[str, str] = {}
-    body = done.stdout
+    body: bytes = done.stdout
     at = 0
     for _oid, path in blobs:
-        head, _, _rest = body[at:].partition("\n")
+        head, sep, _rest = body[at:].partition(b"\n")
+        if not sep:
+            break
         parts = head.split()
-        if len(parts) != 3:
+        if len(parts) != 3 or not parts[2].isdigit():
             break
         size = int(parts[2])
         start_at = at + len(head) + 1
-        out[path] = body[start_at : start_at + size]
+        out[path] = body[start_at : start_at + size].decode("utf-8", "replace")
         at = start_at + size + 1
     return out
 
