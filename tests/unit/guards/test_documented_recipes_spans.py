@@ -28,7 +28,7 @@ from pathlib import Path
 
 import pytest
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "scripts" / "guard" / "records"))
 
 from check_documented_recipes import BACKTICKED, JUST_CALL, QM_CALL, main  # noqa: E402

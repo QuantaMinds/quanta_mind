@@ -332,7 +332,7 @@ module stops being able to carry the field it needs next. `PRRecord` needed two.
 | File | Enforces |
 |---|---|
 | `discovery.py` | shared walker, exclusion list, `LAYER_ORDER` — **imported, not invoked** |
-| `check_structure.py` | ≤200 lines/file, ≤15 files/dir |
+| `check_structure.py` | ≤200 lines/file, ≤15 files/dir — `__init__.py` and `py.typed` are plumbing and do not count |
 | `check_conventions.py` | layering, module docstrings, banned name tokens |
 | `check_assert_quality.py` | tests that are green without verifying anything — enumerates through `discovery.walk`, never `rglob`, which descended into `.venv` |
 | `check_agents_md.py` | AGENTS.md line cap; named guards exist; rules name a mechanism |

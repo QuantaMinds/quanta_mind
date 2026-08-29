@@ -63,7 +63,7 @@ you remember to obey — the machine will stop you either way.
 4. **≤200 lines per source file**, docs and `.md` excluded.
    → `scripts/guard/check_structure.py`
 
-5. **≤15 files per directory**, excluding `__init__.py`.
+5. **≤15 files per directory**, excluding `__init__.py` and `py.typed`.
    → `scripts/guard/check_structure.py`
 
 6. **One public concern per module.** A module exports one class or one function family.

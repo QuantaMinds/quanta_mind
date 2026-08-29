@@ -21,11 +21,11 @@ from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "guard"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts" / "guard"))
 
 from coverage import NothingExamined, assert_examined, is_project
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 
 
 def test_a_count_above_the_floor_is_returned() -> None:

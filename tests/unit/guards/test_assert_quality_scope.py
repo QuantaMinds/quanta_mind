@@ -24,7 +24,7 @@ from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "guard"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts" / "guard"))
 
 import check_assert_quality
 
