@@ -264,19 +264,23 @@ spent deliberately. It must not be spent by accident.
 
 ### D2 — code relationships, deterministically
 
-- [ ] **D2a Labelled import edges.** `parse/imports.py` over stdlib `ast`: no dependency, no
+- [x] **D2a Labelled import edges.** `parse/imports.py`. Base rate measured before shipping —
+      **~44% of import statements resolve in-tree**, see `docs/findings/graph/D2A_IMPORT_EDGE_BASE_RATE_2026-08.md`. `parse/imports.py` over stdlib `ast`: no dependency, no
       model. Every edge carries `Confidence` and `Provenance`; an unresolvable import emits
       `Unresolved(site, reason, construct)` and never nothing — `importlib` is `DYNAMIC_DISPATCH`,
       a third-party name `EXTERNAL_SYMBOL`, a broken file `UNPARSEABLE_SYNTAX`. `RESOLVED` only
       where two independent resolvers agree: the syntax says the import exists AND the target is a
       file in the tree.
-- [ ] **D2b The graph, stored.** A whole-repo pass into a `dependency` table, incremental against
+- [ ] **D2b The graph, stored.** **ON HOLD, recommend DROP.** Six unseen repositories, 1,301 non-degenerate events:
+      in-degree gives the same top three as alphabetical on 99.2% of changes, and loses to the
+      shipped fix-history signal 65-13 at p < 0.0001. See
+      `docs/findings/graph/D2D_BLAST_RADIUS_SIX_REPOS_2026-08.md`. A whole-repo pass into a `dependency` table, incremental against
       the same commit watermark the touch index uses.
 - [ ] **D2c Duplicated logic, without a model.** Normalised AST hashing of function bodies —
       rename-insensitive, comment-insensitive, stdlib only. "The same logic is written in multiple
       places, and a fix to one leaves the others wrong" is a real cost, and it is a structural
       question a parser answers exactly rather than a judgement a model guesses at.
-- [ ] **D2d Blast radius in the review.** "This module is imported by 14 others, two of them entry
+- [ ] **D2d Blast radius in the review.** **ON HOLD**, same reason as D2b. "This module is imported by 14 others, two of them entry
       points." A new signal, testable against the same fix-return outcome the touch index uses.
 
 - [ ] **D2e Architectural drift, measured rather than asserted.** "Team members implement parts of

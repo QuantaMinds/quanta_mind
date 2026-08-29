@@ -1,0 +1,140 @@
+[
+ {
+  "guard": "check_agents_md.py",
+  "exit": 2,
+  "traceback": false,
+  "out": "[agents-md] no file at /Users/dhanu/Documents/SaaS/quanta_mind/.verify-clone/AGENTS.md"
+ },
+ {
+  "guard": "check_assert_quality.py",
+  "exit": 1,
+  "traceback": false,
+  "out": "[assert-quality] 21 violation(s): tests/test_async.py:97: [test-weak-assert] test_async_before_after_request() only asserts truthiness or non-None. As"
+ },
+ {
+  "guard": "check_branch_name.py",
+  "exit": 1,
+  "traceback": false,
+  "out": "[branch-name] 1 violation(s): CONTRIBUTING.md:1: [branch-name] branch 'pinned' does not match (feat|fix|chore|docs|spike)/<lowercase-description>. See"
+ },
+ {
+  "guard": "check_constant_time_compare.py",
+  "exit": 1,
+  "traceback": false,
+  "out": "[constant-time] src/quantamind/serve/webhook_github.py not found \u2014 the guard is watching nothing"
+ },
+ {
+  "guard": "check_conventions.py",
+  "exit": 2,
+  "traceback": false,
+  "out": "[conventions] no package at /Users/dhanu/Documents/SaaS/quanta_mind/.verify-clone/src/quantamind"
+ },
+ {
+  "guard": "check_enforcement_map.py",
+  "exit": 2,
+  "traceback": false,
+  "out": "[enforcement-map] no settings at /Users/dhanu/Documents/SaaS/quanta_mind/.verify-clone/.claude/settings.json"
+ },
+ {
+  "guard": "check_module_identity.py",
+  "exit": 1,
+  "traceback": false,
+  "out": "[module-identity] 2 violation(s): src/flask/app.py:1: [duplicate-module] 'app' is defined more than once in src: also src/flask/sansio/app.py. One of "
+ },
+ {
+  "guard": "check_no_partial_clone.py",
+  "exit": 0,
+  "traceback": false,
+  "out": "[no-partial-clone] ok"
+ },
+ {
+  "guard": "check_no_research_imports.py",
+  "exit": 0,
+  "traceback": false,
+  "out": "[research-imports] ok"
+ },
+ {
+  "guard": "check_structure.py",
+  "exit": 1,
+  "traceback": false,
+  "out": "[structure] 27 violation(s): pyproject.toml:201: [file-length] 279 lines, 79 over the 200 cap. Split by concern, do not raise the cap. src/flask/app.p"
+ },
+ {
+  "guard": "check_subprocess_timeouts.py",
+  "exit": 1,
+  "traceback": false,
+  "out": "[coverage] subprocess call sites: examined 0 under /Users/dhanu/Documents/SaaS/quanta_mind/.verify-clone, and this guard requires at least 10. Discove"
+ },
+ {
+  "guard": "citations/freshness.py",
+  "exit": 0,
+  "traceback": false,
+  "out": "[citation-freshness] ok [citation-freshness] 0 dated figure(s) tracked, 0 suppressed with 'citation-freshness:allow' [citation-freshness] WARNING: no "
+ },
+ {
+  "guard": "citations/resolve.py",
+  "exit": 1,
+  "traceback": false,
+  "out": "[coverage] markdown documents: examined 0 under /Users/dhanu/Documents/SaaS/quanta_mind/.verify-clone, and this guard requires at least 20. Discovery "
+ },
+ {
+  "guard": "records/check_burned_corpora.py",
+  "exit": 0,
+  "traceback": false,
+  "out": "[burned-corpora] research/phase0/quote/corpus.py not found \u2014 nothing to check"
+ },
+ {
+  "guard": "records/check_decided_vocabulary.py",
+  "exit": 1,
+  "traceback": false,
+  "out": "[decided-vocabulary] 0 paragraph(s) against 3 decision(s) [coverage] paragraphs: examined 0 under /Users/dhanu/Documents/SaaS/quanta_mind/.verify-clon"
+ },
+ {
+  "guard": "records/check_docs_sync.py",
+  "exit": 0,
+  "traceback": false,
+  "out": "[docs-sync] ok"
+ },
+ {
+  "guard": "records/check_documented_commands.py",
+  "exit": 0,
+  "traceback": false,
+  "out": "[documented-commands] 3 documented command(s) NOT BUILT [documented-commands] ok"
+ },
+ {
+  "guard": "records/check_documented_recipes.py",
+  "exit": 1,
+  "traceback": false,
+  "out": "[coverage] documented invocations: examined 0 under /Users/dhanu/Documents/SaaS/quanta_mind/.verify-clone, and this guard requires at least 20. Discov"
+ },
+ {
+  "guard": "records/check_no_vague_refs.py",
+  "exit": 1,
+  "traceback": false,
+  "out": "[coverage] markdown documents: examined 6 under /Users/dhanu/Documents/SaaS/quanta_mind/.verify-clone, and this guard requires at least 40. Discovery "
+ },
+ {
+  "guard": "records/check_plan_state.py",
+  "exit": 1,
+  "traceback": false,
+  "out": "[plan-state] docs/plans/implementation.md not found"
+ },
+ {
+  "guard": "records/check_schema_shape.py",
+  "exit": 2,
+  "traceback": false,
+  "out": "[schema-shape] no schema at /Users/dhanu/Documents/SaaS/quanta_mind/.verify-clone/src/quantamind/store/schema.py"
+ },
+ {
+  "guard": "records/check_stage_table.py",
+  "exit": 1,
+  "traceback": false,
+  "out": "[stage-table] docs/plans/implementation.md not found"
+ },
+ {
+  "guard": "records/check_withdrawn_amendments.py",
+  "exit": 1,
+  "traceback": false,
+  "out": "[coverage] amendment rows: examined 0 under /Users/dhanu/Documents/SaaS/quanta_mind/.verify-clone, and this guard requires at least 20. Discovery is b"
+ }
+]

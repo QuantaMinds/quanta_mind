@@ -30,7 +30,8 @@ from pathlib import Path
 # down, so the parent is added explicitly -- the same reason `citations/` does it.
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
-from discovery import Violation, is_excluded, report
+from discovery import Violation, report
+from exclusions import is_excluded
 
 MAP_PATH = Path("docs") / "engineering" / "CODEBASE.md"
 PACKAGE = Path("src") / "quantamind"

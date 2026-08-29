@@ -24,6 +24,7 @@ import ast
 import sys
 from pathlib import Path
 
+from coverage import assert_examined, guarded
 from discovery import LAYER_ORDER, Violation, iter_python_files, layer_of, report
 
 PACKAGE = "quantamind"
@@ -155,8 +156,9 @@ def main(argv: list[str]) -> int:
     violations = (
         check_layering(root, package_root) + check_module_docstrings(root) + check_naming(root)
     )
+    assert_examined("python files", sum(1 for _ in iter_python_files(root)), 40, root)
     return report(violations, root, "conventions")
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv))
+    raise SystemExit(guarded(lambda: main(sys.argv)))

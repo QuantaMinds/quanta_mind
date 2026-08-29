@@ -26,7 +26,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-sys.path.insert(0, "/Users/dhanu/Documents/SaaS/quanta_mind/src")
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 from quantamind.ingest.commits import read_commits
 from quantamind.rank.events import Rejections, admissible
 from quantamind.rank.order import BUDGET
@@ -36,12 +36,15 @@ from quantamind.store import touches as ts
 from quantamind.types.ranking import Discrimination
 from quantamind.types.touch import Touch
 
-ROOT = Path("/Users/dhanu/Documents/SaaS/quanta_mind")
+# **THE REPOSITORY, FOUND — NOT SPELLED OUT.** This read an absolute path under one
+# developer's home directory, so the script ran on exactly one machine and would have
+# failed silently on CI or anyone else's checkout.
+ROOT = Path(__file__).resolve().parents[2]
 spec = json.loads((ROOT / "tests/fixtures/pinned.json").read_text())
 scratch = Path(tempfile.mkdtemp())
 
 
-def renamed_into(clone):
+def renamed_into(clone: Path) -> dict[str, int]:
     out = subprocess.run(
         [
             "git",
@@ -59,7 +62,8 @@ def renamed_into(clone):
         text=True,
         timeout=600,
     ).stdout
-    born, when = {}, 0
+    born: dict[str, int] = {}
+    when = 0
     for line in out.splitlines():
         if line.startswith("@"):
             when = int(line[1:])
@@ -70,8 +74,8 @@ def renamed_into(clone):
     return born
 
 
-cell = collections.Counter()  # (outcome, target_rename_blinded) -> n
-per_repo = {}
+cell: collections.Counter[tuple[str, bool]] = collections.Counter()
+per_repo: dict[str, collections.Counter[tuple[str, bool]]] = {}
 for repo in spec["repos"]:
     clone = ROOT / "tests/fixtures/repos" / repo["name"]
     born = renamed_into(clone)
@@ -81,7 +85,7 @@ for repo in spec["repos"]:
     touches = [Touch(path=p, committed_at=c.committed_at) for c in commits for p in c.paths]
     ts.index(conn, rid, touches)
     rows = 0
-    local = collections.Counter()
+    local: collections.Counter[tuple[str, bool]] = collections.Counter()
     for ev in admissible(commits, Rejections(), limit=None):
         sc = dict(ts.counts(conn, rid, sorted(ev.paths), as_of=ev.at))
         if discriminate(sc) is not Discrimination.ORDERED:
@@ -98,7 +102,8 @@ for repo in spec["repos"]:
     per_repo[repo["name"]] = local
 
 
-def rate(o):
+def rate(o: str) -> tuple[int, int, float]:
+    """(blinded, total, percent). Zero total returns 0.0 rather than dividing."""
     b, nb = cell[(o, True)], cell[(o, False)]
     return b, b + nb, (b / (b + nb) * 100 if b + nb else 0.0)
 

@@ -26,11 +26,10 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts" / "guard"))
 
 from discovery import (  # noqa: E402  — path is set above; guards import stdlib-only
-    EXCLUDED_DIRS,
-    is_excluded,
     iter_package_dirs,
     walk,
 )
+from exclusions import EXCLUDED_DIRS, is_excluded  # noqa: E402
 
 # Trees with real nesting and sibling directories. A single-child tree would pass any
 # traversal order and prove nothing.
@@ -69,13 +68,32 @@ def test_excluded_directories_are_pruned_not_merely_filtered(tmp_path: Path) -> 
     """
     (tmp_path / "keep").mkdir()
     (tmp_path / "keep" / "a.py").write_text("x", encoding="utf-8")
-    for name in ("__pycache__", "data", "node_modules"):
+    # `data` was in this list until it was SCOPED to `research/`: as a bare name it hid product
+    # code from every guard at once. The unconditional names are the ones that are third-party
+    # or generated wherever they appear. → tests/unit/test_guard_exclusions.py
+    for name in ("__pycache__", "node_modules", ".venv"):
         assert name in EXCLUDED_DIRS
         (tmp_path / name).mkdir()
         (tmp_path / name / "b.py").write_text("x", encoding="utf-8")
 
     assert [p.name for p in walk(tmp_path)] == ["a.py"]
     assert [p.name for p in iter_package_dirs(tmp_path)] == ["keep"]
+
+
+def test_a_scoped_name_is_pruned_only_beneath_the_root_it_is_scoped_to(tmp_path: Path) -> None:
+    """`data/` must still be pruned under `research/`, and walked anywhere else.
+
+    The pruning is what the rewrite exists for — a multi-gigabyte clone under
+    `research/phase0/data/` timed out the pre-edit hook — so scoping must not cost it.
+    """
+    (tmp_path / "research" / "data").mkdir(parents=True)
+    (tmp_path / "research" / "data" / "huge.py").write_text("x", encoding="utf-8")
+    (tmp_path / "src" / "data").mkdir(parents=True)
+    (tmp_path / "src" / "data" / "real.py").write_text("x", encoding="utf-8")
+
+    found = [p.name for p in walk(tmp_path)]
+    assert "huge.py" not in found, "research scratch was walked; the pruning was lost"
+    assert found == ["real.py"], f"product code under data/ stayed hidden: {found}"
 
 
 def test_an_unreadable_directory_is_skipped_rather_than_fatal(tmp_path: Path) -> None:

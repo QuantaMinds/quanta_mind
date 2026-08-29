@@ -23,6 +23,7 @@ import ast
 import sys
 from pathlib import Path
 
+from coverage import assert_examined, guarded
 from discovery import Violation, report
 
 MOCK_TOKENS: frozenset[str] = frozenset(
@@ -44,6 +45,25 @@ def _is_weak_assert(node: ast.Assert) -> bool:
         if type(op) in WEAK_COMPARATORS and isinstance(comparator, ast.Constant):
             return comparator.value is None  # `assert x is not None`
     return False
+
+
+def _is_vacuous_assert(node: ast.Assert) -> bool:
+    """True if the assertion cannot depend on the code under test at all.
+
+    **`assert True` PASSED THIS GUARD.** `_is_weak_assert` classifies `Name`, `Attribute`, `Call`
+    and `x is not None`; a bare `Constant` fell through every branch and was scored as a STRONG
+    assertion. So did `assert 1`, `assert "x"`, `assert [1]`, `assert not False` and
+    `assert 1 == 1` — a test containing only those verifies nothing and the guard printed ok.
+
+    An expression naming nothing — no identifier, no attribute, no call, no subscript — is
+    constant-folded before the test runs. It cannot be affected by the system, so it cannot be
+    evidence about it. This is the guard for rule 1, and rule 1 is that a green test is not a
+    verified test.
+    """
+    return not any(
+        isinstance(child, ast.Name | ast.Attribute | ast.Call | ast.Subscript)
+        for child in ast.walk(node.test)
+    )
 
 
 def _mentions_mock(node: ast.AST) -> bool:
@@ -74,6 +94,19 @@ def _check_function(path: Path, fn: ast.FunctionDef | ast.AsyncFunctionDef) -> l
                 "test-no-assert",
                 f"{fn.name}() has no assertion. A test that only proves 'no exception "
                 f"was raised' is a silent failure. Assert on the value.",
+            )
+        )
+        return violations
+
+    if asserts and all(_is_vacuous_assert(a) for a in asserts):
+        violations.append(
+            Violation(
+                path,
+                fn.lineno,
+                "test-vacuous-assert",
+                f"{fn.name}() asserts only constants — `assert True`, `assert 1 == 1` and the "
+                f"like. The expression names nothing, so it cannot depend on the code under "
+                f"test and cannot fail. This is worse than no assertion: it looks like one.",
             )
         )
         return violations
@@ -146,8 +179,9 @@ def main(argv: list[str]) -> int:
             ):
                 violations.extend(_check_function(path, node))
 
+    assert_examined("test modules", sum(1 for _ in root.rglob("test_*.py")), 20, root)
     return report(violations, root, "assert-quality")
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv))
+    raise SystemExit(guarded(lambda: main(sys.argv)))

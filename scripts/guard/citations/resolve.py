@@ -38,6 +38,7 @@ import re
 import sys
 from pathlib import Path
 
+from coverage import assert_examined, guarded
 from discovery import Violation, report
 
 # A markdown path: at least one path-ish character, ending `.md`. Bare basenames count,
@@ -159,8 +160,9 @@ def check(root: Path) -> list[Violation]:
 
 def main(argv: list[str]) -> int:
     root = Path(argv[1]).resolve() if len(argv) > 1 else Path.cwd()
+    assert_examined("markdown documents", sum(1 for _ in (root / "docs").rglob("*.md")), 20, root)
     return report(check(root), root, "citations")
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv))
+    raise SystemExit(guarded(lambda: main(sys.argv)))

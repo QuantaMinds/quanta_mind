@@ -30,9 +30,10 @@ import sys
 import tempfile
 
 HERE = pathlib.Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE.parents[3] / "src"))
+sys.path.insert(0, str(HERE.parents[2] / "src"))
 
 from borrowed_clones import root as clone_root  # noqa: E402
+
 from quantamind.rank.order import NothingToRank  # noqa: E402
 from quantamind.serve.run_review import NoHistory, review  # noqa: E402
 from quantamind.serve.working_clone import CloneFailed, ensure  # noqa: E402
@@ -109,13 +110,13 @@ def main() -> int:
     print(f"\n  {len(out)} pull requests ranked, {fired} fired = {fired / len(out):.0%}\n")
     print(f"  {'files changed':<16}{'n':>5}{'fired':>7}{'rate':>8}")
     for lo, hi, name in BANDS:
-        band = [r for r in out if lo <= int(r["files_changed"]) <= hi]
+        band = [r for r in out if lo <= int(str(r["files_changed"])) <= hi]
         if not band:
             continue
         f = sum(1 for r in band if r["fired"])
         print(f"  {name:<16}{len(band):>5}{f:>7}{f / len(band):>8.0%}")
-    small = [r for r in out if int(r["files_changed"]) <= 4]
-    large = [r for r in out if int(r["files_changed"]) >= 8]
+    small = [r for r in out if int(str(r["files_changed"])) <= 4]
+    large = [r for r in out if int(str(r["files_changed"])) >= 8]
     if small and large:
         sr = sum(1 for r in small if r["fired"]) / len(small)
         lr = sum(1 for r in large if r["fired"]) / len(large)

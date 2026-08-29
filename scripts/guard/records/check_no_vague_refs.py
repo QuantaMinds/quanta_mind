@@ -37,7 +37,11 @@ from pathlib import Path
 # down, so the parent is added explicitly -- the same reason `citations/` does it.
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
+from coverage import assert_examined, guarded
 from discovery import iter_text_files, project_root
+
+# **A FLOOR, NOT A TARGET.** 178 tracked markdown files today.
+MARKDOWN_FLOOR = 40
 
 # `§` followed by a digit. The bare symbol is allowed nowhere useful, so match it alone
 # too -- it is never correct in this repository and always means a section citation.
@@ -113,6 +117,9 @@ def violations(root: Path) -> tuple[list[str], int]:
 def main() -> int:
     root = project_root()
     found, suppressed = violations(root)
+    # **A FLOOR, NOT A TARGET.** 178 tracked markdown files today; this fires only if the file
+    # discovery collapses, which would otherwise print "clean" over nothing.
+    assert_examined("markdown documents", sum(1 for _ in root.rglob("*.md")), MARKDOWN_FLOOR, root)
     note = f" ({suppressed} line(s) suppressed with {ALLOW!r})" if suppressed else ""
     if not found:
         print(f"no-vague-refs: clean{note}")
@@ -130,4 +137,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(guarded(lambda: main()))

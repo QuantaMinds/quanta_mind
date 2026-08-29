@@ -10,8 +10,8 @@ WHY:  A6 reported 0.686 findings published per change. Two later samples on the 
       **THE KNOWN-ANSWER TEST IS THE POINT.** Six findings over the same ten commits read as
       1.500, 1.000 or 0.600 here. A test asserting only that `report()` returns a non-empty
       string would pass against every arrangement of that arithmetic, including the wrong ones.
-IMPORTS: pytest, bench/rate/record.py.
-CONSUMED BY: `just test-phase0`.
+IMPORTS: pytest, scripts/measure/record.py.
+CONSUMED BY: `just check`.
 """
 
 from __future__ import annotations
@@ -21,8 +21,8 @@ import sys
 
 import pytest
 
-ROOT = pathlib.Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "bench" / "rate"))
+ROOT = pathlib.Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "scripts" / "measure"))
 
 from record import ChangeRecord, rates, report  # noqa: E402
 

@@ -36,6 +36,7 @@ from pathlib import Path
 # down, so the parent is added explicitly -- the same reason `citations/` does it.
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
+from coverage import assert_examined, guarded
 from discovery import Violation, project_root, report
 
 LOG = Path("docs/findings/PHASE0_PREREGISTRATION.md")
@@ -98,5 +99,24 @@ def check(root: Path | None = None) -> list[Violation]:
     return violations
 
 
+# **A FLOOR, NOT A TARGET.** 56 amendment rows today; this fires only if the log stops parsing.
+AMENDMENT_FLOOR = 20
+
+
+def main() -> int:
+    root = project_root()
+    found = check()
+    # **COUNTED THE WAY THE GUARD MATCHES.** `AMENDMENT_ROW` is anchored with `^` and compiled
+    # without `re.M`, so `findall` over the whole document matches nothing — the floor fired on
+    # a healthy repository until this counted per line, exactly as `check()` does.
+    rows = (
+        sum(1 for line in LOG.read_text(encoding="utf-8").splitlines() if AMENDMENT_ROW.match(line))
+        if LOG.exists()
+        else 0
+    )
+    assert_examined("amendment rows", rows, AMENDMENT_FLOOR, root)
+    return report(found, root, "withdrawn-amendments")
+
+
 if __name__ == "__main__":
-    sys.exit(report(check(), project_root(), "withdrawn-amendments"))
+    sys.exit(guarded(lambda: main()))

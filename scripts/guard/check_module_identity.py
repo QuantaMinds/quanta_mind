@@ -28,6 +28,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
+from coverage import assert_examined, guarded
 from discovery import Violation, iter_python_files, project_root, report
 
 # Package roots scanned independently. A name may legitimately repeat across them —
@@ -184,8 +185,9 @@ def shared_path_collisions(root: Path) -> list[Violation]:
 def main() -> int:
     root = project_root()
     found = duplicate_basenames(root) + unreferenced_modules(root) + shared_path_collisions(root)
+    assert_examined("python modules", sum(1 for _ in root.rglob("*.py")), 40, root)
     return report(found, root, "module-identity")
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(guarded(lambda: main()))

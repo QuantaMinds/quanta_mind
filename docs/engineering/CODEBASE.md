@@ -2909,3 +2909,130 @@ which is prose written for a human.
 **`serve/deep_review.report()` moved to `serve/run_commit.py`.** It prints a reviewer pass for a
 person at a terminal, its only caller is the CLI, and `deep_review` was over the file cap. The
 split is by concern, not to make room.
+
+### `parse/imports.py` — D2a, labelled import edges
+
+A **detector, not a reviewer**. "This module is imported by fourteen others" is a question a
+parser answers exactly, and `verify/pin_mismatch.py` is the same shape: 24 of 24, precision 100%
+by construction, while model findings on the same corpus are 66.7–82.1% wrong and no gate removes
+any of them. Nothing here consults a model, so no model can be wrong about it.
+
+**`RESOLVED` needs two independent resolvers and has them:** the syntax says the import exists,
+and the named target is a file in the tree. Either alone is `INFERRED`. That is the difference
+between "this file imports that file" and "this file mentions a name that looks like that file",
+and `test_nothing_resolves_against_an_empty_tree` is the assertion — identical syntax, empty tree,
+no resolved edges. An implementation labelling from syntax alone passes every other test.
+
+**No branch returns nothing.** A third-party name is `EXTERNAL_SYMBOL`, an `importlib` call is
+`DYNAMIC_DISPATCH`, a file that will not parse is `UNPARSEABLE_SYNTAX`, a relative import that
+climbs above the root is `MALFORMED_DECLARATION`. An empty edge list means "no static Python
+import resolved to a file in this tree", never "nothing depends on this".
+
+**The defect the tests caught:** `relative` was set for every `ImportFrom`, not only dotted ones,
+so `from requests import get` came back `INFERRED` — an edge asserted inside the tree to a
+third-party package. `import requests` was unaffected, so the obvious test passed.
+
+**Pure — no git, no I/O, no network.** The caller supplies the source and the tree, which is what
+makes it testable without a repository. `parse/importers.py` answers the reverse question per file
+and does the git reading.
+
+### `findings/agreement.py` — the second rater, blind by construction
+
+Published-finding correctness measured **25.0%** on one rater.
+`adjudication-preregistration.md` requires a second before a number like that is leaned on, and
+the ranking result got one at 92% agreement, kappa 0.66.
+
+**Blindness is structural, not an instruction.** The first rater's sheet is moved to
+`~/.quantamind_sealed/` before the second is issued, so a second rater working in this repository
+cannot read it by accident. `PHASE0_PREREGISTRATION.md` A57 voided an entire draw because an
+answer key sat readable beside a blind sheet, and its own conclusion was that the protection
+which failed was an instruction rather than a check. This applies that conclusion.
+
+**Kappa is tested at its known points**, because a chance-corrected statistic is exactly the kind
+that looks plausible while being wrong: identical raters give 1.0, 50% agreement on balanced
+margins gives **0.0 rather than 0.5**, total disagreement goes negative, and two raters who both
+answered TRUE to everything give **NaN rather than 1.0** — they agreed completely and showed
+nothing.
+
+**Disagreements are itemised.** A kappa says how much two people disagreed and never which
+finding they disagreed about, and that list is the part worth reading: it locates the findings
+that are genuinely ambiguous rather than simply wrong.
+
+**`BOTH CALL CORRECT` is the defensible floor.** A finding two independent readers call correct is
+a different claim from one a single reader did, and it is the one to quote.
+
+### The gates that withhold a rate — `findings/scoring.py`, `findings/deciding_line.py`
+
+Four gates, each of which exists because a sheet reached a result it should not have.
+
+| gate | the sheet that got through |
+|---|---|
+| **LINE admissible** | a verdict citing nothing, or citing diff furniture |
+| **DIRECTION** | a rater describing what the commit does, never locating the claim's own code |
+| **constant responder** | 23 TRUE of 24 — the same 95.8% a responder answering TRUE unconditionally scores |
+| **coverage / verdict** | a partial or junk sheet |
+
+**A second rater scored 95.8% and nothing in the output said a robot scores the same.** That is
+why the constant-responder gate prints no rate at all rather than a rate under a caveat: a number
+beneath a warning is a number that gets quoted without one.
+
+**`deciding_line.locate` exists because the first version skipped what it could not evaluate.**
+A sheet citing `+++ b/pkg/mod.py` passed the admissibility gate — the header IS in the diff text,
+so a substring test accepts it — then failed to place, and `if truth and said != truth` passed
+over it in silence. The check written to catch that sheet never fired; a different gate did, and
+only tracing a "passing" test found it. Every unplaceable outcome now carries a reason:
+a header, a blank, a bare marker, unchanged context, or a line both added and removed.
+
+**Every gate is sabotaged in the tests, not merely exercised.** Disabling any one of the four
+fails a named test. Two of them did not, when they were new and had only been demonstrated by
+hand — which is the whole argument for the rule.
+
+
+### `scripts/measure/` — harnesses that measure the product
+
+Nine modules imported `quantamind` from inside `research/`, whose **interpreter cannot import the
+product** — every one was unrunnable from the project it lived in and had to be invoked by hand
+with the root interpreter. They now live in `scripts/measure/`, with `record.py` and `run_six.py`
+that they depend on.
+
+**Not `src/quantamind/`**, which is the package a customer installs with `dependencies = []`; a
+harness that clones repositories and calls Gemini has no business shipping inside it, and the
+layer rule would bind code that crosses layers by design. `scripts/` is the seam: root
+interpreter, covered by rule 11's guard and `just check`, not shipped.
+
+**The move put them under `mypy --strict` for the first time** — `research/` is excluded from
+type-checking — and eleven errors surfaced in code that had never been checked. Two were real
+defects rather than missing annotations: `rename_blindness.py` carried a hardcoded
+`/Users/dhanu/...` root **twice**, so it ran on exactly one machine and would have failed on CI
+or any other checkout.
+
+**It also forced `src/quantamind/py.typed`.** The package is fully typed and never advertised it,
+so every external consumer had its `quantamind` imports skipped as `import-untyped`. Adding the
+marker immediately exposed two unchecked errors in `scripts/verify/build_pack.py`, which imports
+`quantamind.store` submodules in a form `no_implicit_reexport` rejects. Those had been invisible
+since the file was written.
+
+**`bench/forensic/shape/pulls.py` stayed in `research/`.** It imports `quantamind` too, but its
+sibling `shape/tally.py` does not — moving it would drag a research package product-side. It
+still needs the root interpreter, and that is recorded rather than papered over.
+
+### `scripts/guard/exclusions.py` — what the guards never look inside
+
+Split from `discovery.py`, which was at exactly the 200-line cap. The seam is real: this decides
+what is out of bounds, `discovery.py` decides how to reach the rest, and **all 23 guards draw
+their population through the first** — so it should be reviewable without reading a traversal.
+
+**`data` and `results` are scoped to `research/`, not matched as bare names.** They previously
+matched at any depth, so a directory with either name hid its contents from every guard at once
+with nothing reporting it: source under `src/quantamind/data/` would simply have been unguarded.
+Every such directory in this repository is under `research/phase0/`, so scoping costs no pruning.
+
+**The pruning is the reason the exclusion exists and it survives the narrowing.** `walk` prunes
+during traversal rather than filtering after, because `rglob` over a multi-gigabyte clone under
+`research/phase0/data/` timed out the sixty-second pre-edit hook — and a guard that times out is
+a guard that gets switched off. Measured after the change: the same 1,763 files in the same
+0.02s. Reverting either the scope or the pruning fails a named test.
+
+**A pre-existing test asserted `"data" in EXCLUDED_DIRS`** and caught the change. It was updated
+to assert the scoped behaviour — pruned under `research/`, walked under `src/` — rather than
+loosened to pass.

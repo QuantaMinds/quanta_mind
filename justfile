@@ -106,6 +106,11 @@ label-score:
 findings-draw HARVEST SEED:
     cd research/phase0 && uv run python -m phase0.findings.sample --harvest {{HARVEST}} --out data/labelling --seed {{SEED}}
 
+# Two raters on the same pack: agreement, kappa, and every disagreement itemised. The first
+# rater's sheet lives OUTSIDE the working tree so a second rater cannot read it by accident.
+findings-agree FIRST:
+    cd research/phase0 && uv run python -m phase0.findings.agreement --first {{FIRST}} --second data/labelling/findings_labels.rater2.md --pack data/labelling/findings_pack.md
+
 # Score the findings labels. Withholds the rate entirely — does not compute it — if any
 # TRUE/FALSE verdict cites a deciding line that is not in the code that item showed.
 findings-score:

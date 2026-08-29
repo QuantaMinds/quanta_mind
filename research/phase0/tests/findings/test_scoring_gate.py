@@ -31,9 +31,19 @@ def _pack(n: int) -> str:
 
 
 def _labels(verdicts: dict[int, tuple[str, str]]) -> str:
+    """DIRECTION is derived from the cited line's own marker, so these sheets are self-consistent
+    and any failure is the gate under test rather than a malformed fixture."""
     out = ["# Verdicts", ""]
     for i, (verdict, line) in sorted(verdicts.items()):
-        out += [f"## item {i:02d}", "", f"VERDICT: {verdict}", f"LINE: {line}", ""]
+        way = "REMOVED" if line.strip().startswith("-") else "ADDED" if line.strip() else ""
+        out += [
+            f"## item {i:02d}",
+            "",
+            f"VERDICT: {verdict}",
+            f"LINE: {line}",
+            f"DIRECTION: {way}",
+            "",
+        ]
     return "\n".join(out)
 
 
@@ -48,7 +58,7 @@ def _run(tmp: Path, monkeypatch, pack: str, labels: str) -> int:
 
 def _good(n: int, true_upto: int) -> dict[int, tuple[str, str]]:
     return {
-        i: (("TRUE" if i <= true_upto else "FALSE"), f"    value_{i} = compute_{i}(arg)")
+        i: (("TRUE" if i <= true_upto else "FALSE"), f"+    value_{i} = compute_{i}(arg)")
         for i in range(1, n + 1)
     }
 
@@ -60,7 +70,7 @@ def test_a_line_not_in_the_diff_blocks_the_rate(tmp_path, monkeypatch, capsys) -
     code = _run(tmp_path, monkeypatch, _pack(6), _labels(labels))
     out = capsys.readouterr().out
     assert code == 2, out
-    assert "item 02" in out and "not in the diff" in out, out
+    assert "item 02" in out and "not found in the diff" in out, out
     assert "CORRECT" not in out, f"the rate was printed anyway: {out}"
 
 
@@ -69,7 +79,7 @@ def test_a_missing_line_on_a_decided_verdict_blocks_the_rate(tmp_path, monkeypat
     labels[5] = ("FALSE", "")
     assert _run(tmp_path, monkeypatch, _pack(6), _labels(labels)) == 2
     out = capsys.readouterr().out
-    assert "line missing" in out and "CORRECT" not in out, out
+    assert "no line given" in out and "CORRECT" not in out, out
 
 
 def test_unknown_needs_no_line_and_still_scores(tmp_path, monkeypatch, capsys) -> None:

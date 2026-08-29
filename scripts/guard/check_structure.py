@@ -17,7 +17,9 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from discovery import Violation, is_excluded, iter_package_dirs, iter_source_files, report
+from coverage import assert_examined, guarded
+from discovery import Violation, iter_package_dirs, iter_source_files, report
+from exclusions import is_excluded
 
 MAX_FILE_LINES = 200
 MAX_DIR_FILES = 15
@@ -93,8 +95,9 @@ def main(argv: list[str]) -> int:
         return 2
 
     violations = check_file_lengths(root) + check_dir_fanout(root)
+    assert_examined("source files", sum(1 for _ in iter_source_files(root)), 40, root)
     return report(violations, root, "structure")
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv))
+    raise SystemExit(guarded(lambda: main(sys.argv)))

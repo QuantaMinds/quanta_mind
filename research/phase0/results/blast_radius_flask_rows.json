@@ -1,0 +1,8451 @@
+[
+ {
+  "at": 1270552377,
+  "path": "examples/apishowcase/apishowcase.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1270552377,
+  "path": "examples/minitwit/minitwit.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1270552377,
+  "path": "flask.py",
+  "prior_fixes": 0,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1270562534,
+  "path": "docs/conf.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1270562534,
+  "path": "examples/minitwit/minitwit.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1270562534,
+  "path": "flask.py",
+  "prior_fixes": 1,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1270746195,
+  "path": "docs/conf.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1270746195,
+  "path": "examples/minitwit/minitwit.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1270746195,
+  "path": "flask.py",
+  "prior_fixes": 2,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1270769559,
+  "path": "examples/minitwit/minitwit.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1270769559,
+  "path": "flask.py",
+  "prior_fixes": 3,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1270907355,
+  "path": "docs/conf.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1270907355,
+  "path": "docs/flaskext.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1270907355,
+  "path": "flask.py",
+  "prior_fixes": 4,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1270945210,
+  "path": "docs/flaskext.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1270945210,
+  "path": "flask.py",
+  "prior_fixes": 5,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1271001525,
+  "path": "examples/apishowcase/apishowcase.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1271001525,
+  "path": "examples/minitwit/minitwit.py",
+  "prior_fixes": 4,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1271004306,
+  "path": "examples/minitwit/minitwit.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1271004306,
+  "path": "examples/minitwit/minitwit_tests.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1271004306,
+  "path": "flask.py",
+  "prior_fixes": 6,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1271205732,
+  "path": "flask_tests.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1271205732,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1271247060,
+  "path": "flask.py",
+  "prior_fixes": 7,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1271247060,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1271408596,
+  "path": "examples/flaskr/flaskr.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1271408596,
+  "path": "examples/minitwit/minitwit.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1271408596,
+  "path": "flask.py",
+  "prior_fixes": 8,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1271408596,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1271506247,
+  "path": "flask.py",
+  "prior_fixes": 9,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1271506247,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1271598246,
+  "path": "flask.py",
+  "prior_fixes": 10,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1271598246,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 4,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1271684347,
+  "path": "examples/jqueryexample/jqueryexample.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1271684347,
+  "path": "flask.py",
+  "prior_fixes": 11,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1271684347,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1271695864,
+  "path": "flask.py",
+  "prior_fixes": 12,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1271695864,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1271698392,
+  "path": "flask.py",
+  "prior_fixes": 13,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1271698392,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 7,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1271713742,
+  "path": "flask.py",
+  "prior_fixes": 14,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1271713742,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 8,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1271769136,
+  "path": "flask.py",
+  "prior_fixes": 15,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1271769136,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 9,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1271781658,
+  "path": "examples/minitwit/minitwit.py",
+  "prior_fixes": 7,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1271781658,
+  "path": "flask.py",
+  "prior_fixes": 16,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1271781658,
+  "path": "setup.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1271805789,
+  "path": "flask.py",
+  "prior_fixes": 17,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1271805789,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 10,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1271838980,
+  "path": "flask.py",
+  "prior_fixes": 18,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1271838980,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 11,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1272033004,
+  "path": "flask.py",
+  "prior_fixes": 19,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1272033004,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 12,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1272034880,
+  "path": "flask.py",
+  "prior_fixes": 20,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1272034880,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 13,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1272035422,
+  "path": "flask.py",
+  "prior_fixes": 21,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1272035422,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 14,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1272121636,
+  "path": "flask.py",
+  "prior_fixes": 22,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1272121636,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 15,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1272199886,
+  "path": "flask.py",
+  "prior_fixes": 23,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1272199886,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 16,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1272199887,
+  "path": "flask.py",
+  "prior_fixes": 24,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1272199887,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 17,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1272371529,
+  "path": "flask.py",
+  "prior_fixes": 25,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1272371529,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 18,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1272820244,
+  "path": "flask.py",
+  "prior_fixes": 26,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1272820244,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 19,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1272890356,
+  "path": "flask.py",
+  "prior_fixes": 27,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1272890356,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 20,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1272909800,
+  "path": "flask.py",
+  "prior_fixes": 28,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1272909800,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 21,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1272966114,
+  "path": "flask.py",
+  "prior_fixes": 29,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1272966114,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 22,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1272966667,
+  "path": "flask.py",
+  "prior_fixes": 30,
+  "importers": 5,
+  "returned": true
+ },
+ {
+  "at": 1272966667,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 23,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1273483662,
+  "path": "flask.py",
+  "prior_fixes": 31,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1273483662,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 24,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1274049475,
+  "path": "flask.py",
+  "prior_fixes": 32,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1274049475,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 25,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1274105190,
+  "path": "flask.py",
+  "prior_fixes": 33,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1274105190,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 26,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1274129195,
+  "path": "docs/conf.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1274129195,
+  "path": "flask.py",
+  "prior_fixes": 34,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1274129195,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 27,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1274143010,
+  "path": "flask.py",
+  "prior_fixes": 35,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1274143010,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 28,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1274683108,
+  "path": "docs/conf.py",
+  "prior_fixes": 4,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1274683108,
+  "path": "flask.py",
+  "prior_fixes": 36,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1274719068,
+  "path": "flask.py",
+  "prior_fixes": 37,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1274719068,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 29,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1274878141,
+  "path": "docs/conf.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1274878141,
+  "path": "examples/minitwit/minitwit.py",
+  "prior_fixes": 8,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1274959895,
+  "path": "flask.py",
+  "prior_fixes": 38,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1274959895,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 30,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1274959896,
+  "path": "flask.py",
+  "prior_fixes": 39,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1274959896,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 31,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1275002309,
+  "path": "flask.py",
+  "prior_fixes": 40,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1275002309,
+  "path": "setup.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1275075447,
+  "path": "flask.py",
+  "prior_fixes": 41,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1275075447,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 32,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1275319738,
+  "path": "flask.py",
+  "prior_fixes": 42,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1275319738,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 33,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1275494689,
+  "path": "flask.py",
+  "prior_fixes": 43,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1275494689,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 34,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1275571567,
+  "path": "flask.py",
+  "prior_fixes": 44,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1275571567,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 35,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1275574883,
+  "path": "flask.py",
+  "prior_fixes": 45,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1275574883,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 36,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1276872818,
+  "path": "flask.py",
+  "prior_fixes": 46,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1276872818,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 37,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1277766820,
+  "path": "flask.py",
+  "prior_fixes": 47,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1277766820,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 38,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1278094858,
+  "path": "flask/__init__.py",
+  "prior_fixes": 0,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1278094858,
+  "path": "flask/app.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1278094858,
+  "path": "flask/conf.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1278094858,
+  "path": "flask/ctx.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1278094858,
+  "path": "flask/helpers.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1278094858,
+  "path": "flask/module.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1278094858,
+  "path": "flask/session.py",
+  "prior_fixes": 0,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1278094858,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1278097832,
+  "path": "flask/__init__.py",
+  "prior_fixes": 1,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1278097832,
+  "path": "flask/app.py",
+  "prior_fixes": 1,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278097832,
+  "path": "flask/conf.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1278097832,
+  "path": "flask/ctx.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1278097832,
+  "path": "flask/globals.py",
+  "prior_fixes": 0,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1278097832,
+  "path": "flask/helpers.py",
+  "prior_fixes": 1,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1278097832,
+  "path": "flask/module.py",
+  "prior_fixes": 1,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278097832,
+  "path": "flask/session.py",
+  "prior_fixes": 1,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1278097832,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 1,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278234984,
+  "path": "flask.py",
+  "prior_fixes": 48,
+  "importers": 3,
+  "returned": false
+ },
+ {
+  "at": 1278234984,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 39,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1278235526,
+  "path": "flask/__init__.py",
+  "prior_fixes": 2,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1278235526,
+  "path": "flask/app.py",
+  "prior_fixes": 2,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278235526,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 40,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1278236120,
+  "path": "flask/__init__.py",
+  "prior_fixes": 3,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1278236120,
+  "path": "flask/app.py",
+  "prior_fixes": 3,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278236120,
+  "path": "flask/config.py",
+  "prior_fixes": 0,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1278236120,
+  "path": "flask/ctx.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1278236120,
+  "path": "flask/globals.py",
+  "prior_fixes": 1,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1278236120,
+  "path": "flask/helpers.py",
+  "prior_fixes": 2,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1278236120,
+  "path": "flask/module.py",
+  "prior_fixes": 2,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278236120,
+  "path": "flask/session.py",
+  "prior_fixes": 2,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1278236120,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 2,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278236120,
+  "path": "setup.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1278237368,
+  "path": "flask/app.py",
+  "prior_fixes": 4,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278237368,
+  "path": "flask/helpers.py",
+  "prior_fixes": 3,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1278237989,
+  "path": "flask/app.py",
+  "prior_fixes": 5,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278237989,
+  "path": "flask/helpers.py",
+  "prior_fixes": 4,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1278238440,
+  "path": "flask/app.py",
+  "prior_fixes": 6,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278238440,
+  "path": "flask/helpers.py",
+  "prior_fixes": 5,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1278240517,
+  "path": "flask/app.py",
+  "prior_fixes": 7,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278240517,
+  "path": "flask/helpers.py",
+  "prior_fixes": 6,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1278240517,
+  "path": "flask/module.py",
+  "prior_fixes": 3,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278243720,
+  "path": "flask/app.py",
+  "prior_fixes": 8,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278243720,
+  "path": "flask/helpers.py",
+  "prior_fixes": 7,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1278243720,
+  "path": "flask/module.py",
+  "prior_fixes": 4,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278244198,
+  "path": "flask/__init__.py",
+  "prior_fixes": 4,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1278244198,
+  "path": "flask/app.py",
+  "prior_fixes": 9,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278244198,
+  "path": "flask/helpers.py",
+  "prior_fixes": 8,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1278244198,
+  "path": "flask/templating.py",
+  "prior_fixes": 0,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278244916,
+  "path": "flask/app.py",
+  "prior_fixes": 10,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278244916,
+  "path": "flask/ctx.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1278244916,
+  "path": "flask/templating.py",
+  "prior_fixes": 1,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278245549,
+  "path": "flask/module.py",
+  "prior_fixes": 5,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278245549,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 41,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1278245549,
+  "path": "tests/moduleapp/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1278245549,
+  "path": "tests/moduleapp/apps/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1278245549,
+  "path": "tests/moduleapp/apps/admin/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1278245549,
+  "path": "tests/moduleapp/apps/frontend/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1278245849,
+  "path": "flask/app.py",
+  "prior_fixes": 11,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278245849,
+  "path": "flask/config.py",
+  "prior_fixes": 0,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1278245957,
+  "path": "flask/app.py",
+  "prior_fixes": 12,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278245957,
+  "path": "flask/helpers.py",
+  "prior_fixes": 9,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1278266423,
+  "path": "flask/__init__.py",
+  "prior_fixes": 5,
+  "importers": 6,
+  "returned": false
+ },
+ {
+  "at": 1278266423,
+  "path": "flask/app.py",
+  "prior_fixes": 13,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278266423,
+  "path": "flask/ctx.py",
+  "prior_fixes": 4,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1278266423,
+  "path": "flask/helpers.py",
+  "prior_fixes": 10,
+  "importers": 5,
+  "returned": true
+ },
+ {
+  "at": 1278266423,
+  "path": "flask/templating.py",
+  "prior_fixes": 2,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278266423,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 3,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278266823,
+  "path": "flask/helpers.py",
+  "prior_fixes": 11,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1278266823,
+  "path": "flask/module.py",
+  "prior_fixes": 6,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278266823,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 4,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278267114,
+  "path": "flask/app.py",
+  "prior_fixes": 14,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278267114,
+  "path": "flask/module.py",
+  "prior_fixes": 7,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278268594,
+  "path": "flask/helpers.py",
+  "prior_fixes": 12,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1278268594,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 42,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1278318215,
+  "path": "flask/__init__.py",
+  "prior_fixes": 5,
+  "importers": 6,
+  "returned": false
+ },
+ {
+  "at": 1278318215,
+  "path": "flask/app.py",
+  "prior_fixes": 15,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278318215,
+  "path": "flask/helpers.py",
+  "prior_fixes": 13,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1278318215,
+  "path": "flask/module.py",
+  "prior_fixes": 8,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278318215,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 43,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1278318678,
+  "path": "flask/app.py",
+  "prior_fixes": 16,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278318678,
+  "path": "flask/ctx.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1278318678,
+  "path": "flask/module.py",
+  "prior_fixes": 9,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278318678,
+  "path": "flask/testing.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1278319064,
+  "path": "flask/app.py",
+  "prior_fixes": 17,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278319064,
+  "path": "flask/logging.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1278319064,
+  "path": "flask/testing.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1278405756,
+  "path": "flask/app.py",
+  "prior_fixes": 18,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278405756,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 44,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1278437090,
+  "path": "flask/templating.py",
+  "prior_fixes": 3,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278437090,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 45,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1278439747,
+  "path": "flask/app.py",
+  "prior_fixes": 19,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278439747,
+  "path": "flask/logging.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1278439747,
+  "path": "flask/module.py",
+  "prior_fixes": 10,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278439747,
+  "path": "flask/session.py",
+  "prior_fixes": 2,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1278439747,
+  "path": "flask/templating.py",
+  "prior_fixes": 4,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278950650,
+  "path": "flask/app.py",
+  "prior_fixes": 20,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278950650,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 46,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1278968664,
+  "path": "flask/app.py",
+  "prior_fixes": 21,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1278968664,
+  "path": "flask/ctx.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1278968664,
+  "path": "flask/helpers.py",
+  "prior_fixes": 14,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1278968664,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1278968664,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 47,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1279055693,
+  "path": "flask/app.py",
+  "prior_fixes": 22,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1279055693,
+  "path": "flask/helpers.py",
+  "prior_fixes": 15,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1279056629,
+  "path": "flask/app.py",
+  "prior_fixes": 23,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1279056629,
+  "path": "flask/templating.py",
+  "prior_fixes": 5,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1279056629,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 48,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1279057975,
+  "path": "flask/helpers.py",
+  "prior_fixes": 16,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1279057975,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 49,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1279097277,
+  "path": "flask/app.py",
+  "prior_fixes": 24,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1279097277,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1279197302,
+  "path": "flask/app.py",
+  "prior_fixes": 25,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1279197302,
+  "path": "flask/helpers.py",
+  "prior_fixes": 17,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1279197302,
+  "path": "flask/module.py",
+  "prior_fixes": 11,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1279197302,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 50,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1279359376,
+  "path": "flask/__init__.py",
+  "prior_fixes": 5,
+  "importers": 7,
+  "returned": false
+ },
+ {
+  "at": 1279359376,
+  "path": "flask/helpers.py",
+  "prior_fixes": 18,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1279359376,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 51,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1279370368,
+  "path": "docs/conf.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1279370368,
+  "path": "flask/__init__.py",
+  "prior_fixes": 5,
+  "importers": 7,
+  "returned": false
+ },
+ {
+  "at": 1279370368,
+  "path": "flask/app.py",
+  "prior_fixes": 26,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1279370368,
+  "path": "flask/signals.py",
+  "prior_fixes": 0,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1279370368,
+  "path": "flask/templating.py",
+  "prior_fixes": 6,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1279370368,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 52,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1279373964,
+  "path": "flask/app.py",
+  "prior_fixes": 27,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1279373964,
+  "path": "flask/ctx.py",
+  "prior_fixes": 7,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1279888161,
+  "path": "flask/app.py",
+  "prior_fixes": 28,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1279888161,
+  "path": "flask/module.py",
+  "prior_fixes": 12,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1279888161,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 53,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1280072087,
+  "path": "flask/app.py",
+  "prior_fixes": 29,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1280072087,
+  "path": "flask/helpers.py",
+  "prior_fixes": 19,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1280273280,
+  "path": "flask/app.py",
+  "prior_fixes": 30,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1280273280,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 54,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1280440986,
+  "path": "flask/config.py",
+  "prior_fixes": 0,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1280440986,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 55,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1280830061,
+  "path": "flask/app.py",
+  "prior_fixes": 31,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1280830061,
+  "path": "flask/helpers.py",
+  "prior_fixes": 20,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1280830061,
+  "path": "flask/module.py",
+  "prior_fixes": 13,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1280830061,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 7,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1280830515,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 56,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1280830515,
+  "path": "tests/flaskext_test.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1281178973,
+  "path": "flask/globals.py",
+  "prior_fixes": 2,
+  "importers": 4,
+  "returned": false
+ },
+ {
+  "at": 1281178973,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 57,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1281180999,
+  "path": "flask/helpers.py",
+  "prior_fixes": 21,
+  "importers": 4,
+  "returned": false
+ },
+ {
+  "at": 1281180999,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 58,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1281359762,
+  "path": "flask/templating.py",
+  "prior_fixes": 6,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1281359762,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 59,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1281359762,
+  "path": "tests/moduleapp/apps/admin/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1282295778,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 60,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1282295778,
+  "path": "tests/subdomaintestmodule/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1287751007,
+  "path": "flask/app.py",
+  "prior_fixes": 32,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1287751007,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 61,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1287760761,
+  "path": "flask/app.py",
+  "prior_fixes": 33,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1287760761,
+  "path": "flask/testing.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1287760761,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 61,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1291017458,
+  "path": "flask/app.py",
+  "prior_fixes": 34,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1291017458,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 61,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1295194405,
+  "path": "flask/app.py",
+  "prior_fixes": 35,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1295194405,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 61,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1295873351,
+  "path": "flask/app.py",
+  "prior_fixes": 36,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1295873351,
+  "path": "flask/module.py",
+  "prior_fixes": 14,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1298321797,
+  "path": "flask/app.py",
+  "prior_fixes": 37,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1298321797,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 62,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1300113682,
+  "path": "flask/config.py",
+  "prior_fixes": 0,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1300113682,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 63,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1300127295,
+  "path": "flask/app.py",
+  "prior_fixes": 38,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1300127295,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 64,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1300133638,
+  "path": "flask/__init__.py",
+  "prior_fixes": 5,
+  "importers": 8,
+  "returned": true
+ },
+ {
+  "at": 1300133638,
+  "path": "flask/ctx.py",
+  "prior_fixes": 7,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1300133638,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 64,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1300436128,
+  "path": "flask/app.py",
+  "prior_fixes": 39,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1300436128,
+  "path": "flask/helpers.py",
+  "prior_fixes": 21,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1300436128,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 64,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1300437056,
+  "path": "flask/app.py",
+  "prior_fixes": 40,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1300437056,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 64,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1300501719,
+  "path": "flask/app.py",
+  "prior_fixes": 41,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1300501719,
+  "path": "flask/templating.py",
+  "prior_fixes": 6,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1300501719,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 7,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1300501719,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 64,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1303138092,
+  "path": "flask/__init__.py",
+  "prior_fixes": 6,
+  "importers": 8,
+  "returned": true
+ },
+ {
+  "at": 1303138092,
+  "path": "flask/helpers.py",
+  "prior_fixes": 22,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1303161599,
+  "path": "flask/helpers.py",
+  "prior_fixes": 23,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1303161599,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 64,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1306519853,
+  "path": "flask/__init__.py",
+  "prior_fixes": 7,
+  "importers": 8,
+  "returned": true
+ },
+ {
+  "at": 1306519853,
+  "path": "flask/app.py",
+  "prior_fixes": 42,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1306519853,
+  "path": "flask/ctx.py",
+  "prior_fixes": 7,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1306519853,
+  "path": "flask/signals.py",
+  "prior_fixes": 0,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1306519853,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 65,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1306677298,
+  "path": "flask/app.py",
+  "prior_fixes": 43,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1306677298,
+  "path": "flask/blueprints.py",
+  "prior_fixes": 0,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1306677298,
+  "path": "flask/ctx.py",
+  "prior_fixes": 7,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1306677298,
+  "path": "flask/helpers.py",
+  "prior_fixes": 24,
+  "importers": 5,
+  "returned": true
+ },
+ {
+  "at": 1306677298,
+  "path": "flask/module.py",
+  "prior_fixes": 14,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1306677298,
+  "path": "flask/templating.py",
+  "prior_fixes": 6,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1306677298,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 7,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1306677298,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 66,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1306688106,
+  "path": "flask/app.py",
+  "prior_fixes": 44,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1306688106,
+  "path": "flask/blueprints.py",
+  "prior_fixes": 1,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1306691530,
+  "path": "flask/app.py",
+  "prior_fixes": 45,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1306691530,
+  "path": "flask/blueprints.py",
+  "prior_fixes": 2,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1306691776,
+  "path": "flask/app.py",
+  "prior_fixes": 46,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1306691776,
+  "path": "flask/helpers.py",
+  "prior_fixes": 25,
+  "importers": 5,
+  "returned": true
+ },
+ {
+  "at": 1306692339,
+  "path": "flask/__init__.py",
+  "prior_fixes": 8,
+  "importers": 8,
+  "returned": false
+ },
+ {
+  "at": 1306692339,
+  "path": "flask/app.py",
+  "prior_fixes": 47,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1307262435,
+  "path": "flask/app.py",
+  "prior_fixes": 48,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1307262435,
+  "path": "flask/blueprints.py",
+  "prior_fixes": 3,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1307262435,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 67,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1307272768,
+  "path": "flask/helpers.py",
+  "prior_fixes": 26,
+  "importers": 5,
+  "returned": true
+ },
+ {
+  "at": 1307272768,
+  "path": "scripts/flask-07-upgrade.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1307453564,
+  "path": "flask/blueprints.py",
+  "prior_fixes": 4,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1307453564,
+  "path": "scripts/testproj/test.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1308261349,
+  "path": "flask/app.py",
+  "prior_fixes": 49,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1308261349,
+  "path": "flask/blueprints.py",
+  "prior_fixes": 5,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1308261349,
+  "path": "flask/helpers.py",
+  "prior_fixes": 27,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1308261349,
+  "path": "flask/module.py",
+  "prior_fixes": 14,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1308261349,
+  "path": "flask/templating.py",
+  "prior_fixes": 7,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1308261349,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 68,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1308274180,
+  "path": "flask/blueprints.py",
+  "prior_fixes": 6,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1308274180,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 69,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1308274789,
+  "path": "tests/blueprintapp/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1308274789,
+  "path": "tests/blueprintapp/apps/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1308274789,
+  "path": "tests/blueprintapp/apps/admin/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1308274789,
+  "path": "tests/blueprintapp/apps/frontend/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1308274789,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 70,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1309127484,
+  "path": "flask/__init__.py",
+  "prior_fixes": 8,
+  "importers": 12,
+  "returned": false
+ },
+ {
+  "at": 1309127484,
+  "path": "scripts/make-release.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1309128331,
+  "path": "flask/__init__.py",
+  "prior_fixes": 8,
+  "importers": 12,
+  "returned": false
+ },
+ {
+  "at": 1309128331,
+  "path": "setup.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1309159250,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 8,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1309159250,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 71,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1309160445,
+  "path": "flask/app.py",
+  "prior_fixes": 50,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1309160445,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 72,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1309257949,
+  "path": "flask/app.py",
+  "prior_fixes": 51,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1309257949,
+  "path": "flask/views.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1309257949,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 73,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1309264612,
+  "path": "flask/__init__.py",
+  "prior_fixes": 8,
+  "importers": 12,
+  "returned": false
+ },
+ {
+  "at": 1309264612,
+  "path": "setup.py",
+  "prior_fixes": 4,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1309264622,
+  "path": "flask/__init__.py",
+  "prior_fixes": 8,
+  "importers": 12,
+  "returned": false
+ },
+ {
+  "at": 1309264622,
+  "path": "setup.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1309365108,
+  "path": "flask/app.py",
+  "prior_fixes": 52,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1309365108,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 74,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1309365116,
+  "path": "flask/__init__.py",
+  "prior_fixes": 8,
+  "importers": 12,
+  "returned": false
+ },
+ {
+  "at": 1309365116,
+  "path": "setup.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1309940216,
+  "path": "flask/blueprints.py",
+  "prior_fixes": 7,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1309940216,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 75,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1309940483,
+  "path": "flask/__init__.py",
+  "prior_fixes": 8,
+  "importers": 12,
+  "returned": false
+ },
+ {
+  "at": 1309940483,
+  "path": "setup.py",
+  "prior_fixes": 7,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1310030842,
+  "path": "flask/__init__.py",
+  "prior_fixes": 8,
+  "importers": 12,
+  "returned": false
+ },
+ {
+  "at": 1310030842,
+  "path": "flask/app.py",
+  "prior_fixes": 53,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1310030842,
+  "path": "flask/ctx.py",
+  "prior_fixes": 7,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1310030842,
+  "path": "flask/session.py",
+  "prior_fixes": 2,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1310645922,
+  "path": "flask/app.py",
+  "prior_fixes": 54,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1310645922,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 76,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1310745828,
+  "path": "flask/__init__.py",
+  "prior_fixes": 8,
+  "importers": 12,
+  "returned": false
+ },
+ {
+  "at": 1310745828,
+  "path": "flask/app.py",
+  "prior_fixes": 55,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1310745828,
+  "path": "flask/config.py",
+  "prior_fixes": 0,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1310745828,
+  "path": "flask/globals.py",
+  "prior_fixes": 2,
+  "importers": 5,
+  "returned": true
+ },
+ {
+  "at": 1310745828,
+  "path": "flask/helpers.py",
+  "prior_fixes": 28,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1310745828,
+  "path": "flask/testing.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1310745828,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 9,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1310771789,
+  "path": "flask/templating.py",
+  "prior_fixes": 8,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1310771789,
+  "path": "tests/blueprintapp/__init__.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1310771789,
+  "path": "tests/blueprintapp/apps/admin/__init__.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1310771789,
+  "path": "tests/blueprintapp/apps/frontend/__init__.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1310771789,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 77,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1312540541,
+  "path": "flask/app.py",
+  "prior_fixes": 56,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1312540541,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 78,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1312555422,
+  "path": "flask/debughelpers.py",
+  "prior_fixes": 0,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1312555422,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 10,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1312556203,
+  "path": "flask/debughelpers.py",
+  "prior_fixes": 1,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1312556203,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 79,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1312574052,
+  "path": "flask/debughelpers.py",
+  "prior_fixes": 2,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1312574052,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 11,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1312677034,
+  "path": "flask/app.py",
+  "prior_fixes": 57,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1312677034,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 80,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1312713818,
+  "path": "flask/app.py",
+  "prior_fixes": 58,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1312713818,
+  "path": "flask/blueprints.py",
+  "prior_fixes": 8,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1312713818,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 81,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1312719333,
+  "path": "docs/conf.py",
+  "prior_fixes": 7,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1312719333,
+  "path": "docs/flaskdocext.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1312719333,
+  "path": "flask/app.py",
+  "prior_fixes": 59,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1312832813,
+  "path": "flask/app.py",
+  "prior_fixes": 60,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1312832813,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 82,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1312832846,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 12,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1312832846,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 83,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1312894266,
+  "path": "flask/app.py",
+  "prior_fixes": 61,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1312894266,
+  "path": "flask/debughelpers.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1312894266,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 84,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1312976098,
+  "path": "flask/app.py",
+  "prior_fixes": 62,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1312976098,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 85,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1312977357,
+  "path": "flask/app.py",
+  "prior_fixes": 63,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1312977357,
+  "path": "flask/helpers.py",
+  "prior_fixes": 29,
+  "importers": 3,
+  "returned": false
+ },
+ {
+  "at": 1312991180,
+  "path": "flask/app.py",
+  "prior_fixes": 64,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1312991180,
+  "path": "flask/helpers.py",
+  "prior_fixes": 29,
+  "importers": 3,
+  "returned": false
+ },
+ {
+  "at": 1312991180,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 86,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1312991484,
+  "path": "flask/app.py",
+  "prior_fixes": 65,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1312991484,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 87,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1312992016,
+  "path": "flask/app.py",
+  "prior_fixes": 66,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1312992016,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 88,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1313011173,
+  "path": "flask/app.py",
+  "prior_fixes": 67,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1313011173,
+  "path": "flask/helpers.py",
+  "prior_fixes": 29,
+  "importers": 3,
+  "returned": false
+ },
+ {
+  "at": 1313011173,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 89,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314269165,
+  "path": "flask/app.py",
+  "prior_fixes": 68,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1314269165,
+  "path": "flask/blueprints.py",
+  "prior_fixes": 9,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1314269165,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 90,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314270835,
+  "path": "flask/app.py",
+  "prior_fixes": 69,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1314270835,
+  "path": "flask/sessions.py",
+  "prior_fixes": 0,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1314270835,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 91,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314281919,
+  "path": "flask/app.py",
+  "prior_fixes": 70,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1314281919,
+  "path": "flask/testing.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314281919,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 92,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314289617,
+  "path": "flask/blueprints.py",
+  "prior_fixes": 10,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1314289617,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 93,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314301670,
+  "path": "flask/app.py",
+  "prior_fixes": 71,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1314301670,
+  "path": "flask/testing.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314301670,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 94,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314306588,
+  "path": "flask/views.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314306588,
+  "path": "tests/flask_tests.py",
+  "prior_fixes": 95,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314355123,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314355123,
+  "path": "flask/testsuite/blueprints.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1314355123,
+  "path": "flask/testsuite/config.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314355123,
+  "path": "flask/testsuite/deprecations.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1314355123,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314355123,
+  "path": "flask/testsuite/signals.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1314355123,
+  "path": "flask/testsuite/templating.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1314355123,
+  "path": "flask/testsuite/testing.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314355407,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314355407,
+  "path": "flask/testsuite/blueprints.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1314355407,
+  "path": "flask/testsuite/config.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314355407,
+  "path": "flask/testsuite/deprecations.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1314355407,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314355407,
+  "path": "flask/testsuite/signals.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1314355407,
+  "path": "flask/testsuite/templating.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1314355407,
+  "path": "flask/testsuite/testing.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314355713,
+  "path": "flask/testsuite/config.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1314355713,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314362821,
+  "path": "flask/testing.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314362821,
+  "path": "flask/testsuite/testing.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314363706,
+  "path": "flask/testing.py",
+  "prior_fixes": 4,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314363706,
+  "path": "flask/testsuite/testing.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314646771,
+  "path": "flask/testing.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314646771,
+  "path": "flask/testsuite/testing.py",
+  "prior_fixes": 4,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314707810,
+  "path": "flask/app.py",
+  "prior_fixes": 72,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1314707810,
+  "path": "flask/sessions.py",
+  "prior_fixes": 0,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1314707810,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314894904,
+  "path": "flask/testing.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314894904,
+  "path": "flask/testsuite/__init__.py",
+  "prior_fixes": 0,
+  "importers": 7,
+  "returned": false
+ },
+ {
+  "at": 1314894904,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314894904,
+  "path": "flask/testsuite/blueprints.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1314894904,
+  "path": "flask/testsuite/deprecations.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1314894904,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1314894904,
+  "path": "flask/testsuite/templating.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1314894904,
+  "path": "flask/testsuite/testing.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1316888858,
+  "path": "flask/ctx.py",
+  "prior_fixes": 8,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1316888858,
+  "path": "flask/globals.py",
+  "prior_fixes": 3,
+  "importers": 4,
+  "returned": false
+ },
+ {
+  "at": 1316888858,
+  "path": "flask/testing.py",
+  "prior_fixes": 7,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1316888858,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 4,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1316971070,
+  "path": "flask/app.py",
+  "prior_fixes": 73,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1316971070,
+  "path": "flask/config.py",
+  "prior_fixes": 0,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1316971070,
+  "path": "flask/testsuite/config.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1317913023,
+  "path": "flask/helpers.py",
+  "prior_fixes": 29,
+  "importers": 3,
+  "returned": false
+ },
+ {
+  "at": 1317913023,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 4,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1320511420,
+  "path": "flask/ctx.py",
+  "prior_fixes": 8,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1320511420,
+  "path": "flask/testsuite/regression.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1325976902,
+  "path": "flask/testsuite/config.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1325976902,
+  "path": "flask/testsuite/test_apps/lib/python2.5/site-packages/site_app.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1325976902,
+  "path": "flask/testsuite/test_apps/lib/python2.5/site-packages/site_package/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1325976902,
+  "path": "flask/testsuite/test_apps/main_app.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1325976902,
+  "path": "flask/testsuite/test_apps/path/installed_package/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1326763008,
+  "path": "flask/app.py",
+  "prior_fixes": 74,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1326763008,
+  "path": "flask/blueprints.py",
+  "prior_fixes": 11,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1331242899,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1331242899,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 13,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1331565557,
+  "path": "flask/helpers.py",
+  "prior_fixes": 29,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1331565557,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1331576855,
+  "path": "flask/helpers.py",
+  "prior_fixes": 30,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1331576855,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1331589204,
+  "path": "flask/exceptions.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1331589204,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 14,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1331674668,
+  "path": "flask/helpers.py",
+  "prior_fixes": 31,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1331674668,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1331681656,
+  "path": "flask/app.py",
+  "prior_fixes": 75,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1331681656,
+  "path": "flask/helpers.py",
+  "prior_fixes": 32,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1331681656,
+  "path": "flask/testsuite/blueprints.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1331681656,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1333978452,
+  "path": "flask/app.py",
+  "prior_fixes": 75,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1333978452,
+  "path": "flask/ctx.py",
+  "prior_fixes": 9,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1333978452,
+  "path": "flask/globals.py",
+  "prior_fixes": 3,
+  "importers": 4,
+  "returned": false
+ },
+ {
+  "at": 1333980275,
+  "path": "flask/app.py",
+  "prior_fixes": 75,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1333980275,
+  "path": "flask/ctx.py",
+  "prior_fixes": 10,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1333980275,
+  "path": "flask/helpers.py",
+  "prior_fixes": 33,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1333980275,
+  "path": "flask/testsuite/appctx.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1333980969,
+  "path": "flask/__init__.py",
+  "prior_fixes": 8,
+  "importers": 28,
+  "returned": true
+ },
+ {
+  "at": 1333980969,
+  "path": "flask/helpers.py",
+  "prior_fixes": 34,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1333980969,
+  "path": "flask/testsuite/appctx.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1333988940,
+  "path": "flask/app.py",
+  "prior_fixes": 75,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1333988940,
+  "path": "flask/ctx.py",
+  "prior_fixes": 11,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1333988940,
+  "path": "flask/signals.py",
+  "prior_fixes": 0,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1333988940,
+  "path": "flask/testsuite/appctx.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1334850698,
+  "path": "flask/app.py",
+  "prior_fixes": 75,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1334850698,
+  "path": "flask/helpers.py",
+  "prior_fixes": 35,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1335112215,
+  "path": "flask/app.py",
+  "prior_fixes": 75,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1335112215,
+  "path": "flask/helpers.py",
+  "prior_fixes": 36,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1335112215,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1335230447,
+  "path": "flask/app.py",
+  "prior_fixes": 75,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1335230447,
+  "path": "flask/helpers.py",
+  "prior_fixes": 37,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1335246485,
+  "path": "flask/app.py",
+  "prior_fixes": 75,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1335246485,
+  "path": "flask/helpers.py",
+  "prior_fixes": 38,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1335246485,
+  "path": "flask/testsuite/blueprints.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1335246485,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1335247247,
+  "path": "flask/app.py",
+  "prior_fixes": 75,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1335247247,
+  "path": "flask/ctx.py",
+  "prior_fixes": 12,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1335247247,
+  "path": "flask/testsuite/appctx.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1336474571,
+  "path": "flask/app.py",
+  "prior_fixes": 75,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1336474571,
+  "path": "flask/helpers.py",
+  "prior_fixes": 39,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1336474571,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1336479272,
+  "path": "flask/__init__.py",
+  "prior_fixes": 9,
+  "importers": 28,
+  "returned": false
+ },
+ {
+  "at": 1336479272,
+  "path": "flask/app.py",
+  "prior_fixes": 75,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1336479272,
+  "path": "flask/ctx.py",
+  "prior_fixes": 13,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1336479272,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1339939042,
+  "path": "flask/helpers.py",
+  "prior_fixes": 40,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1339939042,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1340805999,
+  "path": "flask/__init__.py",
+  "prior_fixes": 9,
+  "importers": 30,
+  "returned": false
+ },
+ {
+  "at": 1340805999,
+  "path": "flask/ctx.py",
+  "prior_fixes": 14,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1340805999,
+  "path": "flask/helpers.py",
+  "prior_fixes": 41,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1340805999,
+  "path": "flask/testsuite/appctx.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1340805999,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1344648974,
+  "path": "flask/sessions.py",
+  "prior_fixes": 0,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1344648974,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1344649023,
+  "path": "flask/__init__.py",
+  "prior_fixes": 9,
+  "importers": 30,
+  "returned": true
+ },
+ {
+  "at": 1344649023,
+  "path": "setup.py",
+  "prior_fixes": 8,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1344651100,
+  "path": "flask/__init__.py",
+  "prior_fixes": 10,
+  "importers": 31,
+  "returned": true
+ },
+ {
+  "at": 1344651100,
+  "path": "flask/helpers.py",
+  "prior_fixes": 42,
+  "importers": 5,
+  "returned": true
+ },
+ {
+  "at": 1344651100,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 15,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1346951091,
+  "path": "flask/app.py",
+  "prior_fixes": 75,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1346951091,
+  "path": "flask/exthook.py",
+  "prior_fixes": 0,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1346951091,
+  "path": "flask/testsuite/subclassing.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1346951091,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 16,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1349607106,
+  "path": "flask/app.py",
+  "prior_fixes": 76,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1349607106,
+  "path": "flask/blueprints.py",
+  "prior_fixes": 12,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1349607106,
+  "path": "flask/testsuite/blueprints.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1349607106,
+  "path": "flask/testsuite/templating.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1349616805,
+  "path": "flask/helpers.py",
+  "prior_fixes": 43,
+  "importers": 5,
+  "returned": true
+ },
+ {
+  "at": 1349616805,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1349622736,
+  "path": "flask/app.py",
+  "prior_fixes": 77,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1349622736,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1349622736,
+  "path": "flask/testsuite/views.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1349645508,
+  "path": "flask/__init__.py",
+  "prior_fixes": 11,
+  "importers": 32,
+  "returned": false
+ },
+ {
+  "at": 1349645508,
+  "path": "flask/app.py",
+  "prior_fixes": 78,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1349645508,
+  "path": "flask/exceptions.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1349645508,
+  "path": "flask/helpers.py",
+  "prior_fixes": 44,
+  "importers": 3,
+  "returned": false
+ },
+ {
+  "at": 1349645508,
+  "path": "flask/json.py",
+  "prior_fixes": 0,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1349645508,
+  "path": "flask/sessions.py",
+  "prior_fixes": 0,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1349645508,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 16,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1349646101,
+  "path": "flask/json.py",
+  "prior_fixes": 1,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1349646101,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1349672509,
+  "path": "flask/app.py",
+  "prior_fixes": 79,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1349672509,
+  "path": "flask/templating.py",
+  "prior_fixes": 8,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1349672509,
+  "path": "flask/testsuite/templating.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1356086742,
+  "path": "flask/app.py",
+  "prior_fixes": 80,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1356086742,
+  "path": "flask/ctx.py",
+  "prior_fixes": 14,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1356086742,
+  "path": "flask/globals.py",
+  "prior_fixes": 3,
+  "importers": 4,
+  "returned": false
+ },
+ {
+  "at": 1356086742,
+  "path": "flask/templating.py",
+  "prior_fixes": 8,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1356086742,
+  "path": "flask/testsuite/appctx.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1356086742,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1358790907,
+  "path": "flask/app.py",
+  "prior_fixes": 81,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1358790907,
+  "path": "flask/testsuite/regression.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1359247579,
+  "path": "flask/app.py",
+  "prior_fixes": 82,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1359247579,
+  "path": "flask/blueprints.py",
+  "prior_fixes": 12,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1359247579,
+  "path": "flask/testsuite/templating.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1362025192,
+  "path": "flask/__init__.py",
+  "prior_fixes": 11,
+  "importers": 32,
+  "returned": false
+ },
+ {
+  "at": 1362025192,
+  "path": "flask/helpers.py",
+  "prior_fixes": 44,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1362025192,
+  "path": "flask/signals.py",
+  "prior_fixes": 0,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1362025192,
+  "path": "flask/testsuite/signals.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1368525604,
+  "path": "flask/__init__.py",
+  "prior_fixes": 11,
+  "importers": 32,
+  "returned": true
+ },
+ {
+  "at": 1368525604,
+  "path": "flask/app.py",
+  "prior_fixes": 83,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1368525604,
+  "path": "flask/ctx.py",
+  "prior_fixes": 14,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1368525604,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1368525604,
+  "path": "flask/testsuite/reqctx.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1368527616,
+  "path": "flask/sessions.py",
+  "prior_fixes": 0,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1368527616,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 7,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1368887080,
+  "path": "flask/app.py",
+  "prior_fixes": 84,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1368887080,
+  "path": "flask/config.py",
+  "prior_fixes": 0,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1368887080,
+  "path": "flask/ctx.py",
+  "prior_fixes": 15,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1368887080,
+  "path": "flask/debughelpers.py",
+  "prior_fixes": 3,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1368887080,
+  "path": "flask/helpers.py",
+  "prior_fixes": 45,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1368887080,
+  "path": "flask/testsuite/__init__.py",
+  "prior_fixes": 0,
+  "importers": 15,
+  "returned": true
+ },
+ {
+  "at": 1368887080,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 8,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1368887080,
+  "path": "flask/testsuite/blueprints.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1368887080,
+  "path": "flask/testsuite/config.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1368887080,
+  "path": "flask/testsuite/reqctx.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1368887080,
+  "path": "flask/testsuite/testing.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1368887080,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 16,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1368889585,
+  "path": "flask/json.py",
+  "prior_fixes": 2,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1368889585,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 16,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1368889585,
+  "path": "scripts/flask-07-upgrade.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1368889585,
+  "path": "setup.py",
+  "prior_fixes": 8,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1368892060,
+  "path": "flask/_compat.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1368892060,
+  "path": "setup.py",
+  "prior_fixes": 9,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1368892663,
+  "path": "flask/testsuite/__init__.py",
+  "prior_fixes": 1,
+  "importers": 11,
+  "returned": true
+ },
+ {
+  "at": 1368892663,
+  "path": "flask/testsuite/config.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1368892815,
+  "path": "flask/sessions.py",
+  "prior_fixes": 1,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1368892815,
+  "path": "flask/templating.py",
+  "prior_fixes": 8,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1368893017,
+  "path": "flask/helpers.py",
+  "prior_fixes": 46,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1368893017,
+  "path": "flask/sessions.py",
+  "prior_fixes": 2,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1368893017,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 7,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1368893550,
+  "path": "flask/json.py",
+  "prior_fixes": 3,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1368893550,
+  "path": "flask/sessions.py",
+  "prior_fixes": 3,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1368893550,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 9,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1368893550,
+  "path": "flask/testsuite/blueprints.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1368893550,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 8,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1368893550,
+  "path": "flask/testsuite/testing.py",
+  "prior_fixes": 7,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369235377,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 10,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369235377,
+  "path": "flask/testsuite/blueprints.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369235377,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 9,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369235377,
+  "path": "flask/testsuite/regression.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369235377,
+  "path": "flask/testsuite/reqctx.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369235377,
+  "path": "flask/testsuite/signals.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369235377,
+  "path": "flask/testsuite/templating.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369235377,
+  "path": "flask/testsuite/testing.py",
+  "prior_fixes": 8,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369235377,
+  "path": "flask/testsuite/views.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369235647,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 11,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369235647,
+  "path": "flask/testsuite/blueprints.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369235647,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 10,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369235647,
+  "path": "flask/testsuite/subclassing.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369235647,
+  "path": "flask/testsuite/templating.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369235647,
+  "path": "flask/testsuite/testing.py",
+  "prior_fixes": 8,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369236218,
+  "path": "flask/testsuite/__init__.py",
+  "prior_fixes": 2,
+  "importers": 16,
+  "returned": true
+ },
+ {
+  "at": 1369236218,
+  "path": "flask/testsuite/appctx.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369236218,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 12,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369236218,
+  "path": "flask/testsuite/blueprints.py",
+  "prior_fixes": 4,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369236218,
+  "path": "flask/testsuite/config.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369236218,
+  "path": "flask/testsuite/ext.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369236218,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 11,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369236218,
+  "path": "flask/testsuite/reqctx.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369236218,
+  "path": "flask/testsuite/signals.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369236218,
+  "path": "flask/testsuite/subclassing.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369236218,
+  "path": "flask/testsuite/templating.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369236218,
+  "path": "flask/testsuite/testing.py",
+  "prior_fixes": 8,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369246370,
+  "path": "flask/testsuite/__init__.py",
+  "prior_fixes": 3,
+  "importers": 16,
+  "returned": true
+ },
+ {
+  "at": 1369246370,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 13,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369246370,
+  "path": "flask/testsuite/blueprints.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369246370,
+  "path": "flask/testsuite/config.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369246370,
+  "path": "flask/testsuite/ext.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369246370,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 12,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369246370,
+  "path": "flask/testsuite/subclassing.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369246370,
+  "path": "flask/testsuite/templating.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369246370,
+  "path": "flask/testsuite/testing.py",
+  "prior_fixes": 8,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369246649,
+  "path": "flask/testsuite/__init__.py",
+  "prior_fixes": 4,
+  "importers": 16,
+  "returned": true
+ },
+ {
+  "at": 1369246649,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 14,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369246649,
+  "path": "flask/testsuite/config.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369246649,
+  "path": "flask/testsuite/reqctx.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369246649,
+  "path": "flask/testsuite/testing.py",
+  "prior_fixes": 8,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369251630,
+  "path": "flask/helpers.py",
+  "prior_fixes": 47,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1369251630,
+  "path": "flask/json.py",
+  "prior_fixes": 4,
+  "importers": 5,
+  "returned": true
+ },
+ {
+  "at": 1369251630,
+  "path": "flask/templating.py",
+  "prior_fixes": 8,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1369251630,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 15,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369251630,
+  "path": "flask/testsuite/blueprints.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369251630,
+  "path": "flask/testsuite/ext.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369251630,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 13,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369251630,
+  "path": "flask/testsuite/testing.py",
+  "prior_fixes": 8,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369251630,
+  "path": "setup.py",
+  "prior_fixes": 10,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369313950,
+  "path": "flask/exceptions.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369313950,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 14,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369313950,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 16,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369502028,
+  "path": "examples/flaskr/flaskr.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369502028,
+  "path": "examples/flaskr/flaskr_tests.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369502028,
+  "path": "examples/minitwit/minitwit.py",
+  "prior_fixes": 9,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369502028,
+  "path": "examples/minitwit/minitwit_tests.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369502028,
+  "path": "flask/app.py",
+  "prior_fixes": 85,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1369502028,
+  "path": "flask/helpers.py",
+  "prior_fixes": 48,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1369506254,
+  "path": "flask/app.py",
+  "prior_fixes": 86,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1369506254,
+  "path": "flask/config.py",
+  "prior_fixes": 0,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1369506254,
+  "path": "flask/debughelpers.py",
+  "prior_fixes": 4,
+  "importers": 4,
+  "returned": false
+ },
+ {
+  "at": 1369506254,
+  "path": "flask/exthook.py",
+  "prior_fixes": 0,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1369506254,
+  "path": "flask/helpers.py",
+  "prior_fixes": 49,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1369506254,
+  "path": "flask/testing.py",
+  "prior_fixes": 7,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1369512074,
+  "path": "flask/_compat.py",
+  "prior_fixes": 1,
+  "importers": 17,
+  "returned": true
+ },
+ {
+  "at": 1369512074,
+  "path": "flask/app.py",
+  "prior_fixes": 87,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1369512074,
+  "path": "flask/ctx.py",
+  "prior_fixes": 16,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1369512074,
+  "path": "flask/helpers.py",
+  "prior_fixes": 50,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1369512074,
+  "path": "flask/testsuite/blueprints.py",
+  "prior_fixes": 7,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369593202,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 16,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369593202,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 15,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369593202,
+  "path": "flask/testsuite/signals.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369593202,
+  "path": "flask/testsuite/subclassing.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369593202,
+  "path": "flask/testsuite/testing.py",
+  "prior_fixes": 8,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369593202,
+  "path": "flask/testsuite/views.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369920269,
+  "path": "flask/helpers.py",
+  "prior_fixes": 51,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1369920269,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 17,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369920696,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 18,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369920696,
+  "path": "flask/testsuite/blueprints.py",
+  "prior_fixes": 8,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369920696,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 16,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369922838,
+  "path": "flask/_compat.py",
+  "prior_fixes": 2,
+  "importers": 16,
+  "returned": false
+ },
+ {
+  "at": 1369922838,
+  "path": "flask/json.py",
+  "prior_fixes": 5,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1369922838,
+  "path": "flask/testing.py",
+  "prior_fixes": 8,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1369933107,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 19,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1369933107,
+  "path": "flask/testsuite/blueprints.py",
+  "prior_fixes": 9,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369933107,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 17,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1369934117,
+  "path": "flask/app.py",
+  "prior_fixes": 88,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1369934117,
+  "path": "flask/ctx.py",
+  "prior_fixes": 17,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1370042400,
+  "path": "flask/app.py",
+  "prior_fixes": 89,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1370042400,
+  "path": "flask/json.py",
+  "prior_fixes": 6,
+  "importers": 4,
+  "returned": false
+ },
+ {
+  "at": 1370111043,
+  "path": "flask/app.py",
+  "prior_fixes": 90,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1370111043,
+  "path": "flask/json.py",
+  "prior_fixes": 6,
+  "importers": 4,
+  "returned": false
+ },
+ {
+  "at": 1370111043,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 17,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1370206052,
+  "path": "flask/app.py",
+  "prior_fixes": 91,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1370206052,
+  "path": "flask/ctx.py",
+  "prior_fixes": 18,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1370206052,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 20,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1370258708,
+  "path": "flask/app.py",
+  "prior_fixes": 92,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1370258708,
+  "path": "flask/json.py",
+  "prior_fixes": 6,
+  "importers": 4,
+  "returned": false
+ },
+ {
+  "at": 1370258708,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 17,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1370422406,
+  "path": "flask/__init__.py",
+  "prior_fixes": 12,
+  "importers": 40,
+  "returned": true
+ },
+ {
+  "at": 1370422406,
+  "path": "flask/ctx.py",
+  "prior_fixes": 18,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1370422406,
+  "path": "flask/signals.py",
+  "prior_fixes": 0,
+  "importers": 5,
+  "returned": false
+ },
+ {
+  "at": 1370422406,
+  "path": "flask/testsuite/signals.py",
+  "prior_fixes": 4,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1370775993,
+  "path": "flask/ctx.py",
+  "prior_fixes": 18,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1370775993,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 21,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1371050868,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 17,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1371050868,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 16,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1371112535,
+  "path": "flask/__init__.py",
+  "prior_fixes": 13,
+  "importers": 41,
+  "returned": true
+ },
+ {
+  "at": 1371112535,
+  "path": "setup.py",
+  "prior_fixes": 11,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1371112563,
+  "path": "flask/__init__.py",
+  "prior_fixes": 14,
+  "importers": 41,
+  "returned": true
+ },
+ {
+  "at": 1371112563,
+  "path": "setup.py",
+  "prior_fixes": 12,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1371164709,
+  "path": "flask/json.py",
+  "prior_fixes": 6,
+  "importers": 5,
+  "returned": false
+ },
+ {
+  "at": 1371164709,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 18,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1371165857,
+  "path": "flask/sessions.py",
+  "prior_fixes": 4,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1371165857,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 22,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1371194917,
+  "path": "flask/app.py",
+  "prior_fixes": 93,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1371194917,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 23,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1371931770,
+  "path": "flask/app.py",
+  "prior_fixes": 94,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1371931770,
+  "path": "flask/testsuite/__init__.py",
+  "prior_fixes": 5,
+  "importers": 16,
+  "returned": false
+ },
+ {
+  "at": 1371931770,
+  "path": "flask/testsuite/config.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1375195434,
+  "path": "flask/app.py",
+  "prior_fixes": 95,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1375195434,
+  "path": "flask/sessions.py",
+  "prior_fixes": 4,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1375195434,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 24,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1375223883,
+  "path": "flask/app.py",
+  "prior_fixes": 96,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1375223883,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 25,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1378076221,
+  "path": "flask/app.py",
+  "prior_fixes": 97,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1378076221,
+  "path": "flask/debughelpers.py",
+  "prior_fixes": 4,
+  "importers": 4,
+  "returned": false
+ },
+ {
+  "at": 1378076221,
+  "path": "flask/json.py",
+  "prior_fixes": 6,
+  "importers": 5,
+  "returned": false
+ },
+ {
+  "at": 1379798184,
+  "path": "flask/app.py",
+  "prior_fixes": 98,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1379798184,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 25,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1380564409,
+  "path": "flask/app.py",
+  "prior_fixes": 99,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1380564409,
+  "path": "flask/testsuite/templating.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1388524573,
+  "path": "flask/app.py",
+  "prior_fixes": 100,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1388524573,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 25,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1390507537,
+  "path": "flask/config.py",
+  "prior_fixes": 0,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1390507537,
+  "path": "flask/testsuite/config.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1390757677,
+  "path": "flask/_compat.py",
+  "prior_fixes": 2,
+  "importers": 17,
+  "returned": false
+ },
+ {
+  "at": 1390757677,
+  "path": "flask/ctx.py",
+  "prior_fixes": 18,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1391878873,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 19,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1391878873,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 16,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1391879940,
+  "path": "flask/testing.py",
+  "prior_fixes": 8,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1391879940,
+  "path": "flask/testsuite/testing.py",
+  "prior_fixes": 8,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1391881527,
+  "path": "flask/helpers.py",
+  "prior_fixes": 52,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1391881527,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 20,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1391898586,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 21,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1391898586,
+  "path": "flask/testsuite/testing.py",
+  "prior_fixes": 9,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1391952125,
+  "path": "flask/app.py",
+  "prior_fixes": 101,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1391952125,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 26,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1395436346,
+  "path": "flask/blueprints.py",
+  "prior_fixes": 12,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1395436346,
+  "path": "flask/testsuite/blueprints.py",
+  "prior_fixes": 9,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1397239194,
+  "path": "flask/app.py",
+  "prior_fixes": 102,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1397239194,
+  "path": "flask/blueprints.py",
+  "prior_fixes": 13,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1397239194,
+  "path": "flask/helpers.py",
+  "prior_fixes": 53,
+  "importers": 4,
+  "returned": false
+ },
+ {
+  "at": 1398090857,
+  "path": "flask/run.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1398090857,
+  "path": "setup.py",
+  "prior_fixes": 13,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1398095524,
+  "path": "flask/__main__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1398095524,
+  "path": "flask/run.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1398264398,
+  "path": "flask/_compat.py",
+  "prior_fixes": 2,
+  "importers": 18,
+  "returned": true
+ },
+ {
+  "at": 1398264398,
+  "path": "flask/helpers.py",
+  "prior_fixes": 53,
+  "importers": 4,
+  "returned": false
+ },
+ {
+  "at": 1398684383,
+  "path": "flask/__main__.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1398684383,
+  "path": "flask/app.py",
+  "prior_fixes": 103,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1398684383,
+  "path": "flask/cli.py",
+  "prior_fixes": 0,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1398684383,
+  "path": "flask/run.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1398728911,
+  "path": "examples/blueprintexample/blueprintexample.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1398728911,
+  "path": "examples/jqueryexample/jqueryexample.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1398728911,
+  "path": "examples/minitwit/minitwit.py",
+  "prior_fixes": 9,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1398728911,
+  "path": "examples/persona/persona.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1399027564,
+  "path": "examples/flaskr/flaskr.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1399027564,
+  "path": "examples/flaskr/flaskr_tests.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1399027564,
+  "path": "examples/minitwit/minitwit.py",
+  "prior_fixes": 10,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1399027564,
+  "path": "examples/minitwit/minitwit_tests.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1399027564,
+  "path": "flask/cli.py",
+  "prior_fixes": 1,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1399491351,
+  "path": "flask/cli.py",
+  "prior_fixes": 2,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1399491351,
+  "path": "setup.py",
+  "prior_fixes": 14,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1399853798,
+  "path": "flask/app.py",
+  "prior_fixes": 104,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1399853798,
+  "path": "flask/cli.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1407878632,
+  "path": "flask/cli.py",
+  "prior_fixes": 3,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1407878632,
+  "path": "setup.py",
+  "prior_fixes": 15,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1408978222,
+  "path": "flask/app.py",
+  "prior_fixes": 105,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1408978222,
+  "path": "flask/cli.py",
+  "prior_fixes": 4,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1409094499,
+  "path": "flask/app.py",
+  "prior_fixes": 106,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1409094499,
+  "path": "flask/logging.py",
+  "prior_fixes": 0,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1409094499,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 27,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1409094499,
+  "path": "flask/testsuite/blueprints.py",
+  "prior_fixes": 10,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1409094499,
+  "path": "flask/testsuite/helpers.py",
+  "prior_fixes": 22,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1409094499,
+  "path": "flask/testsuite/testing.py",
+  "prior_fixes": 9,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1409094753,
+  "path": "flask/__init__.py",
+  "prior_fixes": 15,
+  "importers": 38,
+  "returned": false
+ },
+ {
+  "at": 1409094753,
+  "path": "flask/app.py",
+  "prior_fixes": 107,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1409094753,
+  "path": "flask/ctx.py",
+  "prior_fixes": 19,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1409094753,
+  "path": "flask/module.py",
+  "prior_fixes": 14,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1409094753,
+  "path": "flask/templating.py",
+  "prior_fixes": 8,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1409094753,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 27,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1409094753,
+  "path": "flask/testsuite/blueprints.py",
+  "prior_fixes": 10,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1409094753,
+  "path": "flask/testsuite/test_apps/moduleapp/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1409094753,
+  "path": "flask/testsuite/test_apps/moduleapp/apps/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1409094753,
+  "path": "flask/testsuite/test_apps/moduleapp/apps/admin/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1409094753,
+  "path": "flask/testsuite/test_apps/moduleapp/apps/frontend/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1409094753,
+  "path": "scripts/testproj/test.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1409759871,
+  "path": "flask/app.py",
+  "prior_fixes": 108,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1409759871,
+  "path": "flask/debughelpers.py",
+  "prior_fixes": 4,
+  "importers": 4,
+  "returned": false
+ },
+ {
+  "at": 1409759871,
+  "path": "flask/sessions.py",
+  "prior_fixes": 4,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1409759871,
+  "path": "flask/templating.py",
+  "prior_fixes": 9,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1409759871,
+  "path": "flask/testsuite/templating.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1409759871,
+  "path": "flask/testsuite/test_apps/blueprintapp/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1409759871,
+  "path": "flask/testsuite/test_apps/blueprintapp/apps/frontend/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1409759871,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 17,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1409767926,
+  "path": "flask/app.py",
+  "prior_fixes": 109,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1409767926,
+  "path": "flask/templating.py",
+  "prior_fixes": 10,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/conftest.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_config.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/__init__.py",
+  "prior_fixes": 0,
+  "importers": 3,
+  "returned": false
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/conftest.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_appctx.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_ext.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_subclassing.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_templating.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_blueprints.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_config.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_deprecations.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_examples.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_regression.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_reqctx.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_signals.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_testing.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/conftest.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_blueprints.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_ext.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_templating.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_apps/flask_broken/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_apps/flask_broken/b.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_apps/flask_newext_package/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_apps/flask_newext_package/submodule.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_apps/flask_newext_simple.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_apps/flaskext/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_apps/flaskext/oldext_package/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_apps/flaskext/oldext_package/submodule.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_apps/flaskext/oldext_simple.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1410466191,
+  "path": "tests/test_ext.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1410466192,
+  "path": "tests/test_apps/importerror.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1410466192,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1413911466,
+  "path": "flask/json.py",
+  "prior_fixes": 6,
+  "importers": 5,
+  "returned": false
+ },
+ {
+  "at": 1413911466,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1414337292,
+  "path": "flask/app.py",
+  "prior_fixes": 110,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1414337292,
+  "path": "tests/test_templating.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1414405455,
+  "path": "flask/app.py",
+  "prior_fixes": 111,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1414405455,
+  "path": "flask/helpers.py",
+  "prior_fixes": 53,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1414405455,
+  "path": "tests/test_templating.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1415156698,
+  "path": "flask/app.py",
+  "prior_fixes": 112,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1415156698,
+  "path": "flask/blueprints.py",
+  "prior_fixes": 13,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1415156698,
+  "path": "flask/config.py",
+  "prior_fixes": 1,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1415156698,
+  "path": "flask/ctx.py",
+  "prior_fixes": 20,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1415156698,
+  "path": "flask/helpers.py",
+  "prior_fixes": 54,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1415156698,
+  "path": "flask/sessions.py",
+  "prior_fixes": 5,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1415156698,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 18,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1415159122,
+  "path": "flask/app.py",
+  "prior_fixes": 113,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1415159122,
+  "path": "flask/helpers.py",
+  "prior_fixes": 55,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1415160235,
+  "path": "flask/app.py",
+  "prior_fixes": 114,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1415160235,
+  "path": "flask/cli.py",
+  "prior_fixes": 5,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1415160649,
+  "path": "flask/app.py",
+  "prior_fixes": 115,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1415160649,
+  "path": "flask/ctx.py",
+  "prior_fixes": 21,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1415160649,
+  "path": "flask/helpers.py",
+  "prior_fixes": 56,
+  "importers": 4,
+  "returned": false
+ },
+ {
+  "at": 1415160649,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 19,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1415163124,
+  "path": "flask/app.py",
+  "prior_fixes": 116,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1415163124,
+  "path": "flask/helpers.py",
+  "prior_fixes": 56,
+  "importers": 4,
+  "returned": false
+ },
+ {
+  "at": 1415164587,
+  "path": "flask/app.py",
+  "prior_fixes": 117,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1415164587,
+  "path": "flask/helpers.py",
+  "prior_fixes": 56,
+  "importers": 4,
+  "returned": false
+ },
+ {
+  "at": 1415164587,
+  "path": "flask/json.py",
+  "prior_fixes": 6,
+  "importers": 5,
+  "returned": false
+ },
+ {
+  "at": 1417991846,
+  "path": "flask/json.py",
+  "prior_fixes": 6,
+  "importers": 5,
+  "returned": false
+ },
+ {
+  "at": 1417991846,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1419602315,
+  "path": "flask/app.py",
+  "prior_fixes": 118,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1419602315,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1422020657,
+  "path": "flask/json.py",
+  "prior_fixes": 6,
+  "importers": 5,
+  "returned": false
+ },
+ {
+  "at": 1422020657,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1423251513,
+  "path": "scripts/flaskext_migrate.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1423251513,
+  "path": "scripts/temp.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1423585396,
+  "path": "scripts/fix_ext_import.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1423585396,
+  "path": "scripts/flaskext_migrate.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1423585396,
+  "path": "scripts/test.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1423678044,
+  "path": "scripts/fix_ext_import.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1423678044,
+  "path": "scripts/flaskext_migrate.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1423678044,
+  "path": "scripts/test.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1423679390,
+  "path": "scripts/flaskext_migrate.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1423679390,
+  "path": "scripts/test.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1423685213,
+  "path": "scripts/test.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1423685213,
+  "path": "tests/test_import_migration.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1423760318,
+  "path": "scripts/flaskext_migrate.py",
+  "prior_fixes": 4,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1423760318,
+  "path": "tests/test_import_migration.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1423777317,
+  "path": "scripts/flaskext_migrate.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1423777317,
+  "path": "scripts/test_import_migration.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1423859249,
+  "path": "scripts/flaskext_migrate.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1423859249,
+  "path": "scripts/test_import_migration.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1423870841,
+  "path": "scripts/flaskext_migrate.py",
+  "prior_fixes": 7,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1423870841,
+  "path": "scripts/test_import_migration.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1427123839,
+  "path": "flask/app.py",
+  "prior_fixes": 119,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1427123839,
+  "path": "flask/ctx.py",
+  "prior_fixes": 21,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1427123839,
+  "path": "tests/test_appctx.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1427123839,
+  "path": "tests/test_reqctx.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1428325380,
+  "path": "flask/app.py",
+  "prior_fixes": 120,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1428325380,
+  "path": "tests/test_templating.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1428753922,
+  "path": "flask/app.py",
+  "prior_fixes": 121,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1428753922,
+  "path": "tests/test_user_error_handler.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1433091554,
+  "path": "flask/helpers.py",
+  "prior_fixes": 56,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1433091554,
+  "path": "flask/json.py",
+  "prior_fixes": 6,
+  "importers": 5,
+  "returned": false
+ },
+ {
+  "at": 1433276010,
+  "path": "flask/app.py",
+  "prior_fixes": 122,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1433276010,
+  "path": "tests/test_user_error_handler.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1433554184,
+  "path": "flask/app.py",
+  "prior_fixes": 123,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1433554184,
+  "path": "flask/blueprints.py",
+  "prior_fixes": 13,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1433554184,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 19,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1433564966,
+  "path": "flask/app.py",
+  "prior_fixes": 124,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1433564966,
+  "path": "tests/test_templating.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1434548559,
+  "path": "flask/__init__.py",
+  "prior_fixes": 15,
+  "importers": 34,
+  "returned": false
+ },
+ {
+  "at": 1434548559,
+  "path": "flask/signals.py",
+  "prior_fixes": 0,
+  "importers": 5,
+  "returned": true
+ },
+ {
+  "at": 1434548559,
+  "path": "flask/templating.py",
+  "prior_fixes": 10,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1434548559,
+  "path": "tests/test_signals.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1434548559,
+  "path": "flask/signals.py",
+  "prior_fixes": 1,
+  "importers": 5,
+  "returned": false
+ },
+ {
+  "at": 1434548559,
+  "path": "tests/test_signals.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1434548559,
+  "path": "flask/templating.py",
+  "prior_fixes": 10,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1434548559,
+  "path": "tests/test_signals.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1436046103,
+  "path": "flask/app.py",
+  "prior_fixes": 125,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1436046103,
+  "path": "flask/templating.py",
+  "prior_fixes": 10,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1436046103,
+  "path": "tests/test_templating.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1436293253,
+  "path": "flask/app.py",
+  "prior_fixes": 126,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1436293253,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1437040816,
+  "path": "flask/app.py",
+  "prior_fixes": 127,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1437040816,
+  "path": "flask/testsuite/basic.py",
+  "prior_fixes": 27,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1445663063,
+  "path": "flask/app.py",
+  "prior_fixes": 128,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1445663063,
+  "path": "flask/helpers.py",
+  "prior_fixes": 57,
+  "importers": 5,
+  "returned": false
+ },
+ {
+  "at": 1445663063,
+  "path": "flask/sessions.py",
+  "prior_fixes": 6,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1445663063,
+  "path": "tests/test_config.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1448037829,
+  "path": "flask/app.py",
+  "prior_fixes": 129,
+  "importers": 1,
+  "returned": true
+ },
+ {
+  "at": 1448037829,
+  "path": "flask/testing.py",
+  "prior_fixes": 8,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1448037829,
+  "path": "flask/testsuite/testing.py",
+  "prior_fixes": 9,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1451773116,
+  "path": "flask/app.py",
+  "prior_fixes": 130,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1451773116,
+  "path": "flask/cli.py",
+  "prior_fixes": 5,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1451773116,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1452720011,
+  "path": "flask/json.py",
+  "prior_fixes": 6,
+  "importers": 5,
+  "returned": false
+ },
+ {
+  "at": 1452720011,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1459552665,
+  "path": "flask/helpers.py",
+  "prior_fixes": 57,
+  "importers": 5,
+  "returned": false
+ },
+ {
+  "at": 1459552665,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 4,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1459624047,
+  "path": "flask/helpers.py",
+  "prior_fixes": 57,
+  "importers": 5,
+  "returned": false
+ },
+ {
+  "at": 1459624047,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1460154647,
+  "path": "flask/app.py",
+  "prior_fixes": 131,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1460154647,
+  "path": "flask/json.py",
+  "prior_fixes": 6,
+  "importers": 5,
+  "returned": true
+ },
+ {
+  "at": 1460154647,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1463420215,
+  "path": "flask/app.py",
+  "prior_fixes": 132,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1463420215,
+  "path": "tests/test_apps/cliapp/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1463420215,
+  "path": "tests/test_apps/cliapp/app.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1463420215,
+  "path": "tests/test_apps/cliapp/multiapp.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1463420215,
+  "path": "tests/test_cli.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1463906729,
+  "path": "flask/helpers.py",
+  "prior_fixes": 57,
+  "importers": 5,
+  "returned": false
+ },
+ {
+  "at": 1463906729,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1464007403,
+  "path": "flask/app.py",
+  "prior_fixes": 133,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1464007403,
+  "path": "flask/blueprints.py",
+  "prior_fixes": 14,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1464007403,
+  "path": "flask/config.py",
+  "prior_fixes": 1,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1464007403,
+  "path": "flask/json.py",
+  "prior_fixes": 7,
+  "importers": 6,
+  "returned": true
+ },
+ {
+  "at": 1464007403,
+  "path": "flask/sessions.py",
+  "prior_fixes": 6,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1464007403,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 19,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1464286072,
+  "path": "flask/app.py",
+  "prior_fixes": 134,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1464286072,
+  "path": "flask/cli.py",
+  "prior_fixes": 5,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1464286072,
+  "path": "flask/helpers.py",
+  "prior_fixes": 57,
+  "importers": 6,
+  "returned": false
+ },
+ {
+  "at": 1464286072,
+  "path": "tests/test_cli.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1464955187,
+  "path": "tests/conftest.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1464955187,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1464955187,
+  "path": "tests/test_deprecations.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1464955187,
+  "path": "tests/test_ext.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1464955187,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 7,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1464956967,
+  "path": "tests/conftest.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1464956967,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1464956967,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 8,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1464958353,
+  "path": "flask/helpers.py",
+  "prior_fixes": 57,
+  "importers": 6,
+  "returned": false
+ },
+ {
+  "at": 1464958353,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 9,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1464972070,
+  "path": "flask/cli.py",
+  "prior_fixes": 6,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1464972070,
+  "path": "tests/test_cli.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1464972127,
+  "path": "flask/cli.py",
+  "prior_fixes": 7,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1464972127,
+  "path": "tests/test_cli.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1465149557,
+  "path": "flask/helpers.py",
+  "prior_fixes": 57,
+  "importers": 6,
+  "returned": false
+ },
+ {
+  "at": 1465149557,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 10,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1465155754,
+  "path": "flask/helpers.py",
+  "prior_fixes": 57,
+  "importers": 6,
+  "returned": false
+ },
+ {
+  "at": 1465155754,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 11,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1465376606,
+  "path": "flask/blueprints.py",
+  "prior_fixes": 14,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1465376606,
+  "path": "flask/json.py",
+  "prior_fixes": 8,
+  "importers": 6,
+  "returned": true
+ },
+ {
+  "at": 1465376606,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 12,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1465379936,
+  "path": "flask/json.py",
+  "prior_fixes": 9,
+  "importers": 6,
+  "returned": true
+ },
+ {
+  "at": 1465379936,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 13,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1466853738,
+  "path": "flask/cli.py",
+  "prior_fixes": 8,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1466853738,
+  "path": "tests/test_apps/cliapp/routesapp.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1466853738,
+  "path": "tests/test_cli.py",
+  "prior_fixes": 4,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1467128139,
+  "path": "flask/views.py",
+  "prior_fixes": 2,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1467128139,
+  "path": "tests/test_views.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1471634013,
+  "path": "flask/testing.py",
+  "prior_fixes": 8,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1471634013,
+  "path": "tests/test_testing.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1471634013,
+  "path": "flask/testing.py",
+  "prior_fixes": 9,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1471634013,
+  "path": "tests/test_testing.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1471891974,
+  "path": "examples/flaskr/tests/context.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1471891974,
+  "path": "examples/flaskr/tests/test_flaskr.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1471891974,
+  "path": "examples/minitwit/minitwit/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1471891974,
+  "path": "examples/minitwit/minitwit/minitwit.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1471891974,
+  "path": "examples/minitwit/setup.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1471891974,
+  "path": "examples/minitwit/tests/test_minitwit.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1472173683,
+  "path": "flask/helpers.py",
+  "prior_fixes": 57,
+  "importers": 6,
+  "returned": true
+ },
+ {
+  "at": 1472173683,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 14,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1472301493,
+  "path": "flask/app.py",
+  "prior_fixes": 135,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1472301493,
+  "path": "flask/cli.py",
+  "prior_fixes": 9,
+  "importers": 3,
+  "returned": false
+ },
+ {
+  "at": 1472301493,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1473193954,
+  "path": "flask/app.py",
+  "prior_fixes": 136,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1473193954,
+  "path": "flask/cli.py",
+  "prior_fixes": 9,
+  "importers": 3,
+  "returned": false
+ },
+ {
+  "at": 1473193954,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1473324962,
+  "path": "flask/app.py",
+  "prior_fixes": 137,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1473324962,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1483134353,
+  "path": "flask/cli.py",
+  "prior_fixes": 9,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1483134353,
+  "path": "tests/test_apps/cliapp/importerrorapp.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1483134353,
+  "path": "tests/test_cli.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1483204105,
+  "path": "examples/patterns/largerapp/setup.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1483204105,
+  "path": "examples/patterns/largerapp/tests/test_largerapp.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1483204105,
+  "path": "examples/patterns/largerapp/yourapplication/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1483204105,
+  "path": "examples/patterns/largerapp/yourapplication/views.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1484068853,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1484068853,
+  "path": "tests/test_ext.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1485689212,
+  "path": "flask/app.py",
+  "prior_fixes": 138,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1485689212,
+  "path": "flask/cli.py",
+  "prior_fixes": 10,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1485689212,
+  "path": "flask/debughelpers.py",
+  "prior_fixes": 4,
+  "importers": 6,
+  "returned": false
+ },
+ {
+  "at": 1486806191,
+  "path": "docs/conf.py",
+  "prior_fixes": 7,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1486806191,
+  "path": "examples/minitwit/minitwit/minitwit.py",
+  "prior_fixes": 0,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1486806191,
+  "path": "setup.py",
+  "prior_fixes": 15,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1487863552,
+  "path": "flask/sessions.py",
+  "prior_fixes": 6,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1487863552,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 4,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1488805559,
+  "path": "docs/conf.py",
+  "prior_fixes": 8,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1488805559,
+  "path": "flask/app.py",
+  "prior_fixes": 139,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1488805559,
+  "path": "scripts/flask-07-upgrade.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1488848986,
+  "path": "flask/app.py",
+  "prior_fixes": 140,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1488848986,
+  "path": "flask/json.py",
+  "prior_fixes": 10,
+  "importers": 6,
+  "returned": false
+ },
+ {
+  "at": 1488848986,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1488848986,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 15,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1490286648,
+  "path": "flask/helpers.py",
+  "prior_fixes": 58,
+  "importers": 6,
+  "returned": true
+ },
+ {
+  "at": 1490286648,
+  "path": "setup.py",
+  "prior_fixes": 16,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1490286648,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 16,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1490382301,
+  "path": "flask/helpers.py",
+  "prior_fixes": 59,
+  "importers": 6,
+  "returned": true
+ },
+ {
+  "at": 1490382301,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 17,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1490887941,
+  "path": "flask/helpers.py",
+  "prior_fixes": 60,
+  "importers": 6,
+  "returned": true
+ },
+ {
+  "at": 1490887941,
+  "path": "setup.py",
+  "prior_fixes": 17,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1490976463,
+  "path": "flask/app.py",
+  "prior_fixes": 141,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1490976463,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1490978654,
+  "path": "flask/app.py",
+  "prior_fixes": 142,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1490978654,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 7,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1491093439,
+  "path": "examples/flaskr/flaskr/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1491093439,
+  "path": "examples/flaskr/flaskr/_cliapp.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1491093439,
+  "path": "examples/flaskr/flaskr/blueprints/__init__.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1491093439,
+  "path": "examples/flaskr/flaskr/blueprints/flaskr.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1491093439,
+  "path": "examples/flaskr/flaskr/factory.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1491093439,
+  "path": "examples/flaskr/setup.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1491093439,
+  "path": "examples/flaskr/tests/test_flaskr.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1491150577,
+  "path": "examples/flaskr/flaskr/_cliapp.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1491150577,
+  "path": "examples/flaskr/flaskr/factory.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1491150577,
+  "path": "examples/flaskr/setup.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1491150577,
+  "path": "examples/flaskr/tests/test_flaskr.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1491575514,
+  "path": "flask/app.py",
+  "prior_fixes": 143,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1491575514,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 8,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1491613351,
+  "path": "flask/helpers.py",
+  "prior_fixes": 61,
+  "importers": 6,
+  "returned": true
+ },
+ {
+  "at": 1491613351,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 18,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1492784790,
+  "path": "flask/app.py",
+  "prior_fixes": 144,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1492784790,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 9,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1492894624,
+  "path": "flask/app.py",
+  "prior_fixes": 145,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1492894624,
+  "path": "tests/test_reqctx.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1493054210,
+  "path": "flask/blueprints.py",
+  "prior_fixes": 14,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1493054210,
+  "path": "flask/json.py",
+  "prior_fixes": 10,
+  "importers": 6,
+  "returned": false
+ },
+ {
+  "at": 1493054210,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 19,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1493134248,
+  "path": "flask/app.py",
+  "prior_fixes": 146,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1493134248,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 10,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1493227619,
+  "path": "flask/cli.py",
+  "prior_fixes": 11,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1493227619,
+  "path": "tests/test_apps/cliapp/routesapp.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1493227619,
+  "path": "tests/test_cli.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1494737263,
+  "path": "flask/helpers.py",
+  "prior_fixes": 62,
+  "importers": 6,
+  "returned": true
+ },
+ {
+  "at": 1494737263,
+  "path": "flask/sessions.py",
+  "prior_fixes": 6,
+  "importers": 3,
+  "returned": false
+ },
+ {
+  "at": 1494737940,
+  "path": "flask/helpers.py",
+  "prior_fixes": 63,
+  "importers": 6,
+  "returned": true
+ },
+ {
+  "at": 1494737940,
+  "path": "flask/sessions.py",
+  "prior_fixes": 6,
+  "importers": 3,
+  "returned": false
+ },
+ {
+  "at": 1494737940,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 11,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1494892681,
+  "path": "flask/helpers.py",
+  "prior_fixes": 64,
+  "importers": 6,
+  "returned": false
+ },
+ {
+  "at": 1494892681,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 20,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1494916477,
+  "path": "flask/helpers.py",
+  "prior_fixes": 64,
+  "importers": 6,
+  "returned": false
+ },
+ {
+  "at": 1494916477,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 21,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1495310417,
+  "path": "flask/sessions.py",
+  "prior_fixes": 6,
+  "importers": 3,
+  "returned": false
+ },
+ {
+  "at": 1495310417,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 12,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1495481418,
+  "path": "flask/cli.py",
+  "prior_fixes": 12,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1495481418,
+  "path": "tests/test_cli.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1495556489,
+  "path": "examples/minitwit/tests/test_minitwit.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1495556489,
+  "path": "tests/conftest.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1495556489,
+  "path": "tests/test_ext.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1495560871,
+  "path": "flask/app.py",
+  "prior_fixes": 147,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1495560871,
+  "path": "tests/test_user_error_handler.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1495561056,
+  "path": "flask/app.py",
+  "prior_fixes": 148,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1495561056,
+  "path": "tests/test_user_error_handler.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1495561542,
+  "path": "flask/app.py",
+  "prior_fixes": 149,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1495561542,
+  "path": "tests/test_user_error_handler.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1495565473,
+  "path": "flask/views.py",
+  "prior_fixes": 3,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1495565473,
+  "path": "tests/test_views.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1495572522,
+  "path": "flask/_compat.py",
+  "prior_fixes": 3,
+  "importers": 19,
+  "returned": false
+ },
+ {
+  "at": 1495572522,
+  "path": "flask/cli.py",
+  "prior_fixes": 13,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1495572522,
+  "path": "tests/test_cli.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1495577919,
+  "path": "tests/conftest.py",
+  "prior_fixes": 4,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1495577919,
+  "path": "tests/test_appctx.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1495577919,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 13,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1495577919,
+  "path": "tests/test_blueprints.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1495577919,
+  "path": "tests/test_deprecations.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1495577919,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 22,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1495577919,
+  "path": "tests/test_regression.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1495577919,
+  "path": "tests/test_reqctx.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1495577919,
+  "path": "tests/test_templating.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1495577919,
+  "path": "tests/test_testing.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1495577919,
+  "path": "tests/test_user_error_handler.py",
+  "prior_fixes": 4,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1495577919,
+  "path": "tests/test_views.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1495672056,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 14,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1495672056,
+  "path": "tests/test_blueprints.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1495672056,
+  "path": "tests/test_cli.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1495672056,
+  "path": "tests/test_deprecations.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1495672056,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 23,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1495672056,
+  "path": "tests/test_regression.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1495672056,
+  "path": "tests/test_signals.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1495672056,
+  "path": "tests/test_templating.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1495672056,
+  "path": "tests/test_testing.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1495672056,
+  "path": "tests/test_views.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1495681511,
+  "path": "flask/sessions.py",
+  "prior_fixes": 6,
+  "importers": 3,
+  "returned": false
+ },
+ {
+  "at": 1495681511,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 15,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1495732302,
+  "path": "flask/cli.py",
+  "prior_fixes": 14,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1495732302,
+  "path": "tests/test_apps/cliapp/factory.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1495732302,
+  "path": "tests/test_cli.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1495736900,
+  "path": "flask/cli.py",
+  "prior_fixes": 15,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1495736900,
+  "path": "tests/test_cli.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1496005733,
+  "path": "flask/app.py",
+  "prior_fixes": 150,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1496005733,
+  "path": "flask/sessions.py",
+  "prior_fixes": 6,
+  "importers": 3,
+  "returned": false
+ },
+ {
+  "at": 1496005733,
+  "path": "flask/testing.py",
+  "prior_fixes": 10,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1496077764,
+  "path": "flask/helpers.py",
+  "prior_fixes": 64,
+  "importers": 7,
+  "returned": false
+ },
+ {
+  "at": 1496077764,
+  "path": "flask/sessions.py",
+  "prior_fixes": 6,
+  "importers": 3,
+  "returned": false
+ },
+ {
+  "at": 1496077764,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 16,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1496090102,
+  "path": "flask/app.py",
+  "prior_fixes": 151,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1496090102,
+  "path": "flask/ctx.py",
+  "prior_fixes": 21,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1496090102,
+  "path": "flask/testing.py",
+  "prior_fixes": 10,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1496110105,
+  "path": "flask/app.py",
+  "prior_fixes": 152,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1496110105,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 24,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1496112067,
+  "path": "flask/app.py",
+  "prior_fixes": 153,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1496112067,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 17,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1496279048,
+  "path": "flask/app.py",
+  "prior_fixes": 154,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1496279048,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 17,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1496760712,
+  "path": "flask/app.py",
+  "prior_fixes": 155,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1496760712,
+  "path": "flask/blueprints.py",
+  "prior_fixes": 14,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1496760712,
+  "path": "flask/helpers.py",
+  "prior_fixes": 64,
+  "importers": 7,
+  "returned": false
+ },
+ {
+  "at": 1497449815,
+  "path": "flask/app.py",
+  "prior_fixes": 156,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1497449815,
+  "path": "flask/blueprints.py",
+  "prior_fixes": 14,
+  "importers": 2,
+  "returned": false
+ },
+ {
+  "at": 1497467305,
+  "path": "flask/app.py",
+  "prior_fixes": 157,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1497467305,
+  "path": "flask/cli.py",
+  "prior_fixes": 16,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1497551270,
+  "path": "flask/cli.py",
+  "prior_fixes": 17,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1497551270,
+  "path": "tests/test_apps/helloworld/hello.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1497551270,
+  "path": "tests/test_apps/helloworld/wsgi.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1497551270,
+  "path": "tests/test_cli.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1497621577,
+  "path": "flask/cli.py",
+  "prior_fixes": 18,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1497621577,
+  "path": "tests/test_cli.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1498488329,
+  "path": "flask/app.py",
+  "prior_fixes": 158,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1498488329,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 17,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1498488393,
+  "path": "flask/helpers.py",
+  "prior_fixes": 64,
+  "importers": 7,
+  "returned": true
+ },
+ {
+  "at": 1498488393,
+  "path": "flask/wrappers.py",
+  "prior_fixes": 19,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1498488393,
+  "path": "tests/test_deprecations.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1498661886,
+  "path": "examples/flaskr/flaskr/factory.py",
+  "prior_fixes": 1,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1498661886,
+  "path": "examples/minitwit/minitwit/minitwit.py",
+  "prior_fixes": 0,
+  "importers": 1,
+  "returned": false
+ },
+ {
+  "at": 1498661886,
+  "path": "flask/app.py",
+  "prior_fixes": 159,
+  "importers": 2,
+  "returned": true
+ },
+ {
+  "at": 1498661886,
+  "path": "tests/conftest.py",
+  "prior_fixes": 5,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1498661886,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 17,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1498661886,
+  "path": "tests/test_config.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1498661886,
+  "path": "tests/test_signals.py",
+  "prior_fixes": 3,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1498661886,
+  "path": "tests/test_templating.py",
+  "prior_fixes": 2,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1498661886,
+  "path": "tests/test_testing.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1507644293,
+  "path": "flask/cli.py",
+  "prior_fixes": 19,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1507644293,
+  "path": "tests/test_apps/cliapp/factory.py",
+  "prior_fixes": 0,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1507644293,
+  "path": "tests/test_cli.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": false
+ },
+ {
+  "at": 1511564757,
+  "path": "flask/cli.py",
+  "prior_fixes": 20,
+  "importers": 4,
+  "returned": true
+ },
+ {
+  "at": 1511564757,
+  "path": "tests/test_cli.py",
+  "prior_fixes": 6,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1511566669,
+  "path": "flask/helpers.py",
+  "prior_fixes": 65,
+  "importers": 6,
+  "returned": true
+ },
+ {
+  "at": 1511566669,
+  "path": "tests/test_helpers.py",
+  "prior_fixes": 25,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1515099378,
+  "path": "flask/sessions.py",
+  "prior_fixes": 6,
+  "importers": 3,
+  "returned": true
+ },
+ {
+  "at": 1515099378,
+  "path": "tests/test_basic.py",
+  "prior_fixes": 17,
+  "importers": 0,
+  "returned": true
+ },
+ {
+  "at": 1515232141,
+  "path": "flask/helpers.py",
+  "prior_fixes": 66,
+  "importers": 7,
+  "returned": true
+ },
+ {
+  "at": 1515232141,
+  "path": "flask/testing.py",
+  "prior_fixes": 10,
+  "importers": 3,
+  "returned": true
+ }
+]

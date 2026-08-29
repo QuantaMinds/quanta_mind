@@ -1,0 +1,32 @@
+{
+ "sqlalchemy/sqlalchemy": {
+  "status": "ok",
+  "rows": 2090,
+  "events": 600
+ },
+ "numpy/numpy": {
+  "status": "ok",
+  "rows": 2047,
+  "events": 600
+ },
+ "scipy/scipy": {
+  "status": "ok",
+  "rows": 2213,
+  "events": 600
+ },
+ "matplotlib/matplotlib": {
+  "status": "ok",
+  "rows": 2307,
+  "events": 600
+ },
+ "pytest-dev/pytest": {
+  "status": "ok",
+  "rows": 2569,
+  "events": 597
+ },
+ "encode/django-rest-framework": {
+  "status": "clone_failed",
+  "rows": 0,
+  "events": 0
+ }
+}
