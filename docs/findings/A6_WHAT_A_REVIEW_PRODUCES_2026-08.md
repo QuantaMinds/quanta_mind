@@ -24,6 +24,12 @@ COST                41,338 tokens in, 221,233 out, 2,108s
 A first pass over 7 changes gave 0.714 raw and 0.571 kept, so the figures are stable across two
 samples of very different size.
 
+**Replicated 2026-08-28 on a third sample the pipeline had not seen** — 30 changes, commits 71–100
+of the same repository — at **0.733 kept per measured change** against this run's 0.686. Pooled
+two-proportion `z = 0.42`; the two are not distinguishable. See
+`FINDINGS_PER_CHANGE_REPLICATED_2026-08.md`, which also retracts a claim made in the same session
+that the rate was unstable — that comparison had divided by a different denominator.
+
 ## What this does NOT say
 
 **0.686 is findings PUBLISHED, not findings CORRECT, and the two must not be compared.** The
