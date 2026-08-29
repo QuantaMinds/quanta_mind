@@ -12,7 +12,9 @@ where a rule stops being a rule without anyone noticing.
 | | count |
 |---|---|
 | guard scripts | 24 |
-| fire correctly on a real violation (5 tested end to end) | **5 of 5** |
+| **fire correctly on a real violation — ALL tested end to end** | **23 of 23 executable** |
+| defects found by that testing | **1**, fixed |
+| "silent" results that were MY probe being wrong | **5 of 5** |
 | report how much they examined | **6 of 24** |
 | pass without saying what they examined | **15 of 24** |
 | **report a count AND still exit 0 at zero coverage** | **5** |
@@ -20,6 +22,34 @@ where a rule stops being a rule without anyone noticing.
 
 **The guards work. The gap is that most cannot tell you they worked**, and five of the six that
 can would report success having examined nothing.
+
+## Every guard fires — and one did not, until it was fixed
+
+All 23 executable guards were given the violation they exist for and each returned non-zero.
+`plan_claims.py` is a library imported by `check_stage_table`, not a standalone check, and
+`coverage.py` is new and carries its own tests.
+
+**`check_assert_quality` accepted `assert True`.** It classified `Name`, `Attribute`, `Call` and
+`x is not None` as weak; a bare `Constant` fell through every branch and scored as a STRONG
+assertion. So did `assert 1`, `assert "x"`, `assert [1]`, `assert not False` and `assert 1 == 1`.
+This is the guard enforcing *a green test is not a verified test*, and it accepted the most
+vacuous test that can be written. Fixed in `42079a5` with `test-vacuous-assert`; the
+false-positive direction is tested as hard, because a rule that fires on `assert compute() == 1`
+gets deleted and takes the hole with it.
+
+**Five guards first appeared silent, and all five were my probe, not the guard.** Recorded
+because the difference is the entire discipline:
+
+| guard | why my probe missed |
+|---|---|
+| `check_decided_vocabulary` | I asserted "rank by file, per developer". The losing side is **"ranks functions"** and **"per seat"** — I had the decision backwards |
+| `check_withdrawn_amendments` | I put the row in `CODEBASE.md`; it reads `PHASE0_PREREGISTRATION.md` |
+| `check_docs_sync` | I replaced one mention of `allocate/`; the word appears **11 times** and the guard correctly still found it |
+| `check_stage_table` | my substitution found no `.py` in the step it picked, so the "violating" line was identical to the real one |
+| `check_burned_corpora` | my literal did not match the `REPOS\w*\s*=\s*\(` shape it scans |
+
+**A silent guard is a claim about the guard OR about the probe, and the probe is the more likely
+of the two.** Each of the five fires once given a violation it can actually see.
 
 ## The finding that matters: five guards pass at zero
 
