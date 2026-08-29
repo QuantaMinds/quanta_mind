@@ -24,7 +24,7 @@ import ast
 import sys
 from pathlib import Path
 
-from coverage import assert_examined
+from coverage import assert_examined, guarded
 from discovery import Violation, iter_python_files, report
 
 # Top-level module names owned by research/. `git` is GitPython.
@@ -102,4 +102,4 @@ def main(argv: list[str]) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv))
+    raise SystemExit(guarded(lambda: main(sys.argv)))

@@ -18,13 +18,15 @@ producer.
 |---|---|
 | guard scripts | **27** — 23 executable, 4 library helpers |
 | **pass clean, fire on their violation, ignore the near-miss** | **23 of 23** |
-| real defects found in a guard | **1**, fixed |
+| real defects found in a guard | **3**, fixed |
 | real defects found elsewhere by this work | **3**, fixed |
+| **defects only a live foreign repository exposed** | **2** |
 | **probes of mine that were wrong** | **9** |
 | report how much they examined | 6 of 23 |
 | pass without saying what they examined | 17 of 23 |
 | **carry a coverage floor** | **12 of 23** — was 0 |
 | **silent on an empty population** | **5 of 23** — was 17 |
+| **tracebacks on a live foreign repository** | **0 of 23** — was 7 |
 
 **One row was deleted rather than updated.** It read *"exit 0 when pointed at a path that does not
 exist: 15"*, and it was a bad measure: **10 guards ignore `argv` entirely and scan a fixed root**,
@@ -36,6 +38,60 @@ take one and a different working directory for the ones that do not.
 can would report success having examined nothing.
 
 
+
+
+## Run against a live external repository
+
+The strongest test is code the guards were never written for. Every guard was pointed at
+**`pallets/flask` — 83 real Python files, a foreign project with none of this repository's
+conventions.** Records: `research/phase0/results/guard_audit_live.json`.
+
+**It found two defects that no synthetic fixture had.**
+
+**Six guards refused correctly but printed a Python traceback.** `assert_examined` raises so a
+run cannot continue, and an unhandled raise prints a stack trace — the exit code was right and
+the output was wrong, so a reader could not tell a coverage floor from a crash in the guard.
+That was code I had added the same day. `coverage.guarded()` now turns it into the
+`[coverage] …` line every other failure prints, and the raise is kept because the tests assert
+on it and because stopping is correct.
+
+**`check_schema_shape` crashed outright** with `FileNotFoundError` on any tree lacking
+`store/schema.py`. Pre-existing, and invisible until the guard met a repository that is not
+this one. It now prints `[schema-shape] no schema at …` and exits 2.
+
+**After both fixes: 0 tracebacks across 23 guards on foreign code.** And they do real work
+there — `check_assert_quality` found 21 genuine weak or missing assertions in flask's own test
+suite, `check_structure` 27 over-length files, `check_module_identity` 2 duplicate basenames.
+
+| guard | exit | what it said |
+|---|---|---|
+| `check_agents_md.py` | 2 | [agents-md] no file at /Users/dhanu/Documents/SaaS/quanta_mind/.verify-clo |
+| `check_assert_quality.py` | 1 | [assert-quality] 21 violation(s): tests/test_async.py:97: [test-weak-asser |
+| `check_branch_name.py` | 1 | [branch-name] 1 violation(s): CONTRIBUTING.md:1: [branch-name] branch 'pin |
+| `check_constant_time_compare.py` | 1 | [constant-time] src/quantamind/serve/webhook_github.py not found — the gua |
+| `check_conventions.py` | 2 | [conventions] no package at /Users/dhanu/Documents/SaaS/quanta_mind/.verif |
+| `check_enforcement_map.py` | 2 | [enforcement-map] no settings at /Users/dhanu/Documents/SaaS/quanta_mind/. |
+| `check_module_identity.py` | 1 | [module-identity] 2 violation(s): src/flask/app.py:1: [duplicate-module] ' |
+| `check_no_partial_clone.py` | 0 | [no-partial-clone] ok |
+| `check_no_research_imports.py` | 0 | [research-imports] ok |
+| `check_structure.py` | 1 | [structure] 27 violation(s): pyproject.toml:201: [file-length] 279 lines,  |
+| `check_subprocess_timeouts.py` | 1 | [coverage] subprocess call sites: examined 0 under /Users/dhanu/Documents/ |
+| `citations/freshness.py` | 0 | [citation-freshness] ok [citation-freshness] 0 dated figure(s) tracked, 0  |
+| `citations/resolve.py` | 1 | [coverage] markdown documents: examined 0 under /Users/dhanu/Documents/Saa |
+| `records/check_burned_corpora.py` | 0 | [burned-corpora] research/phase0/quote/corpus.py not found — nothing to ch |
+| `records/check_decided_vocabulary.py` | 1 | [decided-vocabulary] 0 paragraph(s) against 3 decision(s) [coverage] parag |
+| `records/check_docs_sync.py` | 0 | [docs-sync] ok |
+| `records/check_documented_commands.py` | 0 | [documented-commands] 3 documented command(s) NOT BUILT [documented-comman |
+| `records/check_documented_recipes.py` | 1 | [coverage] documented invocations: examined 0 under /Users/dhanu/Documents |
+| `records/check_no_vague_refs.py` | 1 | [coverage] markdown documents: examined 6 under /Users/dhanu/Documents/Saa |
+| `records/check_plan_state.py` | 1 | [plan-state] docs/plans/implementation.md not found |
+| `records/check_schema_shape.py` | 2 | [schema-shape] no schema at /Users/dhanu/Documents/SaaS/quanta_mind/.verif |
+| `records/check_stage_table.py` | 1 | [stage-table] docs/plans/implementation.md not found |
+| `records/check_withdrawn_amendments.py` | 1 | [coverage] amendment rows: examined 0 under /Users/dhanu/Documents/SaaS/qu |
+
+An exit of 2 is a refusal — the subject file or package is absent — and an exit of 1 is a
+finding. Both are correct against a repository that is not this one; the point of the run was
+that neither is a stack trace.
 
 ## Final sweep — every guard, after every change
 

@@ -28,7 +28,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-from coverage import assert_examined
+from coverage import assert_examined, guarded
 from discovery import Violation, iter_python_files, project_root, report
 
 # Package roots scanned independently. A name may legitimately repeat across them —
@@ -190,4 +190,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(guarded(lambda: main()))

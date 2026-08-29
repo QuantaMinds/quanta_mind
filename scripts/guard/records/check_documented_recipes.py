@@ -35,7 +35,7 @@ from pathlib import Path
 # down, so the parent is added explicitly -- the same reason its sibling does it.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from coverage import assert_examined
+from coverage import assert_examined, guarded
 from discovery import Violation, project_root, report
 
 # **A FLOOR, NOT A TARGET.** Below today's count, to catch discovery collapsing.
@@ -194,4 +194,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(guarded(lambda: main()))

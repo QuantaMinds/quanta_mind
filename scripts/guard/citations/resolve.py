@@ -38,7 +38,7 @@ import re
 import sys
 from pathlib import Path
 
-from coverage import assert_examined
+from coverage import assert_examined, guarded
 from discovery import Violation, report
 
 # A markdown path: at least one path-ish character, ending `.md`. Bare basenames count,
@@ -165,4 +165,4 @@ def main(argv: list[str]) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv))
+    raise SystemExit(guarded(lambda: main(sys.argv)))

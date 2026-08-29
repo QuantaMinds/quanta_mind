@@ -78,6 +78,13 @@ def version_of(text: str) -> int:
 def main() -> int:
     root = project_root()
     path = root / SCHEMA
+    if not path.is_file():
+        # **A MISSING SUBJECT IS A NAMED REFUSAL, NOT A TRACEBACK.** Pointed at any tree without
+        # this file — a foreign repository, a partial checkout — `read_text` raised
+        # `FileNotFoundError` and printed a stack trace, so a reader could not tell a missing
+        # file from a crash in the guard. Found by running the suite against `pallets/flask`.
+        print(f"[schema-shape] no schema at {path}", file=sys.stderr)
+        return 2
     text = path.read_text(encoding="utf-8")
     ddl = ddl_of(text)
     digest = hashlib.sha256(ddl.encode()).hexdigest()[:16]

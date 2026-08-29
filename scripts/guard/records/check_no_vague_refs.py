@@ -37,7 +37,7 @@ from pathlib import Path
 # down, so the parent is added explicitly -- the same reason `citations/` does it.
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
-from coverage import assert_examined
+from coverage import assert_examined, guarded
 from discovery import iter_text_files, project_root
 
 # **A FLOOR, NOT A TARGET.** 178 tracked markdown files today.
@@ -137,4 +137,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(guarded(lambda: main()))

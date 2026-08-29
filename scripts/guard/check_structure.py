@@ -17,7 +17,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from coverage import assert_examined
+from coverage import assert_examined, guarded
 from discovery import Violation, iter_package_dirs, iter_source_files, report
 from exclusions import is_excluded
 
@@ -100,4 +100,4 @@ def main(argv: list[str]) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv))
+    raise SystemExit(guarded(lambda: main(sys.argv)))

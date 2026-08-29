@@ -9,13 +9,15 @@ WHY:  **A GUARD THAT EXAMINED NOTHING PRINTS THE SAME WORD AS A GUARD THAT FOUND
 
       Kept out of `discovery.py`, which finds files. This decides whether finding none is a
       result or a fault, and that is a different question asked by a different caller.
-IMPORTS: stdlib pathlib. No project imports.
+IMPORTS: stdlib pathlib and sys. No project imports.
 CONSUMED BY: `check_subprocess_timeouts.py`, `records/check_documented_recipes.py`;
              any guard that reports a count.
 """
 
 from __future__ import annotations
 
+import sys
+from collections.abc import Callable
 from pathlib import Path
 
 
@@ -68,3 +70,22 @@ def assert_examined(what: str, count: int, floor: int, where: Path) -> int:
             f"reporting success on nothing is worse than no guard."
         )
     return count
+
+
+def guarded(outcome: Callable[[], int]) -> int:
+    """Run a guard's `main`, turning a floor breach into a guard-shaped failure.
+
+    **A GUARD MUST FAIL IN ITS OWN VOCABULARY, NOT PYTHON'S.** `assert_examined` raises so the
+    run cannot continue, and an unhandled raise prints a traceback — which is what every floored
+    guard did when pointed at a foreign repository. The exit code was right and the output was a
+    stack trace, so a reader could not tell a coverage floor from a crash. Found by running the
+    whole suite against `pallets/flask`, not by any test.
+
+    The raise is kept because the tests assert on it and because stopping is correct; this turns
+    it into the `[name] ...` line every other failure prints.
+    """
+    try:
+        return outcome()
+    except NothingExamined as bare:
+        print(f"[coverage] {bare}", file=sys.stderr)
+        return 1

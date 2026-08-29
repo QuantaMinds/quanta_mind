@@ -23,7 +23,7 @@ import ast
 import sys
 from pathlib import Path
 
-from coverage import assert_examined
+from coverage import assert_examined, guarded
 from discovery import Violation, report
 
 MOCK_TOKENS: frozenset[str] = frozenset(
@@ -184,4 +184,4 @@ def main(argv: list[str]) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv))
+    raise SystemExit(guarded(lambda: main(sys.argv)))

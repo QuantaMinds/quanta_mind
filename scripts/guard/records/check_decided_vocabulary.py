@@ -34,7 +34,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from coverage import assert_examined
+from coverage import assert_examined, guarded
 from discovery import Violation, project_root, report
 
 SCANNED = ("docs/product/QUANTAMIND.md",)
@@ -175,4 +175,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(guarded(lambda: main()))
