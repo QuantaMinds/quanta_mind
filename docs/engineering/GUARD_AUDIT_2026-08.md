@@ -355,6 +355,30 @@ directions: 0 findings at the repository root, byte-identical module sets under 
 identical one under `.venv` ignored, and 0 false positives against 25 real assertions.
 Sabotaging the traversal fails two named tests in `tests/unit/test_assert_quality_scope.py`.
 
+## `py.typed` was charged against the fan-out cap
+
+`check_structure` exempts `__init__.py` from the fifteen-files-per-directory cap, on the stated
+grounds that re-export plumbing is not a concern a reader has to understand. A PEP 561 marker is
+the same kind of thing and was counted. **Three packages here sit at exactly 15**, so advertising
+one of them as typed would have failed the build with a fan-out violation raised by a zero-byte
+file. Rule 5 now names both exemptions and the guard implements both.
+
+Surfaced by reconciling the guard's count of 19 for `requests/src/requests` against a hand count
+of 18. The guard was right and the hand count was wrong, which is how the marker came to light.
+
+**The boundary is pinned from both sides**, and one of the tests is pinned to AGENTS.md rather
+than to the guard's own constant. Every test phrased as `MAX_DIR_FILES + 1` stayed green when the
+constant was sabotaged from 15 to 16 — a test that reads the number it is checking cannot detect
+a change to it. `test_caps_match_the_documented_rules` reads rule 4 and rule 5 instead.
+
+**A sabotage that swaps one digit can run against stale bytecode.** Rewriting `MAX_DIR_FILES = 15`
+to `16` leaves the file the same size, and if the edit and the test land in the same wall-clock
+second, CPython's mtime-and-size check validates the old `.pyc` and the test imports the
+pre-sabotage constant. It reported the restored value as 16 for three commands after the restore.
+Sabotage that changes a line's length — as the `rglob`-to-`walk` sabotage above did — is not
+exposed. Same-length sabotage must delete the `__pycache__` entry, not merely `touch` the source,
+or it silently proves nothing.
+
 ## What was fixed, and what was not
 
 **Two of the five now have a floor.** `check_subprocess_timeouts` and

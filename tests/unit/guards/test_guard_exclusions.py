@@ -23,12 +23,12 @@ from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "guard"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts" / "guard"))
 
 from discovery import SCOPED_EXCLUDED_DIRS, SCOPED_TO, walk
 from exclusions import is_excluded
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 
 
 @pytest.mark.parametrize(

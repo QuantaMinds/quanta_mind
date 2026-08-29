@@ -30,9 +30,13 @@ MAX_DIR_FILES = 15
 # files nobody committed measures the machine, not the codebase.
 SESSION_RECORD_PREFIX = "session-"
 
-# __init__.py is re-export plumbing, not a concern in its own right, so it does not
-# count against the fanout budget. It is still subject to the line cap.
-FANOUT_EXEMPT_NAMES: frozenset[str] = frozenset({"__init__.py"})
+# Plumbing, not concerns. __init__.py is re-export wiring; py.typed is a zero-byte PEP 561
+# marker that exists so type checkers will read the package at all. Neither is a thing a
+# reader has to understand, which is what the cap is counting. py.typed was charged against
+# the budget until 2026-08-29, so ADDING TYPE ADVERTISEMENT TO A PACKAGE AT 15 COULD FAIL
+# THE BUILD -- a fan-out violation raised by a file with no contents. Both remain subject
+# to the line cap, which py.typed cannot breach and __init__.py can.
+FANOUT_EXEMPT_NAMES: frozenset[str] = frozenset({"__init__.py", "py.typed"})
 
 
 def check_file_lengths(root: Path) -> list[Violation]:
