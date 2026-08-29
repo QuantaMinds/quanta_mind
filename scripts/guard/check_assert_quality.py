@@ -24,7 +24,7 @@ import sys
 from pathlib import Path
 
 from coverage import assert_examined, guarded
-from discovery import Violation, report
+from discovery import Violation, report, walk
 
 MOCK_TOKENS: frozenset[str] = frozenset(
     {"Mock", "MagicMock", "AsyncMock", "patch", "mocker", "monkeypatch", "stub", "fake"}
@@ -165,8 +165,16 @@ def main(argv: list[str]) -> int:
         print(f"[assert-quality] no test directory at {root}", file=sys.stderr)
         return 2
 
+    # **`rglob` DESCENDS INTO `.venv` AND `.verify-clone`.** Both are in EXCLUDED_DIRS and
+    # both were scanned anyway, because this guard imported discovery for `report` and never
+    # for `walk`. Pointed at the repository root it returned 28,009 violations, every one of
+    # them in somebody else's test suite. `just check` passes `tests`, which is why the gate
+    # never showed it. Enumerated ONCE so the scan and the floor below cannot disagree about
+    # what the population is.
+    modules = [p for p in walk(root) if p.suffix == ".py" and p.name.startswith("test_")]
+
     violations: list[Violation] = []
-    for path in sorted(root.rglob("test_*.py")):
+    for path in modules:
         try:
             tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         except SyntaxError as exc:
@@ -179,7 +187,7 @@ def main(argv: list[str]) -> int:
             ):
                 violations.extend(_check_function(path, node))
 
-    assert_examined("test modules", sum(1 for _ in root.rglob("test_*.py")), 20, root)
+    assert_examined("test modules", len(modules), 20, root)
     return report(violations, root, "assert-quality")
 
 

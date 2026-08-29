@@ -330,6 +330,31 @@ subprocesses; the day its file discovery breaks it reports "0 call sites checked
 The project has hit this exact shape before — `history_rewritten` ran only on admitted records,
 returned zero across 515, and was indistinguishable from a genuine null.
 
+## The defect this report walked past
+
+**`check_assert_quality` scanned `.venv`.** It enumerated test modules with
+`root.rglob("test_*.py")`, which descends into every excluded directory. Pointed at the
+repository root it returned 28,009 violations, all of them inside mypy, werkzeug and flask.
+`just check` passes it `tests` and `research/phase0/tests`, so the gate never showed it.
+
+**The evidence was already in this report and was read as the wrong thing.** The catalogue
+entry above recorded `28003 violation(s): .venv/...` during the original sweep. Twenty-eight
+thousand findings citing site-packages is not a repository that violates a convention; it is a
+guard reading the wrong tree. It was filed as a property of the subject rather than a defect in
+the instrument — the same misreading the audit was written to catch.
+
+**The floor made it worse rather than catching it.** `assert_examined` counted modules through
+the same unfiltered glob, so any root containing `.venv` met a floor of 20 on a population that
+was almost entirely somebody else's tests. Scan and floor now read one enumerated list, since
+two counts of one population drift — the defect already recorded in
+`tests/unit/test_stage_table_drift.py`.
+
+Fixed by enumerating through `discovery.walk`, which prunes during traversal. Verified in four
+directions: 0 findings at the repository root, byte-identical module sets under `tests` and
+`research/phase0/tests` (76 and 57, nothing lost), a planted `assert True` still caught, an
+identical one under `.venv` ignored, and 0 false positives against 25 real assertions.
+Sabotaging the traversal fails two named tests in `tests/unit/test_assert_quality_scope.py`.
+
 ## What was fixed, and what was not
 
 **Two of the five now have a floor.** `check_subprocess_timeouts` and
@@ -395,7 +420,10 @@ and a binary file.
 
 **Emits:** `[assert-quality]`
 
-**On the real repo:** exit 1, coverage not reported — `[assert-quality] 28003 violation(s): .venv/lib/python3.12/site-packages/mypy/test/test_con`
+**On the real repo:** exit 0, 133 test modules examined. **This line previously read `exit 1,
+coverage not reported — 28003 violation(s): .venv/lib/python3.12/site-packages/mypy/...` and that
+was a defect in the guard, recorded here as a property of the repository.** See "The defect this
+report walked past" below.
 
 **Empty tree:** exit 0. **Missing path:** exit 2. **Path argument:** used.
 
