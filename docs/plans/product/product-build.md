@@ -264,7 +264,8 @@ spent deliberately. It must not be spent by accident.
 
 ### D2 — code relationships, deterministically
 
-- [ ] **D2a Labelled import edges.** `parse/imports.py` over stdlib `ast`: no dependency, no
+- [x] **D2a Labelled import edges.** `parse/imports.py`. Base rate measured before shipping —
+      **~44% of import statements resolve in-tree**, see `D2A_IMPORT_EDGE_BASE_RATE_2026-08.md`. `parse/imports.py` over stdlib `ast`: no dependency, no
       model. Every edge carries `Confidence` and `Provenance`; an unresolvable import emits
       `Unresolved(site, reason, construct)` and never nothing — `importlib` is `DYNAMIC_DISPATCH`,
       a third-party name `EXTERNAL_SYMBOL`, a broken file `UNPARSEABLE_SYNTAX`. `RESOLVED` only

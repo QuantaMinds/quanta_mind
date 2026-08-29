@@ -2909,3 +2909,29 @@ which is prose written for a human.
 **`serve/deep_review.report()` moved to `serve/run_commit.py`.** It prints a reviewer pass for a
 person at a terminal, its only caller is the CLI, and `deep_review` was over the file cap. The
 split is by concern, not to make room.
+
+### `parse/imports.py` — D2a, labelled import edges
+
+A **detector, not a reviewer**. "This module is imported by fourteen others" is a question a
+parser answers exactly, and `verify/pin_mismatch.py` is the same shape: 24 of 24, precision 100%
+by construction, while model findings on the same corpus are 66.7–82.1% wrong and no gate removes
+any of them. Nothing here consults a model, so no model can be wrong about it.
+
+**`RESOLVED` needs two independent resolvers and has them:** the syntax says the import exists,
+and the named target is a file in the tree. Either alone is `INFERRED`. That is the difference
+between "this file imports that file" and "this file mentions a name that looks like that file",
+and `test_nothing_resolves_against_an_empty_tree` is the assertion — identical syntax, empty tree,
+no resolved edges. An implementation labelling from syntax alone passes every other test.
+
+**No branch returns nothing.** A third-party name is `EXTERNAL_SYMBOL`, an `importlib` call is
+`DYNAMIC_DISPATCH`, a file that will not parse is `UNPARSEABLE_SYNTAX`, a relative import that
+climbs above the root is `MALFORMED_DECLARATION`. An empty edge list means "no static Python
+import resolved to a file in this tree", never "nothing depends on this".
+
+**The defect the tests caught:** `relative` was set for every `ImportFrom`, not only dotted ones,
+so `from requests import get` came back `INFERRED` — an edge asserted inside the tree to a
+third-party package. `import requests` was unaffected, so the obvious test passed.
+
+**Pure — no git, no I/O, no network.** The caller supplies the source and the tree, which is what
+makes it testable without a repository. `parse/importers.py` answers the reverse question per file
+and does the git reading.
