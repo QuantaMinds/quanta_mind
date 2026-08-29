@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -40,14 +41,33 @@ REPOS = (
     "pytest-dev/pytest",
     "encode/django-rest-framework",
 )
+ONLY = tuple(x for x in os.environ.get("BLAST_ONLY", "").split(",") if x)
 
 
 def clone(repo: str, into: Path) -> bool:
+    """Clone without a working tree.
+
+    **`--no-checkout`, AND LFS SKIPPED.** This reads history through `ls-tree` and `cat-file`,
+    which need objects and not a checkout. `encode/django-rest-framework` uses git-lfs, and on a
+    machine without it the checkout fails and takes the whole clone down with it — "Clone
+    succeeded, but checkout failed" — dropping a pre-registered repository for a reason that has
+    nothing to do with its history.
+    """
+    env = {**os.environ, "GIT_LFS_SKIP_SMUDGE": "1"}
     done = subprocess.run(
-        ["git", "clone", "--quiet", "--single-branch", f"https://github.com/{repo}.git", str(into)],
+        [
+            "git",
+            "clone",
+            "--quiet",
+            "--single-branch",
+            "--no-checkout",
+            f"https://github.com/{repo}.git",
+            str(into),
+        ],
         capture_output=True,
         text=True,
         timeout=CLONE_TIMEOUT_S,
+        env=env,
     )
     if done.returncode != 0:
         print(f"  clone failed: {done.stderr.strip()[:160]}", flush=True)
@@ -64,7 +84,7 @@ def main() -> int:
     args.workdir.mkdir(parents=True, exist_ok=True)
 
     manifest: dict[str, object] = {}
-    for repo in REPOS:
+    for repo in ONLY or REPOS:
         name = repo.replace("/", "_")
         into = args.workdir / name
         print(f"\n=== {repo} ===", flush=True)

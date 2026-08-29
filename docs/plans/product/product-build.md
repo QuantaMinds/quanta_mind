@@ -271,10 +271,10 @@ spent deliberately. It must not be spent by accident.
       a third-party name `EXTERNAL_SYMBOL`, a broken file `UNPARSEABLE_SYNTAX`. `RESOLVED` only
       where two independent resolvers agree: the syntax says the import exists AND the target is a
       file in the tree.
-- [ ] **D2b The graph, stored.** **ON HOLD** — blast radius does not yet separate the
-      fix-return outcome at any usable power: 2 discordant pairs against a floor of 20. See
-      `docs/findings/graph/D2D_BLAST_RADIUS_INCONCLUSIVE_2026-08.md`. Needs six unseen
-      repositories before this is built on. A whole-repo pass into a `dependency` table, incremental against
+- [ ] **D2b The graph, stored.** **ON HOLD, recommend DROP.** Six unseen repositories, 1,301 non-degenerate events:
+      in-degree gives the same top three as alphabetical on 99.2% of changes, and loses to the
+      shipped fix-history signal 65-13 at p < 0.0001. See
+      `docs/findings/graph/D2D_BLAST_RADIUS_SIX_REPOS_2026-08.md`. A whole-repo pass into a `dependency` table, incremental against
       the same commit watermark the touch index uses.
 - [ ] **D2c Duplicated logic, without a model.** Normalised AST hashing of function bodies —
       rename-insensitive, comment-insensitive, stdlib only. "The same logic is written in multiple
