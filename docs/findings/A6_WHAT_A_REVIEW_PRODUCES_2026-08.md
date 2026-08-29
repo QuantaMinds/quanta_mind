@@ -38,6 +38,13 @@ that the rate was unstable — that comparison had divided by a different denomi
 several times the historical figure. **That error rate has not been re-measured on this pipeline**,
 and until it is, the comparison is arithmetic on an assumption rather than a result.
 
+**MEASURED 2026-08-29 AT 25.0%** — 6 of 24 published findings judged correct by a human, 95%
+interval 12.0–44.9%, against a raw band of 17.9–33.3% correct. The published interval contains
+the whole raw band, so there is no evidence the gate raises correctness. See
+`PUBLISHED_CORRECTNESS_MEASURED_2026-08.md`. The sentence above — that the comparison is
+arithmetic on an assumption — no longer applies; the assumption was tested and the arithmetic
+gives 0.17–0.18 correct findings per change.
+
 **One repository, unreplicated.** This project has a rule about that, and it applies to its own
 measurements: the retrospective run on the same clone refused its own verdict the same afternoon —
 *"INCONCLUSIVE — 10 discordant pairs, floor is 20."* Thirty-five changes on one repository is a
