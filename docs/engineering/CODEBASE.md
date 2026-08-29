@@ -3015,3 +3015,24 @@ since the file was written.
 **`bench/forensic/shape/pulls.py` stayed in `research/`.** It imports `quantamind` too, but its
 sibling `shape/tally.py` does not — moving it would drag a research package product-side. It
 still needs the root interpreter, and that is recorded rather than papered over.
+
+### `scripts/guard/exclusions.py` — what the guards never look inside
+
+Split from `discovery.py`, which was at exactly the 200-line cap. The seam is real: this decides
+what is out of bounds, `discovery.py` decides how to reach the rest, and **all 23 guards draw
+their population through the first** — so it should be reviewable without reading a traversal.
+
+**`data` and `results` are scoped to `research/`, not matched as bare names.** They previously
+matched at any depth, so a directory with either name hid its contents from every guard at once
+with nothing reporting it: source under `src/quantamind/data/` would simply have been unguarded.
+Every such directory in this repository is under `research/phase0/`, so scoping costs no pruning.
+
+**The pruning is the reason the exclusion exists and it survives the narrowing.** `walk` prunes
+during traversal rather than filtering after, because `rglob` over a multi-gigabyte clone under
+`research/phase0/data/` timed out the sixty-second pre-edit hook — and a guard that times out is
+a guard that gets switched off. Measured after the change: the same 1,763 files in the same
+0.02s. Reverting either the scope or the pruning fails a named test.
+
+**A pre-existing test asserted `"data" in EXCLUDED_DIRS`** and caught the change. It was updated
+to assert the scoped behaviour — pruned under `research/`, walked under `src/` — rather than
+loosened to pass.

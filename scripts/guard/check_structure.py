@@ -18,7 +18,8 @@ import sys
 from pathlib import Path
 
 from coverage import assert_examined
-from discovery import Violation, is_excluded, iter_package_dirs, iter_source_files, report
+from discovery import Violation, iter_package_dirs, iter_source_files, report
+from exclusions import is_excluded
 
 MAX_FILE_LINES = 200
 MAX_DIR_FILES = 15

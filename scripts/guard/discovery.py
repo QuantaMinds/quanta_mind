@@ -17,37 +17,14 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 
-# Directories never inspected. Vendored code is third-party and exempt from our
-# style rules; caches are generated; docs are exempt from the line cap by policy.
-EXCLUDED_DIRS: frozenset[str] = frozenset(
-    {
-        ".git",
-        ".venv",
-        "venv",
-        "__pycache__",
-        ".mypy_cache",
-        ".pytest_cache",
-        ".ruff_cache",
-        # Generated and unbounded like the other caches; the cap was firing on it.
-        ".hypothesis",
-        "vendor",
-        "martian",  # Martian's benchmark data, vendored off /private/tmp. Not ours to police.
-        "node_modules",
-        "htmlcov",
-        "dist",
-        "build",
-        ".verify-clone",
-        # Scratch clones of third-party repositories: `.verify-clone` for `just verify`, and
-        # research/phase0/data/ for the harness. The guards were walking into them and crashing --
-        # a 300-character AutoGPT path, a read-only sqlmesh file mid-deletion -- so every hook
-        # failed for reasons unrelated to the edit, which is how guards get switched off.
-        "data",
-        "results",
-    }
+from exclusions import (
+    EXCLUDED_DIRS,
+    SCOPED_EXCLUDED_DIRS,
+    SCOPED_TO,
 )
 
-# Extensions subject to the length and structure rules. Markdown and text are
-# deliberately absent: docs are exempt.
+# Directories never inspected. Vendored code is third-party and exempt from our
+# style rules; caches are generated; docs are exempt from the line cap by policy.
 SOURCE_SUFFIXES: frozenset[str] = frozenset({".py", ".pyi", ".toml", ".yaml", ".yml"})
 
 # The declared layer order. Index position defines what may import what.
@@ -99,12 +76,7 @@ def project_root() -> Path:
     return Path.cwd().resolve()
 
 
-def is_excluded(path: Path) -> bool:
-    """True if any path component is an excluded directory."""
-    return any(part in EXCLUDED_DIRS for part in path.parts)
-
-
-def walk(root: Path) -> Iterator[Path]:
+def walk(root: Path, *, scoped: bool = False) -> Iterator[Path]:
     """Every file beneath root, in deterministic order, PRUNING excluded directories.
 
     Pruning during the walk rather than filtering after it. `rglob("*")` enumerates
@@ -125,8 +97,13 @@ def walk(root: Path) -> Iterator[Path]:
         return  # vanished mid-walk, or unreadable; not this guard's business
     for entry in entries:
         if entry.is_dir():
-            if entry.name not in EXCLUDED_DIRS:
-                yield from walk(entry)
+            if entry.name in EXCLUDED_DIRS:
+                continue
+            # Scope is inherited: once beneath `research/`, every descendant is in scope.
+            inside = scoped or entry.name in SCOPED_TO
+            if inside and entry.name in SCOPED_EXCLUDED_DIRS:
+                continue
+            yield from walk(entry, scoped=inside)
         elif entry.is_file():
             yield entry
 

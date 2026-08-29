@@ -34,6 +34,7 @@ from __future__ import annotations
 import ast
 import sys
 
+from coverage import assert_examined
 from discovery import Violation, iter_python_files, project_root, report
 
 SCANNED_ROOTS = ("src", "research/phase0/src", "scripts")
@@ -106,5 +107,22 @@ def check(root_names: tuple[str, ...] = SCANNED_ROOTS) -> list[Violation]:
     return violations
 
 
+# **A FLOOR, NOT A TARGET.** 29 source files carry a clone call today. Set well below that, so
+# it fires when discovery collapses rather than when the count drifts.
+CLONE_FILE_FLOOR = 10
+
+
+def main() -> int:
+    root = project_root()
+    found = check()
+    assert_examined(
+        "files scanned for a git clone",
+        sum(1 for _ in iter_python_files(root)),
+        CLONE_FILE_FLOOR,
+        root,
+    )
+    return report(found, root, "no-partial-clone")
+
+
 if __name__ == "__main__":
-    sys.exit(report(check(), project_root(), "no-partial-clone"))
+    sys.exit(main())

@@ -59,6 +59,29 @@ Each guard was run against: the real repository (**clean**), a violation it must
 **23 of 23 correct on clean, violation and near-miss.** Not one false positive and not one
 missed violation, across every guard in the repository.
 
+**Now 5 remain silent, down from 17 when this audit started.** Twelve guards carry a coverage
+floor. The five left have populations too small for a floor to mean anything, and saying so is
+better than inventing one:
+
+| guard | population | why no floor |
+|---|---|---|
+| `check_branch_name` | 1 branch name | there is nothing to count |
+| `citations/freshness` | 1 dated figure | a floor of 1 is not a check |
+| `check_burned_corpora` | 6 REPOS literals | too few to distinguish collapse from change |
+| `check_documented_commands` | 6 invocations | as above |
+| `check_docs_sync` | 11 directories | marginal; it already fails loudly when a directory is missing from the docs |
+
+**The three named as worth having now have one**, verified in both directions — exit 1 from a
+collapsed tree, exit 0 on the real repository: `check_no_partial_clone` (10), 
+`check_withdrawn_amendments` (20), `check_no_vague_refs` (40).
+
+**A floor caught my own miscount while being added.** `check_withdrawn_amendments` fired on a
+healthy repository because I counted rows with `findall` over the whole document, while
+`AMENDMENT_ROW` is anchored with `^` and compiled without `re.M` — it matches per line, as the
+guard's own `check()` does. The floor refused before the number could be believed.
+
+### Superseded: what this said before
+
 **8 remain silent when their population is empty**, and for most of them a floor would be
 theatre rather than protection — the population is too small for one to mean anything:
 
@@ -84,9 +107,20 @@ docstring reads *"Data, never code"*, and the 203 tracked files under `data/` an
 directories are run outputs and golden fixtures. Reporting the path without opening it would
 have been a false alarm.
 
-**The residual risk is the mechanism, not today's file:** the exclusion matches a bare
-directory NAME at any depth, so real source placed under a directory called `data` or
-`results` would be invisible to every guard simultaneously, with nothing reporting it.
+**FIXED.** `data` and `results` are no longer bare names. `scripts/guard/exclusions.py` scopes
+them to `research/`, so the harness clones that once timed out the pre-edit hook are still
+pruned while `src/quantamind/data/` or `scripts/results/` would now be seen. Verified three
+ways: the walk yields the same 1,763 files in the same 0.02s, so no pruning was lost; research
+scratch paths are still excluded; and product paths under those names are not.
+
+Reverting either property fails a named test in `tests/unit/test_guard_exclusions.py`. A
+pre-existing test asserting `"data" in EXCLUDED_DIRS` caught the change and was updated to
+assert the scoped behaviour rather than loosened.
+
+The exclusion policy moved to its own module because `discovery.py` was already at exactly the
+200-line cap. That is a real seam: `exclusions.py` decides what is out of bounds, `discovery.py`
+decides how to reach the rest, and every one of the 23 guards draws its population through the
+first — so it should be reviewable without reading a traversal.
 
 ## Every guard fires — and one did not, until it was fixed
 
