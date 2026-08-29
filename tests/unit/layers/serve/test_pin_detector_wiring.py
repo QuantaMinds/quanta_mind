@@ -7,7 +7,7 @@ WHY:  **EVERY EXISTING ORACLE TEST PASSES WITH THE WIRING BROKEN.** They call `d
       ever given anything. It was not: `changed_files()` filtered to `REVIEWABLE_SUFFIXES`, which
       holds no `.yml`, and that filtered list was passed to `check()`, so `workflows()` returned
       `[]` and the detector exited before touching git on every pull request ever delivered.
-      → `docs/findings/WHY_THE_ORACLES_NEVER_FIRE_2026-08.md`
+      → `docs/findings/oracles/WHY_THE_ORACLES_NEVER_FIRE_2026-08.md`
 
       So these tests start from a changed-file LIST, the thing the delivery path actually holds,
       and assert on what reaches the detector. A test that starts from a diff cannot fail the way

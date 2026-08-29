@@ -153,7 +153,7 @@ def adjudicate(
     # **A HEX TOKEN IS NOT A CLAIM ABOUT A COMMIT.** A cache key or a colour constant reached
     # here and `publishable.gate` DROPPED the finding -- its only demonstrated behaviour over 38
     # real findings. An external claim we cannot settle still drops.
-    # → `docs/findings/WHY_THE_ORACLES_NEVER_FIRE_2026-08.md`
+    # → `docs/findings/oracles/WHY_THE_ORACLES_NEVER_FIRE_2026-08.md`
     disputes = bool(DENIES_EXISTENCE.search(finding) or ASSERTS_TAG.search(finding))
     if not repo and not disputes:
         return Adjudicated(

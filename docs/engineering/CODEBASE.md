@@ -2870,7 +2870,7 @@ slash command turning it on would be that drift with a friendlier entry point.
 
 ### The oracles, made reachable — issue #87
 
-`docs/findings/WHY_THE_ORACLES_NEVER_FIRE_2026-08.md` found that across 65 changes the gate had
+`docs/findings/oracles/WHY_THE_ORACLES_NEVER_FIRE_2026-08.md` found that across 65 changes the gate had
 dropped 8 findings for a missing anchor and one for anything else, and that the one was probably
 not a refutation. Four fixes.
 

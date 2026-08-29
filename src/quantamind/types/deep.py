@@ -44,7 +44,7 @@ class Deep:
     `refuted` because they are opposite events.** A refutation is an authority contradicting the
     model; an unresolvable is us being unable to ask. Summing them made a gate that had never
     refuted anything read as a gate that refuted once -- see
-    `docs/findings/WHY_THE_ORACLES_NEVER_FIRE_2026-08.md`."""
+    `docs/findings/oracles/WHY_THE_ORACLES_NEVER_FIRE_2026-08.md`."""
 
     withdrawn: int
     """Dropped because the model itself withdrew the finding once handed a fact it did not have.

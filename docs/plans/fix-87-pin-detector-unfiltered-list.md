@@ -1,7 +1,7 @@
 # Make the oracles reachable — the four fixes from the investigation
 
 **Branch** `fix/87-pin-detector-unfiltered-list`, issue #87. Diagnosis:
-`docs/findings/WHY_THE_ORACLES_NEVER_FIRE_2026-08.md`. This touches `verify/`, so the plan is
+`docs/findings/oracles/WHY_THE_ORACLES_NEVER_FIRE_2026-08.md`. This touches `verify/`, so the plan is
 written first as the working rules require.
 
 ## 1. Give the pin detector the list it was designed for
