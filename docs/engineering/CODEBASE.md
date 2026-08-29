@@ -2935,3 +2935,28 @@ third-party package. `import requests` was unaffected, so the obvious test passe
 **Pure — no git, no I/O, no network.** The caller supplies the source and the tree, which is what
 makes it testable without a repository. `parse/importers.py` answers the reverse question per file
 and does the git reading.
+
+### `findings/agreement.py` — the second rater, blind by construction
+
+Published-finding correctness measured **25.0%** on one rater.
+`adjudication-preregistration.md` requires a second before a number like that is leaned on, and
+the ranking result got one at 92% agreement, kappa 0.66.
+
+**Blindness is structural, not an instruction.** The first rater's sheet is moved to
+`~/.quantamind_sealed/` before the second is issued, so a second rater working in this repository
+cannot read it by accident. `PHASE0_PREREGISTRATION.md` A57 voided an entire draw because an
+answer key sat readable beside a blind sheet, and its own conclusion was that the protection
+which failed was an instruction rather than a check. This applies that conclusion.
+
+**Kappa is tested at its known points**, because a chance-corrected statistic is exactly the kind
+that looks plausible while being wrong: identical raters give 1.0, 50% agreement on balanced
+margins gives **0.0 rather than 0.5**, total disagreement goes negative, and two raters who both
+answered TRUE to everything give **NaN rather than 1.0** — they agreed completely and showed
+nothing.
+
+**Disagreements are itemised.** A kappa says how much two people disagreed and never which
+finding they disagreed about, and that list is the part worth reading: it locates the findings
+that are genuinely ambiguous rather than simply wrong.
+
+**`BOTH CALL CORRECT` is the defensible floor.** A finding two independent readers call correct is
+a different claim from one a single reader did, and it is the one to quote.
