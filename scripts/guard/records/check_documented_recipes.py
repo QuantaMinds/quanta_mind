@@ -35,7 +35,11 @@ from pathlib import Path
 # down, so the parent is added explicitly -- the same reason its sibling does it.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from coverage import assert_examined
 from discovery import Violation, project_root, report
+
+# **A FLOOR, NOT A TARGET.** Below today's count, to catch discovery collapsing.
+RECIPE_FLOOR = 20
 
 DOC_ROOTS = (
     "docs/findings",
@@ -182,6 +186,7 @@ def main() -> int:
                         )
                     )
 
+    assert_examined("documented invocations", checked, RECIPE_FLOOR, root)
     print(f"[documented-recipes] {checked} documented invocation(s) checked", flush=True)
     if suppressed:
         print(f"[documented-recipes] {suppressed} documented command(s) NOT BUILT", flush=True)

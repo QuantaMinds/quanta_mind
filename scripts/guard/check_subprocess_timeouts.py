@@ -28,7 +28,12 @@ from __future__ import annotations
 import ast
 import sys
 
+from coverage import assert_examined
 from discovery import Violation, iter_python_files, project_root, report
+
+# **A FLOOR, NOT A TARGET.** Set well below today's 35 so it fires when discovery
+# collapses -- a moved directory, a narrowed glob -- rather than when the count drifts.
+SUBPROCESS_FLOOR = 10
 
 SCANNED_ROOTS = ("src", "research/phase0/src", "scripts")
 # Every subprocess entry point that starts a child process and can therefore wait forever.
@@ -101,6 +106,7 @@ def main() -> int:
 
     # Printed on every run. The count is the evidence the guard is looking at anything at all:
     # a scan that silently matched zero call sites reports exactly what a clean run reports.
+    assert_examined("subprocess call sites", checked, SUBPROCESS_FLOOR, root)
     print(f"[subprocess-timeouts] {checked} subprocess call site(s) checked", flush=True)
     return report(violations, root, "subprocess-timeouts")
 

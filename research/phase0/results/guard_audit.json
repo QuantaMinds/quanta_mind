@@ -1,0 +1,514 @@
+[
+ {
+  "name": "check_agents_md.py",
+  "what": "Three checks on the agent memory file. 1. Length \u2014 at most 200 lines. Past ~80 lines adherence starts dropping; past ~200 whole blocks get ignored. 2. Pointers \u2014 every `scripts/guard/*.py` the file names must exist. 3. C",
+  "why": "AGENTS.md is delivered to the model as a user message and every line costs instruction budget for every other line. That makes an unenforced rule actively harmful: it consumes budget and buys nothing. Check 2 exists because this file shipped for months citing ",
+  "tags": [
+   "agents-md",
+   "line"
+  ],
+  "codes": [
+   "agents-md-length",
+   "agents-md-no-rules",
+   "agents-md-phantom-guard",
+   "agents-md-unenforced-rule"
+  ],
+  "reads": [],
+  "uses_argv": true,
+  "real_exit": 0,
+  "real_out": "[agents-md] ok",
+  "real_count": null,
+  "empty_exit": 2,
+  "empty_out": "",
+  "missing_exit": 2
+ },
+ {
+  "name": "check_assert_quality.py",
+  "what": "Statically inspects every test function and fails CI when the test cannot possibly have verified a behaviour \u2014 no assertions, assertions only on truthiness, assertions only against mocks, or a live test that never touche",
+  "why": "This is the single highest-value guard in the repository. A green test suite is the most convincing lie a codebase can tell. Our product exists to expose silent failure in other people's systems; shipping silent failure in our own would be disqualifying. The s",
+  "tags": [
+   "assert-quality"
+  ],
+  "codes": [
+   "live-test-mocked",
+   "monkeypatch",
+   "patch",
+   "test-mock-only",
+   "test-no-assert",
+   "test-weak-assert"
+  ],
+  "reads": [],
+  "uses_argv": true,
+  "real_exit": 1,
+  "real_out": "[assert-quality] 28003 violation(s): .venv/lib/python3.12/site-packages/mypy/test/test_config_parser.py:38: [test-weak-assert] test_no_config() only a",
+  "real_count": null,
+  "empty_exit": 0,
+  "empty_out": "[assert-quality] ok",
+  "missing_exit": 2
+ },
+ {
+  "name": "check_branch_name.py",
+  "what": "Fails when the current branch does not match the scheme in CONTRIBUTING.md: feat/ fix/ chore/ docs/ spike/, with fix/ requiring a leading issue number.",
+  "why": "One change, one branch, one PR. The prefix is what makes the history readable after a squash merge, and the issue number on fix/ is what ties a fix to the report that motivated it -- CONTRIBUTING.md requires a failing test referencing an issue, and a branch th",
+  "tags": [
+   "branch-name"
+  ],
+  "codes": [
+   "branch-name",
+   "branch-name-missing-issue",
+   "main",
+   "rev-parse"
+  ],
+  "reads": [],
+  "uses_argv": true,
+  "real_exit": 0,
+  "real_out": "[branch-name] ok",
+  "real_count": null,
+  "empty_exit": 0,
+  "empty_out": "[branch-name] not a git checkout, or detached HEAD; skipping",
+  "missing_exit": 0
+ },
+ {
+  "name": "check_constant_time_compare.py",
+  "what": "Parses `serve/webhook_github.py` and fails unless the HMAC digest is compared with `hmac.compare_digest` and never with `==` or `!=`.",
+  "why": "**Swapping `compare_digest` for `==` leaves every test in the suite passing** \u2014 verified by doing it. A byte-by-byte compare returns False at the first mismatched byte, so an attacker who can measure response times can recover the expected signature one byte a",
+  "tags": [
+   "constant-time"
+  ],
+  "codes": [
+   "expected",
+   "signature"
+  ],
+  "reads": [
+   "src/quantamind/serve/webhook_github.py"
+  ],
+  "uses_argv": true,
+  "real_exit": 0,
+  "real_out": "[constant-time] ok \u2014 the signature comparison is constant-time",
+  "real_count": null,
+  "empty_exit": 1,
+  "empty_out": "[constant-time] src/quantamind/serve/webhook_github.py not found \u2014 the guard is watching nothing",
+  "missing_exit": 1
+ },
+ {
+  "name": "check_conventions.py",
+  "what": "Three checks that protect separation of concerns and readability. 1. Layering \u2014 a module may import only from layers to its left in the declared order (types < discover < ingest < resolve < probe < label < store < serve)",
+  "why": "Layering is what lets us change one resolver without breaking another; it is the mechanical form of \"any change should be independently testable\". Docstrings are the onboarding contract. Banned tokens are how vague modules start.",
+  "tags": [
+   "conventions"
+  ],
+  "codes": [
+   "banned-name",
+   "core",
+   "helper",
+   "incomplete-docstring",
+   "layer-violation",
+   "manager"
+  ],
+  "reads": [
+   "__init__.py"
+  ],
+  "uses_argv": true,
+  "real_exit": 0,
+  "real_out": "[conventions] ok",
+  "real_count": null,
+  "empty_exit": 2,
+  "empty_out": "",
+  "missing_exit": 2
+ },
+ {
+  "name": "check_enforcement_map.py",
+  "what": "Two checks, one in each direction. 1. Resolution \u2014 every `guard:`, `ci:` and `hook:` token in the map must name something that exists: a guard file, a justfile recipe or workflow job, or a hook event actually registered.",
+  "why": "The map is the repository's claim about which rules are mechanically enforced. Fixing it by hand once does not stop it drifting again, and drift here is invisible: a row can name a guard that was renamed, or a guard can exist and never run, and both look fine ",
+  "tags": [
+   "enforcement-map"
+  ],
+  "codes": [
+   "enforcement-unresolved",
+   "orphan-guard"
+  ],
+  "reads": [
+   "__init__.py",
+   "settings.json"
+  ],
+  "uses_argv": true,
+  "real_exit": 0,
+  "real_out": "[enforcement-map] ok",
+  "real_count": null,
+  "empty_exit": 2,
+  "empty_out": "",
+  "missing_exit": 2
+ },
+ {
+  "name": "check_module_identity.py",
+  "what": "Two checks over each package. Duplicate basenames across a package tree, and modules unreachable from any import inside their own tree.",
+  "why": "A stale `assemble.py` survived a split and a commit. `git mv` was not used, so git tracked both copies; nothing imported the old name; every guard passed. The copy that stayed behind was missing `CATEGORIES` and the `no_symbols` rejection \u2014 the two things the ",
+  "tags": [],
+  "codes": [
+   "duplicate-module",
+   "module-identity",
+   "unreferenced-module"
+  ],
+  "reads": [
+   "__init__.py"
+  ],
+  "uses_argv": false,
+  "real_exit": 0,
+  "real_out": "[module-identity] ok",
+  "real_count": null,
+  "empty_exit": 0,
+  "empty_out": "[module-identity] ok",
+  "missing_exit": 0
+ },
+ {
+  "name": "check_no_partial_clone.py",
+  "what": "Scans every `git clone` argument list in the source trees for a `--filter` option, in any form: a literal `--filter=blob:none`, a separated `\"--filter\", \"blob:none\"`, or an f-string building either.",
+  "why": "A29 adopted `--filter=blob:none` to recover eight repositories that exceeded the clone timeout. A31 pre-registered a stop rule BEFORE the re-run, the known-answer PR came back wrong, and the strategy was ABANDONED rather than patched. The amendment log recorde",
+  "tags": [],
+  "codes": [
+   "--filter"
+  ],
+  "reads": [
+   "scripts/guard/check_no_partial_clone.py"
+  ],
+  "uses_argv": false,
+  "real_exit": 0,
+  "real_out": "[no-partial-clone] ok",
+  "real_count": null,
+  "empty_exit": 0,
+  "empty_out": "[no-partial-clone] ok",
+  "missing_exit": 0
+ },
+ {
+  "name": "check_no_research_imports.py",
+  "what": "Fails if anything under src/ or scripts/ imports a package that belongs to research/ only -- pandas, scipy, statsmodels, git, yaml, pycg, tree_sitter.",
+  "why": "research/phase0/ is a standalone uv project with its own lockfile and its own interpreter, which is the structural reason those packages cannot reach the product today. This guard is the backstop for the day someone converts the projects into a uv workspace to",
+  "tags": [
+   "research-imports"
+  ],
+  "codes": [
+   "pandas",
+   "research-import-in-product",
+   "scipy",
+   "yaml"
+  ],
+  "reads": [],
+  "uses_argv": true,
+  "real_exit": 0,
+  "real_out": "[research-imports] ok",
+  "real_count": null,
+  "empty_exit": 0,
+  "empty_out": "[research-imports] ok",
+  "missing_exit": 2
+ },
+ {
+  "name": "check_structure.py",
+  "what": "Fails CI when any source file exceeds 200 lines, or any directory holds more than 15 files (excluding __init__.py).",
+  "why": "Both caps are proxies for separation of concerns. A 400-line module is doing two jobs; a 40-file directory is a layer that was never decomposed. Enforcing the proxy mechanically is cheaper than arguing about the principle in review, and it keeps every file sma",
+  "tags": [
+   "structure"
+  ],
+  "codes": [
+   "dir-fanout",
+   "file-encoding",
+   "file-length"
+  ],
+  "reads": [
+   "__init__.py"
+  ],
+  "uses_argv": true,
+  "real_exit": 0,
+  "real_out": "[structure] ok",
+  "real_count": null,
+  "empty_exit": 0,
+  "empty_out": "[structure] ok",
+  "missing_exit": 2
+ },
+ {
+  "name": "check_subprocess_timeouts.py",
+  "what": "Walks every `subprocess.run`, `.Popen`, `.call`, `.check_call` and `.check_output` in the source trees and requires an explicit `timeout=` keyword. Reports the file and line of each one that lacks it.",
+  "why": "AGENTS.md has said \"Timeouts on every subprocess and every I/O call. Default 30s, declared explicitly\" since it was written, and NOTHING CHECKED IT. All thirteen call sites complied when this guard was added, which is exactly the moment to add it: a rule that ",
+  "tags": [
+   "subprocess-timeouts"
+  ],
+  "codes": [
+   "call",
+   "getoutput",
+   "subprocess-timeout"
+  ],
+  "reads": [],
+  "uses_argv": false,
+  "real_exit": 0,
+  "real_out": "[subprocess-timeouts] 35 subprocess call site(s) checked [subprocess-timeouts] ok",
+  "real_count": "35",
+  "empty_exit": 0,
+  "empty_out": "[subprocess-timeouts] 0 subprocess call site(s) checked [subprocess-timeouts] ok",
+  "missing_exit": 0
+ },
+ {
+  "name": "citations/freshness.py",
+  "what": "Finds every figure marked `re-check <Month YYYY>` in the documents and fails when that date has passed. One rule: if a number carries a re-check date, the date is enforced.",
+  "why": "Every other mechanism in this repository reports what it did -- the drop-rate counter, the shadow ranker, the retention counter, the bin-sum check against an independently known total. The citation cadence was the only one left that depended on somebody rememb",
+  "tags": [
+   "citation-freshness"
+  ],
+  "codes": [
+   "citation-stale"
+  ],
+  "reads": [],
+  "uses_argv": true,
+  "real_exit": 0,
+  "real_out": "[citation-freshness] ok [citation-freshness] 1 dated figure(s) tracked, 0 suppressed with 'citation-freshness:allow'",
+  "real_count": "1",
+  "empty_exit": 0,
+  "empty_out": "[citation-freshness] ok [citation-freshness] 0 dated figure(s) tracked, 0 suppressed with 'citation-freshness:",
+  "missing_exit": 0
+ },
+ {
+  "name": "citations/resolve.py",
+  "what": "Scans prose for citations and fails when one points at nothing: a `.md` path with no such file, or a `file.py:NNN` past that file's end.",
+  "why": "A document was cited in review as established policy -- by path AND section number -- and the file had never been committed. The section it quoted did not exist either. Nothing objected, because prose does not fail a test, and the citation was acted on: work w",
+  "tags": [],
+  "codes": [
+   "citation-past-eof",
+   "citation-unresolved",
+   "vendor"
+  ],
+  "reads": [],
+  "uses_argv": true,
+  "real_exit": 0,
+  "real_out": "[citations] ok",
+  "real_count": null,
+  "empty_exit": 0,
+  "empty_out": "[citations] ok",
+  "missing_exit": 0
+ },
+ {
+  "name": "plan_claims.py",
+  "what": "`normalise()`, `exists()`, `referenced()`, `sentences()` and `steps()` -- turn a stage heading, a table cell or a numbered step into the module names it asserts something about, and say whether each is on disk.",
+  "why": "**Split from `check_stage_table.py` at the 200-line cap, on the seam between reading a document and judging it.** The rules are three short conditions; almost all the length was deciding what the author actually wrote, which is the part this repository keeps g",
+  "tags": [],
+  "codes": [],
+  "reads": [
+   "__init__.py"
+  ],
+  "uses_argv": false,
+  "real_exit": 0,
+  "real_out": "",
+  "real_count": null,
+  "empty_exit": 0,
+  "empty_out": "",
+  "missing_exit": 0
+ },
+ {
+  "name": "records/check_burned_corpora.py",
+  "what": "Reads every `REPOS*` literal in `research/phase0/quote/corpus.py`, fails if any repository is named by more than one, and in `--check owner/name` mode prints every file under `research/` that already mentions a candidate",
+  "why": "`tornadoweb/tornado` was put into design thirteen's corpus by eye and turned out to be burned -- it sits in the aged corpus and in two rater pools' chunks. It was caught by luck, one manual grep, at a point where 38 repositories were already spent. **Eyeballin",
+  "tags": [
+   "burned-corpora",
+   "repositories"
+  ],
+  "codes": [],
+  "reads": [],
+  "uses_argv": true,
+  "real_exit": 0,
+  "real_out": "[burned-corpora] ok \u2014 36 repositories across 6 corpora, none reused",
+  "real_count": null,
+  "empty_exit": 0,
+  "empty_out": "[burned-corpora] research/phase0/quote/corpus.py not found \u2014 nothing to check",
+  "missing_exit": 0
+ },
+ {
+  "name": "records/check_decided_vocabulary.py",
+  "what": "Scans the product documents for terms where a decision has been taken and the losing side is still quotable -- the ranking unit, the pricing axis, and capabilities that do not ship. Reports the file, the line and which d",
+  "why": "**A figure-extraction check would have caught none of the six defects that prompted this.** Every published number in `QUANTAMIND.md` was already corroborated by a file outside it; the document was still wrong, because the errors were prose contradicting a tab",
+  "tags": [
+   "decided-vocabulary"
+  ],
+  "codes": [
+   "decided",
+   "decided-vocabulary"
+  ],
+  "reads": [],
+  "uses_argv": false,
+  "real_exit": 0,
+  "real_out": "[decided-vocabulary] 590 paragraph(s) against 3 decision(s) [decided-vocabulary] ok",
+  "real_count": "590",
+  "empty_exit": 0,
+  "empty_out": "[decided-vocabulary] 0 paragraph(s) against 3 decision(s) [decided-vocabulary] ok",
+  "missing_exit": 0
+ },
+ {
+  "name": "records/check_docs_sync.py",
+  "what": "Two checks. 1. Every directory under src/quantamind/ is mentioned in docs/engineering/CODEBASE.md. 2. In CI, a diff that touches src/ must also touch docs/engineering/CODEBASE.md.",
+  "why": "CODEBASE.md is the onboarding map -- a new contributor, or a new agent session, should read one file and know which directory to open. A map that silently omits a directory is worse than no map, because it is trusted. This VERIFIES rather than regenerates. The",
+  "tags": [
+   "docs-sync"
+  ],
+  "codes": [
+   "diff",
+   "docs-not-updated",
+   "undocumented-directory"
+  ],
+  "reads": [],
+  "uses_argv": true,
+  "real_exit": 0,
+  "real_out": "[docs-sync] ok",
+  "real_count": null,
+  "empty_exit": 0,
+  "empty_out": "[docs-sync] ok",
+  "missing_exit": 2
+ },
+ {
+  "name": "records/check_documented_commands.py",
+  "what": "Finds `python -m <module>` invocations in the documentation and fails when the named module has no command-line entry point.",
+  "why": "`PHASE0_RUNBOOK.md` \"Days 3-5 - The run\" documents the three commands that ARE the study. None of the three modules had a `main`, a `__main__` guard, or any argparse: uv run python -m phase0.extract_prs ... --out data/prs.jsonl uv run python -m phase0.run_pipe",
+  "tags": [
+   "documented-commands"
+  ],
+  "codes": [
+   "documented-command",
+   "pycg",
+   "venv"
+  ],
+  "reads": [
+   "__main__.py"
+  ],
+  "uses_argv": true,
+  "real_exit": 0,
+  "real_out": "[documented-commands] 3 documented command(s) NOT BUILT [documented-commands] ok",
+  "real_count": null,
+  "empty_exit": 0,
+  "empty_out": "[documented-commands] ok",
+  "missing_exit": 0
+ },
+ {
+  "name": "records/check_documented_recipes.py",
+  "what": "Scans the documentation for `just <recipe>` and `quantamind <subcommand>` and checks each one against reality -- the recipe names in the justfile, and the subparsers registered in `serve/cli.py`. A subcommand `cli.py` it",
+  "why": "`check_documented_commands.py` matches `python -m` and nothing else, so two whole classes of documented command were invisible to it. **`just fixtures` exited 1 on every invocation it ever had** -- it ran `git submodule update --init tests/fixtures/repos` agai",
+  "tags": [
+   "documented-recipes",
+   "line"
+  ],
+  "codes": [
+   "documented-recipe"
+  ],
+  "reads": [
+   "src/quantamind/serve/cli.py"
+  ],
+  "uses_argv": false,
+  "real_exit": 0,
+  "real_out": "[documented-recipes] 82 documented invocation(s) checked [documented-recipes] 5 documented command(s) NOT BUILT [documented-recipes] ok",
+  "real_count": "82",
+  "empty_exit": 0,
+  "empty_out": "[documented-recipes] 0 documented invocation(s) checked [documented-recipes] ok",
+  "missing_exit": 0
+ },
+ {
+  "name": "records/check_no_vague_refs.py",
+  "what": "Scans tracked text files for two classes of reference that read as precise and are not: section-number citations (`\u00a77`, `RUNBOOK \u00a72.1`) and phase-number citations (`Phase 0`, `Phase 4`).",
+  "why": "Both break silently. Insert a section into a document and every `\u00a77` in the repository now points somewhere else, with nothing to catch it -- no test fails, no link 404s, and the sentence still reads correctly. Phase numbers are worse: they name a position in ",
+  "tags": [
+   "no-vague-refs",
+   "phase-ref",
+   "section-ref"
+  ],
+  "codes": [],
+  "reads": [
+   "scripts/guard/records/check_no_vague_refs.py",
+   "tests/unit/test_no_vague_refs.py"
+  ],
+  "uses_argv": false,
+  "real_exit": 0,
+  "real_out": "no-vague-refs: clean (3 line(s) suppressed with 'no-vague-refs:allow')",
+  "real_count": "3",
+  "empty_exit": 0,
+  "empty_out": "no-vague-refs: clean",
+  "missing_exit": 0
+ },
+ {
+  "name": "records/check_plan_state.py",
+  "what": "Counts the modules in each layer of `src/quantamind/`, renders a table between the `plan-state` markers in `docs/plans/implementation.md`, and exits non-zero when the file does not already contain exactly that. `--write`",
+  "why": "The plan carries a \"Where this is now\" section so a reader arriving cold knows what is built. **Ask what that section prints when it is wrong: the same thing.** It is prose, so it stays convincing for exactly as long as nobody checks it, and this project has a",
+  "tags": [
+   "layer",
+   "plan-state"
+  ],
+  "codes": [
+   "infer",
+   "ingest",
+   "rank",
+   "render",
+   "types"
+  ],
+  "reads": [
+   "__init__.py",
+   "docs/plans/implementation.md"
+  ],
+  "uses_argv": true,
+  "real_exit": 0,
+  "real_out": "[plan-state] ok \u2014 the plan's state block matches the filesystem",
+  "real_count": null,
+  "empty_exit": 1,
+  "empty_out": "[plan-state] docs/plans/implementation.md not found",
+  "missing_exit": 1
+ },
+ {
+  "name": "records/check_schema_shape.py",
+  "what": "Hashes the DDL in `store/schema.py` and compares it to the value recorded here. On a difference it fails, naming what the change requires: a SCHEMA_VERSION bump, a migration, and the byte-level golden that does not exist",
+  "why": "**`just verify` SAYS IN ITS OWN BANNER WHAT IT CANNOT SEE.** It recomputes every pack row from git per path, which is a strong check on the VALUES and blind to the FORM -- column order, row ordering, path encoding. A byte-level golden would catch those and a r",
+  "tags": [
+   "schema-shape"
+  ],
+  "codes": [
+   "schema-shape"
+  ],
+  "reads": [
+   "src/quantamind/store/schema.py"
+  ],
+  "uses_argv": false,
+  "real_exit": 0,
+  "real_out": "[schema-shape] DDL digest 4a95ae6d761071bd, SCHEMA_VERSION 5 [schema-shape] ok",
+  "real_count": null,
+  "empty_exit": 1,
+  "empty_out": "",
+  "missing_exit": 0
+ },
+ {
+  "name": "records/check_stage_table.py",
+  "what": "Cross-checks three places `docs/plans/implementation.md` records progress -- the summary table, each `# Stage \u2014` heading's status, and the numbered steps -- against `src/quantamind/` and against each other. Four sound ru",
+  "why": "**Its sibling `check_plan_state.py` says in its own docstring that it \"cannot check that a stage's prose is honest\".** That was true, and the prose then drifted in four rows while the machine-checked block twelve lines below it stayed correct. The summary tabl",
+  "tags": [
+   "name",
+   "stage-table"
+  ],
+  "codes": [
+   "stage-table"
+  ],
+  "reads": [
+   "docs/plans/implementation.md"
+  ],
+  "uses_argv": false,
+  "real_exit": 0,
+  "real_out": "[stage-table] 7 summary row(s), 6 stage section(s) [stage-table] ok",
+  "real_count": "7",
+  "empty_exit": 1,
+  "empty_out": "[stage-table] docs/plans/implementation.md not found",
+  "missing_exit": 0
+ },
+ {
+  "name": "records/check_withdrawn_amendments.py",
+  "what": "Scans the amendment log for rows declaring something ABANDONED or WITHDRAWN, and requires each to name a `guard:`, `ci:` or `hook:` mechanism that exists -- or to tag itself ADVISORY.",
+  "why": "A31 pre-registered a stop rule, the known-answer test failed, and `--filter=blob:none` was declared ABANDONED. The commit recording that touched thirteen files: docs and results, no source. The flag stayed in `pipeline/worktree.py` and two pilot arms were walk",
+  "tags": [],
+  "codes": [],
+  "reads": [],
+  "uses_argv": false,
+  "real_exit": 0,
+  "real_out": "[withdrawn-amendments] ok",
+  "real_count": null,
+  "empty_exit": 0,
+  "empty_out": "[withdrawn-amendments] ok",
+  "missing_exit": 0
+ }
+]

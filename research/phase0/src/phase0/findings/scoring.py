@@ -26,7 +26,16 @@ import argparse
 import re
 from pathlib import Path
 
+from phase0.findings.deciding_line import locate
+
+# A sheet this one-sided cannot be told apart from a constant responder.
+CONSTANT_AT = 0.9
 VERDICTS = {"TRUE", "FALSE", "UNKNOWN"}
+# **DIRECTION HAS A MECHANICAL RIGHT ANSWER**, which is the whole point of asking for it. A
+# rater who describes what the commit does rather than judging the claim never has to locate the
+# claim's own code; this makes them locate it. On the item that exposed this, the claim asserts a
+# sentinel IS yielded and the diff deletes it -- answering REMOVED makes that visible.
+DIRECTIONS = {"ADDED", "REMOVED"}
 NEEDS_LINE = {"TRUE", "FALSE"}
 Z = 1.96
 
@@ -72,7 +81,7 @@ def main() -> int:
     args = parser.parse_args()
 
     shown = diffs_of(args.pack.read_text())
-    labels = read_blocks(args.labels.read_text(), fields=("VERDICT", "LINE"))
+    labels = read_blocks(args.labels.read_text(), fields=("VERDICT", "LINE", "DIRECTION"))
 
     if set(labels) != set(shown):
         print(f"labels cover {len(labels)} items, the pack has {len(shown)} -- refusing to score")
@@ -93,10 +102,9 @@ def main() -> int:
         if got["VERDICT"] not in NEEDS_LINE:
             continue
         line = got["LINE"].strip().strip("`")
-        if not line or line not in shown[name]:
-            unquoted.append(
-                f"{name} ({got['VERDICT']}, line {'missing' if not line else 'not in the diff'})"
-            )
+        placed = locate(line, shown[name])
+        if not placed.placed:
+            unquoted.append(f"{name} ({got['VERDICT']}): {placed.reason}")
     if unquoted:
         print(f"VERDICTS WITHOUT AN ADMISSIBLE DECIDING LINE   {len(unquoted)} of {len(labels)}")
         print()
@@ -107,9 +115,53 @@ def main() -> int:
         print("  code. The rate is NOT computed -- fix these, or record why the line is absent.")
         return 2
 
+    # **WHAT A ROBOT WOULD SCORE, PRINTED BESIDE WHAT THE RATER SCORED.** A second rater
+    # returned 23 TRUE of 24 and scored 95.8%; a responder answering TRUE unconditionally scores
+    # the same. Nothing in the output said so, so the number read as a measurement. It now cannot
+    # be quoted without its own null beside it.
+    # The cited line's direction is checked against the diff, when the sheet asks for it.
+    wrong_way: list[str] = []
+    for name, got in sorted(labels.items()):
+        if got["VERDICT"] not in NEEDS_LINE:
+            continue
+        said = got.get("DIRECTION", "").strip().upper()
+        if said not in DIRECTIONS:
+            # **MISSING IS NOT SKIPPED.** An absent field made this check pass over the item in
+            # silence, which is the same shape as every defect this instrument was built after.
+            wrong_way.append(f"{name}: no DIRECTION given ({said or 'blank'})")
+            continue
+        placed = locate(got["LINE"].strip().strip("`"), shown[name])
+        if not placed.placed:
+            # **UNPLACEABLE IS REPORTED, NOT SKIPPED.** `if truth and ...` passed over these,
+            # so a sheet citing diff headers went through this gate untouched.
+            wrong_way.append(f"{name}: cannot be placed -- {placed.reason}")
+        elif said != placed.direction:
+            wrong_way.append(f"{name}: said {said}, the diff shows {placed.direction}")
+    if wrong_way:
+        print(f"DECIDING LINES POINTING THE WRONG WAY   {len(wrong_way)} of {len(labels)}")
+        print()
+        for w in wrong_way:
+            print(f"  {w}")
+        print()
+        print("  A verdict whose own deciding line was not located in the diff was not read off")
+        print("  it. The rate is NOT computed.")
+        return 4
+
     counts = {v: sum(g["VERDICT"] == v for g in labels.values()) for v in sorted(VERDICTS)}
     decided = counts["TRUE"] + counts["FALSE"]
     print(f"TRUE {counts['TRUE']}   FALSE {counts['FALSE']}   UNKNOWN {counts['UNKNOWN']}")
+    top = max(counts.values())
+    if top >= len(labels) * CONSTANT_AT:
+        share = top / len(labels)
+        print()
+        print(f"  ONE VERDICT ON {share:.0%} OF ITEMS. A responder answering that verdict to")
+        print("  every item is indistinguishable from this sheet on every check here.")
+        print("  THE RATE IS WITHHELD -- not computed, not printed under a caveat.")
+        print()
+        print("  This is not an accusation of carelessness. It says the instrument cannot")
+        print("  separate this rating from a constant one, which makes the number unusable")
+        print("  either way. A second reading is the only thing that resolves it.")
+        return 3
     print(f"every verdict cites a line present in its own diff  ({len(labels)} of {len(labels)})")
     print()
     n = len(labels)

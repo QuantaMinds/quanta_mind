@@ -2960,3 +2960,29 @@ that are genuinely ambiguous rather than simply wrong.
 
 **`BOTH CALL CORRECT` is the defensible floor.** A finding two independent readers call correct is
 a different claim from one a single reader did, and it is the one to quote.
+
+### The gates that withhold a rate — `findings/scoring.py`, `findings/deciding_line.py`
+
+Four gates, each of which exists because a sheet reached a result it should not have.
+
+| gate | the sheet that got through |
+|---|---|
+| **LINE admissible** | a verdict citing nothing, or citing diff furniture |
+| **DIRECTION** | a rater describing what the commit does, never locating the claim's own code |
+| **constant responder** | 23 TRUE of 24 — the same 95.8% a responder answering TRUE unconditionally scores |
+| **coverage / verdict** | a partial or junk sheet |
+
+**A second rater scored 95.8% and nothing in the output said a robot scores the same.** That is
+why the constant-responder gate prints no rate at all rather than a rate under a caveat: a number
+beneath a warning is a number that gets quoted without one.
+
+**`deciding_line.locate` exists because the first version skipped what it could not evaluate.**
+A sheet citing `+++ b/pkg/mod.py` passed the admissibility gate — the header IS in the diff text,
+so a substring test accepts it — then failed to place, and `if truth and said != truth` passed
+over it in silence. The check written to catch that sheet never fired; a different gate did, and
+only tracing a "passing" test found it. Every unplaceable outcome now carries a reason:
+a header, a blank, a bare marker, unchanged context, or a line both added and removed.
+
+**Every gate is sabotaged in the tests, not merely exercised.** Disabling any one of the four
+fails a named test. Two of them did not, when they were new and had only been demonstrated by
+hand — which is the whole argument for the rule.
