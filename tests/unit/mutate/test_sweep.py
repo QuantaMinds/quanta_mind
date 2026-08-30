@@ -1,6 +1,6 @@
 """Verification that the mutation sweep refuses rather than reporting a meaningless verdict.
 
-WHAT: Drives `scripts/measure/mutate.py` over a temporary tree — its discovery, its refusals,
+WHAT: Drives `scripts/mutate/sweep.py` over a temporary tree — its discovery, its refusals,
       the survivor verdict, and that it puts every file back.
 WHY:  **A MUTATION SWEEP THAT RUNS AGAINST A RED SUITE REPORTS TOTAL COVERAGE.** Every mutation
       would be "caught", because the suite was failing before any of them was applied, and the
@@ -14,7 +14,7 @@ WHY:  **A MUTATION SWEEP THAT RUNS AGAINST A RED SUITE REPORTS TOTAL COVERAGE.**
       **AND IT MUST PUT EVERYTHING BACK.** A mutation left on disk is a corrupted working tree
       that looks like ordinary work, so restoration is asserted by re-reading the file rather
       than assumed from the `finally`.
-IMPORTS: pytest, scripts/measure/mutate.py. Nothing from `quantamind`.
+IMPORTS: pytest, scripts/mutate/sweep.py. Nothing from `quantamind`.
 CONSUMED BY: `just check`.
 """
 
@@ -25,9 +25,9 @@ from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts" / "measure"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts" / "mutate"))
 
-import mutate
+import sweep as mutate
 
 REFUSED = 2
 SOURCE = "CAP = 15\nFLOOR = 0\nENABLED = True\nNAME = 'x'\n"
@@ -79,7 +79,8 @@ def test_survivors_are_named_and_the_file_is_restored(tree: Path, monkeypatch) -
     """A suite that never fails means every mutation survives — and the file still comes back."""
     monkeypatch.setattr(mutate, "suite_passes", lambda: True)
 
-    survivors, left = mutate.sweep(mutate.targets_in([tree / "mod.py"]))
+    results, left = mutate.sweep(mutate.targets_in([tree / "mod.py"]))
+    survivors = [t for t, caught in results if not caught]
 
     assert {t.name for t in survivors} == {"CAP", "FLOOR"}
     assert left == []
@@ -96,9 +97,9 @@ def test_a_suite_that_always_fails_reports_no_survivors(tree: Path, monkeypatch)
 
     monkeypatch.setattr(mutate, "suite_passes", once_then_fail)
 
-    survivors, left = mutate.sweep(mutate.targets_in([tree / "mod.py"]))
+    results, left = mutate.sweep(mutate.targets_in([tree / "mod.py"]))
 
-    assert survivors == []
+    assert [t for t, caught in results if not caught] == []
     assert left == []
     assert (tree / "mod.py").read_text() == SOURCE
 
