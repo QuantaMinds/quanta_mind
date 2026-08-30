@@ -76,7 +76,7 @@ class Reviewed:
 LANGUAGES = ",".join(sorted(REVIEWABLE_SUFFIXES))
 
 
-def _index(clone: Path, repo: str, store_path: Path) -> tuple[sqlite3.Connection, int]:
+def index_repository(clone: Path, repo: str, store_path: Path) -> tuple[sqlite3.Connection, int]:
     """Bring the touch index up to HEAD, extending it when that is provably safe.
 
     **THE INDEX IS DERIVED, AND EXTENDING IT IS AN OPTIMISATION THAT MUST NOT CHANGE THE ANSWER.**
@@ -158,7 +158,7 @@ def review(
     considered = [p for p in changed if language_of(p) is not Language.UNSUPPORTED]
     skipped = [p for p in changed if language_of(p) is Language.UNSUPPORTED]
 
-    conn, repo_id = _index(clone, repo, store_path)
+    conn, repo_id = index_repository(clone, repo, store_path)
     try:
         if not considered:
             # Every changed file is in a language we do not read. NOT an error and NOT silence:

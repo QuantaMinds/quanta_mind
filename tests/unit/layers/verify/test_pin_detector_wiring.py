@@ -1,6 +1,6 @@
 """Verification that the pin detector is handed a list it can actually act on.
 
-WHAT: Pins the wiring between the changed-file list and `serve/pin_check`, and the `None`
+WHAT: Pins the wiring between the changed-file list and `verify/pin_check`, and the `None`
       sentinel that makes an unfiltered fetch possible.
 WHY:  **EVERY EXISTING ORACLE TEST PASSES WITH THE WIRING BROKEN.** They call `detect()` with a
       synthetic diff string, so they prove the detector works and say nothing about whether it is
@@ -12,14 +12,14 @@ WHY:  **EVERY EXISTING ORACLE TEST PASSES WITH THE WIRING BROKEN.** They call `d
       So these tests start from a changed-file LIST, the thing the delivery path actually holds,
       and assert on what reaches the detector. A test that starts from a diff cannot fail the way
       this system failed.
-IMPORTS: pytest, quantamind.serve.pin_check, quantamind.ingest.diff, quantamind.types.change.
+IMPORTS: pytest, quantamind.verify.pin_check, quantamind.ingest.diff, quantamind.types.change.
 CONSUMED BY: `just check`.
 """
 
 from __future__ import annotations
 
-from quantamind.serve.pin_check import workflows
 from quantamind.types.change import REVIEWABLE_SUFFIXES
+from quantamind.verify.pin_check import workflows
 
 WORKFLOW = ".github/workflows/tests.yaml"
 MIXED = [WORKFLOW, ".github/workflows/lock.yml", "src/flask/app.py", "README.md"]
