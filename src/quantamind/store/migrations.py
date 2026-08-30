@@ -86,6 +86,17 @@ def _to_6(conn: sqlite3.Connection) -> None:
             conn.execute(statement)
 
 
+def _to_7(conn: sqlite3.Connection) -> None:
+    """Add `account` and `session`. **No session survives a migration, and none is invented.**
+
+    There were no accounts before this step, so there is nothing to backfill and nobody to grant a
+    session to. A migration that created one would be issuing a credential nobody asked for.
+    """
+    for statement in TABLES:
+        if "account" in statement or "session" in statement:
+            conn.execute(statement)
+
+
 def _to_4(conn: sqlite3.Connection) -> None:
     """Add `touch_watermark`. Nothing is backfilled, and that is what keeps it safe.
 
@@ -99,7 +110,13 @@ def _to_4(conn: sqlite3.Connection) -> None:
             conn.execute(statement)
 
 
-STEPS: dict[int, Callable[[sqlite3.Connection], None]] = {3: _to_3, 4: _to_4, 5: _to_5, 6: _to_6}
+STEPS: dict[int, Callable[[sqlite3.Connection], None]] = {
+    3: _to_3,
+    4: _to_4,
+    5: _to_5,
+    6: _to_6,
+    7: _to_7,
+}
 
 
 @dataclass(frozen=True, slots=True)

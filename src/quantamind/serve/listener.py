@@ -40,6 +40,8 @@ from typing import Any
 
 from quantamind.serve.health import health
 from quantamind.serve.onboarding import admit
+from quantamind.serve.web import routes
+from quantamind.serve.web.http_io import read_body
 from quantamind.serve.webhook_github import (
     DELIVERY_HEADER,
     EVENT_HEADER,
@@ -59,31 +61,6 @@ WEBHOOK_PATH = "/webhook"
 HEALTH_PATH = "/health"
 
 Work = Callable[[Review], None]
-
-
-def _read_body(handler: BaseHTTPRequestHandler) -> tuple[bytes | None, str]:
-    """(body, reason). Exactly `Content-Length` bytes, or None with WHICH of three faults it was.
-
-    Reading to EOF would hang on a client that never closes, and reading a different number of
-    bytes than the signature covers turns an authentic delivery into a rejected one.
-
-    **The three refusals are distinct values, not one.** An absent header, an unparseable one and
-    an oversized one need different responses from whoever is debugging the 411 -- a
-    misconfigured proxy, a malformed client and an attack look nothing alike, and collapsing them
-    into a single message makes the endpoint answer the same way for all three.
-    """
-    raw = handler.headers.get("Content-Length")
-    if raw is None:
-        return None, "no Content-Length header; the body length must be declared"
-    try:
-        length = int(raw)
-    except ValueError:
-        return None, f"Content-Length {raw!r} is not an integer"
-    if length < 0:
-        return None, f"Content-Length {length} is negative"
-    if length > MAX_BODY_BYTES:
-        return None, f"Content-Length {length} exceeds the {MAX_BODY_BYTES}-byte ceiling"
-    return handler.rfile.read(length), ""
 
 
 class _Handler(BaseHTTPRequestHandler):
@@ -108,7 +85,17 @@ class _Handler(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:
         if self.path != HEALTH_PATH:
-            self._say(404, {"error": "no such path"})
+            # Everything a BROWSER reaches. `routes.get` builds a reply rather than writing one,
+            # so a forged callback can be tested without a socket. Unknown paths 404 there.
+            reply = routes.get(self.path, self.headers.get("Cookie", ""), self.settings)
+            body = reply.body.encode()
+            self.send_response(reply.status)
+            for name, value in reply.headers:
+                self.send_header(name, value)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
             return
         verdict = health(self.settings.database_path)
         self._say(200 if verdict.ok else 503, {"ok": verdict.ok, "detail": verdict.detail})
@@ -128,7 +115,7 @@ class _Handler(BaseHTTPRequestHandler):
         if self.path != WEBHOOK_PATH:
             self._say(404, {"error": "no such path"})
             return
-        body, why = _read_body(self)
+        body, why = read_body(self)
         if body is None:
             self._say(411, {"error": why})
             return

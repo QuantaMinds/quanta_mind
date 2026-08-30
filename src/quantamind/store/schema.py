@@ -42,7 +42,7 @@ from quantamind.store import drift
 from quantamind.store.tables import TABLES
 
 # Bump on ANY change to the DDL below, and write a migration. There is no in-place edit.
-SCHEMA_VERSION = 6
+SCHEMA_VERSION = 7
 
 # `finding` and `claim` exist because adding a table later is a migration, and the schema is
 # append-only. NOTHING WRITES TO THEM: `infer/` is closed on evidence and publishes no findings.

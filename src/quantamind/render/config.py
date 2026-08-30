@@ -39,6 +39,9 @@ def render_config(settings: Settings) -> str:
         # **REPORTED AS SET OR UNSET, NEVER PRINTED.** It is a credential, and `config` output
         # lands in terminal scrollback and CI logs. The operator needs to know whether public
         # reads are rate-limited; nobody needs the token itself on screen to learn that.
+        f"oauth_client_id            {settings.oauth_client_id or '(unset)'}",
+        # A credential. Reported as set or unset, never printed, like the token below it.
+        f"oauth_client_secret        {'set' if settings.oauth_client_secret else '(unset)'}",
         f"public_read_token          {'set' if settings.public_read_token else '(unset)'}",
         f"posting_enabled            {settings.posting_enabled}",
         "",

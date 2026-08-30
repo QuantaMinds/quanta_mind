@@ -97,6 +97,15 @@ TABLES: tuple[str, ...] = (
     # `completed_at` NULL means we started and did not finish: GitHub redelivers on failure and
     # REUSES the same GUID, so an unfinished attempt must be retryable while a finished one must
     # not be replayable.
+    # B2. **THE SESSION TOKEN IS NEVER STORED, ONLY ITS HASH.** A stolen database must not hand
+    # anyone a live session, which is the same reason `app_key_path` holds a path and not a key.
+    # `expires_at` is written at issue: a session with no end is a credential with no end.
+    """CREATE TABLE IF NOT EXISTS account (
+        login TEXT PRIMARY KEY, github_id INTEGER NOT NULL,
+        first_seen INTEGER NOT NULL, last_seen INTEGER NOT NULL)""",
+    """CREATE TABLE IF NOT EXISTS session (
+        token_hash TEXT PRIMARY KEY, login TEXT NOT NULL REFERENCES account(login),
+        created_at INTEGER NOT NULL, expires_at INTEGER NOT NULL)""",
     # `eligible` NULL is "never assessed", 0 is "refused". → `store/installations.py`.
     """CREATE TABLE IF NOT EXISTS installation (
         account TEXT NOT NULL, repo TEXT NOT NULL, tier TEXT NOT NULL DEFAULT 'free',
