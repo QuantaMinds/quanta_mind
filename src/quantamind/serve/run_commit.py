@@ -20,7 +20,7 @@ import time
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from quantamind.infer.gemini import InferenceFailed, Unavailable
+from quantamind.infer.vertex import InferenceFailed, Unavailable
 from quantamind.ingest.worktree import NothingPending, pending
 from quantamind.rank import firing
 from quantamind.render.deep_report import lines

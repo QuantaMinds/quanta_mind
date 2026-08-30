@@ -26,7 +26,7 @@ from dataclasses import replace
 from pathlib import Path
 
 from quantamind.infer.change_summary import Summary, summarise
-from quantamind.infer.gemini import InferenceFailed, Unavailable
+from quantamind.infer.vertex import InferenceFailed, Unavailable
 from quantamind.ingest.diff import DiffReadFailed, stated_goal, unified_diff
 from quantamind.ingest.standards.conventions import written
 from quantamind.parse.importers import importers

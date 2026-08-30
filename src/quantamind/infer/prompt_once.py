@@ -15,7 +15,7 @@ CONSUMED BY: `serve/settle.py`.
 
 from __future__ import annotations
 
-from quantamind.infer.gemini import MODEL, InferenceFailed, _post, _token
+from quantamind.infer.vertex import MODEL, InferenceFailed, post, token
 
 
 def ask(
@@ -35,14 +35,14 @@ def ask(
     **The truncation check stays.** A cut-off reply reads as a shorter answer rather than a broken
     one, which is the failure shape this project keeps mistaking for a result.
     """
-    token = _token(gcloud)
+    bearer = token(gcloud)
     url = (
         f"https://{location}-aiplatform.googleapis.com/v1/projects/{project}"
         f"/locations/{location}/publishers/google/models/{model}:generateContent"
     )
-    answer = _post(
+    answer = post(
         url,
-        token,
+        bearer,
         {
             "contents": [{"role": "user", "parts": [{"text": prompt}]}],
             "generationConfig": {"temperature": 0.0, "maxOutputTokens": 4096},

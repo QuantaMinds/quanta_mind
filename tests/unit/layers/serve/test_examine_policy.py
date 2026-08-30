@@ -27,7 +27,7 @@ from pathlib import Path
 import pytest
 
 from quantamind.allocate.depth import Depth, Reading
-from quantamind.infer.gemini import Unavailable
+from quantamind.infer.vertex import Unavailable
 from quantamind.serve import deep_review
 from quantamind.types.settings import Settings
 

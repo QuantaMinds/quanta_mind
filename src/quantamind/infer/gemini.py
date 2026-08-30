@@ -27,17 +27,18 @@ from __future__ import annotations
 
 import json
 import re
-import time
-import urllib.error
-import urllib.request
 
-from quantamind.ingest import google_auth
+from quantamind.infer.diff_cap import capped
+from quantamind.infer.vertex import (
+    MODEL,
+    InferenceFailed,
+    post,
+    token,
+)
 from quantamind.types.finding import Finding
 from quantamind.types.spend import Spend, measured
 
-MODEL = "gemini-2.5-pro"
 MAX_FINDINGS = 8
-TIMEOUT_S = 300
 MAX_DIFF_CHARS = 120_000
 
 PROMPT = """You are reviewing part of a pull request. Report only defects a maintainer must fix
@@ -61,55 +62,6 @@ For each defect quote the EXACT line from the diff that is wrong. Do not give a 
 Respond with ONLY a JSON array of objects, each:
 {{"path": "the file", "quote": "the exact line copied from the diff", "claim": "one sentence
 naming the defect and why it is wrong", "fix": "the corrected line"}}"""
-
-
-class Unavailable(RuntimeError):
-    """No credentials. Distinct from a model that ran and found nothing."""
-
-
-class InferenceFailed(RuntimeError):
-    """The model did not return usable findings. Never silently an empty review."""
-
-
-def _token(gcloud: str) -> str:
-    """A bearer token from wherever we are running.
-
-    **THIS SHELLED OUT TO `gcloud` AND NOTHING ELSE**, which meant the model half could only work
-    on a machine with the SDK installed and a human logged in — never in the container, which is
-    where the product actually runs. `ingest/google_auth` tries the GCP metadata server first, so
-    a deployed container needs no credential on disk at all, and falls back to `gcloud` for
-    laptop development.
-    """
-    try:
-        got = google_auth.token(gcloud)
-    except google_auth.Unavailable as exc:
-        raise Unavailable(str(exc)) from None
-    # **THE SOURCE IS LOGGED AND THE TOKEN IS NOT.** `Token` was built carrying its source "so it
-    # can be logged" and then nothing logged it, which left no way to tell a container using the
-    # metadata server from one that had somehow found a `gcloud` — the exact difference a
-    # deployment is trying to prove. The value never appears; only which identity answered.
-    print(f"[infer] access token from {got.source}", flush=True)
-    return got.value
-
-
-def _post(url: str, token: str, body: dict[str, object]) -> dict[str, object]:
-    """One call. **The elapsed time is attached to the reply**: a caller timing it separately would
-    be timing its own parsing too, and a cost that drifts from the bill is worse than none."""
-    started = time.monotonic()
-    request = urllib.request.Request(
-        url,
-        data=json.dumps(body).encode(),
-        headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
-    )
-    try:
-        with urllib.request.urlopen(request, timeout=TIMEOUT_S) as response:
-            parsed = json.loads(response.read())
-    except urllib.error.HTTPError as exc:
-        raise InferenceFailed(f"HTTP {exc.code}: {exc.read()[:200]!r}") from None
-    if not isinstance(parsed, dict):
-        raise InferenceFailed(f"expected an object, got {type(parsed).__name__}")
-    parsed["_ms"] = int((time.monotonic() - started) * 1000)
-    return parsed
 
 
 def _findings(text: str, allowed: set[str]) -> list[Finding]:
@@ -169,15 +121,17 @@ def read(
     """
     if not paths:
         return [], Spend()
-    token = _token(gcloud)
+    bearer = token(gcloud)
     url = (
         f"https://{location}-aiplatform.googleapis.com/v1/projects/{project}"
         f"/locations/{location}/publishers/google/models/{model}:generateContent"
     )
-    prompt = PROMPT.format(max_findings=MAX_FINDINGS, diff=diff[:MAX_DIFF_CHARS], context=context)
-    answer = _post(
+    prompt = PROMPT.format(
+        max_findings=MAX_FINDINGS, diff=capped(diff, MAX_DIFF_CHARS), context=context
+    )
+    answer = post(
         url,
-        token,
+        bearer,
         {
             "contents": [{"role": "user", "parts": [{"text": prompt}]}],
             "generationConfig": {"temperature": 0.0, "maxOutputTokens": 32768},
