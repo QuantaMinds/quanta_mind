@@ -24,8 +24,8 @@ WHY:  **THE COLD START IS A FULL CLONE PLUS A ~31s INDEX BUILD ON A 115,776-COMM
       worse outcome than a slow first review. Each outcome is PRINTED as it happens as well as
       returned — an operator watching the log is the only person who can see a warm-up that has
       been failing quietly for a week.
-IMPORTS: serve.{run_review,working_clone}, ingest.github_api, store.tenancy, types.settings,
-      verify.qualification.
+IMPORTS: serve.{run_review,working_clone}, ingest.github_api, parse.suite_reach, store.tenancy,
+      types.settings, verify.qualification.
 CONSUMED BY: `serve/listener.py`, on an installation event.
 """
 
@@ -34,6 +34,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from quantamind.ingest.github_api import token_for
+from quantamind.parse.suite_reach import NoSource, reach
 from quantamind.serve.run_review import index_repository
 from quantamind.serve.working_clone import ensure
 from quantamind.store import tenancy
@@ -57,6 +58,15 @@ def warm(repo: str, settings: Settings) -> int:
     clone = ensure(repo, Path(settings.clone_root), token=token_for(repo) if app else None)
     owner, _, name = repo.partition("/")
     store = tenancy.store_for(Path(settings.database_path), owner, name)
+    # **WHAT ITS OWN SUITE REACHES, SAID ONCE, WHERE A CLONE ALREADY EXISTS.** `product-build.md`
+    # B8 asks for eligibility to be "a measured answer about their repository instead of a sales
+    # rule"; a repository whose tests import little of its own source is one where a review has
+    # less to stand on. Reported, never enforced — it is information for a human, not a gate.
+    try:
+        print(f"[serve] {repo}: {reach(clone).sentence()}", flush=True)
+    except NoSource as empty:
+        print(f"[serve] {repo}: suite reach unreadable — {empty}", flush=True)
+
     conn, _ = index_repository(clone, repo, store)
     try:
         return int(conn.execute("SELECT COUNT(*) FROM touch").fetchone()[0])

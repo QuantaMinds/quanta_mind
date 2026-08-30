@@ -183,3 +183,27 @@ point is recoverable by counting relative imports the parser currently drops.
 **And the direction of the error is the one that should worry a reader.** The proxy was described
 above as over-counting, "which makes a FAIL trustworthy and a PASS an upper bound". That was
 correct, and it was still reported as a PASS. The upper bound was quoted as the result.
+
+---
+
+# ROUND TWO — declared 2026-08-30 before any of these was cloned
+
+Round one measured **ten** candidates and two cleared. The bar asks how many qualifying
+repositories EXIST, and ten is a small sample of open-source Python — so a second round is a fair
+way to answer it and a cheap one, since nothing here costs a model call.
+
+**It is also the obvious way to cheat**, by adding repositories until three pass. Two commitments
+against that, made now:
+
+1. **The list is fixed here, before cloning**, and every one of the ten is reported whatever it
+   scores — the same rule round one followed when typer's headline collapsed.
+2. **The bar does not move.** Still ≥50% of changed library source imported by a test, still three
+   repositories, now judged on the IMPORT column rather than the mention column.
+
+`python/mypy`, `PyCQA/flake8`, `pallets/werkzeug`, `pallets/jinja`, `paramiko/paramiko`,
+`Pylons/pyramid`, `tqdm/tqdm`, `ipython/ipython`, `pypa/pip`, `pypa/setuptools`.
+
+None appears in `research/phase0/quote/corpus.py`, and `check_burned_corpora` enforces that.
+
+**If round one and round two together do not reach three, the answer is FAIL and it is published
+as one.** Two rounds is where this stops; a third would be sampling until the number arrives.

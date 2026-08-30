@@ -1,20 +1,20 @@
 """Can any corpus support the execution-grounding arm? Measure the ceiling before building one.
 
-WHAT: For repositories this project has never measured, classify the files recent changes touch
-      and report what share of changed SOURCE files are named by some test file.
-WHY:  **THE EXECUTION ARM DIED AT A CEILING, NOT AT A RESULT.** Step 0 of
+WHAT: For repositories never measured here, report what share of changed SOURCE a test imports.
+WHY:  **THE ARM DIED AT A CEILING, NOT A RESULT.** Step 0 of
       `docs/plans/preregistrations/reviewer/execution-grounding-preregistration.md` measured 31%
       of findings about source a suite even names, against a 50% bar, and stopped rather than
       running an arm whose number would have described the corpus.
 
-      **IT COUNTS IMPORTS, NOT MENTIONS, BECAUSE THE MENTION PROXY OVER-COUNTED BY UP TO 43
-      POINTS.** Step 0 used mentions; this reports the stricter number and the result document
-      records both, so the two remain comparable while the bar is judged on the honest one.
+      **IT COUNTS IMPORTS, NOT MENTIONS: THE MENTION PROXY OVER-COUNTED BY UP TO 43 POINTS.**
+      The result document records both columns, so Step 0's number stays comparable.
 
-      **A KNOWN-ANSWER CHECK RUNS FIRST.** A classifier that called everything `source` would
-      report a wonderful share, and would look exactly like a working one.
+      **A KNOWN-ANSWER CHECK RUNS FIRST**: a classifier calling everything `source` would report
+      a wonderful share and look exactly like a working one.
 IMPORTS: stdlib only. No product import — this measures repositories, not the pipeline.
 CONSUMED BY: a person, and the pre-registration it answers.
+SEE ALSO: `src/quantamind/parse/suite_reach.py`, its twin in the product — same question for ONE
+      repository rather than a corpus. Duplicated because research cannot import the product.
 """
 
 from __future__ import annotations
@@ -67,7 +67,7 @@ class Shape:
 
 
 def classify(path: str) -> str:
-    """`test`, `config`, `source` or `other`. A test cannot adjudicate a claim about itself."""
+    """`test`, `config`, `source` or `other`. A test cannot judge a claim about itself."""
     if TEST_PART.search(path):
         return "test"
     if path.endswith(".py") and NOT_LIBRARY.search(path):
