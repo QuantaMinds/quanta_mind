@@ -112,4 +112,9 @@ def test_an_undecided_check_is_excluded_from_the_compliance_count() -> None:
 
 def test_the_schema_is_versioned_so_a_consumer_can_refuse() -> None:
     """A tool built on these keys outlives this file; unversioned it mis-reads silently."""
-    assert json.loads(report(rank({"a.py": 1})))["schema"] == SCHEMA
+    # **NOT `== SCHEMA`.** That imported the value under test and compared it to itself, so
+    # changing SCHEMA from 1 to 99 passed this test, the property tier and the live tier alike.
+    # The emitted number is a promise to consumers; raising it is a deliberate act that should
+    # break this line and make somebody say why.
+    assert json.loads(report(rank({"a.py": 1})))["schema"] == 1
+    assert SCHEMA == 1, "the wire contract changed; every consumer keying off it must be updated"

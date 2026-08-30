@@ -1,7 +1,7 @@
 # Does blast radius predict the fix-return outcome? Inconclusive, and D2d is on hold
 
 **Run 2026-08-29 on `pallets/flask`, 393 admissible events, 1,207 file-rows.**
-Harness `research/phase0/bench/blast/predicts.py`; rows in `research/phase0/results/`.
+Harness `scripts/measure/predicts.py`; rows in `research/phase0/results/`.
 
 D2a measured that ~44% of import statements resolve in-tree. That says the graph is buildable and
 **nothing** about whether it predicts anything. This is the test that was named as not-yet-run.

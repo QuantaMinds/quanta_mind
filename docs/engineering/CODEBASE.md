@@ -1,6 +1,6 @@
 # Codebase Map
 
-> **Hand-written, and verified by `scripts/guard/check_docs_sync.py`.**
+> **Hand-written, and verified by `scripts/guard/records/check_docs_sync.py`.**
 > A PR that changes `src/` without touching this file fails CI, and every directory under
 > `src/quantamind/` must appear below.
 >
@@ -359,7 +359,7 @@ optimisation; it is the difference between a rule and a wish, which is the same
 distinction `$enforcement_map` exists to make. Treat guard latency as correctness.
 
 The rewrite was then diffed against the implementation it replaced — same files, same
-order, asserted in `tests/unit/test_discovery_walk.py`. A walk that is fast because it
+order, asserted in `tests/unit/guards/test_discovery_walk.py`. A walk that is fast because it
 prunes too much reports clean on files it never opened, and "faster and quietly
 narrower" is the same failure class as every other silent absence in this codebase.
 
@@ -1305,7 +1305,7 @@ never observed in production renders `-`, never anything resembling good news.
 `quantamind dashboard <owner/name>` prints it. Labels will be thin: ~24 reviewed changes a month at
 200 PRs and 12% firing, and incidents that trace to one are a handful a quarter.
 
-### `bench/forensic/confabulation.py` — the dominant failure mechanism, tested live
+### `research/phase0/bench/forensic/oracles/confabulation.py` — the dominant failure mechanism, tested live
 
 31.1% of real wrong findings are claims about which tag a pinned commit SHA carries. Tested rather
 than argued: 12 real GitHub Actions, each SHA fetched from the API during the run, each shown to
@@ -1337,7 +1337,7 @@ shipped prompt objects to 6 of 12 **correct** pin/tag pairings and 5 of 12 wrong
 **Whether it fires on a real pull request is unmeasured.** Those trials were built to contain
 mismatches. If the base rate in the wild is zero, the detector is correct and useless.
 
-### `bench/forensic/pin_prevalence.py` — the falsification that came before the build
+### `scripts/measure/pin_prevalence.py` — the falsification that came before the build
 
 1,259 commented pins from 22 repositories at HEAD. **Genuine mismatch rate 0.24%** (3 of 1,244
 resolvable) once the major-alias convention is honoured; 1.05% under exact matching.
@@ -1351,7 +1351,7 @@ when `# v6` on a `v6.4.0` commit is convention. **They flagged 13 pins of which 
 
 **Registry base rate: 0 of 176 distinct pinned versions across ten real requirement files.** A
 version that does not exist fails CI on first install, so a detector would be correct and never
-fire → closed road, recorded in `bench/forensic/registry_prevalence.py`.
+fire → closed road, recorded in `research/phase0/bench/forensic/oracles/registry_prevalence.py`.
 
 The verifier ships regardless, because it refutes the *opposite* direction — the reviewer asserting
 a release is missing, 3 of 45 wrong findings. Live: refutes awscli 1.45.34, isort 9.0.0b2, requests
@@ -2089,7 +2089,7 @@ the developer's own credentials silently answered.
   *with* one git BLOCKS on the prompt and the delivery never returns, holding the listener thread
   until the clone timeout.
 
-`tests/unit/layers/test_git_credentials.py` runs **real git** against the environment rather than
+`tests/unit/layers/ingest/test_git_credentials.py` runs **real git** against the environment rather than
 asserting the dict has the right keys — the original bug was precisely a gap between what we
 intended and what git does. All four assertions were verified by sabotage: removing the credential,
 unscoping the header, and writing the token into `remote.origin.url` each fail their own test.
@@ -2200,7 +2200,7 @@ check is the same defect this project chases in code.
 Findings are **not** rendered into the comment body yet. That is deliberate: the number worth
 knowing first is findings-per-pull-request, and A6 reads it before anything is published.
 
-### `types/rule.py` + `ingest/rules_file.py` — standards a repository declares for itself
+### `types/rule.py` + `ingest/standards/rules_file.py` — standards a repository declares for itself
 
 A compliance rate cannot be reported without rules to be compliant with, so the rules engine is
 built before the audit trail and the dashboard that read it. `read(clone)` returns

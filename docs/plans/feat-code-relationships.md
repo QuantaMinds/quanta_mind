@@ -14,7 +14,7 @@ incident note at the end — and rewritten from the same intent.
 | | |
 |---|---|
 | `types/rule.py` | a declared standard; provenance DERIVED from the check kind |
-| `ingest/rules_file.py` | `.quantamind/rules.toml` → rules and typed refusals |
+| `ingest/standards/rules_file.py` | `.quantamind/rules.toml` → rules and typed refusals |
 | `parse/python_names.py` | calls, imports and definitions from a syntax tree |
 | `types/checked.py` | one audit row: PASSED / VIOLATED / UNCHECKABLE / DEFERRED |
 | `verify/rule_check.py` | apply rules to a file, and to a whole change |

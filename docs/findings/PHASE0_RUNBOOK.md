@@ -199,7 +199,7 @@ reason to pause, not a reason to proceed carefully.
 > success. Only `phase0.pilot.run`, `phase0.controls.gate`, `phase0.sample_for_labelling`
 > and `phase0.score_labelling` are wired to a command line today.
 >
-> `scripts/guard/check_documented_commands.py` now fails on any `python -m` in the docs
+> `scripts/guard/records/check_documented_commands.py` now fails on any `python -m` in the docs
 > whose module has no entry point, and prints the count of those still marked unbuilt on
 > every run — so this gap cannot go quiet again while it is being fixed.
 

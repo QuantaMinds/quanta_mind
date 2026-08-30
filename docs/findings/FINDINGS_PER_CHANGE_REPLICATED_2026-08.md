@@ -2,7 +2,7 @@
 
 **Run 2026-08-28 on `pallets/flask`, 30 changes, commits 71–100 of `git log --no-merges -- '*.py'`
 — a slice neither A6 nor any other sample here touched.** Harness:
-`research/phase0/bench/rate/measure.py`. Records: `research/phase0/results/findings_rate_flask_skip70.json`.
+`scripts/measure/measure.py`. Records: `research/phase0/results/findings_rate_flask_skip70.json`.
 
 ## The result
 
@@ -33,7 +33,7 @@ That was wrong, and it was wrong in a way this project has a rule about.**
 A6 divides by *changes measured* — commits where the model was actually asked something. The 0.46
 and 0.25 divided by *every commit in a log slice*, including commits skipped before inference ever
 ran. Two rates over two denominators are not evidence of instability; they are a broken
-comparison. The fixture in `bench/rate/record.py` shows the size of the error directly: the same
+comparison. The fixture in `scripts/measure/record.py` shows the size of the error directly: the same
 six findings read as **1.500, 1.000 or 0.600** depending only on which denominator is chosen.
 
 Measured properly on A6's own denominator, the answer is 0.733 against 0.686.
