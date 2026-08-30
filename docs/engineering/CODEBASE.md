@@ -381,28 +381,39 @@ narrower" is the same failure class as every other silent absence in this codeba
 
 ---
 
-### `serve/warm.py` — the cold start, paid before anyone is waiting
+### `verify/qualification.py` — free-tier eligibility, checked rather than advertised
 
-On an installation event the listener answers **200 first**, then `warm_all` clones and indexes
-each provisioned repository. It cannot be inline: GitHub requires a 2XX within ten seconds and a
-clone will not finish in ten, which is the same acknowledge-then-work shape `listener.py` already
-documents for deliveries.
+`facts_for(repo)` reads what GitHub says; `qualifies(facts, ...)` returns a `Verdict` naming
+**every** failing rule. A prospect told "not eligible", who fixes one thing and hears it again,
+learns the list by attrition. `Verdict.__post_init__` refuses to construct a refusal with no
+reason — "no" with no cause is the silence this codebase rejects.
+
+Nothing is defaulted on a failed read: a contributors call that errored would otherwise look like
+"fewer than fifty contributors" and refuse a repository because GitHub had an outage.
+
+**Two numbers the plan left open are now explicit.** `STAR_CEILING` is `None` — B8 asked "is 5K a
+ceiling or just 'and above'?" and never answered, and the section's own reasoning argues against
+one, since the criteria exist to select repositories the ranker can serve. A ceiling would be a
+COST control, which is a different rule. `MAX_PUSHED_DAYS_AGO` is 30 because "recent" was
+undefined, and a number in a constant is arguable where a number in nobody's head is not.
+
+### `serve/onboarding.py` — what happens when a repository is installed
+
+`admit()` qualifies each newly provisioned repository and warms the ones that pass; the listener
+answers **200 first**, because a clone will not finish inside GitHub's ten seconds. It does not
+refuse the installation — enforcement is B5's entitlement check at delivery, and refusing to
+provision with no way to say "but this one is a customer" is a dead end with no override. An
+unqualified repository is simply not warmed, which is the part that costs a clone and ~31s.
 
 **The line it replaces claimed the job was already done.** `listener.py` read "Provisioned here so
 a first review pays no cold index", but `store/tenancy.provision` creates each tenant's store FILE
-and nothing else — no clone, no touches, no watermark. The first pull request paid a full clone
-plus a ~31s index build on a 115,776-commit repository, and Cloud Run's ephemeral disk means every
-new instance paid it again.
-
-**A failed warm-up is not a failed installation.** `warm_all` collects failures per repository and
-prints them; it runs after the endpoint has answered, and an install that 500s over a slow clone
-is a worse outcome than a slow first review. Idempotent because `run_review.index_repository`
-reads the watermark and appends `<watermark>..HEAD` — warming twice yields the same row count.
+and nothing else. The first pull request paid the full clone plus index build, and Cloud Run's
+ephemeral disk means every new instance paid it again.
 
 **Making room for it moved `pin_check` into `verify/`**, where it belongs: it adjudicates a claim
-about a pinned SHA and imports `verify.pin_mismatch`, and `verify/rule_check.py` already reads a
-clone through `ingest.blob` for the same kind of work. `serve/` was at its fifteen-file cap, and
-the honest question was which module was in the wrong layer rather than which cap to raise.
+about a pinned SHA, and `verify/rule_check.py` already reads a clone through `ingest.blob`.
+`serve/` was at its fifteen-file cap, and the honest question was which module was in the wrong
+layer rather than which cap to raise.
 
 ### `compliance` — what the declared rules actually did, per repository
 

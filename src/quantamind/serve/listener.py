@@ -39,7 +39,7 @@ from pathlib import Path
 from typing import Any
 
 from quantamind.serve.health import health
-from quantamind.serve.warm import warm_all
+from quantamind.serve.onboarding import admit
 from quantamind.serve.webhook_github import (
     DELIVERY_HEADER,
     EVENT_HEADER,
@@ -158,7 +158,7 @@ class _Handler(BaseHTTPRequestHandler):
             return
 
         if isinstance(decision, Installed):
-            # `provision` makes the store FILE only. → `serve/warm.py` for the clone and index.
+            # `provision` makes the store FILE only. → `serve/onboarding.py` decides and warms.
             made, refused = tenancy.provision(Path(self.settings.database_path), decision.repos)
             for full in refused:
                 print(f"[serve] {full}: NOT provisioned", flush=True)
@@ -168,7 +168,7 @@ class _Handler(BaseHTTPRequestHandler):
                 flush=True,
             )
             self._say(200, {"provisioned": made})
-            warm_all(made, self.settings)
+            admit(made, self.settings)
             return
 
         # **THE DELIVERY LEDGER IS ITS OWN STORE, BESIDE THE TENANTS AND NOT INSIDE ONE.**
