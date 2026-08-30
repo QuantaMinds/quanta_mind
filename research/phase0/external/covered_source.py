@@ -5,13 +5,11 @@ WHAT: For repositories this project has never measured, classify the files recen
 WHY:  **THE EXECUTION ARM DIED AT A CEILING, NOT AT A RESULT.** Step 0 of
       `docs/plans/preregistrations/reviewer/execution-grounding-preregistration.md` measured 31%
       of findings about source a suite even names, against a 50% bar, and stopped rather than
-      running an arm whose number would have described the corpus. Seven of sixteen findings were
-      about test files themselves, where the suite that would adjudicate IS the subject.
+      running an arm whose number would have described the corpus.
 
-      **THE PROXY IS DELIBERATELY THE SAME ONE STEP 0 USED** — "a test names the module" rather
-      than "a test executes the line" — so the numbers are comparable. It over-counts, which is
-      the direction that makes a FAIL trustworthy: a repository that cannot clear this cannot
-      clear the stronger check either.
+      **IT COUNTS IMPORTS, NOT MENTIONS, BECAUSE THE MENTION PROXY OVER-COUNTED BY UP TO 43
+      POINTS.** Step 0 used mentions; this reports the stricter number and the result document
+      records both, so the two remain comparable while the bar is judged on the honest one.
 
       **A KNOWN-ANSWER CHECK RUNS FIRST.** A classifier that called everything `source` would
       report a wonderful share, and would look exactly like a working one.
@@ -21,6 +19,7 @@ CONSUMED BY: a person, and the pre-registration it answers.
 
 from __future__ import annotations
 
+import ast
 import json
 import pathlib
 import re
@@ -31,21 +30,22 @@ from dataclasses import dataclass
 
 GIT_TIMEOUT_S = 300
 COMMITS = 200
-SOURCE_BAR = 0.50
-MIN_SOURCE_FILES = 50
+SOURCE_BAR, MIN_SOURCE_FILES = 0.50, 50
 
 TEST_PART = re.compile(r"(^|/)(tests?|testing|spec)(/|$)|(^|/)test_[^/]*\.py$|_test\.py$")
+# **TYPER READ 98% AND 91% OF ITS "SOURCE" WAS TUTORIAL SNIPPETS** — `docs_src/tutorial/...`
+# examples reached by parametrised path, not import. Excluding them takes typer from 329 changed
+# source files to 30, below the floor to read a share at all.
+NOT_LIBRARY = re.compile(r"(^|/)(docs?|docs_src|examples?|samples?|benchmarks?|scripts?)(/|$)")
 CONFIG_SUFFIX = (".toml", ".cfg", ".ini", ".yaml", ".yml", ".json", ".txt", ".md", ".rst")
 
 
 class NoSuite(RuntimeError):
-    """No test file was found at all. Distinct from a suite that names nothing.
+    """No test file found at all — distinct from a suite that names nothing.
 
-    **A CLONE THAT FAILED TO CHECK OUT REPORTED 0% AND LOOKED LIKE A REPOSITORY WITHOUT TESTS.**
-    `django-rest-framework` came back 0 of 76 covered on the first run; the clone held no Python
-    file whatsoever. A share of zero over a real suite is a finding about that repository; a share
-    of zero over no suite is a finding about this instrument, and they must not print the same
-    number.
+    `django-rest-framework` read 0 of 76 because `git-lfs` was absent and the checkout left an
+    empty tree. A zero over a real suite describes the repository; a zero over no suite describes
+    this instrument, and they must not print the same number.
     """
 
 
@@ -67,9 +67,11 @@ class Shape:
 
 
 def classify(path: str) -> str:
-    """`test`, `config`, `source` or `other`. A claim about a test cannot be judged by that test."""
+    """`test`, `config`, `source` or `other`. A test cannot adjudicate a claim about itself."""
     if TEST_PART.search(path):
         return "test"
+    if path.endswith(".py") and NOT_LIBRARY.search(path):
+        return "other"
     if path.endswith(".py"):
         return "source"
     if path.endswith(CONFIG_SUFFIX):
@@ -87,23 +89,37 @@ def _run(clone: pathlib.Path, args: list[str]) -> str:
 
 
 def changed_files(clone: pathlib.Path, commits: int = COMMITS) -> list[str]:
-    """Every path the last `commits` non-merge commits touched, with repeats."""
+    """Every path the last `commits` non-merge commits touched, repeats included."""
     out = _run(clone, ["log", f"-{commits}", "--no-merges", "--name-only", "--format="])
     return [line.strip() for line in out.splitlines() if line.strip()]
 
 
-def test_vocabulary(clone: pathlib.Path) -> set[str]:
-    """Every module name any test file mentions. The same proxy Step 0 used, over the whole tree."""
-    words: set[str] = set()
+def imported_by_tests(clone: pathlib.Path) -> set[str]:
+    """Every module a test file actually IMPORTS, parsed rather than matched as text.
+
+    **THE TEXT PROXY OVER-COUNTED BY 12 TO 43 POINTS** on the same corpus. Three artefacts:
+    `__init__`/`__main__` match in any test mentioning a dunder; short stems collide, and sphinx's
+    `ru`, `it`, `pt` are LOCALE files counted whenever those letters appear; and documentation
+    examples were classified as source. Dunders are dropped: a name every package carries cannot
+    identify a module.
+    """
+    found: set[str] = set()
     for path in clone.rglob("*.py"):
-        rel = path.relative_to(clone).as_posix()
-        if classify(rel) != "test":
+        if classify(path.relative_to(clone).as_posix()) != "test":
             continue
         try:
-            words |= set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", path.read_text(errors="ignore")))
-        except OSError:
+            tree = ast.parse(path.read_text(errors="ignore"))
+        except (OSError, SyntaxError):
             continue
-    return words
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    found.update(alias.name.split("."))
+            elif isinstance(node, ast.ImportFrom):
+                if node.module:
+                    found.update(node.module.split("."))
+                found.update(alias.name for alias in node.names)
+    return {name for name in found if not name.startswith("__")}
 
 
 def shape_of(clone: pathlib.Path, repo: str) -> Shape:
@@ -116,13 +132,14 @@ def shape_of(clone: pathlib.Path, repo: str) -> Shape:
         if kind == "source":
             sources.add(path)
 
-    vocabulary = test_vocabulary(clone)
+    vocabulary = imported_by_tests(clone)
     if not vocabulary:
         raise NoSuite(
             f"{repo}: no test file in the tree; a 0% share would describe this "
             f"instrument rather than the repository"
         )
-    covered = sum(1 for path in sources if pathlib.PurePosixPath(path).stem in vocabulary)
+    stems = [s for s in (pathlib.PurePosixPath(p).stem for p in sources) if not s.startswith("__")]
+    covered = sum(1 for stem in stems if stem in vocabulary)
     return Shape(repo, len(sources), counts["test"], counts["config"], counts["other"], covered)
 
 
@@ -130,6 +147,8 @@ def known_answer() -> None:
     """A classifier that called everything `source` would report a wonderful share. Refuse first."""
     cases = {
         "src/pkg/thing.py": "source",
+        "docs_src/tutorial/tutorial001.py": "other",
+        "examples/demo.py": "other",
         "tests/test_thing.py": "test",
         "pkg/tests/helpers.py": "test",
         "thing_test.py": "test",

@@ -132,3 +132,54 @@ A corpus built from these repositories still has to clear the stronger check per
 **And the expensive half is untouched.** These repositories can support the arm; the findings
 still have to be generated and hand-adjudicated, and the protocol forbids an agent doing the
 labelling. That is the cost this result puts a floor under, not one it removes.
+
+---
+
+# RESULT REVISED — 2026-08-30, same day. **The PASS does not survive its own proxy.**
+
+The result above was **PASS, 6 of 9**. Tested against the stricter check it claimed to be an
+upper bound for, it is **2 of 9. By the bar registered above — three repositories at ≥50% — that
+is a FAIL.**
+
+| repository | changed library source | by MENTION | by IMPORT |
+|---|---|---|---|
+| scrapy | 185 | 94% | **72%** |
+| celery | 210 | 91% | **67%** |
+| sphinx | 253 | 80% | 49% |
+| black | 50 | 57% | 36% |
+| python-telegram-bot | 236 | 34% | 21% |
+| typer | 33 | 98% | too few source files |
+| loguru / pytest / tornado | <50 | — | too few source files |
+
+**Only scrapy and celery clear it.** sphinx lands at 49%, under the bar by a point.
+
+## Why the mention proxy over-counted, by 12 to 43 points
+
+Three causes, none of them coverage:
+
+1. **`__init__` and `__main__` match everywhere.** Every package carries them, so any test file
+   mentioning a dunder marks every changed `__init__.py` as covered. Dunder stems are now dropped:
+   a name every package has cannot identify a module.
+2. **Short stems collide.** sphinx's `ru`, `it` and `pt` are LOCALE files. Any test containing
+   those two letters in any context counted them as covered.
+3. **Documentation examples were classified as source, and this was a defect in the instrument
+   rather than looseness in the proxy.** `typer` read **98%** and 91% of its "source" was
+   `docs_src/tutorial/...` snippets, which its tests reach by parametrised path rather than by
+   import. Excluding documentation takes typer from 329 changed source files to **30** — below
+   the floor to read a share at all. Its headline was the artefact, not a finding.
+
+## What this changes
+
+**The corpus is thinner than the first result claimed.** Two repositories clear the bar, not six.
+Two is enough by volume — scrapy and celery contribute ~395 changed library-source files between
+them — and thin on external validity: the ranking claim this company rests on is 6 of 6
+repositories, and an execution result from two would not be that.
+
+**The road is not closed.** 31% on the old pool against 67–72% on these is still the finding that
+matters: the ceiling that ended the arm was a property of that corpus. But "six repositories can
+support it" was wrong, and the number to plan against is two, possibly three if sphinx's missing
+point is recoverable by counting relative imports the parser currently drops.
+
+**And the direction of the error is the one that should worry a reader.** The proxy was described
+above as over-counting, "which makes a FAIL trustworthy and a PASS an upper bound". That was
+correct, and it was still reported as a PASS. The upper bound was quoted as the result.
