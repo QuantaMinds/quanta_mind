@@ -101,9 +101,10 @@ def warm_all(repos: list[str], settings: Settings) -> tuple[dict[str, int], dict
 def _record(settings: Settings, account: str, repo: str, verdict: Verdict | None) -> None:
     """Write the installation row beside the tenant's own data. Flattened here because
     `store/` sits left of `verify/` and cannot import a `Verdict`."""
-    owner, _, name = repo.partition("/")
-    store = tenancy.store_for(Path(settings.database_path), owner, name)
-    conn = open_store(store)
+    # **AN INSTALLATION IS AN ACCOUNT-LEVEL FACT AND LIVES IN ONE PLACE.** It was written beside
+    # the tenant it named, which made "which repositories does this account have" a read of every
+    # tenant store — O(tenants) on every dashboard page. One row, one file, one query.
+    conn = open_store(tenancy.shared(Path(settings.database_path), tenancy.ACCOUNTS))
     try:
         installations.record(
             conn,

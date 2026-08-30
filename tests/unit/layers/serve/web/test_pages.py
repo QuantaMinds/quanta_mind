@@ -32,8 +32,14 @@ NOW = 1_700_000_000
 
 
 def _install(root: Path, account: str, repo: str, *, removed: bool = False) -> None:
+    """Record an installation where it now lives: once, beside the tenants."""
     owner, _, name = repo.partition("/")
-    conn = open_store(tenancy.store_for(root, owner, name))
+    # **THE TENANT FILE IS CREATED, NOT JUST ITS DIRECTORY.** `store_for` makes the directory and
+    # leaves the file absent, so `tenants()` — which globs `<root>/<owner>/*.db` — found NOTHING
+    # and the open-count test below passed against an empty loop. A fixture with no tenants cannot
+    # show that listing an account stopped reading every tenant.
+    open_store(tenancy.store_for(root, owner, name)).close()
+    conn = open_store(tenancy.shared(root, tenancy.ACCOUNTS))
     try:
         installations.record(conn, account, repo, at=NOW, eligible=True)
         if removed:
@@ -122,3 +128,31 @@ def test_the_signed_in_login_is_escaped_too(root: Path) -> None:
 
     assert "<img src=x" not in body
     assert "&lt;img" in body
+
+
+def test_listing_an_account_opens_one_store_not_one_per_tenant(root: Path) -> None:
+    """The fix. It was O(tenants) per page load; a hundred repositories meant a hundred opens.
+
+    Counted rather than asserted in prose, because "it is faster now" is the kind of claim that
+    survives a regression. The opener is the seam: `mine` may open the account store and nothing
+    else, however many tenants exist beside it.
+    """
+    opened: list[Path] = []
+
+    def counting(path: Path):
+        opened.append(path)
+        return open_store(path)
+
+    _install(root, "dhanush", "acme/third")
+    _install(root, "dhanush", "acme/fourth")
+
+    pages.mine(root, "dhanush", opener=counting)
+
+    assert len(opened) == 1, f"opened {len(opened)} stores to list one account"
+    assert opened[0].name == tenancy.ACCOUNTS
+
+
+def test_the_shared_layout_refuses_a_name_it_does_not_define(root: Path) -> None:
+    """`shared()` takes a name this layout names, never caller text that could escape the root."""
+    with pytest.raises(TenantRefused):
+        tenancy.shared(root, "../../etc/passwd")

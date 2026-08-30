@@ -27,7 +27,7 @@ from pathlib import Path
 
 from quantamind.render import page
 from quantamind.serve.web import pages, signin
-from quantamind.store import accounts
+from quantamind.store import accounts, tenancy
 from quantamind.store.schema import open_store
 from quantamind.types.settings import Settings
 
@@ -38,7 +38,6 @@ STATE_SECONDS = 600
 """How long a sign-in may take. Ten minutes: long enough for a slow consent screen, short enough
 that a stolen state value is worthless by the time anybody could use it."""
 
-ACCOUNTS_DB = "accounts.db"
 REPO_PREFIX = "/r/"
 HTML = "text/html; charset=utf-8"
 SIGN_IN_PAGE = (
@@ -89,7 +88,7 @@ def get(path: str, cookies: str, settings: Settings, *, at: int | None = None) -
 
     if where == CALLBACK:
         fields = urllib.parse.parse_qs(query)
-        conn = open_store(Path(settings.database_path) / ACCOUNTS_DB)
+        conn = open_store(tenancy.shared(Path(settings.database_path), tenancy.ACCOUNTS))
         try:
             token = signin.sign_in(
                 conn,
@@ -117,7 +116,7 @@ def get(path: str, cookies: str, settings: Settings, *, at: int | None = None) -
         )
 
     if where == "/" or where.startswith(REPO_PREFIX):
-        conn = open_store(Path(settings.database_path) / ACCOUNTS_DB)
+        conn = open_store(tenancy.shared(Path(settings.database_path), tenancy.ACCOUNTS))
         try:
             session = accounts.whose(conn, signin.token_in(cookies), at=moment)
         finally:

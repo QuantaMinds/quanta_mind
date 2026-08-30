@@ -164,7 +164,9 @@ class _Handler(BaseHTTPRequestHandler):
         # and so does not mistake this for a customer. This line once opened `database_path` as a
         # database after it became a ROOT; the same defect outlived it in `run_dashboard`, and
         # `docs/engineering/CODEBASE.md` records both under the compliance section.
-        conn = schema.open_store(Path(self.settings.database_path) / "deliveries.db")
+        conn = schema.open_store(
+            tenancy.shared(Path(self.settings.database_path), tenancy.DELIVERIES)
+        )
         try:
             try:
                 fresh = deliveries.begin(conn, delivery_id, event)

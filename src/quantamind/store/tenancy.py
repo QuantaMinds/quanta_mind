@@ -38,6 +38,15 @@ from quantamind.store import schema
 
 SAFE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 
+ACCOUNTS = "accounts.db"
+DELIVERIES = "deliveries.db"
+"""The two stores that sit BESIDE the tenants rather than inside one.
+
+**A DELIVERY ID IS GLOBAL AND SO IS AN ACCOUNT.** The same delivery must not be processed twice
+for any tenant, and a person is not a repository — neither fact belongs in a file keyed by
+`<owner>/<name>`. `tenants()` globs `<root>/<owner>/*.db`, so a file at the root is never mistaken
+for a customer."""
+
 
 class TenantRefused(ValueError):
     """A repository name that cannot be turned into a path. Carries what was rejected."""
@@ -65,6 +74,13 @@ def store_for(root: Path, owner: str, name: str) -> Path:
     place = root / _segment(owner)
     place.mkdir(parents=True, exist_ok=True)
     return place / f"{_segment(name)}.db"
+
+
+def shared(root: Path, name: str) -> Path:
+    """A store beside the tenants. `name` must be one this module names, never caller text."""
+    if name not in (ACCOUNTS, DELIVERIES):
+        raise TenantRefused(name, "not a store this layout defines")
+    return root / name
 
 
 def tenants(root: Path) -> list[tuple[str, str]]:

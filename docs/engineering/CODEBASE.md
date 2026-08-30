@@ -404,9 +404,16 @@ function call somebody can grep for rather than as a habit.
 refusal rather than an escape, because a test asserting escaping there would describe a path that
 does not exist.
 
-**Listing an account's repositories reads every tenant store**, since `installation` rows live
-beside the tenant they describe. O(tenants) per page, honest at a forty-repository free tier and
-the first thing to move when it stops being.
+**Listing an account's repositories is one query.** It was O(tenants) per page: `installation`
+rows were written beside the tenant they named, so listing an account meant opening every tenant
+store. An installation is an account-level fact and now lives once, in `<root>/accounts.db`
+beside the tenants. `store/tenancy.shared()` is the only place either root-level filename is
+written, and it refuses a name this layout does not define.
+
+**The test counts opens rather than describing the improvement** — and the first version of it
+passed against the sabotage, because the fixture created tenant DIRECTORIES and no `.db` files, so
+`tenants()` globbed nothing and the loop it was meant to catch ran zero times. A fixture with no
+tenants cannot show that listing stopped reading them.
 
 ### `serve/web/` and `store/accounts.py` — sign in with GitHub
 

@@ -12,9 +12,10 @@ WHY:  **AN ACCOUNT SEES ITS OWN REPOSITORIES AND NOTHING ELSE, AND THAT IS CHECK
       `quantamind dashboard` already decide what those tables say. A second rendering would be a
       second judgement, and the one that drifts.
 
-      **LISTING AN ACCOUNT'S REPOSITORIES READS EVERY TENANT STORE.** `installation` rows live
-      beside the tenant they describe, so this is O(tenants) per page. That is honest at a
-      forty-repository free tier and is the first thing to move if it stops being.
+      **IT IS ONE QUERY, AND IT WAS O(TENANTS).** `installation` rows were written beside the
+      tenant they named, so listing an account meant opening every tenant store on every page.
+      An installation is an account-level fact; it now lives once, in the store beside the
+      tenants, and the list is a single indexed read.
 IMPORTS: render.{page,dashboard,compliance_table}, store.{compliance,installations,lifecycle}.
 CONSUMED BY: `serve/web/routes.py`.
 """
@@ -28,7 +29,7 @@ from pathlib import Path
 from quantamind.render import page as html
 from quantamind.render.compliance_table import table as rule_table
 from quantamind.render.dashboard import table as outcome_table
-from quantamind.store import installations, tenancy
+from quantamind.store import tenancy
 from quantamind.store.compliance import standing
 from quantamind.store.lifecycle import board
 from quantamind.store.schema import open_store
@@ -43,23 +44,15 @@ def mine(root: Path, login: str, *, opener: Opener = open_store) -> list[str]:
     **THE ANSWER COMES FROM THE INSTALLATION ROWS, NEVER FROM THE PATH.** A browser controls the
     path; it does not control what an account installed.
     """
-    found: list[str] = []
-    for owner, name in tenancy.tenants(root):
-        conn = opener(tenancy.store_for(root, owner, name))
-        try:
-            seat = installations.entitled(conn, f"{owner}/{name}")
-            row = conn.execute(
-                "SELECT account FROM installation WHERE repo = ?", (f"{owner}/{name}",)
-            ).fetchone()
-        finally:
-            conn.close()
-        if (
-            row is not None
-            and str(row[0]) == login
-            and seat.state is not installations.State.REMOVED
-        ):
-            found.append(f"{owner}/{name}")
-    return sorted(found)
+    conn = opener(tenancy.shared(root, tenancy.ACCOUNTS))
+    try:
+        rows = conn.execute(
+            "SELECT repo FROM installation WHERE account = ? AND removed_at IS NULL ORDER BY repo",
+            (login,),
+        ).fetchall()
+    finally:
+        conn.close()
+    return [str(row[0]) for row in rows]
 
 
 def home(root: Path, login: str, *, opener: Opener = open_store) -> str:
