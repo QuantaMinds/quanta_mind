@@ -45,7 +45,7 @@ three months stale.
 | `rank/` | **6** | `baseline.py`, `events.py`, `firing.py`, `history_rates.py`, `order.py`, `score.py` |
 | `allocate/` | **1** | `depth.py` |
 | `infer/` | **7** | `change_review.py`, `change_summary.py`, `diff_cap.py`, `gemini.py`, `prompt_once.py`, `summary_prompt.py`, `vertex.py` |
-| `verify/` | **7** | `anchor.py`, `external_facts.py`, `pin_mismatch.py`, `publishable.py`, `release_claims.py`, `releases.py`, `rule_check.py` |
+| `verify/` | **8** | `anchor.py`, `external_facts.py`, `pin_mismatch.py`, `publishable.py`, `release_claims.py`, `releases.py`, `repeats.py`, `rule_check.py` |
 | `render/` | **11** | `comment.py`, `coverage_line.py`, `dashboard.py`, `deep_report.py`, `found_block.py`, `json_report.py`, `pin_block.py`, `replay_report.py`, `rule_block.py`, `shape_line.py`, `verdict_block.py` |
 | `serve/` | **15** | `cli.py`, `deep_review.py`, `health.py`, `listener.py`, `pin_check.py`, `retrospective.py`, `review_delivery.py`, `run_commit.py`, `run_dashboard.py`, `run_endpoint.py`, `run_migrate.py`, `run_review.py`, `settle.py`, `webhook_github.py`, `working_clone.py` |
 
