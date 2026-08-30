@@ -42,7 +42,6 @@ BLIND = (
     "Nothing below is a verdict on your code — it is only what the ranking could still say."
 )
 MAX_DEPENDENTS = 5
-GOAL_LINES = 8
 LOOK = "**Look here first**"
 NOT_CHECKED = (
     "_Callers are found by static Python import only: a dynamic import, a re-export, or another "
