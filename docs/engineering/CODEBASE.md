@@ -327,6 +327,13 @@ Split out of `extract_prs.py`, which exported a record type, an attrition type a
 table-loading family from one module and had reached the 200-line cap — which is how a
 module stops being able to carry the field it needs next. `PRRecord` needed two.
 
+### `scripts/measure/mutate.py` — does the suite notice when a constant changes?
+
+Rewrites each numeric constant, runs the tests, and names the changes nothing caught. Diff mode
+by default (seconds); `--all` sweeps a tree (~30 min for `src/quantamind`). Refuses on a red
+baseline or an empty population, because both make a meaningless report look like full coverage.
+Found `hook_pre_edit.DENY` and `verify/anchor.MIN_QUOTE_CHARS` disableable with every tier green.
+
 ### `scripts/guard/` — the enforcement layer
 
 | File | Enforces |
