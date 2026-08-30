@@ -23,7 +23,7 @@ changes: same prompt, same gates, same expansion at `MAX_BACK = 20`, same conven
 
 ## Corpus
 
-Six repositories, each checked with `scripts/guard/check_burned_corpora.py --check owner/name` and
+Six repositories, each checked with `scripts/guard/records/check_burned_corpora.py --check owner/name` and
 required to return **FRESH** — no prior mention anywhere under `research/`. That check exists
 because `tornadoweb/tornado` entered design thirteen's corpus by eye and was already burned in the
 aged corpus and two rater pools. Fifteen merged pull requests apiece.

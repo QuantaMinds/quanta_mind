@@ -273,7 +273,7 @@ pruned while `src/quantamind/data/` or `scripts/results/` would now be seen. Ver
 ways: the walk yields the same 1,763 files in the same 0.02s, so no pruning was lost; research
 scratch paths are still excluded; and product paths under those names are not.
 
-Reverting either property fails a named test in `tests/unit/test_guard_exclusions.py`. A
+Reverting either property fails a named test in `tests/unit/guards/test_guard_exclusions.py`. A
 pre-existing test asserting `"data" in EXCLUDED_DIRS` caught the change and was updated to
 assert the scoped behaviour rather than loosened.
 
@@ -347,13 +347,13 @@ the instrument — the same misreading the audit was written to catch.
 the same unfiltered glob, so any root containing `.venv` met a floor of 20 on a population that
 was almost entirely somebody else's tests. Scan and floor now read one enumerated list, since
 two counts of one population drift — the defect already recorded in
-`tests/unit/test_stage_table_drift.py`.
+`tests/unit/guards/test_stage_table_drift.py`.
 
 Fixed by enumerating through `discovery.walk`, which prunes during traversal. Verified in four
 directions: 0 findings at the repository root, byte-identical module sets under `tests` and
 `research/phase0/tests` (76 and 57, nothing lost), a planted `assert True` still caught, an
 identical one under `.venv` ignored, and 0 false positives against 25 real assertions.
-Sabotaging the traversal fails two named tests in `tests/unit/test_assert_quality_scope.py`.
+Sabotaging the traversal fails two named tests in `tests/unit/guards/test_assert_quality_scope.py`.
 
 ## `py.typed` was charged against the fan-out cap
 
@@ -720,7 +720,7 @@ report walked past" below.
 
 **Checks:** Scans tracked text files for two classes of reference that read as precise and are not: section-number citations (a section symbol with a number) and phase-number citations (`the stage-0 section`, `the stage-4 section`).
 
-**Reads:** `scripts/guard/records/check_no_vague_refs.py`, `tests/unit/test_no_vague_refs.py`
+**Reads:** `scripts/guard/records/check_no_vague_refs.py`. **It has no behavioural test** — `tests/unit/test_no_vague_refs.py` was named here and has never existed. Only its floor is pinned, in `tests/unit/guards/test_thresholds_are_pinned.py`.
 
 **Emits:** `[no-vague-refs]`, `[phase-ref]`, `[section-ref]`
 

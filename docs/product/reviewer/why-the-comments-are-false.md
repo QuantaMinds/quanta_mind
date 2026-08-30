@@ -1,7 +1,7 @@
 # Why two thirds of the comments assert things that are not true
 
 **Run live on 2026-08-24 against the GitHub API, not recalled from a stored pool.**
-→ `research/phase0/bench/forensic/confabulation.py`, `bench/results/confabulation.json`
+→ `research/phase0/bench/forensic/oracles/confabulation.py`, `bench/results/confabulation.json`
 
 ## The failure has a shape, and one mechanism dominates it
 

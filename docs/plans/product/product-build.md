@@ -207,7 +207,7 @@ A compliance rate cannot be reported without rules to be compliant with. Built f
 and D5 read what it records.
 
 - [x] **D1a Rules as code, in the customer's repository.** `types/rule.py` +
-      `ingest/rules_file.py`. **No rules and unreadable rules return different answers** — the
+      `ingest/standards/rules_file.py`. **No rules and unreadable rules return different answers** — the
       failure that would report a customer compliant at the moment enforcement stopped. Malformed
       declarations come back as `Unresolved`, never dropped; provenance is DERIVED from the check
       so a model-judged rule cannot claim a parser verified it; duplicate ids refused. 10 tests,
