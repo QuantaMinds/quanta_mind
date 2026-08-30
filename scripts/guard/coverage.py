@@ -95,3 +95,31 @@ def guarded(outcome: Callable[[], int]) -> int:
     except NothingExamined as bare:
         print(f"[coverage] {bare}", file=sys.stderr)
         return 1
+
+
+def refuse_path_argument(argv: list[str], label: str) -> int | None:
+    """`2` when the caller named a tree this guard cannot read, else `None`.
+
+    **A GUARD THAT IGNORES THE PATH IT WAS GIVEN REPORTS ON A TREE THE CALLER NEVER ASKED
+    ABOUT.** Ten guards resolve their subject from the working directory and discarded
+    `argv[1]` in silence, so `check_schema_shape.py /some/other/repo` printed
+    `[schema-shape] ok` about THIS repository -- a pass with the wrong provenance and nothing
+    in the output to reveal it.
+
+    **NAMING THE DIRECTORY THE GUARD IS ALREADY IN IS NOT AN ERROR.** `just check` invokes
+    every guard as `... .py .` from the repository root, so refusing any argument at all broke
+    the gate. The question is not whether an argument was passed but whether it points
+    somewhere else: the same tree is the invocation the justfile documents, a different tree is
+    a question this guard cannot answer.
+    """
+    if len(argv) <= 1:
+        return None
+    asked = Path(argv[1]).resolve()
+    if asked == Path.cwd().resolve():
+        return None
+    print(
+        f"[{label}] reads the repository it runs in and cannot check {asked}. "
+        f"Refusing rather than reporting on {Path.cwd().name} under another name.",
+        file=sys.stderr,
+    )
+    return 2

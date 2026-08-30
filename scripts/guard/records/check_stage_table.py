@@ -36,6 +36,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from coverage import refuse_path_argument
 from discovery import Violation, project_root, report
 from plan_claims import PACKAGE, normalise, referenced, sentences, steps
 
@@ -190,4 +191,6 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    # Refused HERE, not inside main(): inside, `sys.argv` belongs to whoever
+    # imported this module -- under pytest that is pytest's own command line.
+    sys.exit(refuse_path_argument(sys.argv, "stage-table") or main())

@@ -28,7 +28,7 @@ from __future__ import annotations
 import ast
 import sys
 
-from coverage import assert_examined, guarded
+from coverage import assert_examined, guarded, refuse_path_argument
 from discovery import Violation, iter_python_files, project_root, report
 
 # **A FLOOR, NOT A TARGET.** Set well below today's 35 so it fires when discovery
@@ -112,4 +112,6 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(guarded(lambda: main()))
+    # Refused HERE, not inside main(): inside, `sys.argv` belongs to whoever
+    # imported this module -- under pytest that is pytest's own command line.
+    sys.exit(refuse_path_argument(sys.argv, "subprocess-timeouts") or guarded(lambda: main()))

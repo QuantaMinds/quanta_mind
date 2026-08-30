@@ -40,6 +40,7 @@ from pathlib import Path
 # down, so the parent is added explicitly -- the same reason `citations/` does it.
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
+from coverage import assert_examined, refuse_path_argument
 from discovery import Violation, project_root, report
 
 # `python -m package.module`, however it is invoked -- bare, via uv, or inside a longer
@@ -69,6 +70,7 @@ THIRD_PARTY = frozenset({"pycg", "pytest", "pip", "venv", "build", "uv"})
 # not wired this up" stays visible in CI output instead of being silently absent. It is
 # not a general escape hatch: an unbuilt command still blocks anyone relying on it.
 UNBUILT = "documented-command:unbuilt"
+FLOOR = 2  # below today's 4: catches discovery collapsing, not drift
 
 
 def _module_path(root: Path, dotted: str) -> Path | None:
@@ -148,6 +150,7 @@ def main() -> int:
     violations: list[Violation] = []
 
     suppressed = 0
+    examined = 0
     for document in _documents(root):
         for number, line in _logical_lines(document.read_text(encoding="utf-8")):
             match = INVOCATION.search(line)
@@ -156,6 +159,7 @@ def main() -> int:
             dotted = match.group("module")
             if dotted.split(".")[0] in THIRD_PARTY:
                 continue
+            examined += 1
             if UNBUILT in line:
                 suppressed += 1
                 continue
@@ -181,12 +185,14 @@ def main() -> int:
                 )
 
     if suppressed:
-        # Printed on every run, clean or not. An unbuilt command is a known gap in the
-        # instrument, and the whole reason this guard exists is that such a gap was
-        # invisible -- so it must not become invisible again by being suppressed quietly.
+        # Printed every run, clean or not: an unbuilt command is a known gap in the
+        # instrument, and this guard exists because such a gap was once invisible.
         print(f"[documented-commands] {suppressed} documented command(s) NOT BUILT", flush=True)
+    assert_examined("documented python -m invocations", examined, FLOOR, root)
     return report(violations, root, "documented-commands")
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    # Refused HERE, not inside main(): inside, `sys.argv` belongs to whoever
+    # imported this module -- under pytest that is pytest's own command line.
+    sys.exit(refuse_path_argument(sys.argv, "documented-commands") or main())

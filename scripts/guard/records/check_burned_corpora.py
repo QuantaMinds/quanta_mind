@@ -79,8 +79,13 @@ def main(argv: list[str]) -> int:
 
     path = root / CORPUS
     if not path.exists():
-        print(f"[burned-corpora] {CORPUS} not found — nothing to check")
-        return 0
+        # **NOT `return 0`.** "Nothing to check" printed the same word as "checked everything
+        # and found no reuse", so a moved or renamed corpus file would have read as a clean
+        # run forever. The same defect was fixed in check_schema_shape; this is its twin.
+        print(
+            f"[burned-corpora] {CORPUS} not found — the guard is watching nothing", file=sys.stderr
+        )
+        return 2
     lits = literals(path.read_text())
     seen: dict[str, str] = {}
     bad: list[str] = []
