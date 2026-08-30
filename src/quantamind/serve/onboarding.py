@@ -1,8 +1,8 @@
-"""Clone and index a repository before its first review, so nobody waits for the cold start.
+"""What happens to a repository when it is installed: decide whether we serve it, then warm it.
 
-WHAT: `warm(repo, settings)` clones the repository and builds its touch index now, returning the
-      rows the index holds afterwards. `warm_all(repos, settings)` does that for each and returns
-      what succeeded and what did not, both named.
+WHAT: `admit(repos, settings)` is the entry point — it qualifies each repository for the free
+      tier and warms the ones that pass. `warm(repo, settings)` clones and builds the touch index,
+      returning the rows it then holds; `warm_all` does that for several and names both outcomes.
 WHY:  **THE COLD START IS A FULL CLONE PLUS A ~31s INDEX BUILD ON A 115,776-COMMIT REPOSITORY**,
       and Cloud Run's ephemeral disk means every new instance pays it again. Paid on the first
       pull request, that is a customer watching a review take half a minute longer than it ever
@@ -24,7 +24,8 @@ WHY:  **THE COLD START IS A FULL CLONE PLUS A ~31s INDEX BUILD ON A 115,776-COMM
       worse outcome than a slow first review. Each outcome is PRINTED as it happens as well as
       returned — an operator watching the log is the only person who can see a warm-up that has
       been failing quietly for a week.
-IMPORTS: serve.{run_review,working_clone}, ingest.github_api, store.tenancy, types.settings.
+IMPORTS: serve.{run_review,working_clone}, ingest.github_api, store.tenancy, types.settings,
+      verify.qualification.
 CONSUMED BY: `serve/listener.py`, on an installation event.
 """
 
@@ -37,6 +38,7 @@ from quantamind.serve.run_review import index_repository
 from quantamind.serve.working_clone import ensure
 from quantamind.store import tenancy
 from quantamind.types.settings import Settings
+from quantamind.verify.qualification import Verdict, facts_for, qualifies
 
 
 def warm(repo: str, settings: Settings) -> int:
@@ -82,3 +84,43 @@ def warm_all(repos: list[str], settings: Settings) -> tuple[dict[str, int], dict
                 flush=True,
             )
     return indexed, failed
+
+
+def admit(repos: list[str], settings: Settings) -> dict[str, Verdict]:
+    """Qualify each repository, warm the ones that pass, and return every verdict.
+
+    **THE VERDICT IS RECORDED AND REPORTED; IT DOES NOT REFUSE THE INSTALLATION.** Enforcement
+    belongs at delivery, which is B5 in `docs/plans/product/product-build.md` — "today any
+    installation is reviewed, paid or not". Refusing to provision here, with no entitlement
+    system to say "but this one is a customer", would turn every non-qualifying install into a
+    dead end with no override.
+
+    **AN UNQUALIFIED REPOSITORY IS NOT WARMED**, which is the part that costs money. A clone and a
+    ~31s index build spent on a repository we have decided not to serve is the free tier paying
+    for itself twice.
+
+    **A QUALIFICATION THAT COULD NOT BE READ IS NOT A REFUSAL.** `facts_for` raises rather than
+    defaulting, and a repository whose facts are unreadable is warmed anyway: an outage at GitHub
+    must not quietly downgrade somebody's installation.
+    """
+    verdicts: dict[str, Verdict] = {}
+    warm_these: list[str] = []
+    taken = len(tenancy.tenants(Path(settings.database_path)))
+    for repo in repos:
+        owner = repo.partition("/")[0]
+        try:
+            facts = facts_for(repo)
+        except Exception as exc:  # an unreadable repository is served, not refused
+            print(f"[serve] {repo}: eligibility unreadable ({exc}); warming anyway", flush=True)
+            warm_these.append(repo)
+            continue
+        already = any(o == owner for o, _ in tenancy.tenants(Path(settings.database_path)))
+        verdict = qualifies(facts, owner_already_free=already, repos_taken=taken)
+        verdicts[repo] = verdict
+        if verdict.eligible:
+            warm_these.append(repo)
+        else:
+            for reason in verdict.reasons:
+                print(f"[serve] {repo}: not free-tier eligible — {reason}", flush=True)
+    warm_all(warm_these, settings)
+    return verdicts

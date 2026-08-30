@@ -1,6 +1,6 @@
 """Verification that warming a repository really indexes it, and that failing to is not fatal.
 
-WHAT: Drives `serve/warm.warm` and `warm_all` against a REAL git repository and a REAL store,
+WHAT: Drives `serve/onboarding.warm` and `warm_all` against a REAL git repository and a REAL store,
       with only the network clone stubbed out.
 WHY:  **`listener.py` CLAIMED THIS WAS ALREADY HANDLED AND IT WAS NOT.** The line beside the
       installation branch read "Provisioned here so a first review pays no cold index", but
@@ -15,7 +15,7 @@ WHY:  **`listener.py` CLAIMED THIS WAS ALREADY HANDLED AND IT WAS NOT.** The lin
       **AND A FAILED WARM-UP MUST NOT FAIL THE INSTALLATION.** It runs after the endpoint has
       answered 200; an exception escaping would kill a worker thread over something that costs
       nothing worse than a slow first review.
-IMPORTS: pytest, quantamind.serve.warm, quantamind.store.schema, quantamind.types.settings.
+IMPORTS: pytest, quantamind.serve.onboarding, quantamind.store.schema, quantamind.types.settings.
 CONSUMED BY: `just check`.
 """
 
@@ -26,8 +26,8 @@ from pathlib import Path
 
 import pytest
 
-from quantamind.serve import warm as warm_module
-from quantamind.serve.warm import warm, warm_all
+from quantamind.serve import onboarding as warm_module
+from quantamind.serve.onboarding import warm, warm_all
 from quantamind.store import tenancy
 from quantamind.store.schema import open_store
 from quantamind.types.settings import Settings

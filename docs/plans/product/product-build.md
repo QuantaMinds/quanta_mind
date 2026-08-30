@@ -187,8 +187,24 @@ Stripe.
       makes per-review cost somebody else's ceiling rather than our margin. Needs per-tenant
       credentials rather than one `inference_project`, and a stored key is a liability: it belongs
       encrypted at rest and must never reach `quantamind config`, a log, or a comment.
-- [ ] **B8 Free tier — NOT parked; this IS the traffic path and needs no payment rail.** Every rule below is checkable
-      from the GitHub API at install time, so it can be enforced rather than advertised:
+- [x] **B8 Free tier — the decision, made and recorded; enforcement is B5's.** `verify/qualification.py`
+      reads the facts and `qualifies()` returns a `Verdict` naming EVERY failing rule, not the
+      first — a prospect told "no" repeatedly learns the list by attrition. 18 tests; three
+      sabotages caught (dropping a rule, making a bound exclusive, returning one reason).
+      `serve/onboarding.admit()` runs it on installation and **skips warming a repository that
+      does not qualify**, which is the part that costs a clone and a ~31s index build.
+      **It does NOT refuse the installation, deliberately.** B5 is "entitlement check at delivery
+      — today any installation is reviewed, paid or not", and refusing to provision here with no
+      entitlement system to say "but this one is a customer" turns every non-qualifying install
+      into a dead end with no override. **An unreadable repository is warmed, not refused**: an
+      outage at GitHub must not quietly downgrade somebody's installation.
+      **TWO NUMBERS THE PLAN LEFT OPEN ARE NOW EXPLICIT RATHER THAN IMPLICIT.** `STAR_CEILING`
+      ships as `None` — the question below was never answered, and this section's own reasoning
+      argues against a ceiling since the criteria exist to select repositories the ranker can
+      serve. If one is wanted it is a COST control, a different rule with a different reason.
+      `MAX_PUSHED_DAYS_AGO` is 30, because "recent" was undefined and a number in a constant is
+      arguable where a number in nobody's head is not.
+      Every rule below is checkable from the GitHub API at install time:
 
       | rule | check |
       |---|---|
