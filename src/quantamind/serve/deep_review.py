@@ -38,8 +38,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from quantamind.allocate.depth import Reading
-from quantamind.infer import gemini
-from quantamind.infer.gemini import InferenceFailed, Unavailable
+from quantamind.infer import gemini, vertex
+from quantamind.infer.vertex import InferenceFailed, Unavailable
 from quantamind.ingest.change_shape import shape
 from quantamind.ingest.review_window import WindowUnreadable
 from quantamind.render.shape_line import block
@@ -66,7 +66,7 @@ def diff_for(clone: Path, sha: str, paths: list[str]) -> str:
         timeout=GIT_TIMEOUT_S,
     )
     if done.returncode != 0:
-        raise gemini.InferenceFailed(
+        raise vertex.InferenceFailed(
             f"git show {sha[:12]} exited {done.returncode}: {done.stderr.strip()[:120]}"
         )
     return done.stdout

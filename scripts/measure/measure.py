@@ -24,7 +24,7 @@ from dataclasses import asdict
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from quantamind.infer.gemini import InferenceFailed, Unavailable
+from quantamind.infer.vertex import InferenceFailed, Unavailable
 from quantamind.serve.deep_review import deep
 from quantamind.serve.run_commit import _timestamp
 from quantamind.serve.run_review import review

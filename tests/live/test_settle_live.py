@@ -24,7 +24,7 @@ import shutil
 
 import pytest
 
-from quantamind.infer.gemini import InferenceFailed, Unavailable
+from quantamind.infer.vertex import InferenceFailed, Unavailable
 from quantamind.serve.settle import answer, settle
 from quantamind.types.finding import Finding
 

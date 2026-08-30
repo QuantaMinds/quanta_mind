@@ -29,7 +29,8 @@ import json
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 
-from quantamind.infer import gemini
+from quantamind.infer import vertex
+from quantamind.infer.diff_cap import capped
 from quantamind.infer.summary_prompt import PROMPT
 from quantamind.ingest.diff import Stated
 from quantamind.types.spend import Spend, measured
@@ -41,12 +42,6 @@ from quantamind.types.spend import Spend, measured
 # the diff was sliced and handed over, and the model read a change that stopped mid-hunk with
 # no way to know it had. Rule 14 — a comment may explain why, never assert whether.
 MAX_DIFF_CHARS = 30_000
-TRUNCATED = "\n\n[... truncated: this diff is longer than the review reads ...]"
-
-
-def _capped(diff: str) -> str:
-    """The diff, cut to `MAX_DIFF_CHARS` with the cut MARKED so the reader knows it happened."""
-    return diff if len(diff) <= MAX_DIFF_CHARS else diff[:MAX_DIFF_CHARS] + TRUNCATED
 
 
 @dataclass(frozen=True, slots=True)
@@ -117,11 +112,11 @@ def summarise(
 ) -> Summary:
     """Ask the model what changed and whether it matches the author's stated purpose."""
     if not diff.strip():
-        raise gemini.InferenceFailed("no diff to summarise")
-    token = gemini._token(gcloud)
+        raise vertex.InferenceFailed("no diff to summarise")
+    token = vertex.token(gcloud)
     url = (
         f"https://{location}-aiplatform.googleapis.com/v1/projects/{project}"
-        f"/locations/{location}/publishers/google/models/{gemini.MODEL}:generateContent"
+        f"/locations/{location}/publishers/google/models/{vertex.MODEL}:generateContent"
     )
     goal = stated.text() or "(the author wrote no description)"
     # **AN EMPTY LIST IS SAID IN WORDS, NOT LEFT AS A BLANK.** A blank section reads to a
@@ -137,7 +132,7 @@ def summarise(
     past = "\n".join(f"- {p}: {n} prior fix(es)" for p, n in sorted((history or {}).items())) or (
         "(no fix history for these files in this repository)"
     )
-    answer = gemini._post(
+    answer = vertex.post(
         url,
         token,
         {
@@ -148,7 +143,7 @@ def summarise(
                         {
                             "text": PROMPT.format(
                                 goal=goal,
-                                diff=_capped(diff),
+                                diff=capped(diff, MAX_DIFF_CHARS),
                                 files=touched,
                                 importers=imports,
                                 history=past,
@@ -167,17 +162,17 @@ def summarise(
     )
     candidates = answer.get("candidates")
     if not isinstance(candidates, list) or not candidates:
-        raise gemini.InferenceFailed(f"no candidates in reply: {str(answer)[:160]}")
+        raise vertex.InferenceFailed(f"no candidates in reply: {str(answer)[:160]}")
     first = candidates[0]
     if first.get("finishReason") != "STOP":
-        raise gemini.InferenceFailed(f"finishReason {first.get('finishReason')!r}, not STOP")
+        raise vertex.InferenceFailed(f"finishReason {first.get('finishReason')!r}, not STOP")
     elapsed = answer.get("_ms", 0)
     text = str(first.get("content", {}).get("parts", [{}])[0].get("text", "")).strip()
     text = text.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
     try:
         payload = json.loads(text)
     except json.JSONDecodeError:
-        raise gemini.InferenceFailed(f"reply was not JSON: {text[:160]}") from None
+        raise vertex.InferenceFailed(f"reply was not JSON: {text[:160]}") from None
     achieved = payload.get("achieves_goal")
     return Summary(
         what_changed=str(payload.get("what_changed", "")).strip(),

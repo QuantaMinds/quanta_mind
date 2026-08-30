@@ -374,6 +374,24 @@ narrower" is the same failure class as every other silent absence in this codeba
 
 ---
 
+### `infer/` — the transport, the prompt, and the one truncation rule
+
+`infer/vertex.py` holds the Vertex call: `MODEL`, `TIMEOUT_S`, `token`, `post`, and the two
+errors both halves raise. `infer/gemini.py` keeps the review prompt, its cap and the parse.
+They were one file until 2026-08-29, split for two reasons that had both been visible for a
+while: `prompt_once.py` was importing `_post` and `_token` out of `gemini`, which is what a
+second module reaching into another's privates means, and `gemini` needed an "and" to describe
+itself — it called Vertex AND built and parsed the prompt. It also sat at the 200-line cap, so
+the next change had nowhere to go.
+
+`infer/diff_cap.py` holds `capped(diff, limit)`, the single rule both prompt builders use to cut
+an oversized diff. **The cut is MARKED.** Both callers previously wrote `diff[:MAX_DIFF_CHARS]`,
+so the model read a change that stopped mid-hunk with no way to know, and answered as though it
+had seen everything; `change_summary` carried a comment claiming the truncation was "visible in
+the output" while nothing made it so. The limit is an argument because the two differ and must:
+30,000 for the summary, which shares its prompt with the conventions and fact blocks, and
+120,000 for the review, which does not.
+
 ## `src/quantamind/` — layer by layer
 
 Dependencies flow **left to right only**. Enforced by `check_conventions.py`.

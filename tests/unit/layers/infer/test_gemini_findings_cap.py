@@ -24,7 +24,8 @@ import json
 
 import pytest
 
-from quantamind.infer.gemini import InferenceFailed, _findings
+from quantamind.infer.gemini import _findings
+from quantamind.infer.vertex import InferenceFailed
 
 CAP = 8
 """The shipped cap, written out. See the module docstring."""
