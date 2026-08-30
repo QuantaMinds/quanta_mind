@@ -23,6 +23,7 @@ from pathlib import Path
 import pytest
 
 from quantamind.serve.web import routes, signin
+from quantamind.store import tenancy
 from quantamind.store.schema import open_store
 from quantamind.types.settings import Settings
 
@@ -122,7 +123,7 @@ def test_an_unknown_path_is_a_404_not_a_redirect(configured: Settings) -> None:
 def _signed_in(configured: Settings, tmp_path: Path) -> str:
     from quantamind.store import accounts
 
-    conn = open_store(Path(configured.database_path) / routes.ACCOUNTS_DB)
+    conn = open_store(tenancy.shared(Path(configured.database_path), tenancy.ACCOUNTS))
     try:
         accounts.remember(conn, "dhanush", 4242, at=NOW)
         return accounts.issue(conn, "dhanush", at=NOW)
@@ -143,7 +144,7 @@ def test_an_expired_session_gets_the_same_page_as_no_session(
 ) -> None:
     from quantamind.store import accounts
 
-    conn = open_store(Path(configured.database_path) / routes.ACCOUNTS_DB)
+    conn = open_store(tenancy.shared(Path(configured.database_path), tenancy.ACCOUNTS))
     try:
         accounts.remember(conn, "dhanush", 4242, at=NOW)
         token = accounts.issue(conn, "dhanush", at=NOW, hours=1)

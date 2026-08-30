@@ -92,7 +92,7 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     # would silence real customers to enforce a rule they were never told about. An INELIGIBLE
     # repository is still reviewed: the free-tier verdict is information for a human, and turning
     # it into a gate without a paid tier to fall back to is a dead end with no override.
-    seat_conn = open_store(store)
+    seat_conn = open_store(tenancy.shared(Path(settings.database_path), tenancy.ACCOUNTS))
     try:
         seat = installations.entitled(seat_conn, delivery_repo)
     finally:
