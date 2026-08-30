@@ -13,7 +13,7 @@ WHY:  **AN INDEX WATERMARK IS ONLY MEANINGFUL IF THE COMMIT IT NAMES IS STILL TH
       question with a different failure. They carry their own runner rather than importing that
       module's private one, which rule 7 forbids reaching for.
 IMPORTS: stdlib only (subprocess). Same layer as `commits`, no sibling internals.
-CONSUMED BY: `serve/run_review.py`, deciding whether the touch index can be extended.
+CONSUMED BY: `serve/commands/run_review.py`, deciding whether the touch index can be extended.
 """
 
 from __future__ import annotations

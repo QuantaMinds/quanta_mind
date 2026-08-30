@@ -7,7 +7,7 @@ WHY:  **Split from `touches.py` at the 200-line cap, and it is the right seam.**
       selective the product should be. They change for different reasons, and the calibration is
       the part with a measured, contested history.
 IMPORTS: stdlib sqlite3 only, plus the window constants from `touches`.
-CONSUMED BY: `rank/firing.py` and `serve/run_review.py`.
+CONSUMED BY: `rank/firing.py` and `serve/commands/run_review.py`.
 """
 
 from __future__ import annotations

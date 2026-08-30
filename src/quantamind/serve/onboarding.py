@@ -24,7 +24,8 @@ WHY:  **THE COLD START IS A FULL CLONE PLUS A ~31s INDEX BUILD ON A 115,776-COMM
       worse outcome than a slow first review. Each outcome is PRINTED as it happens as well as
       returned — an operator watching the log is the only person who can see a warm-up that has
       been failing quietly for a week.
-IMPORTS: serve.{run_review,working_clone}, ingest.github_api, parse.suite_reach, store.tenancy,
+IMPORTS: serve.{commands.run_review,working_clone}, ingest.github_api, parse.suite_reach,
+      store.tenancy,
       types.settings, verify.qualification.
 CONSUMED BY: `serve/listener.py`, on an installation event.
 """
@@ -36,7 +37,7 @@ from pathlib import Path
 
 from quantamind.ingest.github_api import token_for
 from quantamind.parse.suite_reach import NoSource, reach
-from quantamind.serve.run_review import index_repository
+from quantamind.serve.commands.run_review import index_repository
 from quantamind.serve.working_clone import ensure
 from quantamind.store import installations, tenancy
 from quantamind.store.schema import open_store

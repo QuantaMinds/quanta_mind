@@ -25,10 +25,10 @@ WHY:  **THE ENDPOINT AUTHENTICATED DELIVERIES AND REVIEWED NOTHING.** `run_endpo
 
       **THE BASE COMMIT'S TIMESTAMP BOUNDS THE HISTORY, AND IT IS NOT `now`.** A ranking that reads
       commits made after the pull request opened is scoring the change against its own future.
-IMPORTS: ingest.{diff,github_api,github_comments}, serve.{run_review,working_clone},
+IMPORTS: ingest.{diff,github_api,github_comments}, serve.{commands.run_review,working_clone},
       types.settings.
       Rightmost layer.
-CONSUMED BY: `serve/run_endpoint.py`.
+CONSUMED BY: `serve/commands/run_endpoint.py`.
 """
 
 from __future__ import annotations
@@ -42,8 +42,8 @@ from quantamind.ingest.github_api import token_for
 from quantamind.ingest.publish.github_reviews import publish
 from quantamind.render.comment import comment as rendered
 from quantamind.render.pin_block import block
+from quantamind.serve.commands.run_review import review as run_ranking
 from quantamind.serve.deep_review import examine
-from quantamind.serve.run_review import review as run_ranking
 from quantamind.serve.working_clone import ensure, sweep
 from quantamind.store import installations, tenancy
 from quantamind.store.reviews import bank

@@ -9,7 +9,8 @@ WHY:  The CLI is not a convenience. It runs the retrospective, it is how a scept
       idempotency -- and the pipeline must not know which one called it, or what a customer
       verified here is not what runs there.
 IMPORTS: stdlib (argparse, pathlib, tempfile) and types.settings at module scope. The heavier
-      layers -- render.replay_report, serve.{run_endpoint,retrospective}, types.pooled_outcome --
+      layers -- render.replay_report, serve.{commands.run_endpoint,retrospective},
+      types.pooled_outcome --
       are imported inside the command that needs them, so `--version` and `config` still answer
       when a layer below is broken.
 CONSUMED BY: the `quantamind` entry point in pyproject.toml, and tests/unit.
@@ -142,12 +143,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 2
 
     if args.command == "serve":
-        from quantamind.serve.run_endpoint import run
+        from quantamind.serve.commands.run_endpoint import run
 
         return run(args.port, args.host)
 
     if args.command == "review":
-        from quantamind.serve.run_commit import review_commit
+        from quantamind.serve.commands.run_commit import review_commit
 
         return review_commit(
             args.clone, args.repo, args.sha, deep_project=args.deep, as_json=args.as_json
@@ -157,17 +158,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _retrospective(args.clone, args.repo)
 
     if args.command == "migrate":
-        from quantamind.serve.run_migrate import run_migrate
+        from quantamind.serve.commands.run_migrate import run_migrate
 
         return run_migrate()
 
     if args.command == "compliance":
-        from quantamind.serve.run_report import run_compliance
+        from quantamind.serve.commands.run_report import run_compliance
 
         return run_compliance(args.repo)
 
     if args.command == "dashboard":
-        from quantamind.serve.run_report import run_dashboard
+        from quantamind.serve.commands.run_report import run_dashboard
 
         return run_dashboard(args.repo, args.limit)
 

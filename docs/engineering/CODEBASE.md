@@ -541,7 +541,7 @@ decision, never per developer; a test asserts no such word reaches the output.
 `<root>/<owner>/<name>.db` — to `serve/review_delivery.py` and `serve/health.py`, and
 `run_dashboard` still opened it as a single file. On any deployment where that path is a directory
 it raised `sqlite3.OperationalError: unable to open database file` rather than reporting anything.
-`serve/run_report.py` now resolves both commands through `store/tenancy.py`, and calls `store_for`
+`serve/commands/run_report.py` now resolves both commands through `store/tenancy.py`, and calls `store_for`
 only after the tenant is known to exist, because it creates directories.
 
 ### `verify/repeats.py` — the same defect said twice
@@ -1173,7 +1173,7 @@ version failed exactly that way against the CLI **while the unit tests passed** 
 test agreed for a reason unrelated to the property it was testing**; only a plain-function caller
 could tell. Rule 14's verb, in a place nobody was looking.
 
-#### `serve/run_endpoint.py` — the banner prints with `flush=True`, and that is not decoration
+#### `serve/commands/run_endpoint.py` — the banner prints with `flush=True`, and that is not decoration
 
 `quantamind serve` bound the port and **said nothing at all**. Python line-buffers stdout to a
 terminal and BLOCK-buffers it to a pipe — and a pipe is every real deployment: systemd, Docker, CI,
@@ -1485,7 +1485,7 @@ redelivered webhook is ordinary and a second row would double every count comput
 `review.created_at` is registered in `scripts/verify/volatile.py`; the other columns are derived
 from the diff and history and stay in the determinism digest.
 
-`serve/run_commit.py` was split out of `run_review.py`, which crossed the 200-line cap: `review()`
+`serve/commands/run_commit.py` was split out of `run_review.py`, which crossed the 200-line cap: `review()`
 is a library function returning a value, `review_commit()` is an entry point that prints.
 
 Still unwritten and still needed for the dashboard: **merge status** and **production outcome**.
@@ -1991,7 +1991,7 @@ Scale-dependent costs are invisible to a corpus that has no scale.
 question — a stale index ranks a change against a history that stopped before it, and the output
 looks entirely normal. → the rule in `AGENTS.md` that `rank/` changes carry a plan first.
 
-**Half B is bounded by Half A.** `serve/run_commit.py` returns before the deep pass whenever the
+**Half B is bounded by Half A.** `serve/commands/run_commit.py` returns before the deep pass whenever the
 ranker declines, so the reviewer only ever runs on the ~10% of changes the ranker speaks on. That is
 the thesis — inference goes where the ranker pointed — and it also means any live measurement of the
 reviewer is drawn from a tenth of traffic, selected by fix history rather than at random.
@@ -2172,7 +2172,7 @@ rather than merely a working one. `calendar.timegm` is the correct conversion.
 
 **THE KEY PATH IS CONFIGURATION; THE KEY IS NOT.** `Settings` carries `app_id` and `app_key_path`,
 and `app_auth` reads the file at the moment it signs — the same reasoning as the webhook secret in
-`serve/run_endpoint.py`. `quantamind config` prints the path and never the key.
+`serve/commands/run_endpoint.py`. `quantamind config` prints the path and never the key.
 
 **`Settings` REFUSES TO CONSTRUCT IF POSTING IS ENABLED WITHOUT AN APP.** The only way to comment
 without one is as whoever authenticated `gh`, which is the behaviour this replaced. Failing at
@@ -2792,7 +2792,7 @@ every plain rule.
 
 **A rule that fires on deliberate code is worse than no rule**, because it teaches a reviewer to
 scroll past the section. That is why `print` is not among these: this product prints on purpose, and
-`serve/run_endpoint.py` explains why at length.
+`serve/commands/run_endpoint.py` explains why at length.
 
 ### The rules were read from a directory that has no files in it
 
@@ -2816,6 +2816,26 @@ clean compliance sheet for a repository we could not read at all.
 
 **Sabotage found the missing test, not review.** Breaking that refusal path passed all twelve tests;
 only deliberately reverting it revealed there was no test for it. The thirteenth was written then.
+
+### `serve/commands/` — one module per thing the CLI can be asked to do
+
+| module | the command |
+|---|---|
+| `run_review.py` | rank a pull request's changed files against history |
+| `run_commit.py` | `quantamind review` — rank one commit from a local clone |
+| `run_endpoint.py` | `quantamind serve` — bind the webhook and run until interrupted |
+| `run_report.py` | print a repository's outcome board, or its compliance table |
+| `run_migrate.py` | bring an existing store up to this build's schema |
+
+They share a shape — parse what the operator asked for, call one pipeline, print or post the
+result — and nothing else. `cli.py` dispatches to exactly these five and stays outside the group,
+because a dispatcher filed among the things it dispatches to reads as a sixth command.
+
+**They were grouped because `serve/` hit the fifteen-file cap**, and the cap is a prompt to name a
+concern rather than a number to raise. The concern was already there and unnamed. Moving them
+lengthened the paths quoted in eight docstrings past the hundred-column limit, and reflowing two of
+those pushed `types/review.py` and `types/settings.py` one line over the two-hundred-line cap — a
+reminder that both caps are load-bearing on prose as well as on code.
 
 ### `ingest/publish/` — the only two places this product WRITES to a customer's repository
 
@@ -3082,7 +3102,7 @@ tells the agent which keys to read. No new Python, no wrapper script, no new fla
 be a second place for the contract to drift from `serve/cli.py`.
 
 **Building it found that `--json` was not machine-readable on two of its three paths.**
-`serve/run_commit.py` took two early exits — a clean tree, and a change whose files are in no
+`serve/commands/run_commit.py` took two early exits — a clean tree, and a change whose files are in no
 language `parse/` reads — that printed a human sentence to stdout and returned 0 **regardless of
 `--json`**. A tool got a JSON decode error and an exit code of success, so a developer whose
 change touched only Markdown saw exactly what a developer with a broken install saw. That is the
@@ -3148,7 +3168,7 @@ failed the moment the field was added and before any test was updated. `Ruling` 
 `unresolvable` as a value, because the caller's alternative was matching the word inside `detail`,
 which is prose written for a human.
 
-**`serve/deep_review.report()` moved to `serve/run_commit.py`.** It prints a reviewer pass for a
+**`serve/deep_review.report()` moved to `serve/commands/run_commit.py`.** It prints a reviewer pass for a
 person at a terminal, its only caller is the CLI, and `deep_review` was over the file cap. The
 split is by concern, not to make room.
 

@@ -94,8 +94,8 @@ class Settings:
     app_key_path: str = ""
     """Where the App's private key lives. **THE PATH IS CONFIGURATION; THE KEY IS NOT.** The key is
     read from disk at the moment it signs and never held here, for the same reason the webhook
-    secret is read in `serve/run_endpoint.py` rather than stored: a credential in a settings object
-    reaches a log or a config dump the first time anybody prints one."""
+    secret is read in `serve/commands/run_endpoint.py` rather than stored: a credential in a
+    settings object reaches a log or a config dump the first time anybody prints one."""
 
     posting_enabled: bool = False
     """**False on purpose, and it is the one default that writes to somebody else's project.**

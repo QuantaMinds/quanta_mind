@@ -22,7 +22,7 @@ WHY:  Every layer this needs was already built and nothing joined them. `quantam
       must not be the same value on the wire.
 IMPORTS: ingest.history, rank.order, render.comment, store.{schema,touches}, types. Left
       only; nothing from infer or verify.
-CONSUMED BY: `serve/cli.py` and the webhook's work callback in `serve/run_endpoint.py`.
+CONSUMED BY: `serve/cli.py` and the webhook's work callback in `serve/commands/run_endpoint.py`.
 NAMED: `run_review`, not `review`. `types/review.py` already defines `Review`, the webhook's
       decision object, and two modules called `review` in one package is the collision
       `check_module_identity.py` refuses -- a caller cannot tell which one it imported.

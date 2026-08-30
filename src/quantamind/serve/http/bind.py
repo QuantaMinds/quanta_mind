@@ -8,7 +8,7 @@ WHY:  Split from `serve/listener.py`, which decides what a REQUEST means -- rout
       there to make room would have traded a recorded lesson for a feature.
 IMPORTS: stdlib, plus the handler and secret error from `serve.listener`. Same layer, public
       surface only.
-CONSUMED BY: `serve/run_endpoint.py`.
+CONSUMED BY: `serve/commands/run_endpoint.py`.
 """
 
 from __future__ import annotations

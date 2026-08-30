@@ -20,7 +20,7 @@ WHY:  **THE MODEL IS ONLY EVER SHOWN WHAT THE RANKER SELECTED.** That is the pro
       **NOTHING HERE IS PUBLISHED.** These findings are 66.7-82.1% wrong raw across four blind
       rater pools. `verify/` decides what reaches a pull request, and it may not import this module.
 IMPORTS: types.finding, types.verdict. stdlib json, subprocess, urllib.
-CONSUMED BY: `serve/run_review.py`. NEVER `verify/` — rule 7 forbids it.
+CONSUMED BY: `serve/commands/run_review.py`. NEVER `verify/` — rule 7 forbids it.
 """
 
 from __future__ import annotations

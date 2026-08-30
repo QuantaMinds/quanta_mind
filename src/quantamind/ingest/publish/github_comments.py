@@ -31,7 +31,8 @@ WHY:  **A reviewer that comments twice on the same commit is a reviewer people m
 IMPORTS: stdlib json, plus `ingest.github_api` for the authenticated call. It no longer shells
       out to `gh` -- this line said it did, long after the call moved to the API client.
 CONSUMED BY: `ingest/publish/github_reviews.py` for `marker` and `post`, and
-      `serve/run_endpoint.py` for `CommentFailed`. The webhook this said was pending exists.
+      `serve/commands/run_endpoint.py` for `CommentFailed`. The webhook this said was pending
+      exists.
 """
 
 from __future__ import annotations

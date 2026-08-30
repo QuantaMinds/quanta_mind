@@ -30,8 +30,8 @@ from quantamind.render.deep_report import lines
 # collision rule 13 is about, and here it shadowed silently until the call failed at runtime.
 from quantamind.render.json_report import report as json_review
 from quantamind.render.json_report import unreviewed
+from quantamind.serve.commands.run_review import Reviewed, review
 from quantamind.serve.deep_review import deep
-from quantamind.serve.run_review import Reviewed, review
 from quantamind.types.change import REVIEWABLE_SUFFIXES
 from quantamind.types.review import NotReviewed
 from quantamind.types.settings import load

@@ -22,7 +22,7 @@ WHY:  **`prompt_once.py` WAS IMPORTING `_post` AND `_token` OUT OF `gemini`.** A
       worse than no cost at all.
 IMPORTS: stdlib, plus `ingest.google_auth` for the credential. Nothing to its right.
 CONSUMED BY: `infer/gemini.py`, `infer/prompt_once.py`, `infer/change_review.py`,
-      `serve/run_commit.py`, `serve/deep_review.py`.
+      `serve/commands/run_commit.py`, `serve/deep_review.py`.
 """
 
 from __future__ import annotations

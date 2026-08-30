@@ -21,7 +21,7 @@ WHY:  **THIS IS A PARSER AND IT RUNS BEFORE ANY MODEL JUDGE.** A string search d
       indentation is the same line, and failing it would discard true findings for a reason that
       has nothing to do with truth.
 IMPORTS: types.finding only. Never `infer/` — rule 7.
-CONSUMED BY: `serve/run_review.py`, before any model judge runs.
+CONSUMED BY: `serve/commands/run_review.py`, before any model judge runs.
 """
 
 from __future__ import annotations

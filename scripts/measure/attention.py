@@ -23,7 +23,7 @@ WHY:  **THE QUESTION IS REDUNDANCY AND CONVERGENCE, NOT ORIENTATION, AND THE DIF
       **PRE-REGISTERED AS UNDERPOWERED.** 38 pull requests, a median of ONE commented file each,
       and 16 of the 38 from two repositories. This is reported as exploratory and the per-repository
       breakdown travels with it; a pooled statistic over that mix is a repo artefact.
-IMPORTS: stdlib; the product's ranker through `serve.run_review`.
+IMPORTS: stdlib; the product's ranker through `serve.commands.run_review`.
 CONSUMED BY: read by a human; writes `results/attention.json`.
 """
 
@@ -40,7 +40,7 @@ sys.path.insert(0, str(HERE.parents[2] / "src"))
 
 from borrowed_clones import root as clone_root  # noqa: E402
 
-from quantamind.serve.run_review import review  # noqa: E402
+from quantamind.serve.commands.run_review import review  # noqa: E402
 from quantamind.serve.working_clone import CloneFailed, ensure  # noqa: E402
 
 CORPUS = HERE.parent / "results" / "execution_corpus.json"

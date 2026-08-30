@@ -180,9 +180,9 @@ class NotReviewed(enum.Enum):
     """Why a run ended with no ranking. A value, because prose on stdout is not an answer.
 
     **"NOTHING TO REVIEW" AND "THE COMMAND BROKE" MUST NOT BE THE SAME THING ON THE WIRE.**
-    Under `--json`, `serve/run_commit.py` took two early exits that printed a human sentence and
-    returned 0, so a tool got a decode error and a success code -- a change touching only
-    Markdown looked exactly like a broken install. This is rule 3, typed silence, applied to the
+    Under `--json`, `serve/commands/run_commit.py` took two early exits that printed a human
+    sentence and returned 0, so a tool got a decode error and a success code -- a change touching
+    only Markdown looked like a broken install. This is rule 3, typed silence, applied to the
     CLI's machine-readable surface rather than to a resolver.
     """
 

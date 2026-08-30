@@ -114,7 +114,8 @@ def shape(clone: Path, sha: str, changed: list[str], *, against: str = "") -> Sh
     )
     median_files, median_lines = _norms(clone, sha)
 
-    # **EVERY WINDOW BELOW ENDS AT THE CHANGE**, the bound `serve/run_review.py` calls the whole
+    # **EVERY WINDOW BELOW ENDS AT THE CHANGE**, the bound `serve/commands/run_review.py` calls
+    # the whole
     # correctness argument: at review time the future does not exist.
     # → `tests/live/shape/test_change_shape_live.py`, which holds both numbers this was wrong by.
     stamp = _run(clone, ["show", "-s", "--format=%cI", sha]).strip()
