@@ -142,7 +142,7 @@ class Review:
 
 
 class Outcome(enum.Enum):
-    """What became of one delivery. Six values, none of them silence.
+    """What became of one delivery. Seven values, none of them silence.
 
     **`Delivered` ONCE CARRIED TWO FIELDS NOBODY READ**, which pulled a dependency on `allocate`
     and pushed this type out of the layer it belongs to. Written every delivery, read by nothing.
@@ -154,6 +154,9 @@ class Outcome(enum.Enum):
     NOTHING_TO_SAY = "ranked, and no file stood out enough to be worth a comment"
     NO_READABLE_FILES = "every changed file is in a language this product does not read"
     NO_FILES = "the pull request changed no files we could read from the API"
+    NOT_ENTITLED = "the installation was removed; nothing was reviewed"
+    """B5. **A SEVENTH VALUE, NOT A FLAG ON ANOTHER**: folding "we chose not to review" into
+    "there was nothing to review" hides a withdrawn customer among unreadable pull requests."""
 
 
 @dataclass(frozen=True, slots=True)

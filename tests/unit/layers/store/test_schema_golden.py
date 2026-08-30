@@ -25,7 +25,8 @@ import pathlib
 import sqlite3
 
 from quantamind.store.migrations import migrate
-from quantamind.store.schema import SCHEMA_VERSION, TABLES, create
+from quantamind.store.schema import SCHEMA_VERSION, create
+from quantamind.store.tables import TABLES
 
 GOLDEN = pathlib.Path(__file__).resolve().parents[4] / "tests" / "fixtures" / "schema_golden.json"
 
@@ -84,8 +85,8 @@ def test_a_store_migrated_from_version_2_is_identical_to_a_fresh_one() -> None:
     # Hardcoded, not derived from the ledger: deriving it would make the test agree with whatever
     # `STEPS` says, including a step that was forgotten. The next schema bump breaks this line on
     # purpose, so somebody has to look at the migration path from a real old store.
-    assert done.steps == (3, 4, 5), (
-        f"expected the 2->3, 3->4 and 4->5 steps, got {done.steps}. Hardcoded on purpose: a "
+    assert done.steps == (3, 4, 5, 6), (
+        f"expected the 2->3, 3->4, 4->5 and 5->6 steps, got {done.steps}. Hardcoded on purpose: a "
         "schema bump breaks this line so somebody looks at the path from a REAL old store."
     )
     assert normalise(shape_of(old)) == normalise(golden()), (

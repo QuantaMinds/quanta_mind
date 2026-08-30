@@ -46,7 +46,7 @@ def shape(conn: sqlite3.Connection) -> dict[str, str]:
 
 def expected() -> dict[str, str]:
     """What this build's DDL produces, read back from a throwaway database."""
-    from quantamind.store.schema import TABLES
+    from quantamind.store.tables import TABLES
 
     probe = sqlite3.connect(":memory:")
     try:

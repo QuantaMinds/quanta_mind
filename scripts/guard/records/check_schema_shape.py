@@ -1,6 +1,6 @@
 """The serialised form is not covered by any check, so notice the moment it changes.
 
-WHAT: Hashes the DDL in `store/schema.py` and compares it to the value recorded here. On a
+WHAT: Hashes the DDL in `store/tables.py` and compares it to the value recorded here. On a
       difference it fails, naming what the change requires: a SCHEMA_VERSION bump, a migration,
       and the byte-level golden that does not exist yet.
 WHY:  **`just verify` SAYS IN ITS OWN BANNER WHAT IT CANNOT SEE.** It recomputes every pack row
@@ -33,7 +33,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from coverage import refuse_path_argument
 from discovery import Violation, project_root, report
 
-SCHEMA = "src/quantamind/store/schema.py"
+SCHEMA = "src/quantamind/store/tables.py"
+VERSIONED = "src/quantamind/store/schema.py"
 
 # The digest of the DDL as it stands. **Change this ONLY together with a SCHEMA_VERSION bump, a
 # migration, and the golden described above** -- never to make the build green again.
@@ -57,8 +58,8 @@ SCHEMA = "src/quantamind/store/schema.py"
 # place to describe version 5, which left a comment naming `_to_5` under a heading that said
 # version 4 and destroyed the only record of what the version-4 bump did. The digest line moves
 # once per bump; the reasons it moved are the thing worth keeping.
-RECORDED_DIGEST = "4a95ae6d761071bd"
-RECORDED_VERSION = 5
+RECORDED_DIGEST = "1a76ba50aa71a1ef"
+RECORDED_VERSION = 6
 
 
 def ddl_of(text: str) -> str:
@@ -89,7 +90,11 @@ def main() -> int:
     text = path.read_text(encoding="utf-8")
     ddl = ddl_of(text)
     digest = hashlib.sha256(ddl.encode()).hexdigest()[:16]
-    version = version_of(text)
+    # **THE DDL AND THE VERSION LIVE IN DIFFERENT FILES SINCE THE SPLIT**, so the version is
+    # read from where the version is. Reading it from the DDL file would find nothing and report
+    # version 0, which reads as "no schema" rather than as "looked in the wrong place".
+    versioned = root / VERSIONED
+    version = version_of(versioned.read_text(encoding="utf-8")) if versioned.is_file() else 0
 
     if not ddl:
         print(f"[schema-shape] FAILED to find any CREATE statement in {SCHEMA}", file=sys.stderr)

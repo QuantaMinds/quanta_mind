@@ -29,7 +29,8 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from quantamind.store import drift
-from quantamind.store.schema import SCHEMA_VERSION, TABLES, version
+from quantamind.store.schema import SCHEMA_VERSION, version
+from quantamind.store.tables import TABLES
 
 
 class MigrationFailed(RuntimeError):
@@ -69,6 +70,22 @@ def _to_5(conn: sqlite3.Connection) -> None:
             conn.execute(statement)
 
 
+def _to_6(conn: sqlite3.Connection) -> None:
+    """Add `installation`. **Nothing is backfilled, and `eligible` stays NULL for every store.**
+
+    A repository installed before this table existed was never assessed against the free-tier
+    rules, because no assessment ran. Writing 1 would grant an entitlement nobody checked; writing
+    0 would refuse a customer we never looked at. NULL is the only honest value, and
+    `store/installations.entitled` reads it as "unknown" rather than as either.
+
+    Created from `TABLES` rather than written out again, so a migrated store is byte-identical to
+    a fresh one — which `test_schema_golden.py` asserts.
+    """
+    for statement in TABLES:
+        if "installation" in statement:
+            conn.execute(statement)
+
+
 def _to_4(conn: sqlite3.Connection) -> None:
     """Add `touch_watermark`. Nothing is backfilled, and that is what keeps it safe.
 
@@ -82,7 +99,7 @@ def _to_4(conn: sqlite3.Connection) -> None:
             conn.execute(statement)
 
 
-STEPS: dict[int, Callable[[sqlite3.Connection], None]] = {3: _to_3, 4: _to_4, 5: _to_5}
+STEPS: dict[int, Callable[[sqlite3.Connection], None]] = {3: _to_3, 4: _to_4, 5: _to_5, 6: _to_6}
 
 
 @dataclass(frozen=True, slots=True)

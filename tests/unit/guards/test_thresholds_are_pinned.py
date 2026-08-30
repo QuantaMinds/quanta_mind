@@ -61,7 +61,7 @@ RECORDED: dict[str, int] = {
     "records/check_documented_commands.py::FLOOR": 2,
     "records/check_documented_recipes.py::RECIPE_FLOOR": 20,
     "records/check_no_vague_refs.py::MARKDOWN_FLOOR": 40,
-    "records/check_schema_shape.py::RECORDED_VERSION": 5,
+    "records/check_schema_shape.py::RECORDED_VERSION": 6,
     "records/check_withdrawn_amendments.py::AMENDMENT_FLOOR": 20,
 }
 

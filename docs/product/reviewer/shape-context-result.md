@@ -1,5 +1,15 @@
 # Telling the model what the change looks like — NULL. The effect is smaller than the noise.
 
+> **DECIDED 2026-08-30: THE CONTEXT STAYS IN THE PROMPT, AND THIS NULL DOES NOT ARGUE OTHERWISE.**
+> What was measured is one thing — whether shape context lifts DEFECT DETECTION against a golden
+> set — and it does not, by less than the instrument's own wobble. What the context is FOR is
+> another: the prompt is structured as facts about the change, in the conversational form the
+> product uses on every pull request, and the shape line is one of those facts. A null on
+> detection lift is not a licence to stop telling the model what the change looks like.
+>
+> Recorded because this file was read twice as "remove it" — once from a stale memory that had it
+> as a PASS, once from the null. Neither reading was the decision, and now there is one.
+
 > **NULL. Do not cite the +5.2 headline; it was noise clearing a bar set below the noise.**
 > A same-arm replicate — two runs with no context on either side — landed **7 defects apart**. The
 > shape effect was 9 defects, then 6 on re-judging. **One of the no-context runs scored 91, beating

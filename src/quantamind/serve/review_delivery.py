@@ -45,8 +45,9 @@ from quantamind.render.pin_block import block
 from quantamind.serve.deep_review import examine
 from quantamind.serve.run_review import review as run_ranking
 from quantamind.serve.working_clone import ensure, sweep
-from quantamind.store import tenancy
+from quantamind.store import installations, tenancy
 from quantamind.store.reviews import bank
+from quantamind.store.schema import open_store
 from quantamind.types.change import REVIEWABLE_SUFFIXES
 from quantamind.types.review import Delivered, Outcome
 from quantamind.types.settings import Settings
@@ -85,6 +86,20 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
         print(f"[deliver] removed {swept} stale clone(s)", flush=True)
 
     store = tenancy.store_for(Path(settings.database_path), *delivery_repo.split("/", 1))
+
+    # **B5. THE ONLY STATE THAT REFUSES IS `REMOVED`**, and that is deliberate. `UNKNOWN` means no
+    # installation row -- every repository installed before the mapping existed -- and refusing it
+    # would silence real customers to enforce a rule they were never told about. An INELIGIBLE
+    # repository is still reviewed: the free-tier verdict is information for a human, and turning
+    # it into a gate without a paid tier to fall back to is a dead end with no override.
+    seat_conn = open_store(store)
+    try:
+        seat = installations.entitled(seat_conn, delivery_repo)
+    finally:
+        seat_conn.close()
+    if not seat.may_review:
+        print(f"[serve] {delivery_repo} #{number}: not reviewed — {seat.why()}", flush=True)
+        return Delivered(Outcome.NOT_ENTITLED, (), (), None)
     # **FETCHED ONCE, UNFILTERED, THEN FILTERED HERE.** The ranker must see only files we read;
     # `pin_check` must see the workflows, which the ranker's filter removes. Two calls would cost
     # a second page walk and could disagree if the pull request changed between them.
