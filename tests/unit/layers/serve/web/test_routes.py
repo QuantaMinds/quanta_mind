@@ -23,6 +23,7 @@ from pathlib import Path
 import pytest
 
 from quantamind.serve.web import routes, signin
+from quantamind.store.schema import open_store
 from quantamind.types.settings import Settings
 
 NOW = 1_700_000_000
@@ -109,3 +110,73 @@ def test_an_unknown_path_is_a_404_not_a_redirect(configured: Settings) -> None:
 
     assert reply.status == 404
     assert _header(reply, "Location") == []
+
+
+# --- the pages behind sign-in ------------------------------------------------------------------
+#
+# **A SIGNED-OUT VISITOR AND AN EXPIRED SESSION GET THE SAME PAGE.** The difference matters to us
+# and not to them, and telling a visitor which one they are is telling an attacker whether a token
+# was ever real.
+
+
+def _signed_in(configured: Settings, tmp_path: Path) -> str:
+    from quantamind.store import accounts
+
+    conn = open_store(Path(configured.database_path) / routes.ACCOUNTS_DB)
+    try:
+        accounts.remember(conn, "dhanush", 4242, at=NOW)
+        return accounts.issue(conn, "dhanush", at=NOW)
+    finally:
+        conn.close()
+
+
+def test_the_root_signed_out_offers_sign_in(configured: Settings) -> None:
+    reply = routes.get("/", "", configured, at=NOW)
+
+    assert reply.status == 200
+    assert "/login" in reply.body
+    assert reply.kind.startswith("text/html")
+
+
+def test_an_expired_session_gets_the_same_page_as_no_session(
+    configured: Settings, tmp_path: Path
+) -> None:
+    from quantamind.store import accounts
+
+    conn = open_store(Path(configured.database_path) / routes.ACCOUNTS_DB)
+    try:
+        accounts.remember(conn, "dhanush", 4242, at=NOW)
+        token = accounts.issue(conn, "dhanush", at=NOW, hours=1)
+    finally:
+        conn.close()
+
+    stale = routes.get("/", f"{signin.COOKIE}={token}", configured, at=NOW + 7200)
+    absent = routes.get("/", "", configured, at=NOW + 7200)
+
+    assert stale.body == absent.body
+
+
+def test_a_signed_in_visitor_sees_their_list(configured: Settings, tmp_path: Path) -> None:
+    token = _signed_in(configured, tmp_path)
+
+    reply = routes.get("/", f"{signin.COOKIE}={token}", configured, at=NOW)
+
+    assert reply.status == 200
+    assert "Signed in as dhanush" in reply.body
+
+
+def test_a_repository_that_is_not_yours_is_a_404(configured: Settings, tmp_path: Path) -> None:
+    """Same answer as one that does not exist. A different one would confirm it is there."""
+    token = _signed_in(configured, tmp_path)
+
+    reply = routes.get("/r/rival/secret", f"{signin.COOKIE}={token}", configured, at=NOW)
+
+    assert reply.status == 404
+
+
+def test_the_repository_path_signed_out_does_not_leak_a_404_or_a_200(configured: Settings) -> None:
+    """Signed out, every path behind the wall answers the same way: sign in."""
+    reply = routes.get("/r/rival/secret", "", configured, at=NOW)
+
+    assert reply.status == 200
+    assert "/login" in reply.body

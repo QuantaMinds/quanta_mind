@@ -381,6 +381,33 @@ narrower" is the same failure class as every other silent absence in this codeba
 
 ---
 
+### `serve/web/pages.py` — the dashboard, and who is allowed to see it
+
+Signed out, `/` offers sign-in. Signed in, it lists the account's repositories and
+`/r/<owner>/<name>` shows that repository's compliance table and outcome board.
+
+**An account sees only its own, checked per request.** A path is a claim, not a permission:
+`mine()` answers from the `installation` rows, never from the URL. **"Not yours" and "does not
+exist" return the same answer**, and the test compares the two to each other rather than each to
+None — a difference would confirm to a visitor that a repository is there.
+
+**The two reports are the CLI's, shown rather than rebuilt.** `quantamind compliance` and
+`quantamind dashboard` already decide what those tables say; a second rendering would be a second
+judgement, and the one that drifts. They go inside `<pre>`, escaped.
+
+**No dependency and no script.** `render/page.py` is hand-rolled because `dependencies = []`, and
+a page with no script is one where a missed escape cannot execute. `escaped()` exists as a
+function call somebody can grep for rather than as a habit.
+
+**A repository name carrying markup never reaches the page** — `store/tenancy.py` accepts
+`^[A-Za-z0-9][A-Za-z0-9._-]*$` and refuses the rest at the storage boundary. The test asserts that
+refusal rather than an escape, because a test asserting escaping there would describe a path that
+does not exist.
+
+**Listing an account's repositories reads every tenant store**, since `installation` rows live
+beside the tenant they describe. O(tenants) per page, honest at a forty-repository free tier and
+the first thing to move when it stops being.
+
 ### `serve/web/` and `store/accounts.py` — sign in with GitHub
 
 `serve/web/` is the HTTP surface: `http_io.read_body` (shared with the webhook), `signin` (the
