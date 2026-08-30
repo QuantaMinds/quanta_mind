@@ -41,7 +41,7 @@ def run(port: int, host: str = "127.0.0.1") -> int:
     that was doing something.
     """
     from quantamind.ingest.diff import DiffReadFailed
-    from quantamind.ingest.github_comments import CommentFailed
+    from quantamind.ingest.publish.github_comments import CommentFailed
     from quantamind.serve.http.bind import build
     from quantamind.serve.review_delivery import deliver
     from quantamind.serve.webhook_github import MisconfiguredSecret, Review

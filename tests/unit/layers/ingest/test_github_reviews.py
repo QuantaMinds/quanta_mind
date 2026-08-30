@@ -26,7 +26,8 @@ import json
 
 import pytest
 
-from quantamind.ingest import github_api, github_reviews
+from quantamind.ingest import github_api
+from quantamind.ingest.publish import github_reviews
 from quantamind.types.finding import Finding
 
 PLACED = Finding(path="a.py", quote="x = 1", claim="This shadows a builtin.", line=12)

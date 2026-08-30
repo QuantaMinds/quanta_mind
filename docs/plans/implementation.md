@@ -20,9 +20,9 @@ evidence and it is not the commercial plan. Those were moved out so this reads a
 | stage | status | evidence |
 |---|---|---|
 | **the skeleton** | **DONE** | ten layers importable; `types/` holds the value objects; `serve/cli.py` runs |
-| **the reader** | **STARTED** | `ingest/history.py`, `ingest/diff.py`, `ingest/commits.py`, `ingest/github_comments.py`, `parse/languages.py` and `parse/units.py` all built and live-verified. The stage's own gate is not signed off |
+| **the reader** | **STARTED** | `ingest/history.py`, `ingest/diff.py`, `ingest/commits.py`, `ingest/publish/github_comments.py`, `parse/languages.py` and `parse/units.py` all built and live-verified. The stage's own gate is not signed off |
 | **the store and the ranker** | **STARTED** | `store/schema.py`, `store/touches.py`, `rank/score.py`, `rank/order.py`, `rank/events.py` and `rank/baseline.py` built and live-verified. Gate 2b is met at 1.21% vs 3.12% on six unseen repositories |
-| **render and the free tier** | **STARTED** | `render/coverage_line.py`, `render/comment.py` and `ingest/github_comments.py` built; `post()` has written, refused a duplicate, and reposted on a moved head |
+| **render and the free tier** | **STARTED** | `render/coverage_line.py`, `render/comment.py` and `ingest/publish/github_comments.py` built; `post()` has written, refused a duplicate, and reposted on a moved head |
 | **the retrospective** | **STARTED** | `serve/retrospective.py` and `render/replay_report.py` built; `quantamind retrospective <clone>` runs against any clone and is live-tested |
 | **serve** | **STARTED** | the endpoint binds, authenticates, de-duplicates and answers; `serve/listener.py` + `run_endpoint.py`. **Nothing is wired to the work callback** — `review` is unbuilt |
 | **the reviewer — allocate, infer, verify** | **NOT BEGUN** | scheduled by product decision 2026-08-20. `infer/` is Gemini over the ranked files; `verify/` is ONE isolated judge of a different family, and it is what makes `infer/` shippable |
@@ -40,7 +40,7 @@ three months stale.
 |---|---|---|
 | `types/` | **15** | `change.py`, `checked.py`, `commit.py`, `deep.py`, `env_values.py`, `finding.py`, `pooled_outcome.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `rule.py`, `settings.py`, `spend.py`, `touch.py`, `verdict.py` |
 | `store/` | **14** | `accounts.py`, `calibration.py`, `compliance.py`, `deliveries.py`, `drift.py`, `installations.py`, `lifecycle.py`, `migrations.py`, `reviews.py`, `rule_checks.py`, `schema.py`, `tables.py`, `tenancy.py`, `touches.py` |
-| `ingest/` | **15** | `app_auth.py`, `blob.py`, `change_shape.py`, `commits.py`, `diff.py`, `git_credentials.py`, `github_api.py`, `github_comments.py`, `github_reviews.py`, `google_auth.py`, `history.py`, `pull_refs.py`, `reachability.py`, `review_window.py`, `worktree.py` |
+| `ingest/` | **13** | `app_auth.py`, `blob.py`, `change_shape.py`, `commits.py`, `diff.py`, `git_credentials.py`, `github_api.py`, `google_auth.py`, `history.py`, `pull_refs.py`, `reachability.py`, `review_window.py`, `worktree.py` |
 | `parse/` | **6** | `importers.py`, `imports.py`, `languages.py`, `python_names.py`, `suite_reach.py`, `units.py` |
 | `rank/` | **6** | `baseline.py`, `events.py`, `firing.py`, `history_rates.py`, `order.py`, `score.py` |
 | `allocate/` | **1** | `depth.py` |
@@ -189,7 +189,7 @@ test asserting the guard finds a non-zero number of files.
    from the clone is refused, not guessed — a ranking against the wrong instant looks identical to
    a correct one. Hunks and line ranges are not built; nothing needs them until `parse/`.
 3. `ingest/github_pulls.py` — pull request metadata. **Timeout 30s, declared.**
-4. **DONE, both paths verified.** `ingest/github_comments.py` — one comment
+4. **DONE, both paths verified.** `ingest/publish/github_comments.py` — one comment
    per head SHA. The key is the head SHA rather than the pull request number: a pull request lives
    for weeks and its head moves, so keying on the number would comment once and go silent for every
    later push. **The decision is a pure function** so the half that can double-post is the half
@@ -345,7 +345,7 @@ produce the no-history label, not an arbitrary order presented as a ranking.
 1. **DONE.** `render/coverage_line.py` — **the coverage line comes first in every comment**,
    naming what was not analysed and why.
 2. **DONE.** `render/comment.py` — the comment body: the ranking, the budget, the unresolved list.
-3. **DONE.** `ingest/github_comments.py` posts it, idempotently, keyed on head SHA.
+3. **DONE.** `ingest/publish/github_comments.py` posts it, idempotently, keyed on head SHA.
 
 ### Output
 

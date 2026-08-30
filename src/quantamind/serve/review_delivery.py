@@ -39,7 +39,7 @@ from quantamind.allocate.depth import plan as allocate
 from quantamind.infer.change_review import explain
 from quantamind.ingest.diff import base_commit, changed_files
 from quantamind.ingest.github_api import token_for
-from quantamind.ingest.github_reviews import publish
+from quantamind.ingest.publish.github_reviews import publish
 from quantamind.render.comment import comment as rendered
 from quantamind.render.pin_block import block
 from quantamind.serve.deep_review import examine
