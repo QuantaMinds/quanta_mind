@@ -381,6 +381,34 @@ narrower" is the same failure class as every other silent absence in this codeba
 
 ---
 
+### `serve/web/` and `store/accounts.py` — sign in with GitHub
+
+`serve/web/` is the HTTP surface: `http_io.read_body` (shared with the webhook), `signin` (the
+OAuth flow), `routes` (the two GET routes). `listener.py` keeps the socket and the routing
+decision. It moved out when `listener.py` hit the line cap and the alternative was shaving one
+comment per new route.
+
+**The session token is never stored, only its SHA-256.** `issue()` returns it once and cannot
+return it again, so a stolen database yields no live session — the same reason `app_key_path`
+holds a path rather than a key. A test asserts the raw token appears nowhere in the file on disk.
+
+**Expired and unknown are different answers.** Both refuse; folding them together would show
+"no such session" to somebody whose session simply aged out. Sessions last two weeks, written at
+issue — a credential with no end outlives every reason it was granted.
+
+**`state` is checked, and checked before the code is spent.** Without it anyone can hand a
+victim's browser a callback carrying THEIR code and log the victim into the attacker's account.
+Two copies — one in the URL, one in a short-lived `HttpOnly` cookie the attacker cannot set — and
+the cookie is cleared on use, because a replayed callback is what an attacker keeps. The exchange
+happens only after the comparison, so a rejected callback never burns a real authorisation code.
+
+**Cookies carry `HttpOnly`, `Secure` and `SameSite=Lax`**, each closing a different door, and the
+error page never echoes the callback because a browser reaches it with attacker-supplied values.
+
+`routes.get()` returns a `Reply` rather than writing to a socket, which is what makes a forged
+callback testable without one. Accounts live in `<root>/accounts.db`, beside the tenants and never
+inside one: a person is not a repository.
+
 ### `installation` — whose repository this is, and whether we may review it
 
 `store/installations.py` at schema v6. `serve/onboarding.admit()` writes a row per repository at

@@ -181,7 +181,20 @@ Stripe.
       **Making room for it moved `pin_check` to `verify/`**, where it always belonged: it
       adjudicates a claim about a pinned SHA and imports `verify.pin_mismatch`, and `serve/` was
       at its fifteen-file cap.
-- [ ] **B2 Accounts + sign in with GitHub.** No user model exists today.
+- [x] **B2 Accounts + sign in with GitHub.** `store/accounts.py` at schema v7, `serve/web/`
+      for the surface: `/login` redirects, `/callback` signs in, anything else 404s. 26 tests,
+      four security sabotages caught.
+      **The session token is never stored, only its SHA-256** — `issue()` returns it once, so a
+      stolen database yields no live session, and a test asserts the raw token appears nowhere in
+      the file on disk. **Expired and unknown are different answers.** Sessions last two weeks,
+      written at issue.
+      **`state` is checked, and before the code is spent.** Without it anyone can hand a victim's
+      browser a callback carrying THEIR code and log the victim into the attacker's account. Two
+      copies — URL and a short-lived `HttpOnly` cookie — cleared on use, because a replayed
+      callback is what an attacker keeps. Cookies carry `HttpOnly`, `Secure` and `SameSite=Lax`,
+      and the error page never echoes the callback.
+      **NOT DONE HERE:** nothing is shown to a signed-in user yet. `whose()` answers who a cookie
+      belongs to and no page consumes it — the dashboards from 7 and 13 are what would.
 - [ ] **B3 Stripe checkout + subscription webhooks.** ⏸ PARKED. 🔑 *needs `claude mcp login plugin:stripe:stripe` run in a REAL terminal (my Bash tool has no tty), and a `STRIPE_WEBHOOK_SECRET`, absent from `.env`. Present: `STRIPE_Publishable_key`, `STRIPE_Secret_key`, `STRIPE_LIVE_SECRET_KEY`, `STRIPE_LIVE_PUBLISHABLE_KEY`.*
 - [ ] **B7 BYOK — the customer brings their own model key.** ⏸ PARKED with B3. Inference cost moves to them, which
       makes per-review cost somebody else's ceiling rather than our margin. Needs per-tenant

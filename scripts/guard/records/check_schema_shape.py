@@ -58,8 +58,8 @@ VERSIONED = "src/quantamind/store/schema.py"
 # place to describe version 5, which left a comment naming `_to_5` under a heading that said
 # version 4 and destroyed the only record of what the version-4 bump did. The digest line moves
 # once per bump; the reasons it moved are the thing worth keeping.
-RECORDED_DIGEST = "1a76ba50aa71a1ef"
-RECORDED_VERSION = 6
+RECORDED_DIGEST = "352af1a6571350d0"
+RECORDED_VERSION = 7
 
 
 def ddl_of(text: str) -> str:

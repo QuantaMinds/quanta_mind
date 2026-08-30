@@ -61,6 +61,14 @@ class Settings:
     app_id: str = ""
     """The GitHub App's numeric id. Public: it identifies the App, it authorises nothing."""
 
+    oauth_client_id: str = ""
+    """The OAuth App's client id. Public: it names the App in a redirect a browser can read."""
+
+    oauth_client_secret: str = ""
+    """**A CREDENTIAL, AND THE ONLY ONE HELD HERE RATHER THAN READ AT USE.** It goes into one
+    POST body and nowhere else; `render_config` reports it as set or unset, never printed, the
+    same rule `public_read_token` follows because `config` output lands in scrollback."""
+
     public_read_token: str = ""
     """Used ONLY where we are NOT installed, never a customer -- see `ingest/github_api`.
 
@@ -180,6 +188,8 @@ def load(env: Mapping[str, str] | None = None) -> Settings:
         posting_enabled=read_bool(source, "POSTING_ENABLED", False),
         app_id=source.get(PREFIX + "APP_ID", ""),
         app_key_path=source.get(PREFIX + "APP_KEY_PATH", ""),
+        oauth_client_id=source.get(PREFIX + "OAUTH_CLIENT_ID", ""),
+        oauth_client_secret=source.get(PREFIX + "OAUTH_CLIENT_SECRET", ""),
         public_read_token=source.get(PREFIX + "PUBLIC_READ_TOKEN", ""),
         inference_project=source.get(PREFIX + "INFERENCE_PROJECT", ""),
         # **`or`, NOT A `get` DEFAULT.** `QUANTAMIND_GCLOUD_PATH=` — set but empty, which is
