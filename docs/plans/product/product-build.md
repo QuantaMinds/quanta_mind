@@ -165,8 +165,22 @@ blocks Half B in production, and it was invisible until the deep half ran for th
 which need no payment rail — a free tier is free, so onboarding real repositories does not wait on
 Stripe.
 
-- [ ] **B1 Background warm-up worker.** Kills the cold start: full clone + ~31s index build on a
-      115k-commit repository. Cannot be inline — GitHub needs a prompt 2xx.
+- [x] **B1 Background warm-up worker.** `serve/warm.py`. On an installation event the handler
+      answers **200 first**, then clones and indexes each provisioned repository — the same
+      acknowledge-then-work shape the module docstring already documents for deliveries, because a
+      clone will not finish inside GitHub's ten seconds. 5 tests against a REAL git repository and
+      a REAL store with only the network clone stubbed; sabotaging the index call fails two of
+      them by name.
+      **The line it replaces was a false claim.** `listener.py` said "Provisioned here so a first
+      review pays no cold index", but `tenancy.provision` creates the store FILE and nothing else
+      — no clone, no touches, no watermark. It was true of nothing until this existed.
+      **A failed warm-up is not a failed installation**: `warm_all` collects failures per
+      repository and prints them, because an install that 500s over a slow clone is worse than a
+      slow first review. Idempotent by construction — `index_repository` reads the watermark and
+      appends `<watermark>..HEAD`, asserted by warming twice and getting the same count.
+      **Making room for it moved `pin_check` to `verify/`**, where it always belonged: it
+      adjudicates a claim about a pinned SHA and imports `verify.pin_mismatch`, and `serve/` was
+      at its fifteen-file cap.
 - [ ] **B2 Accounts + sign in with GitHub.** No user model exists today.
 - [ ] **B3 Stripe checkout + subscription webhooks.** ⏸ PARKED. 🔑 *needs `claude mcp login plugin:stripe:stripe` run in a REAL terminal (my Bash tool has no tty), and a `STRIPE_WEBHOOK_SECRET`, absent from `.env`. Present: `STRIPE_Publishable_key`, `STRIPE_Secret_key`, `STRIPE_LIVE_SECRET_KEY`, `STRIPE_LIVE_PUBLISHABLE_KEY`.*
 - [ ] **B7 BYOK — the customer brings their own model key.** ⏸ PARKED with B3. Inference cost moves to them, which

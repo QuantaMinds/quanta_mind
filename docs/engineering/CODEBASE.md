@@ -381,6 +381,29 @@ narrower" is the same failure class as every other silent absence in this codeba
 
 ---
 
+### `serve/warm.py` — the cold start, paid before anyone is waiting
+
+On an installation event the listener answers **200 first**, then `warm_all` clones and indexes
+each provisioned repository. It cannot be inline: GitHub requires a 2XX within ten seconds and a
+clone will not finish in ten, which is the same acknowledge-then-work shape `listener.py` already
+documents for deliveries.
+
+**The line it replaces claimed the job was already done.** `listener.py` read "Provisioned here so
+a first review pays no cold index", but `store/tenancy.provision` creates each tenant's store FILE
+and nothing else — no clone, no touches, no watermark. The first pull request paid a full clone
+plus a ~31s index build on a 115,776-commit repository, and Cloud Run's ephemeral disk means every
+new instance paid it again.
+
+**A failed warm-up is not a failed installation.** `warm_all` collects failures per repository and
+prints them; it runs after the endpoint has answered, and an install that 500s over a slow clone
+is a worse outcome than a slow first review. Idempotent because `run_review.index_repository`
+reads the watermark and appends `<watermark>..HEAD` — warming twice yields the same row count.
+
+**Making room for it moved `pin_check` into `verify/`**, where it belongs: it adjudicates a claim
+about a pinned SHA and imports `verify.pin_mismatch`, and `verify/rule_check.py` already reads a
+clone through `ingest.blob` for the same kind of work. `serve/` was at its fifteen-file cap, and
+the honest question was which module was in the wrong layer rather than which cap to raise.
+
 ### `compliance` — what the declared rules actually did, per repository
 
 `store/compliance.py` reads every `rule_check` row for one repository; `render/compliance_table.py`

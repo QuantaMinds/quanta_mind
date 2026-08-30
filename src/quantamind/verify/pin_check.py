@@ -25,6 +25,10 @@ WHY:  **THE DETECTOR WAS BUILT, MEASURED 24/24, AND WIRED SOMEWHERE IT COULD NEV
       **THE BASE RATE IS 0.24%** -- 3 genuine mismatches in 1,244 real commented pins across 22
       repositories. This fires rarely and is correct when it does.
 IMPORTS: verify.pin_mismatch. Rightmost layer.
+SEE ALSO: it lived in `serve/` until 2026-08-30 and never belonged there — it adjudicates a
+      claim about a pinned SHA, which is what `verify/` is, and `verify/rule_check.py` already
+      reads a clone through `ingest.blob` for the same kind of work. Moved when `serve/` hit its
+      fifteen-file cap and the honest question was which module was in the wrong layer.
 CONSUMED BY: `serve/review_delivery.py`, `serve/run_commit.py`.
 """
 

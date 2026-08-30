@@ -42,7 +42,6 @@ from quantamind.ingest.github_api import token_for
 from quantamind.ingest.github_reviews import publish
 from quantamind.render.comment import comment as rendered
 from quantamind.render.pin_block import block
-from quantamind.serve import pin_check
 from quantamind.serve.deep_review import examine
 from quantamind.serve.run_review import review as run_ranking
 from quantamind.serve.working_clone import ensure, sweep
@@ -52,6 +51,7 @@ from quantamind.types.change import REVIEWABLE_SUFFIXES
 from quantamind.types.review import Delivered, Outcome
 from quantamind.types.settings import Settings
 from quantamind.types.spend import Spend
+from quantamind.verify import pin_check
 from quantamind.verify.rule_check import enforce
 
 

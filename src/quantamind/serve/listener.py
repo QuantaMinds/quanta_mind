@@ -39,6 +39,7 @@ from pathlib import Path
 from typing import Any
 
 from quantamind.serve.health import health
+from quantamind.serve.warm import warm_all
 from quantamind.serve.webhook_github import (
     DELIVERY_HEADER,
     EVENT_HEADER,
@@ -157,26 +158,25 @@ class _Handler(BaseHTTPRequestHandler):
             return
 
         if isinstance(decision, Installed):
-            # Provisioned here so a first review pays no cold index. → `store/tenancy.provision`.
+            # `provision` makes the store FILE only. → `serve/warm.py` for the clone and index.
             made, refused = tenancy.provision(Path(self.settings.database_path), decision.repos)
             for full in refused:
                 print(f"[serve] {full}: NOT provisioned", flush=True)
             print(
-                f"[serve] installation {decision.action!r} for {decision.account}: "
-                f"provisioned {len(made)} of {len(decision.repos)} repository(ies)",
+                f"[serve] install {decision.action!r} {decision.account}: "
+                f"provisioned {len(made)}/{len(decision.repos)}",
                 flush=True,
             )
             self._say(200, {"provisioned": made})
+            warm_all(made, self.settings)
             return
 
         # **THE DELIVERY LEDGER IS ITS OWN STORE, BESIDE THE TENANTS AND NOT INSIDE ONE.**
-        # `database_path` became a ROOT when each repository got its own file, and this line still
-        # opened it as though it were a database: the first real pull request would have died on
-        # `unable to open database file`. It survived every test because the tests never drive the
-        # listener's store, and survived three live deliveries because a ping returns above.
-        # Delivery ids are global -- the same id must not be processed twice for any tenant -- so
+        # Delivery ids are global -- the same id must not be processed twice for ANY tenant -- so
         # the ledger cannot live in a tenant's file. `tenancy.tenants()` globs `<root>/<owner>/*.db`
-        # and so does not mistake this for a customer.
+        # and so does not mistake this for a customer. This line once opened `database_path` as a
+        # database after it became a ROOT; the same defect outlived it in `run_dashboard`, and
+        # `docs/engineering/CODEBASE.md` records both under the compliance section.
         conn = schema.open_store(Path(self.settings.database_path) / "deliveries.db")
         try:
             try:
