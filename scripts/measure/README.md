@@ -80,3 +80,36 @@ they run. That is why the copies are copies rather than an attempt to make resea
 
 Every duplicated file names its twin in its own docstring, so an edit to one is a visible
 prompt to edit the other.
+
+---
+
+## `mutate.py` — change a constant, see whether anything notices
+
+Everything else here measures the product's behaviour. This one measures **the suite**: it
+rewrites each numeric constant, runs the tests, and reports the changes nothing caught.
+
+```bash
+uv run python scripts/measure/mutate.py                          # constants in files this branch changed
+uv run python scripts/measure/mutate.py --all                    # every constant in src/quantamind
+uv run python scripts/measure/mutate.py --all --root scripts/guard
+```
+
+Exit codes: `0` nothing survived, `1` survivors (or a file it failed to restore), `2` refused.
+
+**It refuses rather than reporting a verdict it cannot support.** A red baseline makes every
+mutation look caught and the report read as total coverage — the exact failure the tool exists
+to find — so the suite is run once before anything is mutated and a failure stops the run. An
+empty population refuses for the same reason.
+
+**The diff mode is the cheap one.** A whole-tree sweep of `src/quantamind` is 130 mutations and
+about thirty minutes; the default only touches files the branch changed, which is usually
+seconds and is the form worth running habitually.
+
+**What it found.** On `scripts/guard`, 15 of 17 threshold weakenings survived the whole suite,
+including `hook_pre_edit.DENY` set to 0 — which turns every refusal into a permission. On
+`src/quantamind`, 95 of 130 mutations survived, among them `verify/anchor.MIN_QUOTE_CHARS` set
+to 0, which lets a finding quoting a single brace anchor to any added line; that one survived
+`tests/live` too. Both are fixed, and `docs/engineering/GUARD_AUDIT_2026-08.md` records them.
+
+**A survivor is not automatically a defect.** Twenty of the remaining ones are subprocess
+timeouts, which a unit test can pin but cannot exercise. Read the list, decide per constant.
