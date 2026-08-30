@@ -177,7 +177,10 @@ def test_health_reports_the_store_and_an_unknown_path_is_a_404(server: _Server) 
     missing = conn.getresponse().status
     conn.close()
 
-    assert health_status in (200, 503), "health must answer with a verdict, not an error"
+    # `in (200, 503)` here accepted BOTH statuses the route can emit, so it could not fail.
+    # This root is empty and writable, which `health()` decides is healthy, deterministically.
+    # The route reading the verdict at all is pinned next door, in `test_listener_health.py`.
+    assert health_status == 200, f"an empty writable root is healthy, got {health_status}"
     assert "ok" in health_body and "detail" in health_body
     assert missing == 404
 
