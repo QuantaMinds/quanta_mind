@@ -82,7 +82,7 @@ def fires(
 
     **The fallback is kept and is NOT the default anyone should ship**, because a caller with no
     repository index still needs an answer, and returning False there would silence a ranking that
-    is perfectly good. `serve/run_review.py` passes the baseline.
+    is perfectly good. `serve/commands/run_review.py` passes the baseline.
 
     False when there is nothing to rank: with every file at zero the ordering is alphabetical, and
     speaking would present `sort(filenames)` as a judgement about risk. Staying quiet is the

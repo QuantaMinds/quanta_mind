@@ -19,7 +19,7 @@ WHY:  **A REVIEW THAT NEEDS A COMMIT ARRIVES TOO LATE TO BE CHEAP.** By the time
       also the honest answer to "can this run air-gapped", and it is why the local path can read a
       convention file the endpoint structurally cannot.
 IMPORTS: stdlib only. Same layer as the rest of `ingest/`.
-CONSUMED BY: `serve/run_commit.py`, for `quantamind review` without a commit.
+CONSUMED BY: `serve/commands/run_commit.py`, for `quantamind review` without a commit.
 """
 
 from __future__ import annotations

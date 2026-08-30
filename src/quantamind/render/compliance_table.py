@@ -17,7 +17,7 @@ WHY:  **THE UNCHECKABLE COLUMN IS THE PRODUCT.** Every competitor's compliance s
 
       **PER REPOSITORY.** No developer is named anywhere in this file, deliberately.
 IMPORTS: store.compliance. Left of serve, right of store.
-CONSUMED BY: `serve/run_report.py` behind `quantamind compliance`.
+CONSUMED BY: `serve/commands/run_report.py` behind `quantamind compliance`.
 SEE ALSO: named for its
       artefact, not its subject — `store/compliance.py` is the read model, and `AGENTS.md` rule 13
       forbids two modules sharing a name, as `store/lifecycle.py` and `render/dashboard.py` do.

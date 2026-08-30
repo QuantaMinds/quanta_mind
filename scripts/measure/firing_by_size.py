@@ -17,7 +17,7 @@ WHY:  **THE FILE-LEVEL PITCH IS DEAD AND THE QUEUE-LEVEL ONE IS UNMEASURED.** Th
       **THIS IS NOT A TEST OF WHETHER FIRING IS RIGHT.** It asks only where the gate speaks. Whether
       the pull requests it speaks on are the ones that later break is a different measurement and
       needs a customer's incident data.
-IMPORTS: stdlib; the product's ranker through `serve.run_review`.
+IMPORTS: stdlib; the product's ranker through `serve.commands.run_review`.
 CONSUMED BY: read by a human; writes `results/firing_by_size.json`.
 """
 
@@ -35,7 +35,7 @@ sys.path.insert(0, str(HERE.parents[2] / "src"))
 from borrowed_clones import root as clone_root  # noqa: E402
 
 from quantamind.rank.order import NothingToRank  # noqa: E402
-from quantamind.serve.run_review import NoHistory, review  # noqa: E402
+from quantamind.serve.commands.run_review import NoHistory, review  # noqa: E402
 from quantamind.serve.working_clone import CloneFailed, ensure  # noqa: E402
 
 CORPUS = HERE.parent / "results" / "execution_corpus.json"

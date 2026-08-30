@@ -16,7 +16,7 @@ WHY:  Two early exits printed a human sentence to stdout and returned 0 regardle
       **AND IT PINS THE KEYS ACROSS OUTCOMES.** A consumer that must branch on which shape it
       got is back to parsing prose; the point of the reason being a value is that the envelope
       does not change.
-IMPORTS: pytest, quantamind.serve.run_commit, quantamind.types.unreviewed.
+IMPORTS: pytest, quantamind.serve.commands.run_commit, quantamind.types.unreviewed.
 CONSUMED BY: `just check`.
 """
 
@@ -28,7 +28,7 @@ from pathlib import Path
 
 import pytest
 
-from quantamind.serve.run_commit import review_commit
+from quantamind.serve.commands.run_commit import review_commit
 from quantamind.types.review import NotReviewed
 
 GIT_TIMEOUT_S = 30

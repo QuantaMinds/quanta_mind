@@ -16,7 +16,8 @@ WHY:  **`ingest/github_comments.py` SHELLED OUT TO THE `gh` CLI, WHICH COMMENTS 
       with `pull_requests: write`.
 
       **THE KEY IS READ FROM DISK AT USE AND NEVER HELD IN `Settings`.** Same reasoning as the
-      webhook secret in `serve/run_endpoint.py`: a credential in a settings object reaches a config
+      webhook secret in `serve/commands/run_endpoint.py`: a credential in a settings object
+      reaches a config
       dump or a log the first time anyone prints one. The path is configuration; the key is not.
 
       **A TOKEN IS CACHED UNTIL A MINUTE BEFORE IT EXPIRES, NOT UNTIL IT EXPIRES.** A token that is

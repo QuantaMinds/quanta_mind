@@ -26,7 +26,7 @@ WHY:  **A HUMAN RE-TYPING PROSE IS NOT AN INTEGRATION.** `/qm-review` inside Cur
       tell"; `breaks: false` is "we checked the callers and it does not". An agent that read the
       first as the second would merge on a check that never ran.
 IMPORTS: types.{checked,finding,ranking}. Nothing to its right, and nothing from `infer/`.
-CONSUMED BY: `serve/run_commit.py`, behind `--json`.
+CONSUMED BY: `serve/commands/run_commit.py`, behind `--json`.
 """
 
 from __future__ import annotations
@@ -125,7 +125,8 @@ def unreviewed(reason: NotReviewed, *, changed: Sequence[str] = (), origin: str 
     """The same object when there was no ranking to report, carrying WHY as a value.
 
     **THIS EXISTS BECAUSE THE ALTERNATIVE WAS A HUMAN SENTENCE AND EXIT 0.** Under `--json` the
-    two early exits in `serve/run_commit.py` printed prose to stdout, so a tool got a decode
+    two early exits in `serve/commands/run_commit.py` printed prose to stdout, so a tool got a
+    decode
     error and a success code -- a change touching only Markdown looked exactly like a broken
     install. The keys are those of `report`, so one consumer parses both without branching.
 

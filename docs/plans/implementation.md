@@ -47,7 +47,7 @@ three months stale.
 | `infer/` | **7** | `change_review.py`, `change_summary.py`, `diff_cap.py`, `gemini.py`, `prompt_once.py`, `summary_prompt.py`, `vertex.py` |
 | `verify/` | **10** | `anchor.py`, `external_facts.py`, `pin_check.py`, `pin_mismatch.py`, `publishable.py`, `qualification.py`, `release_claims.py`, `releases.py`, `repeats.py`, `rule_check.py` |
 | `render/` | **14** | `comment.py`, `compliance_table.py`, `config.py`, `coverage_line.py`, `dashboard.py`, `deep_report.py`, `found_block.py`, `json_report.py`, `page.py`, `pin_block.py`, `replay_report.py`, `rule_block.py`, `shape_line.py`, `verdict_block.py` |
-| `serve/` | **15** | `cli.py`, `deep_review.py`, `health.py`, `listener.py`, `onboarding.py`, `retrospective.py`, `review_delivery.py`, `run_commit.py`, `run_endpoint.py`, `run_migrate.py`, `run_report.py`, `run_review.py`, `settle.py`, `webhook_github.py`, `working_clone.py` |
+| `serve/` | **10** | `cli.py`, `deep_review.py`, `health.py`, `listener.py`, `onboarding.py`, `retrospective.py`, `review_delivery.py`, `settle.py`, `webhook_github.py`, `working_clone.py` |
 
 <!-- plan-state:end -->
 
@@ -418,7 +418,7 @@ number it produces is the one shown to prospects, and no customer can audit the 
 2. **DONE.** `serve/health.py` — it OPENS the store rather than pinging it, because version
    mismatch and schema drift are what a deploy produces and both are invisible to a file check.
    It never raises: an orchestrator needs a verdict, not a stack trace.
-3. **DONE.** `serve/listener.py` and `serve/run_endpoint.py` — the socket, on stdlib. **Verify
+3. **DONE.** `serve/listener.py` and `serve/commands/run_endpoint.py` — the socket, on stdlib. **Verify
    before parse**: the body is read by `Content-Length` and handed to `verify()` as raw bytes, and
    `Content-Length` is bounded at GitHub's 25 MB because it is attacker-controlled. **Answer, then
    work**: GitHub wants a 2XX in ten seconds and a real run will not finish in ten, which is what
@@ -443,7 +443,7 @@ written to the pipe and `readline()` blocks forever — and a hang in CI burns t
 reads as "stuck", not "broken". The read is bounded now. The underlying defect was that
 `quantamind serve` bound the port and printed **nothing at all** under a pipe, which is every real
 deployment; the lost line was "IT DOES NOT REVIEW", invisible to exactly the operator who needed
-it. → `docs/engineering/CODEBASE.md` "`serve/run_endpoint.py` — the banner prints with `flush=True`, and that is not decoration"
+it. → `docs/engineering/CODEBASE.md` "`serve/commands/run_endpoint.py` — the banner prints with `flush=True`, and that is not decoration"
 
 ---
 
