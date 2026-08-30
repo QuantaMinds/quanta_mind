@@ -381,6 +381,33 @@ narrower" is the same failure class as every other silent absence in this codeba
 
 ---
 
+### `installation` — whose repository this is, and whether we may review it
+
+`store/installations.py` at schema v6. `serve/onboarding.admit()` writes a row per repository at
+install time; `serve/review_delivery.deliver()` reads it before reviewing.
+
+**`eligible` is nullable and that is the design.** NULL is *never assessed*, 0 is *assessed and
+refused*. Nothing is backfilled, so a repository installed before the table reads `UNKNOWN` rather
+than as one we turned down — reading NULL as refused would silence existing customers at their
+next delivery, and reading it as allowed would grant an entitlement nobody checked.
+
+**Only `REMOVED` refuses.** `UNKNOWN` reviews; an *ineligible* repository reviews too, because the
+free-tier verdict is information for a human and a gate with no paid tier to fall back on is a dead
+end with no override. Refusal returns a seventh `Outcome`, `NOT_ENTITLED`, rather than a flag on an
+existing one — folding it into "nothing to review" would hide a withdrawn customer among unreadable
+pull requests.
+
+**An uninstall is recorded, not deleted**, and `withdraw()` returns how many rows it touched so a
+no-op is visible.
+
+### `store/tables.py` — the DDL, split out when `schema.py` hit the cap
+
+The next table had nowhere to go and the alternative was trimming the comments that explain why
+each table has its shape. **`check_schema_shape` follows the DDL, not the filename**: its digest is
+over the extracted `CREATE` statements, so the move left it byte-identical, and it refuses outright
+if it finds no `CREATE` statement — which is what stops it quietly watching the wrong file. Both
+were sabotage-checked after the move.
+
 ### `parse/suite_reach.py` — how much of a repository its own tests import
 
 `reach(clone)` returns modules, reached and a sentence a prospect can read. B8 asks for

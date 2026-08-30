@@ -225,9 +225,23 @@ Stripe.
       dominate; almost nothing will be flagged"). Running it during onboarding turns eligibility
       into a measured answer about their repository instead of a sales rule — and refusing a
       repository we would serve badly is worth more than the install.
-- [ ] **B4 Installation → customer mapping.** The App install flow already provisions a store; it
-      does not know whose it is.
-- [ ] **B5 Entitlement check at delivery.** Today any installation is reviewed, paid or not.
+- [x] **B4 Installation → customer mapping.** `store/installations.py`, schema v6. `admit()`
+      writes one row per repository at install time carrying the account, the tier, and the B8
+      verdict flattened — `store/` sits left of `verify/` and cannot import a `Verdict`.
+      **`eligible` IS NULLABLE AND THAT IS THE WHOLE DESIGN**: NULL is "never assessed", 0 is
+      "assessed and refused". Nothing is backfilled, so every repository installed before the
+      table reads UNKNOWN rather than as one we turned down. An uninstall sets `removed_at` and
+      keeps the row — "never a customer" and "left" are different answers to an auditor.
+- [x] **B5 Entitlement check at delivery.** `review_delivery.deliver()` reads the seat before
+      reviewing and returns a SEVENTH outcome, `NOT_ENTITLED`, rather than a flag on an existing
+      one: folding "we chose not to review" into "there was nothing to review" would hide a
+      withdrawn customer among unreadable pull requests.
+      **ONLY `REMOVED` REFUSES.** `UNKNOWN` reviews, because refusing it would silence every
+      installation predating the mapping to enforce a rule they were never told about. An
+      INELIGIBLE repository reviews too: the free-tier verdict is information for a human, and a
+      gate with no paid tier to fall back on is a dead end with no override. 10 tests; three
+      sabotages caught — UNKNOWN refusing, ineligible refusing, and a no-op withdrawal claiming
+      it removed one.
 - [x] **B6 Posting ON.** Default in the Dockerfile, still False in `Settings`, so building the image is the act of asking while a test or CLI run can never write to a pull request. Real comments and an inline review posted to PRs #85 and #86 as `quanminds[bot]`. *Per-tenant switch still absent.* ~~`POSTING_ENABLED` is off by default and `POSTING_ENABLED` is off by default and
       the webhook path has never posted to a real pull request.
 

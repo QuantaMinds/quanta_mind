@@ -1,5 +1,5 @@
 {
- "__version__": 5,
+ "__version__": 6,
  "claim": {
   "columns": [
    [
@@ -150,6 +150,67 @@
    ]
   ],
   "sql": "CREATE TABLE finding (\n        id INTEGER PRIMARY KEY, review_id INTEGER NOT NULL REFERENCES review(id),\n        unit_path TEXT NOT NULL, kind TEXT NOT NULL, body TEXT NOT NULL,\n        published INTEGER NOT NULL DEFAULT 0, confidence TEXT NOT NULL,\n        provenance TEXT NOT NULL)"
+ },
+ "installation": {
+  "columns": [
+   [
+    0,
+    "account",
+    "TEXT",
+    1,
+    null,
+    1
+   ],
+   [
+    1,
+    "repo",
+    "TEXT",
+    1,
+    null,
+    2
+   ],
+   [
+    2,
+    "tier",
+    "TEXT",
+    1,
+    "'free'",
+    0
+   ],
+   [
+    3,
+    "eligible",
+    "INTEGER",
+    0,
+    null,
+    0
+   ],
+   [
+    4,
+    "reasons",
+    "TEXT",
+    1,
+    "''",
+    0
+   ],
+   [
+    5,
+    "first_seen",
+    "INTEGER",
+    1,
+    null,
+    0
+   ],
+   [
+    6,
+    "removed_at",
+    "INTEGER",
+    0,
+    null,
+    0
+   ]
+  ],
+  "sql": "CREATE TABLE installation (\n        account TEXT NOT NULL, repo TEXT NOT NULL, tier TEXT NOT NULL DEFAULT 'free',\n        eligible INTEGER, reasons TEXT NOT NULL DEFAULT '', first_seen INTEGER NOT NULL,\n        removed_at INTEGER, PRIMARY KEY (account, repo))"
  },
  "lifecycle": {
   "columns": [

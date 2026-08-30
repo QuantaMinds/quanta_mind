@@ -31,13 +31,15 @@ CONSUMED BY: `serve/listener.py`, on an installation event.
 
 from __future__ import annotations
 
+import time
 from pathlib import Path
 
 from quantamind.ingest.github_api import token_for
 from quantamind.parse.suite_reach import NoSource, reach
 from quantamind.serve.run_review import index_repository
 from quantamind.serve.working_clone import ensure
-from quantamind.store import tenancy
+from quantamind.store import installations, tenancy
+from quantamind.store.schema import open_store
 from quantamind.types.settings import Settings
 from quantamind.verify.qualification import Verdict, facts_for, qualifies
 
@@ -96,7 +98,26 @@ def warm_all(repos: list[str], settings: Settings) -> tuple[dict[str, int], dict
     return indexed, failed
 
 
-def admit(repos: list[str], settings: Settings) -> dict[str, Verdict]:
+def _record(settings: Settings, account: str, repo: str, verdict: Verdict | None) -> None:
+    """Write the installation row beside the tenant's own data. Flattened here because
+    `store/` sits left of `verify/` and cannot import a `Verdict`."""
+    owner, _, name = repo.partition("/")
+    store = tenancy.store_for(Path(settings.database_path), owner, name)
+    conn = open_store(store)
+    try:
+        installations.record(
+            conn,
+            account,
+            repo,
+            at=int(time.time()),
+            eligible=None if verdict is None else verdict.eligible,
+            reasons=() if verdict is None else verdict.reasons,
+        )
+    finally:
+        conn.close()
+
+
+def admit(repos: list[str], settings: Settings, account: str = "") -> dict[str, Verdict]:
     """Qualify each repository, warm the ones that pass, and return every verdict.
 
     **THE VERDICT IS RECORDED AND REPORTED; IT DOES NOT REFUSE THE INSTALLATION.** Enforcement
@@ -128,9 +149,11 @@ def admit(repos: list[str], settings: Settings) -> dict[str, Verdict]:
         except Exception as exc:  # an unreadable repository is served, not refused
             print(f"[serve] {repo}: eligibility unreadable ({exc}); warming anyway", flush=True)
             warm_these.append(repo)
+            _record(settings, account or owner, repo, None)
             continue
         verdict = qualifies(facts, owner_already_free=owner in owners, repos_taken=taken)
         verdicts[repo] = verdict
+        _record(settings, account or owner, repo, verdict)
         if verdict.eligible:
             warm_these.append(repo)
         else:
