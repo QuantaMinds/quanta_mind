@@ -332,7 +332,9 @@ module stops being able to carry the field it needs next. `PRRecord` needed two.
 Rewrites each numeric constant, runs the tests, and names the changes nothing caught. Diff mode
 by default (seconds); `--all` sweeps a tree (~30 min for `src/quantamind`). Refuses on a red
 baseline or an empty population, because both make a meaningless report look like full coverage.
-Found `hook_pre_edit.DENY` and `verify/anchor.MIN_QUOTE_CHARS` disableable with every tier green.
+Found `hook_pre_edit.DENY` and `verify/anchor.MIN_QUOTE_CHARS` disableable with every tier green. Also found two dead constants — `render/comment.GOAL_LINES` and
+`infer/gemini.TOKEN_TIMEOUT_S`, the second implying a timeout that is not applied — because
+mutating unreachable code cannot change anything, so it always survives.
 
 ### `scripts/guard/` — the enforcement layer
 

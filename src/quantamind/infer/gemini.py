@@ -38,7 +38,6 @@ from quantamind.types.spend import Spend, measured
 MODEL = "gemini-2.5-pro"
 MAX_FINDINGS = 8
 TIMEOUT_S = 300
-TOKEN_TIMEOUT_S = 60
 MAX_DIFF_CHARS = 120_000
 
 PROMPT = """You are reviewing part of a pull request. Report only defects a maintainer must fix
