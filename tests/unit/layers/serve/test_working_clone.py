@@ -60,3 +60,31 @@ def test_sweep_returns_how_many_it_removed(tmp_path: Path) -> None:
 
 def test_sweep_on_a_missing_root_is_zero_not_an_error(tmp_path: Path) -> None:
     assert sweep(tmp_path / "never-created") == 0
+
+
+# **`DEFAULT_KEEP` WAS FREELY MUTABLE.** The test above passes `keep=2`, so the shipped default
+# was never exercised: setting it to 0 deletes every clone on the next sweep and setting it to 17
+# lets the disk fill, and both left the suite green. Eight is written out rather than imported,
+# because `DEFAULT_KEEP + 1` reads the value under test and passes at any value.
+
+KEEP = 8
+
+
+def test_the_default_keeps_eight_clones(tmp_path: Path) -> None:
+    """Ten clones, swept with no explicit keep: two go, eight stay."""
+    for i in range(10):
+        (tmp_path / "owner" / f"repo{i}" / ".git").mkdir(parents=True)
+
+    removed = sweep(tmp_path)
+
+    assert removed == 2
+    assert len([p for p in (tmp_path / "owner").iterdir() if (p / ".git").is_dir()]) == KEEP
+
+
+def test_the_default_deletes_nothing_when_there_is_nothing_spare(tmp_path: Path) -> None:
+    """Fewer clones than the budget is not a reason to delete any. Catches DEFAULT_KEEP = 0."""
+    for i in range(KEEP):
+        (tmp_path / "owner" / f"repo{i}" / ".git").mkdir(parents=True)
+
+    assert sweep(tmp_path) == 0
+    assert len([p for p in (tmp_path / "owner").iterdir() if (p / ".git").is_dir()]) == KEEP
