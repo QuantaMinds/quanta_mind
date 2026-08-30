@@ -260,7 +260,19 @@ Stripe.
 
 ## Phase C — make it comparable
 
-- [ ] **C1 Web dashboard.** `render/dashboard.py` renders the business table as TEXT today.
+- [x] **C1 Web dashboard.** `serve/web/pages.py` over `render/page.py`. Signed out, `/` offers
+      sign-in; signed in, it lists the account's repositories and `/r/<owner>/<name>` shows that
+      repository's compliance table and outcome board. 15 tests, three sabotages caught.
+      **AN ACCOUNT SEES ONLY ITS OWN, CHECKED PER REQUEST.** A path is a claim, not a permission:
+      `mine()` answers from the installation rows, never from the URL. "Not yours" and "does not
+      exist" return the SAME answer, and the test compares the two to each other rather than each
+      to None — a difference would confirm the repository is there.
+      **THE TWO REPORTS ARE THE CLI'S, SHOWN NOT REBUILT.** A second rendering of the same
+      judgement is the one that drifts, so they go inside `<pre>`, escaped.
+      **No dependency, no script.** `dependencies = []` holds; a page with no script is one where
+      a missed escape cannot execute. A repository name carrying markup never reaches the page at
+      all — `store/tenancy.py` refuses it at the storage boundary, which the test asserts instead
+      of asserting an escape that path cannot exercise.
 - [ ] **C2 CI integration.**
 - [ ] **C3 IDE integration.** Only when a deal asks.
 - [ ] **C4 SSO.** Procurement gate — only when a deal asks.

@@ -25,7 +25,9 @@ import urllib.parse
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from quantamind.serve.web import signin
+from quantamind.render import page
+from quantamind.serve.web import pages, signin
+from quantamind.store import accounts
 from quantamind.store.schema import open_store
 from quantamind.types.settings import Settings
 
@@ -37,6 +39,12 @@ STATE_SECONDS = 600
 that a stolen state value is worthless by the time anybody could use it."""
 
 ACCOUNTS_DB = "accounts.db"
+REPO_PREFIX = "/r/"
+HTML = "text/html; charset=utf-8"
+SIGN_IN_PAGE = (
+    "<h1>QuantaMind</h1><p>A code reviewer that reports what it did not check.</p>"
+    '<p><a href="/login">Sign in with GitHub</a></p>'
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,6 +54,10 @@ class Reply:
     status: int
     body: str
     headers: tuple[tuple[str, str], ...] = field(default_factory=tuple)
+    kind: str = "text/plain; charset=utf-8"
+    """**PLAIN TEXT IS THE DEFAULT AND HTML IS THE EXCEPTION.** A refusal that carried caller text
+    would be inert as text and live as markup, so the pages that mean to be HTML say so and
+    everything else stays a document a browser will not execute."""
 
 
 def _state_cookie(state: str) -> str:
@@ -103,5 +115,24 @@ def get(path: str, cookies: str, settings: Settings, *, at: int | None = None) -
                 ("Set-Cookie", f"{STATE_COOKIE}=; Max-Age=0; Path=/"),
             ),
         )
+
+    if where == "/" or where.startswith(REPO_PREFIX):
+        conn = open_store(Path(settings.database_path) / ACCOUNTS_DB)
+        try:
+            session = accounts.whose(conn, signin.token_in(cookies), at=moment)
+        finally:
+            conn.close()
+        if not session.signed_in:
+            # **THE REASON IS NOT SHOWN.** "Expired" and "no such session" differ to us and not to
+            # a visitor, who gets the same page and the same link either way.
+            return Reply(200, page.page("QuantaMind", SIGN_IN_PAGE), kind=HTML)
+        root = Path(settings.database_path)
+        if where == "/":
+            return Reply(200, pages.home(root, session.login), kind=HTML)
+        body = pages.repository(root, session.login, where[len(REPO_PREFIX) :])
+        if body is None:
+            # A repository that is not this account's answers exactly as one that does not exist.
+            return Reply(404, page.page("Not found", "<h1>Not found</h1>"), kind=HTML)
+        return Reply(200, body, kind=HTML)
 
     return Reply(404, "no such path")

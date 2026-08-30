@@ -92,7 +92,7 @@ class _Handler(BaseHTTPRequestHandler):
             self.send_response(reply.status)
             for name, value in reply.headers:
                 self.send_header(name, value)
-            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.send_header("Content-Type", reply.kind)
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
