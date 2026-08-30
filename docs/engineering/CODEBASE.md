@@ -1116,6 +1116,22 @@ store through `schema.open_store`, so **version mismatch and schema drift** — 
 produces, invisible to a file check — fail the probe. It never raises: an orchestrator needs a
 verdict, not a stack trace.
 
+#### `serve/listener.py` — the `/health` route was correct and completely unpinned
+
+`health()` decides well and `test_serve_health.py` proves it. Nothing proved the ROUTE consults it.
+Rewriting `listener.py`'s health branch to `self._say(200, {"ok": True, "detail": verdict.detail})`
+— a store with a schema mismatch reporting healthy to whatever keeps it in rotation — left **all
+690 unit tests passing**. So did hardcoding 503, and so did inverting the verdict.
+
+The assertion that should have caught it read `status in (200, 503)`, which are **the only two
+statuses the route can emit**: it accepted every possible answer and therefore could not fail. A
+check whose output does not change when the thing it checks breaks is not a check.
+
+The pin is a PAIR, in `tests/unit/layers/serve/test_listener_health.py` — one root that is healthy
+and one holding a tenant store that is not a database. **A single status is satisfied by a route
+that hardcodes that status**; only the pair forces the route to read `verdict.ok`. The dangerous
+direction, always-healthy with the real detail passed through, is caught by exactly one assertion.
+
 #### `serve/listener.py` — the socket, and the dependency count still reads zero
 
 `webhook_github.py` was two pure functions over bytes with no caller; nothing bound a port. This is
