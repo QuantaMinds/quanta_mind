@@ -1,21 +1,19 @@
 """Change a constant, run the tests, and report the ones nothing noticed.
 
-WHAT: `python scripts/measure/mutate.py` mutates every module-level numeric constant in the
+WHAT: `python scripts/mutate/sweep.py` mutates every module-level numeric constant in the
       files this branch changed and names what the suite fails to catch. `--all` sweeps a tree.
 WHY:  **A SUITE CAN PASS EXHAUSTIVELY WHILE THE NUMBERS IT DEPENDS ON ARE FREE TO MOVE.** Run
       against `scripts/guard` this found 15 of 17 thresholds weakenable with everything green,
-      the pre-edit hook's `DENY` among them — at 0 it turns every refusal into a permission. On
-      `src/quantamind`, 95 of 130 mutations survived, including `verify/anchor.MIN_QUOTE_CHARS`
-      set to 0, which lets a finding quoting a single brace anchor anywhere.
+      the pre-edit hook's `DENY` among them — at 0 it turns every refusal into a permission.
 
       **THE BASELINE IS RUN FIRST AND A RED ONE REFUSES**: if the suite already fails, every
-      mutation reads as caught and the report claims total coverage. An empty population
-      refuses too; nothing to mutate is not a clean sweep.
+      mutation reads as caught and the report claims total coverage. An empty population refuses
+      too — nothing to mutate is not a clean sweep.
 
-      **IT RESTORES WHAT IT TOUCHED AND RE-READS EVERY FILE TO CHECK.** A mutation left behind
-      is a corrupted tree that looks like ordinary work.
+      **IT RESTORES WHAT IT TOUCHED AND RE-READS EVERY FILE**: a mutation left behind is a
+      corrupted tree that looks like ordinary work.
 IMPORTS: stdlib only. Never `quantamind`: it must work when a mutation breaks the import.
-CONSUMED BY: a person; `scripts/measure/README.md` documents the invocation.
+CONSUMED BY: a person. `scripts/mutate/verdict.py` decides what the results MEAN.
 """
 
 from __future__ import annotations
@@ -26,6 +24,8 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+
+from verdict import verdict
 
 GIT_TIMEOUT_S, SUITE_TIMEOUT_S = 60, 1800
 TESTS = ("tests/unit", "tests/property")
@@ -137,8 +137,8 @@ def _write(target: Target, text: str) -> None:
     target.path.write_text("".join(lines), encoding="utf-8")
 
 
-def sweep(targets: list[Target]) -> tuple[list[Target], list[Path]]:
-    """Every mutation in turn. Returns what survived, and any file left changed."""
+def sweep(targets: list[Target]) -> tuple[list[tuple[Target, bool]], list[Path]]:
+    """Every mutation in turn. Returns (target, caught) for each, and any file left changed."""
     if not targets:
         raise Refused(
             "no numeric constants found. Either the tree holds none or discovery is "
@@ -152,20 +152,19 @@ def sweep(targets: list[Target]) -> tuple[list[Target], list[Path]]:
         )
 
     before = {t.path: t.path.read_text(encoding="utf-8") for t in targets}
-    survivors: list[Target] = []
+    results: list[tuple[Target, bool]] = []
     for number, target in enumerate(targets, 1):
         try:
             _write(target, before[target.path])
             caught = not suite_passes()
         finally:
             target.path.write_text(before[target.path], encoding="utf-8")
-        if not caught:
-            survivors.append(target)
+        results.append((target, caught))
         verdict = "caught  " if caught else "SURVIVED"
         print(f"[mutate] {number}/{len(targets)} {verdict} {target.label()}", flush=True)
 
     left = [p for p, text in before.items() if p.read_text(encoding="utf-8") != text]
-    return survivors, left
+    return results, left
 
 
 def main(argv: list[str]) -> int:
@@ -183,16 +182,17 @@ def main(argv: list[str]) -> int:
         if not files:
             print(f"[mutate] {args.base}...HEAD changes no Python file under {root}")
             return 0
-        survivors, left = sweep(targets_in(files))
+        results, left = sweep(targets_in(files))
     except Refused as refusal:
         print(f"[mutate] {refusal}", file=sys.stderr)
         return 2
 
     for path in left:
         print(f"[mutate] NOT RESTORED: {path}", file=sys.stderr)
-    print(f"\n[mutate] {len(survivors)} mutation(s) survived")
-    for survivor in survivors:
-        print(f"  {survivor.label()}")
+
+    survivors = [t for t, caught in results if not caught]
+    for line in verdict(results):
+        print(line)
     return 1 if survivors or left else 0
 
 

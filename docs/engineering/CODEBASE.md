@@ -327,12 +327,19 @@ Split out of `extract_prs.py`, which exported a record type, an attrition type a
 table-loading family from one module and had reached the 200-line cap — which is how a
 module stops being able to carry the field it needs next. `PRRecord` needed two.
 
-### `scripts/measure/mutate.py` — does the suite notice when a constant changes?
+### `scripts/mutate/` — does the suite notice when a constant changes?
 
-Rewrites each numeric constant, runs the tests, and names the changes nothing caught. Diff mode
-by default (seconds); `--all` sweeps a tree (~30 min for `src/quantamind`). Refuses on a red
-baseline or an empty population, because both make a meaningless report look like full coverage.
-Found `hook_pre_edit.DENY` and `verify/anchor.MIN_QUOTE_CHARS` disableable with every tier green. Also found two dead constants — `render/comment.GOAL_LINES` and
+`sweep.py` rewrites each numeric constant and runs the tests; `verdict.py` says what the results
+mean. Diff mode by default (seconds); `--all` sweeps a tree (~30 min for `src/quantamind`).
+Refuses on a red baseline or an empty population, because both make a meaningless report look
+like full coverage. Found `hook_pre_edit.DENY` and `verify/anchor.MIN_QUOTE_CHARS` disableable
+with every tier green.
+
+**The two mutation directions are reported apart, and that is the point.** A constant is mutated
+to `0` and to `2n+1`. Caught both ways is *pinned*; caught only at `0` is **WEAK**, because zero
+mostly breaks the code rather than failing an assertion — `BLOB_TIMEOUT_S = 0` produced 69
+`TimeoutExpired` and 7 assertions. Counting them together reported 29 of 130 caught on the first
+run when the values actually pinned were 8 constants of 62. Also found two dead constants — `render/comment.GOAL_LINES` and
 `infer/gemini.TOKEN_TIMEOUT_S`, the second implying a timeout that is not applied — because
 mutating unreachable code cannot change anything, so it always survives.
 
