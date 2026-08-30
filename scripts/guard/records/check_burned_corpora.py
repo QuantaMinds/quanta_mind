@@ -12,6 +12,14 @@ WHY:  `tornadoweb/tornado` was put into design thirteen's corpus by eye and turn
       THE PAIRWISE CHECK RUNS EVERY BUILD. The `--check` mode is the part a human runs BEFORE
       choosing a corpus, and it exists because the failure it prevents cannot be detected after the
       run: a contaminated result looks exactly like a clean one.
+
+      **AND THE PAIRWISE CHECK ONLY READ ONE FILE, WHICH IS HOW NINE BURNED REPOSITORIES SAT IN A
+      CORPUS LIST AND THIS GUARD PRINTED `ok`.** `research/phase0/bench/forensic/execution_corpus.
+      py` names its pool `CANDIDATES`, not `REPOS`, and lives elsewhere — so `aio-libs/aiohttp`,
+      `encode/httpx`, `pydantic/pydantic` and six more were queued for a fresh corpus having
+      already been measured. The guard existed for exactly that and could not see it, because it
+      was pointed at the file the last mistake happened in. `pools()` now reads every corpus-shaped
+      literal under `research/`, which is the population the rule was always about.
 IMPORTS: stdlib only (pathlib, re, sys).
 CONSUMED BY: `just check` via the `guards` recipe; a human before writing a new corpus literal.
 """
@@ -43,6 +51,32 @@ def literals(text: str) -> dict[str, list[str]]:
         end = text.index(")", m.end())
         out[m.group(1)] = REPO.findall(text[m.end() : end])
     return out
+
+
+POOL = re.compile(r"^(CANDIDATES|REPOS|CORPUS|POOL)\w*\s*[:=]", re.M)
+
+
+def pools(root: pathlib.Path) -> dict[str, list[str]]:
+    """{file::literal: [repositories]} for every corpus-shaped list anywhere under `research/`.
+
+    **A CORPUS IS A CORPUS WHATEVER ITS VARIABLE IS CALLED.** Matching only `REPOS` in one file
+    let `CANDIDATES` in another hold nine already-measured repositories.
+    """
+    found: dict[str, list[str]] = {}
+    research = root / "research"
+    for path in sorted(research.rglob("*.py")) if research.is_dir() else []:
+        if path.resolve() == (root / CORPUS).resolve():
+            continue
+        text = path.read_text(errors="ignore")
+        for match in POOL.finditer(text):
+            try:
+                end = text.index(")", match.end())
+            except ValueError:
+                continue
+            names = REPO.findall(text[match.end() : end])
+            if names:
+                found[f"{path.relative_to(root)}::{match.group(1)}"] = names
+    return found
 
 
 def mentions(root: pathlib.Path, repo: str) -> list[str]:
@@ -95,12 +129,20 @@ def main(argv: list[str]) -> int:
                 bad.append(f"  {r}: in both {seen[r]} and {name}")
             else:
                 seen[r] = name
+    # Every corpus-shaped literal ANYWHERE under research/, against the ones already spent.
+    for where, names in pools(root).items():
+        for name in names:
+            if name in seen:
+                bad.append(f"  {name}: already in {seen[name]}, and queued again by {where}")
     if bad:
         print(f"[burned-corpora] {len(bad)} repository reused across corpora:")
         print("\n".join(bad))
         print("  A repository measured twice is a design tuned on its own test set.")
         return 1
-    print(f"[burned-corpora] ok — {len(seen)} repositories across {len(lits)} corpora, none reused")
+    print(
+        f"[burned-corpora] ok — {len(seen)} repositories across {len(lits)} corpora "
+        f"and {len(pools(root))} other pool(s), none reused"
+    )
     return 0
 
 
