@@ -28,7 +28,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-from coverage import assert_examined, guarded
+from coverage import assert_examined, guarded, refuse_path_argument
 from discovery import Violation, iter_python_files, project_root, report
 
 # Package roots scanned independently. A name may legitimately repeat across them —
@@ -190,4 +190,6 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(guarded(lambda: main()))
+    # Refused HERE, not inside main(): inside, `sys.argv` belongs to whoever
+    # imported this module -- under pytest that is pytest's own command line.
+    sys.exit(refuse_path_argument(sys.argv, "module-identity") or guarded(lambda: main()))

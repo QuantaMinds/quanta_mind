@@ -37,7 +37,7 @@ from pathlib import Path
 # down, so the parent is added explicitly -- the same reason `citations/` does it.
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
-from coverage import assert_examined, guarded
+from coverage import assert_examined, guarded, refuse_path_argument
 from discovery import iter_text_files, project_root
 
 # **A FLOOR, NOT A TARGET.** 178 tracked markdown files today.
@@ -137,4 +137,6 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(guarded(lambda: main()))
+    # Refused HERE, not inside main(): inside, `sys.argv` belongs to whoever
+    # imported this module -- under pytest that is pytest's own command line.
+    sys.exit(refuse_path_argument(sys.argv, "no-vague-refs") or guarded(lambda: main()))

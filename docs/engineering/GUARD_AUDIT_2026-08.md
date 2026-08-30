@@ -103,12 +103,12 @@ suite, `check_structure` 27 over-length files, `check_module_identity` 2 duplica
 | guard | exit | what it said |
 |---|---|---|
 | `check_agents_md.py` | 2 | [agents-md] no file at /Users/dhanu/Documents/SaaS/quanta_mind/.verify-clo |
-| `check_assert_quality.py` | 1 | [assert-quality] 21 violation(s): tests/test_async.py:97: [test-weak-asser |
+| `check_assert_quality.py` | 1 | [assert-quality] 21 violation(s): tests/test_async.py:97: [test-weak-asser | <!-- citation:allow — quoted output ABOUT flask, not a reference to a file here. It resolved only while a flask clone sat in .verify-clone; clearing the clone exposed it, which is the failure AGENTS.md's citation rule was written about. -->
 | `check_branch_name.py` | 1 | [branch-name] 1 violation(s): CONTRIBUTING.md:1: [branch-name] branch 'pin |
 | `check_constant_time_compare.py` | 1 | [constant-time] src/quantamind/serve/webhook_github.py not found — the gua |
 | `check_conventions.py` | 2 | [conventions] no package at /Users/dhanu/Documents/SaaS/quanta_mind/.verif |
 | `check_enforcement_map.py` | 2 | [enforcement-map] no settings at /Users/dhanu/Documents/SaaS/quanta_mind/. |
-| `check_module_identity.py` | 1 | [module-identity] 2 violation(s): src/flask/app.py:1: [duplicate-module] ' |
+| `check_module_identity.py` | 1 | [module-identity] 2 violation(s): src/flask/app.py:1: [duplicate-module] ' | <!-- citation:allow — quoted output ABOUT flask, not a reference to a file here. It resolved only while a flask clone sat in .verify-clone; clearing the clone exposed it, which is the failure AGENTS.md's citation rule was written about. -->
 | `check_no_partial_clone.py` | 0 | [no-partial-clone] ok |
 | `check_no_research_imports.py` | 0 | [research-imports] ok |
 | `check_structure.py` | 1 | [structure] 27 violation(s): pyproject.toml:201: [file-length] 279 lines,  |
@@ -378,6 +378,83 @@ pre-sabotage constant. It reported the restored value as 16 for three commands a
 Sabotage that changes a line's length — as the `rglob`-to-`walk` sabotage above did — is not
 exposed. Same-length sabotage must delete the `__pycache__` entry, not merely `touch` the source,
 or it silently proves nothing.
+
+## Fifteen of seventeen thresholds could be weakened with the suite still green
+
+Every guard threshold was mutated to a weakening value, the bytecode cleared, and
+`pytest tests/unit` run in full. **Fifteen of seventeen mutations survived.**
+
+| mutation | before | after |
+|---|---|---|
+| every `assert_examined` floor to 0 (8 call sites) | survives | caught |
+| `check_agents_md.MAX_LINES` 210 to 9999 | survives | caught |
+| `hook_pre_edit.DENY` 2 to 0 | survives | caught |
+| `hook_post_edit.FEEDBACK` 2 to 0 | survives | caught |
+| `CLONE_FILE_FLOOR`, `SUBPROCESS_FLOOR`, `RECIPE_FLOOR`, `MARKDOWN_FLOOR`, `AMENDMENT_FLOOR` to 0 | survives | caught |
+| `check_structure.MAX_FILE_LINES`, `MAX_DIR_FILES` | caught | caught |
+
+**The mechanisms were well tested and the numbers wired into them were not.** Twelve tests
+cover `assert_examined` on its own; none covered the floor each guard actually passes it. So
+every call site could be set to 0 — the precise condition the floors exist to detect — while
+the mechanism's own tests stayed green.
+
+**`DENY = 0` is the worst of them.** `hook_pre_edit.decide` returns `DENY` to block an edit and
+the tool obeys the exit code. At 0 the hook prints its refusal to stderr and then returns
+success, so the edit it just objected to proceeds. That is the mechanism behind rule 9, and it
+had no test of any kind — nor did either other hook.
+
+Fixed with two layers, because they fail differently.
+`tests/unit/guards/test_thresholds_are_pinned.py` reads every threshold out of the source with
+`ast` and checks both that it still MEANS something — a floor above zero, a refusal distinct
+from a permission — and that it equals a recorded value, so a deliberate change is a visible
+edit rather than a line nobody sees. A guard added with an unrecorded threshold fails until its
+number is written down. `tests/unit/guards/test_pre_edit_hook.py` drives the hook against a real
+git repository on a protected branch, a feature branch, vendored source and a golden file, with
+the expected codes written as literals rather than imported from the module under test.
+
+Re-running the matrix after the fix: **0 of 18 survive** (18 rather than 17 because `check_documented_commands` gained a floor in the same pass).
+
+## Ten guards answered a question they were never asked
+
+`check_schema_shape.py /some/other/repo` printed `[schema-shape] ok`. It was reporting on THIS
+repository: ten guards resolve their subject from the working directory and discarded `argv[1]`
+in silence. A pass with the wrong provenance, and nothing in the output to reveal it.
+
+**Refusing every argument was the wrong fix, and the gate caught it.** `just check` invokes each
+guard as `... .py .` from the repository root, so a blanket refusal broke the build. The question
+is not whether an argument was passed but whether it names a different tree — the same directory
+is the documented invocation, another one is a question the guard cannot answer. `coverage.py`
+now holds `refuse_path_argument`, beside `is_project`, which is the same concern.
+
+**The first attempt also put the check inside `main()`, where `sys.argv` belongs to whoever
+imported the module.** Under pytest that is pytest's own command line, so every guard refused
+every programmatic caller and nine tests failed at once. The refusal belongs at `__main__`.
+
+## Two more guards reported a pass they had not earned
+
+**`check_burned_corpora` returned 0 when its corpus file was missing** — "nothing to check"
+printed as a clean run, so a moved or renamed corpus would have read as success forever. It is
+the exact twin of the `check_schema_shape` defect fixed earlier in this report, and it survived
+that fix because nobody looked for siblings. It now exits 2.
+
+**`check_docs_sync` reported `ok` when it had skipped its own diff.** With `origin/main`
+unavailable — a shallow clone, a fresh runner, a fork — `check_docs_move_with_code` returned no
+violations and the guard printed `ok`, so rule 10 quietly stopped applying. Inside this
+repository that is now a refusal; outside it there is no base ref to expect, so the skip stands.
+
+**`check_documented_commands` printed `ok` without ever saying what it examined.** It now counts
+the invocations it read and carries a floor of 2, below today's 4.
+
+## Clearing the repository exposed two citations that only resolved against a clone
+
+`citations/resolve` was green until `.verify-clone` was deleted, at which point two references in
+this report — `tests/test_async.py` and `src/flask/app.py` — stopped resolving. They are quoted
+output ABOUT flask, and they had been passing because a flask clone happened to be sitting in the
+tree. That is precisely the failure AGENTS.md's citation rule records about its own example. Both
+now carry `citation:allow` with the reason.
+
+**A guard is only as trustworthy as the tree it last ran against.** Nothing in the suite would
+have caught this; deleting regenerable directories did.
 
 ## What was fixed, and what was not
 

@@ -35,7 +35,7 @@ from pathlib import Path
 # down, so the parent is added explicitly -- the same reason its sibling does it.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from coverage import assert_examined, guarded
+from coverage import assert_examined, guarded, refuse_path_argument
 from discovery import Violation, project_root, report
 
 # **A FLOOR, NOT A TARGET.** Below today's count, to catch discovery collapsing.
@@ -194,4 +194,6 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(guarded(lambda: main()))
+    # Refused HERE, not inside main(): inside, `sys.argv` belongs to whoever
+    # imported this module -- under pytest that is pytest's own command line.
+    sys.exit(refuse_path_argument(sys.argv, "documented-recipes") or guarded(lambda: main()))

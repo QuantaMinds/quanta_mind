@@ -30,6 +30,7 @@ from pathlib import Path
 # down, so the parent is added explicitly -- the same reason `citations/` does it.
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
+from coverage import is_project
 from discovery import Violation, report
 from exclusions import is_excluded
 
@@ -84,10 +85,16 @@ def _changed_files(root: Path) -> list[str] | None:
 
 
 def check_docs_move_with_code(root: Path) -> list[Violation]:
-    """A change to src/ must be reflected in the map."""
+    """A change to src/ must be reflected in the map. Raises when it cannot run at all."""
     changed = _changed_files(root)
     if changed is None:
-        print(f"[docs-sync] {BASE_REF} unavailable; skipping the diff check", file=sys.stderr)
+        # **A SKIPPED CHECK IS NOT A PASSED CHECK.** This returned [] and the run printed
+        # "ok", so rule 10 stopped applying whenever the base ref was missing -- a shallow
+        # clone, a fresh CI runner, a fork -- and nothing in the output said so. Outside this
+        # repository there is no base ref to expect, so the skip is only a refusal here.
+        print(f"[docs-sync] {BASE_REF} unavailable; the diff check did not run", file=sys.stderr)
+        if is_project(root):
+            raise CannotCompare(BASE_REF)
         return []
     if not changed:
         return []
@@ -108,6 +115,14 @@ def check_docs_move_with_code(root: Path) -> list[Violation]:
     return []
 
 
+class CannotCompare(RuntimeError):
+    """The base ref is missing, so the docs-move-with-code rule cannot be evaluated."""
+
+    def __init__(self, ref: str) -> None:
+        super().__init__(f"{ref} is unavailable, so rule 10 could not be checked")
+        self.ref = ref
+
+
 def main(argv: list[str]) -> int:
     """Run both checks against the repository root."""
     root = Path(argv[1]).resolve() if len(argv) > 1 else Path.cwd()
@@ -115,7 +130,11 @@ def main(argv: list[str]) -> int:
         print(f"[docs-sync] root {root} is not a directory", file=sys.stderr)
         return 2
 
-    violations = check_every_directory_is_documented(root) + check_docs_move_with_code(root)
+    try:
+        violations = check_every_directory_is_documented(root) + check_docs_move_with_code(root)
+    except CannotCompare as absent:
+        print(f"[docs-sync] {absent}", file=sys.stderr)
+        return 2
     return report(violations, root, "docs-sync")
 
 
