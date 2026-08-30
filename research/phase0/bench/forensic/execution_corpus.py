@@ -37,31 +37,29 @@ PER_REPO = 30
 # adjudicated by running anything. This is the 19% step 0 found.
 NOT_SOURCE = (".yml", ".yaml", ".toml", ".cfg", ".ini", ".txt", ".md", ".lock", ".json")
 
+# **NINE OF THE TWENTY NAMED HERE WERE ALREADY BURNED**, and `check_burned_corpora` printed `ok`
+# for months because it read only `quote/corpus.py` and only literals called `REPOS*`. A pool
+# called CANDIDATES in another file was invisible to the guard written to prevent exactly this.
+# The guard now reads every corpus-shaped literal under `research/`; these are what survived it.
+#
+# The last three were added 2026-08-30 from `external/covered_source.py`: measured on the strict
+# import check at 72%, 66% and 52% of changed library source imported by a test, against a 50%
+# bar. They are fresh — the guard is what says so, not a reading of the list.
 CANDIDATES = (
     "psf/requests",
     "pallets/flask",
-    "encode/httpx",
-    "pydantic/pydantic",
     "scrapy/scrapy",
-    "aio-libs/aiohttp",
     "celery/celery",
-    "jazzband/pip-tools",
     "tornadoweb/tornado",
-    "urllib3/urllib3",
     "pypa/packaging",
     "kevin1024/vcrpy",
-    # Added to close a 25-pull-request shortfall against the 15-correct requirement. **WIDENED BY
-    # ADDING REPOSITORIES, NEVER BY GOING DEEPER PER REPOSITORY** -- raising PER_REPO reaches
-    # further back into each history, a different population against older test suites, and would
-    # confound a change in the selection rate with the change in depth.
-    "python-attrs/attrs",
     "pallets/click",
     "pallets/jinja",
-    "encode/starlette",
-    "marshmallow-code/marshmallow",
     "sqlalchemy/alembic",
     "psf/black",
-    "pytest-dev/pluggy",
+    "pypa/setuptools",
+    "ipython/ipython",
+    "pypa/pip",
 )
 
 

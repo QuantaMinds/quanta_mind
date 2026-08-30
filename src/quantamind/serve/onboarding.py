@@ -115,7 +115,12 @@ def admit(repos: list[str], settings: Settings) -> dict[str, Verdict]:
     """
     verdicts: dict[str, Verdict] = {}
     warm_these: list[str] = []
-    taken = len(tenancy.tenants(Path(settings.database_path)))
+    # Listed ONCE. This read the directory again per repository, so a hundred-repository
+    # installation globbed the store root a hundred and one times for an answer that cannot
+    # change mid-loop: nothing here provisions a tenant.
+    already = tenancy.tenants(Path(settings.database_path))
+    taken = len(already)
+    owners = {owner for owner, _ in already}
     for repo in repos:
         owner = repo.partition("/")[0]
         try:
@@ -124,8 +129,7 @@ def admit(repos: list[str], settings: Settings) -> dict[str, Verdict]:
             print(f"[serve] {repo}: eligibility unreadable ({exc}); warming anyway", flush=True)
             warm_these.append(repo)
             continue
-        already = any(o == owner for o, _ in tenancy.tenants(Path(settings.database_path)))
-        verdict = qualifies(facts, owner_already_free=already, repos_taken=taken)
+        verdict = qualifies(facts, owner_already_free=owner in owners, repos_taken=taken)
         verdicts[repo] = verdict
         if verdict.eligible:
             warm_these.append(repo)
