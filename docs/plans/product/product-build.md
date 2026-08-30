@@ -326,10 +326,19 @@ spent deliberately. It must not be spent by accident.
 
 ### D5 — compliance dashboard, PER REPOSITORY
 
-- [ ] **D5 Per repo, not per developer.** Rule compliance, violation hotspots, trend. A view over
-      D4. **Deliberately not a per-developer scoreboard**: the competitor screenshot ranks named
-      engineers, which is a cultural decision rather than a feature, and it is declined here until
-      somebody asks for it on purpose.
+- [x] **D5 Per repo, not per developer.** `quantamind compliance --repo owner/name` —
+      `store/compliance.py` reads every `rule_check` row for one repository, `render/compliance_table.py`
+      renders it. **Proven end to end on a seeded tenant store**: three rules over three reviews,
+      "9 check(s) decided, 3 not", `src/pay/ledger.py` named as the hotspot. 14 tests.
+      **All four outcomes are separate columns and the rate is over DECIDED checks only** — a rule
+      nobody could evaluate renders `-`, never `0%`, because zero per cent violated reads as
+      compliance and is actually silence. **Deliberately not a per-developer scoreboard**: the
+      competitor screenshot ranks named engineers, which is a cultural decision rather than a
+      feature, and a test asserts no such word appears in the output.
+      **Building it found `quantamind dashboard` broken**: `database_path` is the tenancy ROOT to
+      `review_delivery` and `health`, and `run_dashboard` still opened it as a single file, so on
+      any real deployment it raised `sqlite3.OperationalError` instead of reporting. Both commands
+      now resolve tenants through `store/tenancy.py`.
 
 ### D6 — the context a human wrote
 
