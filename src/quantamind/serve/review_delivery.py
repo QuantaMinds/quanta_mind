@@ -42,6 +42,7 @@ from quantamind.ingest.github_api import token_for
 from quantamind.ingest.publish.github_reviews import publish
 from quantamind.render.comment import comment as rendered
 from quantamind.render.pin_block import block
+from quantamind.serve.blocking_status import announce
 from quantamind.serve.commands.run_review import review as run_ranking
 from quantamind.serve.deep_review import examine
 from quantamind.serve.working_clone import ensure, sweep
@@ -165,14 +166,12 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     # **THE DECLARED STANDARDS, CHECKED DETERMINISTICALLY.** These verdicts are reproducible on
     # the same commit by anyone, which is why they may be asserted where a model finding may not.
     checks = enforce(clone, head_sha, list(changed), store, delivery_repo, number)
+    announce(delivery_repo, head_sha, checks, enabled=settings.posting_enabled)
 
     # **WHAT THIS REVIEW COST, ON THE RECORD.** The columns have existed since the schema was
     # written and nothing ever wrote them, so every pricing question so far has been arithmetic
     # over a number nobody measured. A spend that is only a floor is refused rather than rounded.
-    spent = Spend()
-    for part in (told, examined):
-        if part is not None:
-            spent = spent.plus(part.spend)
+    spent = Spend.total(*(part.spend for part in (told, examined) if part is not None))
     if bank(store, delivery_repo, number, head_sha, spent):
         print(
             f"[deliver] cost: {spent.requests} call(s), {spent.tokens_out} tokens out", flush=True

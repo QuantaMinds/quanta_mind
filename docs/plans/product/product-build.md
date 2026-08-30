@@ -23,7 +23,7 @@ by decision, not by difficulty.
 | **8** | **B1** background warm-up worker | The cold start is a full clone plus ~31s index build, and Cloud Run's ephemeral disk means every instance pays it. Needed before real traffic, not after. |
 | **9** | **B8** free-tier qualification checks | The traffic path, and **it needs no payment rail** — a free tier is free. Every rule is a GitHub API check that can be enforced rather than advertised. |
 | **10** | **B2/B4/B5** accounts, installation→customer, entitlement | Only meaningful once there is traffic to attribute. |
-| **11** | **D1f** blocking status check | Requires the confidence that only 2 can give. Only reproducible checks may ever block. |
+| **11** | **D1f** blocking status check | **DONE.** One predicate, `VIOLATED`, parser-only by construction. Six sabotages caught by name. |
 | **12** | **D6a** the ticket and discussion behind the change | Retrieval for the reader; worth something whatever the model does. |
 | **13** | **C1** web dashboard | A surface over 7. |
 | **14** | **D2c/D2e** duplicate logic, architectural drift | Real, and neither blocks anything else. |
@@ -335,11 +335,29 @@ and D5 read what it records.
       installation owns; a repository's own file EXTENDS them and may tighten a severity, never
       silently drop an inherited rule. **A dropped inheritance must appear in the audit trail**,
       because a standard that can be disabled invisibly is not a standard.
-- [ ] **D1f Blocking, not just commenting.** The claim is that code meets standards *before a human
+- [x] **D1f Blocking, not just commenting.** The claim is that code meets standards *before a human
       reviewer sees the pull request*. That requires a **required status check that fails**, not a
       comment somebody may scroll past. **Only reproducible checks may block** — a `Provenance.MODEL`
       verdict at our measured error rate must never hold somebody's merge, and the split already
       exists on `Rule.reproducible`.
+
+      **BUILT.** `verify/blocking.py` decides, `render/status_check.py` phrases it,
+      `ingest/publish/commit_status.py` writes it, `serve/blocking_status.py` joins them — one per
+      layer, because none of them may import rightward. The gate is one predicate,
+      `outcome is Outcome.VIOLATED`, and that is **structural rather than filtered**:
+      `verify/rule_check.check` returns `DEFERRED` for `MODEL_JUDGED` before reaching any path that
+      can build a violation. Six sabotages, each caught by a named test, including removing that
+      deferral outright.
+
+      **A change no rule governed gets NO status, not a green one** — `Standing.NOT_DECLARED` is a
+      third value for exactly that, because a tick against a standard nobody wrote is the same lie
+      as a green test that asserts nothing. The unchecked and deferred counts ride in the
+      description, so a pass cannot stand in for compliance it did not measure.
+
+      **The tree-sitter constraint was NOT spent.** `check()` already returns
+      `UNCHECKABLE`/`LANGUAGE_UNSUPPORTED` for every non-Python path and `UNCHECKABLE` never
+      blocks, so the gate is Python-only by construction and `pyproject.toml` keeps
+      `dependencies = []`. → `docs/plans/feat-111-blocking-status-check.md`
 
 **OPEN DECISION — which languages.** Python checks are free: `ast` is stdlib. JS/TS are not, and
 `AGENTS.md` states plainly that **tree-sitter is NOT a dependency** while `pyproject.toml` declares

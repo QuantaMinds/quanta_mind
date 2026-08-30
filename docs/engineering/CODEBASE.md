@@ -2817,6 +2817,45 @@ clean compliance sheet for a repository we could not read at all.
 **Sabotage found the missing test, not review.** Breaking that refusal path passed all twelve tests;
 only deliberately reverting it revealed there was no test for it. The thirteenth was written then.
 
+### The blocking status check — four modules, because no layer may hold all of it
+
+A comment can be scrolled past; a required status check cannot. This is the only surface that can
+stop a merge, and the rule governing it is that **only a reproducible check may ever do so**.
+
+| module | layer | what it does |
+|---|---|---|
+| `verify/blocking.py` | verify | `decide(rows) -> Gate`. No network, no model, no clock. |
+| `render/status_check.py` | render | `Gate` into the state and the one sentence GitHub shows |
+| `ingest/publish/commit_status.py` | ingest | writes `(repo, head_sha, state, description)` |
+| `serve/blocking_status.py` | serve | the join — the only place all three may meet |
+
+**THE GATE IS ONE PREDICATE AND IT IS STRUCTURAL, NOT A FILTER.** What can fail the check is exactly
+`Outcome.VIOLATED`. A model-judged rule cannot produce that row however it is declared:
+`verify/rule_check.check` returns `Outcome.DEFERRED` for `CheckKind.MODEL_JUDGED` before reaching
+any path that constructs a violation, and `Rule.provenance` is derived from the check kind rather
+than set by a caller. Raw model findings measure 66.7 to 82.1% wrong; a verdict at that rate may
+inform a reviewer and must never hold a merge. Verified by removing the deferral outright — two
+tests fail by name.
+
+**A CHANGE NO RULE GOVERNED GETS NO STATUS AT ALL.** `Standing` is three-valued for this:
+`NOT_DECLARED` is not `CLEAR`. Posting `success` where nothing was checked puts a green tick against
+a standard nobody wrote, which is the same lie as a green test that asserts nothing. GitHub treats a
+required context that never arrives as pending, which is the honest reading.
+
+**WHAT COULD NOT BE CHECKED IS IN THE SENTENCE, NOT ONLY IN THE TRAIL.** `UNCHECKABLE` never blocks
+— a failure to decide is not a violation — but a status reading "3 rule check(s) passed" while nine
+files were unparseable is a proxy for compliance rather than compliance. The unchecked and deferred
+counts ride in the description.
+
+**THE WRITER MUST NOT KNOW WHAT BLOCKS, AND THE FIRST DRAFT DID.** `commit_status.py` originally
+took a `Gate` and imported `Standing` inside the function to read it. `verify` is to the RIGHT of
+`ingest`, so that was the sideways import rule 7 forbids — concealed because the `Gate` half sat
+under a `TYPE_CHECKING` guard, which made the file look like it had already handled the question.
+
+**Python-only, and the tree-sitter constraint was NOT spent to get there.** `check()` already
+returns `UNCHECKABLE`/`LANGUAGE_UNSUPPORTED` for every non-Python path, and `UNCHECKABLE` never
+blocks, so a JS file cannot fail the gate and `pyproject.toml` still declares `dependencies = []`.
+
 ### `serve/commands/` — one module per thing the CLI can be asked to do
 
 | module | the command |

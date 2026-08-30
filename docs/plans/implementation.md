@@ -45,9 +45,9 @@ three months stale.
 | `rank/` | **6** | `baseline.py`, `events.py`, `firing.py`, `history_rates.py`, `order.py`, `score.py` |
 | `allocate/` | **1** | `depth.py` |
 | `infer/` | **7** | `change_review.py`, `change_summary.py`, `diff_cap.py`, `gemini.py`, `prompt_once.py`, `summary_prompt.py`, `vertex.py` |
-| `verify/` | **10** | `anchor.py`, `external_facts.py`, `pin_check.py`, `pin_mismatch.py`, `publishable.py`, `qualification.py`, `release_claims.py`, `releases.py`, `repeats.py`, `rule_check.py` |
-| `render/` | **14** | `comment.py`, `compliance_table.py`, `config.py`, `coverage_line.py`, `dashboard.py`, `deep_report.py`, `found_block.py`, `json_report.py`, `page.py`, `pin_block.py`, `replay_report.py`, `rule_block.py`, `shape_line.py`, `verdict_block.py` |
-| `serve/` | **10** | `cli.py`, `deep_review.py`, `health.py`, `listener.py`, `onboarding.py`, `retrospective.py`, `review_delivery.py`, `settle.py`, `webhook_github.py`, `working_clone.py` |
+| `verify/` | **11** | `anchor.py`, `blocking.py`, `external_facts.py`, `pin_check.py`, `pin_mismatch.py`, `publishable.py`, `qualification.py`, `release_claims.py`, `releases.py`, `repeats.py`, `rule_check.py` |
+| `render/` | **15** | `comment.py`, `compliance_table.py`, `config.py`, `coverage_line.py`, `dashboard.py`, `deep_report.py`, `found_block.py`, `json_report.py`, `page.py`, `pin_block.py`, `replay_report.py`, `rule_block.py`, `shape_line.py`, `status_check.py`, `verdict_block.py` |
+| `serve/` | **11** | `blocking_status.py`, `cli.py`, `deep_review.py`, `health.py`, `listener.py`, `onboarding.py`, `retrospective.py`, `review_delivery.py`, `settle.py`, `webhook_github.py`, `working_clone.py` |
 
 <!-- plan-state:end -->
 

@@ -81,6 +81,19 @@ class Spend:
         """
         return self.cache_read_tokens > 0
 
+    @staticmethod
+    def total(*parts: Spend) -> Spend:
+        """Every part of one review, added. `total()` with nothing is a measured zero, not a gap.
+
+        **THE FOLD LIVES ON THE TYPE SO EVERY CALLER GETS THE SAME ONE.** Written out at a call
+        site it is four lines that must remember `complete` is contagious; forgetting that turns a
+        floor into a total silently, which is the exact failure `complete` exists to prevent.
+        """
+        running = Spend()
+        for part in parts:
+            running = running.plus(part)
+        return running
+
     def plus(self, other: Spend) -> Spend:
         """Two calls, added. A review makes several and pays for all of them."""
         return Spend(
