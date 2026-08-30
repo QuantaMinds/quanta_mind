@@ -10,7 +10,7 @@ WHY:  **A reviewer that comments twice on the same commit is a reviewer people m
 
       **`post()` is not exercised here.** It writes into a repository under a real identity, and
       nothing in this suite posts to a repository we do not own.
-IMPORTS: quantamind.ingest.github_comments.
+IMPORTS: quantamind.ingest.publish.github_comments.
 CONSUMED BY: `just check`.
 """
 
@@ -21,8 +21,8 @@ from typing import Any
 
 import pytest
 
-from quantamind.ingest import github_comments
-from quantamind.ingest.github_comments import MARKER_PREFIX, already_posted, marker
+from quantamind.ingest.publish import github_comments
+from quantamind.ingest.publish.github_comments import MARKER_PREFIX, already_posted, marker
 
 SHA = "0f4d1c9a5b3e2d7c8a1b0e9f6d3c2b1a0e9f8d7c"
 OTHER = "ffffffffffffffffffffffffffffffffffffffff"

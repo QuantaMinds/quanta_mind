@@ -624,7 +624,7 @@ runs here" stays falsifiable. → `docs/product/reviewer/review-half-record.md`
 
 ### `store/`
 
-#### `ingest/github_comments.py` — one comment per head SHA, and the half that is untested
+#### `ingest/publish/github_comments.py` — one comment per head SHA, and the half that is untested
 
 **The key is the head SHA, not the pull request number.** A pull request lives for weeks and its
 head moves; keying on the number would comment once and go silent for every later push. The marker
@@ -2710,7 +2710,7 @@ weaker one is what makes an audit trail worthless, and the parser half is the ha
 A repository declaring no rules gets no rule section at all — "no violations" would imply rules
 existed to violate.
 
-### Findings land on the line — `ingest/github_reviews.py`
+### Findings land on the line — `ingest/publish/github_reviews.py`
 
 A line number inside a summary is a reference; a review comment is on the code. `publish()` posts a
 single pull-request review with each finding anchored to its file and line, so the developer reading
@@ -2816,6 +2816,24 @@ clean compliance sheet for a repository we could not read at all.
 
 **Sabotage found the missing test, not review.** Breaking that refusal path passed all twelve tests;
 only deliberately reverting it revealed there was no test for it. The thirteenth was written then.
+
+### `ingest/publish/` — the only two places this product WRITES to a customer's repository
+
+| module | what it owns | what it must not do |
+|---|---|---|
+| `github_comments.py` | one summary comment per head SHA, idempotent on an invisible marker | never post twice for the same head, and never let a duplicate check that failed to run read as "no duplicate" |
+| `github_reviews.py` | findings anchored to the lines they concern, falling back to a comment when nothing anchors | never drop a finding that failed to anchor silently — it is counted and reported |
+
+Every other module in `ingest/` only READS. These two are the side a customer's repository actually
+feels, so they were grouped once `ingest/` reached the fifteen-file cap and a third writer — D1f's
+commit status — needed somewhere to live. **The grouping is by direction, not by API surface.** It does
+not gate anything: `POSTING_ENABLED` is checked by the caller in `serve/review_delivery.py`,
+and nothing under `ingest/publish/` consults it. What it buys is that the set of calls needing
+that gate can be read off a directory listing rather than remembered.
+
+Moving them corrected two docstring lines that had gone stale where nothing could see them:
+`github_comments.py` still said it shells out to `gh` — it has used `ingest/github_api.py` since the
+GitHub App landed — and still said its consumer was "serve, once a webhook exists".
 
 ### `ingest/standards/` — the two places a repository states what it holds itself to
 

@@ -22,7 +22,8 @@ WHY:  **A LINE NUMBER IN A SUMMARY IS A REFERENCE; A REVIEW COMMENT IS ON THE CO
       **`event: COMMENT`, NEVER `REQUEST_CHANGES`.** Blocking a merge on a model's reading is a
       claim this product's evidence does not support — raw findings measured 66.7-82.1% wrong.
       Blocking belongs to the deterministic rule checks, and it is a separate decision (D1f).
-IMPORTS: stdlib json, plus `ingest.github_api` for the authenticated call and `types.finding`.
+IMPORTS: stdlib json, plus `ingest.github_api` for the authenticated call, `types.finding`,
+      and `ingest.publish.github_comments` for the marker and the comment fallback.
 CONSUMED BY: `serve/review_delivery.py`, which calls `publish()` and lets this decide the shape.
 """
 
@@ -32,7 +33,7 @@ import json
 from collections.abc import Sequence
 
 from quantamind.ingest import github_api
-from quantamind.ingest.github_comments import marker, post
+from quantamind.ingest.publish.github_comments import marker, post
 from quantamind.types.finding import Finding
 
 RIGHT = "RIGHT"

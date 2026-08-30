@@ -10,13 +10,13 @@ WHY:  The pure tests cover the decision against payloads I wrote. This covers it
       open-source projects to prove itself is a test suite that should not exist. The write path is
       exercised by hand against a repository we own, and `docs/engineering/CODEBASE.md` says so
       rather than letting a green suite imply coverage.
-IMPORTS: quantamind.ingest.github_comments.
+IMPORTS: quantamind.ingest.publish.github_comments.
 CONSUMED BY: `just verify` via `test-live`.
 """
 
 from __future__ import annotations
 
-from quantamind.ingest.github_comments import CommentFailed, already_posted, existing
+from quantamind.ingest.publish.github_comments import CommentFailed, already_posted, existing
 
 REPO = "pallets/flask"
 BUSY_PR = 6096

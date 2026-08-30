@@ -29,7 +29,8 @@ from pathlib import Path
 
 import pytest
 
-from quantamind.ingest import commits, github_comments
+from quantamind.ingest import commits
+from quantamind.ingest.publish import github_comments
 from quantamind.parse.units import MalformedDiff, units_in
 from quantamind.rank.order import NothingToRank, rank
 from quantamind.render.comment import comment
