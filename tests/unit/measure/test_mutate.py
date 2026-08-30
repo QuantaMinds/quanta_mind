@@ -107,3 +107,31 @@ def test_the_tree_argument_is_checked(tmp_path: Path, capsys: pytest.CaptureFixt
     """A missing root is a refusal, not an empty sweep."""
     assert mutate.main(["mutate.py", "--all", "--root", str(tmp_path / "absent")]) == REFUSED
     assert "no tree at" in capsys.readouterr().err
+
+
+def test_a_literal_written_with_separators_is_read_from_the_source(tmp_path: Path) -> None:
+    """`30_000` reprs to "30000", one character shorter than what is on the line.
+
+    Slicing by `len(repr(value))` landed on "30_00" and the sweep refused at the third such
+    constant in `src/quantamind`. It refused rather than writing at the wrong column, which is
+    the behaviour that kept the tree intact, but it meant three constants were never swept.
+    """
+    (tmp_path / "sep.py").write_text("MAX_DIFF_CHARS = 30_000\n")
+
+    found = mutate.targets_in([tmp_path / "sep.py"])
+
+    assert [t.old for t in found] == ["30_000", "30_000"]
+    assert [t.new for t in found] == ["0", "60001"]
+
+
+def test_a_separated_literal_can_actually_be_written(tmp_path: Path) -> None:
+    """End to end: the refusal above only helps if the mutation now applies cleanly."""
+    path = tmp_path / "sep.py"
+    path.write_text("LEAD = 1\nMAX_DIFF_CHARS = 30_000\n")
+    target = next(
+        t for t in mutate.targets_in([path]) if t.name == "MAX_DIFF_CHARS" and t.new == "0"
+    )
+
+    mutate._write(target, path.read_text())
+
+    assert path.read_text() == "LEAD = 1\nMAX_DIFF_CHARS = 0\n"

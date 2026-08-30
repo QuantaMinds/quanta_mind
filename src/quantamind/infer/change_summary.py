@@ -35,9 +35,18 @@ from quantamind.ingest.diff import Stated
 from quantamind.types.spend import Spend, measured
 
 # **CUT FROM 60,000 WHEN A REAL 27-FILE DELIVERY HIT MAX_TOKENS.** The diff shares the prompt
-# with the conventions and the fact blocks, and a review that fails is worth less than a
-# review of a truncated diff — but only because the truncation is visible in the output.
+# with the conventions and the fact blocks, and a review that fails is worth less than a review
+# of a truncated diff — but only because the truncation is MARKED, which is what `_capped` does.
+# This comment previously asserted the cut was "visible in the output" and nothing made it so:
+# the diff was sliced and handed over, and the model read a change that stopped mid-hunk with
+# no way to know it had. Rule 14 — a comment may explain why, never assert whether.
 MAX_DIFF_CHARS = 30_000
+TRUNCATED = "\n\n[... truncated: this diff is longer than the review reads ...]"
+
+
+def _capped(diff: str) -> str:
+    """The diff, cut to `MAX_DIFF_CHARS` with the cut MARKED so the reader knows it happened."""
+    return diff if len(diff) <= MAX_DIFF_CHARS else diff[:MAX_DIFF_CHARS] + TRUNCATED
 
 
 @dataclass(frozen=True, slots=True)
@@ -139,7 +148,7 @@ def summarise(
                         {
                             "text": PROMPT.format(
                                 goal=goal,
-                                diff=diff[:MAX_DIFF_CHARS],
+                                diff=_capped(diff),
                                 files=touched,
                                 importers=imports,
                                 history=past,

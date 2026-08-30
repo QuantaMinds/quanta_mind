@@ -1,8 +1,7 @@
 """Change a constant, run the tests, and report the ones nothing noticed.
 
 WHAT: `python scripts/measure/mutate.py` mutates every module-level numeric constant in the
-      files this branch changed and names the mutations the suite fails to catch. `--all`
-      sweeps a whole tree, `--root` chooses it.
+      files this branch changed and names what the suite fails to catch. `--all` sweeps a tree.
 WHY:  **A SUITE CAN PASS EXHAUSTIVELY WHILE THE NUMBERS IT DEPENDS ON ARE FREE TO MOVE.** Run
       against `scripts/guard` this found 15 of 17 thresholds weakenable with everything green,
       the pre-edit hook's `DENY` among them — at 0 it turns every refusal into a permission. On
@@ -10,13 +9,13 @@ WHY:  **A SUITE CAN PASS EXHAUSTIVELY WHILE THE NUMBERS IT DEPENDS ON ARE FREE T
       set to 0, which lets a finding quoting a single brace anchor anywhere.
 
       **THE BASELINE IS RUN FIRST AND A RED ONE REFUSES**: if the suite already fails, every
-      mutation reads as caught and the report claims total coverage — the exact failure this
-      tool exists to find. An empty population refuses too; nothing to mutate is not a sweep.
+      mutation reads as caught and the report claims total coverage. An empty population
+      refuses too; nothing to mutate is not a clean sweep.
 
       **IT RESTORES WHAT IT TOUCHED AND RE-READS EVERY FILE TO CHECK.** A mutation left behind
       is a corrupted tree that looks like ordinary work.
 IMPORTS: stdlib only. Never `quantamind`: it must work when a mutation breaks the import.
-CONSUMED BY: a person. `scripts/measure/README.md` documents the invocation.
+CONSUMED BY: a person; `scripts/measure/README.md` documents the invocation.
 """
 
 from __future__ import annotations
@@ -33,7 +32,7 @@ TESTS = ("tests/unit", "tests/property")
 
 
 class Refused(RuntimeError):
-    """The sweep cannot produce a meaningful verdict, and says so instead of producing one."""
+    """The sweep cannot produce a meaningful verdict, and says so rather than producing one."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -55,7 +54,9 @@ def targets_in(paths: list[Path]) -> list[Target]:
     """Every module-level numeric constant in `paths`, with two replacements tried for each."""
     found: list[Target] = []
     for path in sorted(paths):
-        for node in ast.parse(path.read_text(encoding="utf-8")).body:
+        text = path.read_text(encoding="utf-8")
+        lines = text.splitlines()
+        for node in ast.parse(text).body:
             if not isinstance(node, ast.Assign | ast.AnnAssign):
                 continue
             names = node.targets if isinstance(node, ast.Assign) else [node.target]
@@ -69,16 +70,15 @@ def targets_in(paths: list[Path]) -> list[Target]:
                     continue
                 # A replacement equal to the original is never applied and would be recorded as
                 # a survivor, inflating the count with mutations that never happened.
+                # **THE SOURCE TEXT, NOT `repr(value)`.** `30_000` reprs to "30000", five
+                # characters against six on the line, so the slice landed on "30_00" and the
+                # sweep refused at the third such constant rather than corrupting the file.
+                written = lines[value.lineno - 1][value.col_offset : value.end_col_offset or 0]
                 for new in (type(value.value)(0), value.value * 2 + 1):
                     if new != value.value:
                         found.append(
                             Target(
-                                path,
-                                value.lineno,
-                                value.col_offset,
-                                repr(value.value),
-                                repr(new),
-                                name.id,
+                                path, value.lineno, value.col_offset, written, repr(new), name.id
                             )
                         )
     return found
