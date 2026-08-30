@@ -13,7 +13,8 @@ from __future__ import annotations
 
 import pytest
 
-from quantamind.serve.cli import UNBUILT, main, render_config
+from quantamind.render.config import render_config
+from quantamind.serve.cli import UNBUILT, main
 from quantamind.types.settings import Settings
 
 

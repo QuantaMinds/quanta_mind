@@ -381,6 +381,22 @@ narrower" is the same failure class as every other silent absence in this codeba
 
 ---
 
+### `compliance` — what the declared rules actually did, per repository
+
+`store/compliance.py` reads every `rule_check` row for one repository; `render/compliance_table.py`
+renders it; `quantamind compliance --repo owner/name` prints it. **All four outcomes are separate
+columns**, and the violation rate is over checks that could be DECIDED — `PASSED + VIOLATED` — so
+`UNCHECKABLE` and `DEFERRED` never inflate a denominator. A rule nothing decided renders `-`, not
+`0%`: zero per cent violated reads as compliance and is actually silence. Per repository by
+decision, never per developer; a test asserts no such word reaches the output.
+
+**Building it found `quantamind dashboard` broken.** `database_path` is the tenancy ROOT —
+`<root>/<owner>/<name>.db` — to `serve/review_delivery.py` and `serve/health.py`, and
+`run_dashboard` still opened it as a single file. On any deployment where that path is a directory
+it raised `sqlite3.OperationalError: unable to open database file` rather than reporting anything.
+`serve/run_report.py` now resolves both commands through `store/tenancy.py`, and calls `store_for`
+only after the tenant is known to exist, because it creates directories.
+
 ### `verify/repeats.py` — the same defect said twice
 
 `repeats(findings)` returns the INDICES that repeat an earlier claim about the same file, not a

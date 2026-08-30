@@ -23,7 +23,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from quantamind import __version__
-from quantamind.types.settings import Settings, SettingsError, load
+from quantamind.types.settings import SettingsError, load
 
 # Commands named in AGENTS.md that have no implementation behind them yet. They parse and
 # exit non-zero with the stage that will deliver them, rather than exiting 0 having done
@@ -47,6 +47,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     show.add_argument("repo", help="owner/name, as recorded")
     show.add_argument("--limit", type=int, default=100)
+    rules = subparsers.add_parser(
+        "compliance", help="every declared rule and what happened to it, per repository"
+    )
+    rules.add_argument("--repo", required=True, help="owner/name as recorded in the store")
+
     listen = subparsers.add_parser(
         "serve", help="authenticate and de-duplicate GitHub webhooks over HTTP"
     )
@@ -89,35 +94,6 @@ def build_parser() -> argparse.ArgumentParser:
     for name, stage in UNBUILT.items():
         subparsers.add_parser(name, help=f"NOT BUILT — arrives with {stage}")
     return parser
-
-
-def render_config(settings: Settings) -> str:
-    """The resolved configuration, so a misconfiguration is visible before a run, not after."""
-    lines = [
-        f"database_path              {settings.database_path}",
-        f"max_requests               {settings.max_requests}",
-        f"threshold_percentile       {settings.threshold_percentile}",
-        f"inference_enabled          {settings.inference_enabled}",
-        # Not a secret: a GCP project id identifies a billing target, it authorises nothing.
-        f"inference_project          {settings.inference_project or '(unset)'}",
-        f"gcloud_path                {settings.gcloud_path}",
-        f"model                      {settings.model}",
-        f"subprocess_timeout_seconds {settings.subprocess_timeout_seconds}",
-        f"clone_root                 {settings.clone_root}",
-        f"app_id                     {settings.app_id or '(unset)'}",
-        # The PATH, never the key. `app_auth` reads the file when it signs; a credential printed
-        # by a `config` command is a credential in somebody's terminal scrollback.
-        f"app_key_path               {settings.app_key_path or '(unset)'}",
-        # **The one line here that says whether this process writes to somebody else's project.**
-        # **REPORTED AS SET OR UNSET, NEVER PRINTED.** It is a credential, and `config` output
-        # lands in terminal scrollback and CI logs. The operator needs to know whether public
-        # reads are rate-limited; nobody needs the token itself on screen to learn that.
-        f"public_read_token          {'set' if settings.public_read_token else '(unset)'}",
-        f"posting_enabled            {settings.posting_enabled}",
-        "",
-        f"runs a model on a review:  {settings.runs_model}",
-    ]
-    return "\n".join(lines)
 
 
 def _retrospective(clones: list[Path], repo: str) -> int:
@@ -185,8 +161,13 @@ def main(argv: Sequence[str] | None = None) -> int:
 
         return run_migrate()
 
+    if args.command == "compliance":
+        from quantamind.serve.run_report import run_compliance
+
+        return run_compliance(args.repo)
+
     if args.command == "dashboard":
-        from quantamind.serve.run_dashboard import run_dashboard
+        from quantamind.serve.run_report import run_dashboard
 
         return run_dashboard(args.repo, args.limit)
 
@@ -195,6 +176,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     except SettingsError as exc:
         print(f"configuration error: {exc}")
         return 1
+
+    from quantamind.render.config import render_config
 
     print(render_config(settings))
     return 0
