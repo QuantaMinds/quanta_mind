@@ -381,6 +381,30 @@ narrower" is the same failure class as every other silent absence in this codeba
 
 ---
 
+### `parse/suite_reach.py` — how much of a repository its own tests import
+
+`reach(clone)` returns modules, reached and a sentence a prospect can read. B8 asks for
+eligibility to be "a measured answer about their repository instead of a sales rule", and a
+repository whose suite imports little of its own source is one where a review has less to stand
+on. `serve/onboarding.py` prints it after warming, where a clone already exists. **Reported,
+never enforced.**
+
+**It counts imports, not mentions, and that difference was 12 to 43 points** across nineteen
+repositories: `__init__` matches in any test mentioning a dunder, short stems collide — sphinx's
+`ru` and `it` are locale files — and documentation examples were counted as source, which took
+`typer` to a 98% that was 91% tutorial snippets.
+
+**A zero over a real suite and a zero over no suite are different answers.** A repository with
+code and no tests returns a real zero and says so in words; a tree with no Python at all raises
+`NoSource`, because `git-lfs` being absent left an empty working tree while `git clone` exited 0
+and `git ls-tree HEAD` still listed 154 Python files.
+
+**Its twin is `research/phase0/external/covered_source.py`**, duplicated because research runs on
+a different interpreter and cannot import the product. They also measure different populations:
+the product asks what share of ALL library modules the suite reaches, research asks what share of
+files CHANGED in the last 200 commits — 84% against 72% on scrapy for that reason. Each names the
+other in its docstring.
+
 ### `verify/qualification.py` — free-tier eligibility, checked rather than advertised
 
 `facts_for(repo)` reads what GitHub says; `qualifies(facts, ...)` returns a `Verdict` naming
