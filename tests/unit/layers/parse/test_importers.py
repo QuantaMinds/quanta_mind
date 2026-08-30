@@ -127,3 +127,52 @@ def test_the_changed_file_is_not_its_own_importer(tmp_path: Path) -> None:
     found, _ = importers(clone, "HEAD", "src/pkg/target.py")
 
     assert found == ()
+
+
+# **`MAX_CANDIDATES` BOUNDS A `git grep` THAT CAN MATCH THOUSANDS OF FILES**, and it was freely
+# mutable with every tier green. At 0 no candidate is ever considered and every import resolves
+# to nothing, which reads as "this file has no importers" rather than as a bounded search. Two
+# hundred is written out; `MAX_CANDIDATES + 1` reads the value under test.
+
+CANDIDATE_CAP = 200
+
+
+def test_the_candidate_cap_is_two_hundred() -> None:
+    from quantamind.parse.importers import MAX_CANDIDATES
+
+    assert MAX_CANDIDATES == CANDIDATE_CAP
+
+
+def test_a_grep_matching_more_files_than_the_cap_is_bounded(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Five hundred matches come back as two hundred, not as five hundred and not as none."""
+    from quantamind.parse import importers as module
+
+    hits = "\n".join(f"abc123:src/f{n:04d}.py" for n in range(500))
+    monkeypatch.setattr(
+        module.subprocess,
+        "run",
+        lambda *a, **k: subprocess.CompletedProcess(a, 0, stdout=hits, stderr=""),
+    )
+
+    assert (
+        len(module._candidates(Path("/clone"), "abc123", "quantamind.rank.order")) == CANDIDATE_CAP
+    )
+
+
+def test_a_grep_matching_fewer_files_returns_them_all(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The false-positive direction: a bound that truncated an ordinary result would hide files."""
+    from quantamind.parse import importers as module
+
+    hits = "abc123:src/a.py\nabc123:src/b.py\n"
+    monkeypatch.setattr(
+        module.subprocess,
+        "run",
+        lambda *a, **k: subprocess.CompletedProcess(a, 0, stdout=hits, stderr=""),
+    )
+
+    assert module._candidates(Path("/clone"), "abc123", "quantamind.rank.order") == [
+        "src/a.py",
+        "src/b.py",
+    ]

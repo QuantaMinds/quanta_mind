@@ -22,7 +22,11 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
-from quantamind.ingest.standards.conventions import MAX_CHARS, TRUNCATED, written
+from quantamind.ingest.standards.conventions import (
+    MAX_CHARS,
+    TRUNCATED,
+    written,
+)
 
 GIT_TIMEOUT_S = 30
 
