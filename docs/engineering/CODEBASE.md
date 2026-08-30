@@ -381,6 +381,16 @@ narrower" is the same failure class as every other silent absence in this codeba
 
 ---
 
+### `verify/repeats.py` — the same defect said twice
+
+`repeats(findings)` returns the INDICES that repeat an earlier claim about the same file, not a
+shorter list: a function returning fewer findings would make "dropped a repeat" and "lost a
+finding" the same value on the wire. **Nothing calls it.** We emit 194 comments covering 81 golden
+defects where Qodo emits 152 covering 98, at 17.3% redundancy against their 1.0%, and this is the
+model-free half of that gap — but it ships only when the coverage bar in
+`docs/plans/preregistrations/reviewer/dedup-preregistration.md` is met, which needs a judge.
+Bar 1 passed: 0.0% removal on `qodo-extended-v2` against a 3.0% ceiling, while greptile reads 9.3%.
+
 ### `infer/` — the transport, the prompt, and the one truncation rule
 
 `infer/vertex.py` holds the Vertex call: `MODEL`, `TIMEOUT_S`, `token`, `post`, and the two

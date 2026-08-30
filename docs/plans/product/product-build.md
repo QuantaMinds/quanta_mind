@@ -14,7 +14,7 @@ by decision, not by difficulty.
 | # | item | why it is here and not later |
 |---|---|---|
 | **1** | **A5** record depth, cost and gate outcomes | Nothing measures what a review costs or how often the gate fires. Everything after this is decided on numbers we do not have yet, so it comes first and is small. |
-| ~~2~~ | ~~**A6** read those numbers~~ **DONE** | 0.686 published per change, gate rejection 14.3%, 6,321 output tokens each. **The model half was not ruled out**, so the items below it stand. But the correctness rate behind that 0.686 is still the 2024 figure, and re-measuring it is now the highest-value open question — see the finding. |
+| ~~2~~ | ~~**A6** read those numbers~~ **DONE** | 0.686 published per change, gate rejection 14.3%, 6,321 output tokens each. **The model half was not ruled out.** The correctness rate behind that 0.686 was the 2024 figure; **it was re-measured 2026-08-29 at 25.0%** — 6 of 24 published findings correct, 95% interval **12.0–44.9%** against a raw band of 17.9–33.3%. **The published interval contains the whole raw band, so there is no evidence the gate raises correctness.** `docs/findings/A6_WHAT_A_REVIEW_PRODUCES_2026-08.md`. This changes what the numbers below are worth — see the note under the table. |
 | **3** | **E2** `--json` output | Small, and the only thing standing between E1 and a coding agent that can act on a review. A human re-typing prose is not an integration. |
 | **4** | **E3** `/qm-review` editor command | A thin wrapper over E1+E2. Last of Phase E on purpose: a wrapper over a weak answer is a faster way to be unhelpful. |
 | **5** | **D2a/D2b** import edges, stored | The deterministic half of "without disturbing anything else". `parse/importers.py` already answers it per file; this makes it a graph that persists. |
@@ -34,6 +34,21 @@ by decision, not by difficulty.
 **When picking up work: take the lowest number that is not ticked.** If it is blocked, say why in
 the plan rather than skipping silently — a number jumped without a reason is how a checklist stops
 describing the product.
+
+**5 and 6 are parked, 2026-08-29.** D2d's blast-radius claim came back **INCONCLUSIVE against its
+own registered bar** — 10 discordant pairs against a floor of 20, so the test could not decide
+either way rather than deciding against. D2b exists to feed D2d, so it is parked with it, with
+recommend-drop pending a corpus large enough to reach the floor. Written here because the rule
+above requires it: the next person would otherwise read 5 and 6 as simply not started.
+
+**And what row 2 now means for everything under it.** Phase A opens by saying *everything after
+this is packaging, and is worth nothing until A produces a review worth selling*. Three of four
+published findings are wrong and the gate does not measurably improve that. **7 onward — the
+dashboard, the warm-up worker, the free tier — is packaging by this plan's own definition.** The
+one item the evidence positively supports is not on this list: **findings are emitted at a 17.3%
+redundancy rate against Qodo's 1.0%**, and we emit 194 comments covering 81 goldens where Qodo
+emits 152 covering 98. That is model-free and unbuilt — no finding-level dedup exists anywhere in
+`src/`. See `docs/plans/preregistrations/reviewer/dedup-preregistration.md`.
 
 ## The golden rule every item is judged against
 
