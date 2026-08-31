@@ -2909,6 +2909,32 @@ paid plan or public repositories. Measured on this repository while it was priva
 returns `UNCHECKABLE`/`LANGUAGE_UNSUPPORTED` for every non-Python path, and `UNCHECKABLE` never
 blocks, so a JS file cannot fail the gate and `pyproject.toml` still declares `dependencies = []`.
 
+### `store/costs.py` + `quantamind cost` — the columns that were written and never read
+
+`store/reviews.bank()` has filled `request_count`, `tokens_in` and `tokens_out` on every delivery
+since A5. **No `SELECT` anywhere in `src/` touched any of them.** Every cost figure quoted about
+this product came from the research bench rather than from a delivery, and `product-build.md` says
+what that costs: without it, *"BYOK pricing and the free-tier cap are both guesses"*.
+
+That is the fourth instance this session of something written, documented, and never read or
+invoked — after `sweep()`, the permission preflight, and D1f's own wiring.
+
+**THE TWO ZEROS ARE THE WHOLE DESIGN.** "No reviews recorded" and "reviews that consulted no model"
+both total zero and mean opposite things: nothing has run here, versus the ranker ran and
+deliberately read nothing, which is a decision the allocator made. `Costs.reviews` and
+`Costs.billed` are separate counts and `per_review` raises `NothingRecorded` rather than dividing
+by zero — the refusal is rendered, not caught and hidden. This is not hypothetical: the store root
+in this working copy holds an owner directory with no database inside it, so the empty case is the
+one an operator meets first.
+
+**THE MEAN IS OVER BILLED REVIEWS AND THE LINE SAYS SO.** Averaging spend across reviews that never
+called a model understates what a paid review costs, which is the number a price has to cover.
+Sabotaged both ways: dividing by all reviews, and counting every review as billed. Each fails two
+tests by name.
+
+`render/dashboard.py` renders both views because they are two readings of one population — the same
+`review` rows, once for what became of them and once for what they spent.
+
 ### `serve/commands/` — one module per thing the CLI can be asked to do
 
 | module | the command |

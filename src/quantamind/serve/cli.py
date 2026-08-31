@@ -53,6 +53,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     rules.add_argument("--repo", required=True, help="owner/name as recorded in the store")
 
+    money = subparsers.add_parser(
+        "cost", help="what this repository's reviews spent, from the rows that recorded it"
+    )
+    money.add_argument("--repo", required=True, help="owner/name as recorded in the store")
+
     listen = subparsers.add_parser(
         "serve", help="authenticate and de-duplicate GitHub webhooks over HTTP"
     )
@@ -166,6 +171,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         from quantamind.serve.commands.run_report import run_compliance
 
         return run_compliance(args.repo)
+
+    if args.command == "cost":
+        from quantamind.serve.commands.run_report import run_cost
+
+        return run_cost(args.repo)
 
     if args.command == "dashboard":
         from quantamind.serve.commands.run_report import run_dashboard
