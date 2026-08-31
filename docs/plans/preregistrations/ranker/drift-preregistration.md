@@ -98,3 +98,49 @@ edits itself after the result is not one.
 positive and observed negative, so the artefact could only have helped the hypothesis and it still
 failed. **Any future attempt must not measure a rate whose denominator is also the outcome's** —
 count shifts against a fixed window, or model the outcome per commit.
+
+---
+
+# Second run — a repaired instrument, registered before the clones
+
+**Written 2026-08-31 after the first run closed D2e, and before any of the three new repositories
+was cloned.**
+
+## Why this is a repair and not a hunt
+
+**The reason for re-running is the INSTRUMENT, not the answer**, and the two are not the same
+justification. The first run's `drift` and its outcome shared a `1/churn` denominator, so part of
+any association between them was arithmetic. That is a defect in the measurement, and repairing a
+measurement and re-running is what `research/` is for.
+
+**"The null was disappointing" would NOT justify this.** The first run met its own B1 — 305 files
+across four repositories was registered as enough to decide — so adding repositories to see whether
+the answer improves is the move this document exists to prevent, and the one D2d was dropped for
+refusing. **If these bars are unmet, the prior verdict stands and D2e stays closed.**
+
+## The repaired design: one observation per commit, no shared denominator
+
+For each library file, walk the commits that touched it in order. For commit *i*:
+
+- **`shifted`** — the file's resolved import set differs from what it was at the previous commit
+  touching this file. Binary.
+- **`fix_follows`** — any of the **next three** commits touching this file is fix-shaped. Binary.
+
+**Neither variable is a ratio, and they share no denominator.** The unit is a commit-on-a-file, not
+a file, so a busy file contributes many observations rather than one averaged number — which is
+also why the first run's file-level averages were dominated by whichever files had the most history.
+
+Compare **P(fix_follows | shifted)** against **P(fix_follows | not shifted)**.
+
+## The bars, fixed now
+
+| | |
+|---|---|
+| **B1 — enough to decide** | ≥ 5,000 commit-events across ≥ 3 repositories |
+| **B2 — a shift predicts a fix** | P(fix \| shifted) exceeds P(fix \| not shifted) by **≥ 5pp**, Fisher p < 0.01. **The direction is registered**: D2e claims drift precedes trouble, so a negative gap of any size is a FAIL, not a discovery |
+| **B3 — not one repository carrying it** | the gap is positive in **every** repository. `pallets/werkzeug` gave −9 to −21pp alone last time while the pool gave nothing, and that asymmetry is the whole reason for this bar |
+| **B4 — it adds to what ships** | the gap survives inside strata of the file's prior-fix count, which is what the ranker already uses |
+
+**Any bar unmet and D2e stays closed, permanently.** No fourth repository, no widened window, no
+second outcome. The three are `saltstack/salt`, `keras-team/keras`, `ipython/ipython`, all confirmed
+unspent before cloning, and they are named here so the set cannot grow after a result.
