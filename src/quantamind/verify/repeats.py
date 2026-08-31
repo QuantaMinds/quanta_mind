@@ -51,11 +51,20 @@ def _plain(text: str) -> str:
 
 
 def alike(first: str, second: str) -> float:
-    """How alike two claims read, in [0, 1]. Empty against anything is 0, never 1."""
+    """How alike two claims read, in [0, 1]. Empty against anything is 0, never 1.
+
+    **`autojunk=False` IS LOAD-BEARING AND THE DEFAULT IS WRONG FOR THIS INPUT.** `SequenceMatcher`
+    treats any element occurring in more than 1% of a sequence longer than 200 characters as
+    "popular junk" and ignores it. Compared character by character, that junk is ordinary letters
+    and spaces, so the ratio collapses on exactly the long claims this rule exists to compare: two
+    real findings measured 97.3% alike scored **0.100** with the default. Most review comments are
+    longer than 200 characters, so the rule was close to inert on real input while every unit test
+    passed -- each of them compared strings short enough that the heuristic never engaged.
+    """
     left, right = _plain(first), _plain(second)
     if not left or not right:
         return 0.0
-    return SequenceMatcher(None, left, right).ratio()
+    return SequenceMatcher(None, left, right, autojunk=False).ratio()
 
 
 def repeats(findings: Sequence[Finding]) -> tuple[int, ...]:

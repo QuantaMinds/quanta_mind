@@ -114,3 +114,60 @@ requires the coverage bar, which requires a judge — one call per collapsed pai
 regeneration that would produce pairs to judge: 50 model calls at roughly 6,321 output tokens.
 
 **Not authorised, not spent, not merged into the review path.**
+
+
+---
+
+# Result — Bar 2 NOT RUN, and the rule is DROPPED by this document's own criterion, 2026-08-31
+
+**No model calls were spent, and none should be.** The drop criterion registered above — *"the rule
+removes fewer than 5% of comments on any arm"* — is met on every arm, measured on the judged
+benchmark comments rather than estimated. → `scripts/measure/dedup_reach.py`
+
+| arm | comments | repeats WITHIN a file (what the rule collapses) | same claim ACROSS files (kept) | semantic redundancy |
+|---|---|---|---|---|
+| OURS | 194 | **0** | 3 | 17 (17.3%) |
+| qodo-extended-v2 | 152 | **0** | 0 | 1 (1.0%) |
+| greptile-v4-1 | 168 | **0** | 1 | 7 (7.5%) |
+| coderabbit | 318 | **0** | 5 | 34 (24.3%) |
+
+The instrument reproduces the published 17.3% and 1.0% from `redundancy.json`, so it is reading the
+same corpus those figures came from.
+
+## The two measurements are different things, and that is now VERIFIED rather than open
+
+This document recorded it as unknown: *"Whether it detects the phenomenon the 17.3% figure counted
+... The two may measure different things."* They do.
+
+**17.3% is `redundant / candidates_matching` — 17 comments matching a golden a SIBLING had already
+covered.** That is semantic duplication: one defect described twice in different words, usually on
+different files. **`repeats()` collapses near-verbatim prose about the SAME file**, and there are
+**zero** such pairs in the corpus. The rule cannot reach the redundancy that justified building it.
+
+Bar 2 asks whether coverage falls when comments are removed. **The rule removes no comments here,**
+so coverage trivially cannot fall — and the judge calls would have bought a PASS that means nothing.
+Spending them would have produced a green bar for a rule with no effect.
+
+## What this does NOT say
+
+**It does not say redundancy is not worth attacking.** 17 of our 98 matching comments restate a
+golden a sibling already covered, against qodo's 1 of 99. That gap is real and remains the one
+model-free lever with positive evidence. What is dead is *this* rule as the way to close it: any
+mechanism that works has to compare claims across files and by meaning, not by shared prose within
+one file.
+
+## A defect found while measuring, fixed separately
+
+`alike()` called `SequenceMatcher(None, a, b)`, whose `autojunk` default ignores any element
+appearing in more than 1% of a sequence longer than 200 characters. Compared character by
+character, that is ordinary letters and spaces. **Two real findings measured 97.3% alike scored
+0.100.** Most review comments exceed 200 characters, so the rule was close to inert on real input
+while all thirteen unit tests passed — every one compared strings short enough that the heuristic
+never engaged.
+
+**This also undermines the Bar 1 evidence.** Bar 1 passed on the reading that the rule fires
+sensibly and discriminates between arms, and the check offered against "passing by refusing to
+fire" was loosening the threshold. That check could not detect this: the threshold does not affect
+whether long strings are compared at all. Bar 1's own table cannot be re-examined either — it names
+arms (`graphite`, `copilot`) that appear in no results file here, and **the commit recording it
+added no instrument**, which is why `scripts/measure/dedup_reach.py` now exists.
