@@ -1231,6 +1231,29 @@ exempted exactly one filename from "every guard must be invoked by something"; t
 module would have been reported as an orphan, and the obvious fix was to add a second name.
 Resolving imports states the actual property and still covers `discovery.py` without naming it.
 
+**It read only the FIRST dotted segment, and the first sub-package sibling exposed it.** The import
+regex stopped at `records` in `from records.decided_decisions import RULES`, so the sibling looked
+like a guard nobody invokes. The orphan report then demanded a shared data module be registered in
+the justfile or deleted — pressure to put a non-guard in the guard list, from a guard that could
+not see the import in front of it. Every segment is recorded now.
+
+**`check_decided_vocabulary.py` was split, and the split is the lesson from its own reversal.**
+`decided_decisions.py` holds `SCANNED`, `EXEMPT` and `RULES`; the checker holds the scanning. Three
+decisions here have now been reversed — the ranking unit, the reviewer's existence, and the pricing
+axis — and **the 2026-08-31 pricing reversal moved the pattern without moving the exemptions.** An
+entry for `**per repository**`, written when that was the DECIDED side, went on exempting the most
+emphatic statement of the now-REJECTED side: `$99 **per repository** per month` reported ok while
+the unbolded sentence one character apart was caught. The reversed pattern was also too narrow,
+catching one of five realistic phrasings. Keeping the two lists adjacent and away from the scanning
+code is what makes the pair visible in review.
+
+**And the guard could be emptied without complaining.** Sabotaging the whole mechanism — `RULES =
+()` — printed `ok` and exited 0, identical to a clean document, because only the paragraph count
+was floored. `len(RULES)` and the number of documents actually read are floored now, and
+`tests/unit/guards/test_decided_vocabulary_reversal.py` drives `main()` over a fixture project:
+seven phrasings of the rejected pricing axis that must fire, five true cost-or-volume sentences
+that must not, and the printed counts. It fails against both historical defects.
+
 **Owns:** the HTTP webhook, the CLI, health, configuration, and the contracts at the edge.
 **Must not:** let the two adapters diverge. What a customer verifies with the CLI must be what
 the App runs.

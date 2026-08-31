@@ -14,11 +14,25 @@ two of them.
 | surface | what it is | evidence | marginal cost |
 |---|---|---|---|
 | **The ranker** | decides which changed files are read hard, from fix history | **replicated out-of-sample**: 1.21% missed vs 3.12% alphabetical, six unseen repositories, n=2,400, p<1e-6 | none |
-| **The standards engine** | rules as code (`D1a`), deterministic checks (`D1b`), the team's OWN written standards read and enforced (`D1g`), a **blocking status check** (`D1f`), an append-only exportable audit trail (`D4b`), per-repository compliance (`D5`) | reproducible by construction — a parser's verdict re-runs on the same commit | none |
+| **The standards engine** | rules as code (`D1a`), deterministic checks (`D1b`), a **blocking status check** (`D1f`), an append-only audit trail (`D4b`), per-repository compliance (`D5`) | reproducible by construction — a parser's verdict re-runs on the same commit | none |
+| **Written standards as reviewer context** (`D1g`) | the team's `AGENTS.md` / `CONTRIBUTING.md` / `.cursorrules` read and given to the reviewer | **none — and this row is the correction.** An earlier version of the table above listed these as "read and **enforced**". They are not. `ingest/standards/conventions.py` says it plainly: *"THIS IS CONTEXT, NOT ENFORCEMENT… nothing read here becomes a `Checked` row or enters the audit trail."* Prose cannot be re-run on a commit and shown to give the same verdict, so it feeds `infer/` and inherits the reviewer's 25.0% | included in the review |
 | **The model reviewer** | findings on the lines they concern | **25.0% correct**, 6 of 24, 95% CI 12.0–44.9%; the gate shows no measurable improvement | $0.065+/review |
 
 **Two of the three cost nothing per review and carry the stronger evidence.** That is the pricing
 thesis of this document.
+
+**AND THE ENFORCEABLE SURFACE IS NARROWER THAN "THE STANDARDS ENGINE" SOUNDS.** What a parser can
+decide today is three rule kinds — `forbid_call`, `forbid_import`, `naming_pattern` — declared in
+`.quantamind/rules.toml`, **on Python files only**: `verify/rule_check.py` returns `UNCHECKABLE`
+with `LANGUAGE_UNSUPPORTED` for anything else, which is correct and is not coverage. A fourth kind,
+`MODEL_JUDGED`, is recorded `DEFERRED` and never blocks. **Nothing here is sold on prose the
+customer has already written**, and any pricing argument that assumes otherwise is pricing a
+capability that does not exist yet.
+
+**THERE IS ALSO NO EXPORT.** `D4b` records every check as it happens and nothing is backfilled;
+reading it is `quantamind compliance --repo owner/name`. There is no file, no download, and no
+scheduled export anywhere in the build plan. A compliance buyer asks for the artefact, not the
+query.
 
 ## What one model review costs
 
@@ -66,7 +80,7 @@ already tolerates.
 |---|---|---|---|
 | ranker, declared rules, team's own standards | yes | yes | yes |
 | blocking status check `D1f` | yes | yes | yes |
-| compliance table `D5`, audit trail `D4b` | 30 days | full, exportable | full + scheduled export |
+| compliance table `D5`, audit trail `D4b` | 30 days | full history | full history |
 | local + pre-PR review `E1`–`E3` | yes | yes | yes |
 | web dashboard, cost view | yes | yes | yes |
 | model reviewer | — | fair use 40/dev/mo | uncapped, metered |

@@ -25,11 +25,11 @@ the tier arithmetic are internal and live in `unit-economics.md` — do not merg
 | **Review attention goes to the riskiest changes first**, from your repository's own history | ✅ | ✅ | ✅ |
 | **A reviewer sees the answer before they open the pull request** | ✅ | ✅ | ✅ |
 | **Every check, on every file, on the record** — and what could not be checked, named | 30 days | full history | full history |
-| **Evidence you can hand to an auditor** — exportable, append-only | — | ✅ | ✅ + scheduled |
+| **Evidence you can hand to an auditor** — every check recorded as it happens, never backfilled, never edited | — | ✅ | ✅ |
 | **One dashboard for the whole estate** — what was reviewed, what it found, what it cost | ✅ | ✅ | ✅ |
 | **Catch it before you open the PR** — locally, including uncommitted work | ✅ | ✅ | ✅ |
 | **A machine-readable answer** your own tools and agents can act on | ✅ | ✅ | ✅ |
-| **Your code is never used to train anything, and we hold no copy of it** | ✅ | ✅ | ✅ |
+| **Your code is never used to train anything** | ✅ | ✅ | ✅ |
 | **Define a standard once; every repository is held to it** | — | — | ✅ |
 | **Runs where your policy requires** — your cloud, your region, or your own hardware | — | — | ✅ |
 | **SSO, a signed DPA, and an SLA** | — | — | ✅ |
@@ -46,7 +46,7 @@ your host will not enforce it.
 written down, at no cost, with no expiry. Up to ten developers.
 
 **Team — $29 per developer, per month.** The same across an unlimited team, with the full
-exportable record and a dashboard over every repository. **That is less than twenty minutes of one
+full recorded history and a dashboard over every repository. **That is less than twenty minutes of one
 engineer's time a month.** It is a fair bar to hold us to, and it is the one we would use.
 
 **Enterprise — from $60 per developer, per month.** For organisations where the question is not
@@ -73,7 +73,9 @@ We do not claim that, and we would rather you test it than take our word. What w
 that your standards get applied the same way every time, and that you can prove it afterwards.
 
 **What happens to our code?**
-It is never used to train any model, and we keep no copy of it.
+It is never used to train any model. To review a change we keep a working copy of your repository
+on our servers, because a review reads its history — that copy is what the reviewing happens
+against, and it is used for nothing else.
 
 **Is the free tier a trial?**
 No. It does not expire and it does not degrade.

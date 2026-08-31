@@ -56,6 +56,8 @@ RECORDED: dict[str, int] = {
     "hooks/hook_pre_edit.py::DENY": 2,
     "hooks/hook_pre_edit.py::GIT_TIMEOUT_S": 30,
     "hooks/hook_session_end.py::GIT_TIMEOUT_S": 30,
+    "records/check_decided_vocabulary.py::floor(decisions)": 3,
+    "records/check_decided_vocabulary.py::floor(documents)": 3,
     "records/check_decided_vocabulary.py::floor(paragraphs)": 100,
     "records/check_docs_sync.py::GIT_TIMEOUT_S": 30,
     "records/check_documented_commands.py::FLOOR": 2,
