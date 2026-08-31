@@ -164,5 +164,5 @@ def comment(
         if repeats:
             lines += [repeats, ""]
 
-    lines += coverage(ranking, unresolved, effort, checks)
+    lines += coverage(ranking, unresolved, effort, checks, findings)
     return "\n".join(lines)

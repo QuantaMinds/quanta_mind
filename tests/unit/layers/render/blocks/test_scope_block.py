@@ -50,7 +50,7 @@ def test_the_scope_states_both_numbers_and_softens_neither() -> None:
 
     assert "touches **8** file(s)" in block
     assert "**3** were read line by line" in block
-    assert "All 8 changed file(s)" in block
+    assert "5 more file(s), nothing found" in block
 
 
 def test_the_alarming_phrase_is_gone() -> None:
@@ -76,31 +76,22 @@ def test_no_construct_means_no_line_about_constructs() -> None:
     assert "could not be parsed" not in _block(SCORES)
 
 
-def test_tests_are_grouped_and_never_dropped() -> None:
+def test_test_files_are_never_dropped() -> None:
     """**RESEARCHED BEFORE IT WAS DECIDED, AND THE RESEARCH SAID NO.** The ask was to hide test
     files so a developer stops wading through forty paths.
 
     GitHub's own answer to that problem is COLLAPSE — even `linguist-generated` files stay listed
     and only their diff folds — and the review literature is explicit that noticing inadequate
     testing is one of the few things human review is reliably good at, which needs them visible.
-    Omitting forty files would also be the "truncation reads as covered everything" failure this
-    product exists to refuse. So: grouped, counted, skippable by eye, absent from nothing.
+
+    **THE SPLIT IS FOUND/NOT-FOUND RATHER THAN SOURCE/TEST, AND THAT SUBSUMES IT.** The reason to
+    group tests was that developers skip them; the signal they were actually skipping on is "there
+    is nothing here", which is what the fold now means. A test file with a real finding stays in
+    the open, where a source/test split would have buried it.
     """
     block = _block({"src/a.py": 9, "tests/test_a.py": 8, "src/b.py": 7})
 
-    assert "**Source — 2**" in block
-    assert "**Tests — 1**" in block
     assert "`tests/test_a.py`" in block, "a test file was dropped from the list"
-    assert block.index("**Source") < block.index("**Tests"), "tests came before source"
-
-
-def test_a_change_with_no_tests_gets_no_empty_headings() -> None:
-    """Two headings over one group is furniture. A reader should not have to parse structure that
-    carries no information."""
-    block = _block({"src/a.py": 9, "src/b.py": 7})
-
-    assert "Source —" not in block
-    assert "Tests —" not in block
 
 
 def test_the_size_and_the_place_to_look_ride_beside_the_path() -> None:
@@ -108,7 +99,8 @@ def test_the_size_and_the_place_to_look_ride_beside_the_path() -> None:
     sizes = {"src/a.py": Effort(added=160, removed=6, functions=("def handle(request):",))}
     block = _block({"src/a.py": 9, "src/b.py": 7}, sizes=sizes)
 
-    assert "`src/a.py` — 166 lines · `def handle(request):`" in block
+    assert "| 166 lines |" in block
+    assert "`def handle(request):`" in block
 
 
 def test_a_file_we_have_no_size_for_says_nothing_rather_than_zero() -> None:
@@ -116,7 +108,7 @@ def test_a_file_we_have_no_size_for_says_nothing_rather_than_zero() -> None:
     certainly changed is a wrong statement where silence is merely a quiet one."""
     block = _block({"src/a.py": 9, "src/b.py": 7}, sizes={"src/a.py": Effort(added=1)})
 
-    assert "- `src/b.py`" in block
+    assert "`src/b.py`" in block
     assert "0 lines" not in block
 
 
@@ -125,14 +117,15 @@ def test_every_changed_file_is_reachable_even_the_ones_not_read() -> None:
     block = _block(SCORES)
 
     for path in SCORES:
-        assert f"`{path}`" in block, f"{path} was ranked and never shown to the author"
+        assert f"`{path}`" in block, f"{path} changed and was never shown to the author"
 
 
 def test_the_files_read_closely_are_marked_and_the_others_are_not() -> None:
-    """A list where every line looks the same cannot answer "did you look at MY file"."""
-    block = _block(SCORES)
+    """A table where every row looks the same cannot answer "did you look at MY file"."""
     marked = [
-        line for line in block.splitlines() if "read closely" in line and line.startswith("-")
+        line
+        for line in _block(SCORES).splitlines()
+        if line.startswith("|") and "read closely" in line
     ]
 
     assert len(marked) == 3, marked
@@ -146,12 +139,10 @@ def test_the_list_is_alphabetical_and_not_the_ranking() -> None:
     The scores here make the two orders disagree: `zebra.py` is the busiest file and sorts last.
     """
     block = _block({"src/zebra.py": 99, "src/apple.py": 2, "src/mango.py": 1})
-    listed = [line for line in block.splitlines() if line.startswith("- `")]
+    rows = [line for line in block.splitlines() if line.startswith("| `src/")]
 
-    assert listed == sorted(listed), (
-        f"the list is in rank order, which discloses the budget: {listed}"
-    )
-    assert "apple" in listed[0], listed
+    assert rows == sorted(rows), f"the table is in rank order, which discloses the budget: {rows}"
+    assert "apple" in rows[0], rows
 
 
 def test_no_score_from_the_ranking_reaches_the_page() -> None:

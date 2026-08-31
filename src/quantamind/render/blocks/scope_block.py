@@ -49,8 +49,9 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
 
 from quantamind.parse.change_effort import Effort
-from quantamind.parse.suite_reach import is_test
+from quantamind.render.blocks.file_table import table
 from quantamind.types.checked import Checked, Outcome
+from quantamind.types.finding import Finding
 from quantamind.types.ranking import Ranking
 from quantamind.types.verdict import Unresolved
 
@@ -136,6 +137,7 @@ def coverage(
     unresolved: Sequence[Unresolved],
     effort: Mapping[str, Effort] | None = None,
     checks: Sequence[Checked] | None = None,
+    findings: Sequence[Finding] | None = None,
 ) -> list[str]:
     """The scope line, and the full file list behind a fold.
 
@@ -176,15 +178,12 @@ def coverage(
         out.append(f"_{len(unresolved)} construct(s) could not be parsed._")
 
     paths = sorted({unit.unit.site.path for unit in ranking.units})
-    source = [path for path in paths if not is_test(path)]
-    tests = [path for path in paths if is_test(path)]
-
-    out += ["", ALL_FILES.format(total=total), ""]
-    if tests and source:
-        out += [SOURCE_HEADING.format(count=len(source)), ""]
-    out += [_line(path, path in funded, effort, verdicts) for path in source]
-    if tests:
-        out += ["", TEST_HEADING.format(count=len(tests)), ""]
-        out += [_line(path, path in funded, effort, verdicts) for path in tests]
-    out += ["", "</details>"]
+    out += table(
+        paths,
+        frozenset(funded),
+        effort,
+        {path: said.render() for path, said in verdicts.items() if said.render()},
+        findings or (),
+        checks or (),
+    )
     return out

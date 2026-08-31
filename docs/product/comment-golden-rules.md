@@ -109,15 +109,22 @@ and past ~400 lines ([Atomic Robot](https://atomicrobot.com/blog/ai-review-fatig
 **A section a reader must hold in their head is a cost.** Caps are stated in the modules that own
 them, and every cap prints its remainder rather than truncating in silence.
 
-### 7. A parser's claim and a model's claim never render alike
+### 7. A parser's claim outranks a model's, and ordering says so without a heading
 
 A rule the customer declared, checked deterministically, can be **asserted**: they can re-run it on
-the same commit and get the same answer. A model finding at 25.0% correct is **a claim to check**,
-and is worded as one. `types/rule.py` derives `Provenance` from the check so a model-judged rule
-cannot claim a parser verified it.
+the same commit and get the same answer. A model finding at 25.0% correct is **a claim to check**.
+`types/rule.py` derives `Provenance` from the check so a model-judged rule cannot claim a parser
+verified it, and that distinction is carried in the audit trail a compliance reader queries.
 
-**This is the only thing we sell that the competition does not have**, and it is invisible unless
-the comment renders the two differently.
+**IN THE COMMENT IT IS CARRIED BY ORDER, NOT BY A HEADING, AND THAT IS A DECIDED POSITION.**
+`render/blocks/found_block.py` used to print two headed sections — "found by a parser, these are
+facts" and "found by the model, a reading" — and dropped them: *a developer deciding whether to
+look at line 84 does not act on which of our components produced the line, and a heading explaining
+our internals is the thing they scroll past.* That is rule 5 applied to rule 7. Violations come
+first, they name the customer's own rule by id, and the reader can tell.
+
+**This is still the only thing we sell that the competition does not have.** Greptile and Qodo both
+score every finding on one scale; we have two kinds of claim and only one of them is assertable.
 
 ### 8. A claim carries the quote it is about, not a line number
 
@@ -152,6 +159,10 @@ and they are worded so that being wrong costs the reader a glance rather than th
 ## What we are not taking, and why
 
 - **A confidence score.** Rule 3.
+- **A source/test split in the file table.** Tried, then subsumed: the reason to group tests was
+  that developers skip them, and the signal they were actually skipping on is *nothing was found
+  here* — which is what the fold means now. A test file with a real finding stays in the open,
+  where a source/test split would have buried it.
 - **Diagrams.** Greptile picks a diagram by change type; we have no measurement that a diagram
   changes what a reviewer finds, and it is a large surface to maintain on a guess.
 - **A model-written summary of intent as the opening.** The author already wrote what the change is
