@@ -23,11 +23,10 @@ CONSUMED BY: `just check`.
 
 from __future__ import annotations
 
-import re
-
 from quantamind.parse.change_effort import Effort
 from quantamind.rank.order import rank
 from quantamind.render.blocks.scope_block import coverage
+from quantamind.types.checked import Checked
 from quantamind.types.verdict import Construct, Reason, Site, Unresolved
 
 # Scores descend, so rank order and alphabetical order are the same here — deliberately NOT the
@@ -39,8 +38,9 @@ def _block(
     scores: dict[str, int],
     unresolved: tuple[Unresolved, ...] = (),
     sizes: dict[str, Effort] | None = None,
+    checks: tuple[Checked, ...] = (),
 ) -> str:
-    return "\n".join(coverage(rank(scores), unresolved, sizes))
+    return "\n".join(coverage(rank(scores), unresolved, sizes, checks))
 
 
 def test_the_scope_states_both_numbers_and_softens_neither() -> None:
@@ -48,61 +48,19 @@ def test_the_scope_states_both_numbers_and_softens_neither() -> None:
     dishonest sentence in the comment."""
     block = _block(SCORES)
 
-    assert "**3 of 8**" in block
+    assert "touches **8** file(s)" in block
+    assert "**3** were read line by line" in block
     assert "All 8 changed file(s)" in block
 
 
-def test_every_changed_file_is_reachable_even_the_ones_not_read() -> None:
-    """The developer's half: nothing was hidden, and they can check any of it."""
+def test_the_alarming_phrase_is_gone() -> None:
+    """**THE WORDS WERE THE DEFECT.** "53 not reviewed" says *untouched*; what happened is that
+    every file got the deterministic half and three got the model read as well. Both sentences
+    are true and only one of them frightens a developer waiting to merge."""
     block = _block(SCORES)
 
-    for path in SCORES:
-        assert f"`{path}`" in block, f"{path} was ranked and never shown to the author"
-
-
-def test_the_files_read_closely_are_marked_and_the_others_are_not() -> None:
-    """A list where every line looks the same cannot answer "did you look at MY file"."""
-    block = _block(SCORES)
-    marked = [
-        line for line in block.splitlines() if "read closely" in line and line.startswith("-")
-    ]
-
-    assert len(marked) == 3, marked
-    assert all("mod0" in m or "mod1" in m or "mod2" in m for m in marked)
-
-
-def test_the_list_is_alphabetical_and_not_the_ranking() -> None:
-    """**A PUBLISHING RULE, NOT A LAYOUT PREFERENCE.** Rank order lets a reader count to the cut
-    and read the budget off the list, which `publishing-rules.md` never-publishes.
-
-    The scores here make the two orders disagree: `zebra.py` is the busiest file and sorts last.
-    """
-    block = _block({"src/zebra.py": 99, "src/apple.py": 2, "src/mango.py": 1})
-    listed = [line for line in block.splitlines() if line.startswith("- `")]
-
-    assert listed == sorted(listed), (
-        f"the list is in rank order, which discloses the budget: {listed}"
-    )
-    assert "apple" in listed[0], listed
-
-
-def test_a_listed_file_carries_a_path_and_never_a_number() -> None:
-    """*What the ranking is built from* is first on the never-publish list, and a per-file fix
-    count was printed in this comment once before being removed for a different reason.
-
-    **THE ASSERTION IS THE SHAPE OF THE LINE, NOT A LIST OF FORBIDDEN WORDS.** A first draft
-    searched for `"rank"` and failed on the scope sentence's own "were ranked" — a check that
-    fires on correct output is one somebody deletes. A line that is a path, optionally marked as
-    read, cannot carry a score whatever the score is called.
-    """
-    block = _block({"src/zebra.py": 99, "src/apple.py": 2, "src/mango.py": 1})
-    listed = [ln for ln in block.splitlines() if ln.startswith("- `")]
-
-    assert len(listed) == 3
-    for line in listed:
-        assert re.fullmatch(r"- `[^`]+`( — read closely)?", line), (
-            f"a listed file carries something besides its path: {line!r}"
-        )
+    assert "not reviewed" not in block
+    assert "not read closely" not in block
 
 
 def test_a_construct_we_could_not_parse_is_still_reported() -> None:
@@ -160,3 +118,52 @@ def test_a_file_we_have_no_size_for_says_nothing_rather_than_zero() -> None:
 
     assert "- `src/b.py`" in block
     assert "0 lines" not in block
+
+
+def test_every_changed_file_is_reachable_even_the_ones_not_read() -> None:
+    """The developer's half: nothing was hidden, and they can check any of it."""
+    block = _block(SCORES)
+
+    for path in SCORES:
+        assert f"`{path}`" in block, f"{path} was ranked and never shown to the author"
+
+
+def test_the_files_read_closely_are_marked_and_the_others_are_not() -> None:
+    """A list where every line looks the same cannot answer "did you look at MY file"."""
+    block = _block(SCORES)
+    marked = [
+        line for line in block.splitlines() if "read closely" in line and line.startswith("-")
+    ]
+
+    assert len(marked) == 3, marked
+    assert all("mod0" in m or "mod1" in m or "mod2" in m for m in marked)
+
+
+def test_the_list_is_alphabetical_and_not_the_ranking() -> None:
+    """**A PUBLISHING RULE, NOT A LAYOUT PREFERENCE.** Rank order lets a reader count to the cut
+    and read the budget off the list, which `publishing-rules.md` never-publishes.
+
+    The scores here make the two orders disagree: `zebra.py` is the busiest file and sorts last.
+    """
+    block = _block({"src/zebra.py": 99, "src/apple.py": 2, "src/mango.py": 1})
+    listed = [line for line in block.splitlines() if line.startswith("- `")]
+
+    assert listed == sorted(listed), (
+        f"the list is in rank order, which discloses the budget: {listed}"
+    )
+    assert "apple" in listed[0], listed
+
+
+def test_no_score_from_the_ranking_reaches_the_page() -> None:
+    """*What the ranking is built from* is first on the never-publish list, and a per-file fix
+    count was printed in this comment once before being removed for a different reason.
+
+    **THE ASSERTION IS THE SCORE VALUE, NOT THE SHAPE OF THE LINE.** This used to require a line
+    to be a bare path — which was right until the line legitimately gained a size and a rule
+    count, both from sources a customer already has. What must never appear is the number the
+    RANKING computed, so the fixture uses a distinctive one and looks for it.
+    """
+    block = _block({"src/zebra.py": 4242, "src/apple.py": 2, "src/mango.py": 1})
+
+    assert "4242" not in block, f"the ranking's own score reached the page: {block}"
+    assert "`src/zebra.py`" in block, "the file itself must still be listed"

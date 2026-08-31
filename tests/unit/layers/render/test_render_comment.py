@@ -36,8 +36,8 @@ def test_a_change_below_the_threshold_is_still_commented_on() -> None:
 
     First it required `None` below the decile, when the product spoke on about a tenth of changes.
     Then it required a salience sentence, when every change got a comment and the loud ones had to
-    stay distinguishable. Now it requires neither: the comment says where to look and what was not
-    reviewed, and says nothing about deciles, because a developer waiting to merge does not act on
+    stay distinguishable. Now it requires neither: the comment says where to look and how much was
+    read, and says nothing about deciles, because a developer waiting to merge does not act on
     our firing rate. The signal still exists on `Ranking.fired` and still reaches the dashboard.
     """
     ranking = rank(CASES["no_history"])
@@ -47,7 +47,12 @@ def test_a_change_below_the_threshold_is_still_commented_on() -> None:
     assert "decile" not in body and "%" not in body, (
         f"the comment is explaining the product to a reviewer again: {body!r}"
     )
-    assert "reviewed" in body, "the reader must still learn how much of their change was read"
+    # **THE INTENT, NOT THE VOCABULARY.** This asserted the word "reviewed" until the scope line
+    # was rewritten to stop frightening people, and the property it was protecting — the reader
+    # learns how much of their change was read — survived the rewording intact.
+    assert "were read line by line" in body, (
+        "the reader must still learn how much of their change was read"
+    )
 
 
 def test_a_change_the_budget_cannot_help_with_is_not_spoken_on() -> None:

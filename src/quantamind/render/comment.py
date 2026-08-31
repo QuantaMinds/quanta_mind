@@ -57,7 +57,7 @@ HUMAN = "⚠️ **Needs a human.**"
 BUGS = "🐛 **Found {count} thing(s) worth fixing.**"
 BLIND = (
     "⚠️ **I could not review this change.** {why}\n\n"
-    "Nothing below is a verdict on your code — it is only what the ranking could still say."
+    "Nothing below is a verdict on your code — it is only what could still be checked."
 )
 MAX_DEPENDENTS = 3
 """Dependents named before the count takes over. **Five made the single longest line in a
@@ -89,7 +89,7 @@ def _headline(
     if count:
         return BUGS.format(count=count)
     if summary is None:
-        return HUMAN + " No model reviewed this change; only the ranking below ran."
+        return HUMAN + " No model read this change; the checks below still ran."
     if summary.achieves_goal is not True:
         return f"{HUMAN} It may not do what the PR says."
     if summary.breaks is not False:
@@ -164,5 +164,5 @@ def comment(
         if repeats:
             lines += [repeats, ""]
 
-    lines += coverage(ranking, unresolved, effort)
+    lines += coverage(ranking, unresolved, effort, checks)
     return "\n".join(lines)
