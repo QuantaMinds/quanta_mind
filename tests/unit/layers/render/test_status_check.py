@@ -6,7 +6,7 @@ WHY:  **THIS SENTENCE IS THE WHOLE EXPLANATION FOR A FAILING CHECK.** GitHub sho
       omits what could not be checked, a status reading "3 rule check(s) passed" while nine files
       were unparseable reads as compliance and is a proxy for it -- the shape rule 14 names.
 IMPORTS: pytest, quantamind.types.{checked,verdict}, quantamind.verify.blocking,
-      quantamind.render.status_check.
+      quantamind.render.blocks.status_check.
 CONSUMED BY: `just check`.
 """
 
@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import pytest
 
-from quantamind.render.status_check import NothingDeclared, render
+from quantamind.render.blocks.status_check import NothingDeclared, render
 from quantamind.types.checked import Checked, Outcome
 from quantamind.types.verdict import Reason, Site
 from quantamind.verify.blocking import decide

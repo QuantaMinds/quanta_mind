@@ -4,10 +4,10 @@ WHAT: `sentence(shape)` turns an `ingest.change_shape.Shape` into plain prose â€
       change is against the repository's own median, how many other people have been in these
       files, how often they change, and when it landed.
 WHY:  **THIS FILE WAS NAMED BY `ingest/change_shape.py` AND NEVER WRITTEN.** That module's
-      docstring said `CONSUMED BY: render/shape_line.py` while nothing in the tree imported it, so
-      a fully built measurement sat dead. The docstring was the only evidence it was meant to be
-      used, and a promised consumer that does not exist is the same silence this product refuses
-      everywhere else.
+      docstring said `CONSUMED BY: render/blocks/shape_line.py` while nothing in the tree
+      imported it, so a fully built measurement sat dead. The docstring was the only evidence it
+      was meant to be used, and a promised consumer that does not exist is the same silence this
+      product refuses everywhere else.
 
       **EVERY LINE IS COUNTED, NONE IS JUDGED.** "6 files where your median is 2" is settled by
       two git commands; "this change is risky" is not. The prose says the first and never the

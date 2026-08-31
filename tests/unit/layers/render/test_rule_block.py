@@ -12,7 +12,7 @@ CONSUMED BY: `just check`.
 
 from __future__ import annotations
 
-from quantamind.render.rule_block import block
+from quantamind.render.blocks.rule_block import block
 from quantamind.types.checked import Checked, Outcome
 from quantamind.types.verdict import Reason, Site
 

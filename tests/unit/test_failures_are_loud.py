@@ -33,8 +33,8 @@ from quantamind.ingest import commits
 from quantamind.ingest.publish import github_comments
 from quantamind.parse.units import MalformedDiff, units_in
 from quantamind.rank.order import NothingToRank, rank
+from quantamind.render.blocks.coverage_line import NothingToReport, coverage_line
 from quantamind.render.comment import comment
-from quantamind.render.coverage_line import NothingToReport, coverage_line
 from quantamind.store import drift, schema
 from quantamind.store import touches as touch_store
 from quantamind.types.ranking import Ranking

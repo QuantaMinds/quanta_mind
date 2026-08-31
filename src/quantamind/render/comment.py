@@ -39,9 +39,10 @@ from __future__ import annotations
 from collections.abc import Sequence
 
 from quantamind.ingest.context.tickets import Context
+from quantamind.render.blocks.found_block import found
+from quantamind.render.blocks.scope_block import coverage
+from quantamind.render.blocks.verdict_block import Stated, verdicts
 from quantamind.render.context.goal_block import goal
-from quantamind.render.found_block import found
-from quantamind.render.verdict_block import Stated, verdicts
 from quantamind.types.checked import Checked, Outcome
 from quantamind.types.finding import Finding
 from quantamind.types.ranking import Ranking
@@ -148,7 +149,6 @@ def comment(
     the ranking can still offer, because a partial answer presented whole is the failure this
     product refuses.
     """
-    read, total = len(ranking.funded()), len(ranking.units)
     violations = [c for c in checks if c.outcome is Outcome.VIOLATED]
     lines = [HEADER, "", _headline(summary, findings, len(violations), blind), ""]
 
@@ -183,10 +183,5 @@ def comment(
         lines += [f"- `{unit.unit.qualified_name}`" for unit in ranking.funded()]
         lines.append("")
 
-    parts = [f"{read} of {total} file(s) reviewed" if total else "Nothing to review"]
-    if total - read > 0:
-        parts.append(f"{total - read} not reviewed")
-    if unresolved:
-        parts.append(f"{len(unresolved)} construct(s) could not be parsed")
-    lines.append(f"_{'; '.join(parts)}._")
+    lines += coverage(ranking, unresolved)
     return "\n".join(lines)

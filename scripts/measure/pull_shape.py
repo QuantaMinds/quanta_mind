@@ -24,7 +24,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 sys.path[:0] = [str(HERE.parents[2] / "src"), str(HERE)]
 
 from quantamind.ingest.change_shape import shape  # noqa: E402
-from quantamind.render.shape_line import block  # noqa: E402
+from quantamind.render.blocks.shape_line import block  # noqa: E402
 
 GIT_TIMEOUT_S = 300
 

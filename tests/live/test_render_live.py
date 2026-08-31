@@ -20,8 +20,8 @@ from pathlib import Path
 import pytest
 from pipeline import Skips, clone_all, ranked_pulls
 
+from quantamind.render.blocks.coverage_line import coverage_line
 from quantamind.render.comment import comment
-from quantamind.render.coverage_line import coverage_line
 from quantamind.types.ranking import Discrimination
 
 

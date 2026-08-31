@@ -29,7 +29,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from quantamind.ingest.publish.github_reviews import publish
-from quantamind.render.pin_block import block
+from quantamind.render.blocks.pin_block import block
 from quantamind.types.review import Delivered, Outcome
 from quantamind.verify import pin_check
 

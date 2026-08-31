@@ -42,7 +42,7 @@ from quantamind.infer import gemini, vertex
 from quantamind.infer.vertex import InferenceFailed, Unavailable
 from quantamind.ingest.change_shape import shape
 from quantamind.ingest.review_window import WindowUnreadable
-from quantamind.render.shape_line import block
+from quantamind.render.blocks.shape_line import block
 from quantamind.serve.settle import settle
 from quantamind.types.deep import Deep
 from quantamind.types.settings import Settings

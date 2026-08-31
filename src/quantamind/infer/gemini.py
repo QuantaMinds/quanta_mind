@@ -114,10 +114,10 @@ def read(
 ) -> tuple[list[Finding], Spend]:
     """Findings about `paths` only. Raises `Unavailable` when there are no credentials.
 
-    `context` is prose about the change's shape, already rendered by `render/shape_line.py` and
-    passed in by `serve/`. **IT IS A STRING THIS LAYER DOES NOT BUILD**, because `render/` sits to
-    the right of `infer/` and rule 7 forbids reaching for it. Empty is the supported case and
-    leaves the prompt exactly as it was before shape was measured.
+    `context` is prose about the change's shape, already rendered by
+    `render/blocks/shape_line.py` and passed in by `serve/`. **IT IS A STRING THIS LAYER DOES NOT
+    BUILD**, because `render/` sits to the right of `infer/` and rule 7 forbids reaching for it.
+    Empty is the supported case and leaves the prompt exactly as it was before shape was measured.
     """
     if not paths:
         return [], Spend()

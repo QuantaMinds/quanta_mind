@@ -21,8 +21,8 @@ from quantamind.infer.change_summary import Summary
 from quantamind.ingest.context.tickets import Context
 from quantamind.ingest.diff import Stated
 from quantamind.rank.order import rank
+from quantamind.render.blocks.verdict_block import SECTIONS
 from quantamind.render.comment import comment
-from quantamind.render.verdict_block import SECTIONS
 from quantamind.types.finding import Finding
 
 CASES = {

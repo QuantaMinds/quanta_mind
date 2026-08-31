@@ -412,6 +412,31 @@ whole as `serve/pin_review.py` — which turned a source-string test (`"if not p
 a behavioural one, because a branch in a function you can call can be asserted on rather than read.
 The cost report moved into `store/reviews.bank()`, beside the two refusals it sits with.
 
+### `render/blocks/` — one module per section of the comment
+
+**`render/` sat at its fifteen-file cap for three consecutive changes**, and `check_structure.py`
+says the same thing each time: introduce a sub-package, do not raise the cap. `found_block`,
+`pin_block`, `rule_block`, `verdict_block`, `shape_line`, `coverage_line` and `status_check` moved
+here by `git mv`; `comment.py` still decides the order in one place, and each block knows nothing
+about the others. `context/` (D6) stays outside it — those are whole documents, not sections.
+
+**`scope_block.py` is new, and it exists because a real comment frightened somebody.**
+`_3 of 56 file(s) reviewed; 53 not reviewed._` reads as a crash to a developer waiting to merge.
+It is not: three is the budget and the other 53 were ranked. **The count is not softened** — the
+residual is the product — but the scope now reads as a decision, and every changed file is listed
+behind a `<details>` fold so nothing is merely absent.
+
+**Two properties of that list are publishing rules, and `test_scope_block.py` fails if either
+moves.** It is ALPHABETICAL, because a list in rank order lets a reader count down to the cut and
+read the budget straight off it — `publishing-rules.md` never-publishes *how the budget is split
+across a change*. And a listed line carries a path and nothing else, because *what the ranking is
+built from* is first on that same list; a per-file fix count was in this comment once. The
+assertion is the SHAPE of the line rather than a list of forbidden words — a first draft searched
+for "rank" and fired on the scope sentence's own "were ranked", and a check that fires on correct
+output is one somebody deletes.
+
+*"Your repository's own history"* is the phrasing those rules permit, and it is the phrasing used.
+
 ### `scripts/guard/` — the enforcement layer
 
 | File | Enforces |

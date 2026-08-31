@@ -21,7 +21,7 @@ WHY:  **EVERY ONE OF THESE IS A FACT ABOUT HISTORY, NOT A JUDGEMENT ABOUT THE CO
       run these are context for a human rather than a signal.
 IMPORTS: stdlib, and `ingest.review_window` for the bound every backward-looking read carries.
       Same layer, public surface only. Left of rank.
-CONSUMED BY: `render/shape_line.py`, which renders it for the model.
+CONSUMED BY: `render/blocks/shape_line.py`, which renders it for the model.
 """
 
 from __future__ import annotations
