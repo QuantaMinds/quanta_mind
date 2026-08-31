@@ -88,6 +88,7 @@ def main() -> int:
         share = f"{100.0 * redundant / matching:.1f}%" if matching else "n/a"
         print(f"{arm:<20}{len(group):>5}{nopath:>8}{within:>8}{across:>8}{redundant:>10}{share:>8}")
 
+    _localise(rows)
     print(
         "\nwithin  = repeats of an earlier claim about the SAME file — what `repeats()` collapses"
     )
@@ -96,6 +97,46 @@ def main() -> int:
     print("\nThe rule collapses `within` only. If `within` is 0 while `semantic` is not, the rule")
     print("and the figure that justified it are measuring different things.")
     return 0
+
+
+def _localise(rows: list[dict[str, str]]) -> None:
+    """Which pull requests hold the redundant comments, and what they have in common.
+
+    **`redundant` IS A SUBTRACTION AND NAMES NOBODY.** `redundancy.json` records only totals, so
+    the individual comments are recovered here: per pull request, TP comments minus goldens
+    covered. The positive excesses sum to 17 for OURS -- the figure the aggregate reports -- while
+    a naive total gives 13, because the two judge passes disagree by four comments.
+    """
+    detail = RESULTS / "gap_detail.json"
+    if not detail.exists():
+        return
+    gap = {r["key"]: r for r in json.loads(detail.read_text())}
+    tp_by_pr: dict[str, list[dict[str, str]]] = collections.defaultdict(list)
+    for row in rows:
+        if row["arm"] == "OURS" and row["verdict"] == "TP":
+            tp_by_pr[str(row["pr"])].append(row)
+
+    excesses = [
+        (len(tp_by_pr[key]) - len(rec["ours_caught"]), key)
+        for key, rec in gap.items()
+        if len(tp_by_pr[key]) > len(rec["ours_caught"])
+    ]
+    if not excesses:
+        return
+    no_file = shared = 0
+    for _excess, key in excesses:
+        found = [PATH_IN_TEXT.search(str(t["text"])) for t in tp_by_pr[key]]
+        named = [m.group(1) for m in found if m]
+        no_file += sum(1 for m in found if m is None)
+        shared += sum(n - 1 for n in collections.Counter(named).values() if n > 1)
+
+    total = sum(e for e, _ in excesses)
+    print(f"\nOURS: {total} redundant comment(s) across {len(excesses)} pull request(s)")
+    print(f"  keyed on a function, naming no file: {no_file}")
+    print(
+        f"  sharing a file with a sibling:       {shared}"
+        "  <- the most a within-file rule could reach"
+    )
 
 
 if __name__ == "__main__":
