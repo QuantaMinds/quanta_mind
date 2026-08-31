@@ -84,3 +84,17 @@ architecture that we cannot support — the most expensive kind of sentence this
   elsewhere and the one `check_burned_corpora.py` exists for.
 - A file whose import set never resolves in-tree (`drift` undefined) is EXCLUDED and counted, not
   scored as zero.
+
+---
+
+## Amendment, recorded after the run — the instrument shared a denominator
+
+**`drift = shifts / churn` and the outcome `fix_rate = fixes / churn` are both over `churn`.** Two
+ratios with a common denominator move together by construction. This was not seen when the bars
+were written and it is recorded here rather than quietly corrected, because a pre-registration that
+edits itself after the result is not one.
+
+**The verdict does not change.** A shared `1/churn` induces a POSITIVE association; B2 asked for
+positive and observed negative, so the artefact could only have helped the hypothesis and it still
+failed. **Any future attempt must not measure a rate whose denominator is also the outcome's** —
+count shifts against a fixed window, or model the outcome per commit.

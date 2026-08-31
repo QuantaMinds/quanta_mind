@@ -50,6 +50,41 @@ and that pooling is the validated unit, and `publishing-rules.md` requires the p
 the ranking claim for exactly this reason. Had werkzeug been the whole run, D2e would have shipped
 a backwards signal with confident numbers behind it.
 
+## The reverse direction was looked at, and it is the denominator
+
+**"High drift attracts fewer fixes" invites the obvious follow-up: then what attracts MORE?**
+Asked and answered on this same data, EXPLORATORY, no bars, nothing registered — and the answer is
+that there is nothing there.
+
+Holding the fix count **exactly** constant, so churn is the only thing left to vary:
+
+| fixes = N | files | stable fix rate | drifting fix rate | gap | stable churn | drifting churn |
+|---|---|---|---|---|---|---|
+| 2 | 47 | 0.135 | 0.114 | +2.1pp | 17.2 | 20.6 |
+| 3 | 32 | 0.164 | 0.142 | +2.3pp | 21.1 | 25.4 |
+| 4 | 31 | 0.153 | 0.190 | **−3.7pp** | 31.0 | 24.7 |
+| 7 | 16 | 0.215 | 0.172 | +4.3pp | 34.8 | 49.5 |
+
+**+2.1, +2.3, −3.7, +4.3 on cells of 16 to 47 files is noise**, and the sign changes.
+
+## AND THE INSTRUMENT HAD A DEFECT I HAVE TO STATE
+
+**`drift = shifts / churn` and `fix_rate = fixes / churn` SHARE A DENOMINATOR.** Two ratios over the
+same denominator move together by construction, whatever the numerators do — so part of any
+association between them is arithmetic rather than evidence. With the fix count pinned, `fix_rate`
+*is* `N / churn`, and the whole comparison collapses to "are drifting files edited more?" Across all
+305 files, drift against churn is **r = −0.177**: weak, and enough to matter.
+
+**THE VERDICT IS UNAFFECTED, AND THE REASON IS WORTH WRITING DOWN RATHER THAN ASSUMED.** A shared
+`1/churn` induces a POSITIVE association between drift and fix rate. B2 asked for a positive one and
+observed a **negative** one — so the artefact could only have flattered the hypothesis, and it still
+failed. The bar is if anything more securely unmet than the headline number suggests.
+
+**It would have mattered enormously had the result gone the other way**, and it was not noticed
+until the follow-up question forced the arithmetic into view. Same family as
+`docs/engineering/CORRECTIONS.md` entry 7: two quantities that look independent and are not. A
+future attempt at this must not use a rate whose denominator is also the outcome's.
+
 ## What we are NOT concluding
 
 **The direction has a plausible mechanism and it is a HYPOTHESIS, not a finding.** A file whose
