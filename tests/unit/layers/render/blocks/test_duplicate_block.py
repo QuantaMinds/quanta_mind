@@ -14,6 +14,12 @@ WHY:  **D2c IS THE FIRST CLAIM THIS PRODUCT ASSERTS THAT IS NEITHER A RULE THE C
       `stream_template` are a real repeat and a deliberate one; "extract a helper" would be
       confident and wrong there. `test_the_block_gives_no_advice` fails if anybody adds it.
 
+      **THE CHANGED SET RIDES ON `Duplicates` AND `test_the_block_names_the_side_the_author_touched`
+      IS WHY.** It used to be handed in separately as `ranking.units`, a subset of what `twins()`
+      filtered against — one question answered from two populations, which is
+      `docs/engineering/CORRECTIONS.md` entry 7. This product reported it against
+      `QuantaMinds/quanta_mind#92` before it had produced a wrong comment.
+
       **THE FLOOR AND THE LIBRARY FILTER ARE BOTH PINNED HERE.** Unfiltered, flask has 12 groups
       at three statements and seven are conventional test route handlers. Below three statements,
       `__init__` pairs. Both numbers came from a run over two real repositories.
@@ -111,7 +117,7 @@ def test_a_clean_tree_reports_nothing_at_all(tmp_path: Path) -> None:
     found = twins(tmp_path, ["src/one.py"])
 
     assert found.repeats == ()
-    assert duplicates(found, ["src/one.py"]) == ""
+    assert duplicates(found) == ""
 
 
 def test_the_rendered_block_names_both_places_and_the_size(tmp_path: Path) -> None:
@@ -120,7 +126,7 @@ def test_the_rendered_block_names_both_places_and_the_size(tmp_path: Path) -> No
         tmp_path,
         {"src/one.py": f"def alpha(a, b):\n{BODY}", "src/two.py": f"def beta(p, q):\n{BODY}"},
     )
-    block = duplicates(twins(tmp_path, ["src/one.py"]), ["src/one.py"])
+    block = duplicates(twins(tmp_path, ["src/one.py"]))
 
     assert "`src/one.py:1` alpha()" in block
     assert "also at `src/two.py:1` beta()" in block
@@ -134,7 +140,23 @@ def test_the_block_gives_no_advice(tmp_path: Path) -> None:
         tmp_path,
         {"src/one.py": f"def alpha(a, b):\n{BODY}", "src/two.py": f"def beta(p, q):\n{BODY}"},
     )
-    block = duplicates(twins(tmp_path, ["src/one.py"]), ["src/one.py"]).lower()
+    block = duplicates(twins(tmp_path, ["src/one.py"])).lower()
 
     for word in ("extract", "should", "refactor", "consider", "helper", "duplicate code"):
         assert word not in block, f"the block gave advice: {word!r}"
+
+
+def test_the_block_names_the_side_the_author_touched(tmp_path: Path) -> None:
+    """**ONE SET, CARRIED FROM THE FILTER TO THE RENDERER.** A reader must see their own file as
+    the subject and the other as context, and that split is only correct if both halves are
+    decided against the same list of changed paths."""
+    _tree(
+        tmp_path,
+        {"src/mine.py": f"def alpha(a, b):\n{BODY}", "src/theirs.py": f"def beta(p, q):\n{BODY}"},
+    )
+    found = twins(tmp_path, ["src/mine.py"])
+
+    assert found.touched == frozenset({"src/mine.py"})
+    block = duplicates(found)
+    assert block.index("src/mine.py") < block.index("src/theirs.py"), block
+    assert "this change" not in block, "the author's own file was not recognised as theirs"

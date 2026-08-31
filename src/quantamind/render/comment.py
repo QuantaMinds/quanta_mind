@@ -192,7 +192,7 @@ def comment(
     # anything `infer/` said; it is about structure rather than this change's goal, so it comes
     # after the verdict a reader acts on first.
     if repeated is not None:
-        repeats = duplicates(repeated, [unit.unit.site.path for unit in ranking.units])
+        repeats = duplicates(repeated)
         if repeats:
             lines += [repeats, ""]
 

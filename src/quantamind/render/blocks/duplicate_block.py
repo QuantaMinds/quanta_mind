@@ -12,6 +12,12 @@ WHY:  **D2c. "THE SAME LOGIC IS WRITTEN IN TWO PLACES, AND A FIX TO ONE LEAVES T
       need us to suggest one; a reader who chose the duplication should not be argued with by a
       comment.
 
+      **THE CHANGED SET COMES FROM `Duplicates`, NOT FROM THE CALLER.** It used to be passed in as
+      `ranking.units` — a SUBSET of what `twins()` filtered on, because the ranker drops files it
+      cannot read — so the decision to show this block and the contents of it were computed from
+      two different populations. `docs/engineering/CORRECTIONS.md` entry 7 is that shape. Found by
+      this product reviewing `QuantaMinds/quanta_mind#92`.
+
       **THE CHANGED SIDE IS NAMED FIRST AND SEPARATELY.** A reviewer is holding one pull request:
       what they act on is "this function you just touched", and the other place is context. Printing
       a flat list of sites makes them find their own file in it.
@@ -38,7 +44,7 @@ MAX_SHOWN = 5
 a section nobody reads to the bottom hides its own last line."""
 
 
-def duplicates(found: Duplicates, changed: list[str]) -> str:
+def duplicates(found: Duplicates) -> str:
     """The section, or an empty string when nothing repeated.
 
     **EMPTY IS THE COMMON ANSWER AND IT PRINTS NOTHING.** Measured over this repository: 139
@@ -49,11 +55,10 @@ def duplicates(found: Duplicates, changed: list[str]) -> str:
     if not found.repeats:
         return ""
 
-    touched = frozenset(changed)
     lines = [HEADING, ""]
     for repeat in found.repeats[:MAX_SHOWN]:
-        here = repeat.changed(touched)
-        there = repeat.elsewhere(touched)
+        here = repeat.changed(found.touched)
+        there = repeat.elsewhere(found.touched)
         # Both halves can be non-empty on either side: a change that touches two files holding the
         # same body has no "elsewhere", and that is still worth saying.
         subject = ", ".join(site.render() for site in here) or "this change"

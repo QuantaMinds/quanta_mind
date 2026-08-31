@@ -86,6 +86,16 @@ class Duplicates:
     repeats: tuple[Repeat, ...]
     files_read: int
     files_unparsed: int
+    touched: frozenset[str]
+    """The changed paths this was filtered against. **CARRIED, NOT RE-DERIVED BY THE RENDERER.**
+
+    `render/blocks/duplicate_block.py` needs to know which side of a repeat is the author's, and
+    it was passed `ranking.units` — a SUBSET of what `twins()` filtered on, since the ranker drops
+    what it cannot read. Two populations for one question, which is `docs/engineering/
+    CORRECTIONS.md` entry 7 exactly. Reported by this product against
+    `QuantaMinds/quanta_mind#92`; it produced no wrong output yet, and the fix is to have one set.
+    """
+
     capped: bool
     """True when `FILE_CAP` stopped the walk, so "no duplicates" means "none in what we read"."""
 
@@ -145,5 +155,6 @@ def twins(clone: Path, changed: list[str]) -> Duplicates:
         repeats=tuple(sorted(repeats, key=lambda r: (-r.statements, r.sites[0].path))),
         files_read=read,
         files_unparsed=unparsed,
+        touched=touched,
         capped=capped,
     )
