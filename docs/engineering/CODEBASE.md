@@ -2684,6 +2684,19 @@ for here.
 **`.gcloudignore` did not exist**, so a source deploy uploaded every tracked research file, every
 test and the whole of `.git` — 497 MB of `research/` alone, none of which the image copies.
 
+**AND THE DEPLOY COMMAND ITSELF LIVED IN ONE PERSON'S SHELL HISTORY UNTIL 2026-08-31.** On that day
+the deployed revision was three days old while the branch carried a rewritten comment — and because
+the App reviews every push and wins the head-SHA idempotency race against a local run, the pull
+request kept showing the OLD build's output. **A live comment had quietly stopped being evidence
+about the working tree**, which is the same class as a green test that asserts nothing. It cost two
+rounds of confusion before anybody suspected the image rather than the code. `just deploy` is the
+command now, with the health check inside it: a revision serving 100% of traffic and answering
+nothing looks identical to a good one in the deploy output.
+
+Env, secrets, the service account and `--no-cpu-throttling` are properties of the SERVICE, and a
+source deploy preserves them — so the recipe does not repeat them and cannot drift from what is
+running. `gcloud run services describe quantamind-reviewer` is the reader for those.
+
 ### The comment stopped explaining the product
 
 The posted body carried a paragraph of method — "ranked by prior-fix history", "the budget cut

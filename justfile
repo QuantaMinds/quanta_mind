@@ -278,3 +278,31 @@ allow-golden:
 # would invite reading it.
 pilot REPOS="10":
     cd research/phase0 && GITHUB_TOKEN="$(gh auth token)" uv run python -m phase0.pilot.run --repos {{REPOS}}
+
+# ---------------------------------------------------------------- deploy
+
+# Redeploy the reviewer to Cloud Run from source.
+#
+# **THIS COMMAND LIVED IN ONE PERSON'S SHELL HISTORY UNTIL 2026-08-31**, and on that day the
+# deployed image was three days old while the branch carried a rewritten comment. The App reviews
+# every push, wins the head-SHA idempotency race against a local run, and posts the OLD build's
+# output — so a live comment silently stopped being evidence about the working tree. A deploy step
+# nobody can repeat is a deploy step that drifts.
+#
+# gcloud is NOT a dependency of this product — `ingest/google_auth.py` takes its token from the
+# instance metadata server, which is G1's whole point. It is a dependency of DEPLOYING, which is a
+# different thing, and the path is spelled out because the SDK is not on every PATH.
+#
+# Env, secrets, service account and `--no-cpu-throttling` are properties of the SERVICE and a
+# source deploy preserves them; they are not repeated here, so this recipe cannot silently
+# disagree with what is running. `gcloud run services describe` is the reader for those.
+deploy:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    export PATH="/opt/homebrew/share/google-cloud-sdk/bin:$PATH"
+    gcloud run deploy quantamind-reviewer \
+        --source . --project quantamind-oss --region us-central1
+    # **THE HEALTH CHECK IS PART OF THE DEPLOY, NOT A SEPARATE HABIT.** A revision that serves 100%
+    # of traffic and answers nothing looks identical to a good one in the deploy output.
+    curl -fsS -o /dev/null -w 'health: %{http_code}\n' \
+        https://quantamind-reviewer-579663721382.us-central1.run.app/health
