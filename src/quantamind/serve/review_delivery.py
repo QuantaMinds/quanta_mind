@@ -41,6 +41,7 @@ from quantamind.ingest.context.tickets import behind
 from quantamind.ingest.diff import base_commit, changed_files
 from quantamind.ingest.github_api import token_for
 from quantamind.ingest.publish.github_reviews import publish
+from quantamind.render.comment import beyond_the_ranking
 from quantamind.render.comment import comment as rendered
 from quantamind.serve.blocking_status import announce
 from quantamind.serve.commands.run_review import review as run_ranking
@@ -174,12 +175,16 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
         blind=unreadable,
         context=intent,
     )
-    # **`intent` JOINS THE CONDITION, OR D6a WOULD BE DROPPED ON EXACTLY THE DELIVERIES IT IS FOR.**
-    # The fallback to `reviewed.body` is the ranking-only comment, and it renders no goal at all —
-    # so a change with no model summary and no declared rules would have fetched the ticket and
-    # thrown it away.
-    told_anything = told is not None or kept or checks or not intent.empty()
-    body = (fuller if told_anything else (reviewed.body or "")) + pins
+    # **THE FALLBACK IS THE RANKING-ONLY BODY, WHICH CARRIES NEITHER THE GOAL NOR A REFUSAL.**
+    # Written here as an expression this omitted `unreadable` — so an unreachable model on a change
+    # with no findings and no declared rules discarded the "I could not review this" banner — and it
+    # would have omitted `intent` too, throwing away a ticket D6a had just fetched. It lives in
+    # `render/comment.py` now, taking the same arguments `comment()` does, so a section cannot be
+    # added to one without the other. → `QuantaMinds/quanta_mind#91`, found by this product.
+    speaks = beyond_the_ranking(
+        summary=told, findings=kept, checks=checks, blind=unreadable, context=intent
+    )
+    body = (fuller if speaks else (reviewed.body or "")) + pins
 
     if not settings.posting_enabled:
         return Delivered(Outcome.REHEARSED, reviewed.considered, reviewed.skipped, body)

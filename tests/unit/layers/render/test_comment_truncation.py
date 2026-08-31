@@ -11,7 +11,13 @@ WHY:  **THE TRUNCATION WAS FREELY MUTABLE AND IT IS CUSTOMER-FACING TEXT.** At 0
       hidden. A truncation that silently showed five of twelve would be this project's own
       failure mode printed on a customer's pull request.
 
-      Five is written out. `MAX_DEPENDENTS + 1` reads the value under test and passes at any value.
+      The cap is written out rather than imported. `MAX_DEPENDENTS + 1` reads the value under test
+      and passes at any value, which is the whole failure this file exists to stop.
+
+      **IT WAS FIVE AND IS NOW THREE, LOWERED 2026-08-31 AFTER READING A REAL POSTED COMMENT** on
+      `QuantaMinds/quanta_mind#91`: five `src/quantamind/...` paths made the single longest line in
+      the body. The remainder is stated either way, so the fourth and fifth named nothing a reader
+      acts on — the cap moved, the property did not.
 IMPORTS: pytest, quantamind.render.comment, quantamind.types.
 CONSUMED BY: `just check`.
 """
@@ -24,7 +30,7 @@ from quantamind.infer.change_summary import Summary
 from quantamind.rank.order import rank
 from quantamind.render.comment import comment
 
-SHOWN = 5
+SHOWN = 3
 """The shipped cap on named dependents. See the module docstring on why it is not imported."""
 
 
@@ -47,12 +53,12 @@ def _body(count: int) -> str:
     return comment(rank({"src/a.py": 3}), summary=_summary(names))
 
 
-def test_a_long_list_names_five_and_says_how_many_it_hid() -> None:
-    """Twelve dependents: five named, seven declared hidden, twelve stated as the total."""
+def test_a_long_list_names_the_cap_and_says_how_many_it_hid() -> None:
+    """Twelve dependents: three named, nine declared hidden, twelve stated as the total."""
     body = _body(12)
 
     assert body.count("src/dep") == SHOWN, "a different number of dependents was named"
-    assert "and 7 more" in body
+    assert "and 9 more" in body
     assert "Used by 12 other file(s)" in body, "the total must be the real total, not the shown one"
 
 

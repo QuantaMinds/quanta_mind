@@ -94,7 +94,9 @@ def test_the_block_survives_a_delivery_with_no_model_summary() -> None:
     )
 
     assert "What this change says it is for" in body
-    assert "> Retire the shim" in body
+    assert "> Closes #412" in body, (
+        "the body is the goal when there is one; the title is a fallback"
+    )
 
 
 def test_a_review_that_could_not_run_still_says_what_the_change_claims_to_be_for() -> None:

@@ -41,8 +41,13 @@ UNREADABLE = (
 )
 BEHIND = "**Behind it**"
 NOT_READ = "**Not read**"
-BODY_CAP = 600
-"""Characters of the author's body quoted. A COST to the reader's attention, not to ours."""
+BODY_CAP = 240
+"""Characters of the author's goal quoted. A COST to the reader's attention, not to ours.
+
+**LOWERED FROM 600 AFTER READING A REAL COMMENT.** Six hundred characters is most of a screen, and
+this block is orientation before the review rather than the review — a reader who wants the whole
+description is one click from it, and the truncation line says so.
+"""
 
 TRUNCATED = "…\n\n_Quoted to {cap} characters; the rest is on the pull request._"
 
@@ -56,7 +61,11 @@ def _stated(context: Context) -> list[str]:
     """
     if context.unreadable:
         return [UNREADABLE.format(why=context.unreadable), ""]
-    text = context.stated.text()
+    # **THE BODY ALONE WHEN THERE IS ONE, AND THE TITLE ONLY AS A FALLBACK.** GitHub prints the
+    # title at the top of the page the comment is posted on, so quoting it here spends a line
+    # repeating what the reader is already looking at. `Stated.text()` joins both and is still what
+    # `empty()` is decided from — a title with no body is a stated goal and must not read as none.
+    text = context.stated.body.strip() or context.stated.title.strip()
     if not text:
         return [NO_GOAL, ""]
     if len(text) > BODY_CAP:

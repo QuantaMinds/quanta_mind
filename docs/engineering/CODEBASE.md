@@ -370,6 +370,28 @@ stated no goal" out of our own failed read is an assertion about somebody's work
 outage — the collapse non-negotiable 3 exists to refuse, in the one place where it would be rude
 as well as wrong.
 
+**THE PRODUCT FOUND A BUG IN THIS CHANGE, ON THE PULL REQUEST THAT SHIPPED IT.** `quanminds[bot]`
+reported against `QuantaMinds/quanta_mind#91` that the delivery's choice between the full body and
+the ranking-only one *"incorrectly omits the unreadable status, causing failure information from
+the explain step to be dropped"*. It was right, and the omission predated D6a: when the model is
+unreachable `comment()` renders "I could not review this change" at the top, and the caller then
+discarded that body for the ranking-only one whenever there were no findings and no declared rules.
+**A refusal degrading into an ordinary-looking comment is what `_headline` exists to prevent,
+defeated one layer above it.** Every unit test passed, because each half was correct alone.
+
+The decision is `render/comment.beyond_the_ranking()` now, taking the same arguments `comment()`
+does — so a section added to the body without a term in the predicate would be rendered and then
+thrown away, which is exactly how `blind` came to be missing.
+`tests/unit/layers/render/test_beyond_the_ranking.py` asserts each term alone, and the honest
+negative beside them; restoring the reported defect verbatim fails one test and nothing else.
+
+**AND THE COMMENT WAS TOO LONG, WHICH IS ALSO SOMETHING ONLY READING ONE TELLS YOU.** Two caps
+moved after `#91`: `goal_block.BODY_CAP` from 600 characters to 240, and `comment.MAX_DEPENDENTS`
+from five named files to three — five `src/quantamind/...` paths made the single longest line in
+the body. The block also stopped quoting the pull request TITLE when there is a body, because
+GitHub prints the title directly above the comment; a title-only pull request still quotes it,
+since a title with no body is a stated goal and must not read as none.
+
 **`verdict_block` STOPPED QUOTING THE GOAL, AND A LIVE COMMENT IS WHY.** Its first section was
 `**Goal — from the PR description**`, quoting `Summary.goal` — which `infer/change_summary` fills
 from the author's own title and body. So the quote was deterministic content riding on a model's

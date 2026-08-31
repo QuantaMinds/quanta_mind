@@ -52,8 +52,24 @@ def test_the_authors_words_are_quoted_verbatim() -> None:
     """Paraphrasing would move the target the review is measured against."""
     block = goal(Context(stated=Stated("Retire the shim", "It has no callers left.")))
 
-    assert "> Retire the shim" in block
     assert "> It has no callers left." in block
+
+
+def test_the_title_is_not_repeated_when_there_is_a_body() -> None:
+    """GitHub prints the title above the comment. Quoting it here spends a line on something the
+    reader is already looking at, which is the cheapest kind of length to cut."""
+    block = goal(Context(stated=Stated("Retire the shim", "It has no callers left.")))
+
+    assert "Retire the shim" not in block
+
+
+def test_a_pull_request_with_only_a_title_quotes_the_title() -> None:
+    """**AND THIS IS WHY IT IS A FALLBACK AND NOT A DELETION.** A title with no body IS a stated
+    goal, and dropping it would print "the author stated no goal" about somebody who stated one."""
+    block = goal(Context(stated=Stated("Retire the shim", "")))
+
+    assert "> Retire the shim" in block
+    assert "stated no goal" not in block
 
 
 def test_a_body_carrying_its_own_headings_cannot_restructure_the_comment() -> None:

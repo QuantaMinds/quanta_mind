@@ -55,7 +55,10 @@ BLIND = (
     "⚠️ **I could not review this change.** {why}\n\n"
     "Nothing below is a verdict on your code — it is only what the ranking could still say."
 )
-MAX_DEPENDENTS = 5
+MAX_DEPENDENTS = 3
+"""Dependents named before the count takes over. **Five made the single longest line in a
+real posted comment** — five `src/quantamind/...` paths wrapped across a screen, and the
+remainder is stated either way, so the fourth and fifth bought nothing a reader acts on."""
 LOOK = "**Look here first**"
 NOT_CHECKED = (
     "_Callers are found by static Python import only: a dynamic import, a re-export, or another "
@@ -90,6 +93,38 @@ def _headline(
     if summary.convention:
         return f"{HUMAN} It breaks a rule you wrote down."
     return f"{GOOD} It does what the PR says, and nothing that imports it breaks."
+
+
+def beyond_the_ranking(
+    *,
+    summary: Stated | None = None,
+    findings: Sequence[Finding] = (),
+    checks: Sequence[Checked] = (),
+    blind: str = "",
+    context: Context | None = None,
+) -> bool:
+    """Whether anything but the ranking has something to say, so the fuller body is worth rendering.
+
+    **THIS WAS AN EXPRESSION AT THE CALL SITE AND IT WAS MISSING A TERM.** `serve/review_delivery`
+    chose between this body and the ranking-only one with
+    `told is not None or kept or checks`, which omits `blind` — so when the model was UNREACHABLE
+    and the change had no findings and no declared rules, the comment fell back to the ranking and
+    **the "I could not review this change" banner was discarded**. A refusal degrading into a
+    comment that looks ordinary is the exact failure `_headline` exists to prevent, defeated one
+    layer above it. Found by this product reviewing its own pull request,
+    `QuantaMinds/quanta_mind#91`.
+
+    **IT TAKES THE SAME ARGUMENTS `comment()` DOES, ON PURPOSE.** One signature decides both what
+    is rendered and whether it is worth rendering, so a new section cannot be added to one without
+    the other refusing it — which is how the missing term survived in the first place.
+    """
+    return bool(
+        summary is not None
+        or findings
+        or checks
+        or blind
+        or (context is not None and not context.empty())
+    )
 
 
 def comment(

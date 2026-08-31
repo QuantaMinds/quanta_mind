@@ -31,7 +31,7 @@ from quantamind.ingest.diff import Stated
 from quantamind.render.context.goal_block import BODY_CAP, goal
 from quantamind.render.coverage_line import MAX_NAMED, _names
 
-NAMED, QUOTED = 5, 600
+NAMED, QUOTED = 5, 240
 """The shipped caps, written out. See the module docstring."""
 
 
@@ -42,7 +42,7 @@ def test_the_caps_are_the_numbers_that_ship() -> None:
 
 def test_a_goal_at_the_cap_is_quoted_whole_and_claims_no_remainder() -> None:
     """The boundary. Announcing a trim that did not happen is the same lie the other way."""
-    block = goal(Context(stated=Stated("t", "x" * (QUOTED - len("t\n\n")))))
+    block = goal(Context(stated=Stated("t", "x" * QUOTED)))
 
     assert "Quoted to" not in block
 

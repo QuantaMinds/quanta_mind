@@ -8,14 +8,16 @@ WHY:  **THE BUG THESE COVER SHIPPED BECAUSE EVERY TEST RAN WHERE A CREDENTIAL HE
       repeat the original mistake in a smaller form: it checks what we intended, not what git
       does. `git config --get` here is git PARSING our environment -- a wrong `GIT_CONFIG_COUNT`,
       a mistyped key, or a value git rejects fails these, and a dict-shape assertion would not.
-IMPORTS: ingest.git_credentials. stdlib base64, subprocess.
+IMPORTS: ingest.git_credentials. stdlib base64, os, subprocess, tempfile.
 CONSUMED BY: `just check`.
 """
 
 from __future__ import annotations
 
 import base64
+import os
 import subprocess
+import tempfile
 from pathlib import Path
 
 from quantamind.ingest.git_credentials import APP_USERNAME, HEADER_KEY, environment
@@ -24,9 +26,34 @@ GIT_TIMEOUT_S = 30
 TOKEN = "ghs_ThisIsNotARealTokenItIsATestFixture"
 
 
-def _git(args: list[str], env: dict[str, str]) -> subprocess.CompletedProcess[str]:
+def _git(
+    args: list[str], env: dict[str, str], cwd: Path | None = None
+) -> subprocess.CompletedProcess[str]:
+    """Run git with ONLY the environment under test contributing configuration.
+
+    **THIS USED TO INHERIT WHATEVER CONFIG THE WORKING DIRECTORY HAD, AND CI CAUGHT IT.**
+    `git config --get` reads system, global and repository config as well as the environment.
+    Under pytest the working directory is this repository, and on a GitHub Actions runner
+    `actions/checkout` writes `http.https://github.com/.extraheader` into its `.git/config` —
+    so `test_no_token_means_no_credential_and_still_no_prompt` found a credential it had not
+    been given and failed, correctly, about the wrong subject.
+
+    **IT IS THE SAME SHAPE AS THE BUG THIS FILE EXISTS FOR.** The module docstring says these
+    tests were written because "every test ran where a credential helper existed"; the tests
+    then ran where a credential CONFIG existed. A developer with a global `http.extraheader`
+    would have seen the same failure locally and had no idea why.
+
+    `/dev/null` for both config files and a directory outside any repository leaves exactly one
+    source of truth: the dict `environment()` returned.
+    """
+    isolated = {**env, "GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_SYSTEM": os.devnull}
     return subprocess.run(
-        ["git", *args], capture_output=True, text=True, timeout=GIT_TIMEOUT_S, env=env
+        ["git", *args],
+        capture_output=True,
+        text=True,
+        timeout=GIT_TIMEOUT_S,
+        env=isolated,
+        cwd=cwd or tempfile.gettempdir(),
     )
 
 
