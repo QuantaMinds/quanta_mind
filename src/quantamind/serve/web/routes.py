@@ -20,6 +20,7 @@ CONSUMED BY: `serve/listener.py`.
 
 from __future__ import annotations
 
+import sqlite3
 import time
 import urllib.parse
 from dataclasses import dataclass, field
@@ -116,7 +117,15 @@ def get(path: str, cookies: str, settings: Settings, *, at: int | None = None) -
         )
 
     if where == "/" or where.startswith(REPO_PREFIX):
-        conn = open_store(tenancy.shared(Path(settings.database_path), tenancy.ACCOUNTS))
+        # **NO ACCOUNT STORE MEANS NOBODY HAS SIGNED IN, WHICH IS AN ANSWER.** Before the first
+        # installation the file does not exist, and opening it raised `sqlite3.OperationalError`
+        # into the stdlib handler -- a browser at `/` got a dropped connection. Creating the store
+        # here would be worse: a read would provision the thing it is reading, and every visitor
+        # would leave a database behind.
+        try:
+            conn = open_store(tenancy.shared(Path(settings.database_path), tenancy.ACCOUNTS))
+        except sqlite3.Error:
+            return Reply(200, page.page("QuantaMind", SIGN_IN_PAGE), kind=HTML)
         try:
             session = accounts.whose(conn, signin.token_in(cookies), at=moment)
         finally:

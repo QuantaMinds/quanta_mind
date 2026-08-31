@@ -142,6 +142,8 @@ Healthy startup — and read the third line, because it is the honest part:
 [serve] listening on 127.0.0.1:7331
 [serve] POST /webhook  — verifies the signature, refuses a replay, answers 202
 [serve] GET  /health   — opens the store and reports what is wrong, never raises
+[serve] GET  /         — the dashboard: sign in, then a repository's reports
+[serve] GET  /r/<owner>/<name> — compliance, outcomes and cost for one repository
 [serve] IT DOES NOT REVIEW. The work callback logs and returns; see run_endpoint.py.
 [serve] http.server is not a hardened edge — run it behind a TLS-terminating proxy.
 ```

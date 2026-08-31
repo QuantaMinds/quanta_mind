@@ -44,9 +44,14 @@ ENTRY_POINT = Path(sys.executable).parent / "quantamind"
 REQUIRED = (
     "[serve] POST /webhook",
     "[serve] GET  /health",
+    "[serve] GET  /         — the dashboard",
+    "[serve] GET  /r/<owner>/<name>",
     "[serve] It REVIEWS: clone, rank, render. Posting is",
     "[serve] http.server is not a hardened edge",
 )
+"""**THE READ WINDOW BELOW IS SIZED FROM THIS TUPLE**, so a banner line added without a line here
+is not merely unpinned -- it pushes the lines after it past the end of the window and fails this
+test. That is how the browser routes were caught: they were announced and not required."""
 
 
 @pytest.mark.skipif(not ENTRY_POINT.exists(), reason="the console script is not installed")
