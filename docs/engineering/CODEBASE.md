@@ -2909,6 +2909,22 @@ paid plan or public repositories. Measured on this repository while it was priva
 returns `UNCHECKABLE`/`LANGUAGE_UNSUPPORTED` for every non-Python path, and `UNCHECKABLE` never
 blocks, so a JS file cannot fail the gate and `pyproject.toml` still declares `dependencies = []`.
 
+### The cost view on the web — a third report, not a third surface
+
+`serve/web/pages.repository()` renders compliance, outcomes and now cost as three `<pre>` blocks
+behind **one** `mine()` ownership test. A route of its own would have been a second place to get
+that check right, and the check is the only thing standing between one customer's spend and
+another's browser. Sabotaged: removing the ownership test fails three tests by name, including one
+that puts a cost on somebody else's repository and requires the figure to appear on **no** page
+this account can reach — not merely that the page 404s.
+
+**AND `render/page.py` HAD NO TESTS AT ALL.** Deleting the escaping from `pre()` — the helper every
+one of those three reports passes through — broke nothing in the suite. The escaping was correct;
+nothing held it there, so the next edit to that line would have been silent. `test_page.py` now
+covers `escaped`, `pre`, `link` and `page`, and all three escaping sabotages fail by name,
+including dropping `quote=True`, which matters because an href is an attribute context and a value
+that closes the quote escapes the attribute without ever needing a `<`.
+
 ### `store/costs.py` + `quantamind cost` — the columns that were written and never read
 
 `store/reviews.bank()` has filled `request_count`, `tokens_in` and `tokens_out` on every delivery

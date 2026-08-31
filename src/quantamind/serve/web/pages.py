@@ -28,9 +28,11 @@ from pathlib import Path
 
 from quantamind.render import page as html
 from quantamind.render.compliance_table import table as rule_table
+from quantamind.render.dashboard import costs as cost_table
 from quantamind.render.dashboard import table as outcome_table
 from quantamind.store import tenancy
 from quantamind.store.compliance import standing
+from quantamind.store.costs import spent
 from quantamind.store.lifecycle import board
 from quantamind.store.schema import open_store
 
@@ -71,7 +73,7 @@ def home(root: Path, login: str, *, opener: Opener = open_store) -> str:
 
 
 def repository(root: Path, login: str, repo: str, *, opener: Opener = open_store) -> str | None:
-    """One repository's two reports, or None when it is not this account's.
+    """One repository's three reports, or None when it is not this account's.
 
     **None IS THE SAME ANSWER FOR "NOT YOURS" AND "DOES NOT EXIST".** Distinguishing them would
     confirm the existence of a repository to somebody who may not know it is there.
@@ -86,8 +88,13 @@ def repository(root: Path, login: str, repo: str, *, opener: Opener = open_store
             reports = "<p>Nothing has been reviewed on this repository yet.</p>"
         else:
             repo_id = int(found[0])
-            reports = html.pre(rule_table(standing(conn, repo_id), repo)) + html.pre(
-                outcome_table(board(conn, repo_id, BOARD_LIMIT), repo)
+            # **THREE REPORTS, ONE OWNERSHIP CHECK.** The cost view reads the same `review`
+            # rows as the outcome board and is shown behind the same `mine()` test above --
+            # a separate route for it would be a second place to get that check right.
+            reports = (
+                html.pre(rule_table(standing(conn, repo_id), repo))
+                + html.pre(outcome_table(board(conn, repo_id, BOARD_LIMIT), repo))
+                + html.pre(cost_table(spent(conn, repo_id), repo))
             )
     finally:
         conn.close()
