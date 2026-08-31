@@ -412,6 +412,45 @@ whole as `serve/pin_review.py` — which turned a source-string test (`"if not p
 a behavioural one, because a branch in a function you can call can be asserted on rather than read.
 The cost report moved into `store/reviews.bank()`, beside the two refusals it sits with.
 
+### `parse/body_shape.py` and `parse/duplicate_bodies.py` — D2c, the same body twice
+
+**A parser answers "is this the same logic" exactly, so a model must not.** `shapes_in(source)`
+digests each function body with local identifiers replaced by the position of their first
+appearance — so a renamed copy still matches, and `x + x` does not match `y + z`. API names,
+literals and operators are KEPT: a copy renames its variables, not the methods it calls, and
+`timeout=30` is not `timeout=60`. A leading docstring is stripped; comments are free, because they
+are not in the AST.
+
+**THE FLOOR IS 3 STATEMENTS AND IT WAS MEASURED.** Over this repository and `pallets/flask`:
+
+| | library files | functions | groups at 2 | at 3 | at 4 |
+|---|---|---|---|---|---|
+| quanta_mind | 139 | 443 | 2 | **0** | 0 |
+| `pallets/flask` | 24 | 367 | 7 | **5** | 2 |
+
+All five of flask's groups at three were read and all five are real — three of them the same body
+in `app.py` and `blueprints.py`, which flask later hoisted into a shared `Scaffold` base class.
+At two it reports `__init__` pairs; at four it loses three of the five.
+
+**THE LIBRARY/TEST SPLIT DOES MORE WORK THAN THE FLOOR.** Unfiltered, flask has 12 groups at three
+statements and seven are conventional test route handlers — real repeats, not defects, and burying
+five findings under seven is how a section stops being read. `suite_reach.is_library` already drew
+that line for a different question.
+
+**`shapes_in` RAISES ON A FILE THAT WILL NOT PARSE, AND THAT IS THE SECOND ATTEMPT.** The first
+returned `()` for both "no functions here" and "not Python", so `twins()` counted every
+dataclass-only module as unparsed and reported **51 of 390** library files as a coverage gap when
+all 390 had been read. A wrong denominator matters most in the one block whose value is that it
+says what it could not search.
+
+**NOTHING IS STORED.** The tree is parsed at the reviewed commit and thrown away. D2b is
+`ON HOLD, recommend DROP` for having paid a table, a migration and a watermark and then given the
+same top three as alphabetical on 99.2% of changes; paying that again before this signal proves
+itself would repeat the bet rather than learn from it.
+
+**The block reports WHERE, never what to do.** flask's `render_template`/`stream_template` pair is
+a deliberate repeat, and "extract a helper" would be confident and wrong there.
+
 ### `render/blocks/` — one module per section of the comment
 
 **`render/` sat at its fifteen-file cap for three consecutive changes**, and `check_structure.py`

@@ -41,6 +41,7 @@ from quantamind.ingest.context.tickets import behind
 from quantamind.ingest.diff import base_commit, changed_files
 from quantamind.ingest.github_api import token_for
 from quantamind.ingest.publish.github_reviews import publish
+from quantamind.parse.duplicate_bodies import twins
 from quantamind.render.comment import beyond_the_ranking
 from quantamind.render.comment import comment as rendered
 from quantamind.serve.blocking_status import announce
@@ -138,27 +139,24 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     # and a budget is the only consumer that claim ever fitted.
     reading = allocate(reviewed.ranking, list(changed))
     examined = examine(clone, head_sha, reading, list(changed), settings)
-    # **D6a: THE AUTHOR'S OWN STATEMENT OF INTENT, READ FOR THE READER AND NOT FOR THE MODEL.**
-    # `stated_goal` was already fetched on every delivery and handed only to `infer/`, so intent
-    # reached the comment solely through a summary — the path measured at 25.0% correct. `behind()`
-    # never raises and reports a failed read as a failed read.
+    # **THE DETERMINISTIC HALF, GATHERED WHETHER OR NOT THE MODEL RAN.** D6a takes the author's
+    # stated goal and the tickets behind it; D2c reads the tree for a body that already exists
+    # elsewhere; `enforce` checks the declared rules. All three are reproducible on the same
+    # commit by anyone, which is why they may be asserted where a model finding may not — and none
+    # of them is stored. Their own modules carry the reasoning.
     intent = behind(delivery_repo, number)
-    # **RE-RENDERED HERE WITH WHAT ONLY THIS LAYER HAS.** `run_review` renders a ranking-only
-    # body for the CLI, which has no pull request to read a goal from. A delivery does.
-    # The ranking already carries each file's prior-fix count, so the summary reads the same
-    # numbers rather than querying the store twice and risking two answers.
+    repeated = twins(clone, list(changed))
+    # `run_review` renders a ranking-only body for the CLI, which has no pull request to read a
+    # goal from. The ranking already holds each file's prior-fix count, so the summary reads the
+    # same numbers rather than querying the store twice and risking two answers.
     past = {u.unit.site.path: int(u.score.value) for u in reviewed.ranking.units}
     told, unreadable = explain(
         clone, head_sha, delivery_repo, number, reading.paths, settings, history=past
     )
-    # **THE DECLARED STANDARDS, CHECKED DETERMINISTICALLY.** These verdicts are reproducible on
-    # the same commit by anyone, which is why they may be asserted where a model finding may not.
     checks = enforce(clone, head_sha, list(changed), store, delivery_repo, number)
     announce(delivery_repo, head_sha, checks, enabled=settings.posting_enabled)
 
-    # **WHAT THIS REVIEW COST, ON THE RECORD.** The columns have existed since the schema was
-    # written and nothing ever wrote them, so every pricing question so far has been arithmetic
-    # over a number nobody measured. A spend that is only a floor is refused rather than rounded.
+    # What this review cost, on the record. `bank()` says why, and reports what it banked.
     parts = (part.spend for part in (told, examined) if part is not None)
     bank(store, delivery_repo, number, head_sha, Spend.total(*parts))
 
@@ -174,15 +172,19 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
         checks=checks,
         blind=unreadable,
         context=intent,
+        repeated=repeated,
     )
-    # **THE FALLBACK IS THE RANKING-ONLY BODY, WHICH CARRIES NEITHER THE GOAL NOR A REFUSAL.**
-    # Written here as an expression this omitted `unreadable` — so an unreachable model on a change
-    # with no findings and no declared rules discarded the "I could not review this" banner — and it
-    # would have omitted `intent` too, throwing away a ticket D6a had just fetched. It lives in
-    # `render/comment.py` now, taking the same arguments `comment()` does, so a section cannot be
-    # added to one without the other. → `QuantaMinds/quanta_mind#91`, found by this product.
+    # **THE FALLBACK IS THE RANKING-ONLY BODY, CARRYING NEITHER THE GOAL NOR A REFUSAL.** Written
+    # here as an expression it omitted `unreadable` and discarded the "I could not review this"
+    # banner; `beyond_the_ranking` takes `comment()`'s own arguments so a section cannot be added
+    # to one without the other. → `render/comment.py`, and `QuantaMinds/quanta_mind#91`.
     speaks = beyond_the_ranking(
-        summary=told, findings=kept, checks=checks, blind=unreadable, context=intent
+        summary=told,
+        findings=kept,
+        checks=checks,
+        blind=unreadable,
+        context=intent,
+        repeated=repeated,
     )
     body = (fuller if speaks else (reviewed.body or "")) + pins
 

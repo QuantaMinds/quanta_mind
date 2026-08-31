@@ -35,7 +35,7 @@ by decision, not by difficulty.
 the plan rather than skipping silently — a number jumped without a reason is how a checklist stops
 describing the product.
 
-**D6a IS BUILT — 31 OF 50.**
+**D6a AND D2c ARE BUILT — 32 OF 50.**
 
 **ROWS 12 THROUGH 30 WERE RE-VERIFIED AGAINST THE CODE ON 2026-08-31, AND THE COUNT DID NOT MOVE.**
 Nine unticked rows in that range were checked for work already done and **none of them was
@@ -421,10 +421,30 @@ spent deliberately. It must not be spent by accident.
       shipped fix-history signal 65-13 at p < 0.0001. See
       `docs/findings/graph/D2D_BLAST_RADIUS_SIX_REPOS_2026-08.md`. A whole-repo pass into a `dependency` table, incremental against
       the same commit watermark the touch index uses.
-- [ ] **D2c Duplicated logic, without a model.** Normalised AST hashing of function bodies —
-      rename-insensitive, comment-insensitive, stdlib only. "The same logic is written in multiple
-      places, and a fix to one leaves the others wrong" is a real cost, and it is a structural
-      question a parser answers exactly rather than a judgement a model guesses at.
+- [x] **D2c Duplicated logic, without a model.** `parse/body_shape.py` +
+      `parse/duplicate_bodies.py` + `render/blocks/duplicate_block.py`, wired into `deliver()`.
+      **THE FLOOR AND THE FILTER WERE MEASURED BEFORE IT SHIPPED**, the way D2a measured its base
+      rate — 139 library files and 443 functions here, 24 and 367 in `pallets/flask`:
+
+      | | groups at 2 stmt | at 3 | at 4 |
+      |---|---|---|---|
+      | this repository | 2 | **0** | 0 |
+      | `pallets/flask` | 7 | **5** | 2 |
+
+      **All five of flask's groups at three were read and all five are real.** Three are the same
+      body in `app.py` and `blueprints.py` — `get_send_file_max_age`, `send_static_file`,
+      `open_resource` — which flask later hoisted into a shared `Scaffold` base class, so the
+      maintainers performed the refactor this check points at. **THE LIBRARY/TEST SPLIT DOES MORE
+      WORK THAN THE FLOOR AND THAT WAS THE SURPRISE**: unfiltered, flask shows 12 groups at three
+      and seven are conventional test route handlers.
+      **IT REPORTS WHERE, NEVER WHAT TO DO.** flask's `render_template`/`stream_template` pair is
+      a real repeat and a deliberate one; "extract a helper" would be confident and wrong there.
+      **NOTHING IS STORED** — the tree is parsed at the reviewed commit and thrown away, because
+      D2b is on hold for having paid a table, a migration and a watermark and then beaten nothing.
+      22 tests, floor and normaliser both sabotage-verified.
+      → `docs/plans/feat-d2c-duplicated-logic.md`
+      ~~Normalised AST hashing of function bodies — rename-insensitive, comment-insensitive,
+      stdlib only.~~
 - [ ] **D2d Blast radius in the review.** **ON HOLD**, same reason as D2b. "This module is imported by 14 others, two of them entry
       points." A new signal, testable against the same fix-return outcome the touch index uses.
 

@@ -39,6 +39,8 @@ from __future__ import annotations
 from collections.abc import Sequence
 
 from quantamind.ingest.context.tickets import Context
+from quantamind.parse.duplicate_bodies import Duplicates
+from quantamind.render.blocks.duplicate_block import duplicates
 from quantamind.render.blocks.found_block import found
 from quantamind.render.blocks.scope_block import coverage
 from quantamind.render.blocks.verdict_block import Stated, verdicts
@@ -103,6 +105,7 @@ def beyond_the_ranking(
     checks: Sequence[Checked] = (),
     blind: str = "",
     context: Context | None = None,
+    repeated: Duplicates | None = None,
 ) -> bool:
     """Whether anything but the ranking has something to say, so the fuller body is worth rendering.
 
@@ -125,6 +128,7 @@ def beyond_the_ranking(
         or checks
         or blind
         or (context is not None and not context.empty())
+        or (repeated is not None and bool(repeated.repeats))
     )
 
 
@@ -137,6 +141,7 @@ def comment(
     unresolved: Sequence[Unresolved] = (),
     blind: str = "",
     context: Context | None = None,
+    repeated: Duplicates | None = None,
 ) -> str:
     """The comment body: a verdict, then the mandatory sections, then what to fix.
 
@@ -182,6 +187,14 @@ def comment(
         lines += ["**Start here**", ""]
         lines += [f"- `{unit.unit.qualified_name}`" for unit in ranking.funded()]
         lines.append("")
+
+    # **D2c SITS ABOVE THE SCOPE LINE AND BELOW THE MODEL.** It is a parser's claim, so it outranks
+    # anything `infer/` said; it is about structure rather than this change's goal, so it comes
+    # after the verdict a reader acts on first.
+    if repeated is not None:
+        repeats = duplicates(repeated, [unit.unit.site.path for unit in ranking.units])
+        if repeats:
+            lines += [repeats, ""]
 
     lines += coverage(ranking, unresolved)
     return "\n".join(lines)
