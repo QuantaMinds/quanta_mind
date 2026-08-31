@@ -53,9 +53,13 @@ nothing to report.
 
 ## What could still silently fail
 
-- **A reference in a code fence or a quoted log line is still a reference to this parser.** It
-  reads text, not markdown structure. The cost is a spurious ticket in the block, not a wrong
-  verdict, and the test carries the case so the next reader knows it was seen rather than missed.
+- ~~**A reference in a code fence or a quoted log line is still a reference to this parser.** The
+  cost is a spurious ticket in the block, not a wrong verdict.~~ **REPRICED BY THE LIVE RUN AND
+  FIXED.** The first real pull request — `QuantaMinds/quanta_mind#91` — carried the sentence
+  *"`Closes #412` has never been parsed anywhere"* in its own description, and the posted comment
+  said issue 412 could not be read. Estimating this as rare was wrong for a repository whose pull
+  requests discuss issue numbers. `issue_refs._prose` blanks fenced blocks and code spans now.
+  Indented code blocks and reference-style links are still unhandled, and would be next.
 - **`#123` is a pull request as often as an issue on a busy repository**, because GitHub numbers
   them in one sequence. The API answers both from `repos/{repo}/issues/{n}`, and the block prints
   whichever GitHub says it is rather than asserting "issue".

@@ -6,10 +6,12 @@ WHY:  **NOTHING IN THIS CODEBASE HAD EVER READ `Closes #412`,** so every case he
       back marked, because `tickets.behind()` refuses those without making a request and a `foreign`
       flag that defaulted False would quietly quote somebody's private issue title into a comment.
 
-      **THE FALSE-POSITIVE CASES ARE TESTED AS DELIBERATELY AS THE TRUE ONES.** This reads text and
-      not markdown structure, so `#4` inside a code fence is a reference to it. That is a known
-      cost — a spurious line in a block, never a wrong verdict — and it is pinned here so the next
-      reader can tell a limitation that was seen from one that was missed.
+      **THE FALSE-POSITIVE CASES ARE TESTED AS DELIBERATELY AS THE TRUE ONES, AND ONE OF THEM WAS
+      WRONG.** This file used to assert that a reference inside a code fence IS read, filed as a
+      known trade. The first live pull request carried *"`Closes #412` has never been parsed
+      anywhere"* in its own description and the posted comment named issue 412 as unreadable. The
+      assertion is now the opposite, and the reason it survived the first time is worth keeping:
+      **nothing false was asserted**, so no test could object.
 IMPORTS: quantamind.ingest.context.issue_refs. No other project imports.
 CONSUMED BY: `just check`.
 """
@@ -18,7 +20,7 @@ from __future__ import annotations
 
 import pytest
 
-from quantamind.ingest.context.issue_refs import Ref, references
+from quantamind.ingest.context.issue_refs import Ref, _prose, references
 
 HERE = "acme/app"
 
@@ -110,14 +112,42 @@ def test_a_bare_number_or_a_hash_alone_is_not_a_reference() -> None:
     assert references("", "# Heading\n\n412 files changed.", HERE) == ()
 
 
-def test_a_reference_inside_a_code_fence_is_still_read_and_that_is_known() -> None:
-    """**A LIMITATION THAT WAS SEEN, NOT MISSED.** This reads text, not markdown structure.
+@pytest.mark.parametrize(
+    "body",
+    [
+        "`Closes #412` has never been parsed anywhere in this codebase.",
+        "```\ngit log --grep '#412'\n```",
+        "``a #412 span with embedded ` backtick``",
+        "See ```#412``` in the fence.",
+    ],
+)
+def test_a_reference_inside_code_is_prose_about_a_reference_and_not_one(body: str) -> None:
+    """**FOUND BY A LIVE RUN, ON THE FIRST REAL PULL REQUEST.** Its own description carried the
+    first case here, and the posted comment said issue 412 could not be read.
 
-    The cost is one spurious line in a block a human is reading anyway, against the complexity of
-    a markdown parser with `dependencies = []`. Recorded as an assertion so the trade is visible
-    rather than discovered later as a surprise.
+    This test asserted the OPPOSITE until then — that a reference in a fence is still read, filed
+    as a known trade whose cost was one spurious line, rarely. On a repository whose pull requests
+    discuss issue numbers, which is this one, it is not rare. The unit tests were content because
+    nothing false was asserted: the block said a reference existed and was unreadable, and both
+    were true of what the parser had been handed.
     """
-    assert _one("```\ngit log --grep '#412'\n```").number == 412
+    assert references("", body, HERE) == (), f"code is a quotation, not a reference: {body!r}"
+
+
+def test_a_reference_outside_the_backticks_on_the_same_line_still_counts() -> None:
+    """The strip must blank the span and not the line. A body reading "Closes #90 — see `#412`"
+    names one real ticket, and losing it would trade a spurious line for a missing one."""
+    found = references("", "Closes #90 — the sentence about `#412` is prose.", HERE)
+
+    assert [(r.number, r.keyword) for r in found] == [(90, "closes")]
+
+
+def test_the_strip_preserves_length_so_nothing_downstream_shifts() -> None:
+    """Spans are replaced by spaces rather than removed. Offsets are not read today; a future
+    reader that wants them should find them still true rather than subtly wrong."""
+    body = "a `#412` b"
+
+    assert len(_prose(body)) == len(body)
 
 
 def test_the_rendered_form_shows_the_repository_only_when_it_is_another_one() -> None:

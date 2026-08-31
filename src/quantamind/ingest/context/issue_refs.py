@@ -16,6 +16,10 @@ WHY:  **NOTHING IN THIS CODEBASE HAS EVER READ `Closes #412`.** `ingest/diff.sta
       *egress is a decision, not a detail* -- and it binds here first because here it costs
       nothing. `Ref.foreign` is what `tickets.py` refuses on; this module never calls anything.
 
+      **CODE SPANS AND FENCES ARE NOT SCANNED, AND A LIVE RUN IS WHY.** The first real pull request
+      this ran against carried the sentence *"`Closes #412` has never been parsed anywhere"* in its
+      own description, and the comment came back naming issue 412 as unreadable. See `_prose`.
+
       **THE CLOSING KEYWORD IS KEPT BECAUSE IT IS A DIFFERENT CLAIM.** "Closes #412" says this
       change finishes that work; a bare "#412" says only that somebody thought it related. Folding
       them together would print a stronger claim than the author made, in a block whose entire job
@@ -48,6 +52,34 @@ REFERENCE = re.compile(
 )
 
 
+# Fenced blocks first, then inline spans — a fence contains backticks and stripping spans first
+# would leave its remains behind. Both are replaced by spaces so byte offsets do not shift.
+CODE = re.compile(r"```.*?```|``.*?``|`[^`\n]*`", re.DOTALL)
+
+
+def _prose(text: str) -> str:
+    """`text` with code spans and fenced blocks blanked out.
+
+    **THE FIRST REAL PULL REQUEST THIS RAN AGAINST TRIPPED ON ITS OWN DESCRIPTION.** Its body
+    contained the sentence *"`Closes #412` has never been parsed anywhere in this codebase"* —
+    prose ABOUT a reference, inside backticks. This module read it as a reference, `tickets.py`
+    asked GitHub for issue 412, and the comment carried a line saying we could not read it.
+
+    Nothing false was asserted, which is why the unit tests were content: the block said only that
+    a reference existed and was unreadable, and both halves were true of what it had been handed.
+    **The cost is that a repository whose pull requests discuss issue numbers — this one — gets a
+    spurious line on most of them,** and that was estimated as rare before a live run showed it is
+    not. It was recorded as a known trade in `docs/plans/feat-d6a-the-goal-behind-the-change.md`
+    and the live run repriced it.
+
+    Still not a markdown parser, and deliberately: a fence and a code span are the two constructs
+    an author uses to mean *this is a quotation, not an instruction*, and they cost one regex.
+    Indented code blocks and reference-style links are not handled, and would be the next thing
+    if this ever fires again.
+    """
+    return CODE.sub(lambda hit: " " * len(hit.group()), text)
+
+
 @dataclass(frozen=True, slots=True)
 class Ref:
     """One issue the author named, and what they claimed about it."""
@@ -78,7 +110,7 @@ def references(title: str, body: str, repo: str) -> tuple[Ref, ...]:
     """
     seen: set[tuple[str, int]] = set()
     found: list[Ref] = []
-    for match in REFERENCE.finditer(f"{title}\n{body}"):
+    for match in REFERENCE.finditer(_prose(f"{title}\n{body}")):
         number = int(match["url_number"] or match["number"])
         where = (match["url_repo"] or match["repo"] or repo).strip("/")
         key = (where, number)
