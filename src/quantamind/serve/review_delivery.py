@@ -38,12 +38,13 @@ from pathlib import Path
 from quantamind.allocate.depth import plan as allocate
 from quantamind.infer.change_review import explain
 from quantamind.ingest.context.tickets import behind
-from quantamind.ingest.diff import base_commit, changed_files
+from quantamind.ingest.diff import base_commit, changed_files, unified_diff
 from quantamind.ingest.github_api import token_for
 from quantamind.ingest.publish.github_reviews import publish
+from quantamind.parse.change_effort import effort
 from quantamind.parse.duplicate_bodies import twins
-from quantamind.render.comment import beyond_the_ranking
 from quantamind.render.comment import comment as rendered
+from quantamind.render.speaks import beyond_the_ranking
 from quantamind.serve.blocking_status import announce
 from quantamind.serve.commands.run_review import review as run_ranking
 from quantamind.serve.deep_review import examine
@@ -139,13 +140,11 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     # and a budget is the only consumer that claim ever fitted.
     reading = allocate(reviewed.ranking, list(changed))
     examined = examine(clone, head_sha, reading, list(changed), settings)
-    # **THE DETERMINISTIC HALF, GATHERED WHETHER OR NOT THE MODEL RAN.** D6a takes the author's
-    # stated goal and the tickets behind it; D2c reads the tree for a body that already exists
-    # elsewhere; `enforce` checks the declared rules. All three are reproducible on the same
-    # commit by anyone, which is why they may be asserted where a model finding may not — and none
-    # of them is stored. Their own modules carry the reasoning.
+    # **THE DETERMINISTIC HALF, GATHERED WHETHER OR NOT THE MODEL RAN**, and reproducible on the
+    # same commit by anyone — which is why it may be asserted where a model finding may not.
     intent = behind(delivery_repo, number)
     repeated = twins(clone, list(changed))
+    sizes = effort(unified_diff(delivery_repo, number), changed)
     # `run_review` renders a ranking-only body for the CLI, which has no pull request to read a
     # goal from. The ranking already holds each file's prior-fix count, so the summary reads the
     # same numbers rather than querying the store twice and risking two answers.
@@ -173,6 +172,7 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
         blind=unreadable,
         context=intent,
         repeated=repeated,
+        effort=sizes,
     )
     # **THE FALLBACK IS THE RANKING-ONLY BODY, CARRYING NEITHER THE GOAL NOR A REFUSAL.** Written
     # here as an expression it omitted `unreadable` and discarded the "I could not review this"

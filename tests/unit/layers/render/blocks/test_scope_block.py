@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import re
 
+from quantamind.parse.change_effort import Effort
 from quantamind.rank.order import rank
 from quantamind.render.blocks.scope_block import coverage
 from quantamind.types.verdict import Construct, Reason, Site, Unresolved
@@ -34,8 +35,12 @@ from quantamind.types.verdict import Construct, Reason, Site, Unresolved
 SCORES = {f"src/mod{n}.py": 20 - n for n in range(8)}
 
 
-def _block(scores: dict[str, int], unresolved: tuple[Unresolved, ...] = ()) -> str:
-    return "\n".join(coverage(rank(scores), unresolved))
+def _block(
+    scores: dict[str, int],
+    unresolved: tuple[Unresolved, ...] = (),
+    sizes: dict[str, Effort] | None = None,
+) -> str:
+    return "\n".join(coverage(rank(scores), unresolved, sizes))
 
 
 def test_the_scope_states_both_numbers_and_softens_neither() -> None:
@@ -111,3 +116,47 @@ def test_a_construct_we_could_not_parse_is_still_reported() -> None:
 def test_no_construct_means_no_line_about_constructs() -> None:
     """The false-positive direction: a clean parse must not print a zero."""
     assert "could not be parsed" not in _block(SCORES)
+
+
+def test_tests_are_grouped_and_never_dropped() -> None:
+    """**RESEARCHED BEFORE IT WAS DECIDED, AND THE RESEARCH SAID NO.** The ask was to hide test
+    files so a developer stops wading through forty paths.
+
+    GitHub's own answer to that problem is COLLAPSE — even `linguist-generated` files stay listed
+    and only their diff folds — and the review literature is explicit that noticing inadequate
+    testing is one of the few things human review is reliably good at, which needs them visible.
+    Omitting forty files would also be the "truncation reads as covered everything" failure this
+    product exists to refuse. So: grouped, counted, skippable by eye, absent from nothing.
+    """
+    block = _block({"src/a.py": 9, "tests/test_a.py": 8, "src/b.py": 7})
+
+    assert "**Source — 2**" in block
+    assert "**Tests — 1**" in block
+    assert "`tests/test_a.py`" in block, "a test file was dropped from the list"
+    assert block.index("**Source") < block.index("**Tests"), "tests came before source"
+
+
+def test_a_change_with_no_tests_gets_no_empty_headings() -> None:
+    """Two headings over one group is furniture. A reader should not have to parse structure that
+    carries no information."""
+    block = _block({"src/a.py": 9, "src/b.py": 7})
+
+    assert "Source —" not in block
+    assert "Tests —" not in block
+
+
+def test_the_size_and_the_place_to_look_ride_beside_the_path() -> None:
+    """The whole point: a reviewer should not have to open a file to learn it changed two lines."""
+    sizes = {"src/a.py": Effort(added=160, removed=6, functions=("def handle(request):",))}
+    block = _block({"src/a.py": 9, "src/b.py": 7}, sizes=sizes)
+
+    assert "`src/a.py` — 166 lines · `def handle(request):`" in block
+
+
+def test_a_file_we_have_no_size_for_says_nothing_rather_than_zero() -> None:
+    """A pure rename or a binary reaches here with no parsed hunk. "0 lines" beside a file that
+    certainly changed is a wrong statement where silence is merely a quiet one."""
+    block = _block({"src/a.py": 9, "src/b.py": 7}, sizes={"src/a.py": Effort(added=1)})
+
+    assert "- `src/b.py`" in block
+    assert "0 lines" not in block

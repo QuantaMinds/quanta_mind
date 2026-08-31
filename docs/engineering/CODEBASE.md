@@ -465,6 +465,35 @@ It is not: three is the budget and the other 53 were ranked. **The count is not 
 residual is the product — but the scope now reads as a decision, and every changed file is listed
 behind a `<details>` fold so nothing is merely absent.
 
+**EACH FILE CARRIES ITS SIZE AND WHERE TO LOOK, AND TESTS ARE GROUPED RATHER THAN HIDDEN.** The
+list on its own was still a wall — a developer had to open eighty-two files to learn which two
+mattered. `parse/change_effort.py` attaches lines-changed and git's own hunk declaration to each
+path. **Hiding tests was asked for and researched and declined**: GitHub's answer to the same
+problem is COLLAPSE, not removal — even `linguist-generated` files stay listed — and the review
+literature is explicit that spotting inadequate testing is one of the few things human review is
+reliably good at. Omitting forty files would be the truncation-reads-as-coverage failure this
+product refuses. They are under their own heading with their own count.
+
+**THE SIZE IS FROM THE DIFF AND NEVER FROM `rank/`, AND THAT IS THE WHOLE RULE.** Lines added and
+removed are on GitHub's own Files-changed tab, so a reader already has them and a competitor learns
+nothing; a per-file prior-fix count is *what the ranking is built from* and stays out however
+useful it would be. **No percentage is computed** — every honest denominator is wrong. Of the file,
+a big file reads as easy; of the change, the largest file is 100% whatever its size.
+
+**Two defects came out of running it, both silent.** Summing `ChangedUnit.lines_added` scored
+nothing for a file git named no declaration in, so **every brand-new file showed no size at all** —
+and new files are the biggest in a change. Totals are counted per file from the diff now.
+And git's funcname heuristic offered a line of module docstring as the place to look
+(*"WHY: **A COMMENT CAN BE SCROLLED PAST...**"*), so only `def`/`class`/`async def` survives —
+**an omitted location costs a reader nothing; a wrong one sends them somewhere with our confidence
+attached.**
+
+**`ChangedUnit.lines_added`, `lines_removed` and `churn` had never been populated by their only
+producer.** All three were documented, `units_in` left them at zero, and nothing read them so
+nothing failed — until `change_effort` became the first consumer and rendered "0 lines" beside
+files that had plainly changed. A field that looks meaningful and is never filled is the same
+defect as a check that cannot fail; this codebase has found two dead constants the same way.
+
 **Two properties of that list are publishing rules, and `test_scope_block.py` fails if either
 moves.** It is ALPHABETICAL, because a list in rank order lets a reader count down to the cut and
 read the budget straight off it — `publishing-rules.md` never-publishes *how the budget is split

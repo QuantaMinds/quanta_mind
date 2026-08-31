@@ -36,9 +36,10 @@ CONSUMED BY: serve, which posts it; the live tests, which diff it against a gold
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 
 from quantamind.ingest.context.tickets import Context
+from quantamind.parse.change_effort import Effort
 from quantamind.parse.duplicate_bodies import Duplicates
 from quantamind.render.blocks.duplicate_block import duplicates
 from quantamind.render.blocks.found_block import found
@@ -98,40 +99,6 @@ def _headline(
     return f"{GOOD} It does what the PR says, and nothing that imports it breaks."
 
 
-def beyond_the_ranking(
-    *,
-    summary: Stated | None = None,
-    findings: Sequence[Finding] = (),
-    checks: Sequence[Checked] = (),
-    blind: str = "",
-    context: Context | None = None,
-    repeated: Duplicates | None = None,
-) -> bool:
-    """Whether anything but the ranking has something to say, so the fuller body is worth rendering.
-
-    **THIS WAS AN EXPRESSION AT THE CALL SITE AND IT WAS MISSING A TERM.** `serve/review_delivery`
-    chose between this body and the ranking-only one with
-    `told is not None or kept or checks`, which omits `blind` — so when the model was UNREACHABLE
-    and the change had no findings and no declared rules, the comment fell back to the ranking and
-    **the "I could not review this change" banner was discarded**. A refusal degrading into a
-    comment that looks ordinary is the exact failure `_headline` exists to prevent, defeated one
-    layer above it. Found by this product reviewing its own pull request,
-    `QuantaMinds/quanta_mind#91`.
-
-    **IT TAKES THE SAME ARGUMENTS `comment()` DOES, ON PURPOSE.** One signature decides both what
-    is rendered and whether it is worth rendering, so a new section cannot be added to one without
-    the other refusing it — which is how the missing term survived in the first place.
-    """
-    return bool(
-        summary is not None
-        or findings
-        or checks
-        or blind
-        or (context is not None and not context.empty())
-        or (repeated is not None and bool(repeated.repeats))
-    )
-
-
 def comment(
     ranking: Ranking,
     *,
@@ -142,6 +109,7 @@ def comment(
     blind: str = "",
     context: Context | None = None,
     repeated: Duplicates | None = None,
+    effort: Mapping[str, Effort] | None = None,
 ) -> str:
     """The comment body: a verdict, then the mandatory sections, then what to fix.
 
@@ -196,5 +164,5 @@ def comment(
         if repeats:
             lines += [repeats, ""]
 
-    lines += coverage(ranking, unresolved)
+    lines += coverage(ranking, unresolved, effort)
     return "\n".join(lines)

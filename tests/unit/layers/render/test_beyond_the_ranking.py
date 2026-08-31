@@ -17,7 +17,7 @@ WHY:  **THIS PRODUCT FOUND THIS BUG ON ITS OWN PULL REQUEST.** The decision live
       **THE PREDICATE TAKES `comment()`'s OWN ARGUMENTS SO THE TWO CANNOT DRIFT.** A section added
       to the body without a term here would be rendered and then discarded, which is exactly how
       `blind` came to be missing.
-IMPORTS: quantamind.render.comment, quantamind.ingest.{context.tickets,diff}, quantamind.types.
+IMPORTS: quantamind.render.speaks, quantamind.ingest.{context.tickets,diff}, quantamind.types.
 CONSUMED BY: `just check`.
 """
 
@@ -28,7 +28,7 @@ import pytest
 from quantamind.infer.change_summary import Summary
 from quantamind.ingest.context.tickets import Context
 from quantamind.ingest.diff import Stated
-from quantamind.render.comment import beyond_the_ranking
+from quantamind.render.speaks import beyond_the_ranking
 from quantamind.types.checked import Checked, Outcome
 from quantamind.types.finding import Finding
 from quantamind.types.verdict import Site
@@ -84,3 +84,16 @@ def test_no_context_at_all_is_not_the_same_as_an_empty_one() -> None:
     """`None` is the CLI, which has no pull request to read a goal from. Neither speaks, and
     neither may raise — `Context | None` is a real state, not a caller's oversight."""
     assert beyond_the_ranking(context=None) is False
+
+
+def test_per_file_sizes_are_not_a_reason_to_speak() -> None:
+    """**THE ONE ARGUMENT `comment()` TAKES THAT THIS DOES NOT.** Every other term corresponds to
+    a SECTION that would be rendered and then discarded if it were missing. Per-file line counts
+    decorate the scope line, which renders regardless — so accepting them here would turn a change
+    with nothing to say into a full comment on the strength of some line counts.
+
+    The invariant is "every section has a term", not "every argument".
+    """
+    import inspect
+
+    assert "effort" not in inspect.signature(beyond_the_ranking).parameters

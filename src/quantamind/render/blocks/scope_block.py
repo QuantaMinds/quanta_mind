@@ -21,17 +21,28 @@ WHY:  **"3 OF 56 FILE(S) REVIEWED; 53 NOT REVIEWED" READ AS A FAILURE, AND IT IS
       competitor nothing. *"Your repository's own history"* is the phrasing those rules do allow,
       and it is the phrasing used.
 
+      **TESTS ARE GROUPED, NEVER DROPPED, AND THAT WAS RESEARCHED BEFORE IT WAS DECIDED.** The ask
+      was to hide them so a developer stops wading through forty test paths. Two things argued
+      against it. GitHub's own answer to the same problem is COLLAPSE — even `linguist-generated`
+      files stay in the list and only their diff folds — and the review literature is explicit that
+      spotting inadequate testing is one of the few things human review is reliably good at, which
+      needs the tests visible. A list that silently omitted forty files would also be the
+      "truncation reads as covered everything" failure this product exists to refuse. So they are
+      under their own heading with their own count: skippable by eye, absent from nothing.
+
       **`<details>` IS MARKDOWN GITHUB RENDERS AND NEEDS NO SCRIPT.** A link would point at a page
       the reader is not signed in to; a button needs a surface we do not serve on their pull
       request. `dependencies = []` holds either way.
-IMPORTS: types.{ranking,verdict}. Nothing to its right.
+IMPORTS: parse.{change_effort,suite_reach}, types.{ranking,verdict}. Leftward only.
 CONSUMED BY: `render/comment.py`, as the last block.
 """
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 
+from quantamind.parse.change_effort import Effort
+from quantamind.parse.suite_reach import is_test
 from quantamind.types.ranking import Ranking
 from quantamind.types.verdict import Unresolved
 
@@ -41,9 +52,28 @@ SCOPE = (
 )
 NOTHING = "_Nothing to review._"
 ALL_FILES = "<details><summary>All {total} changed file(s)</summary>"
+SOURCE_HEADING = "**Source — {count}**"
+TEST_HEADING = "**Tests — {count}**"
+READ = " — read closely"
 
 
-def coverage(ranking: Ranking, unresolved: Sequence[Unresolved]) -> list[str]:
+def _line(path: str, read: bool, effort: Mapping[str, Effort]) -> str:
+    """One file: where it is, how much of it moved, and which functions.
+
+    **THE SIZE IS ABSENT WHEN WE DO NOT HAVE IT, RATHER THAN PRINTED AS ZERO.** A pure rename, a
+    mode change and a binary all reach here with no parsed hunk, and "0 lines" beside a file that
+    certainly changed is a wrong statement where saying nothing is merely a quiet one.
+    """
+    size = effort.get(path)
+    detail = f" — {size.render()}" if size is not None else ""
+    return f"- `{path}`{detail}{READ if read else ''}"
+
+
+def coverage(
+    ranking: Ranking,
+    unresolved: Sequence[Unresolved],
+    effort: Mapping[str, Effort] | None = None,
+) -> list[str]:
     """The scope line, and the full file list behind a fold.
 
     **"3 OF 56 REVIEWED; 53 NOT REVIEWED" READ AS A FAILURE, AND IT IS THE PRODUCT WORKING.**
@@ -62,6 +92,7 @@ def coverage(ranking: Ranking, unresolved: Sequence[Unresolved]) -> list[str]:
     **THE FOLD IS `<details>`, WHICH IS MARKDOWN GITHUB RENDERS AND NEEDS NO SCRIPT.** A link
     would point somewhere a reader is not signed in to; a button needs a page we do not serve.
     """
+    effort = effort or {}
     total = len(ranking.units)
     if not total:
         return [NOTHING]
@@ -73,7 +104,15 @@ def coverage(ranking: Ranking, unresolved: Sequence[Unresolved]) -> list[str]:
         out.append(f"_{len(unresolved)} construct(s) could not be parsed._")
 
     paths = sorted({unit.unit.site.path for unit in ranking.units})
+    source = [path for path in paths if not is_test(path)]
+    tests = [path for path in paths if is_test(path)]
+
     out += ["", ALL_FILES.format(total=total), ""]
-    out += [f"- `{path}`" + (" — read closely" if path in funded else "") for path in paths]
+    if tests and source:
+        out += [SOURCE_HEADING.format(count=len(source)), ""]
+    out += [_line(path, path in funded, effort) for path in source]
+    if tests:
+        out += ["", TEST_HEADING.format(count=len(tests)), ""]
+        out += [_line(path, path in funded, effort) for path in tests]
     out += ["", "</details>"]
     return out
