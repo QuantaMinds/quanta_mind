@@ -32,6 +32,10 @@ from quantamind.types.verdict import Construct, Reason, Site, Unresolved
 # Scores descend, so rank order and alphabetical order are the same here — deliberately NOT the
 # fixture used for the ordering test, which needs them to disagree.
 SCORES = {f"src/mod{n}.py": 20 - n for n in range(8)}
+# **THE TABLE NEEDS SOMETHING TO CARRY OR IT IS NOT RENDERED AT ALL.** With no sizes and no rule
+# rows every cell would be an em dash, and `file_table` falls back to a plain list rather than
+# print furniture. Tests about the TABLE must therefore supply sizes.
+SIZES = {path: Effort(added=4, removed=1) for path in SCORES}
 
 
 def _block(
@@ -46,7 +50,7 @@ def _block(
 def test_the_scope_states_both_numbers_and_softens_neither() -> None:
     """The residual is the product. A block that reported only what it read would be the one
     dishonest sentence in the comment."""
-    block = _block(SCORES)
+    block = _block(SCORES, sizes=SIZES)
 
     assert "touches **8** file(s)" in block
     assert "**3** were read line by line" in block
@@ -124,7 +128,7 @@ def test_the_files_read_closely_are_marked_and_the_others_are_not() -> None:
     """A table where every row looks the same cannot answer "did you look at MY file"."""
     marked = [
         line
-        for line in _block(SCORES).splitlines()
+        for line in _block(SCORES, sizes=SIZES).splitlines()
         if line.startswith("|") and "read closely" in line
     ]
 
@@ -138,7 +142,8 @@ def test_the_list_is_alphabetical_and_not_the_ranking() -> None:
 
     The scores here make the two orders disagree: `zebra.py` is the busiest file and sorts last.
     """
-    block = _block({"src/zebra.py": 99, "src/apple.py": 2, "src/mango.py": 1})
+    three = {"src/zebra.py": 99, "src/apple.py": 2, "src/mango.py": 1}
+    block = _block(three, sizes={p: Effort(added=2) for p in three})
     rows = [line for line in block.splitlines() if line.startswith("| `src/")]
 
     assert rows == sorted(rows), f"the table is in rank order, which discloses the budget: {rows}"
@@ -158,3 +163,17 @@ def test_no_score_from_the_ranking_reaches_the_page() -> None:
 
     assert "4242" not in block, f"the ranking's own score reached the page: {block}"
     assert "`src/zebra.py`" in block, "the file itself must still be listed"
+
+
+def test_a_table_with_nothing_to_say_is_a_plain_list_instead() -> None:
+    """**A TABLE OF DASHES IS FURNITURE.** The CLI renders a ranking with no diff parsed and no
+    rules run, so every cell would be an em dash and four columns would carry nothing.
+
+    A live run against `pallets/flask#6133` printed exactly that. Every path is still listed and
+    the ones read closely are still marked — only the columns go.
+    """
+    block = _block({"src/a.py": 9, "src/b.py": 7})
+
+    assert "| file | changed |" not in block
+    assert "- `src/a.py`" in block and "- `src/b.py`" in block
+    assert "read closely" in block

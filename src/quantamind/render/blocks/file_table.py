@@ -124,6 +124,12 @@ def table(
     loud = [p for p in paths if p in funded or p in claims or "violated" in verdicts.get(p, "")]
     quiet = [p for p in paths if p not in loud]
 
+    # **A TABLE OF DASHES IS FURNITURE.** The CLI renders a ranking with no diff parsed and no
+    # rules run, so every cell would be an em dash and the columns would carry nothing. A live run
+    # against `pallets/flask#6133` printed exactly that. The paths are still all listed.
+    if not any(_row(p, False, effort, verdicts, claims).count(DASH) < 3 for p in paths):
+        return ["", *[f"- `{_cell(path)}`{READ if path in funded else ''}" for path in paths]]
+
     out = ["", HEAD, RULE]
     out += [_row(p, p in funded, effort, verdicts, claims) for p in loud]
     if quiet:

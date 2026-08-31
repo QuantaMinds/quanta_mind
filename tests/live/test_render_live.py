@@ -56,8 +56,13 @@ def test_the_coverage_line_is_computed_from_each_change_and_differs_by_case(
         # must still hold on real repositories is that the body is about THEIR change — it names
         # files, states how much was reviewed, and explains nothing about us.
         assert body, f"{where}: every reviewable change must still be commented on"
-        assert "reviewed" in body, f"{where}: the reader is not told how much was read: {body!r}"
-        for ours in ("prior-fix", "top decile", "%", "Ranked"):
+        # **THE INTENT, NOT THE VOCABULARY.** This pinned the word "reviewed" until the scope line
+        # was rewritten to stop reading as a crash to a developer waiting to merge. The property —
+        # the reader learns how much of their change was read — is unchanged.
+        assert "were read line by line" in body, (
+            f"{where}: the reader is not told how much was read: {body!r}"
+        )
+        for ours in ("prior-fix", "top decile", "%", "Ranked", "rank", "history", "budget"):
             assert ours not in body, (
                 f"{where}: the comment is explaining the product again ({ours!r}): {body[:200]!r}"
             )
