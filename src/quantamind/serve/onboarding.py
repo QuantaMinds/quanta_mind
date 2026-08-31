@@ -35,7 +35,9 @@ from __future__ import annotations
 import time
 from pathlib import Path
 
+from quantamind.ingest import app_auth
 from quantamind.ingest.github_api import token_for
+from quantamind.ingest.publish import preflight
 from quantamind.parse.suite_reach import NoSource, reach
 from quantamind.serve.commands.run_review import index_repository
 from quantamind.serve.working_clone import ensure
@@ -77,6 +79,35 @@ def warm(repo: str, settings: Settings) -> int:
         conn.close()
 
 
+def announce_permission_gaps(repo: str, settings: Settings) -> tuple[preflight.Gap, ...]:
+    """Ask GitHub what this installation allows, and say plainly what will not work. Never raises.
+
+    **ASKED AT INSTALL, WHILE SOMEBODY IS WATCHING.** D1f shipped against an App holding no
+    `statuses` permission; the first real call returned 403 and, before that was fixed, would have
+    aborted delivery before the review was posted. A permission that was never granted is not a
+    code path, so no test could have found it -- only asking finds it.
+
+    **A FAILURE TO ASK IS REPORTED AS A FAILURE TO ASK.** Returning `()` here on an error would say
+    "every permission is in order", which is the shape this codebase refuses: the answer when we do
+    not know must not equal the answer when everything is fine.
+    """
+    if not (settings.app_id and settings.app_key_path):
+        return ()
+    try:
+        held = app_auth.granted(repo, settings.app_id, Path(settings.app_key_path))
+    except Exception as exc:
+        print(
+            f"[serve] {repo}: could NOT read the App's permissions ({exc}); "
+            "assume nothing about what will publish",
+            flush=True,
+        )
+        return ()
+    found = preflight.gaps(held)
+    if found:
+        print(f"[serve] {repo}: {preflight.sentence(found)}", flush=True)
+    return found
+
+
 def warm_all(repos: list[str], settings: Settings) -> tuple[dict[str, int], dict[str, str]]:
     """Warm each repository. Returns `(indexed, failed)` — rows per repo, and why each failed.
 
@@ -88,6 +119,7 @@ def warm_all(repos: list[str], settings: Settings) -> tuple[dict[str, int], dict
     failed: dict[str, str] = {}
     for repo in repos:
         try:
+            announce_permission_gaps(repo, settings)
             indexed[repo] = warm(repo, settings)
             print(f"[serve] warmed {repo}: {indexed[repo]} touch row(s) indexed", flush=True)
         except Exception as exc:

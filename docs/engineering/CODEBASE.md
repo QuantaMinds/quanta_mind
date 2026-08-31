@@ -2852,6 +2852,40 @@ took a `Gate` and imported `Standing` inside the function to read it. `verify` i
 `ingest`, so that was the sideways import rule 7 forbids — concealed because the `Gate` half sat
 under a `TYPE_CHECKING` guard, which made the file look like it had already handled the question.
 
+**EXERCISED AGAINST THE REAL API, AND THE FIRST CALL FAILED.** `POST
+/repos/QuantaMinds/quanta_mind/statuses/<sha>` returned **403 "Resource not accessible by
+integration"**: the GitHub App carries no `statuses` permission. Every unit test had passed,
+because every one of them replaces the writer with a spy that returns True.
+
+**THE PERMISSION IS NOW ASKED FOR AT INSTALL — `ingest/publish/preflight.py`.** Each writer
+declares what it needs in `NEEDED`; `gaps(granted)` reports what the installation does not hold,
+and `serve/onboarding.warm_all` prints it while somebody is still watching an install. Against the
+real installation it says: *"the GitHub App is missing 1 permission(s): `statuses: write` (holding
+none) — without it, the blocking status check (D1f) does not work."*
+
+Three details are load-bearing. **`read` does not satisfy `write`, and an unrecognised level
+satisfies nothing** — a permission model we do not understand is not one to assume is sufficient.
+**An empty permission set produces a gap for everything, not a clean bill** — the answer when we
+did not ask must never equal the answer when all is well. And **the sentence says installations
+must ACCEPT the update**, because granting it in the App's settings alone changes nothing for
+existing installations.
+
+**The check nothing calls is the same as the check that finds nothing**, so the CALL is pinned, not
+just the checker: removing `announce_permission_gaps` from `warm_all` initially survived every test
+— the identical shape as `sweep()`, which was written, documented and never invoked.
+
+**OPERATIONAL REQUIREMENT: the App needs "Commit statuses: Read and write", and each existing
+installation must accept the new permission.** Until that is granted, `D1f` decides correctly and
+publishes nothing. Nothing in the code can detect a permission it was never given.
+
+**AND THE 403 WOULD HAVE COST THE CUSTOMER THE WHOLE REVIEW.** `announce()` runs at
+`review_delivery.py:169`; the review comment is posted at `:193`. `StatusFailed` was caught
+nowhere, so a missing permission on the newer and less important of the two writes would have
+aborted delivery before the review existed. `announce()` now returns `Announced(standing, wrote,
+refusal)` and never raises. `Wrote` has **four** values — `POSTED`, `NOTHING_DECLARED`,
+`REHEARSED`, `REFUSED` — because a `posted: bool` reports the last three identically, and a caller
+that cannot tell a refusal from a rehearsal cannot alert on the one that matters.
+
 **Python-only, and the tree-sitter constraint was NOT spent to get there.** `check()` already
 returns `UNCHECKABLE`/`LANGUAGE_UNSUPPORTED` for every non-Python path, and `UNCHECKABLE` never
 blocks, so a JS file cannot fail the gate and `pyproject.toml` still declares `dependencies = []`.
