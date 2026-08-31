@@ -451,6 +451,37 @@ itself would repeat the bet rather than learn from it.
 **The block reports WHERE, never what to do.** flask's `render_template`/`stream_template` pair is
 a deliberate repeat, and "extract a helper" would be confident and wrong there.
 
+### `ingest/standards/links_file.py` — D3a, the repositories a business declares
+
+**Declared beats discovered, and that is a product decision before it is a technical one.** Finding
+the links ourselves needs an org-wide crawl and permissions across every repository a customer owns
+— a large ask, a large blast radius, and an answer that is *our guess about their architecture*. A
+link they wrote in `.quantamind/links.toml` is provenance an auditor can be shown.
+
+**IT SHIPS BEFORE D3b, AND WHAT IT BUYS TODAY IS TYPED SILENCE.** Reading the linked repository — a
+changed export checked against the repositories that import it — is gated on a design partner with
+more than one repository that matters. Meanwhile `render/comment.py` printed one static sentence,
+*cross-repository impact is not checked at all*, and a reader could not tell whether that meant
+**there is nothing across the boundary** or **we did not look**. `render/blocks/linked_block.py`
+names the declared repositories and says none was read, which makes it the second.
+
+**FOUR ANSWERS, THREE OF WHICH LEAVE THE LIST EMPTY.** No file means they declared none — the
+common case. An unreadable file, a malformed entry and a declared link are the others, and only the
+first means "no links". Printing that for either of the middle two would narrow a customer's
+cross-repository surface to nothing on the day their declaration stopped parsing.
+
+`owner/name` or nothing: guessing the owner from the repository under review would invent a link
+nobody declared. One malformed entry does not cost the good ones — refusing a whole file over a
+typo loses every link the customer got right.
+
+### `serve/change_facts.py` — the deterministic half, gathered in one place
+
+`intent`, `repeated`, `sizes` and `links` arrived one at a time and each added a line to
+`deliver()`, which crossed the 200-line cap three times in a session. They are one concern: every
+one is read from the clone or the pull request, every one is reproducible on the same commit by
+anybody, and none costs a model call. Gathering them together makes it obvious that the comment
+does not depend on `infer/` — which is the property D6a existed to restore.
+
 ### `render/blocks/` — one module per section of the comment
 
 **`render/` sat at its fifteen-file cap for three consecutive changes**, and `check_structure.py`

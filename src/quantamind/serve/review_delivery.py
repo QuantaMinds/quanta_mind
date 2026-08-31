@@ -37,15 +37,13 @@ from pathlib import Path
 
 from quantamind.allocate.depth import plan as allocate
 from quantamind.infer.change_review import explain
-from quantamind.ingest.context.tickets import behind
-from quantamind.ingest.diff import base_commit, changed_files, unified_diff
+from quantamind.ingest.diff import base_commit, changed_files
 from quantamind.ingest.github_api import token_for
 from quantamind.ingest.publish.github_reviews import publish
-from quantamind.parse.change_effort import effort
-from quantamind.parse.duplicate_bodies import twins
 from quantamind.render.comment import comment as rendered
 from quantamind.render.speaks import beyond_the_ranking
 from quantamind.serve.blocking_status import announce
+from quantamind.serve.change_facts import gather
 from quantamind.serve.commands.run_review import review as run_ranking
 from quantamind.serve.deep_review import examine
 from quantamind.serve.pin_review import only as only_pins
@@ -142,9 +140,7 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     examined = examine(clone, head_sha, reading, list(changed), settings)
     # **THE DETERMINISTIC HALF, GATHERED WHETHER OR NOT THE MODEL RAN**, and reproducible on the
     # same commit by anyone — which is why it may be asserted where a model finding may not.
-    intent = behind(delivery_repo, number)
-    repeated = twins(clone, list(changed))
-    sizes = effort(unified_diff(delivery_repo, number), changed)
+    facts = gather(clone, delivery_repo, number, changed, head_sha)
     # `run_review` renders a ranking-only body for the CLI, which has no pull request to read a
     # goal from. The ranking already holds each file's prior-fix count, so the summary reads the
     # same numbers rather than querying the store twice and risking two answers.
@@ -170,9 +166,11 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
         findings=kept,
         checks=checks,
         blind=unreadable,
-        context=intent,
-        repeated=repeated,
-        effort=sizes,
+        context=facts.intent,
+        repeated=facts.repeated,
+        effort=facts.sizes,
+        links=facts.links,
+        links_unreadable=facts.links_unreadable,
     )
     # **THE FALLBACK IS THE RANKING-ONLY BODY, CARRYING NEITHER THE GOAL NOR A REFUSAL.** Written
     # here as an expression it omitted `unreadable` and discarded the "I could not review this"
@@ -183,8 +181,8 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
         findings=kept,
         checks=checks,
         blind=unreadable,
-        context=intent,
-        repeated=repeated,
+        context=facts.intent,
+        repeated=facts.repeated,
     )
     body = (fuller if speaks else (reviewed.body or "")) + pins
 

@@ -39,6 +39,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 
 from quantamind.ingest.context.tickets import Context
+from quantamind.ingest.standards.links_file import Link
 from quantamind.parse.change_effort import Effort
 from quantamind.parse.duplicate_bodies import Duplicates
 from quantamind.render.blocks.duplicate_block import duplicates
@@ -110,6 +111,8 @@ def comment(
     context: Context | None = None,
     repeated: Duplicates | None = None,
     effort: Mapping[str, Effort] | None = None,
+    links: Sequence[Link] = (),
+    links_unreadable: bool = False,
 ) -> str:
     """The comment body: a verdict, then the mandatory sections, then what to fix.
 
@@ -164,5 +167,5 @@ def comment(
         if repeats:
             lines += [repeats, ""]
 
-    lines += coverage(ranking, unresolved, effort, checks, findings)
+    lines += coverage(ranking, unresolved, effort, checks, findings, links, links_unreadable)
     return "\n".join(lines)

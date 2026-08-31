@@ -39,7 +39,8 @@ WHY:  **"3 OF 56 FILE(S) REVIEWED; 53 NOT REVIEWED" READ AS A FAILURE, AND IT IS
       **`<details>` IS MARKDOWN GITHUB RENDERS AND NEEDS NO SCRIPT.** A link would point at a page
       the reader is not signed in to; a button needs a surface we do not serve on their pull
       request. `dependencies = []` holds either way.
-IMPORTS: parse.{change_effort,suite_reach}, types.{checked,ranking,verdict}. Leftward only.
+IMPORTS: ingest.standards.links_file, parse.{change_effort,suite_reach},
+      types.{checked,ranking,verdict}. Leftward only.
 CONSUMED BY: `render/comment.py`, as the last block.
 """
 
@@ -48,8 +49,10 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
 
+from quantamind.ingest.standards.links_file import Link
 from quantamind.parse.change_effort import Effort
 from quantamind.render.blocks.file_table import table
+from quantamind.render.blocks.linked_block import linked
 from quantamind.types.checked import Checked, Outcome
 from quantamind.types.finding import Finding
 from quantamind.types.ranking import Ranking
@@ -138,6 +141,8 @@ def coverage(
     effort: Mapping[str, Effort] | None = None,
     checks: Sequence[Checked] | None = None,
     findings: Sequence[Finding] | None = None,
+    links: Sequence[Link] = (),
+    links_unreadable: bool = False,
 ) -> list[str]:
     """The scope line, and the full file list behind a fold.
 
@@ -176,6 +181,7 @@ def coverage(
     if unresolved:
         out.append("")
         out.append(f"_{len(unresolved)} construct(s) could not be parsed._")
+    out += linked(links, links_unreadable)
 
     paths = sorted({unit.unit.site.path for unit in ranking.units})
     out += table(

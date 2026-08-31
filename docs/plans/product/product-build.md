@@ -35,7 +35,7 @@ by decision, not by difficulty.
 the plan rather than skipping silently — a number jumped without a reason is how a checklist stops
 describing the product.
 
-**D6a AND D2c ARE BUILT — 32 OF 50.**
+**D6a, D2c AND D3a ARE BUILT — 33 OF 50.**
 
 **ROWS 12 THROUGH 30 WERE RE-VERIFIED AGAINST THE CODE ON 2026-08-31, AND THE COUNT DID NOT MOVE.**
 Nine unticked rows in that range were checked for work already done and **none of them was
@@ -456,10 +456,24 @@ spent deliberately. It must not be spent by accident.
 
 ### D3 — cross-repo, by declaration rather than discovery
 
-- [ ] **D3a The business declares its links.** `.quantamind/links.toml`. **Declared beats
-      discovered:** no org-wide crawl, no broad permissions, and a link a customer stated is
-      provenance an auditor can be shown, where an inferred one is our guess about their
-      architecture.
+- [x] **D3a The business declares its links.** `ingest/standards/links_file.py` +
+      `render/blocks/linked_block.py`, wired through `serve/change_facts.py`.
+      **IT SHIPS BEFORE D3b AND THE REASON IT IS WORTH SHIPPING ALONE IS TYPED SILENCE.** The
+      comment printed one static sentence — *cross-repository impact is not checked at all* — and a
+      reader had no way to tell whether that meant **there is nothing across the boundary** or **we
+      did not look**. It now names the repositories the customer declared and says plainly that
+      none of them was read. `AGENTS.md` non-negotiable 3, applied to a boundary rather than a
+      call site.
+      **FOUR ANSWERS THAT MUST NOT COLLAPSE**: no file (they declared none — the common case), an
+      unreadable file, a malformed entry, and a declared link. Three of the four leave the list
+      empty and only one means "no links"; printing that for the others would be a claim about
+      somebody's architecture made out of our own failed read.
+      **`owner/name` OR NOTHING**, because guessing the owner from the repository under review
+      would invent a link nobody declared — and one bad entry does not cost the good ones, since
+      refusing a whole file over a typo loses every link the customer got right.
+      13 tests. ~~**Declared beats discovered:** no org-wide crawl, no broad permissions, and a
+      link a customer stated is provenance an auditor can be shown, where an inferred one is our
+      guess about their architecture.~~ Still true, and now built.
 - [ ] **D3b Edges that cross a repository boundary.** A changed exported symbol against the linked
       repositories that import it.
 
