@@ -1,22 +1,16 @@
 """The goal block, and the three absences it must not print alike.
 
-WHAT: Drives `render.context.goal_block.goal()` over every state a `Context` can hold, and pins
-      that the block reaches `render.comment.comment()` without a model summary.
-WHY:  **THE LAST ASSERTION IS THE REASON D6a EXISTS.** Intent used to reach a pull request only
-      through `verdict_block.verdicts(summary)`, so on a delivery where `infer/` was off, refused,
-      or hit MAX_TOKENS the comment answered *is anything wrong here* and never *is this what you
-      said you were doing*. `test_the_block_survives_a_delivery_with_no_model_summary` is that
-      property, and it fails against the version of `comment.py` this branch started from.
-
-      **THREE ABSENCES, THREE DIFFERENT LINES.** No goal stated; the description unreadable;
+WHAT: Drives `render.context.goal_block.goal()` over every state a `Context` can hold. Where the
+      block sits in the comment is `test_goal_in_the_comment.py`, split off at the 200-line cap.
+WHY:  **THREE ABSENCES, THREE DIFFERENT LINES.** No goal stated; the description unreadable;
       nothing at all. The middle one is ours and the other two are the pull request's, and a
       renderer that printed "the author stated no goal" after a failed read would make an
       assertion about somebody's work out of our own outage.
 
       **TRUNCATION IS ASSERTED TO ANNOUNCE ITSELF.** A body trimmed in silence lets a comment
       appear to quote a goal in full while dropping the sentence that qualified it.
-IMPORTS: quantamind.ingest.context.tickets, quantamind.render.{comment,context.goal_block},
-      quantamind.types.ranking.
+IMPORTS: quantamind.ingest.{context.issue_refs,context.tickets,diff},
+      quantamind.render.context.goal_block.
 CONSUMED BY: `just check`.
 """
 
@@ -25,9 +19,7 @@ from __future__ import annotations
 from quantamind.ingest.context.issue_refs import Ref
 from quantamind.ingest.context.tickets import Context, Declined, Skipped, Ticket
 from quantamind.ingest.diff import Stated
-from quantamind.render.comment import comment
 from quantamind.render.context.goal_block import BODY_CAP, goal
-from quantamind.types.ranking import Ranking
 
 OURS = Ref(repo="acme/app", number=412, keyword="closes")
 THEIRS = Ref(repo="other/lib", number=7, foreign=True)
@@ -113,37 +105,3 @@ def test_a_closed_ticket_is_printed_closed_and_nothing_is_concluded_from_it() ->
     assert "closed)" in block
     for word in ("already", "stale", "should", "warning"):
         assert word not in block.lower(), f"the block drew a conclusion: {word!r}"
-
-
-def test_the_block_survives_a_delivery_with_no_model_summary() -> None:
-    """**THE WHOLE OF D6a, AS ONE ASSERTION.** `summary=None` is the delivery where `infer/` was
-    off, refused, or out of tokens — precisely where the comment used to carry no statement of
-    intent at all. This fails against the `comment()` this branch started from.
-    """
-    body = comment(
-        Ranking(units=()),
-        summary=None,
-        context=Context(stated=Stated("Retire the shim", "Closes #412")),
-    )
-
-    assert "What this change says it is for" in body
-    assert "> Retire the shim" in body
-
-
-def test_a_review_that_could_not_run_still_says_what_the_change_claims_to_be_for() -> None:
-    """`blind` suppresses the model's verdict and must not suppress the author's own words —
-    a refusal that also withheld the goal would tell the reader less than the pull request does.
-    """
-    body = comment(
-        Ranking(units=()),
-        blind="the model was unreachable",
-        context=Context(stated=Stated("Retire the shim", "")),
-    )
-
-    assert "could not review this change" in body
-    assert "> Retire the shim" in body
-
-
-def test_no_context_means_no_block_and_no_placeholder() -> None:
-    """The CLI has no pull request to read a goal from, and must not print an empty heading."""
-    assert "What this change says it is for" not in comment(Ranking(units=()))

@@ -370,6 +370,16 @@ stated no goal" out of our own failed read is an assertion about somebody's work
 outage — the collapse non-negotiable 3 exists to refuse, in the one place where it would be rude
 as well as wrong.
 
+**`verdict_block` STOPPED QUOTING THE GOAL, AND A LIVE COMMENT IS WHY.** Its first section was
+`**Goal — from the PR description**`, quoting `Summary.goal` — which `infer/change_summary` fills
+from the author's own title and body. So the quote was deterministic content riding on a model's
+object: present when a model answered, gone when it did not. D6a made it deterministic and, for one
+commit, **both blocks rendered it** — a delivery with the model on would have printed the author's
+description twice, in a product whose measured weakness is saying the same thing twice (17.3%
+redundancy against Qodo's 1.0%). `SECTIONS` is three entries now; `achieves_goal` is still judged
+against the goal, and the reader still sees it, once. Caught by reading a comment the deployed App
+posted to `QuantaMinds/quanta_mind#91`, not by any test.
+
 **`Declined` is local, not a new member of `types/verdict.Reason`.** That enum resolves code
 constructs and pairs with a `Construct`; a 404 from the issues API is neither, and widening it
 would have the coverage line reporting retrieval failures as unparsed code.

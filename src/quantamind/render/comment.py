@@ -16,11 +16,13 @@ WHY:  **THE ONE QUESTION A REVIEW ANSWERS IS WHETHER THE CHANGE DID WHAT IT SAID
       `allocate`/`parse` can answer it.
 
       **THE GOAL BLOCK IS FIRST, AND IT DOES NOT DEPEND ON THE MODEL.** Intent used to reach this
-      comment only through `verdict_block.verdicts(summary)`, so a delivery where `infer/` was off
-      or hit MAX_TOKENS answered *is anything wrong here* and never *is this what you said you were
-      doing* — the first half of the only question a review exists to answer, absent on the exact
-      deliveries where the second half was weakest. `render/context/goal_block.py` builds it from
-      the pull request's own text.
+      comment only through `verdict_block.verdicts(summary)` — which quoted `Summary.goal`, filled
+      from the author's own text, so a DETERMINISTIC fact rode on a model's object and vanished
+      whenever `infer/` was off, refused, or out of tokens. Those deliveries answered *is anything
+      wrong here* and never *is this what you said you were doing*.
+      `render/context/goal_block.py` prints it from the same `ingest/diff.stated_goal` read on
+      every delivery, and `verdict_block` no longer prints it at all: for one commit both did, and
+      a real posted comment would have carried the author's description twice.
 
       **A FINDING IS PRINTED WITH ITS LINE AND NOTHING ELSE.** No severity we cannot calibrate, no
       confidence we have not measured. Raw findings ran 66.7-82.1% wrong across four blind pools,
