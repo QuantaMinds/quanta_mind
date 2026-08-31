@@ -464,11 +464,32 @@ spent deliberately. It must not be spent by accident.
       ~~"This module is imported by 14 others, two of them entry points." A new signal, testable
       against the same fix-return outcome the touch index uses.~~
 
-- [ ] **D2e Architectural drift, measured rather than asserted.** "Team members implement parts of
-      the system differently from the original design" is a claim about DIVERGENCE, and divergence
-      is measurable: the import graph plus rule violations over time, per module. We have the
-      history to do it retrospectively — `retrospective` already replays the ranker over a clone's
-      own past, which is the instrument for showing drift happened rather than saying it does.
+- [ ] **D2e Architectural drift.** **CLOSED 2026-08-31 ON THE MEASUREMENT. Divergence is
+      computable and it does not separate the outcome.**
+      Pre-registered in `docs/plans/preregistrations/ranker/drift-preregistration.md`, committed
+      before any repository was cloned. `drift = import-set shifts / commits`, a RATE because a raw
+      count is a proxy for "this file was edited a lot". **305 library files, four repositories the
+      method had never seen, all four confirmed unspent before cloning.**
+
+      | | required | observed |
+      |---|---|---|
+      | B1 enough to decide | ≥200 files, ≥3 repos | **305, 4** — MET |
+      | B2 drift separates | high tertile **+10pp** | **−3.5pp** — the effect points the other way |
+
+      **The sign is not even stable**: +0.4pp, −4.9pp, −9.3pp across three churn strata, so it is
+      not a usable negative signal either. → `docs/findings/graph/D2E_DRIFT_DOES_NOT_SEPARATE_2026-08.md`
+
+      **AND ONE REPOSITORY WOULD HAVE SHIPPED IT BACKWARDS.** `pallets/werkzeug` alone gave −9.1,
+      −21.1 and −19.9pp — strong, consistent, publishable-looking. Pooled across four it collapses.
+      Third recorded instance of a single repository being a fact about that repository.
+
+      **The import graph has now failed twice as a risk signal** — D2d on blast radius, D2e on
+      drift. **This does not condemn cross-file context**: D2c is the same kind of model-free
+      structural claim, measured before it shipped, and the duplicates it found in `pallets/flask`
+      are the ones the maintainers later hoisted into a shared base class.
+      ~~"Team members implement parts of the system differently from the original design" is a
+      claim about DIVERGENCE, and divergence is measurable: the import graph plus rule violations
+      over time, per module.~~
 
 ### D3 — cross-repo, by declaration rather than discovery
 
