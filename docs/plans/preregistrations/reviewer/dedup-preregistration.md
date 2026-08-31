@@ -171,3 +171,39 @@ fire" was loosening the threshold. That check could not detect this: the thresho
 whether long strings are compared at all. Bar 1's own table cannot be re-examined either — it names
 arms (`graphite`, `copilot`) that appear in no results file here, and **the commit recording it
 added no instrument**, which is why `scripts/measure/dedup_reach.py` now exists.
+
+
+## What the 17 comments actually ARE — read, not inferred, 2026-08-31
+
+`redundant` is a subtraction and names nobody, so the comments were recovered per pull request:
+TP comments minus goldens covered. The positive excesses sum to **17 across 10 pull requests**, the
+same figure the aggregate reports. → `scripts/measure/dedup_reach.py`
+
+**They are not repetition. They are one defect class reported at each site where it occurs.**
+`calcom/cal.com#8087` is the clearest: **one** golden — *"the code uses `forEach` with async
+callbacks"* — and **four** of our comments, each naming a different file that does it:
+`app-store/vital/lib/reschedule.ts`, `app-store/wipemycalother/lib/reschedule.ts`,
+`features/bookings/lib/handleCancelBooking.ts`, `trpc/server/routers/viewer/bookings.tsx`.
+`cal.com#10967` is the same shape: three comments about `createEvent` in three CalendarService
+files. `grafana#90045` reports the same metrics defect in `Create`, `Update`, `Delete` and
+`DeleteCollection`.
+
+**Every one of those comments is CORRECT and names a real site.** The benchmark's golden is per
+defect CLASS; we emit per SITE. So a share of the 17.3% is a granularity mismatch between us and
+the scoring, not waste — and **deleting three of those four comments would delete three real
+locations a developer has to fix.** Any dedup that simply drops them makes the product worse while
+improving the score, which is the shape this project exists to refuse.
+
+## What this means for the mechanism
+
+Across the 10 pull requests holding all 17: **13 of the comments name no file at all** — they key
+on a function (`Create`, `deleteScheduledEmailReminder`) — and only **3 share a file with a
+sibling**. Three is therefore the ceiling on what any within-file rule could ever reach, and
+`repeats()` reaches none of them, because the prose genuinely differs: different file, different
+function, different specifics.
+
+**The right mechanism is grouping, not deletion.** One finding that names the defect once and lists
+its sites keeps every location while spending one comment instead of four. That is an emission
+format, not a filter, and it needs no judge to decide what to throw away — which also removes the
+reason Bar 2 existed. A pre-registration for it must set its bar on **sites retained**, not on
+comments removed, because comments-removed is trivially satisfiable by making the product worse.
