@@ -203,7 +203,52 @@ sibling**. Three is therefore the ceiling on what any within-file rule could eve
 function, different specifics.
 
 **The right mechanism is grouping, not deletion.** One finding that names the defect once and lists
-its sites keeps every location while spending one comment instead of four. That is an emission
-format, not a filter, and it needs no judge to decide what to throw away — which also removes the
-reason Bar 2 existed. A pre-registration for it must set its bar on **sites retained**, not on
+its sites keeps every location while spending one comment instead of four. ~~It needs no judge~~ —
+**that was wrong, and the section below measures why.** Grouping needs a judge exactly as much as
+dedup did, because deciding that two comments describe one defect is the same semantic judgement as
+deciding that one is redundant. What grouping fixes is the CONSEQUENCE, not the cost. A pre-registration for it must set its bar on **sites retained**, not on
 comments removed, because comments-removed is trivially satisfiable by making the product worse.
+
+
+# Result — grouping cannot be done model-free either, 2026-08-31
+
+**NEGATIVE. A text rule reaches at most a quarter of the redundancy, and buying more means fusing
+defects it cannot tell apart.** → `scripts/measure/dedup_reach.py`
+
+The mechanism tested is the most favourable one available without a model: strip the backticked
+spans — paths, functions, symbols — which are exactly the part that differs between two reports of
+one defect at different sites, then compare what is left.
+
+| threshold | grouped, of the 17 |
+|---|---|
+| 0.86 (the shipped threshold) | **4 (24%)** |
+| 0.70 | 5 (29%) |
+| 0.60 | 6 (35%) |
+| 0.50 | 7 (41%) |
+
+`calcom/cal.com#8087` shows why, on four comments about one `forEach`-async defect. Comments 1 and
+2 are 0.973 alike raw and 1.000 with identifiers stripped — they group. Comments 3 and 4 describe
+the SAME defect and score **0.440**. Stripping identifiers makes that pair WORSE, 0.449 → 0.377,
+because part of what they shared was the identifiers.
+
+**Two comments about one defect share MEANING, not WORDING** — different file, different function,
+different surrounding explanation. No text metric reaches that, and the thresholds that would are
+the thresholds that start merging genuinely different defects, which nothing model-free can detect.
+
+`types/finding.Finding` carries `path`, `quote`, `claim`, `fix`, `provenance`, `line` — **no defect
+kind**, so there is no free categorical label to group on either.
+
+## What this costs the standing story
+
+**Redundancy is no longer "the model-free lever".** The gap is real — 17 of our 98 matching
+comments against qodo's 1 of 99 — but every mechanism that could close it needs a judge to decide
+defect identity. That puts it in the same category as the five prompt levers that moved nothing,
+rather than in a category of its own. `docs/product/QUANTAMIND.md` and `product-build.md` both
+describe redundancy as the model-free half; that framing does not survive this measurement.
+
+## The integrity caveat, which counts AGAINST the mechanism
+
+The normalisation was designed after reading five pull requests OF THIS CORPUS, so the numbers
+above are a fit rather than a test. **That makes the negative stronger, not weaker: the rule fails
+on the very data it was shaped to fit.** A confirmatory measurement would need a corpus nobody has
+read, and is not worth drawing for a mechanism that already fails here.
