@@ -71,8 +71,17 @@ class Ticket:
     request. Reported as what it is rather than asserted to be an issue."""
 
     def render(self) -> str:
+        """`closes #412 (issue, open)` — and the title is GitHub's job, not ours.
+
+        **WE PRINTED THE TITLE AND GITHUB PRINTED IT AGAIN.** A bare `#412` in a comment body is
+        expanded by GitHub into *title* `#412`, so a line reading `#91 — <title> (pull request,
+        open)` renders as the title, the number, and the title a second time. Seen on
+        `QuantaMinds/quanta_mind#92`. A foreign reference is never fetched and has no title to
+        print anyway, so dropping it costs nothing and removes a duplication we cannot see from
+        inside the renderer.
+        """
         kind = "pull request" if self.is_pull else "issue"
-        return f"{self.ref.render()} — {self.title} ({kind}, {self.state})"
+        return f"{self.ref.render()} ({kind}, {self.state})"
 
 
 @dataclass(frozen=True, slots=True)

@@ -69,7 +69,12 @@ def test_a_same_repository_ticket_is_fetched_and_carries_what_github_said(
     assert context.skipped == ()
     (ticket,) = context.tickets
     assert (ticket.title, ticket.state, ticket.is_pull) == ("Ticket 412", "open", False)
-    assert ticket.render() == "closes #412 — Ticket 412 (issue, open)"
+    # **THE TITLE IS GITHUB'S JOB.** A bare `#412` in a comment body is expanded by GitHub into
+    # *title* `#412`, so printing ours as well rendered the title twice — seen on
+    # `QuantaMinds/quanta_mind#92`. The title is still FETCHED, because `behind()` reading it is
+    # how we know the reference resolves at all.
+    assert ticket.render() == "closes #412 (issue, open)"
+    assert ticket.title == "Ticket 412", "the title is still read; it is only not printed"
 
 
 def test_a_reference_that_is_really_a_pull_request_says_so(

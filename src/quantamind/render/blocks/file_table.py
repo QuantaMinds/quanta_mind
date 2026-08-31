@@ -38,6 +38,8 @@ from quantamind.types.finding import Finding
 HEAD = "| file | changed | where | found |"
 RULE = "|---|---|---|---|"
 QUIET = "<details><summary>{count} more file(s), nothing found</summary>"
+QUIET_DIR = "- `{directory}` — {names}"
+ROOT = "(root)"
 READ = " ⟵ read closely"
 DASH = "—"
 WHERE_CAP = 44
@@ -133,10 +135,31 @@ def table(
     out = ["", HEAD, RULE]
     out += [_row(p, p in funded, effort, verdicts, claims) for p in loud]
     if quiet:
-        # **THE HEADER IS REPEATED INSIDE THE FOLD.** A `<details>` block is a separate markdown
-        # context: rows without their own header render as literal pipes, and the first version
-        # of this shipped exactly that.
-        out += ["", QUIET.format(count=len(quiet)), "", HEAD, RULE]
-        out += [_row(p, p in funded, effort, verdicts, claims) for p in quiet]
-        out += ["", "</details>"]
+        out += ["", QUIET.format(count=len(quiet)), "", *_grouped(quiet), "", "</details>"]
     return out
+
+
+def _grouped(paths: Sequence[str]) -> list[str]:
+    """The quiet files, by directory, names only.
+
+    **EIGHTY-SEVEN TABLE ROWS IS THE WALL THE TABLE WAS BUILT TO REPLACE.** The first version
+    repeated all four columns inside the fold, and on a real ninety-file pull request that was
+    eighty-seven near-identical lines reading "4 rules passed". Working memory holds about four
+    items; the golden rules call this out as *four things, not forty*.
+
+    **THE COLUMNS CARRY NOTHING HERE BY DEFINITION.** A file is in this group because nothing was
+    found in it, so `found` is the same for all of them and `where` is a location in code nobody
+    is being sent to. What a reader wants from this list is *is my file in it*, and a name under
+    its directory answers that in a fifth of the lines.
+
+    **EVERY PATH IS STILL PRESENT.** Grouping is not truncation: no file is dropped, no count is
+    rounded, and a reader can still find any name they are looking for.
+    """
+    by_directory: dict[str, list[str]] = {}
+    for path in paths:
+        directory, _, name = path.rpartition("/")
+        by_directory.setdefault(directory or ROOT, []).append(name)
+    return [
+        QUIET_DIR.format(directory=directory, names=", ".join(f"`{n}`" for n in sorted(names)))
+        for directory, names in sorted(by_directory.items())
+    ]

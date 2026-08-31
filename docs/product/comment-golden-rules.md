@@ -109,6 +109,13 @@ and past ~400 lines ([Atomic Robot](https://atomicrobot.com/blog/ai-review-fatig
 **A section a reader must hold in their head is a cost.** Caps are stated in the modules that own
 them, and every cap prints its remainder rather than truncating in silence.
 
+**A FOLD IS NOT A CAP, AND THE FIRST FILE TABLE FORGOT THAT.** It repeated all four columns inside
+the `<details>`, so a real ninety-file pull request produced **eighty-seven near-identical rows
+reading "4 rules passed"** — the wall the table was built to replace, one click further away. The
+quiet files are grouped by directory now, names only: the columns carry nothing for a file where
+nothing was found, and *is my file in this list* is answered in a fifth of the lines. **Grouping is
+not truncation** — every path is still there.
+
 ### 7. A parser's claim outranks a model's, and ordering says so without a heading
 
 A rule the customer declared, checked deterministically, can be **asserted**: they can re-run it on
