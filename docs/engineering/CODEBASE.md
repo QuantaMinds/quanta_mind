@@ -2852,10 +2852,22 @@ took a `Gate` and imported `Standing` inside the function to read it. `verify` i
 `ingest`, so that was the sideways import rule 7 forbids — concealed because the `Gate` half sat
 under a `TYPE_CHECKING` guard, which made the file look like it had already handled the question.
 
-**EXERCISED AGAINST THE REAL API, AND THE FIRST CALL FAILED.** `POST
-/repos/QuantaMinds/quanta_mind/statuses/<sha>` returned **403 "Resource not accessible by
-integration"**: the GitHub App carries no `statuses` permission. Every unit test had passed,
+**EXERCISED AGAINST THE REAL API. THE FIRST CALL FAILED; THE PATH NOW WORKS END TO END.** `POST
+/repos/QuantaMinds/quanta_mind/statuses/<sha>` first returned **403 "Resource not accessible by
+integration"**: the GitHub App carried no `statuses` permission. Every unit test had passed,
 because every one of them replaces the writer with a spy that returns True.
+
+With `statuses: write` granted, the whole chain was run live and **read back from GitHub rather
+than trusted from a return value**: `announce()` with a real violation produced
+`standing=BLOCKED wrote=POSTED`, and GitHub reported `quantamind/declared-rules -> failure:
+1 violation(s): no-pickle in app/loader.py; 1 could not be checked` — the unchecked count carried
+into the sentence, on the real surface. The commit was then restored to `success`.
+
+**THE REQUIRED CHECK IS BOUND TO OUR APP ID, WHICH IS A PROPERTY WORTH KEEPING.** Requiring the
+context on `main` produced `checks: [{"context": "quantamind/declared-rules", "app_id": 4743262}]`
+— GitHub pinned it to the App that posted it. **No other actor can satisfy the gate by posting a
+green status under the same context.** A gate that any token could turn green would be a gate in
+name only, so this is not incidental and must survive any change to how the status is published.
 
 **THE PERMISSION IS NOW ASKED FOR AT INSTALL — `ingest/publish/preflight.py`.** Each writer
 declares what it needs in `NEEDED`; `gaps(granted)` reports what the installation does not hold,
@@ -2885,6 +2897,13 @@ aborted delivery before the review existed. `announce()` now returns `Announced(
 refusal)` and never raises. `Wrote` has **four** values — `POSTED`, `NOTHING_DECLARED`,
 `REHEARSED`, `REFUSED` — because a `posted: bool` reports the last three identically, and a caller
 that cannot tell a refusal from a rehearsal cannot alert on the one that matters.
+
+**BLOCKING IS CONDITIONAL ON THE CUSTOMER'S GITHUB PLAN, AND NOTHING HERE CAN CHANGE THAT.**
+Required status checks and rulesets are both gated: on a PRIVATE repository under a free plan, both
+`branches/main/protection` and `rulesets` answer *"Upgrade to GitHub Pro or make this repository
+public"*. The status still posts and is still visible — but it cannot be made to BLOCK. So D1f's
+claim, "standards met before a human reviewer sees the pull request", holds only for customers on a
+paid plan or public repositories. Measured on this repository while it was private, not assumed.
 
 **Python-only, and the tree-sitter constraint was NOT spent to get there.** `check()` already
 returns `UNCHECKABLE`/`LANGUAGE_UNSUPPORTED` for every non-Python path, and `UNCHECKABLE` never
