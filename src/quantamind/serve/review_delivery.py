@@ -37,14 +37,16 @@ from pathlib import Path
 
 from quantamind.allocate.depth import plan as allocate
 from quantamind.infer.change_review import explain
+from quantamind.ingest.context.tickets import behind
 from quantamind.ingest.diff import base_commit, changed_files
 from quantamind.ingest.github_api import token_for
 from quantamind.ingest.publish.github_reviews import publish
 from quantamind.render.comment import comment as rendered
-from quantamind.render.pin_block import block
 from quantamind.serve.blocking_status import announce
 from quantamind.serve.commands.run_review import review as run_ranking
 from quantamind.serve.deep_review import examine
+from quantamind.serve.pin_review import only as only_pins
+from quantamind.serve.pin_review import pins_for
 from quantamind.serve.working_clone import ensure, sweep
 from quantamind.store import installations, tenancy
 from quantamind.store.reviews import bank
@@ -53,7 +55,6 @@ from quantamind.types.change import REVIEWABLE_SUFFIXES
 from quantamind.types.review import Delivered, Outcome
 from quantamind.types.settings import Settings
 from quantamind.types.spend import Spend
-from quantamind.verify import pin_check
 from quantamind.verify.rule_check import enforce
 
 
@@ -107,21 +108,11 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     every_file = changed_files(delivery_repo, number, suffixes=None)
     changed = [name for name in every_file if name.endswith(REVIEWABLE_SUFFIXES)]
 
-    # **THE PIN DETECTOR RUNS BEFORE THE EARLY RETURN, NOT AFTER IT.** It needs no ranking and no
-    # model, and a pull request that changes ONLY a workflow is the most common shape carrying a
-    # pin change. Returning NO_FILES first left it unreachable on exactly those changes even
-    # after it was given the unfiltered list -- found by firing at a real pull request rather
-    # than by any test. → `docs/findings/oracles/WHY_THE_ORACLES_NEVER_FIRE_2026-08.md`
-    mismatched, _unresolved = pin_check.check(clone, head_sha, every_file)
-    pins = block(mismatched)
-
+    # Detected BEFORE the early return: a workflow-only change is the commonest shape carrying a
+    # pin mismatch, and ordering these the other way made the detector unreachable on exactly it.
+    pins = pins_for(clone, head_sha, every_file)
     if not changed:
-        if not pins:
-            return Delivered(Outcome.NO_FILES, (), (), None)
-        if not settings.posting_enabled:
-            return Delivered(Outcome.REHEARSED, (), (), pins)
-        wrote = publish(delivery_repo, number, head_sha, pins, ())
-        return Delivered(Outcome.POSTED if wrote else Outcome.DUPLICATE, (), (), pins)
+        return only_pins(delivery_repo, number, head_sha, pins, enabled=settings.posting_enabled)
 
     # **The base commit, not the head and not the clock.** See the module docstring.
     base = base_commit(delivery_repo, number, clone)
@@ -146,6 +137,11 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     # and a budget is the only consumer that claim ever fitted.
     reading = allocate(reviewed.ranking, list(changed))
     examined = examine(clone, head_sha, reading, list(changed), settings)
+    # **D6a: THE AUTHOR'S OWN STATEMENT OF INTENT, READ FOR THE READER AND NOT FOR THE MODEL.**
+    # `stated_goal` was already fetched on every delivery and handed only to `infer/`, so intent
+    # reached the comment solely through a summary — the path measured at 25.0% correct. `behind()`
+    # never raises and reports a failed read as a failed read.
+    intent = behind(delivery_repo, number)
     # **RE-RENDERED HERE WITH WHAT ONLY THIS LAYER HAS.** `run_review` renders a ranking-only
     # body for the CLI, which has no pull request to read a goal from. A delivery does.
     # The ranking already carries each file's prior-fix count, so the summary reads the same
@@ -154,15 +150,6 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     told, unreadable = explain(
         clone, head_sha, delivery_repo, number, reading.paths, settings, history=past
     )
-    if examined is not None:
-        print(f"[deliver] {reading.depth.value}: {reading.why}", flush=True)
-        print(
-            f"[deliver] model: {len(examined.anchored)} finding(s) kept of {examined.raw} raw "
-            f"({examined.unanchored} unanchored, {examined.refuted} refuted, "
-            f"{examined.withdrawn} withdrawn), consulted={examined.consulted}",
-            flush=True,
-        )
-
     # **THE DECLARED STANDARDS, CHECKED DETERMINISTICALLY.** These verdicts are reproducible on
     # the same commit by anyone, which is why they may be asserted where a model finding may not.
     checks = enforce(clone, head_sha, list(changed), store, delivery_repo, number)
@@ -171,11 +158,8 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     # **WHAT THIS REVIEW COST, ON THE RECORD.** The columns have existed since the schema was
     # written and nothing ever wrote them, so every pricing question so far has been arithmetic
     # over a number nobody measured. A spend that is only a floor is refused rather than rounded.
-    spent = Spend.total(*(part.spend for part in (told, examined) if part is not None))
-    if bank(store, delivery_repo, number, head_sha, spent):
-        print(
-            f"[deliver] cost: {spent.requests} call(s), {spent.tokens_out} tokens out", flush=True
-        )
+    parts = (part.spend for part in (told, examined) if part is not None)
+    bank(store, delivery_repo, number, head_sha, Spend.total(*parts))
 
     if reviewed.body is None and not pins:
         quiet = Outcome.NO_READABLE_FILES if not reviewed.considered else Outcome.NOTHING_TO_SAY
@@ -183,9 +167,19 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
 
     kept = examined.anchored if examined is not None else ()
     fuller = rendered(
-        reviewed.ranking, summary=told, findings=kept, checks=checks, blind=unreadable
+        reviewed.ranking,
+        summary=told,
+        findings=kept,
+        checks=checks,
+        blind=unreadable,
+        context=intent,
     )
-    body = (fuller if told is not None or kept or checks else (reviewed.body or "")) + pins
+    # **`intent` JOINS THE CONDITION, OR D6a WOULD BE DROPPED ON EXACTLY THE DELIVERIES IT IS FOR.**
+    # The fallback to `reviewed.body` is the ranking-only comment, and it renders no goal at all —
+    # so a change with no model summary and no declared rules would have fetched the ticket and
+    # thrown it away.
+    told_anything = told is not None or kept or checks or not intent.empty()
+    body = (fuller if told_anything else (reviewed.body or "")) + pins
 
     if not settings.posting_enabled:
         return Delivered(Outcome.REHEARSED, reviewed.considered, reviewed.skipped, body)

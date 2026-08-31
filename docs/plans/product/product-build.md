@@ -35,6 +35,21 @@ by decision, not by difficulty.
 the plan rather than skipping silently — a number jumped without a reason is how a checklist stops
 describing the product.
 
+**D6a IS BUILT — 31 OF 50.**
+
+**ROWS 12 THROUGH 30 WERE RE-VERIFIED AGAINST THE CODE ON 2026-08-31, AND THE COUNT DID NOT MOVE.**
+Nine unticked rows in that range were checked for work already done and **none of them was
+tickable**: no Stripe code exists outside one comment in `webhook_github.py` (B3); `Settings` holds
+one global `inference_project` and no per-tenant credential (B7); no rule-mining exists (D1d);
+`rules_file.py` reads one per-repository `.quantamind/rules.toml` with no inheritance of any kind
+(D1e); `store/tables.py` has no `dependency` table (D2b). Ten ticked rows were confirmed built.
+
+**The one thing the pass found was a tick whose TITLE was false — D1g, "read and enforced".** The
+body directly underneath it read *"Context, not enforcement"*, and `ingest/standards/conventions.py`
+says the same in capitals. The row also cited `ingest/conventions.py`, a path that moved into the
+`standards/` sub-package. **A row can be correctly ticked and still lie in the line somebody skims**,
+which is the half of a checklist nobody re-reads.
+
 **5 and 6 are parked, 2026-08-29.** D2d's blast-radius claim came back **INCONCLUSIVE against its
 own registered bar** — 10 discordant pairs against a floor of 20, so the test could not decide
 either way rather than deciding against. D2b exists to feed D2d, so it is parked with it, with
@@ -284,7 +299,12 @@ Stripe.
       a missed escape cannot execute. A repository name carrying markup never reaches the page at
       all — `store/tenancy.py` refuses it at the storage boundary, which the test asserts instead
       of asserting an escape that path cannot exercise.
-- [ ] **C2 CI integration.**
+- [ ] **C2 CI integration.** **NOT TICKED, AND THE REASON IS THAT THE ROW NEVER SAID WHAT IT
+      WANTED.** It is the only deliverable here with no body. Verified 2026-08-31: the adjacent
+      thing IS built and belongs to D1f — `ingest/publish/commit_status.py` writes a commit status,
+      `verify/blocking.py` decides it, and it has run against a real pull request. Ticking C2 on
+      that work would count one build twice, which is how a checklist comes to overstate a product.
+      **Write what C2 means — a check run with annotations? a non-GitHub CI? — or delete the row.**
 - [ ] **C3 IDE integration.** Only when a deal asks.
 - [ ] **C4 SSO.** Procurement gate — only when a deal asks.
 
@@ -324,13 +344,25 @@ and D5 read what it records.
 - [ ] **D1c Model-checked rules, clearly separated.** For rules a parser genuinely cannot answer.
       Each result carries `Provenance.PARSER` or `Provenance.MODEL` so an auditor can see which
       claims are reproducible. **They must never render alike.**
-- [x] **D1g The team's OWN written standards, read and enforced.** `ingest/conventions.py` reads
+      **HALF OF THIS IS BUILT AND IT IS THE HALF THAT DOES NOT CHECK ANYTHING.** Verified
+      2026-08-31: `CheckKind.MODEL_JUDGED` exists, `Rule.provenance` derives `Provenance.MODEL`
+      from it and cannot be set by a caller, `store/rule_checks.py` writes that column, and
+      `render/compliance_table.py` prints `deferred` in its own column outside the rate. **No model
+      is ever consulted** — `verify/rule_check.check()` returns `DEFERRED` and stops. So the
+      separation the row asks for exists and the capability does not, which is why it stays
+      unticked: an auditor can already tell the two apart, and there is nothing yet to tell apart.
+- [x] **D1g The team's OWN written standards, read as CONTEXT.** ~~read and enforced~~ — **the
+      title said "enforced" for four days and the body underneath it said the opposite.** Nothing
+      read here becomes a `Checked` row, so it is not enforcement and a compliance number must
+      never count it; `docs/product/unit-economics.md` carries the same correction because the
+      pricing table had inherited the wrong word. `ingest/standards/conventions.py` reads
       `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.github/copilot-instructions.md`, `CONVENTIONS.md`  <!-- citation:allow — these are filenames `ingest/standards/conventions.py` SEARCHES FOR in a customer's repository, not documents in this one -->
       and `CONTRIBUTING.md` from git at the commit under review, and the review names any rule the
       change contradicts — quoting the customer's own sentence. **A team that wrote its rules down
       should not have to write them again for us**, and `.quantamind/rules.toml` asking them to
       restate the same standards creates two documents that drift.
-      **Context, not enforcement:** prose cannot be re-run on a commit and shown to give the same
+      **Context, not enforcement, and the title above now says so too:** prose cannot be re-run
+      on a commit and shown to give the same
       verdict, so nothing read here becomes a `Checked` row or enters the audit trail — that stays
       the parser's territory. Known-answer tested: a diff with a bare `except` and no docstring was
       caught against this repository's own rule 8. **A local-only file this repo never pushes is
@@ -442,8 +474,29 @@ spent deliberately. It must not be spent by accident.
 
 Pulled in as **two separate uses**, because they succeed or fail independently:
 
-- [ ] **D6a Retrieval for the READER.** The ticket and discussion behind the files being changed,
-      shown in the comment. Deterministic, and worth something whatever the model does.
+- [x] **D6a Retrieval for the READER.** `ingest/context/{issue_refs,tickets}.py` +
+      `render/context/goal_block.py`, wired into `deliver()` and `render/comment.py`.
+      **THE GOAL WAS ALREADY BEING FETCHED AND ONLY A MODEL EVER SAW IT.** `ingest/diff.stated_goal`
+      has run on every delivery since the pipeline was joined, and `infer/change_review` was its
+      only consumer — so intent reached a pull request solely through a summary, on the path
+      measured at **25.0% correct**, and a delivery with `infer/` off, refused, or out of tokens
+      carried no statement of what the change claimed to be for. Two tests fail against the
+      previous `comment()` and pass against this one; that is the row.
+      **`Closes #412` had never been parsed anywhere.** It is now, with the closing keyword kept
+      because "this finishes that work" and "somebody thought it related" are different claims.
+      **A CROSS-REPOSITORY REFERENCE IS REFUSED WITHOUT A REQUEST**, and the test asserts on the
+      call list rather than the outcome: an implementation that asked, was refused, and recorded
+      the refusal returns the same `Context` and has still sent a private issue number to an
+      endpoint we hold no token for. D6c's *egress is a decision, not a detail* binds here first,
+      where it costs nothing.
+      **FOUR STATES LEAVE THE GOAL EMPTY AND THEY RENDER DIFFERENTLY**: the author wrote nothing,
+      the reference was foreign, GitHub refused the issue, there were more references than the cap.
+      A fifth — **we could not read the pull request at all** — is `Context.unreadable`, because
+      printing "the author stated no goal" out of our own outage is an assertion about somebody's
+      work that we did not earn. 38 tests; the wiring sabotage-verified by restoring the previous
+      `comment()` verbatim. → `docs/plans/feat-d6a-the-goal-behind-the-change.md`
+      ~~The ticket and discussion behind the files being changed,
+      shown in the comment. Deterministic, and worth something whatever the model does.~~
 - [ ] **D6b The same text as MODEL input.** **Pre-register a bar.** Shape-context went
       PASS to NULL under McNemar and a same-arm replicate, and five prompt levers moved nothing.
       Human context is a DIFFERENT variable — it carries why a change exists, which no diff shape

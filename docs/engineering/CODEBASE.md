@@ -343,6 +343,43 @@ run when the values actually pinned were 8 constants of 62. Also found two dead 
 `infer/gemini.TOKEN_TIMEOUT_S`, the second implying a timeout that is not applied — because
 mutating unreachable code cannot change anything, so it always survives.
 
+### `ingest/context/` and `render/context/` — the context a human wrote
+
+**D6a. The goal a change states, read for the reader and not for a model.**
+`ingest/diff.stated_goal` had fetched the pull request's title and body on every delivery since
+the pipeline was joined, and `infer/change_review.py` was its **only** consumer — so a reader saw
+the change's stated intent only when a model produced a summary, on the path measured at 25.0%
+correct. A delivery with `infer/` off, refused, or out of tokens carried none at all.
+
+| file | what |
+|---|---|
+| `ingest/context/issue_refs.py` | `references(title, body, repo)` — `#412`, `owner/name#7` and the issue URL, with the closing keyword when the author used one. Pure, no I/O |
+| `ingest/context/tickets.py` | `behind(repo, number)` — the stated goal, one `Ticket` per same-repository reference, one `Skipped` for every reference not read |
+| `render/context/goal_block.py` | the block, quoted verbatim above the model's verdict |
+
+**A CROSS-REPOSITORY REFERENCE IS REFUSED WITHOUT A REQUEST.** `Ref.foreign` is decided from the
+text, so `otherorg/private#5` is never asked for — quoting its title into this repository's comment
+would move somebody's data across a boundary nobody opted into, and we may hold no token for it
+either. The test asserts on the list of calls made, not on the outcome: an implementation that
+asked, was refused and recorded the refusal returns an identical `Context` and has still leaked.
+
+**FIVE ABSENCES, FIVE LINES.** The author wrote nothing; the reference was foreign; GitHub refused
+the issue; there were more references than `FETCH_CAP`; and **we could not read the pull request at
+all**. The last is `Context.unreadable` rather than an empty `Stated`, because printing "the author
+stated no goal" out of our own failed read is an assertion about somebody's work made from our
+outage — the collapse non-negotiable 3 exists to refuse, in the one place where it would be rude
+as well as wrong.
+
+**`Declined` is local, not a new member of `types/verdict.Reason`.** That enum resolves code
+constructs and pairs with a `Construct`; a 404 from the issues API is neither, and widening it
+would have the coverage line reporting retrieval failures as unparsed code.
+
+**Two files moved to make room, and the guard chose both.** `render/` was at its fifteen-file cap,
+so the block is a sub-package. `serve/review_delivery.py` crossed 200 lines, so the pin path left
+whole as `serve/pin_review.py` — which turned a source-string test (`"if not pins:" in source`) into
+a behavioural one, because a branch in a function you can call can be asserted on rather than read.
+The cost report moved into `store/reviews.bank()`, beside the two refusals it sits with.
+
 ### `scripts/guard/` — the enforcement layer
 
 | File | Enforces |

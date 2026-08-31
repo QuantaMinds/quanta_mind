@@ -1,6 +1,7 @@
 """The comment we post: what changed, whether it did what it said, and what nobody checked.
 
-WHAT: `comment(ranking, summary, findings, unresolved)` renders the body posted on a pull request.
+WHAT: `comment(ranking, summary, findings, unresolved, context)` renders the body posted on a
+      pull request.
 WHY:  **THE ONE QUESTION A REVIEW ANSWERS IS WHETHER THE CHANGE DID WHAT IT SAID WITHOUT
       DISTURBING ANYTHING ELSE.** An earlier version listed files to read and nothing more, which
       told a developer where to look without telling them anything about their own change. Before
@@ -14,11 +15,20 @@ WHY:  **THE ONE QUESTION A REVIEW ANSWERS IS WHETHER THE CHANGE DID WHAT IT SAID
       which is the failure this product exists to refuse. So it is stated, in one line, until
       `allocate`/`parse` can answer it.
 
+      **THE GOAL BLOCK IS FIRST, AND IT DOES NOT DEPEND ON THE MODEL.** Intent used to reach this
+      comment only through `verdict_block.verdicts(summary)`, so a delivery where `infer/` was off
+      or hit MAX_TOKENS answered *is anything wrong here* and never *is this what you said you were
+      doing* — the first half of the only question a review exists to answer, absent on the exact
+      deliveries where the second half was weakest. `render/context/goal_block.py` builds it from
+      the pull request's own text.
+
       **A FINDING IS PRINTED WITH ITS LINE AND NOTHING ELSE.** No severity we cannot calibrate, no
       confidence we have not measured. Raw findings ran 66.7-82.1% wrong across four blind pools,
       so what publishes here has passed `verify/publishable.gate()` and is still shown as a claim
       to check rather than a defect to fix.
-IMPORTS: types.{finding,ranking,verdict}. Nothing to its right, and nothing from `infer/`.
+IMPORTS: types.{checked,finding,ranking,verdict}, render.{context.goal_block,found_block,
+      verdict_block}, and `ingest.context.tickets` for the value object D6a retrieves. Nothing to
+      its right, and nothing from `infer/`.
 CONSUMED BY: serve, which posts it; the live tests, which diff it against a golden file.
 """
 
@@ -26,6 +36,8 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
+from quantamind.ingest.context.tickets import Context
+from quantamind.render.context.goal_block import goal
 from quantamind.render.found_block import found
 from quantamind.render.verdict_block import Stated, verdicts
 from quantamind.types.checked import Checked, Outcome
@@ -86,6 +98,7 @@ def comment(
     checks: Sequence[Checked] = (),
     unresolved: Sequence[Unresolved] = (),
     blind: str = "",
+    context: Context | None = None,
 ) -> str:
     """The comment body: a verdict, then the mandatory sections, then what to fix.
 
@@ -101,6 +114,16 @@ def comment(
     read, total = len(ranking.funded()), len(ranking.units)
     violations = [c for c in checks if c.outcome is Outcome.VIOLATED]
     lines = [HEADER, "", _headline(summary, findings, len(violations), blind), ""]
+
+    # **ABOVE THE MODEL'S VERDICT, AND PRINTED EVEN WHEN THERE IS NO VERDICT.** This block is the
+    # author's own words plus one API read, so it survives `infer/` being off, refused, or out of
+    # tokens — the deliveries where the comment used to carry no statement of intent at all. It is
+    # deliberately NOT suppressed by `blind`: a review that could not run still tells the reader
+    # what the change claims to be for, which is the half of the question we can always answer.
+    if context is not None:
+        block = goal(context)
+        if block:
+            lines += [block, ""]
 
     if summary is not None and not blind:
         lines += verdicts(summary)
