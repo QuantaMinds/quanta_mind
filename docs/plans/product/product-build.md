@@ -416,7 +416,7 @@ spent deliberately. It must not be spent by accident.
       a third-party name `EXTERNAL_SYMBOL`, a broken file `UNPARSEABLE_SYNTAX`. `RESOLVED` only
       where two independent resolvers agree: the syntax says the import exists AND the target is a
       file in the tree.
-- [ ] **D2b The graph, stored.** **ON HOLD, recommend DROP.** Six unseen repositories, 1,301 non-degenerate events:
+- [ ] **D2b The graph, stored.** **DROPPED 2026-08-31 with D2d, which is what it existed to feed.** Six unseen repositories, 1,301 non-degenerate events:
       in-degree gives the same top three as alphabetical on 99.2% of changes, and loses to the
       shipped fix-history signal 65-13 at p < 0.0001. See
       `docs/findings/graph/D2D_BLAST_RADIUS_SIX_REPOS_2026-08.md`. A whole-repo pass into a `dependency` table, incremental against
@@ -445,8 +445,24 @@ spent deliberately. It must not be spent by accident.
       → `docs/plans/feat-d2c-duplicated-logic.md`
       ~~Normalised AST hashing of function bodies — rename-insensitive, comment-insensitive,
       stdlib only.~~
-- [ ] **D2d Blast radius in the review.** **ON HOLD**, same reason as D2b. "This module is imported by 14 others, two of them entry
-      points." A new signal, testable against the same fix-return outcome the touch index uses.
+- [ ] **D2d Blast radius in the review.** **DROPPED 2026-08-31, on the measurement, by decision.**
+      It was `ON HOLD, recommend DROP`; the recommendation is now taken and the row stays here
+      unticked rather than being deleted, so nobody proposes it again without meeting the evidence.
+
+      **THE PRE-REGISTERED TEST CAME BACK INCONCLUSIVE AND THE SHIPPED SIGNAL WON ANYWAY.** Six
+      repositories the method had never seen, 3,591 events, 1,301 non-degenerate: **10 discordant
+      pairs against a floor of 20**, so importer count could not be separated from alphabetical
+      either way — and where the two DID disagree, prior-fix history beat it **65-13, p < 0.0001**.
+      In-degree gives the same top three as alphabetical on **99.2%** of changes.
+      → `docs/findings/graph/D2D_BLAST_RADIUS_SIX_REPOS_2026-08.md`
+
+      **DROPPING IS THE HONEST READING OF AN INCONCLUSIVE RESULT HERE, NOT A STRETCH OF IT.** The
+      bar was fixed in `blast-radius-preregistration.md` before a repository was cloned, and the
+      run did not clear it. Keeping the row open would mean waiting for a seventh repository, which
+      is how a null becomes a hunt — this project has withdrawn a figure for exactly that before.
+      **D2b is dropped with it**, since it existed to feed this.
+      ~~"This module is imported by 14 others, two of them entry points." A new signal, testable
+      against the same fix-return outcome the touch index uses.~~
 
 - [ ] **D2e Architectural drift, measured rather than asserted.** "Team members implement parts of
       the system differently from the original design" is a claim about DIVERGENCE, and divergence
