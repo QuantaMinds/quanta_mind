@@ -3,8 +3,7 @@
 WHAT: Runs `verify/repeats`'s similarity over the judged benchmark comments in
       `research/phase0/bench/results/candidate_labels.json` and reports, per arm, how many comments
       repeat an earlier one WITHIN a file (which the rule collapses) versus ACROSS files in the same
-      pull request (which it does not). Prints the semantic redundancy from `redundancy.json`
-      beside it, because those are the two numbers the dedup case rests on.
+      pull request (which it does not), beside the semantic redundancy from `redundancy.json`.
 WHY:  **THE BAR 1 RESULT HAD NO COMMITTED INSTRUMENT.** Its table names arms — `graphite`,
       `copilot` — that appear in no results file in this repository, and the commit that recorded
       the result added only the product module, its tests and documentation. A measurement nobody
@@ -27,8 +26,9 @@ import json
 import pathlib
 import re
 import sys
+from difflib import SequenceMatcher
 
-from quantamind.verify.repeats import SIMILAR_AT, alike
+from quantamind.verify.repeats import SIMILAR_AT, _plain, alike
 
 RESULTS = pathlib.Path("research/phase0/bench/results")
 PATH_IN_TEXT = re.compile(r"`([^`]*[/.][^`]*)`")
@@ -89,13 +89,11 @@ def main() -> int:
         print(f"{arm:<20}{len(group):>5}{nopath:>8}{within:>8}{across:>8}{redundant:>10}{share:>8}")
 
     _localise(rows)
-    print(
-        "\nwithin  = repeats of an earlier claim about the SAME file — what `repeats()` collapses"
-    )
-    print("across  = same claim on a DIFFERENT file in one pull request — the rule keeps both")
-    print("semantic= comments matching a golden a sibling already covered (redundancy.json)")
-    print("\nThe rule collapses `within` only. If `within` is 0 while `semantic` is not, the rule")
-    print("and the figure that justified it are measuring different things.")
+    _grouping_reach(rows)
+    print("\nwithin = repeat of an earlier claim about the SAME file — all `repeats()` collapses")
+    print("across = same claim on a DIFFERENT file in one pull request — the rule keeps both")
+    print("semantic = comments matching a golden a sibling already covered. `within` is 0 while")
+    print("`semantic` is not, so the rule and the figure justifying it measure different things.")
     return 0
 
 
@@ -137,6 +135,63 @@ def _localise(rows: list[dict[str, str]]) -> None:
         f"  sharing a file with a sibling:       {shared}"
         "  <- the most a within-file rule could reach"
     )
+
+
+IDENTIFIER = re.compile(r"`[^`]*`")
+"""Backticked spans -- paths, functions, symbols -- the part that differs between two reports of ONE
+defect at different sites. Removing them is the most favourable test a text grouper can be given,
+so the reach below is a CEILING, not an estimate."""
+
+
+def _grouping_reach(rows: list[dict[str, str]]) -> None:
+    """Could a text rule GROUP one defect's sites into a single finding? Measured, and it cannot.
+
+    **THE MECHANISM WAS DESIGNED AFTER READING FIVE PULL REQUESTS OF THIS CORPUS**, so this is a
+    fit, not a test. It counts against the mechanism rather than for it: the rule fails on the very
+    data it was shaped to fit. A confirmatory number would need a corpus nobody has read.
+    """
+    detail = RESULTS / "gap_detail.json"
+    if not detail.exists():
+        return
+    gap = {r["key"]: r for r in json.loads(detail.read_text())}
+    tp_by_pr: dict[str, list[str]] = collections.defaultdict(list)
+    for row in rows:
+        if row["arm"] == "OURS" and row["verdict"] == "TP":
+            tp_by_pr[str(row["pr"])].append(str(row["text"]))
+
+    excess = {
+        key: len(tp_by_pr[key]) - len(rec["ours_caught"])
+        for key, rec in gap.items()
+        if len(tp_by_pr[key]) > len(rec["ours_caught"])
+    }
+    total = sum(excess.values())
+    if not total:
+        return
+
+    def site_free(text: str) -> str:
+        return _plain(IDENTIFIER.sub(" ", text))
+
+    print(f"\ngrouping reach — could one finding carry N sites? ({total} redundant comments)")
+    for threshold in (SIMILAR_AT, 0.70, 0.60, 0.50):
+        grouped = 0
+        for key in excess:
+            claims = tp_by_pr[key]
+            taken: set[int] = set()
+            for i in range(len(claims)):
+                if i in taken:
+                    continue
+                for j in range(i + 1, len(claims)):
+                    if j in taken:
+                        continue
+                    ratio = SequenceMatcher(
+                        None, site_free(claims[i]), site_free(claims[j]), autojunk=False
+                    ).ratio()
+                    if ratio >= threshold:
+                        taken.add(j)
+                        grouped += 1
+        pct = 100 * grouped // total
+        print(f"  threshold {threshold:.2f}: {grouped:>2} of {total} grouped ({pct}%)")
+    print("  below ~0.60 a text rule fuses different defects, undetectably: identity is semantic.")
 
 
 if __name__ == "__main__":
