@@ -130,6 +130,27 @@ def installation_id(repo: str, jwt: str) -> int:
     return int(got["id"])
 
 
+def granted(repo: str, app_id: str, key_path: Path) -> dict[str, str]:
+    """What this installation actually lets us do, in GitHub's own words.
+
+    **A PERMISSION WE WERE NEVER GIVEN CANNOT BE DETECTED BY THE CODE THAT NEEDS IT.** The writer
+    finds out as a 403 at the moment it matters, in production, on somebody's pull request. Asked
+    here, the answer arrives while an operator is still watching an install.
+
+    Deliberately uncached: `token()` caches the string, and a stale permission set is exactly the
+    thing this exists to catch -- an administrator accepting an updated permission must be visible
+    on the next call, not after a process restart.
+    """
+    jwt = app_jwt(app_id, key_path)
+    got = _call(f"/app/installations/{installation_id(repo, jwt)}/access_tokens", jwt, "POST")
+    if not isinstance(got, dict):
+        raise AuthFailed("read permissions", f"unexpected reply: {str(got)[:120]}")
+    holds = got.get("permissions")
+    if not isinstance(holds, dict):
+        raise AuthFailed("read permissions", "the installation reported no permission set at all")
+    return {str(name): str(level) for name, level in holds.items()}
+
+
 def token(repo: str, app_id: str, key_path: Path) -> str:
     """An installation access token for `repo`, cached until shortly before it expires."""
     hit = _cache.get(repo)

@@ -26,6 +26,7 @@ from pathlib import Path
 
 import pytest
 
+from quantamind.serve import onboarding as onboarding_module
 from quantamind.serve import onboarding as warm_module
 from quantamind.serve.onboarding import warm, warm_all
 from quantamind.store import tenancy
@@ -129,3 +130,27 @@ def test_one_failure_does_not_stop_the_others(
 def test_warming_nothing_returns_two_empty_maps(settings: Settings) -> None:
     """An installation selecting no repository is a real state, not an error."""
     assert warm_all([], settings) == ({}, {})
+
+
+def test_warm_all_actually_asks_what_the_app_is_allowed_to_do(
+    settings: Settings, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The preflight has to be CALLED, and a sabotage removing the call survived without this.
+
+    `sweep()` in this codebase was written, documented and never invoked; the D1f status writer
+    shipped against an App that could not post. A check nothing calls reports exactly what a check
+    that finds nothing reports, so the call itself is what needs pinning -- not the checker.
+    """
+    asked: list[str] = []
+    monkeypatch.setattr(
+        onboarding_module,
+        "announce_permission_gaps",
+        lambda repo, _settings: asked.append(repo) or (),
+    )
+
+    warm_all(["acme/payments"], settings)
+
+    assert asked == ["acme/payments"], (
+        "warm_all never asked what the App may do; a missing permission would surface as a 403 "
+        "on a customer's pull request instead of at install"
+    )

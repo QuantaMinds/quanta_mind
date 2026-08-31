@@ -27,6 +27,8 @@ CONSUMED BY: `serve/review_delivery.py`, once the rule checks have been recorded
 from __future__ import annotations
 
 from collections.abc import Sequence
+from dataclasses import dataclass
+from enum import Enum
 
 from quantamind.ingest.publish import commit_status
 from quantamind.render.status_check import render
@@ -34,21 +36,61 @@ from quantamind.types.checked import Checked
 from quantamind.verify.blocking import Standing, decide
 
 
-def announce(repo: str, head_sha: str, checks: Sequence[Checked], *, enabled: bool) -> Standing:
-    """Post the blocking status. Returns what was decided, whether or not anything was written.
+class Wrote(Enum):
+    """What became of the status. **Four outcomes, never one boolean.**
+
+    "Nothing was declared", "we rehearsed", and "GitHub refused us" are three different facts and a
+    `posted: bool` reports all three as False. A caller that cannot tell a refusal from a rehearsal
+    cannot alert on the one that matters.
+    """
+
+    POSTED = "posted"
+    NOTHING_DECLARED = "nothing_declared"
+    REHEARSED = "rehearsed"
+    REFUSED = "refused"
+
+
+@dataclass(frozen=True, slots=True)
+class Announced:
+    """What was decided and what became of publishing it."""
+
+    standing: Standing
+    wrote: Wrote
+    refusal: str = ""
+    """GitHub's own words when `wrote is REFUSED`, empty otherwise."""
+
+    def __post_init__(self) -> None:
+        if (self.wrote is Wrote.REFUSED) != bool(self.refusal):
+            raise ValueError("a refusal must carry GitHub's reason, and only a refusal may")
+
+
+def announce(repo: str, head_sha: str, checks: Sequence[Checked], *, enabled: bool) -> Announced:
+    """Post the blocking status. **Never raises: the review must survive this failing.**
+
+    **A STATUS THAT CANNOT BE PUBLISHED MUST NOT TAKE THE REVIEW WITH IT.** This runs before the
+    review comment is posted, so an exception here costs the customer the whole review -- and the
+    first thing tried against a real repository was a 403, because the App had no `statuses`
+    permission. Every unit test missed it: they replace the writer with a spy that returns True.
+    `verify/rule_check.enforce` already states this reasoning for the audit trail; the same holds
+    here, and more sharply, because the gate is the newer and less important of the two writes.
+
+    **THE REFUSAL IS RETURNED AND PRINTED, NOT SWALLOWED.** A gate that silently stops publishing
+    is a gate that reports success by saying nothing -- the failure this codebase exists to refuse.
 
     **A CHANGE NOTHING GOVERNED GETS NO STATUS.** Posting `success` where no rule applied puts a
-    green tick against a standard nobody wrote, which is the same lie as a green test that asserts
-    nothing. The absence is the honest answer, and a required check that never arrives is treated
-    by GitHub as pending rather than passed.
+    green tick against a standard nobody wrote.
     """
     gate = decide(checks)
     if gate.standing is Standing.NOT_DECLARED:
-        return gate.standing
+        return Announced(gate.standing, Wrote.NOTHING_DECLARED)
     shown = render(gate)
     if not enabled:
         print(f"[gate] rehearsed {shown.state}: {shown.description}", flush=True)
-        return gate.standing
-    commit_status.post(repo, head_sha, shown.state, shown.description)
+        return Announced(gate.standing, Wrote.REHEARSED)
+    try:
+        commit_status.post(repo, head_sha, shown.state, shown.description)
+    except commit_status.StatusFailed as exc:
+        print(f"[gate] NOT PUBLISHED — {exc.reason}; the review is posted anyway", flush=True)
+        return Announced(gate.standing, Wrote.REFUSED, exc.reason)
     print(f"[gate] {shown.state}: {shown.description}", flush=True)
-    return gate.standing
+    return Announced(gate.standing, Wrote.POSTED)
