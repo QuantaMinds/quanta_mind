@@ -84,3 +84,46 @@ def test_unlike_or_empty_claims_score_below_the_threshold(left: str, right: str)
 def test_an_identical_claim_scores_one() -> None:
     """The control: without this, the similarity function could return 0 always and pass above."""
     assert alike(SAME, SAME) == 1.0
+
+
+# Two findings from the benchmark corpus, trimmed only in the path. Measured 97.3% alike with
+# `autojunk=False` and 0.100 with the default, which is the defect these two tests exist to pin.
+_LONG_A = (
+    "In `packages/app-store/vital/lib/reschedule.ts`, `forEach` is called with an `async` "
+    "function, but `forEach` does not await the promises returned by the callback, so the "
+    "surrounding function resolves before the rescheduling work has finished and any error "
+    "raised inside the callback is swallowed rather than propagated to the caller."
+)
+_LONG_B = (
+    "In `packages/app-store/wipemycalother/lib/reschedule.ts`, `forEach` is called with an `async` "
+    "function, but `forEach` does not await the promises returned by the callback, so the "
+    "surrounding function resolves before the rescheduling work has finished and any error "
+    "raised inside the callback is swallowed rather than propagated to the caller."
+)
+
+
+def test_two_long_claims_that_read_the_same_are_scored_as_the_same() -> None:
+    """The regression. `SequenceMatcher`'s `autojunk` ignores common elements past 200 characters.
+
+    Compared character by character that means ordinary letters and spaces, so the ratio collapsed
+    on precisely the long claims this rule exists to compare — 0.100 for a pair that is 97.3%
+    alike. Every other test in this file compares strings short enough that the heuristic never
+    engages, so all thirteen passed against the defect.
+    """
+    assert len(_LONG_A) > 200 and len(_LONG_B) > 200, (
+        "this test is only meaningful above the 200-character threshold that triggers autojunk"
+    )
+
+    assert alike(_LONG_A, _LONG_B) >= SIMILAR_AT, (
+        f"two near-identical long claims scored {alike(_LONG_A, _LONG_B):.3f}"
+    )
+
+
+def test_a_long_claim_repeated_in_one_file_is_reported() -> None:
+    """The rule, not just the ratio: the repeat must reach `repeats()` and be returned."""
+    findings = (
+        _finding(_LONG_A, "a.ts"),
+        _finding(_LONG_B, "a.ts"),
+    )
+
+    assert repeats(findings) == (1,), "the second statement of one long claim was not detected"
