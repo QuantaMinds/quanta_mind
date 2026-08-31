@@ -144,3 +144,51 @@ Compare **P(fix_follows | shifted)** against **P(fix_follows | not shifted)**.
 **Any bar unmet and D2e stays closed, permanently.** No fourth repository, no widened window, no
 second outcome. The three are `saltstack/salt`, `keras-team/keras`, `ipython/ipython`, all confirmed
 unspent before cloning, and they are named here so the set cannot grow after a result.
+
+---
+
+# The second run is WITHDRAWN before it ran, and the reason is that it tested the wrong thing
+
+**Withdrawn 2026-08-31, after reading what the competition actually detects.** Not one repository
+was cloned for it. **ADVISORY** — no mechanism, and the reason is stated rather than the tag being
+a shrug: no guard can decide that a hypothesis is a poor description of a market claim, and one
+that appeared to would be asserting more than it can test.
+
+## What went wrong, and it was not the arithmetic
+
+Both runs asked whether **a file whose imports churn attracts more later fixes** — a per-file
+historical risk signal. That question is coherent, it was measured properly the first time, and the
+answer is no.
+
+**It is not what "architectural drift" means to the people shipping it.** Qodo's drift detection
+flags: reimplementation of existing authentication and validation logic in other modules; modified
+response formats consumed by other services; deviations from team standards; function-signature
+violations, broken API contracts and schema drift — **read against registered consumer
+repositories**. Greptile's is whole-codebase context applied to the change in front of it.
+
+**Every one of those is a claim about THIS CHANGE against the codebase as it stands. None is a
+statistic about a file's past**, and none of them predicts defects — they assert inconsistency,
+which a reviewer judges directly. We picked an outcome their feature never claimed and then
+measured ourselves failing to hit it.
+
+| what they flag | where we are |
+|---|---|
+| logic reimplemented elsewhere | **built** — D2c |
+| deviations from declared standards | **built** — D1a, D1b, D1f |
+| signature and contract changes against consumers | **not built** — D3b |
+| registered consumer repositories | **built** — D3a, and "registered" is our word too |
+
+## What this means for D2e
+
+**D2e stays closed as written**, because what it wrote down was the churn statistic and that is
+measured and dead. The three things a customer means by architectural drift are D2c, D1b and D3b —
+two shipped, one gated on a design partner with a second repository.
+
+**The first run's finding stands and its value goes up**: it is now evidence that the *obvious*
+formulation of drift does not work, which is worth having on record the next time somebody proposes
+a churn-based risk score.
+
+**What would have caught this earlier is a question, not a mechanism:** before registering bars,
+state what the competitor's version of the feature actually asserts, and check that the outcome
+being measured is one they would recognise. The pre-registration named the market claim and then
+tested a proxy for it without saying it was a proxy.

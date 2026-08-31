@@ -487,6 +487,27 @@ spent deliberately. It must not be spent by accident.
       drift. **This does not condemn cross-file context**: D2c is the same kind of model-free
       structural claim, measured before it shipped, and the duplicates it found in `pallets/flask`
       are the ones the maintainers later hoisted into a shared base class.
+
+      **AND THE CHURN STATISTIC WAS NEVER WHAT A CUSTOMER MEANS BY DRIFT.** Read after the run,
+      Qodo's drift detection flags *reimplementation of existing logic in other modules*,
+      *deviations from team standards*, and *signature violations, broken API contracts and schema
+      drift against **registered** consumer repositories*. Every one is a claim about THIS CHANGE
+      against the codebase as it stands; none is a statistic about a file's past, and none predicts
+      defects — they assert inconsistency, which a reviewer judges directly.
+
+      | what the category flags | our row |
+      |---|---|
+      | logic reimplemented elsewhere | **built** — D2c |
+      | deviations from declared standards | **built** — D1a, D1b, D1f |
+      | contract and signature changes against consumers | **not built** — D3b |
+      | registered consumer repositories | **built** — D3a |
+
+      **So D2e is closed as WRITTEN, and the feature it was reaching for is three rows that already
+      exist or are already scheduled.** A second run with a repaired instrument was registered and
+      then WITHDRAWN before a repository was cloned, because it would have measured the same wrong
+      thing more carefully. The lesson is recorded in the pre-registration: state what a
+      competitor's version actually asserts before registering bars, and check the outcome is one
+      they would recognise.
       ~~"Team members implement parts of the system differently from the original design" is a
       claim about DIVERGENCE, and divergence is measurable: the import graph plus rule violations
       over time, per module.~~
