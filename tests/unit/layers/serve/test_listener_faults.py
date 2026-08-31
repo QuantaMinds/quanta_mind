@@ -22,6 +22,7 @@ CONSUMED BY: `just check`.
 
 from __future__ import annotations
 
+import http.client
 import json
 from pathlib import Path
 
@@ -33,6 +34,7 @@ import pytest
 from test_listener import PAYLOAD, SECRET, _headers, _post, _Server, _Settings
 from test_listener import server as server
 
+from quantamind.serve import listener
 from quantamind.serve.http import bind
 from quantamind.serve.webhook_github import MisconfiguredSecret, sign, verify
 
@@ -91,3 +93,29 @@ def test_build_refuses_every_secret_verify_would_raise_on(secret: str, tmp_path:
         bind.build(_Settings(str(tmp_path)), secret, lambda _r: None, port=0)
 
     assert "open command channel" in str(refused.value)
+
+
+def test_a_get_that_raises_answers_500_rather_than_dropping_the_connection(
+    server: _Server, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """`do_POST` had this guard and `do_GET` did not, so a browser got no status at all.
+
+    Visiting `/` before any account store existed raised `sqlite3.OperationalError` into the
+    stdlib handler, which closes the socket silently. A visitor cannot report that and an operator
+    cannot see it — the least diagnosable outcome available, and the reasoning was already written
+    on `do_POST` and simply never applied here.
+    """
+
+    def _explode(*_: object, **__: object) -> object:
+        raise RuntimeError("the route blew up")
+
+    monkeypatch.setattr(listener.routes, "get", _explode)
+
+    conn = http.client.HTTPConnection("127.0.0.1", server.port, timeout=10)
+    conn.request("GET", "/")
+    response = conn.getresponse()
+    status, body = response.status, response.read()
+    conn.close()
+
+    assert status == 500, f"a raising GET must still answer, got {status}"
+    assert b"RuntimeError" in body, f"the answer must name the fault, got {body!r}"
