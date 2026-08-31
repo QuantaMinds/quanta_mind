@@ -12,7 +12,7 @@ WHY:  A PR that merged into a feature branch since deleted cannot have its own w
       expectation on record was that feature branches merge back late and every
       substitution would measure a different week. On four PRs whose base branch was
       deleted, three arrived within MINUTES and the fourth within three and a half days --
-      all inside the window. See `docs/CORRECTIONS.md`.
+      all inside the window. See `docs/engineering/CORRECTIONS.md`.
 
       None means the merge is not in default's history at all, and there the caller must
       stop: a squash-merged feature branch and an abandoned one are indistinguishable,

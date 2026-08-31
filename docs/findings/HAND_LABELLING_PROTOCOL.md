@@ -14,7 +14,7 @@
 >
 > **A section numbered “8” of this document was once cited as forbidding delegation to an
 > agent. No such section was ever written, and this document did not exist when it was
-> cited.** See `docs/CORRECTIONS.md` entry 1. That rule is not carried over here, because
+> cited.** See `docs/engineering/CORRECTIONS.md` entry 1. That rule is not carried over here, because
 > inventing it retroactively would repeat the failure. The runbook's “read them yourself”
 > already says what needs saying, and it is the line that should have stopped an agent from
 > labelling.
@@ -57,7 +57,7 @@ shape.**
   fourth cell exists belongs in the analysis, after the key is opened — see
   `PHASE0_PREREGISTRATION.md` A52.
 - **The draw scans the pipeline's own `PRRecord`s**, never a reconstruction of them —
-  `sample_for_labelling --records` is required. See `docs/CORRECTIONS.md` entry 3 for what
+  `sample_for_labelling --records` is required. See `docs/engineering/CORRECTIONS.md` entry 3 for what
   happened when it rebuilt them instead.
 - **The key is sealed.** `.gitignore` permits only `human_labels.csv` out of
   `data/labelling/`, so the key cannot be committed and the labels can.
@@ -74,7 +74,7 @@ shape.**
   subject implied.
 - **An unreadable window is not an empty one.** If the base branch is gone, the window
   cannot be walked, and “no commits found” is not a finding. This is what invalidated four
-  labels on the first attempt — see `docs/CORRECTIONS.md`.
+  labels on the first attempt — see `docs/engineering/CORRECTIONS.md`.
 
 ## Committing
 

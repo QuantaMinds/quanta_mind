@@ -6,7 +6,7 @@ WHY:  **A guard nobody has watched fail is a guard nobody should trust.** The mi
       to catch produced no exception and a plausible 68/32 split, so a test asserting only that
       the guard imports would certify nothing. The second case is the one that matters most: a
       guard could pass the first by refusing everything, which is the exact failure mode it is
-      itself written to catch. → `docs/CORRECTIONS.md` entry 7.
+      itself written to catch. → `docs/engineering/CORRECTIONS.md` entry 7.
 IMPORTS: stdlib, pytest, and `bench/forensic/population.py`.
 CONSUMED BY: `uv run pytest tests/forensic` and `just check`.
 """

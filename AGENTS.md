@@ -105,10 +105,10 @@ you remember to obey — the machine will stop you either way.
     Phase 0    →  the correlation test                                 no-vague-refs:allow
     ```
 
-13. **Move files with `git mv`, and never leave two modules with one name.** A stale
-    duplicate passed every guard: git tracked both copies, nothing imported the old
-    name, and the copy left behind was missing the logic the analysis rested on. On a
-    project whose thesis is provenance, letting git lose a rename is not a small irony. → `scripts/guard/check_module_identity.py`
+13. **`git mv`, and never two files with one name — modules OR documents.** A stale
+    `assemble.py` passed every guard, missing the logic the analysis rested on. Then the
+    corrections log ran as two `CORRECTIONS.md` for eighteen days: the copy left behind declared
+    the other's entries fabricated, and 25 citations resolved to the wrong file, all green. → `scripts/guard/check_module_identity.py`, `scripts/guard/citations/identity.py`
 
 14. **A comment may explain *why*, never assert *whether*.** A safety claim — "this is caught
     later", "callers always hold the lock" — belongs in an assertion, a test, or a returned

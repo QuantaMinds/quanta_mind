@@ -48,6 +48,9 @@ RECORDED: dict[str, int] = {
     "check_structure.py::MAX_FILE_LINES": 200,
     "check_structure.py::floor(source files)": 40,
     "check_subprocess_timeouts.py::SUBPROCESS_FLOOR": 10,
+    # Set below the count `docs/` actually holds, to catch discovery collapsing rather than
+    # to police the number drifting. Same floor and same reason as the resolver beside it.
+    "citations/identity.py::floor(documents)": 20,
     "citations/resolve.py::floor(markdown documents)": 20,
     "hooks/hook_post_edit.py::FEEDBACK": 2,
     "hooks/hook_post_edit.py::QUIET": 0,

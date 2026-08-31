@@ -359,9 +359,32 @@ mutating unreachable code cannot change anything, so it always survives.
 | `check_no_research_imports.py` | research deps never reach `src/` or `scripts/` |
 | `check_no_vague_refs.py` | references name files and headings, never section or phase numbers |
 | `check_module_identity.py` | no two modules with one name; no module nothing imports |
+| `citations/identity.py` | no two DOCUMENTS under `docs/` with one name — the `src/` rule above, for prose |
+| `citations/resolve.py` | a cited `.md` or `file.py:NNN` exists, and a bare basename is not ambiguous |
+| `citations/freshness.py` | a dated external figure is re-checked on its stated cadence |
 | `hooks/hook_pre_edit.py` | denies `vendor/` and writes on `main`; asks on golden files |
 | `hooks/hook_post_edit.py` | formats the edited file, reports violations — **advisory** |
-| `hooks/hook_session_end.py` | session record to `docs/plans/` |
+| `hooks/hook_session_end.py` | session record to `docs/plans/` — **gitignored**, and its `MAP_PATH` is imported from `check_docs_sync` rather than redeclared |
+
+**THE CORRECTIONS LOG RAN AS TWO FILES FOR EIGHTEEN DAYS AND `citations/identity.py` IS WHY IT
+CANNOT AGAIN.** `a38c2d1` moved eight loose documents into folders by `git mv` and closed by naming
+the risk it left behind: the citation resolver falls back to matching on basename, so two documents
+of one name resolve to whichever the index kept, and *"`check_module_identity.py` enforces this for
+`src/` and nothing enforces it for `docs/`."* A file was then created at the vacated
+`docs/CORRECTIONS.md`.  <!-- citation:allow — the vacated path is the subject; it must not resolve. -->
+Twenty-five citations named that path and about half pointed at an entry that lived only in the
+other copy; **`citations/resolve.py` passed all twenty-five, because the path existed.** A citation
+that resolves is not a citation that resolves to the right thing, which is why the collision is now
+forbidden at creation rather than reported at citation. The account is
+`docs/engineering/CORRECTIONS.md` entry 12.
+
+**THE SAME RENAME BROKE THE SESSION HOOK, AND NOTHING NOTICED FOR THE SAME REASON.** The hook held
+its own `MAP_PATH = "docs/CODEBASE.md"`; the move updated the copy in `check_docs_sync.py` and not
+this one, so `touched_map` compared every changed path against a file that does not exist. **27 of
+27 session records reported `updated: no`** — a clean zero from a comparison that could not return
+anything else. The constant is now imported, the record says so when the map is absent instead of
+printing the same line, and `tests/unit/guards/hooks/test_session_end_map_path.py` drives
+`build_record` against real repositories for all three states.
 
 **A guard's enforcement value is capped by whether people leave it enabled.** The walker
 in `discovery.py` used to enumerate every path under an excluded directory before
@@ -1416,7 +1439,7 @@ deduplication, live registry lookup, date injection, per-category thresholds —
 size, and the shared reason: they improve a ratio without creating a correct finding, which is not
 what the closure turned on.
 
-`docs/CORRECTIONS.md` entry 7 lists what the `ours_caught` mis-read voided, and — checked and
+`docs/engineering/CORRECTIONS.md` entry 7 lists what the `ours_caught` mis-read voided, and — checked and
 re-derived — what it did not.
 
 ### `population.assert_intersects` — the clean-zero rule, enforced
@@ -1826,7 +1849,7 @@ dead in the tree with a promise in its header as the only evidence it was meant 
 
 The empty-window case is the dangerous one. A stale clone returns **0 people, 0 changes** for every
 file — which reads as a quiet, untouched file and is the exact opposite of what a silent instrument
-means. → `docs/CORRECTIONS.md`, the clean-zero rule.
+means. → `docs/engineering/CORRECTIONS.md`, the clean-zero rule.
 
 **`review_window.py` exists because bounding time and counting files are two concerns**, and
 because bounding time is the half that was wrong. `ending_at(stamp, days, site)` is a pure function
@@ -3315,7 +3338,7 @@ would have been reported as a real mismatch in a real workflow. It now requires
 7–40 character hex run, so a cache key or a colour constant returned `UNRESOLVABLE` and
 `publishable.gate` **dropped the finding** — the gate's only demonstrated behaviour over 38 real
 findings. "Not an external claim" is now `NO_CLAIM` and publishes; "an external claim we cannot
-settle" still drops, because `docs/CORRECTIONS.md` entry 8 is a verifier that defaulted the other
+settle" still drops, because `docs/engineering/CORRECTIONS.md` entry 8 is a verifier that defaulted the other
 way and confirmed every false claim it existed to refute. The trigger is narrowed by requiring
 denial-or-tag phrasing, not by removing the check.
 

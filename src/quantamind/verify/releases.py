@@ -109,8 +109,8 @@ def adjudicate_release(finding: str, context: str = "") -> Adjudicated:
     # **REFUTING AND CONFIRMING GET DIFFERENT EVIDENCE BARS, BECAUSE THEY HAVE OPPOSITE RISKS.**
     # A wrong REFUTED costs one true finding: bad, bounded, and the finding simply does not publish.
     # A wrong CONFIRMED publishes a false claim with an authority behind it, which is the failure
-    # `docs/CORRECTIONS.md` entry 8 records. So refuting accepts any nearby candidate; confirming
-    # accepts only a name the sentence syntactically BINDS to the version.
+    # `docs/engineering/CORRECTIONS.md` entry 8 records. So refuting accepts any nearby
+    # candidate; confirming accepts only a name the sentence syntactically BINDS to the version.
     around = finding[max(0, version.start() - 40) : version.end() + 40]
     nearby = [
         t

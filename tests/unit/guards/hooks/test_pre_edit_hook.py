@@ -25,7 +25,10 @@ from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts" / "guard" / "hooks"))
+# **`parents[4]`, NOT `[3]`.** This file moved down a level when `tests/unit/guards/` hit its
+# fifteen-file cap. A depth index is exactly the kind of reference AGENTS.md rule 12 is about:
+# it stays syntactically valid after a move and silently resolves somewhere else.
+sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "scripts" / "guard" / "hooks"))
 
 import hook_pre_edit
 

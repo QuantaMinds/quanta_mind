@@ -116,7 +116,7 @@ An oracle that cannot reach its authority returns `UNRESOLVABLE` for everything.
 the class then drops, the wrong-rate improves, and **the arm looks like a success**. The
 unreachable count is therefore reported per run, and a run where it is non-trivial is a void run
 rather than a clean one — the same defect as a filter that admits nothing across a whole pass.
-→ `docs/CORRECTIONS.md` entry 7
+→ `docs/engineering/CORRECTIONS.md` entry 7
 
 ---
 

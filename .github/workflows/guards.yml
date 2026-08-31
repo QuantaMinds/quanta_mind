@@ -58,6 +58,9 @@ jobs:
       - name: Docs move with code
         run: python scripts/guard/records/check_docs_sync.py .
 
+      - name: One document, one name
+        run: python scripts/guard/citations/identity.py .
+
       - name: Branch name
         if: github.event_name == 'pull_request'
         run: python scripts/guard/check_branch_name.py . "${{ github.head_ref }}"

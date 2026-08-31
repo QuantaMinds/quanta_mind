@@ -64,6 +64,7 @@ guards:
     uv run python scripts/guard/records/check_stage_table.py .
     uv run python scripts/guard/records/check_schema_shape.py .
     uv run python scripts/guard/records/check_withdrawn_amendments.py .
+    uv run python scripts/guard/citations/identity.py .
     uv run python scripts/guard/citations/resolve.py .
     uv run python scripts/guard/citations/freshness.py .
 

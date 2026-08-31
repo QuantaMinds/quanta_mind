@@ -87,13 +87,21 @@ def _index(root: Path, suffix: str) -> dict[str, list[Path]]:
     return out
 
 
-def _resolves(root: Path, token: str, index: dict[str, list[Path]]) -> Path | None:
-    """The file a citation names, by relative path or by basename."""
+def _resolves(root: Path, token: str, index: dict[str, list[Path]]) -> tuple[Path | None, int]:
+    """The file a citation names, and how many files its basename matches.
+
+    **THE COUNT IS RETURNED BECAUSE THIS USED TO RETURN `matches[0]` AND SAY NOTHING.** The
+    basename fallback is what let eight documents move folders without a single citation edit,
+    which is a property worth having. It also means a bare basename held by two files resolves
+    to whichever `rglob` happened to yield first — no error, no warning, and the citing prose
+    reads as though it named something. `citations/identity.py` forbids the collision inside
+    `docs/`; this reports it wherever the fallback would otherwise pick for the reader.
+    """
     direct = root / token
     if direct.is_file():
-        return direct
-    matches = index.get(Path(token).name)
-    return matches[0] if matches else None
+        return direct, 1
+    matches = index.get(Path(token).name, [])
+    return (matches[0] if matches else None), len(matches)
 
 
 def check(root: Path) -> list[Violation]:
@@ -119,7 +127,8 @@ def check(root: Path) -> list[Violation]:
             stripped = re.sub(r"https?://\S+", " ", line)
 
             for token in MD.findall(stripped):
-                if _resolves(root, token, md_index) is None:
+                found, count = _resolves(root, token, md_index)
+                if found is None:
                     violations.append(
                         Violation(
                             doc,
@@ -130,9 +139,21 @@ def check(root: Path) -> list[Violation]:
                             f"authority and gets acted on.",
                         )
                     )
+                elif count > 1:
+                    violations.append(
+                        Violation(
+                            doc,
+                            number,
+                            "citation-ambiguous",
+                            f"cites {token!r} by basename, and {count} files carry that "
+                            f"name. This guard picks one and says nothing, so the citation "
+                            f"reads as resolved while naming whichever the index kept. "
+                            f"Spell the path.",
+                        )
+                    )
 
             for token, raw in PY_LINE.findall(stripped):
-                target = _resolves(root, token, py_index)
+                target, _ = _resolves(root, token, py_index)
                 if target is None:
                     violations.append(
                         Violation(
