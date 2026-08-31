@@ -23,7 +23,7 @@ by decision, not by difficulty.
 | **8** | **B1** background warm-up worker | The cold start is a full clone plus ~31s index build, and Cloud Run's ephemeral disk means every instance pays it. Needed before real traffic, not after. |
 | **9** | **B8** free-tier qualification checks | The traffic path, and **it needs no payment rail** — a free tier is free. Every rule is a GitHub API check that can be enforced rather than advertised. |
 | **10** | **B2/B4/B5** accounts, installation→customer, entitlement | Only meaningful once there is traffic to attribute. |
-| **11** | **D1f** blocking status check | **DONE, and exercised live.** One predicate, `VIOLATED`, parser-only. ⚠ **Publishes nothing until the App is granted `statuses: write`** — the real POST returned 403. |
+| **11** | **D1f** blocking status check | **DONE, exercised live, and required on `main`.** Both states posted and read back. ⚠ **Blocking needs a paid plan on private repos** — protection and rulesets are gated. |
 | **12** | **D6a** the ticket and discussion behind the change | Retrieval for the reader; worth something whatever the model does. |
 | **13** | **C1** web dashboard | A surface over 7. |
 | **14** | **D2c/D2e** duplicate logic, architectural drift | Real, and neither blocks anything else. |
