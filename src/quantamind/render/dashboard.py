@@ -2,6 +2,9 @@
 
 WHAT: `table(board, repo)` renders a `store.lifecycle.Board` as text, newest first, with a header
       stating what the numbers are and a line stating when they cannot yet be read as a rate.
+      `costs(spend, repo)` renders a `store.costs.Costs` — the same `review` rows read for what
+      they SPENT rather than for what became of them. Two views of one population, which is why
+      they are one module: a repository's reviews are the subject of both.
 WHY:  **THE HONEST HEADLINE IS AN OUTCOME COUNT, NOT A QUALITY SCORE.** This product's findings
       measure 66.7-82.1% wrong across four blind pools, and no dashboard changes that. What this
       table reports instead is what happened: we ranked here, it merged, production said this. That
@@ -14,14 +17,20 @@ WHY:  **THE HONEST HEADLINE IS AN OUTCOME COUNT, NOT A QUALITY SCORE.** This pro
       **A NEVER-OBSERVED CHANGE RENDERS AS `-`, NOT AS HEALTHY.** An empty cell that reads like
       good news is the silence this codebase exists to refuse: "we did not look" and "we looked and
       it was fine" must not print the same character.
-IMPORTS: store.lifecycle. Left of serve, right of store.
-CONSUMED BY: `serve/cli.py` behind `quantamind dashboard`.
+      **THE COST VIEW HAS THREE STATES AND PRINTS THREE SENTENCES.** No reviews, reviews that
+      consulted no model, and reviews that spent. The first two both total zero and mean opposite
+      things — nothing has run here, versus the ranker ran and deliberately read nothing. A single
+      "0" would say the product is free when it has never run.
+
+IMPORTS: store.lifecycle, store.costs. Left of serve, right of store.
+CONSUMED BY: `serve/cli.py` behind `quantamind dashboard` and `quantamind cost`.
 """
 
 from __future__ import annotations
 
 from datetime import UTC, datetime
 
+from quantamind.store.costs import Costs, NothingRecorded
 from quantamind.store.lifecycle import Board, MergeState, ProdState
 
 MERGE_MARK = {
@@ -73,5 +82,44 @@ def table(board: Board, repo: str) -> str:
         "`spoke` is whether the ranking fired. `read` is units read of units ranked — the rest",
         "were ranked and deliberately not read, which is a decision and not an oversight.",
         "`-` means never observed. It does not mean healthy.",
+    ]
+    return "\n".join(lines)
+
+
+def costs(spend: Costs, repo: str) -> str:
+    """What this repository's reviews cost. A complete report even when nothing has spent anything.
+
+    **THE THREE STATES ARE PRINTED AS THREE DIFFERENT SENTENCES.** No reviews at all, reviews that
+    consulted no model, and reviews that spent — a single "0" for the first two would say the
+    ranker is free when in fact it has never run. `Costs.per_review` raises rather than dividing by
+    zero, and that refusal is rendered rather than caught and hidden.
+
+    **THE MEAN IS OVER BILLED REVIEWS AND THE LINE SAYS SO**, because a mean over reviews that
+    never called a model understates the cost of the ones that did, and a price has to cover those.
+    """
+    lines = [f"QuantaMind — cost, {repo}", ""]
+    if spend.reviews == 0:
+        lines.append("No reviews recorded. Nothing has been ranked for this repository.")
+        return "\n".join(lines)
+    try:
+        per_requests, per_tokens = spend.per_review
+    except NothingRecorded:
+        lines += [
+            f"{spend.reviews} review(s) recorded, none consulted a model.",
+            "",
+            "There is no cost per review yet. That is not a cost of zero: the ranker ran and",
+            "deliberately read nothing, which is a decision the allocator made.",
+        ]
+        return "\n".join(lines)
+
+    lines += [
+        f"{'reviews':>9}  {'billed':>7}  {'requests':>9}  {'tokens in':>10}  {'tokens out':>11}",
+        "-" * 54,
+        f"{spend.reviews:>9}  {spend.billed:>7}  {spend.requests:>9}  "
+        f"{spend.tokens_in:>10}  {spend.tokens_out:>11}",
+        "",
+        f"Per BILLED review: {per_requests:.2f} request(s), {per_tokens:,.0f} output token(s).",
+        f"{spend.reviews - spend.billed} review(s) consulted no model and are excluded from that",
+        "mean — including them would understate what a paid review costs.",
     ]
     return "\n".join(lines)

@@ -156,8 +156,19 @@ blocks Half B in production, and it was invisible until the deep half ran for th
       CLI on a laptop. Never from a webhook delivery, never in Docker, never with a service
       account. Until that runs, "the endpoint reviews with a model" is a claim about a code path
       rather than an observation.
-- [ ] **G3 Cost per review, measured.** Every delivery that consults a model records what it
+- [x] **G3 Cost per review, measured.** Every delivery that consults a model records what it
       spent. Without it, BYOK pricing and the free-tier cap are both guesses.
+
+      **THE WRITE EXISTED SINCE A5; THE READ DID NOT.** `bank()` had been filling `request_count`,
+      `tokens_in` and `tokens_out` on every delivery and **no `SELECT` in `src/` ever touched
+      them** — so every cost figure quoted about this product came from the bench, not a delivery.
+      `store/costs.py` reads them, `render/dashboard.costs()` renders them, `quantamind cost`
+      prints them. Five sabotages, each caught by a named test.
+
+      **"No reviews" and "reviews that consulted no model" are printed as different sentences**,
+      because both total zero and mean opposite things, and `per_review` refuses to divide rather
+      than returning a comfortable 0.0. The mean is over BILLED reviews and says so — averaging
+      over reviews that called no model understates the number a price has to cover.
 
 ## Phase B — make it buyable  ⏸ **PAYMENTS PARKED 2026-08-27**
 
