@@ -18,8 +18,8 @@ WHY:  **THE ORACLES WERE BUILT AND MEASURED AND FOR A WHILE NOT WIRED IN.** `ser
 
       **`UNRESOLVABLE` DROPS THE FINDING.** A claim we could not check is not one we publish, and
       collapsing it into "fine" is exactly the failure being fixed -- an unanswerable question
-      answered confidently. → `docs/CORRECTIONS.md` entry 8, where a verifier that defaulted the
-      other way confirmed every false claim it was built to refute.
+      answered confidently. → `docs/engineering/CORRECTIONS.md` entry 8, where a verifier
+      that defaulted the other way confirmed every false claim it was built to refute.
 IMPORTS: types.finding, verify.{external_facts,pin_mismatch,releases}. Nothing to its right.
 CONSUMED BY: `serve/deep_review.py`.
 """

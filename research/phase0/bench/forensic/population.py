@@ -5,7 +5,7 @@ WHAT: `assert_intersects(what, left, right)` raises `PopulationMismatch` when NO
 WHY:  **`candidate in ours_caught` was false for all 194 candidates**, because that key holds
       GOLDEN comments and the loop was feeding it candidates. Both sides are `str`, so no type
       checker could see it, nothing raised, and the resulting 68/32 split looked exactly like a
-      finding. Four analyses were built on it. → `docs/CORRECTIONS.md` entry 7.
+      finding. Four analyses were built on it. → `docs/engineering/CORRECTIONS.md` entry 7.
 
       **A filter that admits nothing across a whole pass is a statement about the two sets, not
       about the data.** It is the third clean zero in this project to mean a broken comparison

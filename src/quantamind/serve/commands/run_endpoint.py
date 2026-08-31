@@ -110,6 +110,14 @@ def run(port: int, host: str = "127.0.0.1") -> int:
         flush=True,
     )
     print(
+        "[serve] GET  /         — the dashboard: sign in, then a repository's reports",
+        flush=True,
+    )
+    print(
+        "[serve] GET  /r/<owner>/<name> — compliance, outcomes and cost for one repository",
+        flush=True,
+    )
+    print(
         "[serve] It REVIEWS: clone, rank, render. Posting is "
         + (
             "ON — comments are written to real pull requests."

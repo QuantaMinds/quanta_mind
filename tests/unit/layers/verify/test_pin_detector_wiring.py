@@ -12,17 +12,32 @@ WHY:  **EVERY EXISTING ORACLE TEST PASSES WITH THE WIRING BROKEN.** They call `d
       So these tests start from a changed-file LIST, the thing the delivery path actually holds,
       and assert on what reaches the detector. A test that starts from a diff cannot fail the way
       this system failed.
-IMPORTS: pytest, quantamind.verify.pin_check, quantamind.ingest.diff, quantamind.types.change.
+IMPORTS: pytest, quantamind.serve.{pin_review,review_delivery}, quantamind.verify.pin_check,
+      quantamind.types.{change,review}.
 CONSUMED BY: `just check`.
 """
 
 from __future__ import annotations
 
+import inspect
+
+import pytest
+
+from quantamind.serve import pin_review, review_delivery
+from quantamind.serve.pin_review import only
 from quantamind.types.change import REVIEWABLE_SUFFIXES
+from quantamind.types.review import Outcome
 from quantamind.verify.pin_check import workflows
 
 WORKFLOW = ".github/workflows/tests.yaml"
 MIXED = [WORKFLOW, ".github/workflows/lock.yml", "src/flask/app.py", "README.md"]
+REPO = "acme/app"
+SHA = "0" * 40
+
+
+def _delivery() -> str:
+    """`deliver()`'s source. Two tests read it; neither should re-derive how to get it."""
+    return inspect.getsource(review_delivery)
 
 
 def test_the_ranking_filter_removes_every_workflow() -> None:
@@ -48,13 +63,10 @@ def test_delivery_passes_the_unfiltered_list_to_the_detector() -> None:
     A source-level assertion is weak and is used here on purpose: the alternative is a live
     pull request with a pinned workflow, and this is the property that actually broke.
     """
-    source = __import__("inspect").getsource(
-        __import__("quantamind.serve.review_delivery", fromlist=["review_delivery"])
-    )
-    assert "pin_check.check(clone, head_sha, every_file)" in source, (
+    assert "pins_for(clone, head_sha, every_file)" in _delivery(), (
         "the detector must be handed the unfiltered list; passing `changed` is the defect"
     )
-    assert "changed_files(delivery_repo, number, suffixes=None)" in source, (
+    assert "changed_files(delivery_repo, number, suffixes=None)" in _delivery(), (
         "the unfiltered fetch must ask for no filter explicitly"
     )
 
@@ -83,23 +95,49 @@ def test_the_detector_runs_before_the_no_source_files_return() -> None:
     it exists to catch. Found by firing at a real one, not by any test, which is why the order
     is asserted here rather than trusted.
     """
-    source = __import__("inspect").getsource(
-        __import__("quantamind.serve.review_delivery", fromlist=["review_delivery"])
-    )
-    check_at = source.index("pin_check.check(clone, head_sha, every_file)")
-    return_at = source.index("return Delivered(Outcome.NO_FILES")
-    assert check_at < return_at, (
-        "pin_check must run BEFORE the no-source-files return, or a workflow-only "
+    source = _delivery()
+    assert source.index("pins_for(clone, head_sha, every_file)") < source.index(
+        "if not changed:"
+    ), (
+        "the detector must run BEFORE the no-source-files return, or a workflow-only "
         "pull request exits with the detector never having looked"
     )
 
 
-def test_a_workflow_only_change_can_still_produce_a_comment() -> None:
-    """The other half: having run, a mismatch must survive to a body rather than be discarded."""
-    source = __import__("inspect").getsource(
-        __import__("quantamind.serve.review_delivery", fromlist=["review_delivery"])
-    )
-    guard = source.index("if not changed:")
-    assert "if not pins:" in source[guard : guard + 400], (
-        "with no source files, NO_FILES must be conditional on there being no pins either"
-    )
+def test_a_workflow_only_change_with_a_mismatch_is_not_no_files() -> None:
+    """The other half: having run, a mismatch must survive to a body rather than be discarded.
+
+    **THIS USED TO BE A STRING SEARCH FOR `if not pins:` AND IS NOW THE BEHAVIOUR.** The branch
+    moved into `serve/pin_review.only()` when `review_delivery.py` hit the 200-line cap, and a
+    function that can be CALLED can be asserted on instead of read. A source match would have gone
+    on passing against a body that computed the right branch and returned the wrong outcome.
+    """
+    assert only(REPO, 7, SHA, "", enabled=False).outcome is Outcome.NO_FILES
+
+    rehearsed = only(REPO, 7, SHA, "PIN MISMATCH", enabled=False)
+    assert rehearsed.outcome is Outcome.REHEARSED, rehearsed
+    assert rehearsed.body == "PIN MISMATCH", "the block must survive to the body, not be discarded"
+
+
+def test_the_three_outcomes_are_three_and_posting_is_what_separates_them(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """`NO_FILES`, `REHEARSED` and `POSTED` are different answers and a caller reads all three.
+
+    A `DUPLICATE` is the fourth: `publish()` returning False means this head was already
+    commented on, which must not read as a comment we chose not to write.
+    """
+    calls: list[str] = []
+
+    def _wrote(repo: str, number: int, sha: str, body: str, findings: object) -> bool:
+        calls.append(body)
+        return len(calls) == 1
+
+    monkeypatch.setattr(pin_review, "publish", _wrote)
+    assert only(REPO, 7, SHA, "PINS", enabled=True).outcome is Outcome.POSTED
+    assert only(REPO, 7, SHA, "PINS", enabled=True).outcome is Outcome.DUPLICATE
+    assert calls == ["PINS", "PINS"], calls
+
+    calls.clear()
+    assert only(REPO, 7, SHA, "", enabled=True).outcome is Outcome.NO_FILES
+    assert calls == [], "nothing to say must not reach GitHub at all"

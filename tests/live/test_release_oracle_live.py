@@ -73,7 +73,8 @@ def test_a_package_the_diff_never_mentions_cannot_be_CONFIRMED() -> None:
     """PyPI has packages called `pin`, `Some` and `dependency`. A stop-list cannot win that race.
 
     **This exact sentence CONFIRMED on `dependency` before the diff check existed** — publishing a
-    finding on the strength of a name collision, which is `docs/CORRECTIONS.md` entry 8's direction.
+    finding on the strength of a name collision, which is the direction
+    `docs/engineering/CORRECTIONS.md` entry 8 records.
     """
     got = adjudicate_release(
         "Some dependency 91.7.3 does not exist anywhere.",

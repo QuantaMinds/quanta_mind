@@ -18,6 +18,8 @@ from __future__ import annotations
 import pytest
 
 from quantamind.infer.change_summary import Summary
+from quantamind.ingest.context.tickets import Context
+from quantamind.ingest.diff import Stated
 from quantamind.rank.order import rank
 from quantamind.render.comment import comment
 from quantamind.render.verdict_block import SECTIONS
@@ -83,12 +85,21 @@ def test_the_verdict_comes_before_everything_else() -> None:
     must meet the thing they act on first — only what that thing is. It is a verdict now because a
     developer waiting to merge wants to know whether this is good, needs a human, or has a bug.
     """
-    body = comment(rank(CASES["ordered"]), summary=FULL)
+    body = comment(
+        rank(CASES["ordered"]),
+        summary=FULL,
+        context=Context(stated=Stated("feat(store): the audit trail", "")),
+    )
     lines = [ln for ln in body.splitlines() if ln.strip()]
 
     assert lines[0].startswith("### QuantaMind")
     assert lines[1].startswith(("✅", "⚠️", "🐛")), f"the verdict is not first: {lines[1]!r}"
-    assert body.index(lines[1]) < body.index("**Goal"), "the verdict came after the goal"
+    # **THE HEADING MOVED MODULES AND THE ORDERING IS THE SAME DECISION.** It was
+    # `verdict_block`'s "**Goal — from the PR description**"; the deterministic block carries the
+    # quote now, and it still sits under the verdict rather than above it.
+    assert body.index(lines[1]) < body.index("**What this change says it is for**"), (
+        "the verdict came after the goal"
+    )
 
 
 def test_the_comment_makes_no_claim_about_correctness() -> None:
@@ -129,13 +140,6 @@ def test_every_mandatory_section_is_present(section: str) -> None:
         f"the mandatory section {section!r} is missing. Every one of them is half of "
         '"did this change do what it said, without disturbing anything else"'
     )
-
-
-def test_the_goal_is_quoted_from_the_pr_not_summarised() -> None:
-    """A model restating the goal puts a second author between the reviewer and the promise."""
-    body = comment(rank(CASES["ordered"]), summary=FULL)
-
-    assert "> feat(store): the audit trail" in body
 
 
 def test_a_review_that_could_not_run_says_so_and_offers_no_verdict() -> None:

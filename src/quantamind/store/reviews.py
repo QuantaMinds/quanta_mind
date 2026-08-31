@@ -170,7 +170,16 @@ def bank(store_path: Path, repo: str, pr_number: int, head_sha: str, spend: Spen
         if row is None:
             print(f"[store] no review row for {repo}#{pr_number}; cost not recorded", flush=True)
             return False
-        return record_spend(conn, int(row[0]), spend)
+        # **THE SUCCESS IS PRINTED HERE, BESIDE THE TWO REFUSALS ABOVE IT.** The caller used to say
+        # it, which meant a write that failed for either reason above was silent at the call site
+        # and a write that succeeded was announced by somebody who had not checked.
+        banked = record_spend(conn, int(row[0]), spend)
+        if banked:
+            print(
+                f"[store] cost: {spend.requests} call(s), {spend.tokens_out} tokens out",
+                flush=True,
+            )
+        return banked
     except sqlite3.Error as exc:
         print(f"[store] cost not recorded: {exc}", flush=True)
         return False

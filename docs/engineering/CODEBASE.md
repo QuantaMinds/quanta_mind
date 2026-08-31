@@ -343,6 +343,75 @@ run when the values actually pinned were 8 constants of 62. Also found two dead 
 `infer/gemini.TOKEN_TIMEOUT_S`, the second implying a timeout that is not applied — because
 mutating unreachable code cannot change anything, so it always survives.
 
+### `ingest/context/` and `render/context/` — the context a human wrote
+
+**D6a. The goal a change states, read for the reader and not for a model.**
+`ingest/diff.stated_goal` had fetched the pull request's title and body on every delivery since
+the pipeline was joined, and `infer/change_review.py` was its **only** consumer — so a reader saw
+the change's stated intent only when a model produced a summary, on the path measured at 25.0%
+correct. A delivery with `infer/` off, refused, or out of tokens carried none at all.
+
+| file | what |
+|---|---|
+| `ingest/context/issue_refs.py` | `references(title, body, repo)` — `#412`, `owner/name#7` and the issue URL, with the closing keyword when the author used one. Pure, no I/O |
+| `ingest/context/tickets.py` | `behind(repo, number)` — the stated goal, one `Ticket` per same-repository reference, one `Skipped` for every reference not read |
+| `render/context/goal_block.py` | the block, quoted verbatim above the model's verdict |
+
+**A CROSS-REPOSITORY REFERENCE IS REFUSED WITHOUT A REQUEST.** `Ref.foreign` is decided from the
+text, so `otherorg/private#5` is never asked for — quoting its title into this repository's comment
+would move somebody's data across a boundary nobody opted into, and we may hold no token for it
+either. The test asserts on the list of calls made, not on the outcome: an implementation that
+asked, was refused and recorded the refusal returns an identical `Context` and has still leaked.
+
+**FIVE ABSENCES, FIVE LINES.** The author wrote nothing; the reference was foreign; GitHub refused
+the issue; there were more references than `FETCH_CAP`; and **we could not read the pull request at
+all**. The last is `Context.unreadable` rather than an empty `Stated`, because printing "the author
+stated no goal" out of our own failed read is an assertion about somebody's work made from our
+outage — the collapse non-negotiable 3 exists to refuse, in the one place where it would be rude
+as well as wrong.
+
+**THE PRODUCT FOUND A BUG IN THIS CHANGE, ON THE PULL REQUEST THAT SHIPPED IT.** `quanminds[bot]`
+reported against `QuantaMinds/quanta_mind#91` that the delivery's choice between the full body and
+the ranking-only one *"incorrectly omits the unreadable status, causing failure information from
+the explain step to be dropped"*. It was right, and the omission predated D6a: when the model is
+unreachable `comment()` renders "I could not review this change" at the top, and the caller then
+discarded that body for the ranking-only one whenever there were no findings and no declared rules.
+**A refusal degrading into an ordinary-looking comment is what `_headline` exists to prevent,
+defeated one layer above it.** Every unit test passed, because each half was correct alone.
+
+The decision is `render/comment.beyond_the_ranking()` now, taking the same arguments `comment()`
+does — so a section added to the body without a term in the predicate would be rendered and then
+thrown away, which is exactly how `blind` came to be missing.
+`tests/unit/layers/render/test_beyond_the_ranking.py` asserts each term alone, and the honest
+negative beside them; restoring the reported defect verbatim fails one test and nothing else.
+
+**AND THE COMMENT WAS TOO LONG, WHICH IS ALSO SOMETHING ONLY READING ONE TELLS YOU.** Two caps
+moved after `#91`: `goal_block.BODY_CAP` from 600 characters to 240, and `comment.MAX_DEPENDENTS`
+from five named files to three — five `src/quantamind/...` paths made the single longest line in
+the body. The block also stopped quoting the pull request TITLE when there is a body, because
+GitHub prints the title directly above the comment; a title-only pull request still quotes it,
+since a title with no body is a stated goal and must not read as none.
+
+**`verdict_block` STOPPED QUOTING THE GOAL, AND A LIVE COMMENT IS WHY.** Its first section was
+`**Goal — from the PR description**`, quoting `Summary.goal` — which `infer/change_summary` fills
+from the author's own title and body. So the quote was deterministic content riding on a model's
+object: present when a model answered, gone when it did not. D6a made it deterministic and, for one
+commit, **both blocks rendered it** — a delivery with the model on would have printed the author's
+description twice, in a product whose measured weakness is saying the same thing twice (17.3%
+redundancy against Qodo's 1.0%). `SECTIONS` is three entries now; `achieves_goal` is still judged
+against the goal, and the reader still sees it, once. Caught by reading a comment the deployed App
+posted to `QuantaMinds/quanta_mind#91`, not by any test.
+
+**`Declined` is local, not a new member of `types/verdict.Reason`.** That enum resolves code
+constructs and pairs with a `Construct`; a 404 from the issues API is neither, and widening it
+would have the coverage line reporting retrieval failures as unparsed code.
+
+**Two files moved to make room, and the guard chose both.** `render/` was at its fifteen-file cap,
+so the block is a sub-package. `serve/review_delivery.py` crossed 200 lines, so the pin path left
+whole as `serve/pin_review.py` — which turned a source-string test (`"if not pins:" in source`) into
+a behavioural one, because a branch in a function you can call can be asserted on rather than read.
+The cost report moved into `store/reviews.bank()`, beside the two refusals it sits with.
+
 ### `scripts/guard/` — the enforcement layer
 
 | File | Enforces |
@@ -359,9 +428,32 @@ mutating unreachable code cannot change anything, so it always survives.
 | `check_no_research_imports.py` | research deps never reach `src/` or `scripts/` |
 | `check_no_vague_refs.py` | references name files and headings, never section or phase numbers |
 | `check_module_identity.py` | no two modules with one name; no module nothing imports |
+| `citations/identity.py` | no two DOCUMENTS under `docs/` with one name — the `src/` rule above, for prose |
+| `citations/resolve.py` | a cited `.md` or `file.py:NNN` exists, and a bare basename is not ambiguous |
+| `citations/freshness.py` | a dated external figure is re-checked on its stated cadence |
 | `hooks/hook_pre_edit.py` | denies `vendor/` and writes on `main`; asks on golden files |
 | `hooks/hook_post_edit.py` | formats the edited file, reports violations — **advisory** |
-| `hooks/hook_session_end.py` | session record to `docs/plans/` |
+| `hooks/hook_session_end.py` | session record to `docs/plans/` — **gitignored**, and its `MAP_PATH` is imported from `check_docs_sync` rather than redeclared |
+
+**THE CORRECTIONS LOG RAN AS TWO FILES FOR EIGHTEEN DAYS AND `citations/identity.py` IS WHY IT
+CANNOT AGAIN.** `a38c2d1` moved eight loose documents into folders by `git mv` and closed by naming
+the risk it left behind: the citation resolver falls back to matching on basename, so two documents
+of one name resolve to whichever the index kept, and *"`check_module_identity.py` enforces this for
+`src/` and nothing enforces it for `docs/`."* A file was then created at the vacated
+`docs/CORRECTIONS.md`.  <!-- citation:allow — the vacated path is the subject; it must not resolve. -->
+Twenty-five citations named that path and about half pointed at an entry that lived only in the
+other copy; **`citations/resolve.py` passed all twenty-five, because the path existed.** A citation
+that resolves is not a citation that resolves to the right thing, which is why the collision is now
+forbidden at creation rather than reported at citation. The account is
+`docs/engineering/CORRECTIONS.md` entry 12.
+
+**THE SAME RENAME BROKE THE SESSION HOOK, AND NOTHING NOTICED FOR THE SAME REASON.** The hook held
+its own `MAP_PATH = "docs/CODEBASE.md"`; the move updated the copy in `check_docs_sync.py` and not
+this one, so `touched_map` compared every changed path against a file that does not exist. **27 of
+27 session records reported `updated: no`** — a clean zero from a comparison that could not return
+anything else. The constant is now imported, the record says so when the map is absent instead of
+printing the same line, and `tests/unit/guards/hooks/test_session_end_map_path.py` drives
+`build_record` against real repositories for all three states.
 
 **A guard's enforcement value is capped by whether people leave it enabled.** The walker
 in `discovery.py` used to enumerate every path under an excluded directory before
@@ -1231,6 +1323,29 @@ exempted exactly one filename from "every guard must be invoked by something"; t
 module would have been reported as an orphan, and the obvious fix was to add a second name.
 Resolving imports states the actual property and still covers `discovery.py` without naming it.
 
+**It read only the FIRST dotted segment, and the first sub-package sibling exposed it.** The import
+regex stopped at `records` in `from records.decided_decisions import RULES`, so the sibling looked
+like a guard nobody invokes. The orphan report then demanded a shared data module be registered in
+the justfile or deleted — pressure to put a non-guard in the guard list, from a guard that could
+not see the import in front of it. Every segment is recorded now.
+
+**`check_decided_vocabulary.py` was split, and the split is the lesson from its own reversal.**
+`decided_decisions.py` holds `SCANNED`, `EXEMPT` and `RULES`; the checker holds the scanning. Three
+decisions here have now been reversed — the ranking unit, the reviewer's existence, and the pricing
+axis — and **the 2026-08-31 pricing reversal moved the pattern without moving the exemptions.** An
+entry for `**per repository**`, written when that was the DECIDED side, went on exempting the most
+emphatic statement of the now-REJECTED side: `$99 **per repository** per month` reported ok while
+the unbolded sentence one character apart was caught. The reversed pattern was also too narrow,
+catching one of five realistic phrasings. Keeping the two lists adjacent and away from the scanning
+code is what makes the pair visible in review.
+
+**And the guard could be emptied without complaining.** Sabotaging the whole mechanism — `RULES =
+()` — printed `ok` and exited 0, identical to a clean document, because only the paragraph count
+was floored. `len(RULES)` and the number of documents actually read are floored now, and
+`tests/unit/guards/test_decided_vocabulary_reversal.py` drives `main()` over a fixture project:
+seven phrasings of the rejected pricing axis that must fire, five true cost-or-volume sentences
+that must not, and the printed counts. It fails against both historical defects.
+
 **Owns:** the HTTP webhook, the CLI, health, configuration, and the contracts at the edge.
 **Must not:** let the two adapters diverge. What a customer verifies with the CLI must be what
 the App runs.
@@ -1393,7 +1508,7 @@ deduplication, live registry lookup, date injection, per-category thresholds —
 size, and the shared reason: they improve a ratio without creating a correct finding, which is not
 what the closure turned on.
 
-`docs/CORRECTIONS.md` entry 7 lists what the `ours_caught` mis-read voided, and — checked and
+`docs/engineering/CORRECTIONS.md` entry 7 lists what the `ours_caught` mis-read voided, and — checked and
 re-derived — what it did not.
 
 ### `population.assert_intersects` — the clean-zero rule, enforced
@@ -1803,7 +1918,7 @@ dead in the tree with a promise in its header as the only evidence it was meant 
 
 The empty-window case is the dangerous one. A stale clone returns **0 people, 0 changes** for every
 file — which reads as a quiet, untouched file and is the exact opposite of what a silent instrument
-means. → `docs/CORRECTIONS.md`, the clean-zero rule.
+means. → `docs/engineering/CORRECTIONS.md`, the clean-zero rule.
 
 **`review_window.py` exists because bounding time and counting files are two concerns**, and
 because bounding time is the half that was wrong. `ending_at(stamp, days, site)` is a pure function
@@ -2591,6 +2706,19 @@ for here.
 **`.gcloudignore` did not exist**, so a source deploy uploaded every tracked research file, every
 test and the whole of `.git` — 497 MB of `research/` alone, none of which the image copies.
 
+**AND THE DEPLOY COMMAND ITSELF LIVED IN ONE PERSON'S SHELL HISTORY UNTIL 2026-08-31.** On that day
+the deployed revision was three days old while the branch carried a rewritten comment — and because
+the App reviews every push and wins the head-SHA idempotency race against a local run, the pull
+request kept showing the OLD build's output. **A live comment had quietly stopped being evidence
+about the working tree**, which is the same class as a green test that asserts nothing. It cost two
+rounds of confusion before anybody suspected the image rather than the code. `just deploy` is the
+command now, with the health check inside it: a revision serving 100% of traffic and answering
+nothing looks identical to a good one in the deploy output.
+
+Env, secrets, the service account and `--no-cpu-throttling` are properties of the SERVICE, and a
+source deploy preserves them — so the recipe does not repeat them and cannot drift from what is
+running. `gcloud run services describe quantamind-reviewer` is the reader for those.
+
 ### The comment stopped explaining the product
 
 The posted body carried a paragraph of method — "ranked by prior-fix history", "the budget cut
@@ -2908,6 +3036,48 @@ paid plan or public repositories. Measured on this repository while it was priva
 **Python-only, and the tree-sitter constraint was NOT spent to get there.** `check()` already
 returns `UNCHECKABLE`/`LANGUAGE_UNSUPPORTED` for every non-Python path, and `UNCHECKABLE` never
 blocks, so a JS file cannot fail the gate and `pyproject.toml` still declares `dependencies = []`.
+
+### The cost view on the web — a third report, not a third surface
+
+`serve/web/pages.repository()` renders compliance, outcomes and now cost as three `<pre>` blocks
+behind **one** `mine()` ownership test. A route of its own would have been a second place to get
+that check right, and the check is the only thing standing between one customer's spend and
+another's browser. Sabotaged: removing the ownership test fails three tests by name, including one
+that puts a cost on somebody else's repository and requires the figure to appear on **no** page
+this account can reach — not merely that the page 404s.
+
+**AND `render/page.py` HAD NO TESTS AT ALL.** Deleting the escaping from `pre()` — the helper every
+one of those three reports passes through — broke nothing in the suite. The escaping was correct;
+nothing held it there, so the next edit to that line would have been silent. `test_page.py` now
+covers `escaped`, `pre`, `link` and `page`, and all three escaping sabotages fail by name,
+including dropping `quote=True`, which matters because an href is an attribute context and a value
+that closes the quote escapes the attribute without ever needing a `<`.
+
+### `store/costs.py` + `quantamind cost` — the columns that were written and never read
+
+`store/reviews.bank()` has filled `request_count`, `tokens_in` and `tokens_out` on every delivery
+since A5. **No `SELECT` anywhere in `src/` touched any of them.** Every cost figure quoted about
+this product came from the research bench rather than from a delivery, and `product-build.md` says
+what that costs: without it, *"BYOK pricing and the free-tier cap are both guesses"*.
+
+That is the fourth instance this session of something written, documented, and never read or
+invoked — after `sweep()`, the permission preflight, and D1f's own wiring.
+
+**THE TWO ZEROS ARE THE WHOLE DESIGN.** "No reviews recorded" and "reviews that consulted no model"
+both total zero and mean opposite things: nothing has run here, versus the ranker ran and
+deliberately read nothing, which is a decision the allocator made. `Costs.reviews` and
+`Costs.billed` are separate counts and `per_review` raises `NothingRecorded` rather than dividing
+by zero — the refusal is rendered, not caught and hidden. This is not hypothetical: the store root
+in this working copy holds an owner directory with no database inside it, so the empty case is the
+one an operator meets first.
+
+**THE MEAN IS OVER BILLED REVIEWS AND THE LINE SAYS SO.** Averaging spend across reviews that never
+called a model understates what a paid review costs, which is the number a price has to cover.
+Sabotaged both ways: dividing by all reviews, and counting every review as billed. Each fails two
+tests by name.
+
+`render/dashboard.py` renders both views because they are two readings of one population — the same
+`review` rows, once for what became of them and once for what they spent.
 
 ### `serve/commands/` — one module per thing the CLI can be asked to do
 
@@ -3250,7 +3420,7 @@ would have been reported as a real mismatch in a real workflow. It now requires
 7–40 character hex run, so a cache key or a colour constant returned `UNRESOLVABLE` and
 `publishable.gate` **dropped the finding** — the gate's only demonstrated behaviour over 38 real
 findings. "Not an external claim" is now `NO_CLAIM` and publishes; "an external claim we cannot
-settle" still drops, because `docs/CORRECTIONS.md` entry 8 is a verifier that defaulted the other
+settle" still drops, because `docs/engineering/CORRECTIONS.md` entry 8 is a verifier that defaulted the other
 way and confirmed every false claim it existed to refute. The trigger is narrowed by requiring
 denial-or-tag phrasing, not by removing the check.
 

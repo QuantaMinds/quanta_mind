@@ -64,7 +64,7 @@ the conversational arm.
 **A finding about code no test touches is `UNCOVERED`, and that is a third value.** It is not
 evidence the finding is wrong. Collapsing "no test covers this" into "the tests say it is fine" is
 the same defect as collapsing UNRESOLVABLE into CONFIRMED, and that one shipped a verifier that
-confirmed every false claim it was built to refute. → `docs/CORRECTIONS.md` entry 8
+confirmed every false claim it was built to refute. → `docs/engineering/CORRECTIONS.md` entry 8
 
 ## Step 0, before the arm — three checks, each of which can end it
 
@@ -120,7 +120,7 @@ adjudicated findings, 12 correct, and a perfect verifier for every failure class
 **C/n = 16.7%**, against our own 5.8% today. **A verifier deletes; it cannot create.** (This
 document first compared that to "a 49% field floor", which `publishing-rules.md` bars: 49% is a
 BEHAVIOURAL figure — did a developer change the code — and 16.7% is truth-adjudicated.
-→ `docs/CORRECTIONS.md` entry 9) Execution
+→ `docs/engineering/CORRECTIONS.md` entry 9) Execution
 grounding deletes more accurately than a prompt does. It does not produce a correct finding that
 was not already there.
 
@@ -189,7 +189,7 @@ population it was not measured on.
 
 A corpus of semantic findings **about source code covered by an existing suite**, large enough that
 7 correct findings do not collapse to 2. That is a fresh corpus and a fresh hand-labelling round —
-the thing design 14 spent and the thing `docs/CORRECTIONS.md` entry 6 is about.
+the thing design 14 spent and the thing `docs/engineering/CORRECTIONS.md` entry 6 is about.
 
 **Recorded as a closed road for this pool. Not retried on it.** The mechanism remains untested
 rather than refuted, and the distinction is the whole point of stopping here: **an arm run at a 31%

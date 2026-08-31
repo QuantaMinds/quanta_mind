@@ -22,13 +22,14 @@ WHY:  **A figure-extraction check would have caught none of the six defects that
       that the rejected side is not stated as current. Each rule names the decision it enforces
       and where that decision is recorded, so a rule that outlives its decision can be found and
       removed rather than worked around.
-IMPORTS: scripts/guard/discovery.py; stdlib re. No project imports.
+IMPORTS: scripts/guard/discovery.py, scripts/guard/coverage.py,
+         scripts/guard/records/decided_decisions.py -- which holds SCANNED, EXEMPT and RULES.
+         No project imports.
 CONSUMED BY: `just guards`; CI.
 """
 
 from __future__ import annotations
 
-import re
 import sys
 from pathlib import Path
 
@@ -37,63 +38,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from coverage import assert_examined, guarded, refuse_path_argument
 from discovery import Violation, project_root, report
 
-SCANNED = ("docs/product/QUANTAMIND.md",)
-# A line carrying any of these is discussing the decision rather than asserting the losing side.
-EXEMPT = re.compile(
-    # Marked as not shipping, or as the rejected side of a decision.
-    r"~~|NOT BUILT|NOT SELLABLE|not built|closed on evidence|used to|no longer|superseded|"
-    r"retired|road not taken|were written when|rejected|would\s+\w+|"
-    # Describing somebody else's product. A price range attributed to a vendor is about them.
-    r"incumbent|competitor|CodeRabbit|Greptile|Qodo|Bugbot|Macroscope|Aikido|CodeScene|"
-    r"\$[\d,]+[^ ]{1,3}[\d,]+ per seat|sold \*\*per seat\*\*|reviewer sold|"
-    # A comparison row whose OWN column already carries the decided value.
-    r"\*\*per repository\*\*",
-    re.I,
-)
-
-
-class Rule:
-    """One decision, the pattern that contradicts it, and where the decision is recorded."""
-
-    __slots__ = ("decided", "pattern", "recorded")
-
-    def __init__(self, decided: str, pattern: str, recorded: str) -> None:
-        self.decided = decided
-        self.pattern = re.compile(pattern, re.I)
-        self.recorded = recorded
-
-
-RULES = (
-    Rule(
-        "allocation ranks FILES, not functions",
-        r"rank(?:s|ing|ed)?\s+(?:the\s+)?functions?\b|top-ranked function|"
-        r"every changed function|names?\s+(?:the\s+)?(?:one\s+)?function\b|"
-        r"for every function|ranked function",
-        "rank/order.py — `Site(path, line=0)`; docs/plans/delivered/feat-rank-fix-history.md",
-    ),
-    Rule(
-        "pricing is per REPOSITORY, not per seat",
-        r"\bper seat\b|\bper developer per month\b|/dev/mo",
-        'docs/product/QUANTAMIND.md — "price on the axis the costs actually sit on"',
-    ),
-    # **THIS RULE REPLACES ONE THAT ENFORCED THE OPPOSITE, AND THE REVERSAL IS RECORDED RATHER
-    # THAN QUIETLY APPLIED.** It used to read "no model reads the code -- `infer/` and `verify/`
-    # ship nothing", which was true of the product until 2026-08-20, when the reviewer half was
-    # brought back in as a product decision. A guard enforcing a withdrawn decision is worse than
-    # no guard: it turns the build red for saying the true thing.
-    #
-    # What is worth protecting NOW is the mechanism that makes shipping a model defensible, and it
-    # is the part a summary drops first: findings are published only after an isolated judge in a
-    # DIFFERENT model family clears them. Measured 2026-08-20 -- a same-family judge agreed with a
-    # careful rater on 34.9% of findings and certified the reviewer's own invented facts.
-    Rule(
-        "raw model findings are never published, and the judge is a DIFFERENT family",
-        r"publish(?:es|ed)? (?:the )?(?:raw |model )?findings? (?:directly|unverified|as[- ]is)|"
-        r"same model (?:family|as the reviewer)|"
-        r"no judge|without (?:a|the) judge|judge is the same",
-        'docs/product/QUANTAMIND.md — "THE JUDGE IS THE RELIABILITY MECHANISM"',
-    ),
-)
+from records.decided_decisions import EXEMPT, RULES, SCANNED
 
 
 def _paragraphs(text: str) -> list[tuple[int, str]]:
@@ -144,11 +89,13 @@ def main() -> int:
     root = project_root()
     violations: list[Violation] = []
     scanned = 0
+    read = 0
 
     for relative in SCANNED:
         document = root / relative
         if not document.is_file():
             continue
+        read += 1
         for number, block in _paragraphs(document.read_text(encoding="utf-8")):
             scanned += 1
             if EXEMPT.search(block):
@@ -168,9 +115,20 @@ def main() -> int:
                     )
 
     print(
-        f"[decided-vocabulary] {scanned} paragraph(s) against {len(RULES)} decision(s)", flush=True
+        f"[decided-vocabulary] {scanned} paragraph(s) in {read} document(s) "
+        f"against {len(RULES)} decision(s)",
+        flush=True,
     )
     assert_examined("paragraphs", scanned, 100, root)
+    # **THE RULE COUNT IS A POPULATION TOO, AND IT WAS UNGUARDED.** Sabotaging the whole mechanism
+    # -- emptying `RULES` -- printed `ok` and exited 0, identical to a document with no drift in it.
+    # Every document was still read, so the paragraph floor above passed while the guard checked
+    # nothing. A decision retired without its rule being removed on purpose reads the same way.
+    assert_examined("decisions", len(RULES), 3, root)
+    # **AND THE DOCUMENT COUNT.** `SCANNED` skips a path that does not exist, so a renamed or moved
+    # product document silently drops out of the scan. That is how the pricing documents went
+    # unscanned in the first place, in a different costume.
+    assert_examined("documents", read, 3, root)
     return report(violations, root, "decided-vocabulary")
 
 

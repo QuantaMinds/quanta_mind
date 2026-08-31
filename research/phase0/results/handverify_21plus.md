@@ -56,7 +56,7 @@ The generalisable form, and the reason this section exists rather than a clean t
 > inputs that produced it are the check on the check.**
 
 It is the same class the pipeline has now removed from five layers, reproduced inside the
-verification written to test for it. `docs/CORRECTIONS.md` records the class.
+verification written to test for it. `docs/engineering/CORRECTIONS.md` records the class.
 
 ## What this does not settle
 

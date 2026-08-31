@@ -46,7 +46,7 @@ used to stand here was an inversion. Incidents are not a proxy.
 precision caps at roughly one in seven — 85.3% of admitted events are not genuine repairs"*.
 **85.3% is the ranker's top-1 HIT rate** against a 72.0% null, n = 4,293, 17 of 17 repositories;
 one in seven — **14.7% — is its ERROR rate**, halved from the null's 28.0%. The success figure and
-its complement were both reported as failures. → `docs/CORRECTIONS.md` entry 11
+its complement were both reported as failures. → `docs/engineering/CORRECTIONS.md` entry 11
 
 **What survives without them:** the label carries known contamination — blind labelling put roughly
 **86% of symbol-overlap pairs** in the not-a-genuine-repair class, a different population reached a

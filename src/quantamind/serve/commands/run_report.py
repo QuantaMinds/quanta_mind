@@ -31,9 +31,11 @@ from collections.abc import Callable
 from pathlib import Path
 
 from quantamind.render.compliance_table import table as rule_table
+from quantamind.render.dashboard import costs as cost_table
 from quantamind.render.dashboard import table
 from quantamind.store import tenancy
 from quantamind.store.compliance import standing
+from quantamind.store.costs import spent
 from quantamind.store.lifecycle import board
 from quantamind.store.schema import open_store
 from quantamind.types.settings import SettingsError, load
@@ -74,6 +76,11 @@ def _for_repo(repo: str, report: Callable[[sqlite3.Connection, int], str]) -> in
 def run_dashboard(repo: str, limit: int) -> int:
     """`quantamind dashboard` — the outcome table for one repository."""
     return _for_repo(repo, lambda conn, repo_id: table(board(conn, repo_id, limit), repo))
+
+
+def run_cost(repo: str) -> int:
+    """`quantamind cost` — what this repository's reviews spent, from the rows that recorded it."""
+    return _for_repo(repo, lambda conn, repo_id: cost_table(spent(conn, repo_id), repo))
 
 
 def run_compliance(repo: str) -> int:

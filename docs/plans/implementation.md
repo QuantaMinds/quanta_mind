@@ -39,7 +39,7 @@ three months stale.
 | layer | modules | files |
 |---|---|---|
 | `types/` | **15** | `change.py`, `checked.py`, `commit.py`, `deep.py`, `env_values.py`, `finding.py`, `pooled_outcome.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `rule.py`, `settings.py`, `spend.py`, `touch.py`, `verdict.py` |
-| `store/` | **14** | `accounts.py`, `calibration.py`, `compliance.py`, `deliveries.py`, `drift.py`, `installations.py`, `lifecycle.py`, `migrations.py`, `reviews.py`, `rule_checks.py`, `schema.py`, `tables.py`, `tenancy.py`, `touches.py` |
+| `store/` | **15** | `accounts.py`, `calibration.py`, `compliance.py`, `costs.py`, `deliveries.py`, `drift.py`, `installations.py`, `lifecycle.py`, `migrations.py`, `reviews.py`, `rule_checks.py`, `schema.py`, `tables.py`, `tenancy.py`, `touches.py` |
 | `ingest/` | **13** | `app_auth.py`, `blob.py`, `change_shape.py`, `commits.py`, `diff.py`, `git_credentials.py`, `github_api.py`, `google_auth.py`, `history.py`, `pull_refs.py`, `reachability.py`, `review_window.py`, `worktree.py` |
 | `parse/` | **6** | `importers.py`, `imports.py`, `languages.py`, `python_names.py`, `suite_reach.py`, `units.py` |
 | `rank/` | **6** | `baseline.py`, `events.py`, `firing.py`, `history_rates.py`, `order.py`, `score.py` |
@@ -47,7 +47,7 @@ three months stale.
 | `infer/` | **7** | `change_review.py`, `change_summary.py`, `diff_cap.py`, `gemini.py`, `prompt_once.py`, `summary_prompt.py`, `vertex.py` |
 | `verify/` | **11** | `anchor.py`, `blocking.py`, `external_facts.py`, `pin_check.py`, `pin_mismatch.py`, `publishable.py`, `qualification.py`, `release_claims.py`, `releases.py`, `repeats.py`, `rule_check.py` |
 | `render/` | **15** | `comment.py`, `compliance_table.py`, `config.py`, `coverage_line.py`, `dashboard.py`, `deep_report.py`, `found_block.py`, `json_report.py`, `page.py`, `pin_block.py`, `replay_report.py`, `rule_block.py`, `shape_line.py`, `status_check.py`, `verdict_block.py` |
-| `serve/` | **11** | `blocking_status.py`, `cli.py`, `deep_review.py`, `health.py`, `listener.py`, `onboarding.py`, `retrospective.py`, `review_delivery.py`, `settle.py`, `webhook_github.py`, `working_clone.py` |
+| `serve/` | **12** | `blocking_status.py`, `cli.py`, `deep_review.py`, `health.py`, `listener.py`, `onboarding.py`, `pin_review.py`, `retrospective.py`, `review_delivery.py`, `settle.py`, `webhook_github.py`, `working_clone.py` |
 
 <!-- plan-state:end -->
 

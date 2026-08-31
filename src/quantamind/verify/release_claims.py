@@ -5,8 +5,8 @@ WHAT: The patterns `verify/releases.py` matches against a finding — what count
 WHY:  **`BOUND` IS A SAFETY PROPERTY AND NOT A TIDY-UP.** PyPI has packages called `pin`, `Some`
       and `dependency`. Scanning near a version number for a name-shaped token finds them, and the
       oracle then CONFIRMS — publishing a finding on a name collision, which is the direction
-      `docs/CORRECTIONS.md` entry 8 records a verifier shipping. Only these three forms are read as
-      a sentence naming the distribution it is talking about.
+      `docs/engineering/CORRECTIONS.md` entry 8 records a verifier shipping. Only these three
+      forms are read as a sentence naming the distribution it is talking about.
 
       **`NOT_A_PACKAGE` IS A SECOND LAYER AND CANNOT BE THE FIRST.** It is a stop-list of English
       words, and a stop-list against PyPI's namespace is a race that cannot be won — which is why

@@ -35,7 +35,12 @@ TOKEN = re.compile(r"\b(guard|ci|hook):([A-Za-z0-9_./-]+)")
 
 # Recipe names in the justfile: a line starting at column 0 ending in ':'.
 # `from discovery import ...` / `import discovery` inside scripts/guard/, at column 0.
-IMPORT = re.compile(r"^(?:from|import)\s+([a-z_][a-z0-9_]*)", re.MULTILINE)
+# **EVERY SEGMENT, NOT JUST THE FIRST.** This read `([a-z_][a-z0-9_]*)` and stopped at the first
+# dotted segment, so `from records.decided_decisions import RULES` recorded `records` and left
+# `decided_decisions` looking like a guard nobody invokes. The orphan report then demands that a
+# shared data module be registered in the justfile or deleted -- pressure to put a non-guard in the
+# guard list, from a guard that could not see the import in front of it.
+IMPORT = re.compile(r"^(?:from|import)\s+([a-z_][a-z0-9_.]*)", re.MULTILINE)
 
 JUST_RECIPE = re.compile(r"^([a-z][a-z0-9-]*)\s*(?:[A-Za-z0-9_= \"'.]*)?:", re.MULTILINE)
 
@@ -124,9 +129,10 @@ def check_no_orphan_guards(settings: Path, root: Path) -> list[Violation]:
     # was reported as an orphan and the obvious fix was to add a second name. Reading the imports
     # states the actual property, and it keeps covering discovery.py without naming it.
     imported = {
-        module
+        segment
         for path in guard_dir.rglob("*.py")
         for module in IMPORT.findall(path.read_text(encoding="utf-8"))
+        for segment in module.split(".")
     }
 
     violations: list[Violation] = []

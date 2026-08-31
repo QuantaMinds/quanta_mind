@@ -23,11 +23,17 @@ from __future__ import annotations
 
 from typing import Protocol
 
-GOAL_LINES = 8
-
 # **EVERY ONE OF THESE IS MANDATORY.** A test asserts each appears; see the module docstring.
+#
+# **"Goal — from the PR description" USED TO BE THE FIRST OF FIVE AND IS NOW RENDERED ELSEWHERE.**
+# It quoted `Summary.goal`, which `infer/change_summary` fills from the author's own title and body
+# — deterministic content riding on a model's object. `render/context/goal_block.py` (D6a) quotes
+# the same text from `ingest/context/tickets.behind()`, and for a while BOTH ran: the first live
+# delivery of D6a to `QuantaMinds/quanta_mind#91` would have printed the description twice, in a
+# product whose measured weakness is saying the same thing twice (17.3% redundancy against Qodo's
+# 1.0%). One fact, one renderer, and the surviving one is the deterministic one — it is there when
+# the model is off, refused, or out of tokens, and this one never was.
 SECTIONS = (
-    "**Goal — from the PR description**",
     "**What changed**",
     "**Does it do what the PR says?**",
     "**Will it break anything?**",
@@ -70,22 +76,22 @@ def _breaks(summary: Stated) -> str:
 
 
 def verdicts(summary: Stated) -> list[str]:
-    """The mandatory sections, in the order the reader needs them."""
-    if summary.goal.strip():
-        quoted = "\n".join(f"> {ln}" for ln in summary.goal.strip().splitlines()[:GOAL_LINES])
-        goal = [SECTIONS[0], "", quoted, ""]
-    else:
-        goal = ["**Goal — from the PR description**", "", "> _The PR description states none._", ""]
+    """The mandatory sections, in the order the reader needs them.
 
+    **THE GOAL IS NOT QUOTED HERE ANY MORE, AND `achieves_goal` IS STILL JUDGED AGAINST IT.**
+    `render/context/goal_block.py` prints it from the same `ingest/diff.stated_goal` read, above
+    this block, on every delivery rather than only the ones where a model answered. What the reader
+    loses is nothing; what they stop getting is the same paragraph twice.
+    """
     achieved = "Yes" if summary.achieves_goal else "**No**"
     if summary.achieves_goal is None:
         achieved = "**Cannot tell**"
 
-    lines = [*goal, SECTIONS[1], "", summary.what_changed, ""]
-    lines.append(f"{SECTIONS[2]} {achieved} — {summary.reasoning}")
+    lines = [SECTIONS[0], "", summary.what_changed, ""]
+    lines.append(f"{SECTIONS[1]} {achieved} — {summary.reasoning}")
     if summary.impact:
         lines.append(f"**Effect on callers:** {summary.impact}")
-    lines.append(f"{SECTIONS[3]} {_breaks(summary)} — {summary.breaks_why}")
+    lines.append(f"{SECTIONS[2]} {_breaks(summary)} — {summary.breaks_why}")
     if summary.convention:
         lines.append(f"**Breaks a rule you wrote down:** {summary.convention}")
     lines.append("")

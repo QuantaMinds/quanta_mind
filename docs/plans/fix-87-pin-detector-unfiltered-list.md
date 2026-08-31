@@ -39,7 +39,7 @@ hex token alone is not a claim about a commit; a hex token **plus** `DENIES_EXIS
   nothing is pretended)
 - hex, denial or tag assertion, no repo → **`UNRESOLVABLE`** (drops, unchanged)
 
-**The safety policy is preserved deliberately.** `docs/CORRECTIONS.md` entry 8 records a verifier
+**The safety policy is preserved deliberately.** `docs/engineering/CORRECTIONS.md` entry 8 records a verifier
 that defaulted to confirming and validated every false claim it existed to refute. A real external
 claim we cannot settle still drops.
 

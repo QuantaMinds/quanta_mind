@@ -169,7 +169,7 @@ def examine(
     if not settings.runs_model or not reading.paths:
         return None
     try:
-        return deep(
+        looked = deep(
             clone,
             head_sha,
             list(reading.paths),
@@ -177,6 +177,19 @@ def examine(
             changed=changed,
             gcloud=settings.gcloud_path,
         )
+        # **PRINTED WHERE THE NUMBERS ARE PRODUCED.** These five counts were logged by
+        # `serve/review_delivery.py`, which had to be handed every one of them to say a sentence
+        # about work it did not do. Moving the line here means the depth, the raw count and the
+        # three rejection counts have one reader, and a sixth count cannot be added without the
+        # line that reports it being right there.
+        print(f"[deliver] {reading.depth.value}: {reading.why}", flush=True)
+        print(
+            f"[deliver] model: {len(looked.anchored)} finding(s) kept of {looked.raw} raw "
+            f"({looked.unanchored} unanchored, {looked.refuted} refuted, "
+            f"{looked.withdrawn} withdrawn), consulted={looked.consulted}",
+            flush=True,
+        )
+        return looked
     except (InferenceFailed, Unavailable) as exc:
         print(f"[deliver] the model was unreachable, ranking still stands: {exc}", flush=True)
         return Deep((), 0, 0, 0, 0, 0, tuple(reading.paths), consulted=False)

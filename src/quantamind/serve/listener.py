@@ -84,6 +84,19 @@ class _Handler(BaseHTTPRequestHandler):
         print(f"[listener] {fmt % args}", flush=True)
 
     def do_GET(self) -> None:
+        # **THE GUARD do_POST HAS, WRITTEN FOR THE WEBHOOK AND NEVER APPLIED HERE.** A browser at
+        # `/` before any account store existed got a dropped connection and no status: the stdlib
+        # handler closes the socket on an unhandled exception, which nobody can see or report.
+        try:
+            self._get()
+        except Exception as exc:
+            print(
+                f"[listener] unhandled fault on GET {self.path}: {type(exc).__name__}: {exc}",
+                flush=True,
+            )
+            self._say(500, {"error": f"{type(exc).__name__}: {exc}"})
+
+    def _get(self) -> None:
         if self.path != HEALTH_PATH:
             # Everything a BROWSER reaches. `routes.get` builds a reply rather than writing one,
             # so a forged callback can be tested without a socket. Unknown paths 404 there.
@@ -101,10 +114,8 @@ class _Handler(BaseHTTPRequestHandler):
         self._say(200 if verdict.ok else 503, {"ok": verdict.ok, "detail": verdict.detail})
 
     def do_POST(self) -> None:
-        # A fault below must answer, not drop the connection. The stdlib handler lets an unhandled
-        # exception close the socket with NO response, which GitHub records as a failed delivery
-        # with no status -- the least diagnosable outcome available. Caught here, logged loudly,
-        # and answered 500 so a redelivery is a retry of something we can see went wrong.
+        # As above, and GitHub records a dropped POST as a failed delivery with no status -- the
+        # least diagnosable outcome. Answered 500 so a redelivery retries something we can see.
         try:
             self._post()
         except Exception as exc:

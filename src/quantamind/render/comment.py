@@ -1,6 +1,7 @@
 """The comment we post: what changed, whether it did what it said, and what nobody checked.
 
-WHAT: `comment(ranking, summary, findings, unresolved)` renders the body posted on a pull request.
+WHAT: `comment(ranking, summary, findings, unresolved, context)` renders the body posted on a
+      pull request.
 WHY:  **THE ONE QUESTION A REVIEW ANSWERS IS WHETHER THE CHANGE DID WHAT IT SAID WITHOUT
       DISTURBING ANYTHING ELSE.** An earlier version listed files to read and nothing more, which
       told a developer where to look without telling them anything about their own change. Before
@@ -14,11 +15,22 @@ WHY:  **THE ONE QUESTION A REVIEW ANSWERS IS WHETHER THE CHANGE DID WHAT IT SAID
       which is the failure this product exists to refuse. So it is stated, in one line, until
       `allocate`/`parse` can answer it.
 
+      **THE GOAL BLOCK IS FIRST, AND IT DOES NOT DEPEND ON THE MODEL.** Intent used to reach this
+      comment only through `verdict_block.verdicts(summary)` — which quoted `Summary.goal`, filled
+      from the author's own text, so a DETERMINISTIC fact rode on a model's object and vanished
+      whenever `infer/` was off, refused, or out of tokens. Those deliveries answered *is anything
+      wrong here* and never *is this what you said you were doing*.
+      `render/context/goal_block.py` prints it from the same `ingest/diff.stated_goal` read on
+      every delivery, and `verdict_block` no longer prints it at all: for one commit both did, and
+      a real posted comment would have carried the author's description twice.
+
       **A FINDING IS PRINTED WITH ITS LINE AND NOTHING ELSE.** No severity we cannot calibrate, no
       confidence we have not measured. Raw findings ran 66.7-82.1% wrong across four blind pools,
       so what publishes here has passed `verify/publishable.gate()` and is still shown as a claim
       to check rather than a defect to fix.
-IMPORTS: types.{finding,ranking,verdict}. Nothing to its right, and nothing from `infer/`.
+IMPORTS: types.{checked,finding,ranking,verdict}, render.{context.goal_block,found_block,
+      verdict_block}, and `ingest.context.tickets` for the value object D6a retrieves. Nothing to
+      its right, and nothing from `infer/`.
 CONSUMED BY: serve, which posts it; the live tests, which diff it against a golden file.
 """
 
@@ -26,6 +38,8 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
+from quantamind.ingest.context.tickets import Context
+from quantamind.render.context.goal_block import goal
 from quantamind.render.found_block import found
 from quantamind.render.verdict_block import Stated, verdicts
 from quantamind.types.checked import Checked, Outcome
@@ -41,7 +55,10 @@ BLIND = (
     "⚠️ **I could not review this change.** {why}\n\n"
     "Nothing below is a verdict on your code — it is only what the ranking could still say."
 )
-MAX_DEPENDENTS = 5
+MAX_DEPENDENTS = 3
+"""Dependents named before the count takes over. **Five made the single longest line in a
+real posted comment** — five `src/quantamind/...` paths wrapped across a screen, and the
+remainder is stated either way, so the fourth and fifth bought nothing a reader acts on."""
 LOOK = "**Look here first**"
 NOT_CHECKED = (
     "_Callers are found by static Python import only: a dynamic import, a re-export, or another "
@@ -78,6 +95,38 @@ def _headline(
     return f"{GOOD} It does what the PR says, and nothing that imports it breaks."
 
 
+def beyond_the_ranking(
+    *,
+    summary: Stated | None = None,
+    findings: Sequence[Finding] = (),
+    checks: Sequence[Checked] = (),
+    blind: str = "",
+    context: Context | None = None,
+) -> bool:
+    """Whether anything but the ranking has something to say, so the fuller body is worth rendering.
+
+    **THIS WAS AN EXPRESSION AT THE CALL SITE AND IT WAS MISSING A TERM.** `serve/review_delivery`
+    chose between this body and the ranking-only one with
+    `told is not None or kept or checks`, which omits `blind` — so when the model was UNREACHABLE
+    and the change had no findings and no declared rules, the comment fell back to the ranking and
+    **the "I could not review this change" banner was discarded**. A refusal degrading into a
+    comment that looks ordinary is the exact failure `_headline` exists to prevent, defeated one
+    layer above it. Found by this product reviewing its own pull request,
+    `QuantaMinds/quanta_mind#91`.
+
+    **IT TAKES THE SAME ARGUMENTS `comment()` DOES, ON PURPOSE.** One signature decides both what
+    is rendered and whether it is worth rendering, so a new section cannot be added to one without
+    the other refusing it — which is how the missing term survived in the first place.
+    """
+    return bool(
+        summary is not None
+        or findings
+        or checks
+        or blind
+        or (context is not None and not context.empty())
+    )
+
+
 def comment(
     ranking: Ranking,
     *,
@@ -86,6 +135,7 @@ def comment(
     checks: Sequence[Checked] = (),
     unresolved: Sequence[Unresolved] = (),
     blind: str = "",
+    context: Context | None = None,
 ) -> str:
     """The comment body: a verdict, then the mandatory sections, then what to fix.
 
@@ -101,6 +151,16 @@ def comment(
     read, total = len(ranking.funded()), len(ranking.units)
     violations = [c for c in checks if c.outcome is Outcome.VIOLATED]
     lines = [HEADER, "", _headline(summary, findings, len(violations), blind), ""]
+
+    # **ABOVE THE MODEL'S VERDICT, AND PRINTED EVEN WHEN THERE IS NO VERDICT.** This block is the
+    # author's own words plus one API read, so it survives `infer/` being off, refused, or out of
+    # tokens — the deliveries where the comment used to carry no statement of intent at all. It is
+    # deliberately NOT suppressed by `blind`: a review that could not run still tells the reader
+    # what the change claims to be for, which is the half of the question we can always answer.
+    if context is not None:
+        block = goal(context)
+        if block:
+            lines += [block, ""]
 
     if summary is not None and not blind:
         lines += verdicts(summary)

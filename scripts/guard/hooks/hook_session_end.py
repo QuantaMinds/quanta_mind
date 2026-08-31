@@ -1,18 +1,24 @@
 """Stop hook: record what a session changed, and what it did not verify.
 
 WHAT: At the end of a session, writes a short record to docs/plans/ naming the
-      branch, the files changed against main, and whether docs/CODEBASE.md was
-      updated alongside them.
+      branch, the files changed against main, and whether the CODEBASE map was
+      updated alongside them. The records are gitignored -- they are a transcript,
+      not repository content.
 WHY:  The definition of done in AGENTS.md has seven items, and the ones that get
       skipped are the ones nobody can see were skipped -- the map not updated, the
-      verify never run. This makes the omission a file in the repository rather
-      than something the next session has to infer.
+      verify never run. This puts the omission on disk where the next session
+      reads it, rather than leaving it to be inferred.
+
+      **THE RECORDS ARE GITIGNORED AND THIS PARAGRAPH USED TO SAY OTHERWISE.** It
+      claimed the omission became "a file in the repository". Twelve were committed
+      once, and `a38c2d1` gitignored the pattern precisely so a stray `git add -A`
+      could not do it again. They are a local transcript. 27 accumulated unread.
 
       It never blocks. A Stop hook that fails is a session that ends in an error
       the developer did not ask for, and the record is worth less than the
       interruption costs.
-IMPORTS: stdlib subprocess, sys, datetime, pathlib, plus discovery.project_root
-      (stdlib-only, alongside).
+IMPORTS: stdlib subprocess, sys, datetime, pathlib; discovery.project_root and
+      records.check_docs_sync.MAP_PATH alongside (both stdlib-only).
 CONSUMED BY: .claude/settings.json, Stop.
 """
 
@@ -30,8 +36,17 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from discovery import project_root
 
+# **IMPORTED, NOT REDECLARED, AND THAT IS THE WHOLE OF THIS MODULE'S HISTORY.** This file held its
+# own `MAP_PATH = "docs/CODEBASE.md"`. On 2026-08-13 the map moved to `docs/engineering/` by
+# `git mv`; that commit updated the copy in `check_docs_sync.py` and missed this one. For
+# eighteen days `touched_map` compared every changed path against a file that does not exist, so
+# **27 of 27 session records reported `updated: no`** and every session touching `src/` printed
+# the warning. A perfect zero from a comparison that could not return anything else -- the same
+# class as `candidate in ours_caught`, logged as the clean-zero rule in `AGENTS.md` rule 14.
+# One name for one path is what stops the next rename doing it again.
+from records.check_docs_sync import MAP_PATH
+
 PLANS_DIR = Path("docs") / "plans"
-MAP_PATH = "docs/CODEBASE.md"
 BASE_REF = "main"
 GIT_TIMEOUT_S = 30
 
@@ -68,25 +83,35 @@ def build_record(root: Path) -> tuple[str, str] | None:
     if not changed and not uncommitted:
         return None
 
+    map_path = MAP_PATH.as_posix()
     touched_src = any(f.startswith("src/") for f in changed)
-    touched_map = MAP_PATH in changed
+    touched_map = map_path in changed
     stamp = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     lines = [
         f"# Session record — {branch}",
         "",
-        f"Written by scripts/guard/hook_session_end.py at {stamp}.",
+        f"Written by scripts/guard/hooks/hook_session_end.py at {stamp}.",
         "Informational. Nothing here was blocked or enforced.",
         "",
         f"- Branch: `{branch}`",
         f"- Files changed vs `{BASE_REF}`: {len(changed)}",
         f"- Uncommitted at session end: {len(uncommitted)}",
-        f"- `{MAP_PATH}` updated: {'yes' if touched_map else 'no'}",
+        f"- `{map_path}` updated: {'yes' if touched_map else 'no'}",
         "",
     ]
-    if touched_src and not touched_map:
+    # **THE RECORD SAYS SO WHEN ITS OWN SUBJECT IS MISSING.** `updated: no` is the answer both
+    # when the map was not touched and when the path is wrong, and those two must not print the
+    # same line -- which they did, 27 times, for eighteen days.
+    if not (root / MAP_PATH).is_file():
         lines += [
-            f"> This session changed `src/` without touching `{MAP_PATH}`.",
+            f"> **`{map_path}` does not exist, so the line above is not a measurement.**",
+            "> Whatever renamed it did not update `check_docs_sync.MAP_PATH`.",
+            "",
+        ]
+    elif touched_src and not touched_map:
+        lines += [
+            f"> This session changed `src/` without touching `{map_path}`.",
             "> `just check` will fail on docs-sync until it does.",
             "",
         ]
