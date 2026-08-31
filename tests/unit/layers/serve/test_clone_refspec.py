@@ -26,15 +26,38 @@ CONSUMED BY: `just check`.
 
 from __future__ import annotations
 
+import os
 import subprocess
 from pathlib import Path
 
 BRANCHES = "+refs/heads/*:refs/remotes/origin/*"
 
 
+# **A COMMIT NEEDS AN IDENTITY AND A CI RUNNER HAS NONE.** `git commit` fails with
+# `fatal: empty ident name` where no `user.name` is set, so this fixture passed on every
+# developer's machine and failed on GitHub Actions. Same shape as the ambient
+# `http.extraheader` in `test_git_credentials.py`, same lesson: a test that borrows the
+# machine's git configuration is testing the machine.
+#
+# **IT CANNOT BE REPRODUCED ON A MAC**, which is why it reached CI at all — macOS supplies a
+# full name from the user record where a Linux runner has none, so `GIT_CONFIG_GLOBAL=/dev/null`
+# still commits here. CI is the only oracle for this one, and saying so beats claiming a local
+# check that did not happen. Supplied per-process; nothing is written to any config.
+IDENTITY = {
+    "GIT_AUTHOR_NAME": "t",
+    "GIT_AUTHOR_EMAIL": "t@example.com",
+    "GIT_COMMITTER_NAME": "t",
+    "GIT_COMMITTER_EMAIL": "t@example.com",
+}
+
+
 def git(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        ["git", "-C", str(cwd), *args], capture_output=True, text=True, timeout=60
+        ["git", "-C", str(cwd), *args],
+        capture_output=True,
+        text=True,
+        timeout=60,
+        env={**os.environ, **IDENTITY},
     )
 
 
