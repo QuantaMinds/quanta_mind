@@ -1,8 +1,18 @@
 # D6b — human context as model input
 
-**Status: PRE-REGISTERED AND NOT RUN. The corpus cannot answer the question at the standard this
-project holds, and that was established before any arm was executed.** The bars below are fixed and
-stand for whenever a corpus exists. Nothing here has seen an outcome.
+**Status: RUN 2026-08-31. NULL against all three bars, point estimate NEGATIVE.**
+→ `docs/findings/reviewer/D6B_HUMAN_CONTEXT_NULL_2026-08.md`.
+
+Everything below the line was written BEFORE the run and is unedited, except this header and the
+two corrections at the foot, which record defects the run exposed in this document itself. The
+power analysis below stands and is why the null is reported as uninformative about a small effect
+rather than as evidence of none.
+
+| bar | required | measured |
+|---|---|---|
+| effect | > 0 | **-3** (54 -> 51 golden defects) |
+| McNemar exact | p < 0.05 | **0.4807** (7:11) |
+| repositories positive | >= 4 of 6 | **1 of 4** -- and see correction 1, this bar was unmeetable |
 
 ---
 
@@ -124,3 +134,21 @@ which is the sentence `TEMPLATE.md` was written to enforce.
 - If the two arms produce identical output on more than ~85% of exposed changes, the discordant
   count collapses and no achievable n will help — that would say the model ignores the block, which
   is a finding about the prompt and not about context.
+
+
+---
+
+## Corrections, written after the run
+
+**1. Bar three could never have been met.** ">= 4 of 6 repositories individually positive" was
+copied from `defect-return-external-preregistration.md` without checking that this corpus has six
+repositories. It has five, and four after the discourse exclusion below. **A threshold nobody
+checked was reachable is not a bar.** Same class of error as the power calculation design fourteen
+skipped -- appearing in a document whose whole purpose was to avoid that class.
+
+**2. The exposed population is 36, not 33.** The feasibility script read each golden entry's `url`;
+the runner reads `original`. They differ on 13 of 50, where `url` is a synthetic pull request the
+benchmark harness created and `original` is the real commit. The feasibility number was therefore
+partly measuring the harness's text as the author's. The runner excludes commit-backed entries --
+a commit has no description and no ticket, so no arm can be given context about it -- leaving 37
+real pull requests, 36 exposed. **"Two code paths, one column", in the feasibility measurement.**

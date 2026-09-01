@@ -688,8 +688,27 @@ Pulled in as **two separate uses**, because they succeed or fail independently:
       `comment()` verbatim. → `docs/plans/feat-d6a-the-goal-behind-the-change.md`
       ~~The ticket and discussion behind the files being changed,
       shown in the comment. Deterministic, and worth something whatever the model does.~~
-- [ ] **D6b The same text as MODEL input. PRE-REGISTERED, AND NOT RUN — THE CORPUS CANNOT ANSWER
-      IT.** → `docs/plans/preregistrations/reviewer/d6b-human-context-preregistration.md`,
+- [x] **D6b The same text as MODEL input. PRE-REGISTERED, RUN, AND NULL — POINT ESTIMATE
+      NEGATIVE.** → `docs/findings/reviewer/D6B_HUMAN_CONTEXT_NULL_2026-08.md`. 36 exposed changes,
+      116 golden defects, identical prompts but one appended block of stated goal and ticket titles.
+      **Control 54 golden defects found, context 51 (−3); McNemar 7:11, p = 0.4807; 1 of 4
+      repositories positive.** All three pre-registered bars fail.
+      **THE MECHANISM IS VISIBLE: THE CONTEXT ARM SAID MORE AND FOUND LESS** — 143 candidates
+      against 131, +15 false positives, −3 true positives, precision 41.2% → 35.7%. Told what a
+      change is for, the model generates findings about whether it achieves that, which a golden
+      DEFECT list scores as wrong by construction. **That is a question about what we measure as
+      much as about whether context helps.**
+      **The null does not license "human context hurts"** — p = 0.48 is noise-consistent and the
+      pre-registered power analysis said this corpus detects nothing below +32%. Sixth lever to move
+      nothing; the first to trend the wrong way.
+      **THE RUN EXPOSED TWO DEFECTS IN THE PRE-REGISTRATION ITSELF**, recorded there rather than
+      quietly fixed: the "≥ 4 of 6 repositories" bar was unmeetable, because the corpus has five and
+      four after excluding 13 commit-backed entries; and the feasibility script read a different URL
+      field from the runner, so its "33 exposed" was partly the benchmark harness's own synthetic
+      text rather than the author's. **Ticked on the measurement, not on a positive result** — the
+      row asked to pre-register a bar, the bar was set, the arm was run, and it did not clear.
+      Nothing in the product changed as a result, which is the correct consequence.
+      **UNUSED ROW TEXT BELOW, kept because it states the entry price for a real answer:** → `docs/plans/preregistrations/reviewer/d6b-human-context-preregistration.md`,
       reproducible by `scripts/measure/context/exposure.py`. The bars are fixed and stand.
       **The exposed population was measured first**: 33 of the 50 golden changes (66%) carry usable
       human context, using the product's own `tickets.behind`. On the other 17 the two arms are
@@ -705,8 +724,7 @@ Pulled in as **two separate uses**, because they succeed or fail independently:
       +10% effect. Two prerequisites also do not exist: `Ticket` carries no body (D6a fetches title
       and state only, so "the same text" has no text), and feeding ticket text to a model is a
       third destination `ingest/context/egress.py` does not yet name.
-      **This row stays unticked on purpose.** The work done is the pre-registration and the
-      feasibility proof, which is what the row asked for when it said "pre-register a bar".
+
 - [x] **D6c Sources, cheapest first.** `ingest/context/egress.py` + `ingest/context/elsewhere.py`.
       Jira and Slack are REST and JSON over HTTPS, so `urllib` reaches both and
       `dependencies = []` holds; both take the customer's token rather than reading a credential

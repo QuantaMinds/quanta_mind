@@ -1,0 +1,382 @@
+{
+  "exposed": 36,
+  "too_thin": 4,
+  "not_a_pull": 10,
+  "scored": 36,
+  "tp_control": 54,
+  "tp_context": 51,
+  "better": 7,
+  "worse": 11,
+  "same": 18,
+  "mcnemar_p": 0.480682373046875,
+  "by_repo": {
+    "cal_dot_com": 4,
+    "grafana": -5,
+    "keycloak": -2,
+    "sentry": 0
+  },
+  "repositories_positive": 1,
+  "confirmed": false,
+  "detail": [
+    {
+      "repo": "calcom/cal.com",
+      "repo_file": "cal_dot_com",
+      "number": 10600,
+      "golden": 5,
+      "tp_control": 3,
+      "tp_context": 2,
+      "fp_control": 1,
+      "fp_context": 0
+    },
+    {
+      "repo": "calcom/cal.com",
+      "repo_file": "cal_dot_com",
+      "number": 10967,
+      "golden": 6,
+      "tp_control": 4,
+      "tp_context": 4,
+      "fp_control": 3,
+      "fp_context": 7
+    },
+    {
+      "repo": "calcom/cal.com",
+      "repo_file": "cal_dot_com",
+      "number": 22345,
+      "golden": 2,
+      "tp_control": 1,
+      "tp_context": 2,
+      "fp_control": 1,
+      "fp_context": 4
+    },
+    {
+      "repo": "calcom/cal.com",
+      "repo_file": "cal_dot_com",
+      "number": 7232,
+      "golden": 3,
+      "tp_control": 2,
+      "tp_context": 2,
+      "fp_control": 2,
+      "fp_context": 4
+    },
+    {
+      "repo": "calcom/cal.com",
+      "repo_file": "cal_dot_com",
+      "number": 8330,
+      "golden": 2,
+      "tp_control": 2,
+      "tp_context": 2,
+      "fp_control": 5,
+      "fp_context": 5
+    },
+    {
+      "repo": "calcom/cal.com",
+      "repo_file": "cal_dot_com",
+      "number": 11059,
+      "golden": 9,
+      "tp_control": 5,
+      "tp_context": 6,
+      "fp_control": 4,
+      "fp_context": 7
+    },
+    {
+      "repo": "calcom/cal.com",
+      "repo_file": "cal_dot_com",
+      "number": 14943,
+      "golden": 2,
+      "tp_control": 2,
+      "tp_context": 2,
+      "fp_control": 3,
+      "fp_context": 1
+    },
+    {
+      "repo": "calcom/cal.com",
+      "repo_file": "cal_dot_com",
+      "number": 14740,
+      "golden": 6,
+      "tp_control": 2,
+      "tp_context": 5,
+      "fp_control": 5,
+      "fp_context": 3
+    },
+    {
+      "repo": "grafana/grafana",
+      "repo_file": "grafana",
+      "number": 79265,
+      "golden": 5,
+      "tp_control": 1,
+      "tp_context": 1,
+      "fp_control": 1,
+      "fp_context": 2
+    },
+    {
+      "repo": "grafana/grafana",
+      "repo_file": "grafana",
+      "number": 103633,
+      "golden": 3,
+      "tp_control": 0,
+      "tp_context": 0,
+      "fp_control": 4,
+      "fp_context": 6
+    },
+    {
+      "repo": "grafana/grafana",
+      "repo_file": "grafana",
+      "number": 76186,
+      "golden": 3,
+      "tp_control": 2,
+      "tp_context": 1,
+      "fp_control": 0,
+      "fp_context": 2
+    },
+    {
+      "repo": "grafana/grafana",
+      "repo_file": "grafana",
+      "number": 107534,
+      "golden": 1,
+      "tp_control": 0,
+      "tp_context": 0,
+      "fp_control": 3,
+      "fp_context": 2
+    },
+    {
+      "repo": "grafana/grafana",
+      "repo_file": "grafana",
+      "number": 106778,
+      "golden": 2,
+      "tp_control": 1,
+      "tp_context": 0,
+      "fp_control": 2,
+      "fp_context": 1
+    },
+    {
+      "repo": "grafana/grafana",
+      "repo_file": "grafana",
+      "number": 90045,
+      "golden": 3,
+      "tp_control": 3,
+      "tp_context": 2,
+      "fp_control": 2,
+      "fp_context": 4
+    },
+    {
+      "repo": "grafana/grafana",
+      "repo_file": "grafana",
+      "number": 80329,
+      "golden": 2,
+      "tp_control": 2,
+      "tp_context": 2,
+      "fp_control": 1,
+      "fp_context": 1
+    },
+    {
+      "repo": "grafana/grafana",
+      "repo_file": "grafana",
+      "number": 90939,
+      "golden": 2,
+      "tp_control": 1,
+      "tp_context": 1,
+      "fp_control": 0,
+      "fp_context": 0
+    },
+    {
+      "repo": "grafana/grafana",
+      "repo_file": "grafana",
+      "number": 94942,
+      "golden": 2,
+      "tp_control": 2,
+      "tp_context": 1,
+      "fp_control": 0,
+      "fp_context": 0
+    },
+    {
+      "repo": "grafana/grafana",
+      "repo_file": "grafana",
+      "number": 97529,
+      "golden": 2,
+      "tp_control": 1,
+      "tp_context": 0,
+      "fp_control": 1,
+      "fp_context": 1
+    },
+    {
+      "repo": "keycloak/keycloak",
+      "repo_file": "keycloak",
+      "number": 41249,
+      "golden": 2,
+      "tp_control": 0,
+      "tp_context": 0,
+      "fp_control": 2,
+      "fp_context": 1
+    },
+    {
+      "repo": "keycloak/keycloak",
+      "repo_file": "keycloak",
+      "number": 32918,
+      "golden": 2,
+      "tp_control": 2,
+      "tp_context": 0,
+      "fp_control": 3,
+      "fp_context": 4
+    },
+    {
+      "repo": "keycloak/keycloak",
+      "repo_file": "keycloak",
+      "number": 33832,
+      "golden": 4,
+      "tp_control": 3,
+      "tp_context": 3,
+      "fp_control": 0,
+      "fp_context": 2
+    },
+    {
+      "repo": "keycloak/keycloak",
+      "repo_file": "keycloak",
+      "number": 36882,
+      "golden": 2,
+      "tp_control": 1,
+      "tp_context": 1,
+      "fp_control": 1,
+      "fp_context": 3
+    },
+    {
+      "repo": "keycloak/keycloak",
+      "repo_file": "keycloak",
+      "number": 36880,
+      "golden": 5,
+      "tp_control": 0,
+      "tp_context": 0,
+      "fp_control": 4,
+      "fp_context": 2
+    },
+    {
+      "repo": "keycloak/keycloak",
+      "repo_file": "keycloak",
+      "number": 37038,
+      "golden": 2,
+      "tp_control": 2,
+      "tp_context": 2,
+      "fp_control": 2,
+      "fp_context": 0
+    },
+    {
+      "repo": "keycloak/keycloak",
+      "repo_file": "keycloak",
+      "number": 37429,
+      "golden": 5,
+      "tp_control": 2,
+      "tp_context": 1,
+      "fp_control": 4,
+      "fp_context": 5
+    },
+    {
+      "repo": "keycloak/keycloak",
+      "repo_file": "keycloak",
+      "number": 37634,
+      "golden": 4,
+      "tp_control": 2,
+      "tp_context": 2,
+      "fp_control": 3,
+      "fp_context": 2
+    },
+    {
+      "repo": "keycloak/keycloak",
+      "repo_file": "keycloak",
+      "number": 38446,
+      "golden": 2,
+      "tp_control": 0,
+      "tp_context": 1,
+      "fp_control": 3,
+      "fp_context": 2
+    },
+    {
+      "repo": "keycloak/keycloak",
+      "repo_file": "keycloak",
+      "number": 40940,
+      "golden": 2,
+      "tp_control": 1,
+      "tp_context": 1,
+      "fp_control": 0,
+      "fp_context": 0
+    },
+    {
+      "repo": "getsentry/sentry",
+      "repo_file": "sentry",
+      "number": 92393,
+      "golden": 4,
+      "tp_control": 0,
+      "tp_context": 0,
+      "fp_control": 3,
+      "fp_context": 5
+    },
+    {
+      "repo": "getsentry/sentry",
+      "repo_file": "sentry",
+      "number": 94376,
+      "golden": 3,
+      "tp_control": 1,
+      "tp_context": 0,
+      "fp_control": 3,
+      "fp_context": 3
+    },
+    {
+      "repo": "getsentry/sentry",
+      "repo_file": "sentry",
+      "number": 67876,
+      "golden": 3,
+      "tp_control": 2,
+      "tp_context": 1,
+      "fp_control": 0,
+      "fp_context": 2
+    },
+    {
+      "repo": "getsentry/sentry",
+      "repo_file": "sentry",
+      "number": 93824,
+      "golden": 5,
+      "tp_control": 1,
+      "tp_context": 2,
+      "fp_control": 4,
+      "fp_context": 3
+    },
+    {
+      "repo": "getsentry/sentry",
+      "repo_file": "sentry",
+      "number": 77754,
+      "golden": 4,
+      "tp_control": 1,
+      "tp_context": 0,
+      "fp_control": 1,
+      "fp_context": 2
+    },
+    {
+      "repo": "getsentry/sentry",
+      "repo_file": "sentry",
+      "number": 80528,
+      "golden": 2,
+      "tp_control": 1,
+      "tp_context": 2,
+      "fp_control": 2,
+      "fp_context": 3
+    },
+    {
+      "repo": "getsentry/sentry",
+      "repo_file": "sentry",
+      "number": 95633,
+      "golden": 2,
+      "tp_control": 0,
+      "tp_context": 0,
+      "fp_control": 3,
+      "fp_context": 2
+    },
+    {
+      "repo": "getsentry/sentry",
+      "repo_file": "sentry",
+      "number": 80168,
+      "golden": 3,
+      "tp_control": 1,
+      "tp_context": 2,
+      "fp_control": 1,
+      "fp_context": 1
+    }
+  ]
+}
