@@ -133,10 +133,30 @@ its own family's output.** It does not rule out shared bias between two Geminis.
 - **But the two Gemini judges disagree on 12.1% of golden verdicts** (agree 51, differ 7). **The
   judging stage carries its own instability of roughly one verdict in eight**, on top of the
   reviewer's — a second noise source under every number in the withdrawn run.
-- **The degradation print added above fired on its first real run**, reporting *"1 of 1 pair(s)
-  went unjudged — they score as non-matches, so this arm is UNDERCOUNTED"*, and Flash accumulated
-  **9 unjudged pairs against Pro's 1**. Under the old code that silently subtracted true positives
-  from the noisier judge and nothing would have said so.
+- **The degradation print fired on its first real run** — Flash accumulated **9 unjudged pairs
+  against Pro's 1** — and making it visible was not the same as fixing it. Classifying the failures
+  showed the cause was **not throttling**, which is what my retry had assumed: **8 of 8 were
+  TRUNCATED JSON**, replies cut off mid-`"reasoning"` with `Unterminated string`. Flash writes
+  longer reasoning than Pro and overran the judge's fixed 2048-token cap, **so the more verbose
+  judge looked like the less accurate one and every truncated pair scored as a non-match.**
+
+  The judge never read its own finish reason on a non-empty reply — the identical defect to the one
+  the runner had, inside the component doing the scoring. Fixed two ways: a `MAX_TOKENS` finish now
+  **doubles the budget and retries** (a truncation is an incomplete answer, not a bad one, while a
+  genuinely malformed reply at `STOP` is still never retried), and a pair that stays unjudged is
+  held **`undecided` and kept OUT of the denominator** instead of counted against the arm.
+
+  Verified by re-running the same comparison:
+
+  | | before | after |
+  |---|---|---|
+  | Pro unjudged | 1 | **0** |
+  | Flash unjudged | **9** | **0** |
+  | Flash true positives | 51 | **52** |
+  | Pro vs Flash disagreement | 12.1% | **10.3%** |
+
+  **About 1.8 points of the apparent judge disagreement was truncation artefact**, not two models
+  reading a finding differently. The remaining ~10% is real.
 
 **Still not fixed:**
 - **The same-family judge**, until somebody enables Anthropic in Model Garden for
