@@ -16,7 +16,8 @@ WHY:  **THE JUDGE IS CONSTRUCTED HERE AND INJECTED, NEVER REACHED FOR INSIDE `ve
       `deliver()` orchestrates: clone, rank, review, render, post. "Enforce the customer's declared
       standards" is one step of that with its own inputs and its own output, and it was the only
       step whose model wiring lived inline.
-IMPORTS: ingest.standards.{inherited,rules_file}, serve.{blocking_status,rule_judge},
+IMPORTS: ingest.publish.check_run, ingest.standards.{inherited,rules_file},
+      serve.{blocking_status,rule_judge},
       types.{settings,standards.checked,standards.judged}, verify.rule_check. Leftward and
       sideways from `serve/`.
 CONSUMED BY: `serve/review_delivery.py`.
@@ -27,6 +28,7 @@ from __future__ import annotations
 from collections.abc import Callable, Sequence
 from pathlib import Path
 
+from quantamind.ingest.publish import check_run
 from quantamind.ingest.standards import rules_file
 from quantamind.ingest.standards.inherited import ORG_REPO, Inheritance, combine
 from quantamind.serve.blocking_status import announce
@@ -95,4 +97,9 @@ def applied(
     )
     # **`checks` ONLY.** See the module docstring: a model verdict does not block a merge.
     announce(repo, sha, checks, enabled=settings.posting_enabled)
+    # **C2: THE SAME PARSER ROWS, AT THE LINE.** A status says pass or fail; a check run puts each
+    # violation on the diff where the developer is already looking. `judged` is deliberately NOT
+    # passed — an annotation reads as a fact against a line, and a model verdict is not one.
+    said = check_run.publish(repo, sha, checks, merged.rules, enabled=settings.posting_enabled)
+    print(f"[checks] {said}", flush=True)
     return checks, judged, merged

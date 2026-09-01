@@ -299,12 +299,24 @@ Stripe.
       a missed escape cannot execute. A repository name carrying markup never reaches the page at
       all — `store/tenancy.py` refuses it at the storage boundary, which the test asserts instead
       of asserting an escape that path cannot exercise.
-- [ ] **C2 CI integration.** **NOT TICKED, AND THE REASON IS THAT THE ROW NEVER SAID WHAT IT
-      WANTED.** It is the only deliverable here with no body. Verified 2026-08-31: the adjacent
-      thing IS built and belongs to D1f — `ingest/publish/commit_status.py` writes a commit status,
-      `verify/blocking.py` decides it, and it has run against a real pull request. Ticking C2 on
-      that work would count one build twice, which is how a checklist comes to overstate a product.
-      **Write what C2 means — a check run with annotations? a non-GitHub CI? — or delete the row.**
+- [x] **C2 CI integration — a check run with inline annotations.**
+      `ingest/publish/check_run.py`. **THE ROW HAD NO BODY, AND WRITING ONE WAS THE FIRST HALF OF
+      THE WORK.** It is NOT the commit status D1f built: that posts one line with one state and no
+      location, and ticking C2 on it would have counted one build twice. A check run puts each
+      violation ON THE DIFF at its file and line, in the interface the developer is already reading.
+      **ONLY A PARSER'S VERDICT IS ANNOTATED, NEVER A MODEL'S.** An annotation renders as a fact
+      against a line — no room for "we think" — and raw model findings are 66.7-82.1% wrong. A
+      `Judged` record has no path into the module, and D1c's `DEFERRED` produces nothing. Only
+      violations: `PASSED` on every line trains a reviewer to dismiss the column, and `UNCHECKABLE`
+      is a statement about OUR coverage rather than their code.
+      **SEVERITY IS THE CUSTOMER'S** — `HIGH` fails the check, `MEDIUM` and `LOW` do not. Deciding
+      which of a team's standards blocks a merge would override the judgement their rules file
+      exists to record. **The 50-annotation cap is announced**, because a truncated list that does
+      not say so reads as complete.
+      Verified end to end on a real repository: `eval` at line 3 → `failure`, `print` at line 2 →
+      `warning`. 10 tests, 4 sabotages caught. It goes through D7f's `permit(GITHUB_API)`, so an
+      air-gapped deployment refuses it like everything else.
+
 - [ ] **C3 IDE integration.** Only when a deal asks.
 - [ ] **C4 SSO.** Procurement gate — only when a deal asks.
 

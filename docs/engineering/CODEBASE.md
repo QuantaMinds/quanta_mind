@@ -585,6 +585,36 @@ one reviewer restating themselves inside a single thread, one character-identica
 changes" and "we could not tell which changes" are different answers and the report prints
 different sentences for them.
 
+### `ingest/publish/check_run.py` — the violations, at the line, on the diff
+
+**C2, and it is NOT the commit status D1f built.** That posts one line with one state and no
+location. This posts a GitHub check run whose annotations appear on the diff itself, at the file
+and line, in the review interface the developer is already reading. The row sat bodiless for weeks
+because nobody had said which of the two it meant, and **ticking it on D1f's work would have
+counted one build twice** — which is how a checklist comes to overstate a product.
+
+**Only a parser's verdict is annotated, never a model's.** An annotation is rendered by GitHub as a
+fact against a line; there is no room for "we think", and raw model findings measure 66.7-82.1%
+wrong across four blind pools. A `Judged` record has no path into this module at all, and D1c's
+`Outcome.DEFERRED` produces nothing. **The surface where being wrong is loudest gets the half that
+is reproducible.**
+
+**Only violations.** `PASSED` on every checked line trains a reviewer to dismiss the column;
+`UNCHECKABLE` is a statement about our coverage rather than their code and belongs in the comment's
+honest count.
+
+**Severity is the customer's.** `HIGH` becomes `failure` and fails the check; `MEDIUM` and `LOW`
+become `warning` and `notice` and do not. Deciding for ourselves which of a team's standards blocks
+a merge would override the judgement `.quantamind/rules.toml` exists to record.
+
+**The 50-annotation cap is announced.** GitHub accepts fifty per request; a run with more says how
+many were not shown. A truncated list that does not say it truncated reads as a complete one.
+
+**A failed check run does not take the review with it** — it needs `checks:write`, which an older
+installation may not have granted, and that is a fact about their consent rather than a fault in
+the review. Verified end to end against a real repository: `eval` at line 3 annotated `failure`,
+`print` at line 2 annotated `warning`.
+
 ### `types/deployment.py` — three shapes, one image, and a refusal that is ours
 
 **D7f. An outbound call that fails quietly in a bank is a finding against us, not a bug.** A
