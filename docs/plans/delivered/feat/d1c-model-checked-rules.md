@@ -10,7 +10,7 @@
 > Each result carries `Provenance.PARSER` or `Provenance.MODEL` so an auditor can see which
 > claims are reproducible. **They must never render alike.**
 
-Verified again today, and `docs/plans/product/product-build.md` already says it: **the half that
+Verified again today, and `docs/plans/roadmap/product-build.md` already says it: **the half that
 separates is built and the half that checks is not.** `CheckKind.MODEL_JUDGED` exists,
 `Rule.provenance` derives `Provenance.MODEL` and refuses to be set by a caller,
 `store/rule_checks.py` writes the column, `render/compliance_table.py` gives `deferred` its own

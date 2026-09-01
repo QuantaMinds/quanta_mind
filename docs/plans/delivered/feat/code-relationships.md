@@ -4,7 +4,7 @@
 `verify/` — the layer that decides what we publish.
 
 **PART OF THIS IS RETROSPECTIVE, AND SAYING SO IS THE POINT.** D1a and D1b were built before this
-file existed; the plan lived in `docs/plans/product/product-build.md` instead. The rule asks for a
+file existed; the plan lived in `docs/plans/roadmap/product-build.md` instead. The rule asks for a
 plan here so a reviewer sees intent separately from the diff, and writing it afterwards is weaker
 than writing it first. Recorded rather than backdated. **This file was then lost once** — see the
 incident note at the end — and rewritten from the same intent.

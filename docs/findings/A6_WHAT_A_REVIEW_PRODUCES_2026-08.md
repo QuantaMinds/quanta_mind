@@ -1,7 +1,7 @@
 # What a review actually produces — A6, first measurement
 
 **Run 2026-08-28 on `pallets/flask`, 35 changes, the full pipeline with the model on.**
-Bars were fixed in `docs/plans/product/product-build.md` before the run.
+Bars were fixed in `docs/plans/roadmap/product-build.md` before the run.
 
 ## Against the pre-registered bars
 

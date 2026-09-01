@@ -33,7 +33,7 @@ WHY:  **THIS LAYER IS NAMED IN `AGENTS.md` AND WAS AN EMPTY DIRECTORY.** The ord
       paying us to know about.
 IMPORTS: `types.ranking` only. Leftward, and nothing from `infer` -- this layer decides the budget
       and must not be able to consult the thing it is budgeting for.
-CONSUMED BY: `serve/review_delivery.py` (phase A2 of `docs/plans/product/product-build.md`).
+CONSUMED BY: `serve/review_delivery.py` (phase A2 of `docs/plans/roadmap/product-build.md`).
 """
 
 from __future__ import annotations
@@ -47,7 +47,7 @@ from quantamind.types.ranking import Ranking
 # **CHOSEN, NOT MEASURED, AND IT IS A COST BOUND.** No artefact in this repository measures where
 # reading a whole change stops paying; what this number does is cap the prompt a small change can
 # produce. It is a parameter so a caller can move it, and A6 in the product build checklist
-# (`docs/plans/product/product-build.md`) reports cost per pull request -- which is the evidence
+# (`docs/plans/roadmap/product-build.md`) reports cost per pull request -- which is the evidence
 # that would justify changing it.
 FULL_CEILING = 10
 

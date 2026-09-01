@@ -6,7 +6,7 @@ WHY:  **DECLARED BEATS DISCOVERED, AND THAT IS A PRODUCT DECISION BEFORE IT IS A
       Finding the links ourselves needs an org-wide crawl and permissions across every repository a
       customer owns — a large ask, a large blast radius, and an answer that is *our guess about
       their architecture*. **A link they wrote down is provenance an auditor can be shown.**
-      → `docs/plans/product/product-build.md` "D3a The business declares its links"
+      → `docs/plans/roadmap/product-build.md` "D3a The business declares its links"
 
       **THIS SHIPS BEFORE ANYTHING READS THE OTHER REPOSITORY, AND IT IS STILL WORTH SHIPPING.**
       D3b — a changed exported symbol checked against the repositories that import it — is gated on

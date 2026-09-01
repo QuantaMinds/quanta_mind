@@ -978,7 +978,7 @@ documents claimed the record was *exportable*, and `pricing.md` sold Enterprise 
 export*. **Neither exists.** `D4b` is real and is the harder half — every check recorded as it
 happens, all four outcomes, provenance derived from the rule, nothing backfilled — and it is read
 with `quantamind compliance --repo owner/name`. There is no file format, no download, and
-"scheduled export" appears nowhere in `docs/plans/product/product-build.md`. **A compliance buyer
+"scheduled export" appears nowhere in `docs/plans/roadmap/product-build.md`. **A compliance buyer
 asks for the artefact, not the query**, so this is a small build standing between a true claim and
 a sellable one.
 

@@ -35,7 +35,7 @@ MIN_STARS = 1_000
 STAR_CEILING: int | None = None
 """Upper bound on stars, or None for "and above".
 
-**THE PLAN RECORDS THIS AS UNRESOLVED** — `docs/plans/product/product-build.md` B8 asks "is 5K a
+**THE PLAN RECORDS THIS AS UNRESOLVED** — `docs/plans/roadmap/product-build.md` B8 asks "is 5K a
 ceiling or just 'and above'?" and does not answer. It ships as None because the section's own
 justification argues against a ceiling: the criteria exist to select repositories the ranker can
 serve, and more history is not worse history. If a ceiling is wanted it is a COST control, which

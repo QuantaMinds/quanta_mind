@@ -15,7 +15,7 @@ WHY:  `defect_return.py` skips an event when every file scores the same -- `if l
       case or the common path.
 IMPORTS: stdlib only (bisect, collections, json, os, sys). Local: `commit_stream`.
 CONSUMED BY: nobody -- it prints and writes degenerate_rate.json. Read by
-      `docs/plans/feat-rank-fix-history.md`.
+      `docs/plans/delivered/feat/rank-fix-history.md`.
 """
 
 from __future__ import annotations

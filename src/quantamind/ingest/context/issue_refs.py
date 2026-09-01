@@ -12,7 +12,7 @@ WHY:  **NOTHING IN THIS CODEBASE HAS EVER READ `Closes #412`.** `ingest/diff.sta
       **WHETHER A REFERENCE LEAVES THIS REPOSITORY IS DECIDED HERE, WHERE THE TEXT IS, AND NOT AT
       THE FETCH.** `otherorg/private#5` is a reference we may hold no installation token for, and
       whose title would move somebody's data into this repository's comment if we quoted it.
-      `docs/plans/product/product-build.md` "D6c Sources, cheapest first" states the rule --
+      `docs/plans/roadmap/product-build.md` "D6c Sources, cheapest first" states the rule --
       *egress is a decision, not a detail* -- and it binds here first because here it costs
       nothing. `Ref.foreign` is what `tickets.py` refuses on; this module never calls anything.
 
@@ -69,7 +69,8 @@ def _prose(text: str) -> str:
     a reference existed and was unreadable, and both halves were true of what it had been handed.
     **The cost is that a repository whose pull requests discuss issue numbers — this one — gets a
     spurious line on most of them,** and that was estimated as rare before a live run showed it is
-    not. It was recorded as a known trade in `docs/plans/feat-d6a-the-goal-behind-the-change.md`
+    not. It was recorded as a known trade in the D6a plan under
+    `docs/plans/delivered/feat/`
     and the live run repriced it.
 
     Still not a markdown parser, and deliberately: a fence and a code span are the two constructs

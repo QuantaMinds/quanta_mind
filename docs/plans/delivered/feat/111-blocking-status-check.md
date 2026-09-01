@@ -1,7 +1,7 @@
 # D1f — a blocking status check, and it may only block on what a parser decided
 
 **Branch** `feat/111-blocking-status-check`. Touches `verify/`, so this plan is written first as
-the working rules require. The row it closes is `docs/plans/product/product-build.md`, "D1f
+the working rules require. The row it closes is `docs/plans/roadmap/product-build.md`, "D1f
 Blocking, not just commenting."
 
 ## The claim being made to a customer

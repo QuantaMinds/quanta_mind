@@ -20,7 +20,7 @@ WHY:  **THE ONE REPORT IN THIS PRODUCT THAT DOES NOT DEPEND ON A COMMENT BEING R
 IMPORTS: render.{dashboard,compliance_table}, store.{lifecycle,compliance,schema},
       types.settings.
       Rightmost layer.
-SEE ALSO: `docs/plans/product/product-build.md` D5 — per repository, never per developer.
+SEE ALSO: `docs/plans/roadmap/product-build.md` D5 — per repository, never per developer.
 CONSUMED BY: `serve/cli.py`.
 """
 

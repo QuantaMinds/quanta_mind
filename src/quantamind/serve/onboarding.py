@@ -155,7 +155,7 @@ def admit(repos: list[str], settings: Settings, account: str = "") -> dict[str, 
     """Qualify each repository, warm the ones that pass, and return every verdict.
 
     **THE VERDICT IS RECORDED AND REPORTED; IT DOES NOT REFUSE THE INSTALLATION.** Enforcement
-    belongs at delivery, which is B5 in `docs/plans/product/product-build.md` — "today any
+    belongs at delivery, which is B5 in `docs/plans/roadmap/product-build.md` — "today any
     installation is reviewed, paid or not". Refusing to provision here, with no entitlement
     system to say "but this one is a customer", would turn every non-qualifying install into a
     dead end with no override.

@@ -350,7 +350,7 @@ committed.
 
 ## 10 · The first defect in a PLAN rather than a measurement
 
-`feat-execution-corpus.md` specified **≥ 30 correct findings** and costed the round at **"~200
+`docs/plans/delivered/feat/execution-corpus.md` specified **≥ 30 correct findings** and costed the round at **"~200
 findings by one independent rater. Days, not hours."**
 
 At the pool's 5.8% correct-rate, 200 findings yields **11.6 correct**. **The spec asked for 30 and
@@ -597,7 +597,7 @@ information is not lost; it is one hop further away than it should be.
 | | |
 |---|---|
 | **Mechanism now** | **NO.** Nothing checks that a merge commit's subject describes its contents, and nothing can: the subject is fixed by whoever presses merge, in an interface this repository does not control. |
-| **What would help** | Landing a branch when its row is done, so the title stays true by construction. That is rule 9, which already exists and was not followed. A guard counting `docs/plans/product/product-build.md` rows touched by a branch would be a mechanism, and is speculative enough that it is named here rather than built. |
+| **What would help** | Landing a branch when its row is done, so the title stays true by construction. That is rule 9, which already exists and was not followed. A guard counting `docs/plans/roadmap/product-build.md` rows touched by a branch would be a mechanism, and is speculative enough that it is named here rather than built. |
 
 **Filed because the subject line is exactly the artefact this log is about:** something stated a
 property — what the change is — and nothing held it.
