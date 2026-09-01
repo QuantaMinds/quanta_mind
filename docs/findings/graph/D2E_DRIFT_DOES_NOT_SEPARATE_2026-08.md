@@ -125,6 +125,41 @@ sentences after we had congratulated ourselves for spotting the defect. Recorded
 **A future attempt must not use a rate whose denominator is also the outcome's, and must not
 assume the direction of an artefact it can measure in one line.**
 
+### Two judges, different families, same prompt — and the second one was sharper
+
+The identical adversarial prompt went to **Gemini 2.5 Pro** (via the product's own `infer/`) and to
+**Claude** (fresh context, no history). Both independently rejected the argument. They did not
+contribute equally.
+
+| | Gemini | Claude |
+|---|---|---|
+| the shared-denominator defence is false | ✅ | ✅ |
+| because the denominator correlates with the numerators | ✅ | ✅ |
+| **compositional constraint** — `drift` and `fix_rate` are shares of one total, so at fixed churn they are pushed APART | — | ✅ |
+| **tertile composition** — the drift tertiles are maturity tertiles in disguise | — | ✅ |
+| **unweighted mean of ratios** weights a churn-10 file like a churn-335 one | — | ✅ |
+| fix-word matching biases toward mature code | ✅ | ✅, with the mechanism |
+| named a concrete alternative (`fixes ~ shifts + log churn`) | — | ✅ |
+
+**Three of Claude's extra claims were checkable and were checked. Two held; one did not.**
+
+| claim | verdict |
+|---|---|
+| "the creation commit always counts as a shift" | **FALSE for this implementation** — the first commit sets `previous` and counts no shift |
+| "high-drift tertile is young/low-churn, low-drift is mature/high-churn" | **TRUE, and large**: mean churn **53.7 vs 32.2**, median 26 vs 22, `corr(drift, churn) = −0.177` |
+| "a mean of ratios weights a churn-2 file like a churn-200 one" | **TRUE, modest**: unweighted 0.167 against pooled 0.195, a 2.8pp gap over a 10–335 churn range |
+
+**THE VERIFIED CLAIM IS THE ONE THAT FINISHES THIS OFF.** The drift tertiles differ in maturity by
+a factor of 1.7, and Q2's bias says fix vocabulary accrues to mature code. **Together they predict
+exactly the direction and roughly the size of the observed effect with no architectural content at
+all.** The instrument was measuring how old a file is.
+
+**And one of the two judges was confidently wrong about the code.** Checking is what separated the
+useful claims from that one — the same discipline `verify/publishable.py` applies to model findings
+before they reach a customer, applied here to a model's findings about us. **A judge is a generator
+of things to check, not a verdict.**
+
+
 ## What we are NOT concluding
 
 **The direction has a plausible mechanism and it is a HYPOTHESIS, not a finding.** A file whose
