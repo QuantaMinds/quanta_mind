@@ -160,10 +160,10 @@ def rank(
             # Nothing was ranked, so no position was chosen. Labelling the alphabetically-first
             # file DEEP would be inventing a decision -- and this is the slice that misses most.
             #
-            # FLAT_NONZERO is deliberately NOT here. `feat-rank-fix-history.md` requires every
-            # unit in a non-discriminating change to be "read, but not because we ranked it", and
-            # in this codebase COLD means NOT READ -- `funded()` excludes it. The rule is honoured
-            # in `render/coverage_line.py` instead, which says in those words that the ranking
+            # FLAT_NONZERO is deliberately NOT here. `feat-rank-fix-history.md` requires every unit
+            # in a non-discriminating change to be "read, but not because we ranked it", and in this
+            # codebase COLD means NOT READ -- `funded()` excludes it. The rule is honoured in
+            # `render/blocks/coverage_line.py` instead, which says in those words that the ranking
             # could not separate the files and the order is alphabetical. Moving the flat case to
             # COLD here renders "Read: ." and funds nothing, which is a different claim entirely.
             allocation = Allocation.COLD

@@ -37,3 +37,16 @@ severity = "high"
 check = "forbid_call"
 target = "eval"
 paths = ["src/", "scripts/"]
+
+# **A model-judged rule was drafted here and WITHDRAWN on its own measurement.** D1c built the
+# capability to check a standard no parser can decide, and the first candidate was AGENTS.md rule
+# 14 -- "a comment may explain WHY, never assert WHETHER". Run over 12 real files from this
+# repository before adding it, the judge called **10 of 12 BROKEN**. Several were fair by the
+# rule's letter (`ingest/diff.py`'s "reaching here means the request succeeded" is exactly the
+# pattern rule 14 names), but a section that fires on 83% of files teaches a reviewer to scroll
+# past it, which the header above says is worse than no rule.
+#
+# **The capability is not the problem and the measurement says so.** On a known-answer pair the
+# same judge scored 12/12, and a real HTTP 403 came back `undecided` rather than `met`
+# (`tests/live/model/test_judged_rule_live.py`). What is missing is a prose rule narrow enough to
+# be worth firing. Adding one is a separate change with its own before-adding measurement.

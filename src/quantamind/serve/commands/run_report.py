@@ -30,10 +30,13 @@ import sqlite3
 from collections.abc import Callable
 from pathlib import Path
 
+from quantamind.render.audit_export import document
 from quantamind.render.compliance_table import table as rule_table
 from quantamind.render.dashboard import costs as cost_table
 from quantamind.render.dashboard import table
 from quantamind.store import tenancy
+from quantamind.store.audit.export import rows as trail
+from quantamind.store.audit.export import window as covers
 from quantamind.store.compliance import standing
 from quantamind.store.costs import spent
 from quantamind.store.lifecycle import board
@@ -83,6 +86,24 @@ def run_cost(repo: str) -> int:
     return _for_repo(repo, lambda conn, repo_id: cost_table(spent(conn, repo_id), repo))
 
 
-def run_compliance(repo: str) -> int:
-    """`quantamind compliance` — every declared rule and what happened to it."""
-    return _for_repo(repo, lambda conn, repo_id: rule_table(standing(conn, repo_id), repo))
+def run_compliance(repo: str, export: Path | None = None) -> int:
+    """`quantamind compliance` — every declared rule and what happened to it.
+
+    **`--export` WRITES THE TRAIL; WITHOUT IT THIS PRINTS A SUMMARY.** D4b was ticked "append-only,
+    exportable" for a fortnight with no export: the rows existed and only a summary could be read
+    out of them. A compliance buyer asks for the artefact, not the query.
+    """
+    if export is None:
+        return _for_repo(repo, lambda conn, repo_id: rule_table(standing(conn, repo_id), repo))
+
+    def _write(conn: object, repo_id: int) -> str:
+        rows, covered = trail(conn, repo_id), covers(conn, repo_id)  # type: ignore[arg-type]
+        export.write_text(document(rows, covered, repo), encoding="utf-8")
+        # **THE COUNTS ARE PRINTED, NOT A BARE SUCCESS.** An export of nothing writes a valid file
+        # saying it covers nothing, and that must not report identically to one holding a year.
+        return (
+            f"Wrote {len(rows)} check(s) across {covered.reviews} review(s) to {export}.\n"
+            f"The file states what it does not cover; read `limits` before quoting it."
+        )
+
+    return _for_repo(repo, _write)

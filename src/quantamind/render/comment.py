@@ -36,95 +36,34 @@ CONSUMED BY: serve, which posts it; the live tests, which diff it against a gold
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 
 from quantamind.ingest.context.tickets import Context
+from quantamind.ingest.standards.inherited import Inheritance
+from quantamind.ingest.standards.links_file import Link
+from quantamind.parse.change_effort import Effort
+from quantamind.parse.duplicate_bodies import Duplicates
+from quantamind.parse.public_api import Break
+from quantamind.render.blocks.crossing_block import crossing
+from quantamind.render.blocks.duplicate_block import duplicates
+from quantamind.render.blocks.found_block import found
+from quantamind.render.blocks.headline import HEADER, headline
+from quantamind.render.blocks.inheritance_block import inheritance
+from quantamind.render.blocks.judged_block import judged as judged_block
+from quantamind.render.blocks.scope_block import coverage
+from quantamind.render.blocks.verdict_block import Stated, verdicts
 from quantamind.render.context.goal_block import goal
-from quantamind.render.found_block import found
-from quantamind.render.verdict_block import Stated, verdicts
-from quantamind.types.checked import Checked, Outcome
 from quantamind.types.finding import Finding
 from quantamind.types.ranking import Ranking
+from quantamind.types.standards.checked import Checked, Outcome
+from quantamind.types.standards.judged import Judged
 from quantamind.types.verdict import Unresolved
+from quantamind.verify.consumers import Crossing
 
-HEADER = "### QuantaMind"
-GOOD = "✅ **Looks good.**"
-HUMAN = "⚠️ **Needs a human.**"
-BUGS = "🐛 **Found {count} thing(s) worth fixing.**"
-BLIND = (
-    "⚠️ **I could not review this change.** {why}\n\n"
-    "Nothing below is a verdict on your code — it is only what the ranking could still say."
-)
 MAX_DEPENDENTS = 3
 """Dependents named before the count takes over. **Five made the single longest line in a
 real posted comment** — five `src/quantamind/...` paths wrapped across a screen, and the
 remainder is stated either way, so the fourth and fifth bought nothing a reader acts on."""
-LOOK = "**Look here first**"
-NOT_CHECKED = (
-    "_Callers are found by static Python import only: a dynamic import, a re-export, or another "
-    "language is invisible to it, and cross-repository impact is not checked at all._"
-)
-
-
-def _headline(
-    summary: Stated | None, findings: Sequence[Finding], violations: int, blind: str
-) -> str:
-    """The first line, which is the only line some readers will act on.
-
-    **A REVIEW THAT COULD NOT RUN MUST NOT LOOK LIKE ONE THAT FOUND NOTHING.** A real delivery hit
-    MAX_TOKENS, the summary was dropped, and the comment degraded into a list of files with no
-    verdict — indistinguishable from a clean review to anybody reading it.
-
-    **IT SUMMARISES THE SECTIONS BELOW; IT DOES NOT REPLACE THEM.** An earlier version of this
-    collapsed the goal and both verdicts into one line, and the review became an opinion with no
-    stated basis. `verdict_block.SECTIONS` is mandatory and a test enforces it.
-    """
-    if blind:
-        return BLIND.format(why=blind)
-    count = len(findings) + violations
-    if count:
-        return BUGS.format(count=count)
-    if summary is None:
-        return HUMAN + " No model reviewed this change; only the ranking below ran."
-    if summary.achieves_goal is not True:
-        return f"{HUMAN} It may not do what the PR says."
-    if summary.breaks is not False:
-        return f"{HUMAN} Whether it breaks callers is not settled."
-    if summary.convention:
-        return f"{HUMAN} It breaks a rule you wrote down."
-    return f"{GOOD} It does what the PR says, and nothing that imports it breaks."
-
-
-def beyond_the_ranking(
-    *,
-    summary: Stated | None = None,
-    findings: Sequence[Finding] = (),
-    checks: Sequence[Checked] = (),
-    blind: str = "",
-    context: Context | None = None,
-) -> bool:
-    """Whether anything but the ranking has something to say, so the fuller body is worth rendering.
-
-    **THIS WAS AN EXPRESSION AT THE CALL SITE AND IT WAS MISSING A TERM.** `serve/review_delivery`
-    chose between this body and the ranking-only one with
-    `told is not None or kept or checks`, which omits `blind` — so when the model was UNREACHABLE
-    and the change had no findings and no declared rules, the comment fell back to the ranking and
-    **the "I could not review this change" banner was discarded**. A refusal degrading into a
-    comment that looks ordinary is the exact failure `_headline` exists to prevent, defeated one
-    layer above it. Found by this product reviewing its own pull request,
-    `QuantaMinds/quanta_mind#91`.
-
-    **IT TAKES THE SAME ARGUMENTS `comment()` DOES, ON PURPOSE.** One signature decides both what
-    is rendered and whether it is worth rendering, so a new section cannot be added to one without
-    the other refusing it — which is how the missing term survived in the first place.
-    """
-    return bool(
-        summary is not None
-        or findings
-        or checks
-        or blind
-        or (context is not None and not context.empty())
-    )
 
 
 def comment(
@@ -133,9 +72,17 @@ def comment(
     summary: Stated | None = None,
     findings: Sequence[Finding] = (),
     checks: Sequence[Checked] = (),
+    judged: Sequence[Judged] = (),
+    inherited: Inheritance | None = None,
     unresolved: Sequence[Unresolved] = (),
     blind: str = "",
     context: Context | None = None,
+    repeated: Duplicates | None = None,
+    effort: Mapping[str, Effort] | None = None,
+    links: Sequence[Link] = (),
+    links_unreadable: bool = False,
+    breaks: Sequence[Break] = (),
+    crossed: Crossing | None = None,
 ) -> str:
     """The comment body: a verdict, then the mandatory sections, then what to fix.
 
@@ -148,9 +95,8 @@ def comment(
     the ranking can still offer, because a partial answer presented whole is the failure this
     product refuses.
     """
-    read, total = len(ranking.funded()), len(ranking.units)
     violations = [c for c in checks if c.outcome is Outcome.VIOLATED]
-    lines = [HEADER, "", _headline(summary, findings, len(violations), blind), ""]
+    lines = [HEADER, "", headline(summary, findings, len(violations), blind), ""]
 
     # **ABOVE THE MODEL'S VERDICT, AND PRINTED EVEN WHEN THERE IS NO VERDICT.** This block is the
     # author's own words plus one API read, so it survives `infer/` being off, refused, or out of
@@ -183,10 +129,40 @@ def comment(
         lines += [f"- `{unit.unit.qualified_name}`" for unit in ranking.funded()]
         lines.append("")
 
-    parts = [f"{read} of {total} file(s) reviewed" if total else "Nothing to review"]
-    if total - read > 0:
-        parts.append(f"{total - read} not reviewed")
-    if unresolved:
-        parts.append(f"{len(unresolved)} construct(s) could not be parsed")
-    lines.append(f"_{'; '.join(parts)}._")
+    # **D2c SITS ABOVE THE SCOPE LINE AND BELOW THE MODEL.** It is a parser's claim, so it outranks
+    # anything `infer/` said; it is about structure rather than this change's goal, so it comes
+    # after the verdict a reader acts on first.
+    # **ABOVE THE DUPLICATE BLOCK BECAUSE IT REACHES FURTHER.** A repeated body is a fact about
+    # this repository; a narrowed export is a fact about everyone who imports it.
+    narrowed = crossing(breaks, crossed or Crossing())
+    if narrowed:
+        lines += [narrowed, ""]
+
+    # **D1e SITS ABOVE THE MODEL'S OPINION.** It says what this change was NOT checked against,
+    # which a reader needs before weighing anything below it.
+    changed_standards = inheritance(inherited)
+    if changed_standards:
+        lines += [changed_standards, ""]
+
+    # **UNDER EVERY PARSER CLAIM ABOVE IT.** This is the one section a re-run may contradict, so
+    # it sits below the ones that cannot — the reader meets the reproducible half first.
+    opinion = judged_block(judged)
+    if opinion:
+        lines += [opinion, ""]
+
+    if repeated is not None:
+        repeats = duplicates(repeated)
+        if repeats:
+            lines += [repeats, ""]
+
+    lines += coverage(
+        ranking,
+        unresolved,
+        effort,
+        checks,
+        findings,
+        links,
+        links_unreadable,
+        (crossed or Crossing()).asked(),
+    )
     return "\n".join(lines)

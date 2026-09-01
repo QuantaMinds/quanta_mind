@@ -23,7 +23,7 @@ WHY:  **NO FILE AND A BROKEN FILE MUST NOT PRODUCE THE SAME ANSWER.** A reposito
       file an auditor has to be told the location of, and a second place for it is a second place
       to disagree with the first.
 IMPORTS: stdlib (pathlib, tomllib), `ingest.blob` to read from git, `types.{rule,verdict}`.
-CONSUMED BY: the checks that enforce these (D1b in docs/plans/product/product-build.md).
+CONSUMED BY: `verify/rule_check.py`, and `ingest/standards/inherited.py` for the D1e merge.
 """
 
 from __future__ import annotations
@@ -33,7 +33,7 @@ from collections import Counter
 from pathlib import Path
 
 from quantamind.ingest.blob import BlobUnreadable, at
-from quantamind.types.rule import CheckKind, Rule, RuleRefused, Severity
+from quantamind.types.standards.rule import CheckKind, Rule, RuleRefused, Severity
 from quantamind.types.verdict import Construct, Reason, Site, Unresolved
 
 RULES_PATH = Path(".quantamind") / "rules.toml"
@@ -65,6 +65,30 @@ def _one(entry: object, index: int, where: str) -> tuple[Rule | None, Unresolved
         # we cannot enforce, and enforcing a DIFFERENT one because it looked close is worse.
         named = str(entry.get("id", "")) or f"{where}[{index}]"
         return None, _refusal(named, Reason.MALFORMED_DECLARATION)
+
+
+def entries(clone: Path, sha: str = "HEAD") -> tuple[dict[str, object], ...]:
+    """The raw `[[rule]]` tables, for the merge that needs to see `inherit = false`.
+
+    **A `Rule` CANNOT REPRESENT "ABSENT" AND SHOULD NOT LEARN HOW.** Declining an inherited rule is
+    a fact about a merge, not about a rule, so `ingest/standards/inherited.py` reads it from here
+    rather than from a field that would be meaningless in a repository with no organisation.
+    Returns empty for anything unreadable — the caller already has `read()`'s typed refusals.
+    """
+    try:
+        raw = at(clone, sha, RULES_PATH.as_posix())
+    except BlobUnreadable:
+        return ()
+    if raw is None:
+        return ()
+    try:
+        document = tomllib.loads(raw)
+    except (tomllib.TOMLDecodeError, ValueError):
+        return ()
+    declared = document.get(TABLE, [])
+    if not isinstance(declared, list):
+        return ()
+    return tuple(entry for entry in declared if isinstance(entry, dict))
 
 
 def read(clone: Path, sha: str = "HEAD") -> tuple[tuple[Rule, ...], tuple[Unresolved, ...]]:
@@ -104,6 +128,12 @@ def read(clone: Path, sha: str = "HEAD") -> tuple[tuple[Rule, ...], tuple[Unreso
     parsed: list[Rule] = []
     refused: list[Unresolved] = []
     for index, entry in enumerate(declared):
+        # **AN OPT-OUT IS NOT A MALFORMED RULE.** D1e lets a repository decline an inherited rule
+        # with `inherit = false`, and such an entry carries only an id — no description, no check.
+        # Parsing it as a rule would refuse it, and the refusal would read as "your file is
+        # broken" for a line that is doing exactly what the format allows.
+        if isinstance(entry, dict) and entry.get("inherit") is False:
+            continue
         rule, refusal = _one(entry, index, where)
         if refusal is not None:
             refused.append(refusal)

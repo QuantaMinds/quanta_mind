@@ -31,6 +31,7 @@ from __future__ import annotations
 import urllib.error
 import urllib.request
 
+from quantamind.types.deployment import Destination, permit
 from quantamind.verify.external_facts import Adjudicated, Verdict
 from quantamind.verify.release_claims import (
     BOUND,
@@ -56,6 +57,10 @@ def released(name: str, version: str) -> tuple[bool, bool]:
     which is 3 of 45 real wrong findings and does not depend on that base rate at all.
     """
     try:
+        # **ASK BEFORE THE SOCKET OPENS.** D7f: an air-gapped deployment REFUSES
+        # this, rather than attempting it and failing somewhere the customer sees
+        # in their egress log and we do not.
+        permit(Destination.PACKAGE_INDEX)
         with urllib.request.urlopen(
             f"https://pypi.org/pypi/{name}/{version}/json", timeout=PYPI_TIMEOUT_S
         ) as r:

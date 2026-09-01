@@ -8,11 +8,10 @@ WHY:  The CLI is not a convenience. It runs the retrospective, it is how a scept
       built first and stays. The App is this plus a webhook, a signature check and
       idempotency -- and the pipeline must not know which one called it, or what a customer
       verified here is not what runs there.
-IMPORTS: stdlib (argparse, pathlib, tempfile) and types.settings at module scope. The heavier
-      layers -- render.replay_report, serve.{commands.run_endpoint,retrospective},
-      types.pooled_outcome --
-      are imported inside the command that needs them, so `--version` and `config` still answer
-      when a layer below is broken.
+IMPORTS: stdlib (argparse, pathlib) and types.settings at module scope. Every command's
+      implementation is imported INSIDE the branch that needs it, so `--version` and `config`
+      still answer when a layer below is broken — and every command now lives in
+      `serve/commands/`, which `retrospective` did not until it pushed this file over the cap.
 CONSUMED BY: the `quantamind` entry point in pyproject.toml, and tests/unit.
 """
 
@@ -21,7 +20,6 @@ from __future__ import annotations
 import argparse
 from collections.abc import Sequence
 from pathlib import Path
-from tempfile import TemporaryDirectory
 
 from quantamind import __version__
 from quantamind.types.settings import SettingsError, load
@@ -48,10 +46,28 @@ def build_parser() -> argparse.ArgumentParser:
     )
     show.add_argument("repo", help="owner/name, as recorded")
     show.add_argument("--limit", type=int, default=100)
+    # **D1d: PROPOSES, NEVER DECLARES.** The pull requests are named rather than crawled — this
+    # product has never run a "recent changes" search and will not pretend to here.
+    mined = subparsers.add_parser(
+        "standards", help="what reviewers of these pull requests said more than once"
+    )
+    mined.add_argument("--repo", required=True, help="owner/name on GitHub")
+    mined.add_argument(
+        "--pulls", type=int, nargs="+", required=True, metavar="N", help="pull request numbers"
+    )
     rules = subparsers.add_parser(
         "compliance", help="every declared rule and what happened to it, per repository"
     )
     rules.add_argument("--repo", required=True, help="owner/name as recorded in the store")
+    # **AN ARTEFACT, NOT A QUERY.** D4b claimed "exportable" while only a summary could be read
+    # out; a compliance team is handed a file, and the file carries its own limits.
+    rules.add_argument(
+        "--export",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        help="write the whole audit trail to PATH as JSON, with what it does not cover stated",
+    )
 
     money = subparsers.add_parser(
         "cost", help="what this repository's reviews spent, from the rows that recorded it"
@@ -102,34 +118,6 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _retrospective(clones: list[Path], repo: str) -> int:
-    """Replay one clone and print the report. The index is scratch and is thrown away.
-
-    Imported here rather than at module scope so `quantamind config` and `--version` do not pay
-    for the ranker, and so a broken layer below cannot stop the CLI reporting its own version.
-    """
-    from quantamind.render.replay_report import report
-    from quantamind.serve.retrospective import replay
-    from quantamind.types.pooled_outcome import pool
-
-    for clone in clones:
-        if not (clone / ".git").exists():
-            print(f"{clone} is not a git clone; a retrospective reads history and nothing else")
-            return 1
-    outcomes = []
-    with TemporaryDirectory() as scratch:
-        for index, clone in enumerate(clones):
-            # NO CAP. `SURVIVOR_CAP` stops one large repository dominating a pooled figure in the
-            # RESEARCH, where the six were compared to each other. Here the customer's own history
-            # is the answer, and capping would discard it and then report it short of the floor:
-            # scrapy has 1,447 events and the capped run announced "132 short of 500".
-            # owner/name is what store.touches requires; a colon or a bare directory is rejected.
-            name = repo if len(clones) == 1 else f"{repo}/{clone.name}"
-            outcomes.append(replay(clone, name, Path(scratch) / f"{index}.db"))
-    print(report(outcomes, pool(outcomes) if len(outcomes) > 1 else None))
-    return 0
-
-
 def main(argv: Sequence[str] | None = None) -> int:
     """Entry point. Returns an exit code rather than calling sys.exit, so tests can assert it."""
     parser = build_parser()
@@ -160,17 +148,24 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
 
     if args.command == "retrospective":
-        return _retrospective(args.clone, args.repo)
+        from quantamind.serve.commands.run_retrospective import run_retrospective
+
+        return run_retrospective(args.clone, args.repo)
 
     if args.command == "migrate":
         from quantamind.serve.commands.run_migrate import run_migrate
 
         return run_migrate()
 
+    if args.command == "standards":
+        from quantamind.serve.commands.run_standards import run_standards
+
+        return run_standards(args.repo, args.pulls)
+
     if args.command == "compliance":
         from quantamind.serve.commands.run_report import run_compliance
 
-        return run_compliance(args.repo)
+        return run_compliance(args.repo, args.export)
 
     if args.command == "cost":
         from quantamind.serve.commands.run_report import run_cost

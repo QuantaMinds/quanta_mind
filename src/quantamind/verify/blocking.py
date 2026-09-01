@@ -33,7 +33,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import Enum
 
-from quantamind.types.checked import Checked, Outcome
+from quantamind.types.standards.checked import Checked, Outcome
 
 
 class Standing(Enum):

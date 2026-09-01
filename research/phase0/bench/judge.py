@@ -23,8 +23,13 @@ from __future__ import annotations
 import concurrent.futures
 import json
 import re
+import sys as _sys
 import time
 import urllib.error
+from pathlib import Path as _Path
+
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "vertex"))
+from client import VertexError
 
 # Copied verbatim from code_review_benchmark/step3_judge_comments.py. Do not reword: a changed
 # judge prompt silently changes every number it produces and nothing would fail.
@@ -48,6 +53,13 @@ Respond with ONLY a JSON object:
 MAX_WORKERS = 12
 TRANSPORT_RETRIES = 4
 
+JUDGE_TOKENS = 2048
+"""Output budget for one verdict, DOUBLED on a MAX_TOKENS finish rather than failed.
+
+A fixed cap makes the more verbose model look like the less accurate one: `gemini-2.5-flash` lost
+8 pairs to truncated JSON where `gemini-2.5-pro` lost 1, and every lost pair scored as a
+non-match."""
+
 
 class JudgeFailed(RuntimeError):
     """The judge did not return a decision. Never silently a non-match."""
@@ -65,7 +77,7 @@ def _parse(text: str) -> tuple[bool, float]:
 
 
 def _one(client: object, golden: str, candidate: str) -> tuple[bool, float]:
-    """One pair. Retries a TRANSPORT failure; never retries a bad answer.
+    """One pair. Retries a TRANSPORT failure or a TRUNCATION; never retries a bad answer.
 
     A read timeout is the network, not a verdict, and letting one kill a two-hour run is how the
     first attempt at this ended at pull request 11 of 50. But the retry is deliberately narrow:
@@ -81,8 +93,9 @@ def _one(client: object, golden: str, candidate: str) -> tuple[bool, float]:
                 ],
             }
         ],
-        "generationConfig": {"temperature": 0.0, "maxOutputTokens": 2048},
+        "generationConfig": {"temperature": 0.0, "maxOutputTokens": JUDGE_TOKENS},
     }
+    budget = JUDGE_TOKENS
     last: Exception | None = None
     for attempt in range(TRANSPORT_RETRIES):
         try:
@@ -91,9 +104,34 @@ def _one(client: object, golden: str, candidate: str) -> tuple[bool, float]:
             last = exc
             time.sleep(2**attempt)
             continue
+        except VertexError as exc:
+            # **A 429 OR A 5xx IS TRANSPORT, NOT A VERDICT, AND IT WAS NOT BEING RETRIED.**
+            # `client.generate` raises `VertexError(RuntimeError)` for both, which fell past this
+            # loop into the caller's `except RuntimeError` and was counted as an unjudged pair —
+            # and an unjudged pair scores IDENTICALLY to a non-match, so the arm that issues more
+            # judge calls loses true positives for a reason that has nothing to do with its
+            # findings. A 4xx that is not 429 is a real refusal and still raises on the first try.
+            if " 429" not in str(exc) and " 5" not in str(exc)[:12]:
+                raise
+            last = exc
+            time.sleep(2**attempt)
+            continue
         text = str(resp.get("text") or "")
+        finish = str(resp.get("finish") or "")
+        if finish == "MAX_TOKENS":
+            # **A TRUNCATED VERDICT IS AN INCOMPLETE ANSWER, NOT A BAD ONE, AND THIS LOOP COULD NOT
+            # TELL THEM APART.** The finish reason was never read on a non-empty reply, so a JSON
+            # object cut off mid-`"reasoning"` reached `_parse` and raised "Unterminated string" —
+            # indistinguishable from a judge that answered badly. Measured on `gemini-2.5-flash`:
+            # 8 of 8 unjudged pairs were this, none were throttling. Flash writes longer reasoning
+            # than Pro and overran the 2048-token cap, so the noisier-looking judge was really the
+            # more verbose one, and every truncated pair scored as a NON-MATCH.
+            budget *= 2
+            body["generationConfig"] = {"temperature": 0.0, "maxOutputTokens": budget}
+            last = JudgeFailed(f"truncated at {budget // 2} tokens")
+            continue
         if not text.strip():
-            raise JudgeFailed(f"empty judge reply, finish={resp.get('finish')}")
+            raise JudgeFailed(f"empty judge reply, finish={finish}")
         return _parse(text)
     raise JudgeFailed(f"transport failed {TRANSPORT_RETRIES}x: {last}")
 
@@ -103,7 +141,7 @@ def verdicts(
 ) -> dict[str, list[str] | int]:
     """TP / FP / FN for one pull request, aggregated as Martian's step 3 aggregates them."""
     if not candidates:
-        return {"tp": [], "fp": [], "fn": list(golden), "errors": 0}
+        return {"tp": [], "fp": [], "fn": list(golden), "errors": 0, "undecided": []}
 
     best: dict[str, tuple[float, str | None]] = dict.fromkeys(golden, (0.0, None))
     matched_cand: set[str] = set()
@@ -129,7 +167,27 @@ def verdicts(
     tp = [g for g, (_, c) in best.items() if c is not None]
     fn = [g for g, (_, c) in best.items() if c is None]
     fp = [c for c in candidates if c not in matched_cand]
-    return {"tp": tp, "fp": fp, "fn": fn, "errors": errors}
+    # **AN UNJUDGED PAIR IS EXCLUDED FROM THE DENOMINATOR, NOT COUNTED AS A NON-MATCH.** Leaving it
+    # in `fn`/`fp` is what made the noisier judge look like the worse reviewer: the pair was never
+    # decided, so scoring it against either arm is inventing a verdict nobody reached. `undecided`
+    # names the goldens whose match status is unknown, and they are kept OUT of `fn`.
+    undecided = (
+        sorted(g for g in golden if g not in tp and best.get(g, (0.0, None))[1] is None and errors)
+        if errors
+        else []
+    )
+    fn = [g for g in fn if g not in undecided]
+    if errors:
+        # **THE DOCSTRING SAID THIS WAS PRINTED AND NOTHING PRINTED IT.** `run_d6b.py` took `tp`
+        # and `fp` and dropped `errors`, so a run degraded by throttling read as a clean one —
+        # the exact failure this module's comment claims cannot happen. Printed HERE rather than
+        # left to a caller, because sixteen call sites each had to remember and one did not.
+        print(
+            f"    [judge] {errors} of {len(pairs)} pair(s) went unjudged; "
+            f"{len(undecided)} golden comment(s) held UNDECIDED rather than counted against",
+            flush=True,
+        )
+    return {"tp": tp, "fp": fp, "fn": fn, "errors": errors, "undecided": undecided}
 
 
 def score(tp: int, fp: int, fn: int) -> tuple[float, float, float]:

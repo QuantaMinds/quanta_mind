@@ -30,6 +30,7 @@ import urllib.parse
 import urllib.request
 
 from quantamind.store import accounts
+from quantamind.types.deployment import Destination, permit
 from quantamind.types.settings import Settings
 
 AUTHORIZE = "https://github.com/login/oauth/authorize"
@@ -74,6 +75,10 @@ def _post(url: str, body: dict[str, str]) -> dict[str, object]:
         data=urllib.parse.urlencode(body).encode(),
         headers={"Accept": "application/json"},
     )
+    # **ASK BEFORE THE SOCKET OPENS.** D7f: an air-gapped deployment REFUSES
+    # this, rather than attempting it and failing somewhere the customer sees
+    # in their egress log and we do not.
+    permit(Destination.GITHUB_API)
     with urllib.request.urlopen(request, timeout=HTTP_TIMEOUT_S) as response:
         parsed = json.loads(response.read())
     return parsed if isinstance(parsed, dict) else {}

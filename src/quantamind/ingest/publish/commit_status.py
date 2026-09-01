@@ -9,10 +9,11 @@ WHY:  **A COMMENT CAN BE SCROLLED PAST; A REQUIRED CHECK CANNOT.** The claim thi
       that can stop a merge.
 
       **IT KNOWS NOTHING ABOUT WHAT BLOCKS, AND THAT IS THE LAYERING, NOT A STYLE CHOICE.**
-      `verify/blocking.py` decides and `render/status_check.py` phrases it -- both sit to the RIGHT
-      of `ingest` in the layer order, so a writer that imported either would be the sideways reach
-      the rule exists to stop. It takes a state and a sentence and posts them. The upside is that
-      the thing which can block a customer's merge is decided in a module with no network in it.
+      `verify/blocking.py` decides and `render/blocks/status_check.py` phrases it -- both sit to
+      the RIGHT of `ingest` in the layer order, so a writer that imported either would be the
+      sideways reach the rule exists to stop. It takes a state and a sentence and posts them. The
+      upside is that the thing which can block a customer's merge is decided in a module with no
+      network in it.
 
       **`POSTING_ENABLED` IS NOT CHECKED HERE.** Nothing under `ingest/publish/` consults it; the
       caller does, at its own call site. A second writer inheriting the first one's gate is a gate

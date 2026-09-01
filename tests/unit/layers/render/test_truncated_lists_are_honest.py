@@ -17,7 +17,7 @@ WHY:  **A LIST THAT SILENTLY SHOWS FIVE OF TWELVE IS THIS PROJECT'S OWN FAILURE 
       **THE REMAINDER IS THE PROPERTY, NOT THE CAP.** Five names and "and 7 more" is honest at
       any cap; five names and nothing else is not. So the tests assert the remainder arithmetic
       as well as the count, which is what fails when the cap moves in either direction.
-IMPORTS: pytest, quantamind.render.coverage_line, quantamind.render.context.goal_block,
+IMPORTS: pytest, quantamind.render.blocks.coverage_line, quantamind.render.context.goal_block,
       quantamind.ingest.{context.tickets,diff}.
 CONSUMED BY: `just check`.
 """
@@ -28,8 +28,8 @@ import pytest
 
 from quantamind.ingest.context.tickets import Context
 from quantamind.ingest.diff import Stated
+from quantamind.render.blocks.coverage_line import MAX_NAMED, _names
 from quantamind.render.context.goal_block import BODY_CAP, goal
-from quantamind.render.coverage_line import MAX_NAMED, _names
 
 NAMED, QUOTED = 5, 240
 """The shipped caps, written out. See the module docstring."""

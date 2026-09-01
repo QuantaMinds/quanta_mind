@@ -26,7 +26,7 @@ which is a fact about the defects and not about the format.**
 | # | The claim | What actually held | How it was caught | Mechanism now |
 |---|---|---|---|---|
 | 1 | A protocol file was cited by path **and section number** as established policy governing how the 20-PR gate must be run. | The file had never been committed. Neither had the section. The real instruction was one line in `PHASE0_RUNBOOK.md` — "Read them yourself" — which predated the citation and said something the fabricated section did not. | By reading. The cited path was checked against the tree, twice, and did not exist either time. | **YES** — `guard:citations/resolve`, sabotage-verified against this exact citation. |
-| 2 | A31 recorded `--filter=blob:none` as ABANDONED. | The flag stayed in `pipeline/worktree.py` for a day, and **both arms were walked under the strategy the amendment said was abandoned.** | By reading the code after the walks had already run. | **YES** — `guard:check_no_partial_clone` rejects any `--filter`, and `guard:check_withdrawn_amendments` requires a withdrawal to name its enforcer. |
+| 2 | A31 recorded `--filter=blob:none` as ABANDONED. | The flag stayed in `pipeline/worktree.py` for a day, and **both arms were walked under the strategy the amendment said was abandoned.** | By reading the code after the walks had already run. | **YES** — `guard:runtime/check_no_partial_clone` rejects any `--filter`, and `guard:check_withdrawn_amendments` requires a withdrawal to name its enforcer. |
 | 3 | The 20-PR gate validated the outcome classifier. | `draw._as_record` **rebuilt** the classifier's input instead of consuming the `PRRecord` the pipeline had written, and got `base_ref`, `arm` and `merged_sha` wrong. The gate certified a classifier the study does not run, on roughly one PR in six. | By reading, after it had already invalidated a gate — chased down from a single disagreement where machine and human gave three different answers for the same PR. | **NO.** No guard catches "this tool rebuilds its input instead of consuming it". `record_for` now returns the stored object and is asserted on **identity**, but that is a test of one call site, not of the class. |
 
 | 4 | "All four base branches merged into main later than the PR merged into them, so walking default measures a different week." Stated as a measurement, and a taxonomy was designed on it — the fourth arm was said to be one that *will* fire. | **All four arrived inside the window.** Measured: 1 minute, 3 minutes, 10 minutes, and 3 days 12 hours, against a 7-day window. Walking default would have been valid for every one. | By finally running the query — `git rev-list --ancestry-path <merge_sha>..<default>`, last entry, its committer date. Minutes of work, never done until after the claim had been built on. | **NO.** Nothing catches an unmeasured claim in prose. See the mitigation below. |
@@ -499,6 +499,64 @@ identity` fails when two documents under `docs/` share a basename, and `guard:ci
 now fails a bare-basename citation that matches more than one file instead of silently taking the
 first. The first check would have fired on the day the duplicate was created; the second closes the
 fallback that hid it afterwards. Both were sabotage-verified against this exact collision.
+
+---
+
+## 13 · I asserted the direction of an artefact I could have measured in one line
+
+**2026-08-31, closing D2e on a pre-registered null.**
+
+I found a defect in my own instrument — `drift = shifts/churn` and `fix_rate = fixes/churn` share a
+denominator, so part of any association between them is arithmetic — reported it prominently, and
+then wrote:
+
+> A shared `1/churn` induces a POSITIVE association between drift and fix rate. B2 asked for a
+> positive one and observed a **negative** one — so the artefact could only have flattered the
+> hypothesis, and it still failed. The bar is if anything more securely unmet than the headline
+> number suggests.
+
+**That is false.** A shared denominator induces a positive association **only when the denominator
+is independent of the numerators**. Measured on the same 305 rows, in one line:
+`corr(shifts, churn) = +0.696`, `corr(fixes, churn) = +0.841`. Both track it hard, so the induced
+sign is not reliably positive and the negative result I read as evidence may be the artefact itself.
+
+**On raw counts with no ratio anywhere, two of three churn bands run the OTHER way.**
+
+### What makes this the worst kind of entry in this log
+
+**It came immediately after catching the defect, in the sentence that disposed of it.** Finding the
+shared denominator was the good half; the bad half was reaching for a reason it did not matter
+rather than spending one line finding out. **A caveat that is raised and then dismissed is more
+dangerous than one that is never raised**, because the raising is what buys the reader's trust and
+the dismissal is what spends it.
+
+The shape is entry 6's and entry 11's, one level up: **the convenient answer went unchecked because
+it was convenient.** There I quoted a number that damaged our own work without finding the run; here
+I argued away a defect in our own work without doing the arithmetic.
+
+### How it was caught
+
+**By an isolated model of a different family, asked to attack the document.** It got the statistics
+right immediately and named the assumption I had not noticed making. That is the product's own
+thesis — *we do not build a better bug-finder, we build the judge* — turned on our own research, and
+it earned its keep on the first try.
+
+**It also found a second bias I had not considered**: `fix_rate` counts commits whose SUBJECT
+matches fix-words, and fixes in high-churn refactored files are more likely to be folded into
+"Refactor to use new API" than labelled "Fix X". That undercounts fixes in exactly the high-drift
+group, and could produce the observed direction on its own. Unverified, and recorded as a claim to
+check rather than a finding.
+
+### The rule this leaves
+
+**Before arguing that a defect does not change your conclusion, measure the thing your argument
+assumes.** Mine assumed independence between a denominator and its numerators — one correlation
+each, thirty seconds, and I wrote a paragraph instead.
+
+**Mechanism now: NO**, and the honest reason is that no guard can read an argument for an unstated
+assumption. What is available is cheaper and was not used: **put the finished document to a judge of
+a different family and tell it to attack.** `docs/product/QUANTAMIND.md` already requires that of
+every published model finding. It was not being required of our own research.
 
 ---
 

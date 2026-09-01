@@ -72,9 +72,9 @@ you remember to obey — the machine will stop you either way.
 
 7. **No cross-layer imports.** Layers are `types → store → ingest → parse → rank →
    allocate → infer → verify → render → serve`. Left only — never right, never sideways
-   into a sibling's internals. This is what stops `verify` importing `infer`: the layer
-   adjudicating the model's claims cannot start trusting them.
-   → `scripts/guard/check_conventions.py`
+   into a sibling's internals. **Plus `FORBIDDEN` pairs ordering cannot catch:** `verify`
+   may not import `infer` — that runs LEFT, so this rule long claimed to stop what nothing did.
+   → `scripts/guard/check_conventions.py` (`check_layering`, `FORBIDDEN`)
 
 8. **Every file opens with a docstring** stating: what it does, why it exists, what it
    imports and from which layer, and who consumes it.

@@ -22,7 +22,7 @@ evidence and it is not the commercial plan. Those were moved out so this reads a
 | **the skeleton** | **DONE** | ten layers importable; `types/` holds the value objects; `serve/cli.py` runs |
 | **the reader** | **STARTED** | `ingest/history.py`, `ingest/diff.py`, `ingest/commits.py`, `ingest/publish/github_comments.py`, `parse/languages.py` and `parse/units.py` all built and live-verified. The stage's own gate is not signed off |
 | **the store and the ranker** | **STARTED** | `store/schema.py`, `store/touches.py`, `rank/score.py`, `rank/order.py`, `rank/events.py` and `rank/baseline.py` built and live-verified. Gate 2b is met at 1.21% vs 3.12% on six unseen repositories |
-| **render and the free tier** | **STARTED** | `render/coverage_line.py`, `render/comment.py` and `ingest/publish/github_comments.py` built; `post()` has written, refused a duplicate, and reposted on a moved head |
+| **render and the free tier** | **STARTED** | `render/blocks/coverage_line.py`, `render/comment.py` and `ingest/publish/github_comments.py` built; `post()` has written, refused a duplicate, and reposted on a moved head |
 | **the retrospective** | **STARTED** | `serve/retrospective.py` and `render/replay_report.py` built; `quantamind retrospective <clone>` runs against any clone and is live-tested |
 | **serve** | **STARTED** | the endpoint binds, authenticates, de-duplicates and answers; `serve/listener.py` + `run_endpoint.py`. **Nothing is wired to the work callback** — `review` is unbuilt |
 | **the reviewer — allocate, infer, verify** | **NOT BEGUN** | scheduled by product decision 2026-08-20. `infer/` is Gemini over the ranked files; `verify/` is ONE isolated judge of a different family, and it is what makes `infer/` shippable |
@@ -38,16 +38,16 @@ three months stale.
 
 | layer | modules | files |
 |---|---|---|
-| `types/` | **15** | `change.py`, `checked.py`, `commit.py`, `deep.py`, `env_values.py`, `finding.py`, `pooled_outcome.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `rule.py`, `settings.py`, `spend.py`, `touch.py`, `verdict.py` |
+| `types/` | **15** | `change.py`, `commit.py`, `deep.py`, `deployment.py`, `dotenv.py`, `env_values.py`, `finding.py`, `pooled_outcome.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `settings.py`, `spend.py`, `touch.py`, `verdict.py` |
 | `store/` | **15** | `accounts.py`, `calibration.py`, `compliance.py`, `costs.py`, `deliveries.py`, `drift.py`, `installations.py`, `lifecycle.py`, `migrations.py`, `reviews.py`, `rule_checks.py`, `schema.py`, `tables.py`, `tenancy.py`, `touches.py` |
 | `ingest/` | **13** | `app_auth.py`, `blob.py`, `change_shape.py`, `commits.py`, `diff.py`, `git_credentials.py`, `github_api.py`, `google_auth.py`, `history.py`, `pull_refs.py`, `reachability.py`, `review_window.py`, `worktree.py` |
-| `parse/` | **6** | `importers.py`, `imports.py`, `languages.py`, `python_names.py`, `suite_reach.py`, `units.py` |
+| `parse/` | **11** | `body_shape.py`, `change_effort.py`, `duplicate_bodies.py`, `importers.py`, `imports.py`, `languages.py`, `public_api.py`, `python_names.py`, `secret_scan.py`, `suite_reach.py`, `units.py` |
 | `rank/` | **6** | `baseline.py`, `events.py`, `firing.py`, `history_rates.py`, `order.py`, `score.py` |
 | `allocate/` | **1** | `depth.py` |
 | `infer/` | **7** | `change_review.py`, `change_summary.py`, `diff_cap.py`, `gemini.py`, `prompt_once.py`, `summary_prompt.py`, `vertex.py` |
-| `verify/` | **11** | `anchor.py`, `blocking.py`, `external_facts.py`, `pin_check.py`, `pin_mismatch.py`, `publishable.py`, `qualification.py`, `release_claims.py`, `releases.py`, `repeats.py`, `rule_check.py` |
-| `render/` | **15** | `comment.py`, `compliance_table.py`, `config.py`, `coverage_line.py`, `dashboard.py`, `deep_report.py`, `found_block.py`, `json_report.py`, `page.py`, `pin_block.py`, `replay_report.py`, `rule_block.py`, `shape_line.py`, `status_check.py`, `verdict_block.py` |
-| `serve/` | **12** | `blocking_status.py`, `cli.py`, `deep_review.py`, `health.py`, `listener.py`, `onboarding.py`, `pin_review.py`, `retrospective.py`, `review_delivery.py`, `settle.py`, `webhook_github.py`, `working_clone.py` |
+| `verify/` | **13** | `anchor.py`, `blocking.py`, `consumers.py`, `external_facts.py`, `judged_rule.py`, `pin_check.py`, `pin_mismatch.py`, `publishable.py`, `qualification.py`, `release_claims.py`, `releases.py`, `repeats.py`, `rule_check.py` |
+| `render/` | **11** | `audit_export.py`, `comment.py`, `compliance_table.py`, `config.py`, `dashboard.py`, `deep_report.py`, `json_report.py`, `mined_rules.py`, `page.py`, `replay_report.py`, `speaks.py` |
+| `serve/` | **10** | `blocking_status.py`, `cli.py`, `health.py`, `listener.py`, `onboarding.py`, `retrospective.py`, `rule_judge.py`, `settle.py`, `webhook_github.py`, `working_clone.py` |
 
 <!-- plan-state:end -->
 
@@ -342,7 +342,7 @@ produce the no-history label, not an arbitrary order presented as a ranking.
 
 ### Steps
 
-1. **DONE.** `render/coverage_line.py` — **the coverage line comes first in every comment**,
+1. **DONE.** `render/blocks/coverage_line.py` — **the coverage line comes first in every comment**,
    naming what was not analysed and why.
 2. **DONE.** `render/comment.py` — the comment body: the ranking, the budget, the unresolved list.
 3. **DONE.** `ingest/publish/github_comments.py` posts it, idempotently, keyed on head SHA.

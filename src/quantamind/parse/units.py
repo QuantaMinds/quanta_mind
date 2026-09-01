@@ -38,7 +38,7 @@ from collections.abc import Collection
 from dataclasses import dataclass
 
 from quantamind.parse.languages import Depth, depth_of, language_of
-from quantamind.types.change import ChangedUnit
+from quantamind.types.change import ChangedUnit, Language
 from quantamind.types.verdict import Construct, Reason, Site, Unresolved
 
 # `@@ -a,b +c,d @@ <declaration>` -- the declaration is what git's funcname driver found.
@@ -88,21 +88,50 @@ def units_in(diff: str, scope: Collection[str] | None = None) -> Parsed:
 
     The unit's `site` carries the hunk's first added line, and its `qualified_name` is the
     declaration git named. Nothing here guesses: a header without an identifier is unresolved.
+
+    **`lines_added` AND `lines_removed` ARE FILLED HERE, AND FOR A LONG TIME THEY WERE NOT.**
+    `ChangedUnit` has carried both fields and a `churn` property since it was written, and this
+    function — its only producer — left all three at zero. Nothing read them, so nothing failed;
+    the first consumer to arrive, `parse/change_effort.py`, rendered "0 lines" beside files that
+    plainly had changed. **A field that looks meaningful and is never populated is the same defect
+    as a check that cannot fail**, and this codebase has found two dead constants the same way.
     """
     units: list[ChangedUnit] = []
     unresolved: list[Unresolved] = []
     hunks = 0
     path = ""
     saw_hunk_marker = False
+    # The unit whose body we are currently counting. A hunk's `+`/`-` lines arrive AFTER its
+    # header, so the unit cannot be built until the next header or the end of the diff.
+    pending: tuple[Site, str, Language] | None = None
+    added = removed = 0
+
+    def _flush() -> None:
+        nonlocal pending, added, removed
+        if pending is not None:
+            site, declaration, language = pending
+            units.append(ChangedUnit(site, declaration, language, added, removed))
+        pending = None
+        added = removed = 0
 
     for line in diff.split("\n"):
         header = FILE_HEADER.match(line)
         if header:
+            _flush()
             path = header.group(1).strip()
             continue
         match = HUNK.match(line)
         if not match:
+            # **ONLY COUNTED WHILE A UNIT IS OPEN.** Body lines of a hunk that became `Unresolved`
+            # belong to no unit, and attributing them to the previous one would inflate a file's
+            # size with a function we could not identify.
+            if pending is not None and line[:1] in ("+", "-"):
+                if line.startswith("+"):
+                    added += 1
+                else:
+                    removed += 1
             continue
+        _flush()
         saw_hunk_marker = True
         if not path:
             continue
@@ -131,8 +160,9 @@ def units_in(diff: str, scope: Collection[str] | None = None) -> Parsed:
             )
             continue
 
-        units.append(ChangedUnit(site=site, qualified_name=declaration, language=language))
+        pending = (site, declaration, language)
 
+    _flush()
     if saw_hunk_marker and hunks == 0 and scope is None:
         raise MalformedDiff(
             "the diff contains hunk headers but no `+++ b/<path>` line naming the file they "

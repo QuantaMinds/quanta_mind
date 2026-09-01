@@ -15,7 +15,7 @@ WHY:  **THE ENDPOINT AUTHENTICATED DELIVERIES AND REVIEWED NOTHING, AND EVERY UN
       **A MERGED, PINNED PULL REQUEST, NOT AN OPEN ONE.** An open pull request's head moves and its
       file list changes, so the assertions below would rot into flakes. This one is closed and
       cannot change.
-IMPORTS: stdlib, pytest, quantamind.serve.review_delivery, quantamind.types.settings.
+IMPORTS: stdlib, pytest, quantamind.serve.review.review_delivery, quantamind.types.settings.
 CONSUMED BY: `uv run pytest tests/live`.
 """
 
@@ -28,7 +28,7 @@ from pathlib import Path
 
 import pytest
 
-from quantamind.serve.review_delivery import Outcome, deliver
+from quantamind.serve.review.review_delivery import Outcome, deliver
 from quantamind.store import tenancy
 from quantamind.store.reviews import recent
 from quantamind.store.schema import open_store

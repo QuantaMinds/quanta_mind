@@ -412,6 +412,461 @@ whole as `serve/pin_review.py` — which turned a source-string test (`"if not p
 a behavioural one, because a branch in a function you can call can be asserted on rather than read.
 The cost report moved into `store/reviews.bank()`, beside the two refusals it sits with.
 
+### `parse/body_shape.py` and `parse/duplicate_bodies.py` — D2c, the same body twice
+
+**A parser answers "is this the same logic" exactly, so a model must not.** `shapes_in(source)`
+digests each function body with local identifiers replaced by the position of their first
+appearance — so a renamed copy still matches, and `x + x` does not match `y + z`. API names,
+literals and operators are KEPT: a copy renames its variables, not the methods it calls, and
+`timeout=30` is not `timeout=60`. A leading docstring is stripped; comments are free, because they
+are not in the AST.
+
+**THE FLOOR IS 3 STATEMENTS AND IT WAS MEASURED.** Over this repository and `pallets/flask`:
+
+| | library files | functions | groups at 2 | at 3 | at 4 |
+|---|---|---|---|---|---|
+| quanta_mind | 139 | 443 | 2 | **0** | 0 |
+| `pallets/flask` | 24 | 367 | 7 | **5** | 2 |
+
+All five of flask's groups at three were read and all five are real — three of them the same body
+in `app.py` and `blueprints.py`, which flask later hoisted into a shared `Scaffold` base class.
+At two it reports `__init__` pairs; at four it loses three of the five.
+
+**THE LIBRARY/TEST SPLIT DOES MORE WORK THAN THE FLOOR.** Unfiltered, flask has 12 groups at three
+statements and seven are conventional test route handlers — real repeats, not defects, and burying
+five findings under seven is how a section stops being read. `suite_reach.is_library` already drew
+that line for a different question.
+
+**`shapes_in` RAISES ON A FILE THAT WILL NOT PARSE, AND THAT IS THE SECOND ATTEMPT.** The first
+returned `()` for both "no functions here" and "not Python", so `twins()` counted every
+dataclass-only module as unparsed and reported **51 of 390** library files as a coverage gap when
+all 390 had been read. A wrong denominator matters most in the one block whose value is that it
+says what it could not search.
+
+**NOTHING IS STORED.** The tree is parsed at the reviewed commit and thrown away. D2b is
+`ON HOLD, recommend DROP` for having paid a table, a migration and a watermark and then given the
+same top three as alphabetical on 99.2% of changes; paying that again before this signal proves
+itself would repeat the bet rather than learn from it.
+
+**The block reports WHERE, never what to do.** flask's `render_template`/`stream_template` pair is
+a deliberate repeat, and "extract a helper" would be confident and wrong there.
+
+### `ingest/standards/links_file.py` — D3a, the repositories a business declares
+
+**Declared beats discovered, and that is a product decision before it is a technical one.** Finding
+the links ourselves needs an org-wide crawl and permissions across every repository a customer owns
+— a large ask, a large blast radius, and an answer that is *our guess about their architecture*. A
+link they wrote in `.quantamind/links.toml` is provenance an auditor can be shown.
+
+**IT SHIPS BEFORE D3b, AND WHAT IT BUYS TODAY IS TYPED SILENCE.** Reading the linked repository — a
+changed export checked against the repositories that import it — is gated on a design partner with
+more than one repository that matters. Meanwhile `render/comment.py` printed one static sentence,
+*cross-repository impact is not checked at all*, and a reader could not tell whether that meant
+**there is nothing across the boundary** or **we did not look**. `render/blocks/linked_block.py`
+names the declared repositories and says none was read, which makes it the second.
+
+**FOUR ANSWERS, THREE OF WHICH LEAVE THE LIST EMPTY.** No file means they declared none — the
+common case. An unreadable file, a malformed entry and a declared link are the others, and only the
+first means "no links". Printing that for either of the middle two would narrow a customer's
+cross-repository surface to nothing on the day their declaration stopped parsing.
+
+`owner/name` or nothing: guessing the owner from the repository under review would invent a link
+nobody declared. One malformed entry does not cost the good ones — refusing a whole file over a
+typo loses every link the customer got right.
+
+### `ingest/context/egress.py` — which systems may be quoted INTO a comment
+
+**D6c. "Egress is a decision, not a detail."** Reading a Jira ticket to understand a change is one
+thing; printing its text into a GitHub comment is another, and the second moves the customer's data
+from a system with one access list into a system with a different one. A private Slack thread
+quoted into a pull request is visible to everyone who can read the repository, who are not the
+people who could read the channel.
+
+**Deny by default, per source, and only a literal `true` grants.** No file means nothing outside
+GitHub is quoted. `"yes"`, `1` and a misspelled key all grant nothing — a typo must not open an
+egress path. One switch for "external context" would let agreeing to a ticket title agree to a
+private channel, so `quote_jira` says nothing about `quote_slack`.
+
+**GitHub is always quotable and that is not an exception.** The comment is posted to GitHub, by an
+app installed on GitHub, quoting text already in the same repository. Nothing crosses a boundary,
+so there is no decision to ask for. Every other source crosses one.
+
+**An unreadable consent file grants nothing.** This is the one place in the product where "we could
+not tell" and "no" are deliberately the same answer, and the reason is that the cost of the two
+mistakes is not symmetric — everywhere else, collapsing them is the bug.
+
+### `ingest/context/elsewhere.py` — Jira and Slack over stdlib HTTP
+
+Both are REST and JSON over HTTPS, so `urllib` reaches them and `dependencies = []` holds. What
+they need is not a library but the customer's credential, which is why both take a token rather
+than reading one from anywhere. **It must not grow a client library**, and it must not decide
+whether its text may be quoted — `egress.py` does that, separately, so the two acts stay visible.
+
+**`Unreachable` is the expected answer.** No token is configured for either system in any current
+deployment, so both decline before opening a socket. `NOT_CONFIGURED`, `REFUSED` and `UNREADABLE`
+are three different sentences to a reader: not bought, wrong credential, our bug.
+
+**Slack answers 200 with `ok: false`.** Reading only the status code turns a refusal into an empty
+message, which would print a change with no stated goal and let the reader assume the author gave
+none. **Plain HTTP is refused rather than downgraded** — the token is in the header.
+
+### `serve/review/` — the pipeline, split from the edge
+
+**`serve/` reached its 15-file cap while building D1e, and this is the honest seam.** The rest of
+`serve/` is the edge — listener, webhook, CLI, health, onboarding — which receives a request and
+hands it here. These six are one pipeline with one entry point: `review_delivery.deliver()`
+orchestrates, `change_facts.gather()` collects, `standards_step.applied()` enforces,
+`deep_review`/`pin_review` produce findings, `review_body.body_for()` assembles the text.
+
+**`review_body.py` exists because two renderers were allowed to drift.** Written inline, the "does
+this comment say anything" check omitted `blind` and silently discarded the "I could not review
+this" banner — a refusal became silence, found by this product's own review of itself on
+`QuantaMinds/quanta_mind#91`. Both calls now take the same arguments in one small function, so a
+section cannot be added to one without the other.
+
+### `ingest/standards/inherited.py` — one standard, defined once for an organisation
+
+**D1e. "Define a standard once and it is checked on every pull request across all repositories" is
+the enterprise claim, and a per-repository `rules.toml` does not make it.** Organisation rules live
+in `<owner>/.quantamind`, the same convention GitHub already uses for `.github` — a real repository
+with real permissions, changed through a pull request like anything else.
+
+**The asymmetry is the design.** A repository may TIGHTEN an inherited rule with no permission, and
+it is recorded. It may not LOOSEN one while still claiming to inherit it: that is refused, the
+organisation's severity stands, and the refusal says how to opt out properly. It may DROP one
+outright with `inherit = false` — allowed, explicit, and **recorded**, because the row's own
+sentence is that a standard which can be disabled invisibly is not a standard.
+
+**`render/blocks/inheritance_block.py` is where that becomes true or false.** `combine` can compute
+a perfect `Dropped` record and it changes nothing if the record never reaches a reader. Verified end
+to end against two real git repositories: an organisation declaring `no-eval`, a repository dropping
+it, a file containing a real `eval(x)` — the violation went unreported, and the comment said the
+rule had been switched off here.
+
+**`org_read` is False for a file we could not read, and True for an organisation that declares
+nothing.** A merge treating an unreachable file as an empty one would report a repository as fully
+compliant at the moment its inherited standards stopped arriving — `rules_file.py`'s own confusion,
+one level up. That case renders the loudest line in the block: a drop is a decision somebody made,
+an unreadable file is enforcement stopping with nobody deciding anything.
+
+**The fetch is `serve/`'s and the merge is `ingest/`'s.** `verify/rule_check.enforce` takes the
+effective rules and never learns that inheritance exists, because `verify/` may not clone.
+
+### `ingest/standards/mined.py` — the standards a team repeats, proposed and never declared
+
+**D1d, and the premise was measured before the module existed.** Over 1,213 real inline review
+comments from eight public repositories the yield is **1.62 candidate clusters per repository**, of
+which roughly five of thirteen were generalizable standards.
+→ `docs/findings/standards/D1D_REVIEWER_REPETITION_YIELD_2026-08.md`. That finding fixed two
+refutation bars in advance — more than ~2 proposals per repository means the filter has stopped
+working, and finding nothing in `huggingface/transformers` means the clearest true positive was
+missed — and `tests/unit/layers/ingest/standards/test_mined_corpus.py` asserts both against the
+real corpus.
+
+**No model is called.** Clustering comments by shared vocabulary is deterministic and re-runnable,
+and a proposal only has to be worth a human's glance. What a model could add is phrasing a proposal
+as a rule; finding the repetition does not need one.
+
+**The acknowledgement filter is the feature.** Without it the largest clusters in that corpus are
+`done` x6, `fixed` x6, `ditto` x4, `nit: suggestion` x11 — repetition, and not one of them a
+standard. Every token in `ACKNOWLEDGEMENT` headed a real cluster.
+
+**The first real run of `quantamind standards` proposed this product's own review comments as the
+team's standards** — three of three, pointed at our own pull requests, with twenty green tests
+behind it. Every hand-built fixture had no author, so nothing tested authorship at all;
+`research/phase0/corpus/human_attention.py` had already recorded that about a third of inline
+comments in public repositories are AI-written. `Comment.machine` now reads GitHub's own
+`user.type`, and `mine` drops bots **before** clustering so a bot cannot swell a human's evidence
+count. **It must not grow a text heuristic for this** — a guess on the prose misfires on a human
+quoting a bot.
+
+**`Proposal.distinct_pulls` returns `None`, not a number.** Four of the thirteen real clusters were
+one reviewer restating themselves inside a single thread, one character-identical. "Said on two
+changes" and "we could not tell which changes" are different answers and the report prints
+different sentences for them.
+
+### `ingest/publish/check_run.py` — the violations, at the line, on the diff
+
+**C2, and it is NOT the commit status D1f built.** That posts one line with one state and no
+location. This posts a GitHub check run whose annotations appear on the diff itself, at the file
+and line, in the review interface the developer is already reading. The row sat bodiless for weeks
+because nobody had said which of the two it meant, and **ticking it on D1f's work would have
+counted one build twice** — which is how a checklist comes to overstate a product.
+
+**Only a parser's verdict is annotated, never a model's.** An annotation is rendered by GitHub as a
+fact against a line; there is no room for "we think", and raw model findings measure 66.7-82.1%
+wrong across four blind pools. A `Judged` record has no path into this module at all, and D1c's
+`Outcome.DEFERRED` produces nothing. **The surface where being wrong is loudest gets the half that
+is reproducible.**
+
+**Only violations.** `PASSED` on every checked line trains a reviewer to dismiss the column;
+`UNCHECKABLE` is a statement about our coverage rather than their code and belongs in the comment's
+honest count.
+
+**Severity is the customer's.** `HIGH` becomes `failure` and fails the check; `MEDIUM` and `LOW`
+become `warning` and `notice` and do not. Deciding for ourselves which of a team's standards blocks
+a merge would override the judgement `.quantamind/rules.toml` exists to record.
+
+**The 50-annotation cap is announced.** GitHub accepts fifty per request; a run with more says how
+many were not shown. A truncated list that does not say it truncated reads as a complete one.
+
+**A failed check run does not take the review with it** — it needs `checks:write`, which an older
+installation may not have granted, and that is a fact about their consent rather than a fault in
+the review. Verified end to end against a real repository: `eval` at line 3 annotated `failure`,
+`print` at line 2 annotated `warning`.
+
+### `types/deployment.py` — three shapes, one image, and a refusal that is ours
+
+**D7f. An outbound call that fails quietly in a bank is a finding against us, not a bug.** A
+deployment that merely lacks a route produces timeouts and a late review; the customer finds the
+attempt in their egress log and we never see it. So `permit(destination, shape)` is called BEFORE
+the socket opens, and a forbidden destination raises `NetworkRefused` naming the shape, the
+destination, and what IS allowed.
+
+**The clone is the boundary, not an exception to it.** `air_gapped` permits `GIT_REMOTE` and
+nothing else — with no repository there is nothing to review, so refusing it would not be an air
+gap but an off switch. `on_prem` loses only the Google metadata server, whose address exists solely
+inside Google's fabric and elsewhere hangs to a timeout.
+
+**An unrecognised shape refuses rather than defaulting.** Reading a typo as `cloud` would turn a
+misconfigured air-gapped deployment into one that reaches the network — the failure the module
+exists to prevent, arriving through its own configuration.
+
+**`scripts/guard/runtime/check_network_chokepoint.py` is what makes this a mechanism.** It fails
+the build if any module in `src/` opens a socket or runs a networked git subcommand without calling
+`permit` first — nine call sites today, and nine chances to forget one otherwise. It matches on
+primitives rather than names, because a module called `releases.py` reaches PyPI. **It must not be
+relaxed to a name list**: two earlier versions flagged `serve/cli.py`, which names an argparse
+argument `"clone"` and calls a local `run()`, and a guard that fires on deliberate code teaches a
+reader to scroll past it. Importing `subprocess` is the signal that distinguishes them.
+
+Operator documentation: `docs/engineering/DEPLOYMENT.md`.
+
+### `types/standards/` — a declared rule, and the two kinds of verdict it can receive
+
+**D1c. `rule.py` is the declaration, `checked.py` is what a PARSER decided, `judged.py` is what a
+MODEL said.** They moved here together because they are one concern, and because the split between
+the last two is the product: a `Checked` can be re-run on the same commit and shown to give the
+same answer, and a `Judged` cannot.
+
+**The separation is a TYPE, not a field, and that is deliberate.**
+`types/standards/checked.py:counts_toward_compliance` is true for `PASSED` and `VIOLATED`, so a
+model verdict expressed as an `Outcome` would enter the compliance rate — the number a customer
+shows an auditor — carrying our measured 66.7-82.1% raw error rate with it. There is no `Outcome`
+to set on a `Judged`, no `rule_check` row it can be written to, and no renderer shared with the
+compliance table. D1c asks that the two "never render alike"; here that is structural rather than
+remembered.
+
+**`Judged` refuses `BROKEN` without a quote at construction**, the way `Checked` refuses `VIOLATED`
+without evidence. A violation the developer cannot locate in their own file is not one they can act
+on, and an invented quote is the failure shape most likely to survive review — the prose still
+reads correctly.
+
+**It must not grow a converter.** Anything that turns a `Judged` into a `Checked` re-creates the
+exact hazard this package exists to prevent.
+
+### `verify/judged_rule.py`, `serve/rule_judge.py` — a standard no parser can check
+
+**D1c. The model may form a view on a prose rule; it may never produce a compliance row.**
+`verify/rule_check.py:check` returns `DEFERRED` for every `MODEL_JUDGED` rule and always will —
+that is not an unfinished branch, it is the mechanism. `enforce()` returns two tuples, and only the
+first is handed to `store/rule_checks.py:persist`.
+
+**Every failure path lands on `UNDECIDED`.** The transport raised, the reply did not begin with a
+verdict token, the reply claimed `BROKEN` and quoted a line that is not in the file: all undecided,
+never `MET`. `docs/engineering/CORRECTIONS.md` entry 8 is a verifier that defaulted the other way
+and confirmed every false claim it existed to refute.
+
+**The judge is injected, and building D1c is what exposed a rule with no mechanism behind it.**
+`AGENTS.md` rule 7 said the layer order is "what stops `verify` importing `infer`". It did not:
+`infer` is at index 6 and `verify` at index 7 in `scripts/guard/discovery.py:LAYER_ORDER`, so the
+import runs LEFT and `check_layering` — which only flags a target at or to the *right* — waved it
+through. The rule was true as an intention and false as a claim, for months, with a `→ guard`
+pointer beside it that made it look enforced.
+
+**`scripts/guard/check_conventions.py:FORBIDDEN` now refuses the pair by name**, and
+`tests/unit/guards/test_forbidden_layer_pairs.py` is the known-answer test: a real `verify/` module
+importing `quantamind.infer.gemini` must be reported at its own line, and a clean one must not.
+Sabotaged against `verify/publishable.py` before the test was written, to confirm it fires on the
+real tree and not only on a fixture. `verify/judged_rule.py` still takes the judge as a parameter —
+the precedent `verify/consumers.py` set for its clone — but now the guard says so rather than a
+sentence.
+
+**The general lesson, which did not fit inside AGENTS.md's 210-line cap: a rule naming a guard that
+does not implement it is worse than a rule naming none.** The pointer is what stops anyone checking.
+This is rule 14's own shape — "ask what a check outputs when the thing it checks is broken" —
+appearing inside the rules file itself.
+
+**`serve/standards_step.py` computes the commit status from `checks` alone.** A status blocks a
+merge; blocking on a claim measured 66.7-82.1% wrong would make the product an obstacle.
+
+**The live test found that the FIXTURE was the flaky part, not the judge.** The first negative
+fixture opened `"""A module with only WHY comments."""` and the judge quoted that line as a
+violation in **3 of 6 real trials** — reacting to the label rather than the code, and making the
+live test fail roughly half the time. With a neutral docstring the same judge scored **12/12** on
+the known-answer pair: 6/6 BROKEN on the planted claim, 6/6 MET on the clean file. A fixture that
+describes itself in the oracle's own vocabulary measures the fixture. Same shape as the flat corpus
+that hid a reader bug: the oracle was right and the subject was wrong.
+
+**No model-judged rule is declared in `.quantamind/rules.toml`, on purpose.** The first
+candidate fired on 10 of 12 real files; the withdrawal and its measurement are recorded in the file
+where the rule would have gone. The capability is exercised by
+`tests/live/model/test_judged_rule_live.py` against the live model, not by a declared rule.
+
+**The sabotage run is the reason four of these tests exist.** Thirteen were run; four disabled
+cleanly at first. The most instructive: persisting the judgements into the trail left the row COUNT
+unchanged, because `store/rule_checks.py:70` writes with `INSERT OR REPLACE` — the model verdict
+*overwrote* the honest `deferred` row with `passed`, which `counts_toward_compliance` accepts. The
+count assertion was watching the wrong thing; the test now asserts the outcome of the named row.
+
+### `store/audit/` — the trail as an artefact, not a query
+
+**D4b was ticked "append-only, exportable" for a fortnight and there was no export.**
+`docs/product/unit-economics.md` had already written the gap down — *"There is no file, no
+download, and no scheduled export anywhere in the build plan. A compliance buyer asks for the
+artefact, not the query"* — and the row stayed ticked. It is the second tick corrected in one day
+whose WORK was right and whose WORD was wrong; D1g's title was the first.
+
+`store/audit/export.py` reads every recorded check joined to the review that decided it, oldest
+first, each carrying the commit that lets somebody re-run it. **It owns reading the trail out
+whole; it must not summarise** — `store/compliance.py` answers "how are we doing", and this exists
+because that was not enough for an auditor who wants to pick one row and reproduce it.
+
+**`render/audit_export.py` writes JSON, not CSV, and the caveats are the reason.** A CSV opens more
+easily and cannot carry the four sentences that make the document honest: nothing is backfilled, an
+absent row means the check did not run, `uncheckable` and `deferred` are not passes, and only a
+`parser` row re-runs. **An export that outlives its covering email is how a partial record becomes
+a claim of full coverage**, and this is a document somebody may show a regulator.
+
+**`limits` comes first in the file**, so a reader who stops after the first object has read the part
+that stops them over-reading the rest — the same choice the compliance table made in putting its
+caveat above the rows. **The window is read from the data, never assumed**: the trail begins when
+rule checking was installed, not when the repository did. **An empty export is a document, not an
+error**, and it says it covers nothing.
+
+### `parse/secret_scan.py` — D7a, and the first check that is not Python-only
+
+**The security team's first question is "what does it catch", and this is the only answer we can
+give that survives being checked.** Raw model findings are 66.7–82.1% wrong across four blind pools.
+*"We catch hardcoded credentials, exactly, and we do not claim to catch injection"* is a weaker
+sentence and a defensible one.
+
+**IT DISPATCHES BEFORE THE LANGUAGE GATE, AND THAT IS THE POINT.** Every other rule kind needs an
+AST and returns `LANGUAGE_UNSUPPORTED` for anything but `.py` — the narrowness
+`docs/product/unit-economics.md` calls the honest limit of the standards engine. A credential is a
+string: it is found in `.env`, `.tf`, a CI workflow and a `.ts` config exactly as well as in a
+module, and those are the files that leak one. First widening of the enforceable surface past `.py`,
+and `dependencies = []` still holds because it is one regex pass.
+
+**A provider prefix is evidence; entropy alone is a guess.** `AKIA…` and `ghp_…` are issued by one
+company in one format. A long random string is a hash, a UUID, a checksum or a base64 asset far more
+often than a secret, so the generic rule needs BOTH a credential-shaped name and entropy.
+
+**ENTROPY DID LESS WORK THAN EXPECTED, AND THE DOCSTRING THAT SAID OTHERWISE INVENTED ITS NUMBER.**
+It claimed `password12345678` scores "about 3.1" against a real key "above 4.0", so a 3.5 floor sat
+in a wide gap. Measured: **3.88 against 4.28**. The floor does not separate them; a vocabulary check
+does — a generated credential does not contain an English word for itself. The scanner fired on that
+placeholder the first time it ran.
+
+**Fourteen must-not-fire cases against six must-fire ones, deliberately.** Telling a developer they
+committed a credential when they did not is alarming, public, and takes a rotation to disprove.
+
+**The secret never reaches the evidence.** A `Checked` row goes to the audit trail, the comment and
+the customer's database. Only the kind, the line, and a four-character prefix — enough to find it in
+the file, not enough to use.
+
+### `parse/public_api.py` and `verify/consumers.py` — D3b, a break and who imports it
+
+**The one thing on the category's list we did not have.** Qodo advertises *broken API contracts and
+schema drift read against registered consumer repositories*; theirs is a model's reading, this is a
+parser's, and "registered" is their word for D3a's declaration.
+
+**THE BREAK DETECTOR NEEDS NOBODY ELSE'S PERMISSION.** `surface(source)` reads a module's public
+names and their signatures — `__all__` when present, otherwise the leading-underscore convention.
+`broke(before, after)` compares the diff's two sides, both already in the clone. It reports removed
+or renamed, a changed kind, a dropped or reordered parameter, and a new REQUIRED argument.
+
+**Additions are never breaks.** A new export or a defaulted argument leaves every caller working,
+and a section that fired on those would fire on most pull requests. A reorder IS a break even when
+every name survives, because positional callers exist and are invisible from here.
+
+**THE CONSUMER CHECK MATCHES AN IMPORT, NOT A MENTION.** Grepping the symbol would hit a docstring,
+a comment, a same-named local and a string in a fixture. A false *"your change breaks billing"* is
+the most expensive sentence this product can print: it is about somebody else's repository, and the
+reader cannot check it without leaving their pull request.
+
+**A LINK WE CANNOT OPEN IS THE COMMON CASE AND IT IS NAMED.** The App is installed on the repository
+under review and usually not on the one consuming it, so "nothing imports this" and "we could not
+look" will diverge constantly. **Nothing is cloned when nothing broke** — an additive change asks no
+question and fetches nothing, proven by a test whose clone lookup raises.
+
+**The first render of D3a and D3b together contradicted itself**: the D3a line said *"Nothing in
+them was checked"* directly beneath a block reporting that `acme/billing` imports a removed export.
+Two sentences, each true when written, disagreeing in one comment — caught by printing it, and the
+linked block now takes whether the crossing check ran.
+
+### `serve/change_facts.py` — the deterministic half, gathered in one place
+
+`intent`, `repeated`, `sizes` and `links` arrived one at a time and each added a line to
+`deliver()`, which crossed the 200-line cap three times in a session. They are one concern: every
+one is read from the clone or the pull request, every one is reproducible on the same commit by
+anybody, and none costs a model call. Gathering them together makes it obvious that the comment
+does not depend on `infer/` — which is the property D6a existed to restore.
+
+### `render/blocks/` — one module per section of the comment
+
+**`render/` sat at its fifteen-file cap for three consecutive changes**, and `check_structure.py`
+says the same thing each time: introduce a sub-package, do not raise the cap. `found_block`,
+`pin_block`, `rule_block`, `verdict_block`, `shape_line`, `coverage_line` and `status_check` moved
+here by `git mv`; `comment.py` still decides the order in one place, and each block knows nothing
+about the others. `context/` (D6) stays outside it — those are whole documents, not sections.
+
+**`scope_block.py` is new, and it exists because a real comment frightened somebody.**
+`_3 of 56 file(s) reviewed; 53 not reviewed._` reads as a crash to a developer waiting to merge.
+It is not: three is the budget and the other 53 were ranked. **The count is not softened** — the
+residual is the product — but the scope now reads as a decision, and every changed file is listed
+behind a `<details>` fold so nothing is merely absent.
+
+**EACH FILE CARRIES ITS SIZE AND WHERE TO LOOK, AND TESTS ARE GROUPED RATHER THAN HIDDEN.** The
+list on its own was still a wall — a developer had to open eighty-two files to learn which two
+mattered. `parse/change_effort.py` attaches lines-changed and git's own hunk declaration to each
+path. **Hiding tests was asked for and researched and declined**: GitHub's answer to the same
+problem is COLLAPSE, not removal — even `linguist-generated` files stay listed — and the review
+literature is explicit that spotting inadequate testing is one of the few things human review is
+reliably good at. Omitting forty files would be the truncation-reads-as-coverage failure this
+product refuses. They are under their own heading with their own count.
+
+**THE SIZE IS FROM THE DIFF AND NEVER FROM `rank/`, AND THAT IS THE WHOLE RULE.** Lines added and
+removed are on GitHub's own Files-changed tab, so a reader already has them and a competitor learns
+nothing; a per-file prior-fix count is *what the ranking is built from* and stays out however
+useful it would be. **No percentage is computed** — every honest denominator is wrong. Of the file,
+a big file reads as easy; of the change, the largest file is 100% whatever its size.
+
+**Two defects came out of running it, both silent.** Summing `ChangedUnit.lines_added` scored
+nothing for a file git named no declaration in, so **every brand-new file showed no size at all** —
+and new files are the biggest in a change. Totals are counted per file from the diff now.
+And git's funcname heuristic offered a line of module docstring as the place to look
+(*"WHY: **A COMMENT CAN BE SCROLLED PAST...**"*), so only `def`/`class`/`async def` survives —
+**an omitted location costs a reader nothing; a wrong one sends them somewhere with our confidence
+attached.**
+
+**`ChangedUnit.lines_added`, `lines_removed` and `churn` had never been populated by their only
+producer.** All three were documented, `units_in` left them at zero, and nothing read them so
+nothing failed — until `change_effort` became the first consumer and rendered "0 lines" beside
+files that had plainly changed. A field that looks meaningful and is never filled is the same
+defect as a check that cannot fail; this codebase has found two dead constants the same way.
+
+**Two properties of that list are publishing rules, and `test_scope_block.py` fails if either
+moves.** It is ALPHABETICAL, because a list in rank order lets a reader count down to the cut and
+read the budget straight off it — `publishing-rules.md` never-publishes *how the budget is split
+across a change*. And a listed line carries a path and nothing else, because *what the ranking is
+built from* is first on that same list; a per-file fix count was in this comment once. The
+assertion is the SHAPE of the line rather than a list of forbidden words — a first draft searched
+for "rank" and fired on the scope sentence's own "were ranked", and a check that fires on correct
+output is one somebody deletes.
+
+*"Your repository's own history"* is the phrasing those rules permit, and it is the phrasing used.
+
 ### `scripts/guard/` — the enforcement layer
 
 | File | Enforces |

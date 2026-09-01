@@ -4,7 +4,7 @@ WHAT: `announce(repo, head_sha, checks, enabled=...)` decides the gate from the 
       it, and posts one commit status. Returns the `Standing` so a caller can log what happened,
       including when nothing was posted.
 WHY:  **THIS IS THE ONLY PLACE THE THREE LAYERS MEET, AND IT IS THE ONLY PLACE THEY MAY.**
-      `verify/blocking.py` decides with no network, `render/status_check.py` phrases it, and
+      `verify/blocking.py` decides with no network, `render/blocks/status_check.py` phrases it, and
       `ingest/publish/commit_status.py` writes it knowing nothing about either. Each of those sits
       to the left of the next, so only `serve/` can hold all three at once. Putting the join
       anywhere else would be the sideways import the layering rule exists to stop.
@@ -31,8 +31,8 @@ from dataclasses import dataclass
 from enum import Enum
 
 from quantamind.ingest.publish import commit_status
-from quantamind.render.status_check import render
-from quantamind.types.checked import Checked
+from quantamind.render.blocks.status_check import render
+from quantamind.types.standards.checked import Checked
 from quantamind.verify.blocking import Standing, decide
 
 

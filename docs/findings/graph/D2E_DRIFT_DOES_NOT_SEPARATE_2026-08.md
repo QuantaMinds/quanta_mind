@@ -1,0 +1,185 @@
+# Architectural drift does not separate the outcome — D2E CLOSED
+
+**Run 2026-08-31 against `docs/plans/preregistrations/ranker/drift-preregistration.md`, committed in
+`3c38478` before any repository was cloned. 305 library files across four repositories the method
+had never seen. Script: `scripts/measure/graph/drift_separates.py`.**
+
+## The registered verdict
+
+| bar | required | observed | |
+|---|---|---|---|
+| **B1** enough to decide | ≥ 200 files, ≥ 3 repositories | **305 files, 4 repositories** | **MET** |
+| **B2** drift separates the outcome | high tertile exceeds low by **≥ 10pp** | **high is 3.5pp LOWER** | **NOT MET** |
+| **B3** and not because of churn | must survive within strata | see below | not reached |
+| **B4** it must beat what ships | — | not reached | not reached |
+
+**Any bar unmet closes the row.** D2e is closed.
+
+## The numbers
+
+| tertile | files | mean drift | mean fix rate |
+|---|---|---|---|
+| low | 101 | 0.064 | **0.182** |
+| high | 101 | 0.345 | **0.147** |
+
+**The effect is not merely absent, it points the other way.** Files whose imports move most are
+returned to by a fix *less* often, not more. The registered bar asked for +10pp and the observation
+is −3.5pp.
+
+Within churn strata, which is the control B3 exists for:
+
+| churn | n | low fix rate | high fix rate | gap |
+|---|---|---|---|---|
+| 10–20 | 110 | 0.134 | 0.138 | **+0.4pp** |
+| 20–50 | 122 | 0.189 | 0.140 | **−4.9pp** |
+| 50+ | 73 | 0.241 | 0.148 | **−9.3pp** |
+
+**The sign is not stable, so this is not even a usable negative signal.** It runs from +0.4pp to
+−9.3pp across three strata of the same population. A signal that changes direction with how much a
+file was edited is a description of the editing, not of the architecture.
+
+## The repository that would have made this look real
+
+**`pallets/werkzeug` alone gave −9.1pp, −21.1pp and −19.9pp across the same three strata** — a
+strong, consistent, publishable-looking effect in the negative direction. Pooled across four
+repositories it collapses to +0.4pp, −4.9pp, −9.3pp.
+
+**One repository is a fact about that repository.** This is the third time that has been recorded
+here: the handoff memory already says a single repository usually misses the pre-registered floors
+and that pooling is the validated unit, and `publishing-rules.md` requires the pooled figure for
+the ranking claim for exactly this reason. Had werkzeug been the whole run, D2e would have shipped
+a backwards signal with confident numbers behind it.
+
+## The reverse direction was looked at, and it is the denominator
+
+**"High drift attracts fewer fixes" invites the obvious follow-up: then what attracts MORE?**
+Asked and answered on this same data, EXPLORATORY, no bars, nothing registered — and the answer is
+that there is nothing there.
+
+Holding the fix count **exactly** constant, so churn is the only thing left to vary:
+
+| fixes = N | files | stable fix rate | drifting fix rate | gap | stable churn | drifting churn |
+|---|---|---|---|---|---|---|
+| 2 | 47 | 0.135 | 0.114 | +2.1pp | 17.2 | 20.6 |
+| 3 | 32 | 0.164 | 0.142 | +2.3pp | 21.1 | 25.4 |
+| 4 | 31 | 0.153 | 0.190 | **−3.7pp** | 31.0 | 24.7 |
+| 7 | 16 | 0.215 | 0.172 | +4.3pp | 34.8 | 49.5 |
+
+**+2.1, +2.3, −3.7, +4.3 on cells of 16 to 47 files is noise**, and the sign changes.
+
+## AND THE INSTRUMENT HAD A DEFECT I HAVE TO STATE
+
+**`drift = shifts / churn` and `fix_rate = fixes / churn` SHARE A DENOMINATOR.** Two ratios over the
+same denominator move together by construction, whatever the numerators do — so part of any
+association between them is arithmetic rather than evidence. With the fix count pinned, `fix_rate`
+*is* `N / churn`, and the whole comparison collapses to "are drifting files edited more?" Across all
+305 files, drift against churn is **r = −0.177**: weak, and enough to matter.
+
+### ~~The verdict is unaffected~~ — WITHDRAWN. It was wrong, and an isolated judge found it
+
+**What this section said:** *a shared `1/churn` induces a POSITIVE association, B2 asked for
+positive and observed negative, so the artefact could only have flattered the hypothesis and the
+bar is more securely unmet than the headline suggests.*
+
+**That argument is false, and its falseness was checkable in one line.** A shared denominator
+induces a positive association **only when the denominator is independent of the numerators**. It
+is not:
+
+| | |
+|---|---|
+| `corr(shifts, churn)` | **+0.696** |
+| `corr(fixes, churn)` | **+0.841** |
+
+Both numerators track the denominator hard. When they do, dividing by it normalises the ratios
+toward constants and the induced sign is **not reliably positive** — it can be negative, which is
+the sign we observed and read as evidence.
+
+**AND THE RAW COUNTS, WITH NO RATIO ANYWHERE, MOSTLY POINT THE OTHER WAY.** Same files, churn
+matched by stratum, comparing `shifts` against `fixes` directly:
+
+| churn band | n | low-shift fixes | high-shift fixes | gap | churn low vs high |
+|---|---|---|---|---|---|
+| 10–20 | 110 | 1.67 | 2.56 | **+0.89** | 13 vs 15 |
+| 20–50 | 122 | 5.85 | 4.67 | −1.17 | 28 vs 34 |
+| 50+ | 73 | 19.00 | 33.71 | **+14.71** | 93 vs 150 |
+
+Two of three bands run **positive** — the direction D2e predicted and the opposite of what the
+ratio analysis reported.
+
+**SO THE STATISTICAL VERDICT IS WITHDRAWN, IN BOTH DIRECTIONS.** The ratio inverts the result
+through correlated denominators; the raw counts confound it through churn, which is what the ratio
+was there to control for and did badly (93 commits against 150 inside one "matched" band). **This
+measurement cannot answer the question either way**, and reporting it as a clean null was as wrong
+as reporting it as a finding would have been.
+
+**D2e stays closed on the OTHER argument, which is independent of all this** — it measured a
+different construct from the one anybody ships. That reasoning does not touch the arithmetic and
+survives it.
+
+**Found by putting this document to an isolated model of a different family and asking it to
+attack.** That is the product's own thesis — *we do not build a better bug-finder, we build the
+judge* — applied to our own research, and the first thing it did was overturn a claim three
+sentences after we had congratulated ourselves for spotting the defect. Recorded as entry 13 of
+`docs/engineering/CORRECTIONS.md`.
+
+**A future attempt must not use a rate whose denominator is also the outcome's, and must not
+assume the direction of an artefact it can measure in one line.**
+
+### Two judges, different families, same prompt — and the second one was sharper
+
+The identical adversarial prompt went to **Gemini 2.5 Pro** (via the product's own `infer/`) and to
+**Claude** (fresh context, no history). Both independently rejected the argument. They did not
+contribute equally.
+
+| | Gemini | Claude |
+|---|---|---|
+| the shared-denominator defence is false | ✅ | ✅ |
+| because the denominator correlates with the numerators | ✅ | ✅ |
+| **compositional constraint** — `drift` and `fix_rate` are shares of one total, so at fixed churn they are pushed APART | — | ✅ |
+| **tertile composition** — the drift tertiles are maturity tertiles in disguise | — | ✅ |
+| **unweighted mean of ratios** weights a churn-10 file like a churn-335 one | — | ✅ |
+| fix-word matching biases toward mature code | ✅ | ✅, with the mechanism |
+| named a concrete alternative (`fixes ~ shifts + log churn`) | — | ✅ |
+
+**Three of Claude's extra claims were checkable and were checked. Two held; one did not.**
+
+| claim | verdict |
+|---|---|
+| "the creation commit always counts as a shift" | **FALSE for this implementation** — the first commit sets `previous` and counts no shift |
+| "high-drift tertile is young/low-churn, low-drift is mature/high-churn" | **TRUE, and large**: mean churn **53.7 vs 32.2**, median 26 vs 22, `corr(drift, churn) = −0.177` |
+| "a mean of ratios weights a churn-2 file like a churn-200 one" | **TRUE, modest**: unweighted 0.167 against pooled 0.195, a 2.8pp gap over a 10–335 churn range |
+
+**THE VERIFIED CLAIM IS THE ONE THAT FINISHES THIS OFF.** The drift tertiles differ in maturity by
+a factor of 1.7, and Q2's bias says fix vocabulary accrues to mature code. **Together they predict
+exactly the direction and roughly the size of the observed effect with no architectural content at
+all.** The instrument was measuring how old a file is.
+
+**And one of the two judges was confidently wrong about the code.** Checking is what separated the
+useful claims from that one — the same discipline `verify/publishable.py` applies to model findings
+before they reach a customer, applied here to a model's findings about us. **A judge is a generator
+of things to check, not a verdict.**
+
+
+## What we are NOT concluding
+
+**The direction has a plausible mechanism and it is a HYPOTHESIS, not a finding.** A file whose
+imports keep changing is plausibly a file under active development — new dependencies arriving with
+new features — while a file touched repeatedly *without* its dependencies moving is plausibly a
+file being patched. That story fits the sign. Nothing here tests it, and `AGENTS.md` asks which of
+the two we are claiming: **diagnosis, not detector.**
+
+**And this does not condemn cross-file context generally.** D2c is the counter-example: the same
+kind of structural, model-free, cross-file claim, measured before it shipped, and the three groups
+it found in `pallets/flask` are the ones the maintainers later hoisted into a shared base class.
+What has now failed twice is the **import graph as a ranking or risk signal** — D2d on blast radius,
+D2e on drift.
+
+## The corpus
+
+`tiangolo/fastapi`, `pallets/werkzeug`, `python-trio/trio`, `sanic-org/sanic` — all four confirmed
+FRESH by `scripts/guard/records/check_burned_corpora.py` before cloning, none of them among the
+thirty-eight already spent. **No repository was added after seeing a result**, which is the rule the
+pre-registration fixed and the one a null tempts you to break.
+
+fastapi contributes only 25 files despite 1,138 Python files in the tree: most are documentation
+examples under `docs_src/`, which `suite_reach.is_library` correctly excludes.

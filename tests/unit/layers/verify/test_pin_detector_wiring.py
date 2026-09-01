@@ -23,8 +23,8 @@ import inspect
 
 import pytest
 
-from quantamind.serve import pin_review, review_delivery
-from quantamind.serve.pin_review import only
+from quantamind.serve.review import pin_review, review_delivery
+from quantamind.serve.review.pin_review import only
 from quantamind.types.change import REVIEWABLE_SUFFIXES
 from quantamind.types.review import Outcome
 from quantamind.verify.pin_check import workflows

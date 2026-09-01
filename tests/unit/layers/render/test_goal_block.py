@@ -104,7 +104,7 @@ def test_tickets_and_refusals_appear_together_so_the_reader_knows_what_was_left(
         )
     )
 
-    assert "closes #412 — Retire the shim (issue, open)" in block
+    assert "closes #412 (issue, open)" in block
     assert "other/lib#7" in block
     assert "we do not quote across one" in block
 

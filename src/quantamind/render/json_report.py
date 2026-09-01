@@ -35,10 +35,10 @@ import json
 from collections.abc import Sequence
 from typing import Any, Protocol
 
-from quantamind.types.checked import Checked
 from quantamind.types.finding import Finding
 from quantamind.types.ranking import Ranking
 from quantamind.types.review import NotReviewed
+from quantamind.types.standards.checked import Checked
 
 SCHEMA = 1
 

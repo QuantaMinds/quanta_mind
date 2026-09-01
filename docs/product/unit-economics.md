@@ -29,7 +29,11 @@ with `LANGUAGE_UNSUPPORTED` for anything else, which is correct and is not cover
 customer has already written**, and any pricing argument that assumes otherwise is pricing a
 capability that does not exist yet.
 
-**THERE IS ALSO NO EXPORT.** `D4b` records every check as it happens and nothing is backfilled;
+**~~THERE IS ALSO NO EXPORT.~~ BUILT 2026-08-31** — `quantamind compliance --repo owner/name
+--export PATH` writes the whole trail as JSON with its own limits inside it. This paragraph named
+the gap for a fortnight while D4b stayed ticked "exportable"; it is kept rather than deleted
+because a document that quietly stops naming a gap it was right about teaches nobody anything. What
+follows was true when written:** `D4b` records every check as it happens and nothing is backfilled;
 reading it is `quantamind compliance --repo owner/name`. There is no file, no download, and no
 scheduled export anywhere in the build plan. A compliance buyer asks for the artefact, not the
 query.

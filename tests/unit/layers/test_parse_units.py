@@ -134,3 +134,37 @@ def test_out_of_scope_files_are_not_reported_as_parse_failures() -> None:
         f"and could not' are different facts: {scoped.unresolved}"
     )
     assert scoped.conserved()
+
+
+def test_a_unit_carries_the_lines_its_hunk_changed() -> None:
+    """**THESE TWO FIELDS EXISTED FOR MONTHS AND THIS FUNCTION NEVER FILLED THEM.**
+
+    `ChangedUnit.lines_added`, `lines_removed` and the `churn` property built on them were all
+    documented and all left at zero by their only producer. Nothing read them, so nothing failed —
+    until `parse/change_effort.py` arrived and rendered "0 lines" beside files that had plainly
+    changed. A field that looks meaningful and is never populated is the same defect as a check
+    that cannot fail, and this codebase has found two dead constants the same way.
+    """
+    diff = (
+        "+++ b/src/a.py\n"
+        "@@ -1,2 +1,3 @@ def handle(request):\n"
+        " context\n"
+        "-gone\n"
+        "+added\n"
+        "+also added\n"
+    )
+
+    (unit,) = units_in(diff, ["src/a.py"]).units
+
+    assert (unit.lines_added, unit.lines_removed) == (2, 1)
+    assert unit.churn == 3
+
+
+def test_a_second_hunk_does_not_inherit_the_first_ones_lines() -> None:
+    """The counters are per unit, so they must reset. Sharing them would make every later hunk in
+    a file report the whole file's churn."""
+    diff = "+++ b/src/a.py\n@@ -1,1 +1,2 @@ def one():\n+a\n+b\n@@ -9,1 +9,2 @@ def two():\n+c\n"
+
+    first, second = units_in(diff, ["src/a.py"]).units
+
+    assert (first.lines_added, second.lines_added) == (2, 1)

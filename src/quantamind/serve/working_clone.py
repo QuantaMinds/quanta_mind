@@ -39,6 +39,7 @@ from pathlib import Path
 
 from quantamind.ingest.git_credentials import environment
 from quantamind.ingest.pull_refs import present, refspecs
+from quantamind.types.deployment import Destination, permit
 
 CLONE_TIMEOUT_S = 900
 FETCH_TIMEOUT_S = 300
@@ -106,6 +107,10 @@ def ensure(
     env = environment(token)
     if not (where / ".git").is_dir():
         where.parent.mkdir(parents=True, exist_ok=True)
+        # **ASK BEFORE GIT REACHES THE REMOTE.** D7f permits exactly this in an air-gapped
+        # deployment and nothing else — with no clone there is nothing to review, so the
+        # clone is the boundary rather than an exception to it.
+        permit(Destination.GIT_REMOTE)
         done = subprocess.run(
             ["git", "clone", "--no-checkout", f"https://github.com/{repo}.git", str(where)],
             capture_output=True,
@@ -117,6 +122,7 @@ def ensure(
             # A half-written directory would be taken for a good clone on the next delivery.
             shutil.rmtree(where, ignore_errors=True)
             raise CloneFailed(repo, f"clone exited {done.returncode}: {done.stderr.strip()[:160]}")
+    permit(Destination.GIT_REMOTE)
     done = subprocess.run(
         [
             "git",

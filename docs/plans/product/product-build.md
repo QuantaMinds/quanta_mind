@@ -35,7 +35,7 @@ by decision, not by difficulty.
 the plan rather than skipping silently — a number jumped without a reason is how a checklist stops
 describing the product.
 
-**D6a IS BUILT — 31 OF 50.**
+**D6a, D2c, D3a, D3b AND D7a ARE BUILT — 35 OF 50.**
 
 **ROWS 12 THROUGH 30 WERE RE-VERIFIED AGAINST THE CODE ON 2026-08-31, AND THE COUNT DID NOT MOVE.**
 Nine unticked rows in that range were checked for work already done and **none of them was
@@ -299,12 +299,24 @@ Stripe.
       a missed escape cannot execute. A repository name carrying markup never reaches the page at
       all — `store/tenancy.py` refuses it at the storage boundary, which the test asserts instead
       of asserting an escape that path cannot exercise.
-- [ ] **C2 CI integration.** **NOT TICKED, AND THE REASON IS THAT THE ROW NEVER SAID WHAT IT
-      WANTED.** It is the only deliverable here with no body. Verified 2026-08-31: the adjacent
-      thing IS built and belongs to D1f — `ingest/publish/commit_status.py` writes a commit status,
-      `verify/blocking.py` decides it, and it has run against a real pull request. Ticking C2 on
-      that work would count one build twice, which is how a checklist comes to overstate a product.
-      **Write what C2 means — a check run with annotations? a non-GitHub CI? — or delete the row.**
+- [x] **C2 CI integration — a check run with inline annotations.**
+      `ingest/publish/check_run.py`. **THE ROW HAD NO BODY, AND WRITING ONE WAS THE FIRST HALF OF
+      THE WORK.** It is NOT the commit status D1f built: that posts one line with one state and no
+      location, and ticking C2 on it would have counted one build twice. A check run puts each
+      violation ON THE DIFF at its file and line, in the interface the developer is already reading.
+      **ONLY A PARSER'S VERDICT IS ANNOTATED, NEVER A MODEL'S.** An annotation renders as a fact
+      against a line — no room for "we think" — and raw model findings are 66.7-82.1% wrong. A
+      `Judged` record has no path into the module, and D1c's `DEFERRED` produces nothing. Only
+      violations: `PASSED` on every line trains a reviewer to dismiss the column, and `UNCHECKABLE`
+      is a statement about OUR coverage rather than their code.
+      **SEVERITY IS THE CUSTOMER'S** — `HIGH` fails the check, `MEDIUM` and `LOW` do not. Deciding
+      which of a team's standards blocks a merge would override the judgement their rules file
+      exists to record. **The 50-annotation cap is announced**, because a truncated list that does
+      not say so reads as complete.
+      Verified end to end on a real repository: `eval` at line 3 → `failure`, `print` at line 2 →
+      `warning`. 10 tests, 4 sabotages caught. It goes through D7f's `permit(GITHUB_API)`, so an
+      air-gapped deployment refuses it like everything else.
+
 - [ ] **C3 IDE integration.** Only when a deal asks.
 - [ ] **C4 SSO.** Procurement gate — only when a deal asks.
 
@@ -341,16 +353,41 @@ and D5 read what it records.
       `input-validation-required`. **Every one is an AST pattern, not a semantic judgement.** A
       parser can answer them, so a model must not — and a deterministic check is the only kind
       that can be re-run later to prove an audit entry was right.~~
-- [ ] **D1c Model-checked rules, clearly separated.** For rules a parser genuinely cannot answer.
-      Each result carries `Provenance.PARSER` or `Provenance.MODEL` so an auditor can see which
-      claims are reproducible. **They must never render alike.**
-      **HALF OF THIS IS BUILT AND IT IS THE HALF THAT DOES NOT CHECK ANYTHING.** Verified
-      2026-08-31: `CheckKind.MODEL_JUDGED` exists, `Rule.provenance` derives `Provenance.MODEL`
-      from it and cannot be set by a caller, `store/rule_checks.py` writes that column, and
-      `render/compliance_table.py` prints `deferred` in its own column outside the rate. **No model
-      is ever consulted** — `verify/rule_check.check()` returns `DEFERRED` and stops. So the
-      separation the row asks for exists and the capability does not, which is why it stays
-      unticked: an auditor can already tell the two apart, and there is nothing yet to tell apart.
+- [x] **D1c Model-checked rules, clearly separated.** `types/standards/judged.py` +
+      `verify/judged_rule.py` + `serve/rule_judge.py` + `render/blocks/judged_block.py`.
+      **THE ROW WAS NEVER ABOUT WIRING A MODEL IN; IT WAS ABOUT DECIDING WHAT A MODEL VERDICT IS
+      ALLOWED TO BE.** `types/standards/checked.py:counts_toward_compliance` is true for `PASSED`
+      and `VIOLATED`, so any outcome but `DEFERRED` would have put a Gemini opinion into the number
+      a customer shows an auditor, carrying our measured 66.7-82.1% raw error rate with it.
+      **A model verdict is published as a finding and never as a compliance row:**
+      `verify/rule_check.py:check` still returns `DEFERRED` for every model-judged rule, on purpose
+      and permanently, and `Judged` is a separate type that reaches the comment and stops. Not the
+      same class, not the same table, not the same renderer — "they must never render alike" is
+      structural here rather than remembered.
+      **`UNDECIDED` on every failure path** — transport raised, reply unparseable, quote absent
+      from the file — never `MET`; `BROKEN` requires a quote found verbatim in the source, the rule
+      `verify/anchor.py` applies to review findings. **The judge is injected, not imported**, and the rule
+      that was supposed to require this is now enforced: `AGENTS.md` rule 7 claimed the layer order
+      stopped `verify` importing `infer`, but `infer` is to the LEFT so the import was legal and
+      `check_layering` allowed it. `check_conventions.py:FORBIDDEN` refuses the pair by name, with
+      a known-answer test and a sabotage against a real module.
+      33 tests. **13 sabotages run, 4 initially disabled cleanly** — persisting judgements past an
+      `INSERT OR REPLACE` that kept the row count identical, an unparsed reply reading as `MET`,
+      the render block dropped from the comment, and the status posted regardless of
+      `POSTING_ENABLED`. Each gap closed with a named test.
+      **Live against the real model** (`tests/live/model/test_judged_rule_live.py`): a known-answer
+      pair scored **12/12** — 6/6 on the planted "safe because the caller always holds the lock",
+      6/6 clean on a file with only WHY comments — and a real HTTP 403 came back `undecided`, not
+      `met`. **The first negative fixture named the rule's own vocabulary in its docstring and drew
+      a false positive in 3 of 6 trials**; the judge was right and the fixture was wrong.
+      **NO MODEL-JUDGED RULE SHIPS ENABLED, AND THAT IS THE HONEST RESULT.** The first candidate —
+      AGENTS.md rule 14 — was run over 12 real files of this repository before being declared, as
+      `.quantamind/rules.toml`'s header requires, and the judge called **10 of 12 BROKEN**. Some
+      were fair by the rule's letter; a section firing on 83% of files teaches a reviewer to scroll
+      past it. The rule was withdrawn with the measurement recorded in its place. **The capability
+      is built and verified; what is missing is a prose rule narrow enough to be worth firing**,
+      which is a separate change with its own before-adding measurement.
+
 - [x] **D1g The team's OWN written standards, read as CONTEXT.** ~~read and enforced~~ — **the
       title said "enforced" for four days and the body underneath it said the opposite.** Nothing
       read here becomes a `Checked` row, so it is not enforcement and a compliance number must
@@ -367,17 +404,46 @@ and D5 read what it records.
       the parser's territory. Known-answer tested: a diff with a bare `except` and no docstring was
       caught against this repository's own rule 8. **A local-only file this repo never pushes is
       invisible to it**, because the reviewer reads the clone.
-- [ ] **D1d Mine rules from past review comments.** Senior engineers repeat themselves, and the
-      repetition IS the standard. **This is the one model use where being wrong is cheap:** the
-      output is a PROPOSED rule a human approves, not a published finding — a different risk
-      profile entirely from the path that measured 66.7-82.1% wrong.
+- [x] **D1d Mine rules from past review comments.** `types/standards/proposal.py` +
+      `ingest/standards/mined.py` + `render/mined_rules.py` + `quantamind standards --repo R
+      --pulls N...`. **THE PREMISE WAS MEASURED BEFORE A LINE WAS WRITTEN AND IT HOLDS THINLY.**
+      Over 1,213 real inline comments from eight public repositories: **1.62 candidate clusters per
+      repository, of which roughly 5 of 13 were generalizable standards** — under one real rule per
+      repository per ~150 comments. → `docs/findings/standards/D1D_REVIEWER_REPETITION_YIELD_2026-08.md`,
+      which fixed the refutation bars in advance and both are now tests.
+      **Unfiltered, the largest "standards" in that corpus are `done` x6, `fixed` x6, `ditto` x4 and
+      `nit: suggestion` x11**, so the acknowledgement filter is the feature rather than a tidy-up.
+      **No model is called at all** — clustering by shared vocabulary is deterministic, and
+      `AGENTS.md` says if a parser can answer it a model must not. The row's "being wrong is cheap"
+      still governs the OUTPUT: a proposal a human accepts or refuses, nothing written to
+      `.quantamind/rules.toml` ever.
+      **THE FIRST REAL RUN PROPOSED THIS PRODUCT'S OWN COMMENTS AS THE TEAM'S STANDARDS** — three
+      of three, on our own pull requests, with 20 green tests, because every hand-built fixture had
+      no author. `Comment.machine` reads GitHub's `user.type` and `mine` drops bots before
+      clustering, so a bot cannot swell a human's evidence count either. 24 tests.
+      **`distinct_pulls` returns `None` rather than a number** when the source cannot say which
+      change a comment was on: four of the thirteen real clusters were one reviewer restating
+      themselves in a single thread, and "said on two changes" must not read like "we could not
+      tell".
 
-- [ ] **D1e One definition, every repository.** "Define a standard once and it is checked on every
-      pull request across all repositories" is the actual enterprise claim, and a per-repo
-      `rules.toml` does not make it. Org-level rules live in a `.quantamind` repository the
-      installation owns; a repository's own file EXTENDS them and may tighten a severity, never
-      silently drop an inherited rule. **A dropped inheritance must appear in the audit trail**,
-      because a standard that can be disabled invisibly is not a standard.
+- [x] **D1e One definition, every repository.** `ingest/standards/inherited.py` +
+      `render/blocks/inheritance_block.py` + the fetch in `serve/review/standards_step.py`.
+      Organisation rules live in `<owner>/.quantamind`, the convention GitHub already uses for
+      `.github`. **THE ASYMMETRY IS THE DESIGN:** a repository may TIGHTEN with no permission
+      (recorded), may not LOOSEN while still claiming to inherit (refused, the organisation's
+      severity stands, and the refusal says how to opt out properly), and may DROP outright with
+      `inherit = false` — allowed, explicit, and **recorded**, because a standard that can be
+      disabled invisibly is not a standard.
+      **`org_read` IS FALSE FOR A FILE WE COULD NOT READ AND TRUE FOR AN ORGANISATION THAT DECLARES
+      NOTHING** — a merge treating an unreachable file as an empty one would report a repository as
+      fully compliant at the moment its inherited standards stopped arriving. That case renders the
+      loudest line in the block: a drop is a decision somebody made, an unreadable file is
+      enforcement stopping with nobody deciding anything.
+      **Verified end to end against two real git repositories**: an organisation declaring
+      `no-eval`, a repository dropping it, a file containing a real `eval(x)` — the violation went
+      unreported and the comment said the rule had been switched off here. 17 tests, 4 sabotages
+      caught. The fetch is `serve/`'s and the merge is `ingest/`'s; `verify/` never learns that
+      inheritance exists, because it may not clone.
 - [x] **D1f Blocking, not just commenting.** The claim is that code meets standards *before a human
       reviewer sees the pull request*. That requires a **required status check that fails**, not a
       comment somebody may scroll past. **Only reproducible checks may block** — a `Provenance.MODEL`
@@ -416,32 +482,151 @@ spent deliberately. It must not be spent by accident.
       a third-party name `EXTERNAL_SYMBOL`, a broken file `UNPARSEABLE_SYNTAX`. `RESOLVED` only
       where two independent resolvers agree: the syntax says the import exists AND the target is a
       file in the tree.
-- [ ] **D2b The graph, stored.** **ON HOLD, recommend DROP.** Six unseen repositories, 1,301 non-degenerate events:
+- [ ] **D2b The graph, stored.** **DROPPED 2026-08-31 with D2d, which is what it existed to feed.** Six unseen repositories, 1,301 non-degenerate events:
       in-degree gives the same top three as alphabetical on 99.2% of changes, and loses to the
       shipped fix-history signal 65-13 at p < 0.0001. See
       `docs/findings/graph/D2D_BLAST_RADIUS_SIX_REPOS_2026-08.md`. A whole-repo pass into a `dependency` table, incremental against
       the same commit watermark the touch index uses.
-- [ ] **D2c Duplicated logic, without a model.** Normalised AST hashing of function bodies —
-      rename-insensitive, comment-insensitive, stdlib only. "The same logic is written in multiple
-      places, and a fix to one leaves the others wrong" is a real cost, and it is a structural
-      question a parser answers exactly rather than a judgement a model guesses at.
-- [ ] **D2d Blast radius in the review.** **ON HOLD**, same reason as D2b. "This module is imported by 14 others, two of them entry
-      points." A new signal, testable against the same fix-return outcome the touch index uses.
+- [x] **D2c Duplicated logic, without a model.** `parse/body_shape.py` +
+      `parse/duplicate_bodies.py` + `render/blocks/duplicate_block.py`, wired into `deliver()`.
+      **THE FLOOR AND THE FILTER WERE MEASURED BEFORE IT SHIPPED**, the way D2a measured its base
+      rate — 139 library files and 443 functions here, 24 and 367 in `pallets/flask`:
 
-- [ ] **D2e Architectural drift, measured rather than asserted.** "Team members implement parts of
-      the system differently from the original design" is a claim about DIVERGENCE, and divergence
-      is measurable: the import graph plus rule violations over time, per module. We have the
-      history to do it retrospectively — `retrospective` already replays the ranker over a clone's
-      own past, which is the instrument for showing drift happened rather than saying it does.
+      | | groups at 2 stmt | at 3 | at 4 |
+      |---|---|---|---|
+      | this repository | 2 | **0** | 0 |
+      | `pallets/flask` | 7 | **5** | 2 |
+
+      **All five of flask's groups at three were read and all five are real.** Three are the same
+      body in `app.py` and `blueprints.py` — `get_send_file_max_age`, `send_static_file`,
+      `open_resource` — which flask later hoisted into a shared `Scaffold` base class, so the
+      maintainers performed the refactor this check points at. **THE LIBRARY/TEST SPLIT DOES MORE
+      WORK THAN THE FLOOR AND THAT WAS THE SURPRISE**: unfiltered, flask shows 12 groups at three
+      and seven are conventional test route handlers.
+      **IT REPORTS WHERE, NEVER WHAT TO DO.** flask's `render_template`/`stream_template` pair is
+      a real repeat and a deliberate one; "extract a helper" would be confident and wrong there.
+      **NOTHING IS STORED** — the tree is parsed at the reviewed commit and thrown away, because
+      D2b is on hold for having paid a table, a migration and a watermark and then beaten nothing.
+      22 tests, floor and normaliser both sabotage-verified.
+      → `docs/plans/feat-d2c-duplicated-logic.md`
+      ~~Normalised AST hashing of function bodies — rename-insensitive, comment-insensitive,
+      stdlib only.~~
+- [ ] **D2d Blast radius in the review.** **DROPPED 2026-08-31, on the measurement, by decision.**
+      It was `ON HOLD, recommend DROP`; the recommendation is now taken and the row stays here
+      unticked rather than being deleted, so nobody proposes it again without meeting the evidence.
+
+      **THE PRE-REGISTERED TEST CAME BACK INCONCLUSIVE AND THE SHIPPED SIGNAL WON ANYWAY.** Six
+      repositories the method had never seen, 3,591 events, 1,301 non-degenerate: **10 discordant
+      pairs against a floor of 20**, so importer count could not be separated from alphabetical
+      either way — and where the two DID disagree, prior-fix history beat it **65-13, p < 0.0001**.
+      In-degree gives the same top three as alphabetical on **99.2%** of changes.
+      → `docs/findings/graph/D2D_BLAST_RADIUS_SIX_REPOS_2026-08.md`
+
+      **DROPPING IS THE HONEST READING OF AN INCONCLUSIVE RESULT HERE, NOT A STRETCH OF IT.** The
+      bar was fixed in `blast-radius-preregistration.md` before a repository was cloned, and the
+      run did not clear it. Keeping the row open would mean waiting for a seventh repository, which
+      is how a null becomes a hunt — this project has withdrawn a figure for exactly that before.
+      **D2b is dropped with it**, since it existed to feed this.
+      ~~"This module is imported by 14 others, two of them entry points." A new signal, testable
+      against the same fix-return outcome the touch index uses.~~
+
+- [ ] **D2e Architectural drift.** **CLOSED 2026-08-31 ON THE MEASUREMENT. Divergence is
+      computable and it does not separate the outcome.**
+      Pre-registered in `docs/plans/preregistrations/ranker/drift-preregistration.md`, committed
+      before any repository was cloned. `drift = import-set shifts / commits`, a RATE because a raw
+      count is a proxy for "this file was edited a lot". **305 library files, four repositories the
+      method had never seen, all four confirmed unspent before cloning.**
+
+      | | required | observed |
+      |---|---|---|
+      | B1 enough to decide | ≥200 files, ≥3 repos | **305, 4** — MET |
+      | B2 drift separates | high tertile **+10pp** | **−3.5pp** — the effect points the other way |
+
+      **THE STATISTICAL VERDICT WAS LATER WITHDRAWN IN BOTH DIRECTIONS, AND THE ROW STAYS CLOSED
+      ON A DIFFERENT ARGUMENT.** `drift` and the outcome shared a `churn` denominator; the defence
+      that this could only have flattered the hypothesis was **false**, because it assumed the
+      denominator was independent of the numerators and it is not — `corr(shifts, churn) = +0.696`,
+      `corr(fixes, churn) = +0.841`. On raw counts with no ratio, two of three churn bands run the
+      OTHER way. **The measurement cannot answer the question either way.** Found by putting the
+      document to an isolated model of a different family and telling it to attack; recorded as
+      entry 13 of `docs/engineering/CORRECTIONS.md`.
+      → `docs/findings/graph/D2E_DRIFT_DOES_NOT_SEPARATE_2026-08.md`
+
+      **AND ONE REPOSITORY WOULD HAVE SHIPPED IT BACKWARDS.** `pallets/werkzeug` alone gave −9.1,
+      −21.1 and −19.9pp — strong, consistent, publishable-looking. Pooled across four it collapses.
+      Third recorded instance of a single repository being a fact about that repository.
+
+      **The import graph has now failed twice as a risk signal** — D2d on blast radius, D2e on
+      drift. **This does not condemn cross-file context**: D2c is the same kind of model-free
+      structural claim, measured before it shipped, and the duplicates it found in `pallets/flask`
+      are the ones the maintainers later hoisted into a shared base class.
+
+      **AND THE CHURN STATISTIC WAS NEVER WHAT A CUSTOMER MEANS BY DRIFT.** Read after the run,
+      Qodo's drift detection flags *reimplementation of existing logic in other modules*,
+      *deviations from team standards*, and *signature violations, broken API contracts and schema
+      drift against **registered** consumer repositories*. Every one is a claim about THIS CHANGE
+      against the codebase as it stands; none is a statistic about a file's past, and none predicts
+      defects — they assert inconsistency, which a reviewer judges directly.
+
+      | what the category flags | our row |
+      |---|---|
+      | logic reimplemented elsewhere | **built** — D2c |
+      | deviations from declared standards | **built** — D1a, D1b, D1f |
+      | contract and signature changes against consumers | **not built** — D3b |
+      | registered consumer repositories | **built** — D3a |
+
+      **So D2e is closed as WRITTEN, and the feature it was reaching for is three rows that already
+      exist or are already scheduled.** A second run with a repaired instrument was registered and
+      then WITHDRAWN before a repository was cloned, because it would have measured the same wrong
+      thing more carefully. The lesson is recorded in the pre-registration: state what a
+      competitor's version actually asserts before registering bars, and check the outcome is one
+      they would recognise.
+      ~~"Team members implement parts of the system differently from the original design" is a
+      claim about DIVERGENCE, and divergence is measurable: the import graph plus rule violations
+      over time, per module.~~
 
 ### D3 — cross-repo, by declaration rather than discovery
 
-- [ ] **D3a The business declares its links.** `.quantamind/links.toml`. **Declared beats
-      discovered:** no org-wide crawl, no broad permissions, and a link a customer stated is
-      provenance an auditor can be shown, where an inferred one is our guess about their
-      architecture.
-- [ ] **D3b Edges that cross a repository boundary.** A changed exported symbol against the linked
-      repositories that import it.
+- [x] **D3a The business declares its links.** `ingest/standards/links_file.py` +
+      `render/blocks/linked_block.py`, wired through `serve/change_facts.py`.
+      **IT SHIPS BEFORE D3b AND THE REASON IT IS WORTH SHIPPING ALONE IS TYPED SILENCE.** The
+      comment printed one static sentence — *cross-repository impact is not checked at all* — and a
+      reader had no way to tell whether that meant **there is nothing across the boundary** or **we
+      did not look**. It now names the repositories the customer declared and says plainly that
+      none of them was read. `AGENTS.md` non-negotiable 3, applied to a boundary rather than a
+      call site.
+      **FOUR ANSWERS THAT MUST NOT COLLAPSE**: no file (they declared none — the common case), an
+      unreadable file, a malformed entry, and a declared link. Three of the four leave the list
+      empty and only one means "no links"; printing that for the others would be a claim about
+      somebody's architecture made out of our own failed read.
+      **`owner/name` OR NOTHING**, because guessing the owner from the repository under review
+      would invent a link nobody declared — and one bad entry does not cost the good ones, since
+      refusing a whole file over a typo loses every link the customer got right.
+      13 tests. ~~**Declared beats discovered:** no org-wide crawl, no broad permissions, and a
+      link a customer stated is provenance an auditor can be shown, where an inferred one is our
+      guess about their architecture.~~ Still true, and now built.
+- [x] **D3b Edges that cross a repository boundary.** `parse/public_api.py` +
+      `verify/consumers.py` + `render/blocks/crossing_block.py`, wired through
+      `serve/change_facts.py`. **The one thing on the category's list we did not have.**
+      **BUILT BEFORE THE DESIGN PARTNER THE ORDER GATED IT ON**, by decision 2026-08-31. That gate
+      was about not building cross-repo machinery speculatively; the half that needs no second
+      repository turned out to be most of the value, so the gate now applies only to VALIDATING it.
+      **Nobody has yet shown this catches something a reviewer wanted.**
+      **THE BREAK DETECTOR IS ENTIRELY LOCAL.** `surface()` reads a module's public names and their
+      signatures; `broke()` compares the two sides of the diff, both from the clone. Removed or
+      renamed, kind changed, parameter dropped or reordered, a new REQUIRED argument. **Additions
+      are never breaks** — a new export or a defaulted argument leaves every caller working, and a
+      section firing on those fires on most pull requests.
+      **THE CONSUMER CHECK MATCHES AN IMPORT, NOT A MENTION.** A grep would hit a docstring, a
+      comment, a same-named local and a string in a fixture, and a false *"your change breaks
+      billing"* is the most expensive sentence here — it is about somebody else's repository and
+      the reader cannot check it without leaving the pull request.
+      **A LINK WE CANNOT OPEN IS THE COMMON CASE AND IS NAMED.** The App is installed on the
+      repository under review and usually not on its consumer. **Nothing is cloned when nothing
+      broke**, so an additive change costs nothing.
+      **AND THE FIRST RENDER CONTRADICTED ITSELF**: D3a's line said "Nothing in them was checked"
+      directly under a block reporting that `acme/billing` imports a removed export. Two
+      true-when-written sentences disagreeing in one comment, caught by printing it. 21 tests.
 
 ### D4 — audit trail
 
@@ -450,7 +635,25 @@ spent deliberately. It must not be spent by accident.
       code is read AS THE CHANGE LEAVES IT), and renders the result with the denominator printed.
       **Proven on PR #86: "60 declared rule(s) checked".** The per-tenant posting switch that was
       once listed here belongs to B6 and is recorded there; it was never part of this item.
-- [x] **D4b Append-only, exportable.** `rule_check` at schema v5, `store/rule_checks.py`. All four outcomes stored so the denominator is real; `provenance` derived from the rule; nothing backfilled. **Proven on a real delivery: PR #86 reported "60 declared rule(s) checked".** ~~Every check on
+- [x] **D4b Append-only, exportable.** `rule_check` at schema v5, `store/rule_checks.py`. All four outcomes stored so the denominator is real; `provenance` derived from the rule; nothing backfilled. **Proven on a real delivery: PR #86 reported "60 declared rule(s) checked".**
+      **THE WORD "EXPORTABLE" WAS FALSE FOR A FORTNIGHT AND THIS ROW STAYED TICKED.**
+      `docs/product/unit-economics.md` had already written the gap down — *"There is no file, no
+      download, and no scheduled export anywhere in the build plan. A compliance buyer asks for the
+      artefact, not the query"* — and nobody acted on it. Second tick corrected today whose WORK
+      was right and whose WORD was wrong; D1g was the first. **A row can be honestly ticked and
+      still lie in the line somebody skims.**
+      **BUILT 2026-08-31:** `quantamind compliance --repo owner/name --export PATH`.
+      `store/audit/export.py` reads every recorded check joined to the review that decided it;
+      `render/audit_export.py` writes it. **JSON rather than CSV, and the caveats are why** — a CSV
+      opens more easily and cannot carry the four sentences that make the document honest, and an
+      export that outlives its covering email is how a partial record becomes a claim of full
+      coverage.
+      **`limits` COMES FIRST IN THE FILE**, so a reader who stops after the first object has read
+      the part that stops them over-reading the rest. It states that nothing is backfilled, that an
+      absent row means the check did not run, that `uncheckable` and `deferred` are not passes, and
+      that only a `parser` row re-runs. **The window is read from the rows, never assumed** — the
+      trail begins when rule checking was installed, not when the repository did.
+      **An empty export is a document, not an error**, and it says it covers nothing. 6 tests. ~~Every check on
       every pull request: which rule, the outcome, the commit, the provenance, whether it posted.~~ **This is the artefact a compliance team buys**, and it is
       worth more when the checks behind it are reproducible, which is why D1b precedes D1c.
 
@@ -497,24 +700,91 @@ Pulled in as **two separate uses**, because they succeed or fail independently:
       `comment()` verbatim. → `docs/plans/feat-d6a-the-goal-behind-the-change.md`
       ~~The ticket and discussion behind the files being changed,
       shown in the comment. Deterministic, and worth something whatever the model does.~~
-- [ ] **D6b The same text as MODEL input.** **Pre-register a bar.** Shape-context went
-      PASS to NULL under McNemar and a same-arm replicate, and five prompt levers moved nothing.
-      Human context is a DIFFERENT variable — it carries why a change exists, which no diff shape
-      contains — so the null does not condemn it. It does mean measuring rather than assuming.
-- [ ] **D6c Sources, cheapest first.** GitHub PR and issue comments need no new credential and no
-      new dependency. Jira and Slack are REST and JSON over HTTPS, so `urllib` reaches both and
-      `dependencies = []` holds; what they need is the customer's auth. **Egress is a decision,
-      not a detail:** quoting a private Slack thread into a GitHub comment moves their data
-      between systems, and that must be opt-in per source.
+- [ ] **D6b The same text as MODEL input. RUN, AUDITED, AND WITHDRAWN — THE RESULT WAS SHOT
+      NOISE.** → `docs/findings/reviewer/D6B_HUMAN_CONTEXT_NULL_2026-08.md`. 36 exposed changes,
+      116 golden defects, identical prompts but one appended block of stated goal and ticket titles.
+      **Control 54 golden defects found, context 51 (−3); McNemar 7:11, p = 0.4807; 1 of 4
+      repositories positive.** All three pre-registered bars fail.
+      **A CONTROL-VS-CONTROL REPLICATE VOIDED IT.** The same prompt run twice moved **+2 TP with
+      14 of 36 changes discordant**; the treatment moved **−3 TP with 18 of 36**. The same control
+      prompt scored 54, 51 and 53 across three runs. **The treatment moved the pipeline less than
+      the pipeline moves on its own.**
+      **MY REPORTED MECHANISM WAS FALSE ON TWO COUNTS.** "143 candidates against 131" was TP+FP,
+      not candidates — one row shows 13 against a hard cap of 12 — and candidate counts were never
+      recorded. Identical prompts vary by 19 in total candidates, more than the arms differed by.
+      And the "goal-achievement findings" story was **my own added instruction**: the context block
+      says "use it to judge whether the change does what it set out to do", while the runner
+      docstring claimed nothing else varied.
+      **Two adversarial audits found it, one Gemini and one Claude**, and their rival mechanism —
+      silent judge attrition — was itself refuted by the replicate: judge errors 0, truncations 0.
+      → `docs/findings/reviewer/D6B_HUMAN_CONTEXT_NULL_2026-08.md`.
+      **THE PRE-REGISTRATION HAD CONCLUDED THE RUN MUST NOT HAPPEN** — "that is the reason this is
+      not being run, and it is a methodological reason" — and it was run anyway, producing exactly
+      the artefact the document forbade. Five further defects are recorded there: an unmeetable
+      "≥ 4 of 6" bar that executed as 4 of 4; a same-family judge where the Method promised a
+      different family; ticket TITLES where the argument rested on bodies; judge errors and finish
+      reasons discarded; and `_context_for` collapsing "we could not read it" into "the author wrote
+      little" — the typed-silence violation `ingest/context/tickets.py` exists to prevent, committed
+      in its own caller.
+      **THE ROW IS UNTICKED AGAIN.** A withdrawn measurement is not a measurement. **Any future arm
+      here runs its noise floor first** — one extra arm, 36 calls, the cheapest thing in the design,
+      and the only reason any of these numbers could have meant anything.
+      **UNUSED ROW TEXT BELOW, kept because it states the entry price for a real answer:** → `docs/plans/preregistrations/reviewer/d6b-human-context-preregistration.md`,
+      reproducible by `scripts/measure/context/exposure.py`. The bars are fixed and stand.
+      **The exposed population was measured first**: 33 of the 50 golden changes (66%) carry usable
+      human context, using the product's own `tickets.behind`. On the other 17 the two arms are
+      identical by construction, so 33 is the largest paired n this corpus can have.
+      **Then the power calculation, which design fourteen records as the step it skipped.** McNemar
+      exact at n = 33: a +10% net effect has **12% power**, +15% has 28%. The smallest net effect
+      reachable at 80% power is **+32%** — and no lever in this project's history has moved
+      anything by 32%, while five moved nothing at all. **At any believable effect size this corpus
+      returns a null roughly seven times in eight whether or not the effect is real**, and that
+      null would be read as "human context does not help". Running it would manufacture exactly the
+      kind of unsupported conclusion `TEMPLATE.md` exists to prevent.
+      **A corpus of ~250 hand-labelled changes across 6 repositories is the entry price** for a
+      +10% effect. Two prerequisites also do not exist: `Ticket` carries no body (D6a fetches title
+      and state only, so "the same text" has no text), and feeding ticket text to a model is a
+      third destination `ingest/context/egress.py` does not yet name.
+
+- [x] **D6c Sources, cheapest first.** `ingest/context/egress.py` + `ingest/context/elsewhere.py`.
+      Jira and Slack are REST and JSON over HTTPS, so `urllib` reaches both and
+      `dependencies = []` holds; both take the customer's token rather than reading a credential
+      from anywhere. **EGRESS IS THE HALF THAT MATTERED AND IT IS DENY-BY-DEFAULT, PER SOURCE.**
+      No consent file means nothing outside GitHub is quoted; `quote_jira` says nothing about
+      `quote_slack`; and **only a literal `true` grants** — `"yes"`, `1` and a misspelled key all
+      grant nothing, because a typo must not open an egress path. **An unreadable consent file
+      grants nothing**, the one place in this product where "we could not tell" and "no" are
+      deliberately the same answer: the cost of the two mistakes is not symmetric.
+      GitHub needs no consent — the comment is posted to GitHub quoting GitHub, so nothing crosses
+      a boundary. **Slack answers 200 with `ok: false`**, so the status code alone would turn a
+      refusal into an empty message. 20 tests, 5 sabotages caught, verified against a real
+      repository carrying a real consent file.
+      **NOT YET EXERCISED AGAINST A REAL JIRA OR SLACK** — no credential exists to do it with, and
+      the readers are tested against payloads rather than against those services.
 
 ### D7 — the three questions a security team asks
 
 Their answers, given our thesis: say what is true, prove it where we can, and refuse the claim
 where we cannot.
 
-- [ ] **D7a "What does it catch?"** AI-written code carries more hardcoded secrets, and a
-      hardcoded key is **deterministically** detectable — pattern plus entropy, no model, no
-      judgement. It ships as a `CheckKind`, high precision, reproducible in the audit trail.
+- [x] **D7a "What does it catch?"** `parse/secret_scan.py` + `CheckKind.HARDCODED_SECRET`.
+      **AND IT IS THE FIRST CHECK THAT IS NOT PYTHON-ONLY**, which is the part that was not in the
+      row. Every other kind needs an AST and returns `LANGUAGE_UNSUPPORTED` for anything else —
+      the narrowness `docs/product/unit-economics.md` calls the honest limit of the standards
+      engine. A credential is a string, so it is caught in `.env`, `.tf`, a CI workflow and a
+      `.ts` config exactly as well as in a module, and those are the files that leak one. It
+      dispatches BEFORE the language gate for that reason. `dependencies = []` still holds.
+      **A PROVIDER PREFIX IS EVIDENCE; ENTROPY ALONE IS A GUESS.** `AKIA…`, `ghp_…`, `xox…`,
+      `sk_live_…`, `AIza…`, a private-key header. The generic rule needs BOTH a credential-shaped
+      name and enough entropy, and is still the weakest kind reported.
+      **ENTROPY DID LESS WORK THAN THE ROW ASSUMED, AND THAT WAS MEASURED.** `password12345678`
+      scores **3.88** bits against a real key's **4.28** — no floor separates them. The first
+      docstring asserted 3.1 for it, invented, and the scanner fired on it on the first run. A
+      vocabulary check does the work the floor could not.
+      **THE SECRET NEVER REACHES THE EVIDENCE.** A `Checked` row goes to the audit trail, the
+      comment and the customer's database; only the kind, the line and a four-character prefix.
+      14 must-not-fire cases against 6 must-fire ones, deliberately. 37 tests.
+      ~~It ships as a `CheckKind`, high precision, reproducible in the audit trail.~~
       **What we must NOT claim is general vulnerability detection.** Our raw findings measure
       66.7-82.1% wrong across four blind pools. "We catch hardcoded credentials, exactly, and we
       do not claim to catch injection" is a weaker sentence and a defensible one.
@@ -538,11 +808,30 @@ where we cannot.
 - [ ] **D7e SOC 2 Type II.** External, expensive, months of evidence collection, and no code we
       can write substitutes for it. Recorded so nobody plans around its absence. **Until it
       exists, say so** — a buyer discovering it mid-procurement costs more than the deal.
-- [ ] **D7f Three deployment shapes, one container.** Cloud (we run it), on-prem (they run the
-      same image), air-gapped (Half A only, no network beyond the clone). The image already
-      exists; what is missing is on-prem installation docs and an air-gapped mode that REFUSES to
-      make a network call rather than merely not making one — an outbound call that fails quietly
-      in a bank is a finding against us, not a bug.
+- [x] **D7f Three deployment shapes, one container.** `types/deployment.py` +
+      `scripts/guard/runtime/check_network_chokepoint.py` + `docs/engineering/DEPLOYMENT.md`.
+      One variable, `QUANTAMIND_DEPLOYMENT_SHAPE`; **an unrecognised value refuses rather than
+      defaulting to `cloud`**, which would turn a typo in an air-gapped customer's configuration
+      into a deployment that reaches the network.
+      **IT REFUSES, IT DOES NOT MERELY FAIL TO CONNECT.** `permit()` is called before the socket
+      opens at all nine outbound sites, and a forbidden destination raises `NetworkRefused` naming
+      the shape, the destination and what IS permitted. Verified on the real code paths: air-gapped
+      refuses inference, the package index, Jira and Slack; cloud reaches PyPI and returns a real
+      answer. **The clone is the boundary, not an exception** — with no repository there is nothing
+      to review, so refusing it would be an off switch rather than an air gap.
+      **THE GUARD IS WHAT MAKES IT A MECHANISM**, failing the build if any module opens a socket or
+      runs a networked git subcommand without asking. It matches on primitives, not names, and it
+      caught its own false positive twice on `serve/cli.py` before settling on "imports
+      `subprocess`" as the signal. 25 tests, 7 sabotages caught including removing a single
+      `permit` call from one module.
+      **Three of this repository's own guards caught the work mid-flight** — the config renderer
+      must report every `Settings` field, guard thresholds must be recorded, and a withdrawal may
+      not name an enforcer that does not exist. The last one was itself broken: its pattern stopped
+      at `/`, so moving a guard into a sub-package made every withdrawal naming it read as a
+      phantom.
+      **NOT VERIFIED INSIDE A REAL AIR-GAPPED NETWORK** — the refusals are tested and no module
+      bypasses them, but nobody has run this in a customer's isolated environment, and
+      `DEPLOYMENT.md` says so.
 
 **The framing for all of Phase D:** build what the competitor sells, but with the thesis —
 deterministic where a parser can answer, provenance on every verdict, refusals returned rather

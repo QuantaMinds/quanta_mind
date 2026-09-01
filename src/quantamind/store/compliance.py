@@ -27,7 +27,7 @@ import sqlite3
 from dataclasses import dataclass
 
 from quantamind.store.lifecycle import MIN_FOR_A_RATE
-from quantamind.types.checked import Outcome
+from quantamind.types.standards.checked import Outcome
 
 HOTSPOTS = 5
 """Files named in the hotspot list. The remainder is stated as a count, never dropped."""

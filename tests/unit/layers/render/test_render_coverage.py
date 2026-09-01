@@ -22,7 +22,7 @@ from pathlib import Path
 import pytest
 
 from quantamind.rank.order import rank
-from quantamind.render.coverage_line import NothingToReport, coverage_line
+from quantamind.render.blocks.coverage_line import NothingToReport, coverage_line
 from quantamind.types.ranking import Discrimination, Ranking
 from quantamind.types.verdict import Construct, Reason, Site, Unresolved
 
