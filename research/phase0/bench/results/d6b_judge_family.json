@@ -1,0 +1,20 @@
+{
+  "sample": 20,
+  "their_precision": 0.3468013468013468,
+  "models": {
+    "gemini-2.5-pro": {
+      "tp": 58,
+      "fp": 95,
+      "precision": 0.3790849673202614,
+      "errors": 1
+    },
+    "gemini-2.5-flash": {
+      "tp": 51,
+      "fp": 108,
+      "precision": 0.32075471698113206,
+      "errors": 9
+    }
+  },
+  "agree": 51,
+  "differ": 7
+}

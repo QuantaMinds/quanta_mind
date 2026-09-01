@@ -19,9 +19,9 @@ WHY:  **PRE-REGISTERED BEFORE THIS FILE EXISTED**, bars and population and power
       position; the first run reported the information as if it were the only candidate.
       `--placebo` holds the directive and position fixed and swaps in another change's context.
 
-      **THE JUDGE IS THE SAME FAMILY AS THE REVIEWER** — `gemini-2.5-pro` scoring `gemini-2.5-pro`
-      — while the pre-registration's Method promises a DIFFERENT family. Unmeetable here, exactly
-      as the "4 of 6 repositories" bar was, and admitted only after the fact.
+      **THE JUDGE IS THE SAME FAMILY AS THE REVIEWER**, while the Method promises a DIFFERENT one.
+      **UNMET, NOT UNMEETABLE** — the earlier wording was wrong, and `judge_family.py` has the
+      measurement and the reason.
 
       **RUN `run_d6b_noise.py` FIRST.** Identical arms moved +2 TP with 14 of 36 discordant; the
       first treatment run moved -3 with 18 of 36 and was withdrawn as shot noise.

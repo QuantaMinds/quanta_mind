@@ -106,11 +106,41 @@ Fixed in `research/phase0/bench/d6b/` and `judge.py`:
 | directive and information conflated | `DIRECTIVE` is a separate constant, and `--placebo` keeps it fixed while swapping in another change's context | separates compliance from information |
 | the docstring claimed "nothing else varies" | it now states exactly what varies: information, directive, and position | — |
 
-**Not fixed, and honestly out of reach here:**
+**The "no other model is reachable" claim was wrong, and testing it produced three results.**
+→ `research/phase0/bench/d6b/judge_family.py`
 
-- **The same-family judge.** `gemini-2.5-pro` scores `gemini-2.5-pro` and no other capable model is
-  reachable from this project. The Method's "different family" was unmeetable in exactly the way
-  bar three was; it is now stated in the runner rather than only in a document.
+I wrote that a different-family judge was unreachable without trying. Tested:
+
+- **Anthropic models on Vertex return `NOT_FOUND: ... or your project does not have access`.** The
+  Vertex AI API is enabled; the Anthropic publisher is simply not provisioned, which is a one-time
+  Model Garden enablement in the console. **A different-family judge is one console action away,
+  not unreachable.** That is a materially different sentence from the one I wrote.
+- **`gemini-2.5-flash` works and is ~2.5x faster.** Same family, so it does not satisfy the Method
+  requirement — but it makes a within-family judge-variance check cheap.
+- **Our judge is calibrated better than I feared.** Scoring the SAME checked-in CodeRabbit
+  candidates over 20 pull requests:
+
+| judge | precision | tp | fp | unjudged |
+|---|---|---|---|---|
+| their Claude judge (published, all 50) | 34.7% | 103 | 194 | — |
+| `gemini-2.5-pro` (ours) | **37.9%** | 58 | 95 | 1 |
+| `gemini-2.5-flash` | **32.1%** | 51 | 108 | 9 |
+
+All three land within ~3 points. **That partly answers the audit's "the judge's validity is never
+established": on a different family's ground truth, our judge is not systematically lenient toward
+its own family's output.** It does not rule out shared bias between two Geminis.
+
+- **But the two Gemini judges disagree on 12.1% of golden verdicts** (agree 51, differ 7). **The
+  judging stage carries its own instability of roughly one verdict in eight**, on top of the
+  reviewer's — a second noise source under every number in the withdrawn run.
+- **The degradation print added above fired on its first real run**, reporting *"1 of 1 pair(s)
+  went unjudged — they score as non-matches, so this arm is UNDERCOUNTED"*, and Flash accumulated
+  **9 unjudged pairs against Pro's 1**. Under the old code that silently subtracted true positives
+  from the noisier judge and nothing would have said so.
+
+**Still not fixed:**
+- **The same-family judge**, until somebody enables Anthropic in Model Garden for
+  `quantamind-oss`. The requirement is unmet, not unmeetable, and the runner now says which.
 - **Ticket bodies.** `Ticket` still carries title and state only, so the treatment remains weaker
   than the argument for it. Fetching bodies is a change to D6a and a third egress destination that
   `ingest/context/egress.py` does not name.
