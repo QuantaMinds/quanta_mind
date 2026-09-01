@@ -474,6 +474,42 @@ cross-repository surface to nothing on the day their declaration stopped parsing
 nobody declared. One malformed entry does not cost the good ones — refusing a whole file over a
 typo loses every link the customer got right.
 
+### `ingest/context/egress.py` — which systems may be quoted INTO a comment
+
+**D6c. "Egress is a decision, not a detail."** Reading a Jira ticket to understand a change is one
+thing; printing its text into a GitHub comment is another, and the second moves the customer's data
+from a system with one access list into a system with a different one. A private Slack thread
+quoted into a pull request is visible to everyone who can read the repository, who are not the
+people who could read the channel.
+
+**Deny by default, per source, and only a literal `true` grants.** No file means nothing outside
+GitHub is quoted. `"yes"`, `1` and a misspelled key all grant nothing — a typo must not open an
+egress path. One switch for "external context" would let agreeing to a ticket title agree to a
+private channel, so `quote_jira` says nothing about `quote_slack`.
+
+**GitHub is always quotable and that is not an exception.** The comment is posted to GitHub, by an
+app installed on GitHub, quoting text already in the same repository. Nothing crosses a boundary,
+so there is no decision to ask for. Every other source crosses one.
+
+**An unreadable consent file grants nothing.** This is the one place in the product where "we could
+not tell" and "no" are deliberately the same answer, and the reason is that the cost of the two
+mistakes is not symmetric — everywhere else, collapsing them is the bug.
+
+### `ingest/context/elsewhere.py` — Jira and Slack over stdlib HTTP
+
+Both are REST and JSON over HTTPS, so `urllib` reaches them and `dependencies = []` holds. What
+they need is not a library but the customer's credential, which is why both take a token rather
+than reading one from anywhere. **It must not grow a client library**, and it must not decide
+whether its text may be quoted — `egress.py` does that, separately, so the two acts stay visible.
+
+**`Unreachable` is the expected answer.** No token is configured for either system in any current
+deployment, so both decline before opening a socket. `NOT_CONFIGURED`, `REFUSED` and `UNREADABLE`
+are three different sentences to a reader: not bought, wrong credential, our bug.
+
+**Slack answers 200 with `ok: false`.** Reading only the status code turns a refusal into an empty
+message, which would print a change with no stated goal and let the reader assume the author gave
+none. **Plain HTTP is refused rather than downgraded** — the token is in the header.
+
 ### `serve/review/` — the pipeline, split from the edge
 
 **`serve/` reached its 15-file cap while building D1e, and this is the honest seam.** The rest of

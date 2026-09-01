@@ -692,11 +692,21 @@ Pulled in as **two separate uses**, because they succeed or fail independently:
       PASS to NULL under McNemar and a same-arm replicate, and five prompt levers moved nothing.
       Human context is a DIFFERENT variable — it carries why a change exists, which no diff shape
       contains — so the null does not condemn it. It does mean measuring rather than assuming.
-- [ ] **D6c Sources, cheapest first.** GitHub PR and issue comments need no new credential and no
-      new dependency. Jira and Slack are REST and JSON over HTTPS, so `urllib` reaches both and
-      `dependencies = []` holds; what they need is the customer's auth. **Egress is a decision,
-      not a detail:** quoting a private Slack thread into a GitHub comment moves their data
-      between systems, and that must be opt-in per source.
+- [x] **D6c Sources, cheapest first.** `ingest/context/egress.py` + `ingest/context/elsewhere.py`.
+      Jira and Slack are REST and JSON over HTTPS, so `urllib` reaches both and
+      `dependencies = []` holds; both take the customer's token rather than reading a credential
+      from anywhere. **EGRESS IS THE HALF THAT MATTERED AND IT IS DENY-BY-DEFAULT, PER SOURCE.**
+      No consent file means nothing outside GitHub is quoted; `quote_jira` says nothing about
+      `quote_slack`; and **only a literal `true` grants** — `"yes"`, `1` and a misspelled key all
+      grant nothing, because a typo must not open an egress path. **An unreadable consent file
+      grants nothing**, the one place in this product where "we could not tell" and "no" are
+      deliberately the same answer: the cost of the two mistakes is not symmetric.
+      GitHub needs no consent — the comment is posted to GitHub quoting GitHub, so nothing crosses
+      a boundary. **Slack answers 200 with `ok: false`**, so the status code alone would turn a
+      refusal into an empty message. 20 tests, 5 sabotages caught, verified against a real
+      repository carrying a real consent file.
+      **NOT YET EXERCISED AGAINST A REAL JIRA OR SLACK** — no credential exists to do it with, and
+      the readers are tested against payloads rather than against those services.
 
 ### D7 — the three questions a security team asks
 
