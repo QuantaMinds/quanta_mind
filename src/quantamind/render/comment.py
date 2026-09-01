@@ -39,6 +39,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 
 from quantamind.ingest.context.tickets import Context
+from quantamind.ingest.standards.inherited import Inheritance
 from quantamind.ingest.standards.links_file import Link
 from quantamind.parse.change_effort import Effort
 from quantamind.parse.duplicate_bodies import Duplicates
@@ -46,6 +47,8 @@ from quantamind.parse.public_api import Break
 from quantamind.render.blocks.crossing_block import crossing
 from quantamind.render.blocks.duplicate_block import duplicates
 from quantamind.render.blocks.found_block import found
+from quantamind.render.blocks.headline import HEADER, headline
+from quantamind.render.blocks.inheritance_block import inheritance
 from quantamind.render.blocks.judged_block import judged as judged_block
 from quantamind.render.blocks.scope_block import coverage
 from quantamind.render.blocks.verdict_block import Stated, verdicts
@@ -57,52 +60,10 @@ from quantamind.types.standards.judged import Judged
 from quantamind.types.verdict import Unresolved
 from quantamind.verify.consumers import Crossing
 
-HEADER = "### QuantaMind"
-GOOD = "✅ **Looks good.**"
-HUMAN = "⚠️ **Needs a human.**"
-BUGS = "🐛 **Found {count} thing(s) worth fixing.**"
-BLIND = (
-    "⚠️ **I could not review this change.** {why}\n\n"
-    "Nothing below is a verdict on your code — it is only what could still be checked."
-)
 MAX_DEPENDENTS = 3
 """Dependents named before the count takes over. **Five made the single longest line in a
 real posted comment** — five `src/quantamind/...` paths wrapped across a screen, and the
 remainder is stated either way, so the fourth and fifth bought nothing a reader acts on."""
-LOOK = "**Look here first**"
-NOT_CHECKED = (
-    "_Callers are found by static Python import only: a dynamic import, a re-export, or another "
-    "language is invisible to it, and cross-repository impact is not checked at all._"
-)
-
-
-def _headline(
-    summary: Stated | None, findings: Sequence[Finding], violations: int, blind: str
-) -> str:
-    """The first line, which is the only line some readers will act on.
-
-    **A REVIEW THAT COULD NOT RUN MUST NOT LOOK LIKE ONE THAT FOUND NOTHING.** A real delivery hit
-    MAX_TOKENS, the summary was dropped, and the comment degraded into a list of files with no
-    verdict — indistinguishable from a clean review to anybody reading it.
-
-    **IT SUMMARISES THE SECTIONS BELOW; IT DOES NOT REPLACE THEM.** An earlier version of this
-    collapsed the goal and both verdicts into one line, and the review became an opinion with no
-    stated basis. `verdict_block.SECTIONS` is mandatory and a test enforces it.
-    """
-    if blind:
-        return BLIND.format(why=blind)
-    count = len(findings) + violations
-    if count:
-        return BUGS.format(count=count)
-    if summary is None:
-        return HUMAN + " No model read this change; the checks below still ran."
-    if summary.achieves_goal is not True:
-        return f"{HUMAN} It may not do what the PR says."
-    if summary.breaks is not False:
-        return f"{HUMAN} Whether it breaks callers is not settled."
-    if summary.convention:
-        return f"{HUMAN} It breaks a rule you wrote down."
-    return f"{GOOD} It does what the PR says, and nothing that imports it breaks."
 
 
 def comment(
@@ -112,6 +73,7 @@ def comment(
     findings: Sequence[Finding] = (),
     checks: Sequence[Checked] = (),
     judged: Sequence[Judged] = (),
+    inherited: Inheritance | None = None,
     unresolved: Sequence[Unresolved] = (),
     blind: str = "",
     context: Context | None = None,
@@ -134,7 +96,7 @@ def comment(
     product refuses.
     """
     violations = [c for c in checks if c.outcome is Outcome.VIOLATED]
-    lines = [HEADER, "", _headline(summary, findings, len(violations), blind), ""]
+    lines = [HEADER, "", headline(summary, findings, len(violations), blind), ""]
 
     # **ABOVE THE MODEL'S VERDICT, AND PRINTED EVEN WHEN THERE IS NO VERDICT.** This block is the
     # author's own words plus one API read, so it survives `infer/` being off, refused, or out of
@@ -175,6 +137,12 @@ def comment(
     narrowed = crossing(breaks, crossed or Crossing())
     if narrowed:
         lines += [narrowed, ""]
+
+    # **D1e SITS ABOVE THE MODEL'S OPINION.** It says what this change was NOT checked against,
+    # which a reader needs before weighing anything below it.
+    changed_standards = inheritance(inherited)
+    if changed_standards:
+        lines += [changed_standards, ""]
 
     # **UNDER EVERY PARSER CLAIM ABOVE IT.** This is the one section a re-run may contradict, so
     # it sits below the ones that cannot — the reader meets the reproducible half first.

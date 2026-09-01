@@ -31,7 +31,7 @@ from quantamind.render.deep_report import lines
 from quantamind.render.json_report import report as json_review
 from quantamind.render.json_report import unreviewed
 from quantamind.serve.commands.run_review import Reviewed, review
-from quantamind.serve.deep_review import deep
+from quantamind.serve.review.deep_review import deep
 from quantamind.types.change import REVIEWABLE_SUFFIXES
 from quantamind.types.review import NotReviewed
 from quantamind.types.settings import load

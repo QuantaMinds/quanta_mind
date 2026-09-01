@@ -474,6 +474,48 @@ cross-repository surface to nothing on the day their declaration stopped parsing
 nobody declared. One malformed entry does not cost the good ones — refusing a whole file over a
 typo loses every link the customer got right.
 
+### `serve/review/` — the pipeline, split from the edge
+
+**`serve/` reached its 15-file cap while building D1e, and this is the honest seam.** The rest of
+`serve/` is the edge — listener, webhook, CLI, health, onboarding — which receives a request and
+hands it here. These six are one pipeline with one entry point: `review_delivery.deliver()`
+orchestrates, `change_facts.gather()` collects, `standards_step.applied()` enforces,
+`deep_review`/`pin_review` produce findings, `review_body.body_for()` assembles the text.
+
+**`review_body.py` exists because two renderers were allowed to drift.** Written inline, the "does
+this comment say anything" check omitted `blind` and silently discarded the "I could not review
+this" banner — a refusal became silence, found by this product's own review of itself on
+`QuantaMinds/quanta_mind#91`. Both calls now take the same arguments in one small function, so a
+section cannot be added to one without the other.
+
+### `ingest/standards/inherited.py` — one standard, defined once for an organisation
+
+**D1e. "Define a standard once and it is checked on every pull request across all repositories" is
+the enterprise claim, and a per-repository `rules.toml` does not make it.** Organisation rules live
+in `<owner>/.quantamind`, the same convention GitHub already uses for `.github` — a real repository
+with real permissions, changed through a pull request like anything else.
+
+**The asymmetry is the design.** A repository may TIGHTEN an inherited rule with no permission, and
+it is recorded. It may not LOOSEN one while still claiming to inherit it: that is refused, the
+organisation's severity stands, and the refusal says how to opt out properly. It may DROP one
+outright with `inherit = false` — allowed, explicit, and **recorded**, because the row's own
+sentence is that a standard which can be disabled invisibly is not a standard.
+
+**`render/blocks/inheritance_block.py` is where that becomes true or false.** `combine` can compute
+a perfect `Dropped` record and it changes nothing if the record never reaches a reader. Verified end
+to end against two real git repositories: an organisation declaring `no-eval`, a repository dropping
+it, a file containing a real `eval(x)` — the violation went unreported, and the comment said the
+rule had been switched off here.
+
+**`org_read` is False for a file we could not read, and True for an organisation that declares
+nothing.** A merge treating an unreachable file as an empty one would report a repository as fully
+compliant at the moment its inherited standards stopped arriving — `rules_file.py`'s own confusion,
+one level up. That case renders the loudest line in the block: a drop is a decision somebody made,
+an unreadable file is enforcement stopping with nobody deciding anything.
+
+**The fetch is `serve/`'s and the merge is `ingest/`'s.** `verify/rule_check.enforce` takes the
+effective rules and never learns that inheritance exists, because `verify/` may not clone.
+
 ### `ingest/standards/mined.py` — the standards a team repeats, proposed and never declared
 
 **D1d, and the premise was measured before the module existed.** Over 1,213 real inline review

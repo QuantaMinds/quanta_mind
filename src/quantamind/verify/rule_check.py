@@ -157,6 +157,7 @@ def enforce(
     repo: str,
     number: int,
     ask: Ask | None = None,
+    inherited: Sequence[Rule] | None = None,
 ) -> tuple[tuple[Checked, ...], tuple[Judged, ...]]:
     """Read this repository's declared rules, check the change, and put the result on the record.
 
@@ -173,8 +174,17 @@ def enforce(
 
     **A REFUSED DECLARATION IS REPORTED, NOT DROPPED**, and a recording failure does not take the
     review with it — the comment is already worth posting whether or not the trail accepted it.
+
+    **`inherited` ARRIVES ALREADY MERGED, AND THAT IS DELIBERATE.** D1e's organisation rules live
+    in another repository, which means fetching one — and `verify/` may not clone. The merge is
+    `ingest/standards/inherited.combine` and the fetch is `serve/`'s; this layer is handed the
+    effective rule set and never learns that inheritance exists. `None` means nothing was merged
+    and the repository's own file stands alone, which is every deployment without an organisation
+    file and is not an error.
     """
     declared, unreadable = rules_file.read(clone, sha)
+    if inherited is not None:
+        declared = tuple(inherited)
     if unreadable:
         print(f"[rules] {len(unreadable)} declaration(s) could not be read", flush=True)
     if not declared:

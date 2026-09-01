@@ -18,7 +18,7 @@ from typing import Any
 
 import pytest
 
-from quantamind.serve import standards_step
+from quantamind.serve.review import standards_step
 from quantamind.types.settings import Settings
 
 DECLARED = """
@@ -78,12 +78,16 @@ def test_the_status_is_computed_from_the_parsers_rows_alone(
     monkeypatch.setattr(standards_step, "announce", spy)
     settings = Settings(posting_enabled=False, inference_enabled=False)
 
-    checks, judged = standards_step.applied(
+    checks, judged, merged = standards_step.applied(
         root, sha, ["app.py"], tmp_path / "s", "acme/app", 1, settings
     )
 
     assert seen["rows"] == checks
     assert judged == (), "inference was off, so nothing may have been judged"
+    # **NO ORGANISATION CLONE WAS INJECTED**, so nothing was inherited and nothing was dropped —
+    # and `org_read` is True, because "no organisation" is not "we could not read one".
+    assert merged.org_read is True
+    assert merged.changed() is False
     # Every row handed to the status must be a parser's verdict — none may be model-provenance.
     assert all(type(row).__name__ == "Checked" for row in seen["rows"])
 
@@ -127,3 +131,55 @@ def test_posting_disabled_is_passed_through_not_overridden(
         ),
     )
     assert seen["enabled"] is True
+
+
+def test_an_unreachable_organisation_repository_inherits_nothing(
+    clone: tuple[Path, str], tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """**D1e: A FAILED FETCH MUST NOT READ AS "THE ORGANISATION DECLARES NOTHING".**
+
+    Falling back to the repository's own file would report it as fully compliant at the exact
+    moment its inherited standards stopped arriving — the confusion `rules_file.py` was built to
+    prevent, one level up.
+    """
+    root, sha = clone
+    monkeypatch.setattr(standards_step, "announce", lambda *a, **k: None)
+
+    _checks, _judged, merged = standards_step.applied(
+        root,
+        sha,
+        ["app.py"],
+        tmp_path / "s",
+        "acme/app",
+        1,
+        Settings(posting_enabled=False, inference_enabled=False),
+        clone_org=lambda repo: None,
+    )
+
+    assert merged.org_read is False, "an unreachable org file was read as an empty one"
+    assert merged.inherited_ids == frozenset()
+
+
+def test_the_organisation_repository_asked_for_is_the_owners(
+    clone: tuple[Path, str], tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """**NAMES ITS ARTEFACT.** `acme/app` must look in `acme/.quantamind`, not anywhere else."""
+    root, sha = clone
+    monkeypatch.setattr(standards_step, "announce", lambda *a, **k: None)
+    asked: list[str] = []
+
+    def opener(repo: str) -> None:
+        asked.append(repo)
+        return None
+
+    standards_step.applied(
+        root,
+        sha,
+        ["app.py"],
+        tmp_path / "s",
+        "acme/app",
+        1,
+        Settings(posting_enabled=False, inference_enabled=False),
+        clone_org=opener,
+    )
+    assert asked == ["acme/.quantamind"]

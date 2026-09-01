@@ -40,14 +40,13 @@ from quantamind.infer.change_review import explain
 from quantamind.ingest.diff import base_commit, changed_files
 from quantamind.ingest.github_api import token_for
 from quantamind.ingest.publish.github_reviews import publish
-from quantamind.render.comment import comment as rendered
-from quantamind.render.speaks import beyond_the_ranking
-from quantamind.serve.change_facts import gather
 from quantamind.serve.commands.run_review import review as run_ranking
-from quantamind.serve.deep_review import examine
-from quantamind.serve.pin_review import only as only_pins
-from quantamind.serve.pin_review import pins_for
-from quantamind.serve.standards_step import applied
+from quantamind.serve.review.change_facts import gather
+from quantamind.serve.review.deep_review import examine
+from quantamind.serve.review.pin_review import only as only_pins
+from quantamind.serve.review.pin_review import pins_for
+from quantamind.serve.review.review_body import body_for
+from quantamind.serve.review.standards_step import applied
 from quantamind.serve.working_clone import ensure, sweep
 from quantamind.store import installations, tenancy
 from quantamind.store.reviews import bank
@@ -147,7 +146,9 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     told, unreadable = explain(
         clone, head_sha, delivery_repo, number, reading.paths, settings, history=past
     )
-    checks, judged = applied(clone, head_sha, list(changed), store, delivery_repo, number, settings)
+    checks, judged, inherited = applied(
+        clone, head_sha, list(changed), store, delivery_repo, number, settings
+    )
 
     parts = (part.spend for part in (told, examined) if part is not None)
     bank(store, delivery_repo, number, head_sha, Spend.total(*parts))
@@ -157,35 +158,17 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
         return Delivered(quiet, reviewed.considered, reviewed.skipped, None)
 
     kept = examined.anchored if examined is not None else ()
-    fuller = rendered(
+    spoken = body_for(
         reviewed.ranking,
         summary=told,
         findings=kept,
         checks=checks,
         judged=judged,
         blind=unreadable,
-        context=facts.intent,
-        repeated=facts.repeated,
-        effort=facts.sizes,
-        links=facts.links,
-        links_unreadable=facts.links_unreadable,
-        breaks=facts.breaks,
-        crossed=facts.crossing,
+        facts=facts,
+        inherited=inherited,
     )
-    # **THE FALLBACK IS THE RANKING-ONLY BODY, CARRYING NEITHER THE GOAL NOR A REFUSAL.** Written
-    # here as an expression it omitted `unreadable` and discarded the "I could not review this"
-    # banner; `beyond_the_ranking` takes `comment()`'s own arguments so a section cannot be added
-    # to one without the other. → `render/comment.py`, and `QuantaMinds/quanta_mind#91`.
-    speaks = beyond_the_ranking(
-        summary=told,
-        findings=kept,
-        checks=checks,
-        blind=unreadable,
-        context=facts.intent,
-        repeated=facts.repeated,
-        breaks=facts.breaks,
-    )
-    body = (fuller if speaks else (reviewed.body or "")) + pins
+    body = (spoken if spoken is not None else (reviewed.body or "")) + pins
 
     if not settings.posting_enabled:
         return Delivered(Outcome.REHEARSED, reviewed.considered, reviewed.skipped, body)

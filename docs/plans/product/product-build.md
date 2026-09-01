@@ -414,12 +414,24 @@ and D5 read what it records.
       themselves in a single thread, and "said on two changes" must not read like "we could not
       tell".
 
-- [ ] **D1e One definition, every repository.** "Define a standard once and it is checked on every
-      pull request across all repositories" is the actual enterprise claim, and a per-repo
-      `rules.toml` does not make it. Org-level rules live in a `.quantamind` repository the
-      installation owns; a repository's own file EXTENDS them and may tighten a severity, never
-      silently drop an inherited rule. **A dropped inheritance must appear in the audit trail**,
-      because a standard that can be disabled invisibly is not a standard.
+- [x] **D1e One definition, every repository.** `ingest/standards/inherited.py` +
+      `render/blocks/inheritance_block.py` + the fetch in `serve/review/standards_step.py`.
+      Organisation rules live in `<owner>/.quantamind`, the convention GitHub already uses for
+      `.github`. **THE ASYMMETRY IS THE DESIGN:** a repository may TIGHTEN with no permission
+      (recorded), may not LOOSEN while still claiming to inherit (refused, the organisation's
+      severity stands, and the refusal says how to opt out properly), and may DROP outright with
+      `inherit = false` — allowed, explicit, and **recorded**, because a standard that can be
+      disabled invisibly is not a standard.
+      **`org_read` IS FALSE FOR A FILE WE COULD NOT READ AND TRUE FOR AN ORGANISATION THAT DECLARES
+      NOTHING** — a merge treating an unreachable file as an empty one would report a repository as
+      fully compliant at the moment its inherited standards stopped arriving. That case renders the
+      loudest line in the block: a drop is a decision somebody made, an unreadable file is
+      enforcement stopping with nobody deciding anything.
+      **Verified end to end against two real git repositories**: an organisation declaring
+      `no-eval`, a repository dropping it, a file containing a real `eval(x)` — the violation went
+      unreported and the comment said the rule had been switched off here. 17 tests, 4 sabotages
+      caught. The fetch is `serve/`'s and the merge is `ingest/`'s; `verify/` never learns that
+      inheritance exists, because it may not clone.
 - [x] **D1f Blocking, not just commenting.** The claim is that code meets standards *before a human
       reviewer sees the pull request*. That requires a **required status check that fails**, not a
       comment somebody may scroll past. **Only reproducible checks may block** — a `Provenance.MODEL`

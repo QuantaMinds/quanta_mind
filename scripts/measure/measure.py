@@ -27,7 +27,7 @@ from tempfile import TemporaryDirectory
 from quantamind.infer.vertex import InferenceFailed, Unavailable
 from quantamind.serve.commands.run_commit import _timestamp
 from quantamind.serve.commands.run_review import review
-from quantamind.serve.deep_review import deep
+from quantamind.serve.review.deep_review import deep
 
 sys.path.insert(0, str(Path(__file__).parent))
 from record import ChangeRecord, report
