@@ -26,7 +26,7 @@ from __future__ import annotations
 from quantamind.parse.change_effort import Effort
 from quantamind.rank.order import rank
 from quantamind.render.blocks.scope_block import coverage
-from quantamind.types.checked import Checked
+from quantamind.types.standards.checked import Checked
 from quantamind.types.verdict import Construct, Reason, Site, Unresolved
 
 # Scores descend, so rank order and alphabetical order are the same here — deliberately NOT the

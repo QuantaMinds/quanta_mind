@@ -29,8 +29,8 @@ WHY:  **A RULE THAT CANNOT BE CHECKED MUST NOT READ AS A RULE THAT PASSED.** Onl
       `runner.run`. An import matches its target or anything beneath it, so forbidding `subprocess`
       also forbids `subprocess.run`, which is what somebody writing that rule means.
 IMPORTS: ingest.{blob,standards.rules_file}, parse.{python_names,secret_scan},
-      store.rule_checks,
-      types.{change,checked,rule,verdict}. Leftward only.
+      store.rule_checks, types.{change,checked,rule,verdict}, and its sibling
+      `verify.judged_rule` for the model half. Leftward only; nothing from `infer`.
 CONSUMED BY: the audit trail and the compliance dashboard (D4, D5).
 """
 
@@ -46,9 +46,11 @@ from quantamind.parse.python_names import Mention, Names, UnparseableSource, nam
 from quantamind.parse.secret_scan import secrets_in
 from quantamind.store.rule_checks import persist
 from quantamind.types.change import Language, language_of
-from quantamind.types.checked import Checked, Outcome
-from quantamind.types.rule import CheckKind, Rule
+from quantamind.types.standards.checked import Checked, Outcome
+from quantamind.types.standards.judged import Judged
+from quantamind.types.standards.rule import CheckKind, Rule
 from quantamind.types.verdict import Reason, Site
+from quantamind.verify.judged_rule import Ask, judge_change
 
 
 def _unchecked(rule: Rule, path: str, why: Reason) -> Checked:
@@ -148,9 +150,21 @@ def check_change(
 
 
 def enforce(
-    clone: Path, sha: str, paths: Sequence[str], store: Path, repo: str, number: int
-) -> tuple[Checked, ...]:
+    clone: Path,
+    sha: str,
+    paths: Sequence[str],
+    store: Path,
+    repo: str,
+    number: int,
+    ask: Ask | None = None,
+) -> tuple[tuple[Checked, ...], tuple[Judged, ...]]:
     """Read this repository's declared rules, check the change, and put the result on the record.
+
+    **THE TWO HALVES COME BACK SEPARATELY BECAUSE THEY ARE NOT THE SAME KIND OF CLAIM.** The
+    `Checked` rows are reproducible and go to the audit trail. The `Judged` records are a model's
+    opinion, go only to the comment, and **are never persisted** — `persist` below is given the
+    checks and nothing else. `ask=None` produces an empty second half and leaves the first
+    byte-identical to what this returned before D1c.
 
     **APPLYING A STANDARD AND RECORDING THAT YOU APPLIED IT ARE ONE JOB.** Separating them is how a
     trail comes to hold fewer checks than ran: the second half is easy to forget at a call site and
@@ -164,9 +178,13 @@ def enforce(
     if unreadable:
         print(f"[rules] {len(unreadable)} declaration(s) could not be read", flush=True)
     if not declared:
-        return ()
+        return (), ()
     rows = check_change(declared, clone, sha, paths)
     landed = persist(store, repo, number, sha, rows, declared)
     if landed != len(rows):
         print(f"[rules] audit trail took {landed} of {len(rows)} check(s)", flush=True)
-    return rows
+    # **THE JUDGED HALF IS NOT PASSED TO `persist`, AND THAT IS THE WHOLE DESIGN.** A model's
+    # opinion does not enter the audit trail or the compliance rate; it travels to the comment
+    # and stops there. See `types/judged.py`.
+    judged = judge_change(declared, clone, sha, paths, ask)
+    return rows, judged

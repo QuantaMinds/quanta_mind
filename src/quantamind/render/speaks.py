@@ -24,8 +24,8 @@ from quantamind.ingest.context.tickets import Context
 from quantamind.parse.duplicate_bodies import Duplicates
 from quantamind.parse.public_api import Break
 from quantamind.render.blocks.verdict_block import Stated
-from quantamind.types.checked import Checked
 from quantamind.types.finding import Finding
+from quantamind.types.standards.checked import Checked
 
 
 def beyond_the_ranking(

@@ -53,9 +53,9 @@ from quantamind.ingest.standards.links_file import Link
 from quantamind.parse.change_effort import Effort
 from quantamind.render.blocks.file_table import table
 from quantamind.render.blocks.linked_block import linked
-from quantamind.types.checked import Checked, Outcome
 from quantamind.types.finding import Finding
 from quantamind.types.ranking import Ranking
+from quantamind.types.standards.checked import Checked, Outcome
 from quantamind.types.verdict import Unresolved
 
 SCOPE = "_This change touches **{total}** file(s){checked}. **{read}** were read line by line._"

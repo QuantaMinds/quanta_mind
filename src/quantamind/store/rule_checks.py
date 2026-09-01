@@ -30,8 +30,8 @@ from pathlib import Path
 
 from quantamind.store import schema, touches
 from quantamind.store.schema import SchemaVersionMismatch
-from quantamind.types.checked import Checked
-from quantamind.types.rule import Rule
+from quantamind.types.standards.checked import Checked
+from quantamind.types.standards.rule import Rule
 
 
 class ReviewNotRecorded(LookupError):

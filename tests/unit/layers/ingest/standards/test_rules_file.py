@@ -21,7 +21,7 @@ import subprocess
 from pathlib import Path
 
 from quantamind.ingest.standards.rules_file import RULES_PATH, read
-from quantamind.types.rule import CheckKind, Severity
+from quantamind.types.standards.rule import CheckKind, Severity
 from quantamind.types.verdict import Provenance, Reason
 
 GOOD = """

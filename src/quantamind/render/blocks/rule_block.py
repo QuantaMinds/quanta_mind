@@ -25,7 +25,7 @@ from __future__ import annotations
 from collections import Counter
 from collections.abc import Sequence
 
-from quantamind.types.checked import Checked, Outcome
+from quantamind.types.standards.checked import Checked, Outcome
 
 HEADING = "**Declared standards**"
 

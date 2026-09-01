@@ -32,7 +32,7 @@ from enum import Enum
 
 from quantamind.ingest.publish import commit_status
 from quantamind.render.blocks.status_check import render
-from quantamind.types.checked import Checked
+from quantamind.types.standards.checked import Checked
 from quantamind.verify.blocking import Standing, decide
 
 

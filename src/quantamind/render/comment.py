@@ -46,12 +46,14 @@ from quantamind.parse.public_api import Break
 from quantamind.render.blocks.crossing_block import crossing
 from quantamind.render.blocks.duplicate_block import duplicates
 from quantamind.render.blocks.found_block import found
+from quantamind.render.blocks.judged_block import judged as judged_block
 from quantamind.render.blocks.scope_block import coverage
 from quantamind.render.blocks.verdict_block import Stated, verdicts
 from quantamind.render.context.goal_block import goal
-from quantamind.types.checked import Checked, Outcome
 from quantamind.types.finding import Finding
 from quantamind.types.ranking import Ranking
+from quantamind.types.standards.checked import Checked, Outcome
+from quantamind.types.standards.judged import Judged
 from quantamind.types.verdict import Unresolved
 from quantamind.verify.consumers import Crossing
 
@@ -109,6 +111,7 @@ def comment(
     summary: Stated | None = None,
     findings: Sequence[Finding] = (),
     checks: Sequence[Checked] = (),
+    judged: Sequence[Judged] = (),
     unresolved: Sequence[Unresolved] = (),
     blind: str = "",
     context: Context | None = None,
@@ -172,6 +175,12 @@ def comment(
     narrowed = crossing(breaks, crossed or Crossing())
     if narrowed:
         lines += [narrowed, ""]
+
+    # **UNDER EVERY PARSER CLAIM ABOVE IT.** This is the one section a re-run may contradict, so
+    # it sits below the ones that cannot — the reader meets the reproducible half first.
+    opinion = judged_block(judged)
+    if opinion:
+        lines += [opinion, ""]
 
     if repeated is not None:
         repeats = duplicates(repeated)

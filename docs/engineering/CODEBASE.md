@@ -474,6 +474,71 @@ cross-repository surface to nothing on the day their declaration stopped parsing
 nobody declared. One malformed entry does not cost the good ones — refusing a whole file over a
 typo loses every link the customer got right.
 
+### `types/standards/` — a declared rule, and the two kinds of verdict it can receive
+
+**D1c. `rule.py` is the declaration, `checked.py` is what a PARSER decided, `judged.py` is what a
+MODEL said.** They moved here together because they are one concern, and because the split between
+the last two is the product: a `Checked` can be re-run on the same commit and shown to give the
+same answer, and a `Judged` cannot.
+
+**The separation is a TYPE, not a field, and that is deliberate.**
+`types/standards/checked.py:counts_toward_compliance` is true for `PASSED` and `VIOLATED`, so a
+model verdict expressed as an `Outcome` would enter the compliance rate — the number a customer
+shows an auditor — carrying our measured 66.7-82.1% raw error rate with it. There is no `Outcome`
+to set on a `Judged`, no `rule_check` row it can be written to, and no renderer shared with the
+compliance table. D1c asks that the two "never render alike"; here that is structural rather than
+remembered.
+
+**`Judged` refuses `BROKEN` without a quote at construction**, the way `Checked` refuses `VIOLATED`
+without evidence. A violation the developer cannot locate in their own file is not one they can act
+on, and an invented quote is the failure shape most likely to survive review — the prose still
+reads correctly.
+
+**It must not grow a converter.** Anything that turns a `Judged` into a `Checked` re-creates the
+exact hazard this package exists to prevent.
+
+### `verify/judged_rule.py`, `serve/rule_judge.py` — a standard no parser can check
+
+**D1c. The model may form a view on a prose rule; it may never produce a compliance row.**
+`verify/rule_check.py:check` returns `DEFERRED` for every `MODEL_JUDGED` rule and always will —
+that is not an unfinished branch, it is the mechanism. `enforce()` returns two tuples, and only the
+first is handed to `store/rule_checks.py:persist`.
+
+**Every failure path lands on `UNDECIDED`.** The transport raised, the reply did not begin with a
+verdict token, the reply claimed `BROKEN` and quoted a line that is not in the file: all undecided,
+never `MET`. `docs/engineering/CORRECTIONS.md` entry 8 is a verifier that defaulted the other way
+and confirmed every false claim it existed to refute.
+
+**The judge is injected, and the reason is a rule that does not hold.** `AGENTS.md` rule 7 says the
+layer order is "what stops `verify` importing `infer`". It does not: `infer` is at index 6 and
+`verify` at index 7 in `scripts/guard/discovery.py:LAYER_ORDER`, and
+`scripts/guard/check_conventions.py:check_layering` only flags a target at or to the *right* of the
+importer. So `verify/judged_rule.py` takes the judge as a parameter and `serve/rule_judge.py`
+supplies it — the precedent `verify/consumers.py` set for its clone. **The layer adjudicating the
+model's claims does not import the layer that makes them, whatever the guard tolerates.**
+
+**`serve/standards_step.py` computes the commit status from `checks` alone.** A status blocks a
+merge; blocking on a claim measured 66.7-82.1% wrong would make the product an obstacle.
+
+**The live test found that the FIXTURE was the flaky part, not the judge.** The first negative
+fixture opened `"""A module with only WHY comments."""` and the judge quoted that line as a
+violation in **3 of 6 real trials** — reacting to the label rather than the code, and making the
+live test fail roughly half the time. With a neutral docstring the same judge scored **12/12** on
+the known-answer pair: 6/6 BROKEN on the planted claim, 6/6 MET on the clean file. A fixture that
+describes itself in the oracle's own vocabulary measures the fixture. Same shape as the flat corpus
+that hid a reader bug: the oracle was right and the subject was wrong.
+
+**No model-judged rule is declared in `.quantamind/rules.toml`, on purpose.** The first
+candidate fired on 10 of 12 real files; the withdrawal and its measurement are recorded in the file
+where the rule would have gone. The capability is exercised by
+`tests/live/model/test_judged_rule_live.py` against the live model, not by a declared rule.
+
+**The sabotage run is the reason four of these tests exist.** Thirteen were run; four disabled
+cleanly at first. The most instructive: persisting the judgements into the trail left the row COUNT
+unchanged, because `store/rule_checks.py:70` writes with `INSERT OR REPLACE` — the model verdict
+*overwrote* the honest `deferred` row with `passed`, which `counts_toward_compliance` accepts. The
+count assertion was watching the wrong thing; the test now asserts the outcome of the named row.
+
 ### `store/audit/` — the trail as an artefact, not a query
 
 **D4b was ticked "append-only, exportable" for a fortnight and there was no export.**

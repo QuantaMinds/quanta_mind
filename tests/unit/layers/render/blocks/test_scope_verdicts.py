@@ -22,7 +22,7 @@ from __future__ import annotations
 
 from quantamind.rank.order import rank
 from quantamind.render.blocks.scope_block import coverage
-from quantamind.types.checked import Checked, Outcome
+from quantamind.types.standards.checked import Checked, Outcome
 from quantamind.types.verdict import Reason, Site
 
 SCORES = {f"src/mod{n}.py": 20 - n for n in range(8)}

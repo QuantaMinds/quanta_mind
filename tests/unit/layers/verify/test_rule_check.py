@@ -19,8 +19,8 @@ from __future__ import annotations
 
 import pytest
 
-from quantamind.types.checked import Checked, Outcome
-from quantamind.types.rule import CheckKind, Rule, Severity
+from quantamind.types.standards.checked import Checked, Outcome
+from quantamind.types.standards.rule import CheckKind, Rule, Severity
 from quantamind.types.verdict import Reason, Site
 from quantamind.verify.rule_check import check, check_all
 

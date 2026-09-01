@@ -38,16 +38,16 @@ three months stale.
 
 | layer | modules | files |
 |---|---|---|
-| `types/` | **15** | `change.py`, `checked.py`, `commit.py`, `deep.py`, `env_values.py`, `finding.py`, `pooled_outcome.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `rule.py`, `settings.py`, `spend.py`, `touch.py`, `verdict.py` |
+| `types/` | **13** | `change.py`, `commit.py`, `deep.py`, `env_values.py`, `finding.py`, `pooled_outcome.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `settings.py`, `spend.py`, `touch.py`, `verdict.py` |
 | `store/` | **15** | `accounts.py`, `calibration.py`, `compliance.py`, `costs.py`, `deliveries.py`, `drift.py`, `installations.py`, `lifecycle.py`, `migrations.py`, `reviews.py`, `rule_checks.py`, `schema.py`, `tables.py`, `tenancy.py`, `touches.py` |
 | `ingest/` | **13** | `app_auth.py`, `blob.py`, `change_shape.py`, `commits.py`, `diff.py`, `git_credentials.py`, `github_api.py`, `google_auth.py`, `history.py`, `pull_refs.py`, `reachability.py`, `review_window.py`, `worktree.py` |
 | `parse/` | **11** | `body_shape.py`, `change_effort.py`, `duplicate_bodies.py`, `importers.py`, `imports.py`, `languages.py`, `public_api.py`, `python_names.py`, `secret_scan.py`, `suite_reach.py`, `units.py` |
 | `rank/` | **6** | `baseline.py`, `events.py`, `firing.py`, `history_rates.py`, `order.py`, `score.py` |
 | `allocate/` | **1** | `depth.py` |
 | `infer/` | **7** | `change_review.py`, `change_summary.py`, `diff_cap.py`, `gemini.py`, `prompt_once.py`, `summary_prompt.py`, `vertex.py` |
-| `verify/` | **12** | `anchor.py`, `blocking.py`, `consumers.py`, `external_facts.py`, `pin_check.py`, `pin_mismatch.py`, `publishable.py`, `qualification.py`, `release_claims.py`, `releases.py`, `repeats.py`, `rule_check.py` |
+| `verify/` | **13** | `anchor.py`, `blocking.py`, `consumers.py`, `external_facts.py`, `judged_rule.py`, `pin_check.py`, `pin_mismatch.py`, `publishable.py`, `qualification.py`, `release_claims.py`, `releases.py`, `repeats.py`, `rule_check.py` |
 | `render/` | **10** | `audit_export.py`, `comment.py`, `compliance_table.py`, `config.py`, `dashboard.py`, `deep_report.py`, `json_report.py`, `page.py`, `replay_report.py`, `speaks.py` |
-| `serve/` | **13** | `blocking_status.py`, `change_facts.py`, `cli.py`, `deep_review.py`, `health.py`, `listener.py`, `onboarding.py`, `pin_review.py`, `retrospective.py`, `review_delivery.py`, `settle.py`, `webhook_github.py`, `working_clone.py` |
+| `serve/` | **15** | `blocking_status.py`, `change_facts.py`, `cli.py`, `deep_review.py`, `health.py`, `listener.py`, `onboarding.py`, `pin_review.py`, `retrospective.py`, `review_delivery.py`, `rule_judge.py`, `settle.py`, `standards_step.py`, `webhook_github.py`, `working_clone.py` |
 
 <!-- plan-state:end -->
 

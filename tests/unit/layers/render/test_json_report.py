@@ -23,8 +23,8 @@ import json
 
 from quantamind.rank.order import rank
 from quantamind.render.json_report import SCHEMA, report
-from quantamind.types.checked import Checked, Outcome
 from quantamind.types.finding import Finding
+from quantamind.types.standards.checked import Checked, Outcome
 from quantamind.types.verdict import Provenance, Reason, Site
 
 

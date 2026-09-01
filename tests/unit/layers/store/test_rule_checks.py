@@ -21,8 +21,8 @@ import pytest
 
 from quantamind.store import rule_checks, touches
 from quantamind.store.schema import create
-from quantamind.types.checked import Checked, Outcome
-from quantamind.types.rule import CheckKind, Rule, Severity
+from quantamind.types.standards.checked import Checked, Outcome
+from quantamind.types.standards.rule import CheckKind, Rule, Severity
 from quantamind.types.verdict import Reason, Site
 
 PARSED = Rule(

@@ -15,7 +15,7 @@ from __future__ import annotations
 import pytest
 
 from quantamind.render.blocks.status_check import NothingDeclared, render
-from quantamind.types.checked import Checked, Outcome
+from quantamind.types.standards.checked import Checked, Outcome
 from quantamind.types.verdict import Reason, Site
 from quantamind.verify.blocking import decide
 

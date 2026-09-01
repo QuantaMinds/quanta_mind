@@ -24,7 +24,7 @@ from quantamind.store.compliance import HOTSPOTS, standing
 from quantamind.store.lifecycle import MIN_FOR_A_RATE
 from quantamind.store.schema import open_store
 from quantamind.store.touches import ensure_repo
-from quantamind.types.checked import Outcome
+from quantamind.types.standards.checked import Outcome
 
 
 def _store(tmp_path: Path) -> tuple[sqlite3.Connection, int]:

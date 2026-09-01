@@ -33,7 +33,7 @@ from collections import Counter
 from pathlib import Path
 
 from quantamind.ingest.blob import BlobUnreadable, at
-from quantamind.types.rule import CheckKind, Rule, RuleRefused, Severity
+from quantamind.types.standards.rule import CheckKind, Rule, RuleRefused, Severity
 from quantamind.types.verdict import Construct, Reason, Site, Unresolved
 
 RULES_PATH = Path(".quantamind") / "rules.toml"

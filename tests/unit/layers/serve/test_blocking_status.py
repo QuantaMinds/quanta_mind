@@ -19,8 +19,8 @@ import pytest
 from quantamind.ingest.publish import commit_status
 from quantamind.serve import blocking_status
 from quantamind.serve.blocking_status import Wrote
-from quantamind.types.checked import Checked, Outcome
-from quantamind.types.rule import CheckKind, Rule, Severity
+from quantamind.types.standards.checked import Checked, Outcome
+from quantamind.types.standards.rule import CheckKind, Rule, Severity
 from quantamind.types.verdict import Site
 from quantamind.verify import rule_check
 from quantamind.verify.blocking import Standing

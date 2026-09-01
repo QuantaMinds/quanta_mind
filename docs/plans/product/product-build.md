@@ -341,16 +341,40 @@ and D5 read what it records.
       `input-validation-required`. **Every one is an AST pattern, not a semantic judgement.** A
       parser can answer them, so a model must not — and a deterministic check is the only kind
       that can be re-run later to prove an audit entry was right.~~
-- [ ] **D1c Model-checked rules, clearly separated.** For rules a parser genuinely cannot answer.
-      Each result carries `Provenance.PARSER` or `Provenance.MODEL` so an auditor can see which
-      claims are reproducible. **They must never render alike.**
-      **HALF OF THIS IS BUILT AND IT IS THE HALF THAT DOES NOT CHECK ANYTHING.** Verified
-      2026-08-31: `CheckKind.MODEL_JUDGED` exists, `Rule.provenance` derives `Provenance.MODEL`
-      from it and cannot be set by a caller, `store/rule_checks.py` writes that column, and
-      `render/compliance_table.py` prints `deferred` in its own column outside the rate. **No model
-      is ever consulted** — `verify/rule_check.check()` returns `DEFERRED` and stops. So the
-      separation the row asks for exists and the capability does not, which is why it stays
-      unticked: an auditor can already tell the two apart, and there is nothing yet to tell apart.
+- [x] **D1c Model-checked rules, clearly separated.** `types/standards/judged.py` +
+      `verify/judged_rule.py` + `serve/rule_judge.py` + `render/blocks/judged_block.py`.
+      **THE ROW WAS NEVER ABOUT WIRING A MODEL IN; IT WAS ABOUT DECIDING WHAT A MODEL VERDICT IS
+      ALLOWED TO BE.** `types/standards/checked.py:counts_toward_compliance` is true for `PASSED`
+      and `VIOLATED`, so any outcome but `DEFERRED` would have put a Gemini opinion into the number
+      a customer shows an auditor, carrying our measured 66.7-82.1% raw error rate with it.
+      **A model verdict is published as a finding and never as a compliance row:**
+      `verify/rule_check.py:check` still returns `DEFERRED` for every model-judged rule, on purpose
+      and permanently, and `Judged` is a separate type that reaches the comment and stops. Not the
+      same class, not the same table, not the same renderer — "they must never render alike" is
+      structural here rather than remembered.
+      **`UNDECIDED` on every failure path** — transport raised, reply unparseable, quote absent
+      from the file — never `MET`; `BROKEN` requires a quote found verbatim in the source, the rule
+      `verify/anchor.py` applies to review findings. **The judge is injected, not imported:**
+      `AGENTS.md` rule 7 claims the layer order stops `verify` importing `infer` and it does not —
+      `infer` is to the LEFT of `verify`, so `check_conventions.py:check_layering` permits exactly
+      what the sentence forbids. Raised in the PR rather than worked around.
+      33 tests. **13 sabotages run, 4 initially disabled cleanly** — persisting judgements past an
+      `INSERT OR REPLACE` that kept the row count identical, an unparsed reply reading as `MET`,
+      the render block dropped from the comment, and the status posted regardless of
+      `POSTING_ENABLED`. Each gap closed with a named test.
+      **Live against the real model** (`tests/live/model/test_judged_rule_live.py`): a known-answer
+      pair scored **12/12** — 6/6 on the planted "safe because the caller always holds the lock",
+      6/6 clean on a file with only WHY comments — and a real HTTP 403 came back `undecided`, not
+      `met`. **The first negative fixture named the rule's own vocabulary in its docstring and drew
+      a false positive in 3 of 6 trials**; the judge was right and the fixture was wrong.
+      **NO MODEL-JUDGED RULE SHIPS ENABLED, AND THAT IS THE HONEST RESULT.** The first candidate —
+      AGENTS.md rule 14 — was run over 12 real files of this repository before being declared, as
+      `.quantamind/rules.toml`'s header requires, and the judge called **10 of 12 BROKEN**. Some
+      were fair by the rule's letter; a section firing on 83% of files teaches a reviewer to scroll
+      past it. The rule was withdrawn with the measurement recorded in its place. **The capability
+      is built and verified; what is missing is a prose rule narrow enough to be worth firing**,
+      which is a separate change with its own before-adding measurement.
+
 - [x] **D1g The team's OWN written standards, read as CONTEXT.** ~~read and enforced~~ — **the
       title said "enforced" for four days and the body underneath it said the opposite.** Nothing
       read here becomes a `Checked` row, so it is not enforcement and a compliance number must

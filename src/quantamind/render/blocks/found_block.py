@@ -24,8 +24,8 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-from quantamind.types.checked import Checked, Outcome
 from quantamind.types.finding import Finding
+from quantamind.types.standards.checked import Checked, Outcome
 
 WORTH_CHECKING = "**Worth checking**"
 

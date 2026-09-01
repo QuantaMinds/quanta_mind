@@ -42,12 +42,12 @@ from quantamind.ingest.github_api import token_for
 from quantamind.ingest.publish.github_reviews import publish
 from quantamind.render.comment import comment as rendered
 from quantamind.render.speaks import beyond_the_ranking
-from quantamind.serve.blocking_status import announce
 from quantamind.serve.change_facts import gather
 from quantamind.serve.commands.run_review import review as run_ranking
 from quantamind.serve.deep_review import examine
 from quantamind.serve.pin_review import only as only_pins
 from quantamind.serve.pin_review import pins_for
+from quantamind.serve.standards_step import applied
 from quantamind.serve.working_clone import ensure, sweep
 from quantamind.store import installations, tenancy
 from quantamind.store.reviews import bank
@@ -56,7 +56,6 @@ from quantamind.types.change import REVIEWABLE_SUFFIXES
 from quantamind.types.review import Delivered, Outcome
 from quantamind.types.settings import Settings
 from quantamind.types.spend import Spend
-from quantamind.verify.rule_check import enforce
 
 
 def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) -> Delivered:
@@ -148,8 +147,7 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     told, unreadable = explain(
         clone, head_sha, delivery_repo, number, reading.paths, settings, history=past
     )
-    checks = enforce(clone, head_sha, list(changed), store, delivery_repo, number)
-    announce(delivery_repo, head_sha, checks, enabled=settings.posting_enabled)
+    checks, judged = applied(clone, head_sha, list(changed), store, delivery_repo, number, settings)
 
     parts = (part.spend for part in (told, examined) if part is not None)
     bank(store, delivery_repo, number, head_sha, Spend.total(*parts))
@@ -164,6 +162,7 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
         summary=told,
         findings=kept,
         checks=checks,
+        judged=judged,
         blind=unreadable,
         context=facts.intent,
         repeated=facts.repeated,

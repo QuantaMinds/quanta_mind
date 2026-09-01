@@ -15,7 +15,7 @@ WHY:  **EVERY OTHER RULE KIND IS PYTHON-ONLY, AND THE FILES THAT LEAK A CREDENTI
       **AND IT NEEDS NO TARGET.** The other three kinds ask "is this identifier here" and are
       refused without one; this asks "does any line look like an issued credential", so `Rule`
       must not demand a target it would have nothing to do with.
-IMPORTS: quantamind.types.rule, quantamind.types.checked, quantamind.verify.rule_check.
+IMPORTS: quantamind.types.standards.{rule,checked}, quantamind.verify.rule_check.
 CONSUMED BY: `just check`.
 """
 
@@ -23,8 +23,8 @@ from __future__ import annotations
 
 import pytest
 
-from quantamind.types.checked import Outcome
-from quantamind.types.rule import CheckKind, Rule, Severity
+from quantamind.types.standards.checked import Outcome
+from quantamind.types.standards.rule import CheckKind, Rule, Severity
 from quantamind.types.verdict import Provenance, Reason
 
 SECRET_RULE = Rule(

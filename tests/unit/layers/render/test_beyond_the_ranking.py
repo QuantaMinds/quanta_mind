@@ -29,8 +29,8 @@ from quantamind.infer.change_summary import Summary
 from quantamind.ingest.context.tickets import Context
 from quantamind.ingest.diff import Stated
 from quantamind.render.speaks import beyond_the_ranking
-from quantamind.types.checked import Checked, Outcome
 from quantamind.types.finding import Finding
+from quantamind.types.standards.checked import Checked, Outcome
 from quantamind.types.verdict import Site
 
 SUMMARY = Summary(

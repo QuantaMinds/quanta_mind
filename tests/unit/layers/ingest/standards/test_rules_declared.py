@@ -20,7 +20,7 @@ from pathlib import Path
 import pytest
 
 from quantamind.ingest.standards.rules_file import RULES_PATH, read
-from quantamind.types.rule import CheckKind, Rule, RuleRefused, Severity
+from quantamind.types.standards.rule import CheckKind, Rule, RuleRefused, Severity
 from quantamind.types.verdict import Reason
 
 GOOD = """

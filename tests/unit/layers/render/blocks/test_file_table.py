@@ -16,7 +16,7 @@ WHY:  **SPLIT FROM `test_scope_block.py` AT THE 200-LINE CAP, AND IT IS A REAL S
       built to replace, one click further away. Grouping is not truncation and the test asserts
       every path survives.
 IMPORTS: quantamind.parse.change_effort, quantamind.rank.order,
-      quantamind.render.blocks.scope_block, quantamind.types.checked.
+      quantamind.render.blocks.scope_block, quantamind.types.standards.checked.
 CONSUMED BY: `just check`.
 """
 
@@ -25,7 +25,7 @@ from __future__ import annotations
 from quantamind.parse.change_effort import Effort
 from quantamind.rank.order import rank
 from quantamind.render.blocks.scope_block import coverage
-from quantamind.types.checked import Checked
+from quantamind.types.standards.checked import Checked
 
 SCORES = {f"src/mod{n}.py": 20 - n for n in range(8)}
 SIZES = {path: Effort(added=4, removed=1) for path in SCORES}
