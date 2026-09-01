@@ -36,7 +36,7 @@ change reviewed both ways.
 
 - **Shape-context went PASS to NULL.** It cleared `> +2.1 points` twice, then McNemar returned
   9:15, p = 0.31, with the whole effect carried by one repository of five.
-  → `docs/product/reviewer/shape-context-result.md`. The memory recording it as passing was
+  → `docs/findings/reviewer/shape-context-result.md`. The memory recording it as passing was
   retracted.
 - **Five prompt levers have moved nothing**: anchor repair, structured context, a rejection filter,
   hunk expansion, and the reviewer redesign of design fourteen.

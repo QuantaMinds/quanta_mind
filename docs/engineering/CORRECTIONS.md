@@ -193,7 +193,7 @@ exactly what it holds. Re-running `analyze_gap.py` on 2026-08-23 reproduces the 
 - **the severity table** — Low n = 46, both 6 / only THEM 12 / only US 6, net −6, and **"two-thirds
   of the gap is Low severity" stands**
 - **the category table** — bug n = 94, security n = 11 at 45% only-US, style n = 10 at 50% only-THEM
-- **the prompt-ban deficit rates** in `docs/product/reviewer/greptile-gap-analysis.md`
+- **the prompt-ban deficit rates** in `docs/findings/reviewer/greptile-gap-analysis.md`
 - the both / onlyTHEM / onlyUS / neither split: 52 / 38 / 29 / 54 of 173
 
 **These are golden-level and were never candidate-level.** The withdrawal is narrower than it first

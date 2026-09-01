@@ -4,7 +4,7 @@
 
 ## Why this exists
 
-`docs/product/reviewer/why-the-correct-rate-is-low.md` establishes four things, and the fourth is
+`docs/findings/reviewer/why-the-correct-rate-is-low.md` establishes four things, and the fourth is
 the reason for this document:
 
 1. The correct-rate is **5.8%** under strict adjudication, and **no slice of any factor beats

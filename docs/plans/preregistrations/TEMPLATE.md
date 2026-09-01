@@ -12,7 +12,7 @@ The reviewer-side pre-registrations mostly fixed a threshold and stopped there. 
 statistic can be passed by noise, and one was**: the shape-context arm cleared `> +2.1 points` twice,
 and then McNemar returned 9:15, p = 0.31, with the whole effect carried by one repository of five.
 It passed the bars it set and failed the standard the rest of the project holds.
-→ `docs/product/reviewer/shape-context-result.md`.
+→ `docs/findings/reviewer/shape-context-result.md`.
 
 **A verdict table naming only a margin is not a pre-registration. It is a hope with a number in it.**
 

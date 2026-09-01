@@ -79,8 +79,8 @@ wild, and the reviewer claimed it three times in 45.
 | deduplication | +4.0 points golden-level precision, 18% of the gap to Qodo | `research/phase0/bench/forensic/redundancy.py` |
 | live registry lookup — **verifier BUILT, detector CLOSED** | verifier refutes 3 of 45; detector base rate **0.00%** of 176 real pins | `research/phase0/bench/forensic/oracles/registry_prevalence.py` |
 | SHA→tag oracle — **BUILT, both halves** | verifier kills 31% of wrong findings; detector base rate **0.24%** of 1,244 real pins | `scripts/measure/pin_prevalence.py` |
-| date injection | addresses 11% of wrong findings | `docs/product/reviewer/external-evidence-2026-08.md` |
-| per-category thresholds | not sized; category rates differ 0%–45% | `docs/product/reviewer/greptile-gap-analysis.md` |
+| date injection | addresses 11% of wrong findings | `docs/findings/reviewer/external-evidence-2026-08.md` |
+| per-category thresholds | not sized; category rates differ 0%–45% | `docs/findings/reviewer/greptile-gap-analysis.md` |
 
 ## Deduplication — the arithmetic
 

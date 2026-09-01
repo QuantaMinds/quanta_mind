@@ -191,4 +191,4 @@ work, not the prompt's.
 **Recorded, not built** — the fourth such fix, and for the same reason as the other three. It moves
 a benchmark ratio without creating a correct finding, and the reviewer half is closed on 0 of 45
 and a 37-point miss, neither of which a ratio touches.
-→ `docs/product/reviewer/recorded-not-built.md`
+→ `docs/findings/reviewer/recorded-not-built.md`

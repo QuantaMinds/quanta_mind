@@ -1241,7 +1241,7 @@ resembling ones developers downvoted, taking their address rate from 19% to 55%.
 > **Benchmark position and product quality are opposed on this gold set, and the exchange rate is
 > 8.1%. Benchmark rank is therefore not a product target.**
 
-→ `docs/product/reviewer/greptile-gap-analysis.md`
+→ `docs/findings/reviewer/greptile-gap-analysis.md`
 
 ## Should the product be a mandatory gate? The data says no — and it says why
 

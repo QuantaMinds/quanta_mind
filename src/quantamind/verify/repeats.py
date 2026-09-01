@@ -4,7 +4,7 @@ WHAT: `repeats(findings)` returns the indices that repeat one already kept, newe
       preserved. It REPORTS; the caller decides, and nothing in the pipeline calls it yet.
 WHY:  **WE EMIT 194 COMMENTS COVERING 81 GOLDEN DEFECTS WHERE QODO EMITS 152 COVERING 98.** The
       extra output is the same defect said again — 17.3% redundancy against Qodo's 1.0%, measured
-      in `docs/product/reviewer/why-the-correct-rate-is-low.md`. That is the one lever here that
+      in `docs/findings/reviewer/why-the-correct-rate-is-low.md`. That is the one lever here that
       is model-free: every mechanism tried against the correctness rate has been a filter on
       generation, and five moved nothing, but redundancy is an emission property.
 

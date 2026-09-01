@@ -1195,7 +1195,7 @@ bars, 207 findings came back 5.80% correct — and the two validations guarding 
 therefore never fire, which is an unreachable check reading exactly like a passing one.
 `test_a_review_cannot_carry_a_model_claim_at_all` asserts the constructor refuses them.
 `ran_model` survives because it reads the ledger rather than the configuration, so "no model
-runs here" stays falsifiable. → `docs/product/reviewer/review-half-record.md`
+runs here" stays falsifiable. → `docs/findings/reviewer/review-half-record.md`
 
 ### `store/`
 
@@ -1584,7 +1584,7 @@ claims. Neither ships: seven designs failed a bar fixed before each run, the poo
 absent from the line they cite**. SWR-Bench puts five published systems at 2.79–15.39% precision
 on 1,000 pull requests, so this is an unsolved problem rather than a local defect.
 **Do not add an eighth design without a fresh corpus and a bar fixed first.**
-→ `docs/product/reviewer/review-half-record.md`
+→ `docs/findings/reviewer/review-half-record.md`
 
 ### `render/`
 
@@ -1973,7 +1973,7 @@ Five modules sharing one dataset, each written to correct the one before it.
   definition, not noise.
 - `redundancy.py` — every arm on ONE judge, counting goldens covered and candidates that matched.
   Their difference is redundancy: **ours 17 of 98, Qodo's 1 of 99.** Worth +4.0 points if fixed;
-  recorded rather than built → `docs/product/reviewer/recorded-not-built.md`
+  recorded rather than built → `docs/findings/reviewer/recorded-not-built.md`
 - `prompt_arms.py` — four reviewer prompts over the same 50 pull requests. All three
   non-control arms FAIL. → `docs/plans/preregistrations/reviewer/prompt-direction-preregistration.md`
 - `forensics.py` — cross-tabs over the stored labels. It deliberately does **not** ask whether a
@@ -1983,7 +1983,7 @@ Five modules sharing one dataset, each written to correct the one before it.
 `bench_reviewer.review()` gained `template=` so an arm is measured through the same request,
 parsing and truncation-salvage code as the control rather than a second copy of it.
 
-### `docs/product/reviewer/` — the reviewer half's evidence, and `recorded-not-built.md`
+### `docs/findings/reviewer/` — the reviewer half's evidence, and `recorded-not-built.md`
 
 Nine documents grouped out of `docs/product/` at the fanout cap. They are the closed reviewer
 half's record. `recorded-not-built.md` is the register of four measured fixes that were not built —
@@ -2009,7 +2009,7 @@ requires the correct comparison through, so the guard cannot pass by refusing ev
 AGENTS.md rule 14 carries the rule, rewritten in place at the same line count so the instruction
 budget did not grow.
 
-### `docs/product/reviewer/what-it-would-take.md` — the two verifiers, costed
+### `docs/findings/reviewer/what-it-would-take.md` — the two verifiers, costed
 
 The closure named two things that would reopen it. Both are now costed against the 207 adjudicated
 findings (WRONG 135 / UNFALSIFIABLE 36 / TRIVIAL 24 / **CORRECT 12**): **a perfect verifier for
@@ -2134,7 +2134,7 @@ the shipped prompt twice — once with the tag it genuinely carries, once with o
 
 **Objected to 6/12 correct pairings and 5/12 wrong ones: discrimination −8.3%, no signal.** In 7 of
 24 trials it stated the SHA does not exist; every one had been fetched from GitHub minutes earlier.
-→ `docs/product/reviewer/why-the-comments-are-false.md`
+→ `docs/findings/reviewer/why-the-comments-are-false.md`
 
 ### `verify/external_facts.py` + `verify/pin_mismatch.py` — fix 1 of the failure taxonomy
 
@@ -2360,7 +2360,7 @@ on the six out-of-sample repositories before deciding: **miss rate 1.21% → 1.1
 only lets the model *read* workflows — where its discrimination is **−8.3%** — so it would invent
 SHA claims at chance and then pay an API call each to delete them. **It manufactures the exposure
 the oracle exists to cover.**
-→ `docs/product/reviewer/closed/widening-scope-manufactures-the-problem.md`
+→ `docs/findings/reviewer/closed/widening-scope-manufactures-the-problem.md`
 
 ### `sweep()` is called now — it never was
 
@@ -2540,7 +2540,7 @@ stable total hid an unstable composition** — which is why the volume bar looke
 
 **This is a corpus finding and it travels.** Any reviewer arm scored on the 50-change golden set
 against a bar under ~4 points can be passed by noise, whatever its recorded status. The floor is
-written up once in `docs/product/reviewer/corpus-noise-floor.md`, and every result resting on that
+written up once in `docs/findings/reviewer/corpus-noise-floor.md`, and every result resting on that
 corpus now carries a pointer to it. **It does not touch the ranker**, which is a different corpus, a
 different method and model-free.
 

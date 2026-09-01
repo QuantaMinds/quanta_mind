@@ -239,7 +239,7 @@ survived every attempt, including the ones built to overturn it. Recorded here s
 proposing to reopen the half can see what reopening would have to beat.
 
 Four fixes measured since are recorded rather than built, for one shared reason — they improve a
-ratio without creating a correct finding. → `docs/product/reviewer/recorded-not-built.md`
+ratio without creating a correct finding. → `docs/findings/reviewer/recorded-not-built.md`
 
 ## 8. Where everything is
 
