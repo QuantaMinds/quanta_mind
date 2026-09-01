@@ -688,26 +688,35 @@ Pulled in as **two separate uses**, because they succeed or fail independently:
       `comment()` verbatim. → `docs/plans/feat-d6a-the-goal-behind-the-change.md`
       ~~The ticket and discussion behind the files being changed,
       shown in the comment. Deterministic, and worth something whatever the model does.~~
-- [x] **D6b The same text as MODEL input. PRE-REGISTERED, RUN, AND NULL — POINT ESTIMATE
-      NEGATIVE.** → `docs/findings/reviewer/D6B_HUMAN_CONTEXT_NULL_2026-08.md`. 36 exposed changes,
+- [ ] **D6b The same text as MODEL input. RUN, AUDITED, AND WITHDRAWN — THE RESULT WAS SHOT
+      NOISE.** → `docs/findings/reviewer/D6B_HUMAN_CONTEXT_NULL_2026-08.md`. 36 exposed changes,
       116 golden defects, identical prompts but one appended block of stated goal and ticket titles.
       **Control 54 golden defects found, context 51 (−3); McNemar 7:11, p = 0.4807; 1 of 4
       repositories positive.** All three pre-registered bars fail.
-      **THE MECHANISM IS VISIBLE: THE CONTEXT ARM SAID MORE AND FOUND LESS** — 143 candidates
-      against 131, +15 false positives, −3 true positives, precision 41.2% → 35.7%. Told what a
-      change is for, the model generates findings about whether it achieves that, which a golden
-      DEFECT list scores as wrong by construction. **That is a question about what we measure as
-      much as about whether context helps.**
-      **The null does not license "human context hurts"** — p = 0.48 is noise-consistent and the
-      pre-registered power analysis said this corpus detects nothing below +32%. Sixth lever to move
-      nothing; the first to trend the wrong way.
-      **THE RUN EXPOSED TWO DEFECTS IN THE PRE-REGISTRATION ITSELF**, recorded there rather than
-      quietly fixed: the "≥ 4 of 6 repositories" bar was unmeetable, because the corpus has five and
-      four after excluding 13 commit-backed entries; and the feasibility script read a different URL
-      field from the runner, so its "33 exposed" was partly the benchmark harness's own synthetic
-      text rather than the author's. **Ticked on the measurement, not on a positive result** — the
-      row asked to pre-register a bar, the bar was set, the arm was run, and it did not clear.
-      Nothing in the product changed as a result, which is the correct consequence.
+      **A CONTROL-VS-CONTROL REPLICATE VOIDED IT.** The same prompt run twice moved **+2 TP with
+      14 of 36 changes discordant**; the treatment moved **−3 TP with 18 of 36**. The same control
+      prompt scored 54, 51 and 53 across three runs. **The treatment moved the pipeline less than
+      the pipeline moves on its own.**
+      **MY REPORTED MECHANISM WAS FALSE ON TWO COUNTS.** "143 candidates against 131" was TP+FP,
+      not candidates — one row shows 13 against a hard cap of 12 — and candidate counts were never
+      recorded. Identical prompts vary by 19 in total candidates, more than the arms differed by.
+      And the "goal-achievement findings" story was **my own added instruction**: the context block
+      says "use it to judge whether the change does what it set out to do", while the runner
+      docstring claimed nothing else varied.
+      **Two adversarial audits found it, one Gemini and one Claude**, and their rival mechanism —
+      silent judge attrition — was itself refuted by the replicate: judge errors 0, truncations 0.
+      → `docs/findings/reviewer/D6B_HUMAN_CONTEXT_NULL_2026-08.md`.
+      **THE PRE-REGISTRATION HAD CONCLUDED THE RUN MUST NOT HAPPEN** — "that is the reason this is
+      not being run, and it is a methodological reason" — and it was run anyway, producing exactly
+      the artefact the document forbade. Five further defects are recorded there: an unmeetable
+      "≥ 4 of 6" bar that executed as 4 of 4; a same-family judge where the Method promised a
+      different family; ticket TITLES where the argument rested on bodies; judge errors and finish
+      reasons discarded; and `_context_for` collapsing "we could not read it" into "the author wrote
+      little" — the typed-silence violation `ingest/context/tickets.py` exists to prevent, committed
+      in its own caller.
+      **THE ROW IS UNTICKED AGAIN.** A withdrawn measurement is not a measurement. **Any future arm
+      here runs its noise floor first** — one extra arm, 36 calls, the cheapest thing in the design,
+      and the only reason any of these numbers could have meant anything.
       **UNUSED ROW TEXT BELOW, kept because it states the entry price for a real answer:** → `docs/plans/preregistrations/reviewer/d6b-human-context-preregistration.md`,
       reproducible by `scripts/measure/context/exposure.py`. The bars are fixed and stand.
       **The exposed population was measured first**: 33 of the 50 golden changes (66%) carry usable

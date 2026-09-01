@@ -1,7 +1,12 @@
 # D6b — human context as model input
 
-**Status: RUN 2026-08-31. NULL against all three bars, point estimate NEGATIVE.**
-→ `docs/findings/reviewer/D6B_HUMAN_CONTEXT_NULL_2026-08.md`.
+**Status: RUN 2026-08-31 AGAINST THIS DOCUMENT'S OWN INSTRUCTION NOT TO RUN IT. RESULT WITHDRAWN
+2026-09-01 — it was shot noise.** → `docs/findings/reviewer/D6B_HUMAN_CONTEXT_NULL_2026-08.md`.
+
+A control-vs-control replicate (the same prompt twice, scored identically) moved **+2 TP with
+14/36 changes discordant**. The treatment moved **-3 TP with 18/36**. The same control prompt
+scored 54, 51 and 53 on three runs. **The treatment moved the pipeline less than the pipeline moves
+on its own**, so the run measured nothing and the result is withdrawn rather than qualified.
 
 Everything below the line was written BEFORE the run and is unedited, except this header and the
 two corrections at the foot, which record defects the run exposed in this document itself. The
@@ -140,6 +145,13 @@ which is the sentence `TEMPLATE.md` was written to enforce.
 
 ## Corrections, written after the run
 
+**0. The largest defect is that this run happened at all.** The section below headed "The power
+calculation, done BEFORE the run" concludes, in bold, that running it "would produce an
+uninterpretable result" and that "this is not being run". It was run. The low-power sentences later
+attached to the result are not caveats on a finding — they are a restatement of the reason the
+finding should not exist. **A pre-registration that decides against a run, and is then overridden,
+must record the override here rather than in the result.**
+
 **1. Bar three could never have been met.** ">= 4 of 6 repositories individually positive" was
 copied from `defect-return-external-preregistration.md` without checking that this corpus has six
 repositories. It has five, and four after the discourse exclusion below. **A threshold nobody
@@ -152,3 +164,16 @@ benchmark harness created and `original` is the real commit. The feasibility num
 partly measuring the harness's text as the author's. The runner excludes commit-backed entries --
 a commit has no description and no ticket, so no arm can be given context about it -- leaving 37
 real pull requests, 36 exposed. **"Two code paths, one column", in the feasibility measurement.**
+
+
+**3. There was no noise floor, and that is the defect that voided everything.** One draw per arm on
+a pipeline with two stochastic stages. Neither the Method section nor the bars required a
+control-vs-control replicate, and none was run until an adversarial audit demanded it. Shape-context
+is cited in this document as the reason bar three exists; its actual lesson — the effect was smaller
+than the noise floor — was the one not learned. **Any future arm here runs its replicate first.**
+
+**4. Two further requirements were unmeetable, like bar three.** The Method promises "an isolated
+judge of a DIFFERENT family"; the judge was `gemini-2.5-pro` scoring `gemini-2.5-pro`, because no
+other capable model is reachable from this project. And "Two things D6b needs that do not exist yet"
+names `Ticket` carrying no body as a blocker — the run administered ticket TITLES, so the treatment
+argued for was never given.
