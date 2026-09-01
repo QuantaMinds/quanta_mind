@@ -69,9 +69,15 @@ matching the precedent already in `verify/consumers.py`, whose docstring says th
 Judge = Callable[[str, str, str], Verdict | None]   # rule description, path, source
 ```
 
-`serve/` supplies the Gemini-backed implementation. `verify/` imports nothing from `infer/`. This
-is raised in the PR description rather than fixed here — making the guard match the sentence is a
-change to every layer's contract and does not belong in a product row.
+`serve/` supplies the Gemini-backed implementation. `verify/` imports nothing from `infer/`.
+
+> **CORRECTION, same branch, after review.** The paragraph above ends "raised in the PR rather than
+> fixed here". That was wrong to leave: a rule known to be unbacked and left unbacked is how rule
+> 12's eight dangling references accumulated. `scripts/guard/check_conventions.py:FORBIDDEN` now
+> refuses `("verify", "infer")` by name, `tests/unit/guards/test_forbidden_layer_pairs.py` is the
+> known-answer test, and AGENTS.md rule 7 was rewritten to describe what is enforced. **Everything
+> above this box describes the world before that fix**, and is kept because the design it justifies
+> — injecting the judge — is still the design.
 
 ---
 
@@ -159,4 +165,8 @@ already uses for unread files. A cap that does not say it is a cap is a silent t
 
 - Mining rules from review history — that is D1d.
 - Org-wide inheritance — D1e.
-- Making `check_conventions.py` enforce what rule 7 says. Raised in the PR, not fixed here.
+- ~~Making `check_conventions.py` enforce what rule 7 says. Raised in the PR, not fixed here.~~
+  **Done after all**, in the same branch: `FORBIDDEN` in `check_conventions.py`, a known-answer
+  test in `tests/unit/guards/test_forbidden_layer_pairs.py`, and AGENTS.md rule 7 rewritten to say
+  what is enforced rather than what was hoped. Leaving a rule unbacked once it is known to be
+  unbacked is how the eight dangling references in rule 12 accumulated.

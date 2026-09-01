@@ -3,11 +3,10 @@
 WHAT: `applied(clone, sha, paths, store, repo, number, settings)` returns `(checks, judged)` and
       posts the commit status. One call, both halves, exactly one status.
 WHY:  **THE JUDGE IS CONSTRUCTED HERE AND INJECTED, NEVER REACHED FOR INSIDE `verify/`.**
-      `AGENTS.md` rule 7 says the layer order is "what stops `verify` importing `infer`" and it does
-      not — `infer` sits to the LEFT of `verify`, so `check_layering` permits exactly what the
-      sentence forbids. This module supplies the judge as a parameter instead, the way
-      `verify/consumers.py` is given its clone. **The layer that adjudicates the model's claims does
-      not import the layer that makes them**, whatever the guard would tolerate.
+      `AGENTS.md` rule 7 claimed the layer order stopped `verify` importing `infer` and it did not,
+      because `infer` sits to the LEFT and the import runs leftward.
+      `scripts/guard/check_conventions.py:FORBIDDEN` refuses that pair by name now. This module
+      supplies the judge as a parameter, the way `verify/consumers.py` is given its clone.
 
       **THE STATUS IS COMPUTED FROM `checks` ALONE.** A model's verdict never moves a commit status:
       a status blocks a merge, and blocking on a claim measured 66.7-82.1% wrong would make the

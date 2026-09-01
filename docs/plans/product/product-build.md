@@ -354,10 +354,11 @@ and D5 read what it records.
       structural here rather than remembered.
       **`UNDECIDED` on every failure path** — transport raised, reply unparseable, quote absent
       from the file — never `MET`; `BROKEN` requires a quote found verbatim in the source, the rule
-      `verify/anchor.py` applies to review findings. **The judge is injected, not imported:**
-      `AGENTS.md` rule 7 claims the layer order stops `verify` importing `infer` and it does not —
-      `infer` is to the LEFT of `verify`, so `check_conventions.py:check_layering` permits exactly
-      what the sentence forbids. Raised in the PR rather than worked around.
+      `verify/anchor.py` applies to review findings. **The judge is injected, not imported**, and the rule
+      that was supposed to require this is now enforced: `AGENTS.md` rule 7 claimed the layer order
+      stopped `verify` importing `infer`, but `infer` is to the LEFT so the import was legal and
+      `check_layering` allowed it. `check_conventions.py:FORBIDDEN` refuses the pair by name, with
+      a known-answer test and a sabotage against a real module.
       33 tests. **13 sabotages run, 4 initially disabled cleanly** — persisting judgements past an
       `INSERT OR REPLACE` that kept the row count identical, an unparsed reply reading as `MET`,
       the render block dropped from the comment, and the status posted regardless of

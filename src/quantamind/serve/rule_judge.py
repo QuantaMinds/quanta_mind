@@ -3,11 +3,12 @@
 WHAT: `judge_with(settings)` returns a `verify.judged_rule.Ask`, or `None` when inference is off.
       The returned callable takes `(rule, path, source)` and answers `(Verdict, quote, why)`.
 WHY:  **D1c'S MODEL HALF LIVES HERE AND NOT IN `verify/`, ON PURPOSE.** `AGENTS.md` rule 7 says the
-      layer order is "what stops `verify` importing `infer`", and it does not — `infer` is to the
-      LEFT of `verify`, so the guard permits exactly what the sentence forbids. Rather than rely on
-      a guard that does not hold, `verify/judged_rule.py` takes the judge as a parameter and this
-      module supplies it. **The layer that adjudicates the model's claims does not import the layer
-      that makes them**, whatever the guard would tolerate.
+      layer order is "what stops `verify` importing `infer`" — and until this row it did not, since
+      `infer` is to the LEFT of `verify` and the left-only rule allows a leftward import.
+      `scripts/guard/check_conventions.py:FORBIDDEN` now refuses that pair by name, so
+      `verify/judged_rule.py` takes the judge as a parameter and this module supplies it. **The
+      layer that adjudicates the model's claims cannot import the layer that makes them**, and a
+      guard says so rather than a sentence.
 
       **THE REPLY IS PARSED STRICTLY AND ANYTHING ELSE IS `UNDECIDED`.** A model asked for one of
       three words will occasionally write a paragraph. Reading a paragraph as `MET` is how a

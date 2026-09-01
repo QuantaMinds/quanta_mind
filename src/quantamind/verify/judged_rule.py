@@ -28,12 +28,13 @@ WHY:  **D1c, AND THE HALF THAT WAS MISSING WAS NEVER THE WIRING.** `CheckKind.MO
       nothing, and it is the failure shape most likely to survive review — the prose still reads
       correctly.
 
-      **THE JUDGE IS INJECTED, NOT IMPORTED.** `AGENTS.md` rule 7 says the layer order is "what
-      stops `verify` importing `infer`", but `infer` sits to the LEFT of `verify` in
-      `scripts/guard/discovery.py:LAYER_ORDER`, so `check_layering` permits exactly what the
-      sentence forbids. Rather than lean on a guard that does not hold, this takes the judge as a
-      parameter — the precedent `verify/consumers.py` already set for its clone. The layer
-      adjudicating the model's claims does not import the layer that makes them.
+      **THE JUDGE IS INJECTED, NOT IMPORTED**, and that is now enforced rather than intended.
+      `AGENTS.md` rule 7 says the layer order is "what stops `verify` importing `infer`" — it did
+      not: `infer` sits to the LEFT of `verify` in `scripts/guard/discovery.py:LAYER_ORDER`, so the
+      import ran leftward and `check_layering` waved it through. Building this module is what found
+      that, and `scripts/guard/check_conventions.py:FORBIDDEN` now refuses the pair outright. The
+      judge arrives as a parameter — the precedent `verify/consumers.py` set for its clone — so the
+      layer adjudicating the model's claims cannot import the layer that makes them.
 IMPORTS: ingest.blob, types.{judged,rule,verdict}. Nothing to its right, nothing from `infer`.
 CONSUMED BY: `verify/rule_check.py:enforce`, which passes the judge through from `serve/`.
 """

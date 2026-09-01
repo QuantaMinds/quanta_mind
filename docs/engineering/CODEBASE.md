@@ -509,13 +509,25 @@ verdict token, the reply claimed `BROKEN` and quoted a line that is not in the f
 never `MET`. `docs/engineering/CORRECTIONS.md` entry 8 is a verifier that defaulted the other way
 and confirmed every false claim it existed to refute.
 
-**The judge is injected, and the reason is a rule that does not hold.** `AGENTS.md` rule 7 says the
-layer order is "what stops `verify` importing `infer`". It does not: `infer` is at index 6 and
-`verify` at index 7 in `scripts/guard/discovery.py:LAYER_ORDER`, and
-`scripts/guard/check_conventions.py:check_layering` only flags a target at or to the *right* of the
-importer. So `verify/judged_rule.py` takes the judge as a parameter and `serve/rule_judge.py`
-supplies it — the precedent `verify/consumers.py` set for its clone. **The layer adjudicating the
-model's claims does not import the layer that makes them, whatever the guard tolerates.**
+**The judge is injected, and building D1c is what exposed a rule with no mechanism behind it.**
+`AGENTS.md` rule 7 said the layer order is "what stops `verify` importing `infer`". It did not:
+`infer` is at index 6 and `verify` at index 7 in `scripts/guard/discovery.py:LAYER_ORDER`, so the
+import runs LEFT and `check_layering` — which only flags a target at or to the *right* — waved it
+through. The rule was true as an intention and false as a claim, for months, with a `→ guard`
+pointer beside it that made it look enforced.
+
+**`scripts/guard/check_conventions.py:FORBIDDEN` now refuses the pair by name**, and
+`tests/unit/guards/test_forbidden_layer_pairs.py` is the known-answer test: a real `verify/` module
+importing `quantamind.infer.gemini` must be reported at its own line, and a clean one must not.
+Sabotaged against `verify/publishable.py` before the test was written, to confirm it fires on the
+real tree and not only on a fixture. `verify/judged_rule.py` still takes the judge as a parameter —
+the precedent `verify/consumers.py` set for its clone — but now the guard says so rather than a
+sentence.
+
+**The general lesson, which did not fit inside AGENTS.md's 210-line cap: a rule naming a guard that
+does not implement it is worse than a rule naming none.** The pointer is what stops anyone checking.
+This is rule 14's own shape — "ask what a check outputs when the thing it checks is broken" —
+appearing inside the rules file itself.
 
 **`serve/standards_step.py` computes the commit status from `checks` alone.** A status blocks a
 merge; blocking on a claim measured 66.7-82.1% wrong would make the product an obstacle.
