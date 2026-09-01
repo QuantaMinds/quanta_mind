@@ -22,12 +22,14 @@ import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "vertex"))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "vertex"))
 
 import bench_reviewer as reviewer
 import martian_corpus as corpus
 from client import Client
-from run_d6b import CONTEXT_BLOCK, MODEL, _context_for
+from d6b_population import context_for
+from run_d6b import CONTEXT_BLOCK, MODEL
 
 OUT = pathlib.Path(__file__).resolve().parent / "results" / "d6b_texts.json"
 
@@ -47,7 +49,7 @@ def main() -> int:
         if number not in SAMPLE:
             continue
         repo = f"{parts[3]}/{parts[4]}"
-        context = _context_for(repo, number)
+        context = context_for(repo, number)[0]
         diff = corpus.diff(str(pr["original"]))
         title = str(pr["title"])
         control, _ = reviewer.review(client, title, diff)

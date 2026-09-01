@@ -91,6 +91,35 @@ It was run anyway, on request, and produced precisely the artefact the document 
 low-power caveat attached to the result is not a caveat — it is a restatement of the reason the
 result should not exist. **The correct handling is withdrawal, which is what this document does.**
 
+## What has been fixed since, and what has not
+
+Fixed in `research/phase0/bench/d6b/` and `judge.py`:
+
+| defect | fix | proof |
+|---|---|---|
+| bar executed as 4 of 4, not 4 of 6 | computed from the corpus; a corpus that cannot meet it returns **VOID**, not a verdict | 4 and 5 repositories void; 6 needs 4; 8 needs 6 |
+| `_context_for` collapsed a read failure into "too thin" | `context_for` returns `(context, why_not)`; unreadable is its own bucket and its own printed count | an unreachable repository now returns `unreadable: … GET repos/…` rather than `""` |
+| judge errors discarded | `judge.verdicts` **prints its own degradation** — the docstring claimed it was printed and nothing printed it; sixteen call sites each had to remember and one did not | recorded per arm in the artefact |
+| a throttled judge call scored as a non-match | `_one` now retries `VertexError` on 429/5xx; a real 4xx still raises first time | the retry is narrow by construction |
+| finish reasons discarded | both call sites keep them; non-STOP finishes are counted and printed | recorded in the artefact |
+| candidate counts never recorded | `candidates_control` / `candidates_context` stored | "the arm said more" is now measurable rather than inferred from TP+FP |
+| directive and information conflated | `DIRECTIVE` is a separate constant, and `--placebo` keeps it fixed while swapping in another change's context | separates compliance from information |
+| the docstring claimed "nothing else varies" | it now states exactly what varies: information, directive, and position | — |
+
+**Not fixed, and honestly out of reach here:**
+
+- **The same-family judge.** `gemini-2.5-pro` scores `gemini-2.5-pro` and no other capable model is
+  reachable from this project. The Method's "different family" was unmeetable in exactly the way
+  bar three was; it is now stated in the runner rather than only in a document.
+- **Ticket bodies.** `Ticket` still carries title and state only, so the treatment remains weaker
+  than the argument for it. Fetching bodies is a change to D6a and a third egress destination that
+  `ingest/context/egress.py` does not name.
+
+A name collision was also found and fixed while doing this: `report.py` in the new package shadowed
+`research/phase0/vertex/report.py` on `sys.path`, and `import report` executed the wrong file.
+AGENTS.md rule 13 — never two files with one name — arriving in the research tree, where the guard
+does not reach.
+
 ## What a real answer would require
 
 - **A noise floor first, every time.** One extra arm, 36 reviewer calls, the cheapest measurement

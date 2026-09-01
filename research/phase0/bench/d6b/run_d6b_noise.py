@@ -25,13 +25,15 @@ import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "vertex"))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "vertex"))
 
 import bench_reviewer as reviewer
 import judge
 import martian_corpus as corpus
 from client import Client
-from run_d6b import MIN_CONTEXT_CHARS, MODEL, _context_for, _mcnemar
+from d6b_population import MIN_CONTEXT_CHARS, context_for, mcnemar
+from run_d6b import MODEL
 
 OUT = pathlib.Path(__file__).resolve().parent / "results" / "d6b_noise_floor.json"
 
@@ -44,7 +46,7 @@ def main() -> int:
         if len(parts) < 5 or "pull" not in parts or not parts[-1].isdigit():
             continue
         repo, number = f"{parts[3]}/{parts[4]}", int(parts[-1])
-        if len(_context_for(repo, number)) >= MIN_CONTEXT_CHARS:
+        if len(context_for(repo, number)[0]) >= MIN_CONTEXT_CHARS:
             exposed.append((pr, repo, number))
 
     print(f"  {len(exposed)} exposed changes; running the CONTROL prompt twice on each\n")
@@ -97,7 +99,7 @@ def main() -> int:
     print(f"\n  IDENTICAL ARMS: run1 TP={tp_a}, run2 TP={tp_b} ({tp_b - tp_a:+d})")
     print(
         f"  discordant: {better} up, {worse} down, {same} equal"
-        f"  -> p = {_mcnemar(better, worse):.4f}"
+        f"  -> p = {mcnemar(better, worse):.4f}"
     )
     print(f"  judge errors: {errors}    non-STOP finishes: {truncated}")
     print("\n  D6b measured -3 TP and 7:11 discordance between DIFFERENT arms.")

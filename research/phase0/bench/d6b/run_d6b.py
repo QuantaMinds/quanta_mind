@@ -9,9 +9,22 @@ WHY:  **PRE-REGISTERED BEFORE THIS FILE EXISTED**, bars and population and power
       NULL here is uninformative and is reported as such rather than as evidence of no effect.
 
       **ONE CODE PATH, TWO TEMPLATES.** `bench_reviewer.review()` takes `template` for exactly this
-      reason — its own comment says a second copy of the request-building and parsing is where a
-      divergence between an arm and its control would hide, invisible in the prompt diff a reader
-      would check. Nothing else varies: same client, same temperature, same diff, same cap.
+      reason — a second copy of the request-building is where a divergence between an arm and its
+      control would hide. Same client, same temperature, same diff, same cap.
+
+      **THE ARM VARIES TWO THINGS AND THIS DOCSTRING ONCE CLAIMED OTHERWISE** ("nothing else varies
+      — not the instructions"). `DIRECTIVE` IS an instruction, and it is appended AFTER the control
+      prompt's terminal "Respond with ONLY a JSON array" line, demoting the format instruction from
+      last position. A difference between arms can be the information, the directive, or the
+      position; the first run reported the information as if it were the only candidate.
+      `--placebo` holds the directive and position fixed and swaps in another change's context.
+
+      **THE JUDGE IS THE SAME FAMILY AS THE REVIEWER** — `gemini-2.5-pro` scoring `gemini-2.5-pro`
+      — while the pre-registration's Method promises a DIFFERENT family. Unmeetable here, exactly
+      as the "4 of 6 repositories" bar was, and admitted only after the fact.
+
+      **RUN `run_d6b_noise.py` FIRST.** Identical arms moved +2 TP with 14 of 36 discordant; the
+      first treatment run moved -3 with 18 of 36 and was withdrawn as shot noise.
 
       **THE EXPOSED POPULATION IS COMPUTED BY THE PRODUCT'S OWN READER**, `tickets.behind`, not by
       a reimplementation — the failure this repository records as "two code paths, one column".
@@ -23,8 +36,6 @@ CONSUMED BY: `docs/plans/preregistrations/reviewer/d6b-human-context-preregistra
 
 from __future__ import annotations
 
-import collections
-import json
 import pathlib
 import sys
 from math import comb
@@ -45,12 +56,25 @@ OUT = pathlib.Path(__file__).resolve().parent / "results" / "d6b_human_context.j
 
 # The control is `bench_reviewer.PROMPT` verbatim. The arm appends one block and changes nothing
 # else -- not the instructions, not the cap, not the ordering.
-CONTEXT_BLOCK = """
+DIRECTIVE = """
 The author of this change stated the following about why it exists. Use it to judge whether the
 change does what it set out to do; do not report the context itself as a defect.
+"""
+"""**AN INSTRUCTION, HELD APART FROM THE INFORMATION ON PURPOSE.** The first run treated
+directive-plus-information as one variable and then explained its result by the information. A
+model told to judge goal achievement and then doing so is compliance, not evidence."""
 
+CONTEXT_BLOCK = (
+    DIRECTIVE
+    + """
 {context}
 """
+)
+
+PREREGISTERED_BAR, PREREGISTERED_REPOSITORIES = 4, 6
+REPOSITORY_SHARE = PREREGISTERED_BAR / PREREGISTERED_REPOSITORIES
+"""The bar as WRITTEN: 4 of 6, two thirds. Hard-coding `>= 4` made it 4 of 4 on a four-repository
+corpus, which no result could clear — so NULL was a property of the harness, not a fact."""
 
 
 def _context_for(repo: str, number: int) -> str:
@@ -77,10 +101,14 @@ def _mcnemar(better: int, worse: int) -> float:
 
 
 def main() -> int:
+    placebo = "--placebo" in sys.argv
+    if placebo:
+        print("  PLACEBO ARM: same directive, context taken from a DIFFERENT change\n")
     prs = corpus.pulls()
     client = Client(MODEL)
 
     exposed: list = []
+    unreadable: list[str] = []
     thin: list[str] = []
     not_a_pull: list[str] = []
     for pr in prs:
@@ -122,9 +150,12 @@ def main() -> int:
             )
             continue
 
-        control, _ = reviewer.review(client, title, diff)
-        armed, _ = reviewer.review(
-            client, title, diff, template=reviewer.PROMPT + CONTEXT_BLOCK.format(context=context)
+        # **THE FINISH REASON IS KEPT.** Dropping it meant a truncation and a short review printed
+        # the same number, and the arm's prompt is longer so a truncation lands asymmetrically.
+        shown = exposed[index % len(exposed)][3] if placebo else context
+        control, finish_control = reviewer.review(client, title, diff)
+        armed, finish_context = reviewer.review(
+            client, title, diff, template=reviewer.PROMPT + CONTEXT_BLOCK.format(context=shown)
         )
         v_control = judge.verdicts(client, golden, control)
         v_armed = judge.verdicts(client, golden, armed)
@@ -139,6 +170,15 @@ def main() -> int:
                 "tp_context": tp_a,
                 "fp_control": len(v_control["fp"]),
                 "fp_context": len(v_armed["fp"]),
+                # **RECORDED BECAUSE THEIR ABSENCE MADE THE FIRST RUN UNAUDITABLE.** TP+FP is not
+                # a candidate count and can exceed the cap; an unjudged pair scores as a
+                # non-match; a truncation is not a short review.
+                "candidates_control": len(control),
+                "candidates_context": len(armed),
+                "judge_errors_control": int(v_control["errors"]),
+                "judge_errors_context": int(v_armed["errors"]),
+                "finish_control": finish_control,
+                "finish_context": finish_context,
             }
         )
         print(
@@ -147,52 +187,9 @@ def main() -> int:
             f"{'+' if tp_a > tp_c else ('-' if tp_a < tp_c else '=')}"
         )
 
-    scored = [d for d in detail if "skipped" not in d]
-    better = sum(1 for d in scored if d["tp_context"] > d["tp_control"])
-    worse = sum(1 for d in scored if d["tp_context"] < d["tp_control"])
-    same = len(scored) - better - worse
-    p = _mcnemar(better, worse)
+    from d6b_report import report
 
-    by_repo: dict[str, int] = collections.defaultdict(int)
-    for d in scored:
-        by_repo[d["repo_file"]] += d["tp_context"] - d["tp_control"]
-    positive = sum(1 for v in by_repo.values() if v > 0)
-
-    total_c = sum(d["tp_control"] for d in scored)
-    total_a = sum(d["tp_context"] for d in scored)
-
-    print(f"\n  scored {len(scored)} changes")
-    print(f"  golden defects found: control {total_c}, context {total_a} ({total_a - total_c:+d})")
-    print(f"  per change: context better on {better}, worse on {worse}, equal on {same}")
-    print(f"  McNemar exact p = {p:.4f}")
-    print(f"  repositories positive: {positive} of {len(by_repo)}  {dict(by_repo)}")
-
-    confirmed = total_a > total_c and p < 0.05 and positive >= 4
-    print(f"\n  [{'CONFIRMED' if confirmed else 'NULL'}] against the pre-registered bars")
-
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(
-        json.dumps(
-            {
-                "exposed": len(exposed),
-                "too_thin": len(thin),
-                "not_a_pull": len(not_a_pull),
-                "scored": len(scored),
-                "tp_control": total_c,
-                "tp_context": total_a,
-                "better": better,
-                "worse": worse,
-                "same": same,
-                "mcnemar_p": p,
-                "by_repo": dict(by_repo),
-                "repositories_positive": positive,
-                "confirmed": confirmed,
-                "detail": detail,
-            },
-            indent=2,
-        )
-    )
-    return 0
+    return report(detail, placebo, exposed, thin, unreadable, not_a_pull)
 
 
 if __name__ == "__main__":

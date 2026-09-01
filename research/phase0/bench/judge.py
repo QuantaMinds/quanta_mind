@@ -23,8 +23,13 @@ from __future__ import annotations
 import concurrent.futures
 import json
 import re
+import sys as _sys
 import time
 import urllib.error
+from pathlib import Path as _Path
+
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "vertex"))
+from client import VertexError
 
 # Copied verbatim from code_review_benchmark/step3_judge_comments.py. Do not reword: a changed
 # judge prompt silently changes every number it produces and nothing would fail.
@@ -91,6 +96,18 @@ def _one(client: object, golden: str, candidate: str) -> tuple[bool, float]:
             last = exc
             time.sleep(2**attempt)
             continue
+        except VertexError as exc:
+            # **A 429 OR A 5xx IS TRANSPORT, NOT A VERDICT, AND IT WAS NOT BEING RETRIED.**
+            # `client.generate` raises `VertexError(RuntimeError)` for both, which fell past this
+            # loop into the caller's `except RuntimeError` and was counted as an unjudged pair —
+            # and an unjudged pair scores IDENTICALLY to a non-match, so the arm that issues more
+            # judge calls loses true positives for a reason that has nothing to do with its
+            # findings. A 4xx that is not 429 is a real refusal and still raises on the first try.
+            if " 429" not in str(exc) and " 5" not in str(exc)[:12]:
+                raise
+            last = exc
+            time.sleep(2**attempt)
+            continue
         text = str(resp.get("text") or "")
         if not text.strip():
             raise JudgeFailed(f"empty judge reply, finish={resp.get('finish')}")
@@ -129,6 +146,16 @@ def verdicts(
     tp = [g for g, (_, c) in best.items() if c is not None]
     fn = [g for g, (_, c) in best.items() if c is None]
     fp = [c for c in candidates if c not in matched_cand]
+    if errors:
+        # **THE DOCSTRING SAID THIS WAS PRINTED AND NOTHING PRINTED IT.** `run_d6b.py` took `tp`
+        # and `fp` and dropped `errors`, so a run degraded by throttling read as a clean one —
+        # the exact failure this module's comment claims cannot happen. Printed HERE rather than
+        # left to a caller, because sixteen call sites each had to remember and one did not.
+        print(
+            f"    [judge] {errors} of {len(pairs)} pair(s) went unjudged — "
+            f"they score as non-matches, so this arm is UNDERCOUNTED",
+            flush=True,
+        )
     return {"tp": tp, "fp": fp, "fn": fn, "errors": errors}
 
 
