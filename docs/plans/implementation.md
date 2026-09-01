@@ -46,7 +46,7 @@ three months stale.
 | `allocate/` | **1** | `depth.py` |
 | `infer/` | **7** | `change_review.py`, `change_summary.py`, `diff_cap.py`, `gemini.py`, `prompt_once.py`, `summary_prompt.py`, `vertex.py` |
 | `verify/` | **13** | `anchor.py`, `blocking.py`, `consumers.py`, `external_facts.py`, `judged_rule.py`, `pin_check.py`, `pin_mismatch.py`, `publishable.py`, `qualification.py`, `release_claims.py`, `releases.py`, `repeats.py`, `rule_check.py` |
-| `render/` | **10** | `audit_export.py`, `comment.py`, `compliance_table.py`, `config.py`, `dashboard.py`, `deep_report.py`, `json_report.py`, `page.py`, `replay_report.py`, `speaks.py` |
+| `render/` | **11** | `audit_export.py`, `comment.py`, `compliance_table.py`, `config.py`, `dashboard.py`, `deep_report.py`, `json_report.py`, `mined_rules.py`, `page.py`, `replay_report.py`, `speaks.py` |
 | `serve/` | **15** | `blocking_status.py`, `change_facts.py`, `cli.py`, `deep_review.py`, `health.py`, `listener.py`, `onboarding.py`, `pin_review.py`, `retrospective.py`, `review_delivery.py`, `rule_judge.py`, `settle.py`, `standards_step.py`, `webhook_github.py`, `working_clone.py` |
 
 <!-- plan-state:end -->

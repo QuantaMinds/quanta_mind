@@ -474,6 +474,39 @@ cross-repository surface to nothing on the day their declaration stopped parsing
 nobody declared. One malformed entry does not cost the good ones — refusing a whole file over a
 typo loses every link the customer got right.
 
+### `ingest/standards/mined.py` — the standards a team repeats, proposed and never declared
+
+**D1d, and the premise was measured before the module existed.** Over 1,213 real inline review
+comments from eight public repositories the yield is **1.62 candidate clusters per repository**, of
+which roughly five of thirteen were generalizable standards.
+→ `docs/findings/standards/D1D_REVIEWER_REPETITION_YIELD_2026-08.md`. That finding fixed two
+refutation bars in advance — more than ~2 proposals per repository means the filter has stopped
+working, and finding nothing in `huggingface/transformers` means the clearest true positive was
+missed — and `tests/unit/layers/ingest/standards/test_mined_corpus.py` asserts both against the
+real corpus.
+
+**No model is called.** Clustering comments by shared vocabulary is deterministic and re-runnable,
+and a proposal only has to be worth a human's glance. What a model could add is phrasing a proposal
+as a rule; finding the repetition does not need one.
+
+**The acknowledgement filter is the feature.** Without it the largest clusters in that corpus are
+`done` x6, `fixed` x6, `ditto` x4, `nit: suggestion` x11 — repetition, and not one of them a
+standard. Every token in `ACKNOWLEDGEMENT` headed a real cluster.
+
+**The first real run of `quantamind standards` proposed this product's own review comments as the
+team's standards** — three of three, pointed at our own pull requests, with twenty green tests
+behind it. Every hand-built fixture had no author, so nothing tested authorship at all;
+`research/phase0/corpus/human_attention.py` had already recorded that about a third of inline
+comments in public repositories are AI-written. `Comment.machine` now reads GitHub's own
+`user.type`, and `mine` drops bots **before** clustering so a bot cannot swell a human's evidence
+count. **It must not grow a text heuristic for this** — a guess on the prose misfires on a human
+quoting a bot.
+
+**`Proposal.distinct_pulls` returns `None`, not a number.** Four of the thirteen real clusters were
+one reviewer restating themselves inside a single thread, one character-identical. "Said on two
+changes" and "we could not tell which changes" are different answers and the report prints
+different sentences for them.
+
 ### `types/standards/` — a declared rule, and the two kinds of verdict it can receive
 
 **D1c. `rule.py` is the declaration, `checked.py` is what a PARSER decided, `judged.py` is what a

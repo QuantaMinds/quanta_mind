@@ -46,6 +46,15 @@ def build_parser() -> argparse.ArgumentParser:
     )
     show.add_argument("repo", help="owner/name, as recorded")
     show.add_argument("--limit", type=int, default=100)
+    # **D1d: PROPOSES, NEVER DECLARES.** The pull requests are named rather than crawled — this
+    # product has never run a "recent changes" search and will not pretend to here.
+    mined = subparsers.add_parser(
+        "standards", help="what reviewers of these pull requests said more than once"
+    )
+    mined.add_argument("--repo", required=True, help="owner/name on GitHub")
+    mined.add_argument(
+        "--pulls", type=int, nargs="+", required=True, metavar="N", help="pull request numbers"
+    )
     rules = subparsers.add_parser(
         "compliance", help="every declared rule and what happened to it, per repository"
     )
@@ -147,6 +156,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         from quantamind.serve.commands.run_migrate import run_migrate
 
         return run_migrate()
+
+    if args.command == "standards":
+        from quantamind.serve.commands.run_standards import run_standards
+
+        return run_standards(args.repo, args.pulls)
 
     if args.command == "compliance":
         from quantamind.serve.commands.run_report import run_compliance

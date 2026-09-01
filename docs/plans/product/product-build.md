@@ -392,10 +392,27 @@ and D5 read what it records.
       the parser's territory. Known-answer tested: a diff with a bare `except` and no docstring was
       caught against this repository's own rule 8. **A local-only file this repo never pushes is
       invisible to it**, because the reviewer reads the clone.
-- [ ] **D1d Mine rules from past review comments.** Senior engineers repeat themselves, and the
-      repetition IS the standard. **This is the one model use where being wrong is cheap:** the
-      output is a PROPOSED rule a human approves, not a published finding — a different risk
-      profile entirely from the path that measured 66.7-82.1% wrong.
+- [x] **D1d Mine rules from past review comments.** `types/standards/proposal.py` +
+      `ingest/standards/mined.py` + `render/mined_rules.py` + `quantamind standards --repo R
+      --pulls N...`. **THE PREMISE WAS MEASURED BEFORE A LINE WAS WRITTEN AND IT HOLDS THINLY.**
+      Over 1,213 real inline comments from eight public repositories: **1.62 candidate clusters per
+      repository, of which roughly 5 of 13 were generalizable standards** — under one real rule per
+      repository per ~150 comments. → `docs/findings/standards/D1D_REVIEWER_REPETITION_YIELD_2026-08.md`,
+      which fixed the refutation bars in advance and both are now tests.
+      **Unfiltered, the largest "standards" in that corpus are `done` x6, `fixed` x6, `ditto` x4 and
+      `nit: suggestion` x11**, so the acknowledgement filter is the feature rather than a tidy-up.
+      **No model is called at all** — clustering by shared vocabulary is deterministic, and
+      `AGENTS.md` says if a parser can answer it a model must not. The row's "being wrong is cheap"
+      still governs the OUTPUT: a proposal a human accepts or refuses, nothing written to
+      `.quantamind/rules.toml` ever.
+      **THE FIRST REAL RUN PROPOSED THIS PRODUCT'S OWN COMMENTS AS THE TEAM'S STANDARDS** — three
+      of three, on our own pull requests, with 20 green tests, because every hand-built fixture had
+      no author. `Comment.machine` reads GitHub's `user.type` and `mine` drops bots before
+      clustering, so a bot cannot swell a human's evidence count either. 24 tests.
+      **`distinct_pulls` returns `None` rather than a number** when the source cannot say which
+      change a comment was on: four of the thirteen real clusters were one reviewer restating
+      themselves in a single thread, and "said on two changes" must not read like "we could not
+      tell".
 
 - [ ] **D1e One definition, every repository.** "Define a standard once and it is checked on every
       pull request across all repositories" is the actual enterprise claim, and a per-repo
