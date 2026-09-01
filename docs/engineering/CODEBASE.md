@@ -474,6 +474,37 @@ cross-repository surface to nothing on the day their declaration stopped parsing
 nobody declared. One malformed entry does not cost the good ones — refusing a whole file over a
 typo loses every link the customer got right.
 
+### `parse/secret_scan.py` — D7a, and the first check that is not Python-only
+
+**The security team's first question is "what does it catch", and this is the only answer we can
+give that survives being checked.** Raw model findings are 66.7–82.1% wrong across four blind pools.
+*"We catch hardcoded credentials, exactly, and we do not claim to catch injection"* is a weaker
+sentence and a defensible one.
+
+**IT DISPATCHES BEFORE THE LANGUAGE GATE, AND THAT IS THE POINT.** Every other rule kind needs an
+AST and returns `LANGUAGE_UNSUPPORTED` for anything but `.py` — the narrowness
+`docs/product/unit-economics.md` calls the honest limit of the standards engine. A credential is a
+string: it is found in `.env`, `.tf`, a CI workflow and a `.ts` config exactly as well as in a
+module, and those are the files that leak one. First widening of the enforceable surface past `.py`,
+and `dependencies = []` still holds because it is one regex pass.
+
+**A provider prefix is evidence; entropy alone is a guess.** `AKIA…` and `ghp_…` are issued by one
+company in one format. A long random string is a hash, a UUID, a checksum or a base64 asset far more
+often than a secret, so the generic rule needs BOTH a credential-shaped name and entropy.
+
+**ENTROPY DID LESS WORK THAN EXPECTED, AND THE DOCSTRING THAT SAID OTHERWISE INVENTED ITS NUMBER.**
+It claimed `password12345678` scores "about 3.1" against a real key "above 4.0", so a 3.5 floor sat
+in a wide gap. Measured: **3.88 against 4.28**. The floor does not separate them; a vocabulary check
+does — a generated credential does not contain an English word for itself. The scanner fired on that
+placeholder the first time it ran.
+
+**Fourteen must-not-fire cases against six must-fire ones, deliberately.** Telling a developer they
+committed a credential when they did not is alarming, public, and takes a rotation to disprove.
+
+**The secret never reaches the evidence.** A `Checked` row goes to the audit trail, the comment and
+the customer's database. Only the kind, the line, and a four-character prefix — enough to find it in
+the file, not enough to use.
+
 ### `parse/public_api.py` and `verify/consumers.py` — D3b, a break and who imports it
 
 **The one thing on the category's list we did not have.** Qodo advertises *broken API contracts and

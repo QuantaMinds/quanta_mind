@@ -2,9 +2,10 @@
 
 WHAT: `check(rule, path, source)` returns exactly one `Checked`; `check_all(rules, path, source)`
       returns one per rule. Never fewer, including for rules that found nothing.
-WHY:  **A RULE THAT CANNOT BE CHECKED MUST NOT READ AS A RULE THAT PASSED.** Only Python is parsed
-      here: `AGENTS.md` states plainly that tree-sitter is not a dependency and `pyproject.toml`
-      declares `dependencies = []`. A JavaScript file therefore yields `UNCHECKABLE` with
+WHY:  **A RULE THAT CANNOT BE CHECKED MUST NOT READ AS A RULE THAT PASSED.** Only Python is
+      PARSED here: `AGENTS.md` states plainly that tree-sitter is not a dependency and
+      `pyproject.toml` declares `dependencies = []`. A JavaScript file therefore yields
+      `UNCHECKABLE` with
       `LANGUAGE_UNSUPPORTED`, and a compliance rate computed over those rows would otherwise
       report a JS repository as fully compliant with checks that never ran. That is the clean zero
       this project has now found four times.
@@ -17,10 +18,18 @@ WHY:  **A RULE THAT CANNOT BE CHECKED MUST NOT READ AS A RULE THAT PASSED.** Onl
       evidence for a reason: a developer who cannot find what fired cannot fix it, and a reviewer
       who cannot check it has to take our word.
 
+      **`HARDCODED_SECRET` IS THE ONE KIND THAT IS NOT PYTHON-ONLY, AND THE SENTENCE ABOVE USED TO
+      SAY OTHERWISE WITHOUT QUALIFICATION.** A credential is a string, not syntax, so it is found in
+      a `.env`, a `.tf` or a CI workflow exactly as well as in a module — and those are the files
+      that leak one most often, and the files the language gate refuses. It therefore dispatches
+      BEFORE that gate. This is the first rule kind to widen the enforceable surface past `.py`,
+      which `docs/product/unit-economics.md` names as the honest limit of the standards engine.
+
       **EXACT MATCH ON DOTTED NAMES, NOT A SUBSTRING.** `subprocess.run` must not fire on
       `runner.run`. An import matches its target or anything beneath it, so forbidding `subprocess`
       also forbids `subprocess.run`, which is what somebody writing that rule means.
-IMPORTS: ingest.{blob,rules_file}, parse.python_names, store.rule_checks,
+IMPORTS: ingest.{blob,standards.rules_file}, parse.{python_names,secret_scan},
+      store.rule_checks,
       types.{change,checked,rule,verdict}. Leftward only.
 CONSUMED BY: the audit trail and the compliance dashboard (D4, D5).
 """
@@ -34,6 +43,7 @@ from pathlib import Path
 from quantamind.ingest.blob import at
 from quantamind.ingest.standards import rules_file
 from quantamind.parse.python_names import Mention, Names, UnparseableSource, names_in
+from quantamind.parse.secret_scan import secrets_in
 from quantamind.store.rule_checks import persist
 from quantamind.types.change import Language, language_of
 from quantamind.types.checked import Checked, Outcome
@@ -75,6 +85,16 @@ def check(rule: Rule, path: str, source: str) -> Checked:
     """One rule against one file. Exactly one row, whatever happened."""
     if rule.check is CheckKind.MODEL_JUDGED:
         return Checked(rule.id, Site(path), Outcome.DEFERRED)
+    # **THE SECRET CHECK RUNS BEFORE THE LANGUAGE GATE, AND THAT IS THE POINT OF IT.** Every other
+    # kind needs an AST and is Python-only; a credential is a string, and the files that leak one
+    # most often — `.env`, `.tf`, a CI workflow — are exactly the ones the gate below refuses.
+    # This is the first rule kind that widens the enforceable surface past `.py`.
+    if rule.check is CheckKind.HARDCODED_SECRET:
+        found = secrets_in(source)
+        if not found:
+            return Checked(rule.id, Site(path), Outcome.PASSED)
+        first = found[0]
+        return Checked(rule.id, Site(path, first.line), Outcome.VIOLATED, evidence=first.render())
     if language_of(path) is not Language.PYTHON:
         # **NOT A PASS.** The only parser here is Python's; every other language is undecided.
         return _unchecked(rule, path, Reason.LANGUAGE_UNSUPPORTED)

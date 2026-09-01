@@ -35,7 +35,7 @@ by decision, not by difficulty.
 the plan rather than skipping silently — a number jumped without a reason is how a checklist stops
 describing the product.
 
-**D6a, D2c, D3a AND D3b ARE BUILT — 34 OF 50.**
+**D6a, D2c, D3a, D3b AND D7a ARE BUILT — 35 OF 50.**
 
 **ROWS 12 THROUGH 30 WERE RE-VERIFIED AGAINST THE CODE ON 2026-08-31, AND THE COUNT DID NOT MOVE.**
 Nine unticked rows in that range were checked for work already done and **none of them was
@@ -631,9 +631,24 @@ Pulled in as **two separate uses**, because they succeed or fail independently:
 Their answers, given our thesis: say what is true, prove it where we can, and refuse the claim
 where we cannot.
 
-- [ ] **D7a "What does it catch?"** AI-written code carries more hardcoded secrets, and a
-      hardcoded key is **deterministically** detectable — pattern plus entropy, no model, no
-      judgement. It ships as a `CheckKind`, high precision, reproducible in the audit trail.
+- [x] **D7a "What does it catch?"** `parse/secret_scan.py` + `CheckKind.HARDCODED_SECRET`.
+      **AND IT IS THE FIRST CHECK THAT IS NOT PYTHON-ONLY**, which is the part that was not in the
+      row. Every other kind needs an AST and returns `LANGUAGE_UNSUPPORTED` for anything else —
+      the narrowness `docs/product/unit-economics.md` calls the honest limit of the standards
+      engine. A credential is a string, so it is caught in `.env`, `.tf`, a CI workflow and a
+      `.ts` config exactly as well as in a module, and those are the files that leak one. It
+      dispatches BEFORE the language gate for that reason. `dependencies = []` still holds.
+      **A PROVIDER PREFIX IS EVIDENCE; ENTROPY ALONE IS A GUESS.** `AKIA…`, `ghp_…`, `xox…`,
+      `sk_live_…`, `AIza…`, a private-key header. The generic rule needs BOTH a credential-shaped
+      name and enough entropy, and is still the weakest kind reported.
+      **ENTROPY DID LESS WORK THAN THE ROW ASSUMED, AND THAT WAS MEASURED.** `password12345678`
+      scores **3.88** bits against a real key's **4.28** — no floor separates them. The first
+      docstring asserted 3.1 for it, invented, and the scanner fired on it on the first run. A
+      vocabulary check does the work the floor could not.
+      **THE SECRET NEVER REACHES THE EVIDENCE.** A `Checked` row goes to the audit trail, the
+      comment and the customer's database; only the kind, the line and a four-character prefix.
+      14 must-not-fire cases against 6 must-fire ones, deliberately. 37 tests.
+      ~~It ships as a `CheckKind`, high precision, reproducible in the audit trail.~~
       **What we must NOT claim is general vulnerability detection.** Our raw findings measure
       66.7-82.1% wrong across four blind pools. "We catch hardcoded credentials, exactly, and we
       do not claim to catch injection" is a weaker sentence and a defensible one.

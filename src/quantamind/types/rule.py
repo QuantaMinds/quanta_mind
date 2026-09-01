@@ -51,6 +51,12 @@ class CheckKind(Enum):
     FORBID_CALL = "forbid_call"
     FORBID_IMPORT = "forbid_import"
     NAMING_PATTERN = "naming_pattern"
+    HARDCODED_SECRET = "hardcoded_secret"
+    """**THE FIRST KIND THAT NEEDS NO TARGET AND NO PARSER.** The other three ask "is this
+    identifier here"; this one asks "does any line look like an issued credential", which is a
+    question about text rather than syntax. It is also the first that is not Python-only —
+    a credential is a string in a `.env`, a `.tf` or a notebook exactly as much as in a module."""
+
     MODEL_JUDGED = "model_judged"
 
 
@@ -91,7 +97,9 @@ class Rule:
                 self.id,
                 "a rule with no description cannot be acted on by the developer who sees it",
             )
-        if self.check is not CheckKind.MODEL_JUDGED and not self.target.strip():
+        if self.check in (CheckKind.MODEL_JUDGED, CheckKind.HARDCODED_SECRET):
+            return
+        if not self.target.strip():
             raise RuleRefused(
                 self.id, f"{self.check.value} needs a target; there is nothing to look for"
             )
