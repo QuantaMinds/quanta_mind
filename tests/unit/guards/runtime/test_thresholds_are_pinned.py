@@ -45,6 +45,9 @@ RECORDED: dict[str, int] = {
     # D7f. **40 IS THE SAME FLOOR `check_module_identity` USES** for "did the walk find the
     # source tree at all", copied rather than chosen: this guard examines every python module in
     # `src/`, and a run that examined none must report a broken walk instead of "ok".
+    # **30s, COPIED FROM `check_branch_name.py`, NOT CHOSEN.** Both guards shell out to git for a
+    # branch name or a status, and AGENTS.md requires an explicit timeout on every subprocess call.
+    "check_work_on_main.py::GIT_TIMEOUT_S": 30,
     "runtime/check_network_chokepoint.py::floor(python modules)": 40,
     "runtime/check_no_partial_clone.py::CLONE_FILE_FLOOR": 10,
     "check_no_research_imports.py::floor(python files)": 40,

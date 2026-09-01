@@ -101,6 +101,7 @@
     "a decided term never carries the rejected value": "guard:records/check_decided_vocabulary",
     "no duplicate or orphan modules": "guard:check_module_identity",
     "air-gapped refuses an outbound call, never merely fails to make one (D7f)": "guard:runtime/check_network_chokepoint",
+    "no work on main, however it was written (rule 9)": "guard:check_work_on_main",
     "no --filter on a git clone (A31)": "guard:runtime/check_no_partial_clone",
     "every subprocess declares a timeout": "guard:runtime/check_subprocess_timeouts",
     "a withdrawn amendment names its enforcer": "guard:records/check_withdrawn_amendments",

@@ -17,8 +17,11 @@
 > held 6–11 and opened by stating that entries 1, 3 and 5 "did not exist" and "were
 > referenced and never written down". They existed, four directories away, in the file
 > `git mv` had moved. **Entry 12 is that defect, filed in the log it happened to.** There is
-> one file now, entries run 1 through 12, and `guard:citations/identity` fails the build if a
-> second document ever claims a basename this one already holds.
+> one file now, numbered from 1, and `guard:citations/identity` fails the build if a second
+> document ever claims a basename this one already holds. **This sentence used to say
+> "entries run 1 through 12" and entry 13 already existed** — a count in prose goes stale the
+> next time somebody appends, silently, which is rule 12's own argument arriving in the log
+> that records rule violations.
 
 **Entries 1–4 are short enough for a table. From 5 on they are long enough to need sections,
 which is a fact about the defects and not about the format.**
@@ -559,6 +562,45 @@ a different family and tell it to attack.** `docs/product/QUANTAMIND.md` already
 every published model finding. It was not being required of our own research.
 
 ---
+
+## 14 · The commit on main names one row; the change contains twelve
+
+**2026-09-01, merging PR #92.**
+
+`git log` on `main` reads:
+
+```
+15d6ea9 feat(parse,render): D2c — the same body, already somewhere else (#92)
+```
+
+**That squash carries 226 files, +16,226 lines, and twelve build rows** — D2c, D3a, D3b, D4b, D6a,
+D7a, D1c, D1d, D1e, D6c, D7f and C2, plus the D6b withdrawal and four new guards. The subject
+describes the first of them and is false about the other eleven. A reader running `git log` on main
+— which is the first place anybody looks — has no way to tell that from the artefact.
+
+**The proximate cause is an ordering error I recommended and did not sequence.** I suggested
+renaming the pull request because its title no longer described the branch, and then the merge ran
+first and the rename second. GitHub's title is now correct; the commit subject was fixed at merge
+time and cannot be changed without force-pushing `main`, which is denied in `.claude/settings.json`
+and would rewrite shared history to fix a sentence.
+
+**The root cause is rule 9, and it is unenforced.** "One logical change per PR" — this branch
+accumulated twelve rows across three days because each new row was easier to add to the open branch
+than to land the branch first. Nothing objected. `check_branch_name` validates the PREFIX of a
+branch name and says nothing about how much rides on it, and the pre-edit hook blocks writes on
+`main` rather than counting what a feature branch has grown to carry.
+
+**What the reader can still recover:** the `(#92)` suffix resolves to the pull request, whose title
+is now accurate, and every one of the thirty-two original commit messages survives in that PR. The
+information is not lost; it is one hop further away than it should be.
+
+| | |
+|---|---|
+| **Mechanism now** | **NO.** Nothing checks that a merge commit's subject describes its contents, and nothing can: the subject is fixed by whoever presses merge, in an interface this repository does not control. |
+| **What would help** | Landing a branch when its row is done, so the title stays true by construction. That is rule 9, which already exists and was not followed. A guard counting `docs/plans/product/product-build.md` rows touched by a branch would be a mechanism, and is speculative enough that it is named here rather than built. |
+
+**Filed because the subject line is exactly the artefact this log is about:** something stated a
+property — what the change is — and nothing held it.
 
 ## Adding an entry
 
