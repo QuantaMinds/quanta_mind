@@ -474,6 +474,31 @@ cross-repository surface to nothing on the day their declaration stopped parsing
 nobody declared. One malformed entry does not cost the good ones — refusing a whole file over a
 typo loses every link the customer got right.
 
+### `store/audit/` — the trail as an artefact, not a query
+
+**D4b was ticked "append-only, exportable" for a fortnight and there was no export.**
+`docs/product/unit-economics.md` had already written the gap down — *"There is no file, no
+download, and no scheduled export anywhere in the build plan. A compliance buyer asks for the
+artefact, not the query"* — and the row stayed ticked. It is the second tick corrected in one day
+whose WORK was right and whose WORD was wrong; D1g's title was the first.
+
+`store/audit/export.py` reads every recorded check joined to the review that decided it, oldest
+first, each carrying the commit that lets somebody re-run it. **It owns reading the trail out
+whole; it must not summarise** — `store/compliance.py` answers "how are we doing", and this exists
+because that was not enough for an auditor who wants to pick one row and reproduce it.
+
+**`render/audit_export.py` writes JSON, not CSV, and the caveats are the reason.** A CSV opens more
+easily and cannot carry the four sentences that make the document honest: nothing is backfilled, an
+absent row means the check did not run, `uncheckable` and `deferred` are not passes, and only a
+`parser` row re-runs. **An export that outlives its covering email is how a partial record becomes
+a claim of full coverage**, and this is a document somebody may show a regulator.
+
+**`limits` comes first in the file**, so a reader who stops after the first object has read the part
+that stops them over-reading the rest — the same choice the compliance table made in putting its
+caveat above the rows. **The window is read from the data, never assumed**: the trail begins when
+rule checking was installed, not when the repository did. **An empty export is a document, not an
+error**, and it says it covers nothing.
+
 ### `parse/secret_scan.py` — D7a, and the first check that is not Python-only
 
 **The security team's first question is "what does it catch", and this is the only answer we can

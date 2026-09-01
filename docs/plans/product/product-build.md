@@ -569,7 +569,25 @@ spent deliberately. It must not be spent by accident.
       code is read AS THE CHANGE LEAVES IT), and renders the result with the denominator printed.
       **Proven on PR #86: "60 declared rule(s) checked".** The per-tenant posting switch that was
       once listed here belongs to B6 and is recorded there; it was never part of this item.
-- [x] **D4b Append-only, exportable.** `rule_check` at schema v5, `store/rule_checks.py`. All four outcomes stored so the denominator is real; `provenance` derived from the rule; nothing backfilled. **Proven on a real delivery: PR #86 reported "60 declared rule(s) checked".** ~~Every check on
+- [x] **D4b Append-only, exportable.** `rule_check` at schema v5, `store/rule_checks.py`. All four outcomes stored so the denominator is real; `provenance` derived from the rule; nothing backfilled. **Proven on a real delivery: PR #86 reported "60 declared rule(s) checked".**
+      **THE WORD "EXPORTABLE" WAS FALSE FOR A FORTNIGHT AND THIS ROW STAYED TICKED.**
+      `docs/product/unit-economics.md` had already written the gap down — *"There is no file, no
+      download, and no scheduled export anywhere in the build plan. A compliance buyer asks for the
+      artefact, not the query"* — and nobody acted on it. Second tick corrected today whose WORK
+      was right and whose WORD was wrong; D1g was the first. **A row can be honestly ticked and
+      still lie in the line somebody skims.**
+      **BUILT 2026-08-31:** `quantamind compliance --repo owner/name --export PATH`.
+      `store/audit/export.py` reads every recorded check joined to the review that decided it;
+      `render/audit_export.py` writes it. **JSON rather than CSV, and the caveats are why** — a CSV
+      opens more easily and cannot carry the four sentences that make the document honest, and an
+      export that outlives its covering email is how a partial record becomes a claim of full
+      coverage.
+      **`limits` COMES FIRST IN THE FILE**, so a reader who stops after the first object has read
+      the part that stops them over-reading the rest. It states that nothing is backfilled, that an
+      absent row means the check did not run, that `uncheckable` and `deferred` are not passes, and
+      that only a `parser` row re-runs. **The window is read from the rows, never assumed** — the
+      trail begins when rule checking was installed, not when the repository did.
+      **An empty export is a document, not an error**, and it says it covers nothing. 6 tests. ~~Every check on
       every pull request: which rule, the outcome, the commit, the provenance, whether it posted.~~ **This is the artefact a compliance team buys**, and it is
       worth more when the checks behind it are reproducible, which is why D1b precedes D1c.
 
