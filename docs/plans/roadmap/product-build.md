@@ -2,7 +2,7 @@
 
 **How to read this.** One line per deliverable. `[ ]` not built, `[x]` built AND verified by
 `just verify`, `[~]` in progress. A line is only ticked when the gate the definition of done names
-is green — not `just check`. Design reasoning lives in `docs/plans/delivered/feat-review-every-pr.md`; this
+is green — not `just check`. Design reasoning lives in `docs/plans/delivered/feat/review-every-pr.md`; this
 file is the state.
 
 ## THE BUILD ORDER — do these in this number order
@@ -466,7 +466,7 @@ and D5 read what it records.
       **The tree-sitter constraint was NOT spent.** `check()` already returns
       `UNCHECKABLE`/`LANGUAGE_UNSUPPORTED` for every non-Python path and `UNCHECKABLE` never
       blocks, so the gate is Python-only by construction and `pyproject.toml` keeps
-      `dependencies = []`. → `docs/plans/feat-111-blocking-status-check.md`
+      `dependencies = []`. → `docs/plans/delivered/feat/111-blocking-status-check.md`
 
 **OPEN DECISION — which languages.** Python checks are free: `ast` is stdlib. JS/TS are not, and
 `AGENTS.md` states plainly that **tree-sitter is NOT a dependency** while `pyproject.toml` declares
@@ -508,7 +508,7 @@ spent deliberately. It must not be spent by accident.
       **NOTHING IS STORED** — the tree is parsed at the reviewed commit and thrown away, because
       D2b is on hold for having paid a table, a migration and a watermark and then beaten nothing.
       22 tests, floor and normaliser both sabotage-verified.
-      → `docs/plans/feat-d2c-duplicated-logic.md`
+      → `docs/plans/delivered/feat/d2c-duplicated-logic.md`
       ~~Normalised AST hashing of function bodies — rename-insensitive, comment-insensitive,
       stdlib only.~~
 - [ ] **D2d Blast radius in the review.** **DROPPED 2026-08-31, on the measurement, by decision.**
@@ -697,7 +697,7 @@ Pulled in as **two separate uses**, because they succeed or fail independently:
       A fifth — **we could not read the pull request at all** — is `Context.unreadable`, because
       printing "the author stated no goal" out of our own outage is an assertion about somebody's
       work that we did not earn. 38 tests; the wiring sabotage-verified by restoring the previous
-      `comment()` verbatim. → `docs/plans/feat-d6a-the-goal-behind-the-change.md`
+      `comment()` verbatim. → `docs/plans/delivered/feat/d6a-the-goal-behind-the-change.md`
       ~~The ticket and discussion behind the files being changed,
       shown in the comment. Deterministic, and worth something whatever the model does.~~
 - [ ] **D6b The same text as MODEL input. RUN, AUDITED, AND WITHDRAWN — THE RESULT WAS SHOT

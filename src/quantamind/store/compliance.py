@@ -10,7 +10,7 @@ WHY:  **A COMPLIANCE VIEW THAT REPORTS ONLY PASS AND FAIL IS THE ARTEFACT THIS P
       number on a buyer's screen, which is the collapse `AGENTS.md` rule 3 exists to prevent.
 
       **PER REPOSITORY, NEVER PER DEVELOPER.** The competitor screenshot ranks named engineers.
-      That is a cultural decision wearing a feature's clothes, and `docs/plans/product/
+      That is a cultural decision wearing a feature's clothes, and `docs/plans/roadmap/
       product-build.md` declines it until somebody asks for it on purpose.
 
       **`MIN_FOR_A_RATE` IS IMPORTED, NOT REDECLARED.** "How many observations before a

@@ -1195,7 +1195,7 @@ bars, 207 findings came back 5.80% correct — and the two validations guarding 
 therefore never fire, which is an unreachable check reading exactly like a passing one.
 `test_a_review_cannot_carry_a_model_claim_at_all` asserts the constructor refuses them.
 `ran_model` survives because it reads the ledger rather than the configuration, so "no model
-runs here" stays falsifiable. → `docs/product/reviewer/review-half-record.md`
+runs here" stays falsifiable. → `docs/findings/reviewer/review-half-record.md`
 
 ### `store/`
 
@@ -1584,7 +1584,7 @@ claims. Neither ships: seven designs failed a bar fixed before each run, the poo
 absent from the line they cite**. SWR-Bench puts five published systems at 2.79–15.39% precision
 on 1,000 pull requests, so this is an unsolved problem rather than a local defect.
 **Do not add an eighth design without a fresh corpus and a bar fixed first.**
-→ `docs/product/reviewer/review-half-record.md`
+→ `docs/findings/reviewer/review-half-record.md`
 
 ### `render/`
 
@@ -1973,7 +1973,7 @@ Five modules sharing one dataset, each written to correct the one before it.
   definition, not noise.
 - `redundancy.py` — every arm on ONE judge, counting goldens covered and candidates that matched.
   Their difference is redundancy: **ours 17 of 98, Qodo's 1 of 99.** Worth +4.0 points if fixed;
-  recorded rather than built → `docs/product/reviewer/recorded-not-built.md`
+  recorded rather than built → `docs/findings/reviewer/recorded-not-built.md`
 - `prompt_arms.py` — four reviewer prompts over the same 50 pull requests. All three
   non-control arms FAIL. → `docs/plans/preregistrations/reviewer/prompt-direction-preregistration.md`
 - `forensics.py` — cross-tabs over the stored labels. It deliberately does **not** ask whether a
@@ -1983,7 +1983,7 @@ Five modules sharing one dataset, each written to correct the one before it.
 `bench_reviewer.review()` gained `template=` so an arm is measured through the same request,
 parsing and truncation-salvage code as the control rather than a second copy of it.
 
-### `docs/product/reviewer/` — the reviewer half's evidence, and `recorded-not-built.md`
+### `docs/findings/reviewer/` — the reviewer half's evidence, and `recorded-not-built.md`
 
 Nine documents grouped out of `docs/product/` at the fanout cap. They are the closed reviewer
 half's record. `recorded-not-built.md` is the register of four measured fixes that were not built —
@@ -2009,7 +2009,7 @@ requires the correct comparison through, so the guard cannot pass by refusing ev
 AGENTS.md rule 14 carries the rule, rewritten in place at the same line count so the instruction
 budget did not grow.
 
-### `docs/product/reviewer/what-it-would-take.md` — the two verifiers, costed
+### `docs/findings/reviewer/what-it-would-take.md` — the two verifiers, costed
 
 The closure named two things that would reopen it. Both are now costed against the 207 adjudicated
 findings (WRONG 135 / UNFALSIFIABLE 36 / TRIVIAL 24 / **CORRECT 12**): **a perfect verifier for
@@ -2134,7 +2134,7 @@ the shipped prompt twice — once with the tag it genuinely carries, once with o
 
 **Objected to 6/12 correct pairings and 5/12 wrong ones: discrimination −8.3%, no signal.** In 7 of
 24 trials it stated the SHA does not exist; every one had been fetched from GitHub minutes earlier.
-→ `docs/product/reviewer/why-the-comments-are-false.md`
+→ `docs/findings/reviewer/why-the-comments-are-false.md`
 
 ### `verify/external_facts.py` + `verify/pin_mismatch.py` — fix 1 of the failure taxonomy
 
@@ -2238,7 +2238,7 @@ answers why no filter has helped:
 
 **It is a generation failure and every mechanism tried has been a filter.**
 
-### `docs/plans/delivered/feat-execution-corpus.md` — the one road that is UNTESTED, and its price
+### `docs/plans/delivered/feat/execution-corpus.md` — the one road that is UNTESTED, and its price
 
 The Aug 2026 field: best published research on LLM code review is **28.0% RefineEM** (behavioural),
 best tool against planted ground truth is **F1 47%**, and **no strict-adjudication rate is published
@@ -2360,7 +2360,7 @@ on the six out-of-sample repositories before deciding: **miss rate 1.21% → 1.1
 only lets the model *read* workflows — where its discrimination is **−8.3%** — so it would invent
 SHA claims at chance and then pay an API call each to delete them. **It manufactures the exposure
 the oracle exists to cover.**
-→ `docs/product/reviewer/closed/widening-scope-manufactures-the-problem.md`
+→ `docs/findings/reviewer/closed/widening-scope-manufactures-the-problem.md`
 
 ### `sweep()` is called now — it never was
 
@@ -2540,7 +2540,7 @@ stable total hid an unstable composition** — which is why the volume bar looke
 
 **This is a corpus finding and it travels.** Any reviewer arm scored on the 50-change golden set
 against a bar under ~4 points can be passed by noise, whatever its recorded status. The floor is
-written up once in `docs/product/reviewer/corpus-noise-floor.md`, and every result resting on that
+written up once in `docs/findings/reviewer/corpus-noise-floor.md`, and every result resting on that
 corpus now carries a pointer to it. **It does not touch the ranker**, which is a different corpus, a
 different method and model-free.
 
@@ -2668,7 +2668,7 @@ is counted by one and unreachable to the other.
 
 **So this stays open on purpose.** The next step is a measurement — on a repository with real
 release-branch traffic, does base-walking ever change the top-three selection? — not a quiet edit to
-a `git log` invocation. → `docs/plans/delivered/feat-touch-index-cache.md`, the investigation section.
+a `git log` invocation. → `docs/plans/delivered/feat/touch-index-cache.md`, the investigation section.
 
 ### The HEAD horizon, measured: 81% of counts move, 0% of readings, 2.6% of deep reads
 
@@ -2695,7 +2695,7 @@ rate is zero, because none of its recent pull requests target a non-default bran
 **The horizon is now a documented property with a number on it.** What the measurement does not
 cover: one repository, one kind of divergence — short-lived release branches cut from main. A
 long-lived fork is the case that could move the set, and 0 of 78 has a 95% upper bound near 3.8%.
-→ `docs/plans/delivered/feat-touch-index-cache.md`.
+→ `docs/plans/delivered/feat/touch-index-cache.md`.
 
 ### The gate now requires the budget to bind — product-readiness item 2
 
@@ -2735,7 +2735,7 @@ the old one, in the same line, for the length of one command. Caught by running 
 files, while the product counts `.py .pyi .ts .tsx .js`. On a Python repository the populations
 coincide; on a polyglot one **more changes bind than the study's population predicts**, so 4.11% and
 50.3% must be quoted as Python-only. Re-deriving them over the full reviewable set is a separate
-measurement and is not done. → `docs/plans/delivered/feat-gate-on-binding-changes.md`.
+measurement and is not done. → `docs/plans/delivered/feat/gate-on-binding-changes.md`.
 
 ### The product comments as itself — GitHub App auth, no new dependency
 
@@ -2980,7 +2980,7 @@ sabotage: dropping the unread list, relabelling `UNRANKED` as `FOCUSED`, and res
 small-change mute each fail their own test.
 
 Nothing consumes this yet — wiring it into `serve/review_delivery.py` is A2 in
-`docs/plans/product/product-build.md`.
+`docs/plans/roadmap/product-build.md`.
 
 ### The webhook consults the model — A2, and what it costs
 

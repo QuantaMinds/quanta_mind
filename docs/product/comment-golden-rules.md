@@ -43,7 +43,7 @@ naming while missing actual logic bugs"**
 Greptile's published quality is largely **a suppression filter** — we removed the sentence banning
 style, formatting, naming, test coverage and documentation from their prompt and re-ran the
 benchmark: **270 extra comments, 21 real, 238 noise**
-(`docs/product/reviewer/greptile-gap-analysis.md`).
+(`docs/findings/reviewer/greptile-gap-analysis.md`).
 
 **A comment nobody acts on is worse than no comment**, because it teaches the reader to skip the
 next one.
@@ -52,7 +52,7 @@ next one.
 
 Qodo generates up to nine suggestions, **scores every one, and publishes about three**. We generate
 up to twelve and publish twelve — **we have no scoring stage at all**, which
-`docs/product/reviewer/qodo-mechanism.md` names as the single largest structural difference between
+`docs/findings/reviewer/qodo-mechanism.md` names as the single largest structural difference between
 the pipelines. They emit **152 comments across 50 pull requests to our 194, and find 106 real
 issues to our 79.**
 
@@ -136,7 +136,7 @@ score every finding on one scale; we have two kinds of claim and only one of the
 ### 8. A claim carries the quote it is about, not a line number
 
 **Qodo does not ask the model for a line number. It asks for a quote**
-(`docs/product/reviewer/qodo-mechanism.md`). Ours asked for a line, and **87.3% of claims that quote
+(`docs/findings/reviewer/qodo-mechanism.md`). Ours asked for a line, and **87.3% of claims that quote
 code quote code absent from the line they cite.**
 
 ### 9. The comment does not demand a reply

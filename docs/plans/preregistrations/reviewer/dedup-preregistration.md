@@ -7,7 +7,7 @@
 We emit **194 comments covering 81 of 173 golden defects (0.42 per comment)**. Qodo-extended-v2
 emits **152 covering 98 (0.64)**. The gap is not that we find less — it is that we say the same
 defect repeatedly: **17.3% redundancy against Qodo's 1.0%**, measured in
-`docs/product/reviewer/why-the-correct-rate-is-low.md`.
+`docs/findings/reviewer/why-the-correct-rate-is-low.md`.
 
 **The claim under test: a mechanical dedup removes repeats without removing coverage.**
 

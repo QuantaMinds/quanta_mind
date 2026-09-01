@@ -1,7 +1,7 @@
 # Speak only where the budget binds — product-readiness item 2
 
 **Branch:** `feat/gate-on-binding-changes`. **Status: PLAN.** Touches `rank/`, so this is written
-first. → `docs/plans/product/product-readiness.md`, item 2.
+first. → `docs/plans/roadmap/product-readiness.md`, item 2.
 
 ## The claim being acted on
 

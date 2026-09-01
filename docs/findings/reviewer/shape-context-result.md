@@ -73,7 +73,7 @@ it existed to exclude, and a run in which nothing happened could clear it. One d
 
 **This is a corpus finding, not a shape finding, and it travels.** Any arm scored on this 50-change
 corpus against a bar under about 4 points has the same problem — including results recorded as
-SOUND. → `docs/product/reviewer/corpus-noise-floor.md`.
+SOUND. → `docs/findings/reviewer/corpus-noise-floor.md`.
 
 ## What survives
 

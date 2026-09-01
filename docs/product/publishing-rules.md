@@ -89,7 +89,7 @@ When someone asks for our benchmark:
   over-match rate at 15.0% against 5.0%, so the honest reading is *at level with CodeRabbit, behind
   Greptile* and never *better than CodeRabbit*. **Three:** none of it says our findings are correct
   — this benchmark never checks whether a claim is anchored to the line it cites, which is where
-  87.3% of ours fail. → `docs/product/reviewer/greptile-gap-analysis.md`
+  87.3% of ours fail. → `docs/findings/reviewer/greptile-gap-analysis.md`
 
 - **When two measurements of the reviewer disagree, the stricter one governs shipping.** Martian's
   offline layer asks whether a comment matches a known issue; our adjudication asked whether the

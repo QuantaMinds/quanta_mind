@@ -3,7 +3,7 @@
 WHAT: `verify/judged_rule.py` in isolation — one rule, one file, an injected judge.
 WHY:  **EVERY FAILURE PATH MUST LAND ON `UNDECIDED`.** A judge that raises, replies nothing, or
       quotes a line it invented must never read as "the standard is met". Each test names the
-      guarantee it holds; `docs/plans/feat-d1c-model-checked-rules.md` lists what must break each
+      the D1c plan under `docs/plans/delivered/feat/` lists what must break each
       one, and the sabotage run is recorded in the PR.
 IMPORTS: types.standards.{checked,judged,rule}, types.verdict, verify.{judged_rule,rule_check}.
 """

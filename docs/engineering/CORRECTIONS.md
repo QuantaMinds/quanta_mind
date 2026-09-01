@@ -193,7 +193,7 @@ exactly what it holds. Re-running `analyze_gap.py` on 2026-08-23 reproduces the 
 - **the severity table** — Low n = 46, both 6 / only THEM 12 / only US 6, net −6, and **"two-thirds
   of the gap is Low severity" stands**
 - **the category table** — bug n = 94, security n = 11 at 45% only-US, style n = 10 at 50% only-THEM
-- **the prompt-ban deficit rates** in `docs/product/reviewer/greptile-gap-analysis.md`
+- **the prompt-ban deficit rates** in `docs/findings/reviewer/greptile-gap-analysis.md`
 - the both / onlyTHEM / onlyUS / neither split: 52 / 38 / 29 / 54 of 173
 
 **These are golden-level and were never candidate-level.** The withdrawal is narrower than it first
@@ -350,7 +350,7 @@ committed.
 
 ## 10 · The first defect in a PLAN rather than a measurement
 
-`feat-execution-corpus.md` specified **≥ 30 correct findings** and costed the round at **"~200
+`docs/plans/delivered/feat/execution-corpus.md` specified **≥ 30 correct findings** and costed the round at **"~200
 findings by one independent rater. Days, not hours."**
 
 At the pool's 5.8% correct-rate, 200 findings yields **11.6 correct**. **The spec asked for 30 and
@@ -597,7 +597,7 @@ information is not lost; it is one hop further away than it should be.
 | | |
 |---|---|
 | **Mechanism now** | **NO.** Nothing checks that a merge commit's subject describes its contents, and nothing can: the subject is fixed by whoever presses merge, in an interface this repository does not control. |
-| **What would help** | Landing a branch when its row is done, so the title stays true by construction. That is rule 9, which already exists and was not followed. A guard counting `docs/plans/product/product-build.md` rows touched by a branch would be a mechanism, and is speculative enough that it is named here rather than built. |
+| **What would help** | Landing a branch when its row is done, so the title stays true by construction. That is rule 9, which already exists and was not followed. A guard counting `docs/plans/roadmap/product-build.md` rows touched by a branch would be a mechanism, and is speculative enough that it is named here rather than built. |
 
 **Filed because the subject line is exactly the artefact this log is about:** something stated a
 property — what the change is — and nothing held it.

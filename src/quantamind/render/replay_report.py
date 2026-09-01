@@ -18,7 +18,7 @@ WHY:  The two numbers have the same units and the same shape. `rank/` reproduces
       **NOR IS A COLLECTION OF THESE EVIDENCE.** A prospect who dislikes their number does not
       send it back, so an accumulated set skews favourable. Aggregating requires pre-committing to
       report every run including the bad ones -- stated in
-      `docs/plans/delivered/feat-retrospective.md`.
+      `docs/plans/delivered/feat/retrospective.md`.
 
       **THE HEADLINE IS THE INFORMATIVE STRATUM.** Events touching three or fewer files are read
       entirely by a budget of three, so no arm can miss; they are printed as decided-by-

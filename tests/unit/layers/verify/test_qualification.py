@@ -3,7 +3,7 @@
 WHAT: Drives `verify/qualification.qualifies` across each rule and their combinations, and
       `Verdict`'s own invariant that eligibility and reasons cannot disagree.
 WHY:  **AN ELIGIBILITY LIST NOBODY CHECKS IS A PROMISE; THIS IS A DECISION.** Every rule in
-      `docs/plans/product/product-build.md` B8 is readable from the GitHub API at install time, so
+      `docs/plans/roadmap/product-build.md` B8 is readable from the GitHub API at install time, so
       it can be enforced before anything is provisioned.
 
       **EVERY FAILING RULE IS RETURNED, NEVER JUST THE FIRST.** A prospect told "not eligible",

@@ -50,7 +50,7 @@ defect and why it is wrong"}}"""
 # outside -- so this arm exists to test whether the gap is a configuration choice or a capability
 # difference. It is NOT a proposed product configuration: the filter Greptile credits for its own
 # quality (19% -> 55% address rate) exists to remove precisely these comments.
-# → `docs/product/reviewer/greptile-gap-analysis.md`
+# → `docs/findings/reviewer/greptile-gap-analysis.md`
 PROMPT_NITS = """You are reviewing a pull request. Report anything a careful reviewer would
 comment on before merging.
 

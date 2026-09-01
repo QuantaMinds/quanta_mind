@@ -70,7 +70,7 @@ RULES = (
         r"rank(?:s|ing|ed)?\s+(?:the\s+)?functions?\b|top-ranked function|"
         r"every changed function|names?\s+(?:the\s+)?(?:one\s+)?function\b|"
         r"for every function|ranked function",
-        "rank/order.py — `Site(path, line=0)`; docs/plans/delivered/feat-rank-fix-history.md",
+        "rank/order.py — `Site(path, line=0)`; docs/plans/delivered/feat/rank-fix-history.md",
     ),
     # **THIS RULE IS THE REVERSAL OF ONE THAT ENFORCED THE OPPOSITE, RECORDED RATHER THAN QUIETLY
     # APPLIED** -- the same handling as the `infer/`/`verify/` rule below, and for the same reason.

@@ -7,7 +7,7 @@ WHY:  **THIS IS THE ONLY LEVER ON THIS BENCHMARK AND THE MEASUREMENT SAYS SO.** 
       nits allowed finds 100 of 173 golden issues -- 57.8%, against Qodo's 57.2% -- and needs 464
       candidates to do it against their 152. The recall is already there; what is missing is
       anything that discards our own bad findings.
-      `docs/product/reviewer/why-their-f1-is-higher.md` puts
+      `docs/findings/reviewer/why-their-f1-is-higher.md` puts
       the target as a number: **discard ~85% of false positives while keeping the true ones** and
       precision reaches 64.7% with F1 61.0%, past Greptile's 54.5% and Qodo's published 60.1%.
 

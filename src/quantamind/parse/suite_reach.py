@@ -2,7 +2,7 @@
 
 WHAT: `reach(clone)` returns a `Reach`: how many library-source modules exist, how many a test
       file imports, and the share. `NoSource` is raised when the tree holds no Python at all.
-WHY:  **THIS IS THE HONEST ANSWER TO "WOULD THIS PRODUCT SERVE YOU WELL".** `docs/plans/product/
+WHY:  **THIS IS THE HONEST ANSWER TO "WOULD THIS PRODUCT SERVE YOU WELL".** `docs/plans/roadmap/
       product-build.md` B8 says the free-tier criteria "select for repositories where the product
       works" and that eligibility should be "a measured answer about their repository instead of
       a sales rule". A repository whose own suite reaches little of its own source is one where a

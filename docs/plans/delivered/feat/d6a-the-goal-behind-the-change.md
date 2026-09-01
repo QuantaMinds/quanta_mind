@@ -1,7 +1,7 @@
 # D6a — the ticket behind the change, shown to the reader
 
 **Branch** `feat/d6a-the-goal-behind-the-change`. Build order item 12, the lowest number in
-`docs/plans/product/product-build.md` that is neither ticked nor parked. Rows 12–30 were
+`docs/plans/roadmap/product-build.md` that is neither ticked nor parked. Rows 12–30 were
 re-verified against the code first and none of the unticked ones turned out to be built.
 
 ## What is missing, precisely

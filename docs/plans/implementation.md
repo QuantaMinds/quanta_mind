@@ -8,7 +8,7 @@ evidence and it is not the commercial plan. Those were moved out so this reads a
 | why the ranker's unit is the file and its budget is three — gate 3c, the variants, the two tuned-on-noise diagnoses | `docs/findings/ALLOCATION_EVIDENCE_2026-08.md` |
 | the schema, retention, and what the database enforces | `docs/plans/design/storage.md` |
 | tiers, tracking, integrations, identity, procurement | `docs/plans/design/commercial-surface.md` |
-| the ranker as measured, with its pre-registered bar | `docs/plans/delivered/feat-rank-fix-history.md` |
+| the ranker as measured, with its pre-registered bar | `docs/plans/delivered/feat/rank-fix-history.md` |
 | every number quoted here, recomputed from its artefact | `research/phase0/claims/verify.py` |
 
 ---
@@ -249,7 +249,7 @@ previous sabotage here disabled only the entry point and left the suite green.
 
 **This is the stage that decides whether the research is the product.**
 
-Read `docs/plans/design/storage.md` before step 1 and `docs/plans/delivered/feat-rank-fix-history.md` before
+Read `docs/plans/design/storage.md` before step 1 and `docs/plans/delivered/feat/rank-fix-history.md` before
 step 3. The schema is versioned and append-only: a column that must exist from the first row cannot
 be backfilled.
 

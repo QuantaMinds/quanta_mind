@@ -2,7 +2,7 @@
 
 > **SUPERSEDED — kept only because `docs/findings/PHASE0_PREREGISTRATION.md` cites it, and a preregistration is not edited to accommodate a tidy-up.**
 > This document describes the product the correlation test falsified (RR 1.040). It is a historical record, not guidance.
-> For the product being built read `docs/QUANTAMIND.md` and `docs/plans/implementation.md`.
+> For the product being built read `docs/product/QUANTAMIND.md` and `docs/plans/implementation.md`.
 
 > **Nothing in Phases 1+ is authorised until `docs/findings/PHASE0_PREREGISTRATION.md`
 > has a filled Results section and a non-null verdict.**
