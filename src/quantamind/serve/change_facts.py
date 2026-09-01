@@ -30,12 +30,17 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from quantamind.ingest.blob import BlobUnreadable, at
 from quantamind.ingest.context.tickets import Context, behind
 from quantamind.ingest.diff import unified_diff
 from quantamind.ingest.standards import links_file
 from quantamind.ingest.standards.links_file import Link
 from quantamind.parse.change_effort import Effort, effort
 from quantamind.parse.duplicate_bodies import Duplicates, twins
+from quantamind.parse.public_api import Break, broke, surface
+from quantamind.parse.python_names import UnparseableSource
+from quantamind.parse.suite_reach import is_library
+from quantamind.verify.consumers import CloneFor, Crossing, affected
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,16 +51,56 @@ class Facts:
     repeated: Duplicates
     sizes: Mapping[str, Effort] = field(default_factory=dict)
     links: tuple[Link, ...] = ()
+    breaks: tuple[Break, ...] = ()
+    crossing: Crossing = field(default_factory=Crossing)
     links_unreadable: bool = False
     """**Distinct from an empty `links`.** No declaration means this business declared none, which
     is the common case; an unreadable one means we could not tell, and printing the first for the
     second would be a claim about somebody's architecture made out of our own failed read."""
 
 
-def gather(clone: Path, repo: str, number: int, changed: Sequence[str], head_sha: str) -> Facts:
-    """Read all four. **One API call for the diff, one for the pull request, the rest is local.**"""
+def _surface_breaks(
+    clone: Path, base_sha: str, head_sha: str, changed: Sequence[str]
+) -> tuple[Break, ...]:
+    """Public symbols this change removed or narrowed, across every changed library file.
+
+    **BOTH SIDES COME FROM THE CLONE, SO THIS COSTS NOTHING BUT TWO `git show` PER FILE.** A file
+    that did not exist at the base has no surface to lose, and one that will not parse on either
+    side is skipped rather than reported as having removed everything it used to export — which is
+    what an empty `before` would have claimed.
+    """
+    found: list[Break] = []
+    for path in changed:
+        if not is_library(path) or not path.endswith(".py"):
+            continue
+        try:
+            was, now = at(clone, base_sha, path), at(clone, head_sha, path)
+        except BlobUnreadable:
+            continue
+        if was is None or now is None:
+            continue
+        try:
+            found.extend(broke(surface(was), surface(now)))
+        except UnparseableSource:
+            continue
+    return tuple(found)
+
+
+def gather(
+    clone: Path,
+    repo: str,
+    number: int,
+    changed: Sequence[str],
+    head_sha: str,
+    base_sha: str = "",
+    clone_for: CloneFor | None = None,
+) -> Facts:
+    """Read them all. **One API call for the diff, one for the pull request, the rest is local.**"""
     links, refused = links_file.read(clone, head_sha)
+    breaks = _surface_breaks(clone, base_sha, head_sha, changed) if base_sha else ()
     return Facts(
+        breaks=breaks,
+        crossing=affected(links, breaks, clone_for) if clone_for else Crossing(),
         intent=behind(repo, number),
         repeated=twins(clone, list(changed)),
         sizes=effort(unified_diff(repo, number), changed),

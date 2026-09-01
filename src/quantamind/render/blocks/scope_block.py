@@ -143,6 +143,7 @@ def coverage(
     findings: Sequence[Finding] | None = None,
     links: Sequence[Link] = (),
     links_unreadable: bool = False,
+    crossed: bool = False,
 ) -> list[str]:
     """The scope line, and the full file list behind a fold.
 
@@ -181,7 +182,7 @@ def coverage(
     if unresolved:
         out.append("")
         out.append(f"_{len(unresolved)} construct(s) could not be parsed._")
-    out += linked(links, links_unreadable)
+    out += linked(links, links_unreadable, crossed)
 
     paths = sorted({unit.unit.site.path for unit in ranking.units})
     out += table(

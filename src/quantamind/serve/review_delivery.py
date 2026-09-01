@@ -140,7 +140,7 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     examined = examine(clone, head_sha, reading, list(changed), settings)
     # **THE DETERMINISTIC HALF, GATHERED WHETHER OR NOT THE MODEL RAN**, and reproducible on the
     # same commit by anyone — which is why it may be asserted where a model finding may not.
-    facts = gather(clone, delivery_repo, number, changed, head_sha)
+    facts = gather(clone, delivery_repo, number, changed, head_sha, base.sha)
     # `run_review` renders a ranking-only body for the CLI, which has no pull request to read a
     # goal from. The ranking already holds each file's prior-fix count, so the summary reads the
     # same numbers rather than querying the store twice and risking two answers.
@@ -151,7 +151,6 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     checks = enforce(clone, head_sha, list(changed), store, delivery_repo, number)
     announce(delivery_repo, head_sha, checks, enabled=settings.posting_enabled)
 
-    # What this review cost, on the record. `bank()` says why, and reports what it banked.
     parts = (part.spend for part in (told, examined) if part is not None)
     bank(store, delivery_repo, number, head_sha, Spend.total(*parts))
 
@@ -171,6 +170,8 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
         effort=facts.sizes,
         links=facts.links,
         links_unreadable=facts.links_unreadable,
+        breaks=facts.breaks,
+        crossed=facts.crossing,
     )
     # **THE FALLBACK IS THE RANKING-ONLY BODY, CARRYING NEITHER THE GOAL NOR A REFUSAL.** Written
     # here as an expression it omitted `unreadable` and discarded the "I could not review this"
@@ -183,6 +184,7 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
         blind=unreadable,
         context=facts.intent,
         repeated=facts.repeated,
+        breaks=facts.breaks,
     )
     body = (fuller if speaks else (reviewed.body or "")) + pins
 

@@ -35,7 +35,7 @@ by decision, not by difficulty.
 the plan rather than skipping silently — a number jumped without a reason is how a checklist stops
 describing the product.
 
-**D6a, D2c AND D3a ARE BUILT — 33 OF 50.**
+**D6a, D2c, D3a AND D3b ARE BUILT — 34 OF 50.**
 
 **ROWS 12 THROUGH 30 WERE RE-VERIFIED AGAINST THE CODE ON 2026-08-31, AND THE COUNT DID NOT MOVE.**
 Nine unticked rows in that range were checked for work already done and **none of them was
@@ -539,8 +539,28 @@ spent deliberately. It must not be spent by accident.
       13 tests. ~~**Declared beats discovered:** no org-wide crawl, no broad permissions, and a
       link a customer stated is provenance an auditor can be shown, where an inferred one is our
       guess about their architecture.~~ Still true, and now built.
-- [ ] **D3b Edges that cross a repository boundary.** A changed exported symbol against the linked
-      repositories that import it.
+- [x] **D3b Edges that cross a repository boundary.** `parse/public_api.py` +
+      `verify/consumers.py` + `render/blocks/crossing_block.py`, wired through
+      `serve/change_facts.py`. **The one thing on the category's list we did not have.**
+      **BUILT BEFORE THE DESIGN PARTNER THE ORDER GATED IT ON**, by decision 2026-08-31. That gate
+      was about not building cross-repo machinery speculatively; the half that needs no second
+      repository turned out to be most of the value, so the gate now applies only to VALIDATING it.
+      **Nobody has yet shown this catches something a reviewer wanted.**
+      **THE BREAK DETECTOR IS ENTIRELY LOCAL.** `surface()` reads a module's public names and their
+      signatures; `broke()` compares the two sides of the diff, both from the clone. Removed or
+      renamed, kind changed, parameter dropped or reordered, a new REQUIRED argument. **Additions
+      are never breaks** — a new export or a defaulted argument leaves every caller working, and a
+      section firing on those fires on most pull requests.
+      **THE CONSUMER CHECK MATCHES AN IMPORT, NOT A MENTION.** A grep would hit a docstring, a
+      comment, a same-named local and a string in a fixture, and a false *"your change breaks
+      billing"* is the most expensive sentence here — it is about somebody else's repository and
+      the reader cannot check it without leaving the pull request.
+      **A LINK WE CANNOT OPEN IS THE COMMON CASE AND IS NAMED.** The App is installed on the
+      repository under review and usually not on its consumer. **Nothing is cloned when nothing
+      broke**, so an additive change costs nothing.
+      **AND THE FIRST RENDER CONTRADICTED ITSELF**: D3a's line said "Nothing in them was checked"
+      directly under a block reporting that `acme/billing` imports a removed export. Two
+      true-when-written sentences disagreeing in one comment, caught by printing it. 21 tests.
 
 ### D4 — audit trail
 

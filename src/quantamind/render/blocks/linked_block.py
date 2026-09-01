@@ -36,11 +36,15 @@ LINKED_UNREADABLE = (
 
 LINKED = (
     "_This repository declares {count} linked repositor{y}: {names}. **Nothing in {them} was "
-    "checked** — a changed export is not followed across a repository boundary yet._"
+    "checked** — nothing this change removed is exported, so there was nothing to ask them._"
+)
+LINKED_ASKED = (
+    "_This repository declares {count} linked repositor{y}: {names}. They were asked about the "
+    "removed exports only; nothing else in them was read._"
 )
 
 
-def linked(links: Sequence[Link], unreadable: bool) -> list[str]:
+def linked(links: Sequence[Link], unreadable: bool, asked: bool = False) -> list[str]:
     """The repositories this one is declared to touch, and the fact that none was looked at.
 
     **D3a SHIPS BEFORE D3b AND THIS LINE IS WHY IT IS WORTH SHIPPING.** Reading the linked
@@ -58,9 +62,14 @@ def linked(links: Sequence[Link], unreadable: bool) -> list[str]:
         return ["", LINKED_UNREADABLE]
     if not links:
         return []
+    # **"NOTHING WAS CHECKED" IS FALSE THE MOMENT D3b ASKS ONE.** The first render of these two
+    # blocks together put "Nothing in them was checked" directly beneath a section reporting that
+    # `acme/billing` imports a removed export. Two true-when-written sentences contradicting each
+    # other in one comment is the failure this product exists to refuse, and it appeared the first
+    # time both were printed.
     return [
         "",
-        LINKED.format(
+        (LINKED_ASKED if asked else LINKED).format(
             count=len(links),
             y="y" if len(links) == 1 else "ies",
             names=", ".join(link.render() for link in links),

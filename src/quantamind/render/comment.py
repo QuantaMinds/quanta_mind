@@ -42,6 +42,8 @@ from quantamind.ingest.context.tickets import Context
 from quantamind.ingest.standards.links_file import Link
 from quantamind.parse.change_effort import Effort
 from quantamind.parse.duplicate_bodies import Duplicates
+from quantamind.parse.public_api import Break
+from quantamind.render.blocks.crossing_block import crossing
 from quantamind.render.blocks.duplicate_block import duplicates
 from quantamind.render.blocks.found_block import found
 from quantamind.render.blocks.scope_block import coverage
@@ -51,6 +53,7 @@ from quantamind.types.checked import Checked, Outcome
 from quantamind.types.finding import Finding
 from quantamind.types.ranking import Ranking
 from quantamind.types.verdict import Unresolved
+from quantamind.verify.consumers import Crossing
 
 HEADER = "### QuantaMind"
 GOOD = "✅ **Looks good.**"
@@ -113,6 +116,8 @@ def comment(
     effort: Mapping[str, Effort] | None = None,
     links: Sequence[Link] = (),
     links_unreadable: bool = False,
+    breaks: Sequence[Break] = (),
+    crossed: Crossing | None = None,
 ) -> str:
     """The comment body: a verdict, then the mandatory sections, then what to fix.
 
@@ -162,10 +167,25 @@ def comment(
     # **D2c SITS ABOVE THE SCOPE LINE AND BELOW THE MODEL.** It is a parser's claim, so it outranks
     # anything `infer/` said; it is about structure rather than this change's goal, so it comes
     # after the verdict a reader acts on first.
+    # **ABOVE THE DUPLICATE BLOCK BECAUSE IT REACHES FURTHER.** A repeated body is a fact about
+    # this repository; a narrowed export is a fact about everyone who imports it.
+    narrowed = crossing(breaks, crossed or Crossing())
+    if narrowed:
+        lines += [narrowed, ""]
+
     if repeated is not None:
         repeats = duplicates(repeated)
         if repeats:
             lines += [repeats, ""]
 
-    lines += coverage(ranking, unresolved, effort, checks, findings, links, links_unreadable)
+    lines += coverage(
+        ranking,
+        unresolved,
+        effort,
+        checks,
+        findings,
+        links,
+        links_unreadable,
+        (crossed or Crossing()).asked(),
+    )
     return "\n".join(lines)

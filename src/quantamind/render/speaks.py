@@ -22,6 +22,7 @@ from collections.abc import Sequence
 
 from quantamind.ingest.context.tickets import Context
 from quantamind.parse.duplicate_bodies import Duplicates
+from quantamind.parse.public_api import Break
 from quantamind.render.blocks.verdict_block import Stated
 from quantamind.types.checked import Checked
 from quantamind.types.finding import Finding
@@ -35,6 +36,7 @@ def beyond_the_ranking(
     blind: str = "",
     context: Context | None = None,
     repeated: Duplicates | None = None,
+    breaks: Sequence[Break] = (),
 ) -> bool:
     """Whether anything but the ranking has something to say, so the fuller body is worth rendering.
 
@@ -58,4 +60,5 @@ def beyond_the_ranking(
         or blind
         or (context is not None and not context.empty())
         or (repeated is not None and bool(repeated.repeats))
+        or bool(breaks)
     )

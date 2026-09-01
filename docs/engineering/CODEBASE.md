@@ -474,6 +474,36 @@ cross-repository surface to nothing on the day their declaration stopped parsing
 nobody declared. One malformed entry does not cost the good ones — refusing a whole file over a
 typo loses every link the customer got right.
 
+### `parse/public_api.py` and `verify/consumers.py` — D3b, a break and who imports it
+
+**The one thing on the category's list we did not have.** Qodo advertises *broken API contracts and
+schema drift read against registered consumer repositories*; theirs is a model's reading, this is a
+parser's, and "registered" is their word for D3a's declaration.
+
+**THE BREAK DETECTOR NEEDS NOBODY ELSE'S PERMISSION.** `surface(source)` reads a module's public
+names and their signatures — `__all__` when present, otherwise the leading-underscore convention.
+`broke(before, after)` compares the diff's two sides, both already in the clone. It reports removed
+or renamed, a changed kind, a dropped or reordered parameter, and a new REQUIRED argument.
+
+**Additions are never breaks.** A new export or a defaulted argument leaves every caller working,
+and a section that fired on those would fire on most pull requests. A reorder IS a break even when
+every name survives, because positional callers exist and are invisible from here.
+
+**THE CONSUMER CHECK MATCHES AN IMPORT, NOT A MENTION.** Grepping the symbol would hit a docstring,
+a comment, a same-named local and a string in a fixture. A false *"your change breaks billing"* is
+the most expensive sentence this product can print: it is about somebody else's repository, and the
+reader cannot check it without leaving their pull request.
+
+**A LINK WE CANNOT OPEN IS THE COMMON CASE AND IT IS NAMED.** The App is installed on the repository
+under review and usually not on the one consuming it, so "nothing imports this" and "we could not
+look" will diverge constantly. **Nothing is cloned when nothing broke** — an additive change asks no
+question and fetches nothing, proven by a test whose clone lookup raises.
+
+**The first render of D3a and D3b together contradicted itself**: the D3a line said *"Nothing in
+them was checked"* directly beneath a block reporting that `acme/billing` imports a removed export.
+Two sentences, each true when written, disagreeing in one comment — caught by printing it, and the
+linked block now takes whether the crossing check ran.
+
 ### `serve/change_facts.py` — the deterministic half, gathered in one place
 
 `intent`, `repeated`, `sizes` and `links` arrived one at a time and each added a line to
