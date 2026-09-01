@@ -16,8 +16,8 @@ from __future__ import annotations
 import os
 from collections.abc import Mapping
 from dataclasses import dataclass
-from pathlib import Path
 
+from quantamind.types.dotenv import DOTENV, from_file
 from quantamind.types.env_values import (
     PREFIX,
     SettingsError,
@@ -50,6 +50,10 @@ class Settings:
     free tier, it needs no key, and a process that starts calling a model because a default
     said so is the expensive kind of surprise.
     """
+
+    deployment_shape: str = "cloud"
+    """`cloud`, `on_prem` or `air_gapped`. **D7f — one image, three shapes.**
+    → `types/deployment.py`, which owns what each may reach and refuses an unknown name."""
 
     database_path: str = "quantamind.db"
     max_requests: int = DEFAULT_MAX_REQUESTS
@@ -137,37 +141,6 @@ class Settings:
         return self.inference_enabled and self.max_requests > 0 and bool(self.inference_project)
 
 
-def from_file(path: Path) -> dict[str, str]:
-    """`KEY=VALUE` lines from a file, as a mapping. Missing file is an empty mapping, not an error.
-
-    **IT DOES NOT TOUCH `os.environ`.** A loader that mutates the process environment makes every
-    later reader depend on import order, and the effect outlives the test that caused it. This
-    returns a value and `load()` decides what to do with it.
-
-    **THE REAL ENVIRONMENT WINS.** A file checked into a working tree must never override what an
-    operator exported for this process.
-    """
-    if not path.is_file():
-        return {}
-    out: dict[str, str] = {}
-    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#") or "=" not in stripped:
-            continue
-        key, _, value = stripped.partition("=")
-        out[key.strip()] = value.strip().strip("'\"")
-    return out
-
-
-DOTENV = Path(__file__).resolve().parents[3] / ".env"
-"""The repository root, NOT the package directory.
-
-**A `.env` INSIDE `src/quantamind/` IS PACKAGE DATA.** It was there, and a wheel build can carry
-package data into a published artefact -- which would ship a webhook secret and a client secret to
-anyone who installs it. Being gitignored does not help: gitignore governs git, not `build`. The
-root is both the convention and outside the package."""
-
-
 def load(env: Mapping[str, str] | None = None) -> Settings:
     """Build settings from a mapping, defaulting to the process environment.
 
@@ -176,6 +149,7 @@ def load(env: Mapping[str, str] | None = None) -> Settings:
     """
     source: Mapping[str, str] = {**from_file(DOTENV), **os.environ} if env is None else env
     return Settings(
+        deployment_shape=source.get(PREFIX + "DEPLOYMENT_SHAPE") or "cloud",
         database_path=source.get(PREFIX + "DATABASE_PATH", "quantamind.db"),
         max_requests=read_int(source, "MAX_REQUESTS", DEFAULT_MAX_REQUESTS),
         threshold_percentile=read_float(

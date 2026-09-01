@@ -796,11 +796,30 @@ where we cannot.
 - [ ] **D7e SOC 2 Type II.** External, expensive, months of evidence collection, and no code we
       can write substitutes for it. Recorded so nobody plans around its absence. **Until it
       exists, say so** — a buyer discovering it mid-procurement costs more than the deal.
-- [ ] **D7f Three deployment shapes, one container.** Cloud (we run it), on-prem (they run the
-      same image), air-gapped (Half A only, no network beyond the clone). The image already
-      exists; what is missing is on-prem installation docs and an air-gapped mode that REFUSES to
-      make a network call rather than merely not making one — an outbound call that fails quietly
-      in a bank is a finding against us, not a bug.
+- [x] **D7f Three deployment shapes, one container.** `types/deployment.py` +
+      `scripts/guard/runtime/check_network_chokepoint.py` + `docs/engineering/DEPLOYMENT.md`.
+      One variable, `QUANTAMIND_DEPLOYMENT_SHAPE`; **an unrecognised value refuses rather than
+      defaulting to `cloud`**, which would turn a typo in an air-gapped customer's configuration
+      into a deployment that reaches the network.
+      **IT REFUSES, IT DOES NOT MERELY FAIL TO CONNECT.** `permit()` is called before the socket
+      opens at all nine outbound sites, and a forbidden destination raises `NetworkRefused` naming
+      the shape, the destination and what IS permitted. Verified on the real code paths: air-gapped
+      refuses inference, the package index, Jira and Slack; cloud reaches PyPI and returns a real
+      answer. **The clone is the boundary, not an exception** — with no repository there is nothing
+      to review, so refusing it would be an off switch rather than an air gap.
+      **THE GUARD IS WHAT MAKES IT A MECHANISM**, failing the build if any module opens a socket or
+      runs a networked git subcommand without asking. It matches on primitives, not names, and it
+      caught its own false positive twice on `serve/cli.py` before settling on "imports
+      `subprocess`" as the signal. 25 tests, 7 sabotages caught including removing a single
+      `permit` call from one module.
+      **Three of this repository's own guards caught the work mid-flight** — the config renderer
+      must report every `Settings` field, guard thresholds must be recorded, and a withdrawal may
+      not name an enforcer that does not exist. The last one was itself broken: its pattern stopped
+      at `/`, so moving a guard into a sub-package made every withdrawal naming it read as a
+      phantom.
+      **NOT VERIFIED INSIDE A REAL AIR-GAPPED NETWORK** — the refusals are tested and no module
+      bypasses them, but nobody has run this in a customer's isolated environment, and
+      `DEPLOYMENT.md` says so.
 
 **The framing for all of Phase D:** build what the competitor sells, but with the thesis —
 deterministic where a parser can answer, provenance on every verdict, refusals returned rather

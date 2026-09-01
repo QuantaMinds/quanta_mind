@@ -35,6 +35,8 @@ import urllib.error
 import urllib.request
 from typing import NamedTuple
 
+from quantamind.types.deployment import Destination, permit
+
 METADATA_URL = (
     "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token"
 )
@@ -62,6 +64,10 @@ def _from_metadata() -> str | None:
     """A token from the GCP metadata server, or `None` when we are not on GCP."""
     request = urllib.request.Request(METADATA_URL, headers={"Metadata-Flavor": "Google"})
     try:
+        # **ASK BEFORE THE SOCKET OPENS.** D7f: an air-gapped deployment REFUSES
+        # this, rather than attempting it and failing somewhere the customer sees
+        # in their egress log and we do not.
+        permit(Destination.GOOGLE_METADATA)
         with urllib.request.urlopen(request, timeout=METADATA_TIMEOUT_S) as reply:
             body = json.loads(reply.read())
     except (urllib.error.URLError, TimeoutError, OSError, ValueError):

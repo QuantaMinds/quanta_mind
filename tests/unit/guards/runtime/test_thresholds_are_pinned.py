@@ -31,7 +31,7 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-GUARDS = Path(__file__).resolve().parents[3] / "scripts" / "guard"
+GUARDS = Path(__file__).resolve().parents[4] / "scripts" / "guard"
 
 # Every integer threshold in the guard layer, as of 2026-08-29. A guard added with a new
 # threshold fails here until its number is recorded, which is the point: an unrecorded
@@ -42,12 +42,16 @@ RECORDED: dict[str, int] = {
     "check_branch_name.py::GIT_TIMEOUT_S": 30,
     "check_conventions.py::floor(python files)": 40,
     "check_module_identity.py::floor(python modules)": 40,
-    "check_no_partial_clone.py::CLONE_FILE_FLOOR": 10,
+    # D7f. **40 IS THE SAME FLOOR `check_module_identity` USES** for "did the walk find the
+    # source tree at all", copied rather than chosen: this guard examines every python module in
+    # `src/`, and a run that examined none must report a broken walk instead of "ok".
+    "runtime/check_network_chokepoint.py::floor(python modules)": 40,
+    "runtime/check_no_partial_clone.py::CLONE_FILE_FLOOR": 10,
     "check_no_research_imports.py::floor(python files)": 40,
     "check_structure.py::MAX_DIR_FILES": 15,
     "check_structure.py::MAX_FILE_LINES": 200,
     "check_structure.py::floor(source files)": 40,
-    "check_subprocess_timeouts.py::SUBPROCESS_FLOOR": 10,
+    "runtime/check_subprocess_timeouts.py::SUBPROCESS_FLOOR": 10,
     # Set below the count `docs/` actually holds, to catch discovery collapsing rather than
     # to police the number drifting. Same floor and same reason as the resolver beside it.
     "citations/identity.py::floor(documents)": 20,

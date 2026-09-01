@@ -38,7 +38,7 @@ three months stale.
 
 | layer | modules | files |
 |---|---|---|
-| `types/` | **13** | `change.py`, `commit.py`, `deep.py`, `env_values.py`, `finding.py`, `pooled_outcome.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `settings.py`, `spend.py`, `touch.py`, `verdict.py` |
+| `types/` | **15** | `change.py`, `commit.py`, `deep.py`, `deployment.py`, `dotenv.py`, `env_values.py`, `finding.py`, `pooled_outcome.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `settings.py`, `spend.py`, `touch.py`, `verdict.py` |
 | `store/` | **15** | `accounts.py`, `calibration.py`, `compliance.py`, `costs.py`, `deliveries.py`, `drift.py`, `installations.py`, `lifecycle.py`, `migrations.py`, `reviews.py`, `rule_checks.py`, `schema.py`, `tables.py`, `tenancy.py`, `touches.py` |
 | `ingest/` | **13** | `app_auth.py`, `blob.py`, `change_shape.py`, `commits.py`, `diff.py`, `git_credentials.py`, `github_api.py`, `google_auth.py`, `history.py`, `pull_refs.py`, `reachability.py`, `review_window.py`, `worktree.py` |
 | `parse/` | **11** | `body_shape.py`, `change_effort.py`, `duplicate_bodies.py`, `importers.py`, `imports.py`, `languages.py`, `public_api.py`, `python_names.py`, `secret_scan.py`, `suite_reach.py`, `units.py` |

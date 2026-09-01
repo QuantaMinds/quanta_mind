@@ -31,6 +31,8 @@ import subprocess
 from collections.abc import Sequence
 from pathlib import Path
 
+from quantamind.types.deployment import Destination, permit
+
 
 def refspecs(pull_refs: Sequence[int] | None) -> list[str]:
     """Refspecs for the pull heads asked for. None means every one, which is the old behaviour."""
@@ -49,6 +51,9 @@ def present(
     """
     if not pull_refs:
         return []
+    # **ASK BEFORE GIT REACHES THE REMOTE.** D7f: air-gapped permits the clone and refuses
+    # everything else, rather than attempting it and failing where only the customer sees.
+    permit(Destination.GIT_REMOTE)
     done = subprocess.run(
         [
             "git",

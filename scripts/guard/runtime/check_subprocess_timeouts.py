@@ -27,6 +27,11 @@ from __future__ import annotations
 
 import ast
 import sys
+from pathlib import Path
+
+# Running a guard as a script puts only ITS directory on sys.path[0]. This one lives one level
+# down, so the shared modules beside its parent are added explicitly.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from coverage import assert_examined, guarded, refuse_path_argument
 from discovery import Violation, iter_python_files, project_root, report

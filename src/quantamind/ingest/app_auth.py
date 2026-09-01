@@ -40,6 +40,8 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
+from quantamind.types.deployment import Destination, permit
+
 API = "https://api.github.com"
 SIGN_TIMEOUT_S = 30
 HTTP_TIMEOUT_S = 30
@@ -107,6 +109,10 @@ def _call(path: str, bearer: str, method: str = "GET") -> Any:
         },
     )
     try:
+        # **ASK BEFORE THE SOCKET OPENS.** D7f: an air-gapped deployment REFUSES
+        # this, rather than attempting it and failing somewhere the customer sees
+        # in their egress log and we do not.
+        permit(Destination.GITHUB_API)
         with urllib.request.urlopen(request, timeout=HTTP_TIMEOUT_S) as reply:
             return json.loads(reply.read() or b"null")
     except urllib.error.HTTPError as exc:

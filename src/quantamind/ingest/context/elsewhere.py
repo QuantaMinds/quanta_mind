@@ -32,6 +32,8 @@ import urllib.request
 from dataclasses import dataclass
 from enum import Enum
 
+from quantamind.types.deployment import Destination, permit
+
 TIMEOUT_S = 10
 """Seconds before a context fetch is abandoned. **Context is a nicety; the review is not.**
 
@@ -66,6 +68,10 @@ class Elsewhere:
 def _fetch(request: urllib.request.Request) -> dict[str, object] | Unreachable:
     """One JSON GET. **Every failure becomes a typed value.**"""
     try:
+        # **ASK BEFORE THE SOCKET OPENS.** D7f: an air-gapped deployment REFUSES
+        # this, rather than attempting it and failing somewhere the customer sees
+        # in their egress log and we do not.
+        permit(Destination.EXTERNAL_CONTEXT)
         with urllib.request.urlopen(request, timeout=TIMEOUT_S) as answer:
             payload = json.loads(answer.read().decode("utf-8"))
     except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, OSError):

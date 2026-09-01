@@ -56,9 +56,10 @@ guards:
     uv run python scripts/guard/records/check_documented_commands.py .
     uv run python scripts/guard/records/check_documented_recipes.py .
     uv run python scripts/guard/records/check_decided_vocabulary.py .
-    uv run python scripts/guard/check_no_partial_clone.py .
-    uv run python scripts/guard/check_constant_time_compare.py .
-    uv run python scripts/guard/check_subprocess_timeouts.py .
+    uv run python scripts/guard/runtime/check_no_partial_clone.py .
+    uv run python scripts/guard/runtime/check_constant_time_compare.py .
+    uv run python scripts/guard/runtime/check_subprocess_timeouts.py .
+    uv run python scripts/guard/runtime/check_network_chokepoint.py .
     uv run python scripts/guard/records/check_burned_corpora.py .
     uv run python scripts/guard/records/check_plan_state.py .
     uv run python scripts/guard/records/check_stage_table.py .

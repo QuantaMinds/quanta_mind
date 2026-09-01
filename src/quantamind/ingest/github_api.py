@@ -41,6 +41,7 @@ import urllib.request
 from pathlib import Path
 
 from quantamind.ingest import app_auth
+from quantamind.types.deployment import Destination, permit
 from quantamind.types.settings import load
 
 BASE = "https://api.github.com"
@@ -120,6 +121,10 @@ def call(
         },
     )
     try:
+        # **ASK BEFORE THE SOCKET OPENS.** D7f: an air-gapped deployment REFUSES
+        # this, rather than attempting it and failing somewhere the customer sees
+        # in their egress log and we do not.
+        permit(Destination.GITHUB_API)
         with urllib.request.urlopen(request, timeout=TIMEOUT_S) as reply:
             return bytes(reply.read())
     except urllib.error.HTTPError as exc:

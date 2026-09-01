@@ -21,6 +21,9 @@ from quantamind.types.settings import Settings
 def render_config(settings: Settings) -> str:
     """The resolved configuration, so a misconfiguration is visible before a run, not after."""
     lines = [
+        # **D7f: THE SHAPE IS THE FIRST LINE AN OPERATOR SHOULD SEE.** It decides what this
+        # instance may reach, so a wrong value is a wrong deployment rather than a wrong setting.
+        f"deployment_shape           {settings.deployment_shape}",
         f"database_path              {settings.database_path}",
         f"max_requests               {settings.max_requests}",
         f"threshold_percentile       {settings.threshold_percentile}",

@@ -585,6 +585,33 @@ one reviewer restating themselves inside a single thread, one character-identica
 changes" and "we could not tell which changes" are different answers and the report prints
 different sentences for them.
 
+### `types/deployment.py` — three shapes, one image, and a refusal that is ours
+
+**D7f. An outbound call that fails quietly in a bank is a finding against us, not a bug.** A
+deployment that merely lacks a route produces timeouts and a late review; the customer finds the
+attempt in their egress log and we never see it. So `permit(destination, shape)` is called BEFORE
+the socket opens, and a forbidden destination raises `NetworkRefused` naming the shape, the
+destination, and what IS allowed.
+
+**The clone is the boundary, not an exception to it.** `air_gapped` permits `GIT_REMOTE` and
+nothing else — with no repository there is nothing to review, so refusing it would not be an air
+gap but an off switch. `on_prem` loses only the Google metadata server, whose address exists solely
+inside Google's fabric and elsewhere hangs to a timeout.
+
+**An unrecognised shape refuses rather than defaulting.** Reading a typo as `cloud` would turn a
+misconfigured air-gapped deployment into one that reaches the network — the failure the module
+exists to prevent, arriving through its own configuration.
+
+**`scripts/guard/runtime/check_network_chokepoint.py` is what makes this a mechanism.** It fails
+the build if any module in `src/` opens a socket or runs a networked git subcommand without calling
+`permit` first — nine call sites today, and nine chances to forget one otherwise. It matches on
+primitives rather than names, because a module called `releases.py` reaches PyPI. **It must not be
+relaxed to a name list**: two earlier versions flagged `serve/cli.py`, which names an argparse
+argument `"clone"` and calls a local `run()`, and a guard that fires on deliberate code teaches a
+reader to scroll past it. Importing `subprocess` is the signal that distinguishes them.
+
+Operator documentation: `docs/engineering/DEPLOYMENT.md`.
+
 ### `types/standards/` — a declared rule, and the two kinds of verdict it can receive
 
 **D1c. `rule.py` is the declaration, `checked.py` is what a PARSER decided, `judged.py` is what a

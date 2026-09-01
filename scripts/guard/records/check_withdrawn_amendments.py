@@ -49,7 +49,12 @@ AMENDMENT_ROW = re.compile(r"^\|\s*\*\*(?P<id>A\d+)\*\*\s*\|")
 # and a case-insensitive match would fire on every mention and train people to ignore it.
 WITHDRAWAL = re.compile(r"\b(ABANDONED|WITHDRAWN)\b")
 
-MECHANISM = re.compile(r"\b(guard|ci|hook):([A-Za-z0-9_.-]+)")
+MECHANISM = re.compile(r"\b(guard|ci|hook):([A-Za-z0-9_./-]+)")
+"""**`/` IS PART OF THE NAME.** Guards live in sub-packages — `guard:runtime/check_no_partial_clone`
+— and a pattern stopping at the slash resolved `guard:runtime`, reported it missing, and told the
+author their enforcer did not exist. `check_enforcement_map.py` has accepted sub-package paths since
+`guard:citations/freshness`; this one had not, so moving a guard into a directory made every
+withdrawal that named it read as a phantom."""
 ADVISORY = re.compile(r"\bADVISORY\b")
 
 

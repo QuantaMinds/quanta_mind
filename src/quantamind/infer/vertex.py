@@ -33,6 +33,7 @@ import urllib.error
 import urllib.request
 
 from quantamind.ingest import google_auth
+from quantamind.types.deployment import Destination, permit
 
 MODEL = "gemini-2.5-pro"
 TIMEOUT_S = 300
@@ -77,6 +78,10 @@ def post(url: str, token: str, body: dict[str, object]) -> dict[str, object]:
         headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
     )
     try:
+        # **ASK BEFORE THE SOCKET OPENS.** D7f: an air-gapped deployment REFUSES
+        # this, rather than attempting it and failing somewhere the customer sees
+        # in their egress log and we do not.
+        permit(Destination.INFERENCE)
         with urllib.request.urlopen(request, timeout=TIMEOUT_S) as response:
             parsed = json.loads(response.read())
     except urllib.error.HTTPError as exc:
