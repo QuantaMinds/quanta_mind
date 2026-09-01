@@ -82,7 +82,7 @@ you remember to obey — the machine will stop you either way.
 
 9. **Branch per change.** `feat/`, `fix/`, `chore/`, `docs/`, `spike/`. No direct commits
    to `main`. One logical change per PR.
-   → `scripts/guard/check_branch_name.py` + `scripts/guard/hooks/hook_pre_edit.py` + branch protection
+   → `scripts/guard/check_branch_name.py` + `scripts/guard/check_work_on_main.py`
 
 10. **Docs move with code.** A PR that changes behaviour and does not touch
     `docs/engineering/CODEBASE.md` fails CI. → `scripts/guard/records/check_docs_sync.py`

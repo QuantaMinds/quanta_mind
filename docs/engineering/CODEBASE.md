@@ -585,6 +585,34 @@ one reviewer restating themselves inside a single thread, one character-identica
 changes" and "we could not tell which changes" are different answers and the report prints
 different sentences for them.
 
+### `scripts/guard/check_work_on_main.py` — rule 9, caught however the write was made
+
+**`hook_pre_edit.py` denies writes on `main` and is scoped to `"matcher": "Write|Edit"`.** It never
+sees `Bash`, so `sed -i`, a heredoc, `python -c` or `cat >` edits `main` with the hook none the
+wiser. That is not hypothetical: `CORRECTIONS.md` entry 14 was itself written onto `main` through a
+Bash heredoc, by the author who had just filed an entry about rules with no mechanism behind them.
+
+**A hook cannot cover Bash and a guard does not have to.** Enumerating every shell construction
+that writes a file is a losing game. This looks at the RESULT — the tree is dirty, or the branch is
+ahead of `origin/main` — both of which git can answer whatever produced them. Detection after the
+fact rather than prevention before it, which is weaker and is the strongest thing available.
+
+**It is silent on a clean `main` that matches its remote**, which is what CI sees after every
+merge. A guard that failed there would be switched off within a day, so that case is tested as hard
+as the failing one.
+
+**Uncommitted changes and unpushed commits are separate findings** — one is "you are editing the
+wrong branch", the other is "you have already committed to it", and the second needs a different
+remedy.
+
+**It must keep using `git diff --name-only`, not `git status --porcelain`.** The first version
+sliced past porcelain's fixed-width status prefix while `_git` stripped whitespace from the output,
+so ` M AGENTS.md` arrived as `M AGENTS.md` and the guard reported the name with its first
+character missing. <!-- citation:allow — the truncated name is the DEFECT being described, not a
+document; spelling it out made the citation guard resolve it as one, which is the guard working --> A helper that
+normalises whitespace is right for every other caller and wrong for a format whose first column IS
+whitespace. `--name-only` has no prefix to mis-slice, so the class is gone rather than the instance.
+
 ### `ingest/publish/check_run.py` — the violations, at the line, on the diff
 
 **C2, and it is NOT the commit status D1f built.** That posts one line with one state and no
