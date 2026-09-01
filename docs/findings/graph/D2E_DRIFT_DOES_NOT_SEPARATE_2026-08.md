@@ -75,15 +75,55 @@ association between them is arithmetic rather than evidence. With the fix count 
 *is* `N / churn`, and the whole comparison collapses to "are drifting files edited more?" Across all
 305 files, drift against churn is **r = −0.177**: weak, and enough to matter.
 
-**THE VERDICT IS UNAFFECTED, AND THE REASON IS WORTH WRITING DOWN RATHER THAN ASSUMED.** A shared
-`1/churn` induces a POSITIVE association between drift and fix rate. B2 asked for a positive one and
-observed a **negative** one — so the artefact could only have flattered the hypothesis, and it still
-failed. The bar is if anything more securely unmet than the headline number suggests.
+### ~~The verdict is unaffected~~ — WITHDRAWN. It was wrong, and an isolated judge found it
 
-**It would have mattered enormously had the result gone the other way**, and it was not noticed
-until the follow-up question forced the arithmetic into view. Same family as
-`docs/engineering/CORRECTIONS.md` entry 7: two quantities that look independent and are not. A
-future attempt at this must not use a rate whose denominator is also the outcome's.
+**What this section said:** *a shared `1/churn` induces a POSITIVE association, B2 asked for
+positive and observed negative, so the artefact could only have flattered the hypothesis and the
+bar is more securely unmet than the headline suggests.*
+
+**That argument is false, and its falseness was checkable in one line.** A shared denominator
+induces a positive association **only when the denominator is independent of the numerators**. It
+is not:
+
+| | |
+|---|---|
+| `corr(shifts, churn)` | **+0.696** |
+| `corr(fixes, churn)` | **+0.841** |
+
+Both numerators track the denominator hard. When they do, dividing by it normalises the ratios
+toward constants and the induced sign is **not reliably positive** — it can be negative, which is
+the sign we observed and read as evidence.
+
+**AND THE RAW COUNTS, WITH NO RATIO ANYWHERE, MOSTLY POINT THE OTHER WAY.** Same files, churn
+matched by stratum, comparing `shifts` against `fixes` directly:
+
+| churn band | n | low-shift fixes | high-shift fixes | gap | churn low vs high |
+|---|---|---|---|---|---|
+| 10–20 | 110 | 1.67 | 2.56 | **+0.89** | 13 vs 15 |
+| 20–50 | 122 | 5.85 | 4.67 | −1.17 | 28 vs 34 |
+| 50+ | 73 | 19.00 | 33.71 | **+14.71** | 93 vs 150 |
+
+Two of three bands run **positive** — the direction D2e predicted and the opposite of what the
+ratio analysis reported.
+
+**SO THE STATISTICAL VERDICT IS WITHDRAWN, IN BOTH DIRECTIONS.** The ratio inverts the result
+through correlated denominators; the raw counts confound it through churn, which is what the ratio
+was there to control for and did badly (93 commits against 150 inside one "matched" band). **This
+measurement cannot answer the question either way**, and reporting it as a clean null was as wrong
+as reporting it as a finding would have been.
+
+**D2e stays closed on the OTHER argument, which is independent of all this** — it measured a
+different construct from the one anybody ships. That reasoning does not touch the arithmetic and
+survives it.
+
+**Found by putting this document to an isolated model of a different family and asking it to
+attack.** That is the product's own thesis — *we do not build a better bug-finder, we build the
+judge* — applied to our own research, and the first thing it did was overturn a claim three
+sentences after we had congratulated ourselves for spotting the defect. Recorded as entry 13 of
+`docs/engineering/CORRECTIONS.md`.
+
+**A future attempt must not use a rate whose denominator is also the outcome's, and must not
+assume the direction of an artefact it can measure in one line.**
 
 ## What we are NOT concluding
 

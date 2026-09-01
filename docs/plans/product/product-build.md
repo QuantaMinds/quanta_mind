@@ -476,8 +476,15 @@ spent deliberately. It must not be spent by accident.
       | B1 enough to decide | ≥200 files, ≥3 repos | **305, 4** — MET |
       | B2 drift separates | high tertile **+10pp** | **−3.5pp** — the effect points the other way |
 
-      **The sign is not even stable**: +0.4pp, −4.9pp, −9.3pp across three churn strata, so it is
-      not a usable negative signal either. → `docs/findings/graph/D2E_DRIFT_DOES_NOT_SEPARATE_2026-08.md`
+      **THE STATISTICAL VERDICT WAS LATER WITHDRAWN IN BOTH DIRECTIONS, AND THE ROW STAYS CLOSED
+      ON A DIFFERENT ARGUMENT.** `drift` and the outcome shared a `churn` denominator; the defence
+      that this could only have flattered the hypothesis was **false**, because it assumed the
+      denominator was independent of the numerators and it is not — `corr(shifts, churn) = +0.696`,
+      `corr(fixes, churn) = +0.841`. On raw counts with no ratio, two of three churn bands run the
+      OTHER way. **The measurement cannot answer the question either way.** Found by putting the
+      document to an isolated model of a different family and telling it to attack; recorded as
+      entry 13 of `docs/engineering/CORRECTIONS.md`.
+      → `docs/findings/graph/D2E_DRIFT_DOES_NOT_SEPARATE_2026-08.md`
 
       **AND ONE REPOSITORY WOULD HAVE SHIPPED IT BACKWARDS.** `pallets/werkzeug` alone gave −9.1,
       −21.1 and −19.9pp — strong, consistent, publishable-looking. Pooled across four it collapses.
