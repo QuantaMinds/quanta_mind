@@ -688,10 +688,25 @@ Pulled in as **two separate uses**, because they succeed or fail independently:
       `comment()` verbatim. → `docs/plans/feat-d6a-the-goal-behind-the-change.md`
       ~~The ticket and discussion behind the files being changed,
       shown in the comment. Deterministic, and worth something whatever the model does.~~
-- [ ] **D6b The same text as MODEL input.** **Pre-register a bar.** Shape-context went
-      PASS to NULL under McNemar and a same-arm replicate, and five prompt levers moved nothing.
-      Human context is a DIFFERENT variable — it carries why a change exists, which no diff shape
-      contains — so the null does not condemn it. It does mean measuring rather than assuming.
+- [ ] **D6b The same text as MODEL input. PRE-REGISTERED, AND NOT RUN — THE CORPUS CANNOT ANSWER
+      IT.** → `docs/plans/preregistrations/reviewer/d6b-human-context-preregistration.md`,
+      reproducible by `scripts/measure/context/exposure.py`. The bars are fixed and stand.
+      **The exposed population was measured first**: 33 of the 50 golden changes (66%) carry usable
+      human context, using the product's own `tickets.behind`. On the other 17 the two arms are
+      identical by construction, so 33 is the largest paired n this corpus can have.
+      **Then the power calculation, which design fourteen records as the step it skipped.** McNemar
+      exact at n = 33: a +10% net effect has **12% power**, +15% has 28%. The smallest net effect
+      reachable at 80% power is **+32%** — and no lever in this project's history has moved
+      anything by 32%, while five moved nothing at all. **At any believable effect size this corpus
+      returns a null roughly seven times in eight whether or not the effect is real**, and that
+      null would be read as "human context does not help". Running it would manufacture exactly the
+      kind of unsupported conclusion `TEMPLATE.md` exists to prevent.
+      **A corpus of ~250 hand-labelled changes across 6 repositories is the entry price** for a
+      +10% effect. Two prerequisites also do not exist: `Ticket` carries no body (D6a fetches title
+      and state only, so "the same text" has no text), and feeding ticket text to a model is a
+      third destination `ingest/context/egress.py` does not yet name.
+      **This row stays unticked on purpose.** The work done is the pre-registration and the
+      feasibility proof, which is what the row asked for when it said "pre-register a bar".
 - [x] **D6c Sources, cheapest first.** `ingest/context/egress.py` + `ingest/context/elsewhere.py`.
       Jira and Slack are REST and JSON over HTTPS, so `urllib` reaches both and
       `dependencies = []` holds; both take the customer's token rather than reading a credential
