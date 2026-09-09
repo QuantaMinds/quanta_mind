@@ -3875,6 +3875,44 @@ admits less when the thing it guards is broken is not a check.
 `--help` because `docs/product/QUANTAMIND.md` says the product publishes no model findings, and a
 slash command turning it on would be that drift with a friendlier entry point.
 
+### Three commit shapes that printed one line — issue #95
+
+**The same defect as the paragraphs above, one layer lower, and it survived them.** `--json` was
+made machine-readable on the two early exits; what nobody checked was whether the path that
+*does* rank could reach a third situation and report it as a fourth. It could.
+
+`_timestamp()` in `serve/commands/run_commit.py` read a commit's changed paths with
+`git show --name-only --format=%ct`. **Git prints no filenames for a merge commit** — it
+suppresses a merge's diff unless asked for one explicitly — so the function returned
+`([], time)` for every merge. On the most common GitHub workflow the head commit of a pull
+request *is* a merge, so `quantamind review --sha` was blind to the shape it will meet most,
+and said nothing about being blind.
+
+**The second half is why both counters read zero.** The `REVIEWABLE_SUFFIXES` filter ran inside
+`_timestamp`, so a file in a language `parse/` does not read was dropped before anything could
+count it: `skipped` was structurally incapable of being non-zero on this path. A commit of pure
+Markdown and a merge and a commit that changed nothing all printed
+`0 file(s) ranked, 0 skipped as unsupported` and exited 0.
+
+The read is now `git diff-tree -m --first-parent -r --name-only --root --format=%ct`. `-m
+--first-parent` asks for the diff a merge brought in; `--root` lets an initial commit report its
+own files rather than none. **`_timestamp` returns every path**, and the caller filters — the same
+shape the no-`--sha` branch already had, which is why that branch could name its reason and this
+one could not.
+
+**And `review()` is now handed every path rather than the readable ones.** It does its own
+language split into `considered` and `skipped`, so a pre-filtered list left `skipped` empty on
+*every* run of this command, not only the failing ones — the coverage line could not name a single
+file it had passed over. Reviewing flask `3709c4a9` reported `0 skipped` before and `1 skipped`
+after, on a commit nobody thought was broken.
+
+**Tested by naming the artefact, per rule 14.** `tests/live/test_review_commit_live.py` pins
+flask's merge `089cb86d` and asserts `src/flask/app.py` is among the paths returned — a
+merge-blind reader returns `[]`, which no count-based assertion distinguishes from a small
+change. A companion test asserts the pinned commits still have the parent counts the file
+relies on, so a rewritten corpus fails loudly instead of quietly making the suite meaningless.
+Both halves were sabotaged and the named tests failed for each.
+
 ### The oracles, made reachable — issue #87
 
 `docs/findings/oracles/WHY_THE_ORACLES_NEVER_FIRE_2026-08.md` found that across 65 changes the gate had
