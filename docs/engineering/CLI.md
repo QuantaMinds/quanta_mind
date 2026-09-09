@@ -124,10 +124,18 @@ nothing and needs no token** — this is the command a sceptic runs before grant
 Omit `--sha` to review uncommitted work, or the commits on this branch that are not on the
 default one, which is the review worth having before a pull request exists.
 
-**`--sha` on a merge commit reviews nothing, silently.** `_timestamp()` in
-`serve/commands/run_commit.py` reads the changed paths with `git show --name-only`, which prints
-no filenames for a merge, so the command reports `0 file(s) ranked, 0 skipped` and exits 0. That
-is a clean zero of exactly the kind `AGENTS.md` rule 14 names, and it is not yet fixed.
+**Three outcomes, and they used to print the same line.** `_timestamp()` read the changed paths
+with `git show --name-only`, which emits no filenames for a **merge**, and it applied the suffix
+filter itself, so nothing unreadable could reach the `skipped` count. A merge, a change with
+nothing in a language we read, and a commit that changed nothing all reported `0 file(s) ranked,
+0 skipped` and exited 0 — a clean zero of the kind `AGENTS.md` rule 14 names. Fixed in issue #95:
+the read is `git diff-tree -m --first-parent --root`, and the caller filters.
+
+| the commit | what it says now |
+|---|---|
+| a merge | `5 file(s) ranked, 1 skipped as unsupported` — the first-parent diff, which is what the merge brought in |
+| nothing we read | `3 file(s) changed, none in a language we read`, and `not_reviewed_because: no_supported_language` under `--json` |
+| unknown to the clone | `<sha> is not in <clone>`, exit **1** |
 
 ### `quantamind serve [--port N]` — binds; authenticates; **reviews**
 

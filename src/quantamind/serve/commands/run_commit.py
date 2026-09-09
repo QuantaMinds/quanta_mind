@@ -53,9 +53,22 @@ def review_commit(
     if sha:
         stamp = _timestamp(clone, sha)
         if stamp is None:
-            print(f"{sha[:12]} is not in {clone}, or has no reviewable files")
+            print(f"{sha[:12]} is not in {clone}")
             return 1
-        changed, as_of = stamp
+        touched, as_of = stamp
+        changed = [p for p in touched if p.endswith(REVIEWABLE_SUFFIXES)]
+        if not changed:
+            # **THE SAME TYPED ANSWER THE NO-SHA PATH ALREADY GAVE.** This branch could not reach
+            # it while `_timestamp` did the filtering, so `--sha` on a Markdown-only commit was
+            # indistinguishable from `--sha` on a commit that changed nothing.
+            if as_json:
+                print(unreviewed(NotReviewed.NO_SUPPORTED_LANGUAGE, changed=touched, origin=origin))
+            else:
+                print(
+                    f"[review] {len(touched)} file(s) changed, "
+                    f"{NotReviewed.NO_SUPPORTED_LANGUAGE.sentence()}"
+                )
+            return 0
     else:
         # **NO COMMIT MEANS THE REVIEW WORTH HAVING: WHAT IS NOT COMMITTED, OR NOT PUSHED.** By the
         # time a pull request exists the developer has stopped and asked other people to look. The
@@ -73,23 +86,25 @@ def review_commit(
         origin = work.origin
         if not as_json:
             print(f"[review] reviewing {origin}")
-        changed = [p for p in work.paths if p.endswith(REVIEWABLE_SUFFIXES)]
+        touched = list(work.paths)
+        changed = [p for p in touched if p.endswith(REVIEWABLE_SUFFIXES)]
         if not changed:
             if as_json:
-                print(
-                    unreviewed(NotReviewed.NO_SUPPORTED_LANGUAGE, changed=work.paths, origin=origin)
-                )
+                print(unreviewed(NotReviewed.NO_SUPPORTED_LANGUAGE, changed=touched, origin=origin))
             else:
                 print(
-                    f"[review] {len(work.paths)} file(s) changed, "
+                    f"[review] {len(touched)} file(s) changed, "
                     f"{NotReviewed.NO_SUPPORTED_LANGUAGE.sentence()}"
                 )
             return 0
         # Scored against history up to now: the change has no commit, so there is no committer
         # date to bound it by, and the honest bound is the moment the review runs.
         as_of = int(time.time())
+    # **EVERY PATH GOES IN, NOT THE READABLE ONES.** `review()` splits them itself into
+    # `considered` and `skipped` -- so handing it a pre-filtered list left `skipped` empty on
+    # every run, and the coverage line could not name a single file it had passed over.
     with TemporaryDirectory() as scratch:
-        out = review(clone, repo, changed, Path(scratch) / "review.db", as_of=as_of)
+        out = review(clone, repo, touched, Path(scratch) / "review.db", as_of=as_of)
     if as_json:
         # **ONE OBJECT ON STDOUT AND NOTHING ELSE.** A tool parsing this must not have to strip
         # progress lines out of it first, so the human-facing prints are skipped entirely rather
@@ -113,9 +128,36 @@ def review_commit(
 
 
 def _timestamp(clone: Path, sha: str) -> tuple[list[str], int] | None:
-    """The reviewable files a commit changed, and its time. None when the commit is unknown."""
+    """EVERY file a commit changed, and its time. None when the commit is unknown.
+
+    **`diff-tree`, NOT `git show`, AND THE DIFFERENCE IS A MERGE.** `git show --name-only` prints
+    no filenames at all for a merge commit -- git suppresses a merge's diff unless asked for one
+    explicitly -- so this returned `([], time)` for every merge, and the caller reported `0 file(s)
+    ranked, 0 skipped` and exited 0. A merge is the head commit of a pull request on the most
+    common GitHub workflow, so the command was silently blind to the shape it will meet most.
+    `-m --first-parent` asks for the diff against the first parent, which is what the merge
+    brought in; `--root` is what lets an initial commit report its own files rather than none.
+
+    **AND IT RETURNS EVERY PATH, NOT THE READABLE ONES.** The suffix filter used to run here, so
+    a file in a language we do not read was dropped before anyone could count it: `skipped` was
+    structurally incapable of being anything but zero on this path, and a commit of pure Markdown
+    printed the same two zeros as a merge and as a commit that changed nothing. Three situations,
+    one line, one exit code. The caller filters and names which one it met. -> issue #95
+    """
     done = subprocess.run(
-        ["git", "-C", str(clone), "show", "--name-only", "--format=%ct", sha],
+        [
+            "git",
+            "-C",
+            str(clone),
+            "diff-tree",
+            "-m",
+            "--first-parent",
+            "-r",
+            "--name-only",
+            "--root",
+            "--format=%ct",
+            sha,
+        ],
         capture_output=True,
         text=True,
         timeout=60,
@@ -125,8 +167,7 @@ def _timestamp(clone: Path, sha: str) -> tuple[list[str], int] | None:
     lines = [x for x in done.stdout.splitlines() if x.strip()]
     if not lines:
         return None
-    changed = [p for p in lines[1:] if p.endswith(REVIEWABLE_SUFFIXES)]
-    return changed, int(lines[0])
+    return lines[1:], int(lines[0])
 
 
 def report(clone: Path, sha: str, out: Reviewed, project: str, gcloud: str = "gcloud") -> None:
