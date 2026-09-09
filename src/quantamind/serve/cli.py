@@ -2,7 +2,10 @@
 
 WHAT: `main()` and the argument parser behind `uv run quantamind`. `config` prints the resolved
       settings, `retrospective` replays the ranker over a clone's own history, `serve` binds the
-      webhook endpoint. `review` is the one command still unbuilt, and it says so and exits 2.
+      webhook endpoint, and `review` ranks one change from a clone and prints what we would say.
+      The commands still unbuilt are registered by the loop at the end of `build_parser`, which
+      is also what `check_documented_recipes.py` reads to decide which ones the docs may call
+      unbuilt -- so this docstring must never carry that list a second time.
 WHY:  The CLI is not a convenience. It runs the retrospective, it is how a sceptic verifies
       us before granting repository access, and it is what answers the ranker gate. So it is
       built first and stays. The App is this plus a webhook, a signature check and
