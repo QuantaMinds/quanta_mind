@@ -1794,6 +1794,48 @@ nothing about them could ever be checked, and their rows sat at "not begun" thro
 build. Silently passing an unverifiable stage is the unreachable-check defect: identical output
 whether the stage is honest or three months stale.
 
+**And the guard was blind to the STATUS cell until issue #96.** Every rule above reads a row's
+*evidence* cell; the status cell was matched against the `STATUSES` vocabulary and never against
+the filesystem. The not-begun rule reads a **stage section's steps**, so it never ran for a row
+whose stage has no section — and the real plan carried **seven summary rows and six sections**.
+The unchecked row was the wrong one: `the reviewer — allocate, infer, verify` sat at `NOT BEGUN`
+while `allocate/`, `infer/` and `verify/` all held modules, through the entire reviewer build.
+
+**Rule 5 closes it in the same one-directional shape as the rest:** a row whose status says
+`NOT BEGUN` while every module its evidence names exists. A row genuinely not begun may still say
+so — tested in both directions, because a rule that only bans a phrase is a spell-checker.
+
+#### `check_documented_recipes.py` — the marker was a one-way suppression with no expiry
+
+`documented-command:unbuilt` lets a document name a command that does not exist yet. `if UNBUILT
+in line` ran **before any check**, so the guard printed the same thing whether the marker was
+still true or nobody had removed it after the command shipped. Nothing expired it, and no test
+asked.
+
+That is what let `README.md` and `docs/engineering/CLI.md` carry *"`quantamind review` — NOT
+BUILT, exits 2"* for months after `review` shipped — while `docs/plans/delivered/feat/
+qm-review-command.md` listed removing the marker under **"Done when"**, and it was removed from
+`AGENTS.md` only. A marker on one of three documents is indistinguishable, to this guard, from a
+marker on all three.
+
+**The verdict is per LINE, not per invocation, and the first draft got that wrong.** `CODEBASE.md`
+carries *"Run `just check`. There is no `just docs-sync`"* under one marker: the marker is doing  <!-- documented-command:unbuilt — quoting the mixed line this rule exists for; `docs-sync` is still absent, so the marker on THIS line is doing the same real work -->
+real work for `docs-sync`, and a per-invocation rule condemned `check` standing beside it. A
+marker is stale only when **everything on its line now exists** — which is pinned by a test, since
+that false positive is the version a reviewer would have been tempted to merge.
+
+**Both guards were at 199 and 196 lines, so neither rule could be added without a split**, and the
+cap did the thing it exists to do rather than being raised. The seams were already there:
+
+| new module | what it owns | split from |
+|---|---|---|
+| `records/claim_rules.py` | the two rules that judge one sentence against disk — absent-but-present, DONE-but-missing | `check_stage_table.py`, which ran them over two unrelated things (an evidence cell, a stage's steps) and read as though they belonged to one |
+| `records/declared_commands.py` | what the repository provides: justfile recipes, and the subcommands `serve/cli.py` registers | `check_documented_recipes.py`, leaving it owning only "does the prose agree" |
+
+**The unbuilt set is still read from `cli.py` and never listed in a guard.** A hand-kept list of
+unbuilt commands goes stale the moment one ships — which is precisely the defect the marker-expiry
+rule catches, and reintroducing it inside that guard would have been the joke writing itself.
+
 **The parsing unit is split out into `plan_claims.py` deliberately.** This repository has now got
 that unit wrong three times in opposite directions — `check_documented_recipes.py` joined two
 backtick spans into one command, `check_decided_vocabulary.py` first split a negation across a
