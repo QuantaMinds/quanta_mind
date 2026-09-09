@@ -41,8 +41,14 @@ def _run(
     row: str = HONEST_ROW,
     step: str = HONEST_STEP,
     heading: str = "# Stage — The retrospective  ·  STARTED",
+    with_stage: bool = True,
 ) -> int:
-    """A one-stage project whose `serve/retrospective.py` genuinely exists."""
+    """A one-stage project whose `serve/retrospective.py` genuinely exists.
+
+    **`with_stage=False` IS THE CASE THAT SHIPPED WRONG.** The real plan carried seven summary
+    rows and six stage sections, and the row without a section was the one that was false: rule 3
+    reads a stage's STEPS, so a row nothing else describes was checked on its evidence cell alone.
+    """
     package = tmp_path / "src" / "quantamind" / "serve"
     package.mkdir(parents=True)
     (package / "retrospective.py").write_text("x = 1\n", encoding="utf-8")
@@ -56,12 +62,7 @@ def _run(
         "| unrelated | three | columns |\n"
         "|---|---|---|\n"
         "| **a gate** | **MET** | not a stage status at all |\n"
-        "\n"
-        f"{heading}\n"
-        "\n"
-        "### Steps\n"
-        "\n"
-        f"{step}\n",
+        "\n" + (f"{heading}\n\n### Steps\n\n{step}\n" if with_stage else ""),
         encoding="utf-8",
     )
     monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(tmp_path))
@@ -127,3 +128,32 @@ def test_a_heading_disagreeing_with_its_summary_row_is_caught(
     """Three places record one state; the plan had 'NEXT' in one and 'STARTED' in another."""
     assert _run(tmp_path, monkeypatch, heading="# Stage — The retrospective  ·  DONE") == 1
     assert "the summary row says" in capsys.readouterr().out
+
+
+def test_a_row_marked_not_begun_is_caught_even_with_no_stage_section(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """**THE DRIFT RULE 3 COULD NOT SEE — issue #96.**
+
+    `the reviewer — allocate, infer, verify` sat at NOT BEGUN in the real plan while `allocate/`,
+    `infer/` and `verify/` all held modules. It had no stage section, so rule 3 -- which reads a
+    stage's steps -- never ran for it, and `_check_claims` is only ever handed the evidence cell.
+    The status cell was compared against the STATUSES vocabulary and nothing else.
+    """
+    row = "| **the retrospective** | **NOT BEGUN** | `serve/retrospective.py` is the replay |"
+    assert _run(tmp_path, monkeypatch, row=row, with_stage=False) == 1
+    out = capsys.readouterr().out
+    assert "says NOT BEGUN" in out, f"the status cell was not checked: {out!r}"
+    assert "serve/retrospective.py" in out, "the violation must name the module that exists"
+
+
+def test_a_row_marked_not_begun_whose_module_is_absent_is_honest_and_passes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """**THE OTHER DIRECTION, OR THE RULE IS JUST A BAN ON THE WORDS.** A stage genuinely not
+    begun must still be allowed to say so."""
+    row = "| **the retrospective** | **NOT BEGUN** | `serve/never_written.py` will replay |"
+    assert _run(tmp_path, monkeypatch, row=row, with_stage=False) == 0, (
+        "an honest NOT BEGUN row was condemned"
+    )
+    assert "1 summary row(s), 0 stage section(s)" in capsys.readouterr().out

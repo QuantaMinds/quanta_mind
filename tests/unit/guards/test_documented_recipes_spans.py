@@ -104,3 +104,45 @@ def test_joining_the_spans_is_what_produced_the_phantom() -> None:
         f"patterns changed, this test is no longer pinning the fault it was written for"
     )
     assert command is not None and command.group("command") == "just"
+
+
+def test_a_marker_on_a_command_that_now_exists_is_reported_stale(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """**THE ROT ITSELF — issue #96.** `config` is registered, so the marker is doing nothing.
+
+    `documented-command:unbuilt` was a one-way suppression with no expiry: `if UNBUILT in line`
+    ran before any check, so the guard printed the same count whether the marker was still true
+    or nobody had removed it. That is what let `README.md` carry "`quantamind review` — NOT BUILT"
+    for months after the command shipped.
+    """
+    prose = "Run `quantamind config` to print settings. documented-command:unbuilt"
+    assert _run(tmp_path, monkeypatch, prose) == 1
+    out = capsys.readouterr().out
+    assert "marker is stale" in out, f"a marker on a built command was suppressed: {out!r}"
+    assert "quantamind config" in out, "the violation must name what it found built"
+
+
+def test_a_marker_covering_one_built_and_one_absent_invocation_is_left_alone(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """**THE FALSE POSITIVE THE FIRST DRAFT PRODUCED, PINNED.**
+
+    `CODEBASE.md` really carries "Run `just check`. There is no `just docs-sync`" under one
+    marker. The marker is doing real work for `docs-sync`; a per-invocation rule condemned
+    `check` beside it. A marker is stale only when EVERYTHING on its line now exists.
+    """
+    prose = "Run `just fixtures`. There is no `just docs-sync`. documented-command:unbuilt"
+    assert _run(tmp_path, monkeypatch, prose) == 0, (
+        "a marker still needed by one invocation was reported stale for its neighbour"
+    )
+    assert "marker is stale" not in capsys.readouterr().out
+
+
+def test_a_marker_on_a_subcommand_the_cli_itself_calls_unbuilt_is_still_required(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """`serve` is in the fixture CLI's UNBUILT map, so its marker is legitimate and must stay."""
+    prose = "Run `quantamind serve` to bind. documented-command:unbuilt"
+    assert _run(tmp_path, monkeypatch, prose) == 0
+    assert "marker is stale" not in capsys.readouterr().out
