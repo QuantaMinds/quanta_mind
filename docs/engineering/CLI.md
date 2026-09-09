@@ -117,12 +117,19 @@ POOLED across 3 repositories
 **Read the positivity count, always.** A pooled win carried by one repository is an artifact, and
 that line is the only thing in the report that can say so.
 
-### `quantamind review <pr>` — NOT BUILT <!-- documented-command:unbuilt -->
+### `quantamind review <clone> [--repo R] [--sha SHA] [--json]`
 
-Exits **2** naming the stage that will deliver it. It parses so the argument shape is fixed; it
-does nothing else.
+Ranks one change from a clone already on disk and prints the comment it would post. **It posts
+nothing and needs no token** — this is the command a sceptic runs before granting any access.
+Omit `--sha` to review uncommitted work, or the commits on this branch that are not on the
+default one, which is the review worth having before a pull request exists.
 
-### `quantamind serve [--port N]` — binds; authenticates; **does not review**
+**`--sha` on a merge commit reviews nothing, silently.** `_timestamp()` in
+`serve/commands/run_commit.py` reads the changed paths with `git show --name-only`, which prints
+no filenames for a merge, so the command reports `0 file(s) ranked, 0 skipped` and exits 0. That
+is a clean zero of exactly the kind `AGENTS.md` rule 14 names, and it is not yet fixed.
+
+### `quantamind serve [--port N]` — binds; authenticates; **reviews**
 
 Serves two routes on `127.0.0.1` (default port **7331**) using the standard library, so the
 project's runtime dependency count is still zero.
@@ -144,15 +151,23 @@ Healthy startup — and read the third line, because it is the honest part:
 [serve] GET  /health   — opens the store and reports what is wrong, never raises
 [serve] GET  /         — the dashboard: sign in, then a repository's reports
 [serve] GET  /r/<owner>/<name> — compliance, outcomes and cost for one repository
-[serve] IT DOES NOT REVIEW. The work callback logs and returns; see run_endpoint.py.
+[serve] It REVIEWS: clone, rank, render. Posting is OFF — it prints the comment it would have posted and writes nothing.
 [serve] http.server is not a hardened edge — run it behind a TLS-terminating proxy.
 ```
 
-**Nothing is wired to the work callback.** A delivery is authenticated, de-duplicated, acknowledged
-and logged; no repository is cloned and no comment is posted, because `review` is not built. The
-banner says so on every start rather than leaving an operator to infer it from an empty output
-directory — an endpoint that quietly accepted and dropped the work would look identical to one
-doing its job.
+**The work callback reviews.** A delivery is authenticated, de-duplicated and acknowledged, then
+the repository is cloned, ranked, read and rendered by `serve/review/review_delivery.py`. **The
+posting half of that line is computed from the `POSTING_ENABLED` setting, not asserted** —
+with `QUANTAMIND_POSTING_ENABLED=0` the endpoint rehearses and prints the comment it would have
+posted. **The variable an operator exports carries the `QUANTAMIND_` prefix**; `read_bool` in
+`types/env_values.py` prepends it, so a bare `POSTING_ENABLED=1` in the environment is read by
+nothing and leaves posting off. Verified by running both.
+
+*That line is worth its own paragraph.* It read `IT DOES NOT REVIEW` for months after `deliver()`
+was wired, so the one message an operator reads at startup told them the endpoint was inert while
+it was cloning and rendering. It was caught by reading a running container's log — not by a test,
+because every test asserted the line was **present**, which it was, and none asked whether it was
+**true**.
 
 | Exit | Meaning |
 | --- | --- |
