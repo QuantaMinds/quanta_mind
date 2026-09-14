@@ -131,6 +131,19 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
         head_sha=head_sha,
     )
 
+    # **THE DETERMINISTIC HALF RUNS FIRST, AND THE ORDER IS THE POINT.** `applied()` decides every
+    # declared rule with a parser and POSTS THE BLOCKING STATUS, so the verdict that can stop a
+    # merge no longer waits on an inference call that cannot change it. It depends on nothing the
+    # model produces -- clone, sha, changed paths, store -- so the only thing the old order bought
+    # was latency on the half we actually sell.
+    #
+    # **THIS ALSO MAKES THE DOCUMENTED PIPELINE TRUE.** `docs/product/HOW_IT_WORKS.md` and the
+    # pitch deck both describe rules as step one and the model as step three. They described the
+    # rendered comment's order, not this function's, and nothing failed when the two disagreed.
+    checks, judged, inherited = applied(
+        clone, head_sha, list(changed), store, delivery_repo, number, settings
+    )
+
     # **THE ALLOCATION DECIDES WHERE INFERENCE GOES.** The measured claim -- top three by fix
     # history misses 1.21% against alphabetical's 3.12% -- is about which files to read FIRST,
     # and a budget is the only consumer that claim ever fitted.
@@ -145,9 +158,6 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     past = {u.unit.site.path: int(u.score.value) for u in reviewed.ranking.units}
     told, unreadable = explain(
         clone, head_sha, delivery_repo, number, reading.paths, settings, history=past
-    )
-    checks, judged, inherited = applied(
-        clone, head_sha, list(changed), store, delivery_repo, number, settings
     )
 
     parts = (part.spend for part in (told, examined) if part is not None)

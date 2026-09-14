@@ -518,6 +518,14 @@ hands it here. These six are one pipeline with one entry point: `review_delivery
 orchestrates, `change_facts.gather()` collects, `standards_step.applied()` enforces,
 `deep_review`/`pin_review` produce findings, `review_body.body_for()` assembles the text.
 
+**THE DETERMINISTIC HALF RUNS FIRST, CHANGED 2026-09-11.** `deliver()` called `examine()` — the
+model — before `applied()`, so the commit status that can block a merge waited on an inference call
+that could not change it. `applied()` takes clone, sha, changed paths, store, repo, number and
+settings, and **nothing the model produces**, so the old order bought only latency on the half we
+sell. It now runs first. **The defect was found by reading the pitch deck against the code**: both
+`docs/product/HOW_IT_WORKS.md` and the deck described rules as step one, they were describing the
+rendered comment's order rather than this function's, and no test noticed the two disagreeing.
+
 **`review_body.py` exists because two renderers were allowed to drift.** Written inline, the "does
 this comment say anything" check omitted `blind` and silently discarded the "I could not review
 this" banner — a refusal became silence, found by this product's own review of itself on
@@ -1793,6 +1801,48 @@ whose steps named no file at all — "Walk closed pull requests, rank each again
 nothing about them could ever be checked, and their rows sat at "not begun" through the entire
 build. Silently passing an unverifiable stage is the unreachable-check defect: identical output
 whether the stage is honest or three months stale.
+
+**And the guard was blind to the STATUS cell until issue #96.** Every rule above reads a row's
+*evidence* cell; the status cell was matched against the `STATUSES` vocabulary and never against
+the filesystem. The not-begun rule reads a **stage section's steps**, so it never ran for a row
+whose stage has no section — and the real plan carried **seven summary rows and six sections**.
+The unchecked row was the wrong one: `the reviewer — allocate, infer, verify` sat at `NOT BEGUN`
+while `allocate/`, `infer/` and `verify/` all held modules, through the entire reviewer build.
+
+**Rule 5 closes it in the same one-directional shape as the rest:** a row whose status says
+`NOT BEGUN` while every module its evidence names exists. A row genuinely not begun may still say
+so — tested in both directions, because a rule that only bans a phrase is a spell-checker.
+
+#### `check_documented_recipes.py` — the marker was a one-way suppression with no expiry
+
+`documented-command:unbuilt` lets a document name a command that does not exist yet. `if UNBUILT
+in line` ran **before any check**, so the guard printed the same thing whether the marker was
+still true or nobody had removed it after the command shipped. Nothing expired it, and no test
+asked.
+
+That is what let `README.md` and `docs/engineering/CLI.md` carry *"`quantamind review` — NOT
+BUILT, exits 2"* for months after `review` shipped — while `docs/plans/delivered/feat/
+qm-review-command.md` listed removing the marker under **"Done when"**, and it was removed from
+`AGENTS.md` only. A marker on one of three documents is indistinguishable, to this guard, from a
+marker on all three.
+
+**The verdict is per LINE, not per invocation, and the first draft got that wrong.** `CODEBASE.md`
+carries *"Run `just check`. There is no `just docs-sync`"* under one marker: the marker is doing  <!-- documented-command:unbuilt — quoting the mixed line this rule exists for; `docs-sync` is still absent, so the marker on THIS line is doing the same real work -->
+real work for `docs-sync`, and a per-invocation rule condemned `check` standing beside it. A
+marker is stale only when **everything on its line now exists** — which is pinned by a test, since
+that false positive is the version a reviewer would have been tempted to merge.
+
+**Both guards were at 199 and 196 lines, so neither rule could be added without a split**, and the
+cap did the thing it exists to do rather than being raised. The seams were already there:
+
+| new module | what it owns | split from |
+|---|---|---|
+| `records/claim_rules.py` | the two rules that judge one sentence against disk — absent-but-present, DONE-but-missing | `check_stage_table.py`, which ran them over two unrelated things (an evidence cell, a stage's steps) and read as though they belonged to one |
+| `records/declared_commands.py` | what the repository provides: justfile recipes, and the subcommands `serve/cli.py` registers | `check_documented_recipes.py`, leaving it owning only "does the prose agree" |
+
+**The unbuilt set is still read from `cli.py` and never listed in a guard.** A hand-kept list of
+unbuilt commands goes stale the moment one ships — which is precisely the defect the marker-expiry
+rule catches, and reintroducing it inside that guard would have been the joke writing itself.
 
 **The parsing unit is split out into `plan_claims.py` deliberately.** This repository has now got
 that unit wrong three times in opposite directions — `check_documented_recipes.py` joined two
@@ -3562,6 +3612,41 @@ tests by name.
 `render/dashboard.py` renders both views because they are two readings of one population — the same
 `review` rows, once for what became of them and once for what they spent.
 
+### `quantamind scan` and `GET /scan` — the first history walk, and what it found
+
+**`serve/commands/run_scan.py`, `render/scan_report.py`, `infer/history_digest.py`, and `_scan` in
+`serve/web/routes.py`.** The CLI walks a clone's history into a scratch index and prints where
+rework has concentrated; the endpoint reports what `serve/onboarding.warm` already indexed for an
+installed repository. Both render through the same module, so the two surfaces cannot drift.
+
+**THE SCAN IS MODEL-FREE AND STAYS THAT WAY.** `docs/product/PITCH_DECK.md` sells the replay on one
+asymmetry — a prospect's history costs us CPU and costs a model-per-change reviewer an inference
+pass per change. **A narration that ran by default would delete that claim**, so `--explain` takes a
+GCP project by name, is `argparse.SUPPRESS`ed from `--help`, and the default path opens no socket.
+
+**ONLY PATHS AND COUNTS CROSS THE BOUNDARY, AND THE COMMAND SAYS SO BEFORE IT SENDS.** The scan
+holds the whole clone; transmitting source would be trivial and is refused. `ingest/context/
+egress.py` draws the same line for a ticket — reading and transmitting are two acts.
+
+**THE MODEL DESCRIBES THE DISTRIBUTION AND IS FORBIDDEN TO DIAGNOSE.** It is shown counts, never
+code, so any defect claim would be invention; `history_digest.PROMPT` bans naming a bug, a risk or
+a fix, and `render/scan_report` prints the paragraph **below** the table, labelled, with the 25.0%
+figure beside it. A transport failure returns a sentence naming the reason, never an exception —
+the table is the product and has already printed.
+
+**`store/touches.hotspots()` TAKES NO `as_of`, DELIBERATELY.** `counts()` refuses a missing bound
+because it scores a change against history that must not contain it. A scan describes a repository
+as it stands; nothing is being ranked, so there is no future to leak.
+
+**`GET /scan?repo=owner/name` REPORTS A SCAN, IT DOES NOT PERFORM ONE.** Cloning over HTTP would
+outlast any client and would hand anyone who can reach the port a way to make this process clone
+arbitrary repositories. A repository the account did not install answers as one that does not
+exist, and `scanned: false` separates "not indexed yet" from "no history".
+
+**A known limit the output makes visible:** a moved file reads as two rows — the real Flask scan
+lists `flask/app.py` at 354 and `src/flask/app.py` at 128. `docs/product/evidence-ledger.md`
+measures that blind spot and leaves it unfixed on purpose; the scan inherits it.
+
 ### `serve/commands/` — one module per thing the CLI can be asked to do
 
 | module | the command |
@@ -3874,6 +3959,44 @@ admits less when the thing it guards is broken is not a check.
 **`--deep` stays out**, and that is tested rather than trusted: `serve/cli.py` suppresses it from
 `--help` because `docs/product/QUANTAMIND.md` says the product publishes no model findings, and a
 slash command turning it on would be that drift with a friendlier entry point.
+
+### Three commit shapes that printed one line — issue #95
+
+**The same defect as the paragraphs above, one layer lower, and it survived them.** `--json` was
+made machine-readable on the two early exits; what nobody checked was whether the path that
+*does* rank could reach a third situation and report it as a fourth. It could.
+
+`_timestamp()` in `serve/commands/run_commit.py` read a commit's changed paths with
+`git show --name-only --format=%ct`. **Git prints no filenames for a merge commit** — it
+suppresses a merge's diff unless asked for one explicitly — so the function returned
+`([], time)` for every merge. On the most common GitHub workflow the head commit of a pull
+request *is* a merge, so `quantamind review --sha` was blind to the shape it will meet most,
+and said nothing about being blind.
+
+**The second half is why both counters read zero.** The `REVIEWABLE_SUFFIXES` filter ran inside
+`_timestamp`, so a file in a language `parse/` does not read was dropped before anything could
+count it: `skipped` was structurally incapable of being non-zero on this path. A commit of pure
+Markdown and a merge and a commit that changed nothing all printed
+`0 file(s) ranked, 0 skipped as unsupported` and exited 0.
+
+The read is now `git diff-tree -m --first-parent -r --name-only --root --format=%ct`. `-m
+--first-parent` asks for the diff a merge brought in; `--root` lets an initial commit report its
+own files rather than none. **`_timestamp` returns every path**, and the caller filters — the same
+shape the no-`--sha` branch already had, which is why that branch could name its reason and this
+one could not.
+
+**And `review()` is now handed every path rather than the readable ones.** It does its own
+language split into `considered` and `skipped`, so a pre-filtered list left `skipped` empty on
+*every* run of this command, not only the failing ones — the coverage line could not name a single
+file it had passed over. Reviewing flask `3709c4a9` reported `0 skipped` before and `1 skipped`
+after, on a commit nobody thought was broken.
+
+**Tested by naming the artefact, per rule 14.** `tests/live/test_review_commit_live.py` pins
+flask's merge `089cb86d` and asserts `src/flask/app.py` is among the paths returned — a
+merge-blind reader returns `[]`, which no count-based assertion distinguishes from a small
+change. A companion test asserts the pinned commits still have the parent counts the file
+relies on, so a rewritten corpus fails loudly instead of quietly making the suite meaningless.
+Both halves were sabotaged and the named tests failed for each.
 
 ### The oracles, made reachable — issue #87
 

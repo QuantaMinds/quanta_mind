@@ -4,15 +4,27 @@
 gets, never how it is worked out. The build status of each line, the cost behind the margins and
 the tier arithmetic are internal and live in `unit-economics.md` — do not merge the two files.
 
+> **THREE THINGS MUST NEVER BE ADDED TO THIS PAGE, AND ALL THREE WERE ON THE LIVE SITE ON
+> 2026-09-11 WHILE THIS FILE SAID OTHERWISE.**
+>
+> 1. **"We hold no copy of your code."** We do. `serve/working_clone.py` keeps a full clone and
+>    fetches it on every use; `sweep()` deletes the least recently used ones. The honest version is
+>    in "What happens to our code?" below and it is a better answer — **a retention claim that is
+>    false is the one mistake on this page that becomes a contract problem rather than a
+>    credibility problem.**
+> 2. **A scheduled or automatic export.** The compliance artefact is produced by a command somebody
+>    runs. Nothing produces one periodically, and nothing in the build plan does.
+> 3. **A price for bring-your-own-model-key.** That row is parked (decision 2026-08-27). A price
+>    published for something nobody can buy is the same error as a feature published for something
+>    nobody built.
+
 ---
 
 |  | **Free** | **Team** | **Enterprise** |
 |---|---|---|---|
 |  | **$0** | **$29** per developer / month | **from $60** per developer / month |
 |  | up to 10 developers | unlimited | unlimited |
-|  | Your standards, enforced on every pull request | Everything in Free, across your whole team | Everything in Team, plus the controls procurement asks for |
-
-**Bring your own model key: $26** per developer / month on Team.
+|  | Your rules, enforced on every pull request | Everything in Free, across your whole team | Everything in Team, plus the controls procurement asks for |
 
 ---
 
@@ -20,16 +32,16 @@ the tier arithmetic are internal and live in `unit-economics.md` — do not merg
 
 | | Free | Team | Enterprise |
 |---|:--:|:--:|:--:|
-| **The standards your team already wrote are enforced** — not remembered, not applied differently by each reviewer | ✅ | ✅ | ✅ |
+| **The rules you write down are enforced on every change** — not remembered, not applied differently by each reviewer | ✅ | ✅ | ✅ |
 | **Work that breaks them does not merge** ¹ | ✅ | ✅ | ✅ |
 | **Review attention goes to the riskiest changes first**, from your repository's own history | ✅ | ✅ | ✅ |
 | **A reviewer sees the answer before they open the pull request** | ✅ | ✅ | ✅ |
 | **Every check, on every file, on the record** — and what could not be checked, named | 30 days | full history | full history |
-| **Evidence you can hand to an auditor** — every check recorded as it happens, never backfilled, never edited | — | ✅ | ✅ |
-| **One dashboard for the whole estate** — what was reviewed, what it found, what it cost | ✅ | ✅ | ✅ |
-| **Catch it before you open the PR** — locally, including uncommitted work | ✅ | ✅ | ✅ |
+| **Evidence you can hand to an auditor** — exportable on demand, recorded as it happens, never backfilled, never edited ² | — | ✅ | ✅ |
+| **One signed-in dashboard covering every repository you install** — what was reviewed, what it found, what it cost | ✅ | ✅ | ✅ |
+| **Catch it before you open the PR** — from your editor's agent or the command line, on uncommitted work and untracked files. Nothing leaves your machine | ✅ | ✅ | ✅ |
 | **A machine-readable answer** your own tools and agents can act on | ✅ | ✅ | ✅ |
-| **Your code is never used to train anything** | ✅ | ✅ | ✅ |
+| **Your code is never used to train anything** — and we say plainly what we do keep ³ | ✅ | ✅ | ✅ |
 | **Define a standard once; every repository is held to it** | — | — | ✅ |
 | **Runs where your policy requires** — your cloud, your region, or your own hardware | — | — | ✅ |
 | **SSO, a signed DPA, and an SLA** | — | — | ✅ |
@@ -38,23 +50,25 @@ the tier arithmetic are internal and live in `unit-economics.md` — do not merg
 plans on private repositories; on a free private repository the result is posted and visible, but
 your host will not enforce it.
 
+² You run the export when you need it. We do not mail you one on a schedule.
+
+³ One working copy of your repository, on our servers, used for reviewing and nothing else. See
+"What happens to our code?" below.
+
 ---
 
 ## What it is for
 
-**Free — your standards, enforced.** Everything a team needs to hold itself to what it has already
+**Free — your rules, enforced.** Everything a team needs to hold itself to the rules it has
 written down, at no cost, with no expiry. Up to ten developers.
 
 **Team — $29 per developer, per month.** The same across an unlimited team, with the full
-full recorded history and a dashboard over every repository. **That is less than twenty minutes of one
+recorded history and a report on every repository. **That is less than twenty minutes of one
 engineer's time a month.** It is a fair bar to hold us to, and it is the one we would use.
 
 **Enterprise — from $60 per developer, per month.** For organisations where the question is not
 whether the tool works but whether it is allowed: one standard across every repository, deployment
 where your policy requires, SSO, a DPA, an SLA.
-
-**Bring your own model key — $26.** Use your own provider account, your own rates and commitments,
-your own data-retention terms. Available on Team and Enterprise.
 
 ---
 
@@ -78,4 +92,7 @@ on our servers, because a review reads its history — that copy is what the rev
 against, and it is used for nothing else.
 
 **Is the free tier a trial?**
-No. It does not expire and it does not degrade.
+No. It does not expire and it does not degrade. **We would not claim that as a differentiator** —
+CodeRabbit and Greptile both run permanent free tiers too, and theirs carry no seat limit where
+ours stops at ten developers. Ours is here so a team can start keeping a record today, not because
+it is more generous than everyone else's.

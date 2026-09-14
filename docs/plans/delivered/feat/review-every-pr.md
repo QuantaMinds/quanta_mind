@@ -1,7 +1,13 @@
 # Review every pull request — open the gate, and make the ranking pay for it
 
-**Status: PLAN. Nothing here is built.** Required by AGENTS.md "Working rules" because it changes
-`rank/` and `verify/` — the layers that decide where we look and what we publish.
+**Status: DELIVERED. The banner below was stale and said the opposite.** This plan is built:
+`serve/review/review_delivery.py` calls the model on every reviewable change, and
+`rank.order.fires()` no longer decides whether we speak — it survives as a label on `Ranking` and
+as the firing-rate estimate computed for a prospect. **Everything after this line is the plan as
+written, in future tense, and must be read as history.** It said "Status: PLAN. Nothing here is
+built" while sitting in `delivered/`, and that sentence is why a later reader described the product
+as speaking on one change in ten. Required by AGENTS.md "Working rules" because it changes `rank/`
+and `verify/` — the layers that decide where we look and what we publish.
 
 ## Why this changes
 

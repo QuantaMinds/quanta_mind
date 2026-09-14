@@ -1,8 +1,8 @@
 """The prior-touch index: write history into it, and count touches strictly before a change.
 
-WHAT: `ensure_repo()` registers a repository, `index()` writes `Touch` values into the store, and
-      `counts()` returns, for each path asked about, how many touches fall in the window ending
-      just before a given commit.
+WHAT: `ensure_repo()` registers a repository and `repo_id()` finds one WITHOUT registering it;
+      `index()` writes `Touch` values; `counts()` returns per-path touches in the window ending
+      just before a commit; `hotspots()` describes a repository as it stands.
 WHY:  The ranking is this count and nothing else. **The window is half-open — `[as_of - window,
       as_of)` — and the exclusive upper bound is the whole product.** A ranking that can see any
       commit at or after the change it is ranking is not a prediction, it is a lookup, and a
@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import sqlite3
 from collections.abc import Iterable, Mapping, Sequence
+from dataclasses import dataclass
 
 from quantamind.types.touch import Touch
 
@@ -149,3 +150,51 @@ def counts(
     for path, n in rows:
         out[str(path)] = int(n)
     return out
+
+
+@dataclass(frozen=True, slots=True)
+class Hotspots:
+    """Where a repository's history says rework has landed, and how wide the window really is.
+
+    **`tracked` AND `touches` ARE CARRIED BECAUSE THEIR RATIO IS THE ANSWER**, and `first` and
+    `last` because three weeks and seven years give the same shape of table.
+    """
+
+    files: tuple[tuple[str, int], ...]
+    tracked: int
+    touches: int
+    first: int
+    last: int
+
+
+def hotspots(conn: sqlite3.Connection, repo_id: int, *, limit: int = 10) -> Hotspots:
+    """The most-touched paths, with the totals that say what the list is a fraction of.
+
+    **NO `as_of` HERE, AND THAT IS NOT THE OMISSION IT LOOKS LIKE.** `counts()` refuses a missing
+    bound because it scores a change against history that must not contain it. Nothing is being
+    ranked here, so there is no future to leak.
+    """
+    if limit <= 0:
+        raise ValueError(f"limit must be positive, got {limit}")
+    rows = conn.execute(
+        "SELECT path, COUNT(*) AS n FROM touch WHERE repo_id = ? "
+        "GROUP BY path ORDER BY n DESC, path ASC LIMIT ?",
+        (repo_id, limit),
+    ).fetchall()
+    tracked, touches, first, last = conn.execute(
+        "SELECT COUNT(DISTINCT path), COUNT(*), MIN(committed_at), MAX(committed_at) "
+        "FROM touch WHERE repo_id = ?",
+        (repo_id,),
+    ).fetchone()
+    files = tuple((str(path), int(n)) for path, n in rows)
+    return Hotspots(files, int(tracked or 0), int(touches or 0), int(first or 0), int(last or 0))
+
+
+def repo_id(conn: sqlite3.Connection, host: str, name: str) -> int | None:
+    """This repository's row id, or `None`. **Reads; never inserts, and that is the whole point.**
+
+    `ensure_repo` is the write path and a GET must not reach it: a read that provisioned the thing
+    it was reading would leave a row behind for every repository anybody asked about.
+    """
+    row = conn.execute("SELECT id FROM repo WHERE host = ? AND name = ?", (host, name)).fetchone()
+    return None if row is None else int(row[0])

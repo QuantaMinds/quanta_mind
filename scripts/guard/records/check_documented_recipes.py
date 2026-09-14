@@ -25,7 +25,6 @@ CONSUMED BY: `just guards`; CI.
 
 from __future__ import annotations
 
-import ast
 import re
 import sys
 from collections.abc import Iterator, Sequence
@@ -37,6 +36,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from coverage import assert_examined, guarded, refuse_path_argument
 from discovery import Violation, project_root, report
+
+from records.declared_commands import cli_commands, recipes
 
 # **A FLOOR, NOT A TARGET.** Below today's count, to catch discovery collapsing.
 RECIPE_FLOOR = 20
@@ -50,14 +51,12 @@ DOC_ROOTS = (
     "CONTRIBUTING.md",
     "BRIEFING.md",
 )
-CLI = "src/quantamind/serve/cli.py"
 UNBUILT = "documented-command:unbuilt"
 
 # `just <recipe>`, and `quantamind <subcommand>` however it is invoked -- bare or after `uv run`.
 JUST_CALL = re.compile(r"\bjust\s+(?P<recipe>[a-z][a-z0-9-]*)")
 QM_CALL = re.compile(r"\bquantamind\s+(?P<command>[a-z][a-z0-9-]*)")
 # A recipe definition: a name at column 0, optional parameters, then a colon.
-RECIPE_DEF = re.compile(r"^([a-z][a-z0-9-]*)\s*(?:[A-Za-z0-9_= \"'.]*)?:", re.MULTILINE)
 # Only CODE is scanned: a fenced block, or a backtick span. Prose says "just falsified the
 # hypothesis" and means the adverb. The alternative -- a blocklist of English words -- is a
 # blocklist that goes stale silently, which is the defect class this guard exists to catch.
@@ -82,46 +81,6 @@ def _finds(pattern: re.Pattern[str], spans: Sequence[str]) -> Iterator[re.Match[
         yield from pattern.finditer(span)
 
 
-def _recipes(root: Path) -> set[str]:
-    justfile = root / "justfile"
-    return (
-        set(RECIPE_DEF.findall(justfile.read_text(encoding="utf-8")))
-        if justfile.is_file()
-        else set()
-    )
-
-
-def _cli_commands(root: Path) -> tuple[set[str], set[str]]:
-    """(every registered subcommand, the ones the CLI itself calls unbuilt)."""
-    path = root / CLI
-    if not path.is_file():
-        return set(), set()
-    tree = ast.parse(path.read_text(encoding="utf-8"))
-    registered: set[str] = set()
-    unbuilt: set[str] = set()
-    for node in ast.walk(tree):
-        # subparsers.add_parser("config", ...)
-        if (
-            isinstance(node, ast.Call)
-            and isinstance(node.func, ast.Attribute)
-            and node.func.attr == "add_parser"
-            and node.args
-            and isinstance(node.args[0], ast.Constant)
-            and isinstance(node.args[0].value, str)
-        ):
-            registered.add(node.args[0].value)
-        # UNBUILT: dict[str, str] = {"review": "...", ...}
-        if isinstance(node, ast.AnnAssign | ast.Assign):
-            target = node.target if isinstance(node, ast.AnnAssign) else node.targets[0]
-            if isinstance(target, ast.Name) and target.id == "UNBUILT":
-                value = node.value
-                if isinstance(value, ast.Dict):
-                    for key in value.keys:
-                        if isinstance(key, ast.Constant) and isinstance(key.value, str):
-                            unbuilt.add(key.value)
-    return registered | unbuilt, unbuilt
-
-
 def _documents(root: Path) -> list[Path]:
     found: list[Path] = []
     for entry in DOC_ROOTS:
@@ -133,10 +92,30 @@ def _documents(root: Path) -> list[Path]:
     return found
 
 
+def _stale(document: Path, number: int, invocations: list[str]) -> Violation:
+    """A `documented-command:unbuilt` marker on something that now exists.
+
+    **THE MARKER WAS A ONE-WAY SUPPRESSION WITH NO EXPIRY**, and that is what let `README.md` and
+    `docs/engineering/CLI.md` carry "`quantamind review` — NOT BUILT" for months after it shipped.
+    `if UNBUILT in line` ran before any check, so the guard could not tell a marker that is still
+    true from one nobody removed -- it printed the same count either way. `qm-review-command.md`
+    listed removing this marker under "Done when" and it was removed from `AGENTS.md` only.
+    """
+    named = ", ".join(f"`{x}`" for x in invocations)
+    return Violation(
+        document,
+        number,
+        "documented-recipe",
+        f"this line carries {UNBUILT}, and everything it suppresses now exists: {named}. The "
+        f"marker is stale: delete it, and correct any prose beside it still calling these "
+        f"unbuilt. A marker nobody removes is how a shipped command stays documented as absent.",
+    )
+
+
 def main() -> int:
     root = project_root()
-    recipes = _recipes(root)
-    commands, unbuilt = _cli_commands(root)
+    known = recipes(root)
+    commands, unbuilt = cli_commands(root)
     violations: list[Violation] = []
     suppressed = checked = 0
 
@@ -147,12 +126,18 @@ def main() -> int:
                 fenced = not fenced
                 continue
             spans = [line] if fenced else BACKTICKED.findall(line)
+            # **THE MARKER IS LINE-SCOPED, SO THE VERDICT MUST BE TOO.** `CODEBASE.md` carries
+            # "Run `just check`. There is no `just docs-sync`" with one marker covering both: the
+            # marker is doing real work for `docs-sync` and would read as stale for `check`. It is
+            # stale only when EVERY invocation the line suppresses now exists.
+            marked: list[tuple[str, bool]] = []
             for match in _finds(JUST_CALL, spans):
                 name = match.group("recipe")
                 checked += 1
                 if UNBUILT in line:
                     suppressed += 1
-                elif name not in recipes:
+                    marked.append((f"just {name}", name in known))
+                elif name not in known:
                     violations.append(
                         Violation(
                             document,
@@ -166,6 +151,7 @@ def main() -> int:
                 checked += 1
                 if UNBUILT in line:
                     suppressed += 1
+                    marked.append((f"quantamind {name}", name in commands and name not in unbuilt))
                 elif name not in commands:
                     violations.append(
                         Violation(
@@ -185,6 +171,8 @@ def main() -> int:
                             f"document it as not built, or mark it {UNBUILT}",
                         )
                     )
+            if marked and all(exists for _, exists in marked):
+                violations.append(_stale(document, number, [n for n, _ in marked]))
 
     assert_examined("documented invocations", checked, RECIPE_FLOOR, root)
     print(f"[documented-recipes] {checked} documented invocation(s) checked", flush=True)

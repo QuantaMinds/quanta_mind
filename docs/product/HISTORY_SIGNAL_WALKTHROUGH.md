@@ -9,7 +9,19 @@ falsified. The build plan is `docs/plans/delivered/gravity-reviewer-build-plan.m
 `docs/findings/SIGNAL_SEARCH_LOG_2026-08.md` and
 `docs/findings/HISTORY_SIGNAL_BACKTEST_2026-08.md`.
 
-Nothing here is shipped. Numbers inside the mock comments are labelled illustrative; every
+> **STALE BANNER CORRECTED 2026-09-11. THIS DOCUMENT SAID "NOTHING HERE IS SHIPPED" AND THAT IS
+> FALSE.** Ten layers are built, the webhook reviews real pull requests, and `quantamind
+> retrospective` runs against any clone. This is the same failure `what-to-say.md` records about
+> itself: a document that is not re-derived does not decay into vagueness, it states the opposite
+> of the truth in confident prose.
+>
+> **Two further things here are superseded and are kept only because the narrative rests on them.**
+> The product ranks and allocates at **file** level, not function level — the function-level arm was
+> measured and not shipped. And the model now runs on **every** reviewable change over the funded
+> files; the tier table below describes a firing gate that no longer decides whether we speak.
+> → `docs/product/HOW_IT_WORKS.md` is the current description.
+
+Numbers inside the mock comments are labelled illustrative; every
 number outside them is measured and cited.
 
 ---
@@ -22,8 +34,9 @@ or nitpicking**. QuantaMind does the opposite: a free, model-free pass ranks the
 functions by how often each has needed a follow-up fix, and that ranking decides where a model
 is spent — deep on the one or two units history says changes come back to, nothing on the cold
 ones. Structural claims the model makes are checked by the parser before publication. And on
-every pull request it says plainly what it could not analyse, which **no shipping reviewer can
-do** — verified across seven of them.
+every pull request it says plainly what it could not analyse. **Seven shipping reviewers were
+checked in August 2026 and none could express it; that is a dated survey, not a property of the
+category, and it is said as a capability of ours rather than a claim about everyone else.**
 
 ---
 

@@ -13,9 +13,11 @@ DIFFERENT model family from the reviewer, clears every claim first — a same-fa
 with a careful rater on 34.9% and certified the reviewer's own hallucinations. Every review ends
 with its coverage line.
 
-**Status: seven of ten layers built.** The chain from git history to a rendered comment runs end
-to end and is verified against real repositories. `allocate/`, `infer/` and `verify/` are empty
-**and scheduled** — the reviewer runs on Gemini over the ranked files, behind the isolated judge.
+**Status: the chain from git history to a rendered comment runs end to end**, verified against
+real repositories, and the webhook reviews real pull requests. `allocate/`, `infer/` and `verify/`
+are built: the reviewer runs on Gemini over the ranked files, behind an isolated judge of a
+different family. **Its published findings are 25.0% correct**, so nothing is sold on them — what
+carries the product is the deterministic half, which re-runs to the same answer on the same commit.
 
 **No count of modules appears here on purpose.** The one that used to said five layers were empty
 when four of them were not. **Start at `docs/plans/implementation.md`, section "Where this is
@@ -75,8 +77,8 @@ accommodate a tidy-up. **Do not take guidance from them.**
 
 ```bash
 uv sync --all-extras            # install
-uv run quantamind review <pr>   # NOT BUILT, exits 2   documented-command:unbuilt
-uv run quantamind serve         # webhook endpoint; authenticates, does NOT review
+uv run quantamind review <clone>  # rank a change; --json for a tool, --sha for a commit
+uv run quantamind serve         # webhook endpoint; reviews. QUANTAMIND_POSTING_ENABLED=0 rehearses
 just check                      # ruff + mypy + guards + unit tests — before every commit
 just verify                     # check + live data verification — before every PR
 ```

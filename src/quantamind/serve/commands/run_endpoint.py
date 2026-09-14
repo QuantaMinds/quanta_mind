@@ -1,4 +1,4 @@
-"""Run the webhook endpoint until it is interrupted, and say plainly what it does not do.
+"""Run the webhook endpoint until it is interrupted, and say plainly what it will post.
 
 WHAT: `run(port)` reads the secret from the environment, binds the listener, prints the startup
       banner and serves until Ctrl-C. Returns the process exit code.
@@ -6,11 +6,11 @@ WHY:  **Split out of `cli.py` at the 200-line cap, and it is the right seam.** `
       arguments and dispatches; this owns one command, including the one decision in it that is not
       mechanical -- what the banner is allowed to claim.
 
-      **THE WORK CALLBACK IS DELIBERATELY NOT WIRED TO A PIPELINE.** Everything from a delivery to a
-      posted comment exists as decisions, but nothing yet clones a repository on receipt, because
-      `review` is not built. So the banner says the endpoint authenticates and acknowledges and does
-      not review. An endpoint that quietly accepted the work and dropped it would be
-      indistinguishable, from the outside, from one that was doing its job.
+      **THE WORK CALLBACK CALLS `deliver()`, AND THIS PARAGRAPH SAID OTHERWISE FOR MONTHS.** It
+      clones on receipt, ranks, renders and posts. The banner was corrected when the drift was
+      found by reading a running container's log -- see the comment above it -- but these two
+      docstrings were not, so the file went on describing an inert endpoint while shipping a live
+      one. A docstring is the first thing a reader trusts and the last thing a test reads.
 
       **The secret is read here, from the environment, and is deliberately absent from `Settings`**
       -- so it cannot reach `quantamind config` and be printed into a terminal scrollback or a CI
@@ -34,11 +34,11 @@ SECRET_VARIABLE = "QUANTAMIND_WEBHOOK_SECRET"
 def run(port: int, host: str = "127.0.0.1") -> int:
     """Bind, and say plainly what this endpoint does and does not do.
 
-    The work callback is deliberately not wired to a pipeline. Everything from a delivery to a
-    posted comment exists as decisions, but nothing yet clones a repository on receipt -- so the
-    honest startup banner says the endpoint authenticates and acknowledges, and does not review.
-    An endpoint that quietly accepted and dropped the work would be indistinguishable from one
-    that was doing something.
+    The work callback clones on receipt, ranks, renders and hands the result to `deliver()`. The
+    banner states what posting will actually do, read from the setting rather than asserted here:
+    under `QUANTAMIND_POSTING_ENABLED=0` it rehearses and prints what it would have posted. An
+    endpoint that quietly accepted and dropped the work would be indistinguishable from one doing
+    its job, which is why the banner is computed from behaviour and never written as a claim.
     """
     from quantamind.ingest.diff import DiffReadFailed
     from quantamind.ingest.publish.github_comments import CommentFailed
@@ -115,6 +115,10 @@ def run(port: int, host: str = "127.0.0.1") -> int:
     )
     print(
         "[serve] GET  /r/<owner>/<name> — compliance, outcomes and cost for one repository",
+        flush=True,
+    )
+    print(
+        "[serve] GET  /scan?repo=owner/name — what the first history walk found, as JSON",
         flush=True,
     )
     print(

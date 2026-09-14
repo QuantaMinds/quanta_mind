@@ -69,8 +69,8 @@ At **12–20 pull requests per developer per month** (8.1M+ PRs, 4,800+ organisa
 | Snyk Team | $25/dev | security scanning |
 | CodeRabbit Pro | $24/dev annual | AI review |
 | Greptile Pro | $30/seat + **$1 per review** | AI review |
-| Semgrep Code | $30/contributor, free ≤10 | **custom rules, policy enforcement** |
-| SonarQube | ~$40–50/dev at 200 devs | **quality gates, standards** |
+| Semgrep Team | **$35**/contributor, free ≤10 ($30 per module) | **custom rules, policy enforcement** |
+| SonarQube Cloud | **by lines of code**, free ≤50K LOC | **quality gates, standards** |
 | Semgrep full stack | $75/user | rules + supply chain + secrets |
 
 **The standards market pays more than the AI-review market**, and the standards half is the half
@@ -90,14 +90,26 @@ already tolerates.
 | model reviewer | — | fair use 40/dev/mo | uncapped, metered |
 | cross-repo standards `D1e` | — | — | yes |
 | SSO, self-host, residency, DPA, SLA | — | — | yes |
-| **COGS at the cap** | **$0** | **$3.20–4.00** | metered |
+| **COGS at the cap** | **UNDECIDED — see below** | **$3.20–4.00** | metered |
 | **gross margin** | n/a | **86% at cap, ~94% typical** | negotiated |
 | seats | ≤10 contributors | unlimited | unlimited |
 
-**Free is model-free, and that is the product rather than a crippled version of it.** It costs zero
-per review, it is the half with replicated evidence, and it makes the free tier defensible in a way
-"10 free AI reviews" is not — a competitor's free tier expires; ours does not, because it does not
-cost us anything. Free to ten contributors mirrors Semgrep, whose buyers are the buyers we want.
+**CORRECTED 2026-09-11 — "FREE IS MODEL-FREE" IS A DESIGN, NOT A BUILT GATE, AND THE TABLE ABOVE
+PRICED IT AS BUILT.** `serve/review/review_delivery.py` calls `examine()` on every reviewable
+change; the only conditions are `settings.runs_model` (global) and a non-empty allocation, and
+`allocate.plan()` always funds something. Entitlement is binary — `installations.entitled` gives
+`may_review`, not a tier. **So there is no code path that makes Free model-free**, and its COGS is
+$0 only if the gate gets built.
+
+**Two options, and this document must not pick one silently.** Build the tier gate, and the Free
+row and every argument resting on it stand as written. Or accept model COGS on Free — **$1.20–$2.00
+per developer per month at 12–20 changes**, which at ten contributors is $12–$20 per free
+repository per month, and then Free needs a cap and the "structurally free" argument is retired.
+**Until it is decided, nothing may be pitched on Free costing us nothing.**
+
+What survives either way: Free to ten contributors mirrors Semgrep, whose buyers are the buyers we
+want, and **the retrospective replay is genuinely model-free** — `serve/retrospective.py` imports
+`ingest`, `rank` and `store` and never `infer`.
 
 **Team at $29 sits with Semgrep and SonarQube, not with CodeRabbit.** We are not selling better
 findings — at 25% correct we would lose that argument, and `commercial-surface.md` already forbids

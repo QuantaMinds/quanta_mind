@@ -1,8 +1,14 @@
 # What to say when someone asks
 
 > **Derived document.** Measurements here are copied from `QUANTAMIND.md`, which is canonical.
-> Reconciled against it on 2026-08-14. If the two disagree, that one wins and this is the
+> Reconciled against it on 2026-09-09. If the two disagree, that one wins and this is the
 > bug.
+>
+> **THIS FILE WAS THE BUG FOR THREE WEEKS.** It opened "Nothing is built yet — `src/quantamind/`
+> holds a package root and nothing else" while nine layers shipped and the webhook reviewed real
+> pull requests, and it told the reader to answer every question in future tense on that basis. A
+> derived document that is not re-derived does not decay into vagueness; it states the opposite of
+> the truth in confident prose, and this one was handing that to a room.
 
 Six questions, in the order they get asked. Say the bold line, then stop — the paragraphs under
 it are what to reach for **if** they push, not a script to recite.
@@ -11,11 +17,24 @@ it are what to reach for **if** they push, not a script to recite.
 
 ## The one line, if there is time for nothing else
 
-> **We decide where to look first in a large change, and we tell you what we did not look at.**
+> **We check every code change against the rules your team wrote down. If a change breaks
+> one, it doesn't get in.**
 
 If they ask what makes that different: **every other tool in this category tells you what is
-wrong. We do not — we measured that and it does not work.** Then stop. The numbers behind it are in
-`QUANTAMIND.md` and most of them do not belong in print; `publishing-rules.md` says which.
+wrong. We do not — we measured that half and it did not survive.** Then stop. The numbers behind
+it are in `QUANTAMIND.md` and most of them do not belong in print; `publishing-rules.md` says which.
+
+**THE OPENING CHANGED ON 2026-08-31 AND THE OLD ONE IS STILL RIGHT — JUST NOT FIRST.** This line
+used to be *"we decide where to look first, and we tell you what we did not look at."* Routing is
+still true, still replicated, and still the hardest thing here to copy. It stopped being the
+opening because leading with it invites *"and are the findings right?"*, and the honest answer is
+mostly not. Lead with the half that re-runs to the same answer on the same commit; reach for
+routing at question four, where it is the supporting claim rather than the promise.
+
+**A buyer shopping for an AI code reviewer will not recognise that sentence as one, and that is
+the intended trade.** It puts us nearer Semgrep and SonarQube than CodeRabbit. Being mistaken for
+a reviewer is how we get judged on findings we do not sell — but the cost is real, so the second
+sentence has to bridge back to the category they were searching in.
 
 **Do not say "autonomous senior engineer."** Nine designs and four blind rater pools put the best
 configuration at roughly one useful comment per forty pull requests. It is the one claim in this
@@ -24,15 +43,32 @@ first.
 
 ## Read this before the first meeting
 
-**Nothing is built yet.** `src/quantamind/` holds a package root and nothing else. The coverage
-line, the routing and the verifier are stages two, three and four of
-`docs/plans/implementation.md`, each behind a gate.
+**Most of it is built, and the tense rule now cuts a different way.** Thirty of fifty build rows
+are done. The standards engine, the ranker, a commit status that blocks a merge, the append-only
+audit trail, the dashboard, accounts and entitlement, and cost per review all run; the webhook
+reviews real pull requests; `quantamind retrospective` replays a prospect's own history from a
+clone. Present tense is correct for those.
 
-So **every answer below is in future or design tense, deliberately.** *"That is the line we are
-building"*, never *"that is what we print."* To a customer the present tense is a product claim
-about software that does not exist; to an investor it describes a materially different company
-from the one the evidence documents. This is not pedantry — it is the line between a pitch and a
-misrepresentation, and it has to be held in the room where nobody is checking.
+**Four things are not built, and the present tense about any of them is the misrepresentation
+this section exists to prevent:**
+
+| not built | what that means in the room |
+|---|---|
+| **Billing** | Nobody can pay. There is a price list, not a checkout |
+| **Customers** | There are none. Nobody has run the retrospective against a prospect |
+| **A posted check run** | Rehearsed and asserted; never written to a real pull request |
+| **Air-gapped in a real network** | The refusals are tested; the environment has never been entered |
+
+**And two things are built but must not be sold**: the reviewer's findings are **25.0% correct**,
+and the enforceable surface is narrower than "your standards" sounds — three rule kinds
+(`forbid_call`, `forbid_import`, `naming_pattern`) declared in `.quantamind/rules.toml`, **on
+Python files only**. Everything else is recorded `UNCHECKABLE`, which is honest and is not coverage.
+
+**So the rule is no longer "say it in future tense."** It is: *present tense for what a parser
+does, future tense for anything that needs a customer, a payment or a model to be right.* The old
+blanket rule was safe when nothing existed. Applied now it understates a working product to a
+customer and describes a materially different company to an investor — which is the same failure
+as overclaiming, pointing the other way, and it is the one this file actually committed.
 
 **Do not explain how it works.** `publishing-rules.md` lists what must never leave the room.
 
@@ -40,19 +76,25 @@ misrepresentation, and it has to be held in the room where nobody is checking.
 
 ## 1. "What is QuantaMind?"
 
-> **We are building a code reviewer that tells you which parts of your change it actually looked
-> at.**
->
-> Every AI reviewer leaves comments. None of them says what it skipped. So when one is silent
-> about a file, you cannot tell whether it examined the file and found nothing, or never really
-> read it. Those are different facts and they arrive looking identical.
+> **Every team has written down how it works — a CONTRIBUTING file, a style guide, a wiki page.
+> None of it is enforced. You write the checkable parts down once as rules; we enforce them on
+> every pull request, identically, and work that breaks one does not merge.**
 
 If they want a second sentence:
 
-> We also will not read every file at the same depth. We work out which part of the change is
-> riskiest and spend the effort there.
+> And when someone asks you to prove it, you can: every rule, against every file, on the record —
+> including the files nothing could decide about, named rather than quietly counted as passing.
+
+If they ask about the reviewing:
+
+> We also do not read every file at the same depth. We work out which part of the change is
+> riskiest and spend the effort there, and we tell you which parts we did not look at.
 
 **Then stop.** Every extra sentence here explains the mechanism.
+
+**Do not lead with the coverage line or the routing here.** Both are true and both are at question
+four. Leading with them makes this a reviewer pitch, and a reviewer pitch is judged on findings —
+which are 25.0% correct and are not what the price is for.
 
 ---
 
@@ -64,7 +106,9 @@ entire codebase — and claiming it loses the comparison in one sentence.
 > **They see more than us. That is not the difference.**
 >
 > Greptile reads your whole codebase. CodeRabbit reads your whole diff. We are not trying to beat
-> them on how much we look at. We are building the thing that tells you what was looked at.
+> them on how much we look at. **None of them enforces anything** — every one of them produces a
+> comment, and a comment is advisory by construction. We hold the merge on the standards your team
+> wrote down, and we tell you what was looked at.
 >
 > **Silence from a reviewer has two meanings and no tool separates them.** *Examined, nothing
 > wrong* and *never really read* arrive as the same blank space. You cannot act on that, so you
@@ -185,8 +229,21 @@ Tell it about the unresolved region instead:
 > Every reviewer on the market reads past it, silently, because a dynamic registration is not a
 > call it can follow. Nobody tells you. **The review comes back clean and the gap is invisible.**
 >
-> We will name it: *four call sites unresolved, dynamic dispatch in registry.py.* Not a finding —
-> an admission, in the place where you can still act on it.
+> We name it. Not a finding — an admission, in the place where you can still act on it.
+
+**QUOTE THE LINE THE PRODUCT ACTUALLY PRINTS, NOT THE ONE THIS FILE USED TO PROMISE.** It said
+*"four call sites unresolved, dynamic dispatch in registry.py"* and nothing emits that sentence.
+`render/blocks/coverage_line.py` names **files** — read, and not read — and appends unresolved
+constructs in its own words:
+
+> Ranked 4 file(s) by prior-fix history and read the top 3: `src/pay/app.py`, `tests/test_pay.py`,
+> `src/pay/ledger.py`. Not read: `src/pay/settle.py`.
+>
+> …2 construct(s) could not be parsed and are outside everything above: …
+
+**The call-site form is the design target, not the output**, and promising it in a room is how a
+demo contradicts a deck. The shipped line makes the same argument — *this is what we read, this is
+what we did not* — and it has the advantage of being what appears on their pull request.
 
 Then land it:
 
@@ -198,8 +255,14 @@ Then land it:
 > *A reviewer that tells you which parts it could not analyse is one you can build a process
 > around. One that stays quiet about them is a coin toss with a subscription.*
 
-**And be ready for the honest follow-up.** We intend to speak on roughly one pull request in ten.
-On the rest there is a coverage line and no finding. If they ask whether we would have caught
+**And be ready for the honest follow-up. DO NOT SAY THE MODEL SPEAKS ON ONE CHANGE IN TEN — it
+runs on every change.** `review_delivery.py` calls the model on every reviewable delivery, over the
+ranked files only. The 8–15% figure is the share of changes whose top file clears the percentile —
+a label, computed from their history before they install, and **not** our comment rate.
+On the rest there is a standards verdict and a coverage line, and no model finding. **Do not let
+that be heard as "the product is silent nine times in ten":** the standards engine runs on every
+pull request, every rule, every governed file. Nine times in ten we answered deterministically and
+had nothing further to add. If they ask whether we would have caught
 their last incident, the answer is *"possibly not — but you would have known which parts we never
 examined."* Say that before they work it out.
 
@@ -367,8 +430,8 @@ it is the same drift that put a superseded cost figure in three files.
 
 **Why this beats the confident version.** A VP who is told "30% faster reviews" tests it in one
 sprint. A VP who is told "we do not know, here is the run that would settle it, and here is what
-we can back today" has been given something no other vendor in this market will give them —
-which is the product's whole argument, made in the room before the product is installed.
+we can back today" has been handed the run itself — which is the product's whole argument, made in
+the room before the product is installed.
 
 ---
 

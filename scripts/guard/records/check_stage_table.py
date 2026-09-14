@@ -38,50 +38,18 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from coverage import refuse_path_argument
 from discovery import Violation, project_root, report
-from plan_claims import PACKAGE, normalise, referenced, sentences, steps
+from plan_claims import normalise, referenced, steps
+
+from records.claim_rules import contradictions
 
 PLAN = Path("docs/plans/implementation.md")
 # The summary table is identified by its header row, not by its shape. See main().
 HEADER = "| stage | status | evidence |"
 
-# Explicit only. "Nothing is wired to the work callback" is a true statement about behaviour, not a
-# claim that a file is missing, and a looser pattern read it as one.
-ABSENT = re.compile(r"not begun|not built|not yet built|not started|still to come", re.I)
 STATUSES = ("DONE", "STARTED", "NOT BEGUN", "NOT SCHEDULED")
 STAGE = re.compile(r"^# Stage — (.+?)\s*(?:·\s*(.+))?$")
 # The one summary row with no stage section: the layers closed on evidence.
 RESERVE = "held in reserve"
-
-
-def _check_claims(root: Path, plan: Path, number: int, text: str, where: str) -> list[Violation]:
-    """Rules 1 and 2: an absence claim about a present module, a DONE claim about a missing one."""
-    out: list[Violation] = []
-    for sentence in sentences(text):
-        denied = ABSENT.search(sentence)
-        done = "**DONE" in sentence or "**NOT BUILT" in sentence
-        for name, present in referenced(root, sentence):
-            if denied and present:
-                out.append(
-                    Violation(
-                        plan,
-                        number,
-                        "stage-table",
-                        f"{where} says {name} is {denied.group(0)!r}, and it exists on disk. A "
-                        f"resuming reader acts on this table before anything else in the file.",
-                    )
-                )
-            elif done and not denied and not present and "NOT BUILT" not in sentence:
-                out.append(
-                    Violation(
-                        plan,
-                        number,
-                        "stage-table",
-                        f"{where} marks {name} DONE and there is no such file under "
-                        f"{PACKAGE}/. Either it was never written, or it was renamed "
-                        f"without git mv.",
-                    )
-                )
-    return out
 
 
 def main() -> int:
@@ -116,7 +84,24 @@ def main() -> int:
         if RESERVE in normalise(name):
             continue
         rows[normalise(name)] = (number, status)
-        violations += _check_claims(root, plan, number, evidence, f"the summary row for {name!r}")
+        violations += contradictions(root, plan, number, evidence, f"the summary row for {name!r}")
+        # Rule 5: the STATUS cell, against the filesystem. Rule 3 does this for a stage section's
+        # steps, and misses any row whose stage has no section -- which is how
+        # `the reviewer -- allocate, infer, verify` sat at NOT BEGUN while all three layers
+        # shipped. Seven rows and six sections: the unchecked row was the one that was wrong, and
+        # `_check_claims` never sees this cell because it is only ever handed the evidence.
+        claimed = referenced(root, evidence)
+        if "NOT BEGUN" in status.upper() and claimed and all(p for _, p in claimed):
+            violations.append(
+                Violation(
+                    plan,
+                    number,
+                    "stage-table",
+                    f"the summary row for {name!r} says NOT BEGUN, and every module its "
+                    f"evidence names exists: {', '.join(n for n, _ in claimed)}. A resuming "
+                    f"reader acts on this table before anything else in the file.",
+                )
+            )
         if not any(word in status.upper() for word in STATUSES):
             violations.append(
                 Violation(
@@ -182,7 +167,7 @@ def main() -> int:
                 )
             )
         for step_number, step in enumerate(entries, 1):
-            violations += _check_claims(
+            violations += contradictions(
                 root, plan, number, step, f"stage {name!r} step {step_number}"
             )
 
