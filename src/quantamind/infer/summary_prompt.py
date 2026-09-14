@@ -12,6 +12,22 @@ WHY:  **A PROMPT IS AN ARTEFACT, AND KEEPING IT SEPARATE IS HOW ITS CHANGES STAY
       led toward a conclusion and the output would have read as its own. The blocks now state what
       was measured and the task says answer only from them.
 
+      **EVERY LABEL IS WORDED AS THE MODEL MAY REPEAT IT, BECAUSE IT DOES.** The blocks were named
+      `[PR_DESCRIPTION]`, `[STATIC_IMPORTERS]`, `[TEAM_CONVENTIONS]` and the task asked for "one
+      sentence on the files in STATIC_IMPORTERS". On `QuantaMinds/quanta_mind#101` the model wrote
+      **"The test files in STATIC_IMPORTERS will need to be updated"** onto a real pull request --
+      an internal identifier in a sentence a customer reads, which
+      `docs/product/comment-golden-rules.md` forbids. A label is not private just because we think
+      of it as structure; **it is vocabulary, and the model will use it.** Each one now reads as
+      ordinary English if it is echoed.
+
+      **AND `[FILE HISTORY]` IS DELIBERATELY VAGUE, WHICH IS THE OPPOSITE OF THE USUAL RULE HERE.**
+      It read `[PRIOR_FIXES] number of later commits that returned to each file` -- an accurate
+      description of the ranking signal, sitting in a prompt whose output is published.
+      `docs/product/publishing-rules.md` puts *what the ranking is built from* first on the
+      never-publish list, so the clearer label was the more dangerous one. **No output field uses
+      this block**, which is worth knowing before anyone spends a measurement defending it.
+
       **THE ABSENCES ARE WORDED, NOT LEFT BLANK.** An empty section reads to a model as "no
       information" and it will fill the gap; "no static Python import of these files was found"
       makes the absence itself the fact, which is what `parse/importers` can actually support.
@@ -23,19 +39,19 @@ from __future__ import annotations
 
 PROMPT = """FACTS. Each block below is measured, not opinion. Do not restate them.
 
-[PR_DESCRIPTION]
+[WHAT THE AUTHOR SAYS THIS IS FOR]
 {goal}
 
-[FILES_TOUCHED]
+[FILES CHANGED]
 {files}
 
-[PRIOR_FIXES] number of later commits that returned to each file
+[FILE HISTORY]
 {history}
 
-[STATIC_IMPORTERS] files whose Python imports resolve to the changed modules
+[FILES THAT IMPORT THE CHANGED CODE] resolved by static Python import
 {importers}
 
-[TEAM_CONVENTIONS] documents this repository keeps about how its code is written
+[CONVENTIONS THIS TEAM WROTE DOWN]
 {conventions}
 
 [DIFF]
@@ -46,16 +62,18 @@ TASK. Answer only from the facts above. Reply with ONLY a JSON object, no markdo
   "what_changed": "one or two sentences, plain words, naming the function or file",
   "achieves_goal": true | false | null,
   "reasoning": "one sentence; if false name what is missing or contradicted",
-  "impact": "one sentence on the files in STATIC_IMPORTERS",
+  "impact": "one sentence on the files that import the changed code",
   "breaks": true | false | null,
   "breaks_why": "one sentence; if true name what breaks and for whom",
-  "convention": "one sentence, or empty. Name a TEAM_CONVENTIONS rule this diff contradicts and
-                 quote the phrase. Empty if none is contradicted or no conventions were given.
+  "convention": "one sentence, or empty. Name a convention this team wrote down that this
+                 diff contradicts, and quote the phrase. Empty if none is contradicted or
+                 no conventions were given.
                  Do not restate a convention the diff follows."
 }}
 
-achieves_goal is null when PR_DESCRIPTION is empty or states no purpose.
-breaks is true when the diff shows something that fails for a file in STATIC_IMPORTERS: a changed
-signature, a removed name, an altered return. It is false when those files are checked and the
-change is additive or internal. It is null when the deciding fact is absent from the blocks above.
+achieves_goal is null when the author's stated purpose is empty or says nothing.
+breaks is true when the diff shows something that fails for a file that imports the changed
+code: a changed signature, a removed name, an altered return. It is false when those files are
+checked and the change is additive or internal. It is null when the deciding fact is absent from
+the blocks above.
 """
