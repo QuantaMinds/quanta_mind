@@ -27,8 +27,8 @@ its findings remain 25.0% correct, so nothing sells on them.
 
 # 1. What QuantaMind is
 
-> **QuantaMind is a tool that checks every code change against the rules your team already wrote
-> down. If a change breaks one, it doesn't get in.**
+> **QuantaMind is a tool that checks every code change against the rules your team wrote down.
+> If a change breaks one, it doesn't get in.**
 
 **That is the one-liner, and it is the PUBLIC form — 141 characters, two sentences, no mechanism.**
 It follows the shape Y Combinator asks for: name the thing, say what it does, say what happens
@@ -170,8 +170,10 @@ your wiki page is writing most of those changes.**
 **QuantaMind answers the second problem first, and the first problem second.** Every pull request
 gets a verdict on the team's own standards that nobody had to read for, and **work that breaks them
 does not merge**. That runs on every change, deterministically, and costs nothing per review.
-**Then**, and only then, the model reads — and it is quiet on purpose: it speaks on about one change
-in ten, names the **file** worth reading first, and says which files it did not read. The unit is
+**Then** the model reads — on every change, but **only on the files the ranker funded**, naming the
+**file** worth reading first and saying which files it did not read. **The ranker bounds what is
+read, not whether we speak**; `rank.order.fires()` no longer gates the review and survives as a
+label and as the firing-rate estimate we compute for a prospect. The unit is
 the file everywhere allocation happens; a function name appears in the routing sentence only, to
 give a human a place to start inside the file we ranked.
 
@@ -764,7 +766,7 @@ defects are precisely why a model runs at all. So the verifier is structurally u
 the claim class the model exists to produce, and **a wrong semantic finding publishes.**
 
 The honest claim is therefore *typed silence on structural claims*, not *verified findings*. It
-is still a claim no competitor makes. It is narrower than it first sounds, and saying so
+is still an unusual claim to make. It is narrower than it first sounds, and saying so
 ourselves is worth more than being corrected.
 
 A verifier that never rejects anything is not a verifier, so this ships with a sabotage test: a
@@ -1043,8 +1045,8 @@ The underlying technique is old: mining version histories to guide software chan
 **AND THE CATEGORY IN THIS TABLE IS NO LONGER THE ONLY ONE WE ARE IN.** Every tool below asserts
 something about correctness, which is why the table is built around what the output *asserts*. The
 half of the product we now price on asserts something different — *this change breaks a rule your
-team wrote* — and that puts us alongside **Semgrep** ($30 per contributor) and **SonarQube**
-($40–50 per developer), which sell custom rules, policy enforcement and quality gates. Neither of
+team wrote* — and that puts us alongside **Semgrep** ($35 per contributor on Team) and **SonarQube**
+(billed by lines of code, not per developer), which sell custom rules, policy enforcement and quality gates. Neither of
 them reads the standards a team already wrote in prose, and neither routes a model afterwards.
 **The comparison below is still the one a buyer will make first**, because it is the category they
 were shopping in; it is not the category the revenue argument sits in. → `docs/product/
@@ -1068,9 +1070,9 @@ request.** Nine designs; anchor repair, structured context, a rejection filter, 
 a conventions file each moved the headline nothing.
 
 **That is not a claim we are better at it.** On Martian's offline layer we are **level with
-CodeRabbit and behind Greptile**. It is a claim about the category — and we are the only ones who
-ran the experiment, published what it said, and then **built the judge the result demanded instead
-of shipping the findings raw.** Every competitor above publishes its model's claims directly. Ours
+CodeRabbit and behind Greptile**. It is a claim about the category — and we ran the experiment,
+published what it said, and then **built the judge the result demanded instead of shipping the
+findings raw.** Every competitor above publishes its model's claims directly. Ours
 do not reach a pull request unless a judge in a different model family confirms them, and what the
 judge dropped is reported as a number.
 
@@ -1079,6 +1081,28 @@ own precision, recall and miss rate do not go on a page, and a competitor's ONLI
 never a backdrop for one of our numbers. The offline-layer comparison above is permitted because we
 entered that layer and it measures the same quantity — that exception is written into the rules,
 not assumed here.
+
+### CORRECTED 2026-09-11 — CodeRabbit already ships a deterministic rule engine
+
+**The row above said "enforces the standards the team already wrote: no, no, no, yes". That was
+wrong about CodeRabbit and it was never checked.** They run `ast-grep` on changed files with an
+essentials rule package **plus custom rules the customer writes in YAML**, and their own material
+calls it *"deterministic code quality"*. → `docs.coderabbit.ai/tools/ast-grep`
+
+**Three consequences, and none of them is fatal, but all three change what may be said.**
+
+**One: "rules a parser decides" is not a differentiator and must stop being pitched as one.** The
+first evaluator who has used CodeRabbit disproves it from their docs page, and being wrong about
+the market leader's public feature set discredits the measured claims — which are the actual asset.
+
+**Two: the difference moves downstream, to what happens to the result.** Their rule output is a
+comment among comments. Ours is a blocking status, an append-only row with a `provenance` column,
+and a fourth outcome so an unreadable file never counts as a pass. **A compliance table with two
+outcomes is the thing we are actually against**, not the absence of a rule engine.
+
+**Three: the enforceable surface comparison now runs against us, not for us.** `ast-grep` covers
+every language tree-sitter parses. We cover **Python, three rule kinds**. Anything that sounds like
+"we enforce your standards and they do not" is false in both halves of the sentence.
 
 ### Where this survives, and where it does not
 
@@ -1120,7 +1144,8 @@ that can carry a price.
 | | CodeRabbit | Graphite | Greptile | **QuantaMind** |
 |---|---|---|---|---|
 | Question it answers | Is this change **wrong**? | Is this change **slow to ship**? | Is this change **wrong**? | **Does this change break a rule your team wrote — and where should a human look first** |
-| **Enforces the standards the team already wrote** | **no** | **no** | **no** | **yes — read out of `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `.cursorrules`, no re-authoring** |
+| **Rules you write, decided by a parser** | **yes — `ast-grep`, custom YAML rules** | not verified by us | not verified by us | **yes — `.quantamind/rules.toml`, three kinds, Python only** |
+| **The verdict is recorded, exportable and re-runnable** | **no** | **no** | **no** | **yes — every rule, every file, append-only, `quantamind compliance --export`** |
 | **Can it stop a bad merge** | it comments | it queues | it comments | **a commit status that fails — and only a parser's verdict may fail it** |
 | **Can you prove what was checked** | **no** | **no** | **no** | **every rule, every file, every outcome, append-only and readable per repository** |
 | **Verdicts reproduce on the same commit** | **no** | **no** | **no** | **yes for the standards half — a parser re-runs to the same answer. Not for the model half, and we do not claim it** |
@@ -1129,7 +1154,7 @@ that can carry a price.
 | Says what it could not analyse | **no** | **no** | **no** | **yes, on every pull request** |
 | Publishes model claims about correctness | yes | yes | yes | **only what an isolated judge in a different model family confirmed** |
 | Fires on | nearly every change | nearly every change | nearly every change | **8–13% on six of seven repositories, and computed on yours before you install** |
-| Marginal cost per pull request | tokens, scaling with lines read | tokens | tokens | **tokens on 10–12% of changes, and only on the ranked files — the ranker is the budget** |
+| Marginal cost per pull request | tokens, scaling with lines read | tokens | tokens | **tokens on every change, but only on the ranked files — the ranker is the budget, not a mute button** |
 | Priced | per seat | per seat | per seat | **per developer — the same axis, so a buyer can compare — with a free tier that never has to expire, because the half we lead with costs nothing per review** |
 | Separates *undecidable* from *clean* | **no** | **no** | **no** | **a MODEL gate did, `p = 0.0007`, n = 29, never out-of-sample. The free rule inverted** |
 
@@ -1144,8 +1169,8 @@ is the drift this project's publishing rules exist to catch.
 
 **The last row is the newest axis, and it is the one the reviewer-half work bought.** A finding
 whose truth depends on a fact the diff cannot supply — whether a commit hash exists, whether a tag
-was released, what today's date is — is not a finding a diff-scoped reviewer can make. **We can
-label those; nobody else does.** The label separates: findings the model itself called "decidable
+was released, what today's date is — is not a finding a diff-scoped reviewer can make. **We label
+those, and the label earns its place:** findings the model itself called "decidable
 from the diff" were **0 of 14 wrong**, against **9 of 15 wrong** for "needs a deeper look", Fisher
 **p = 0.0007**. And the same principle, applied to file kinds rather than single findings, is what
 explains the reviewer half's failure: **CI-config findings are 66.7% wrong and 23 of 24 of those
@@ -1170,10 +1195,14 @@ inference at all.**
 > pricing documents**, which it did not, and that the guard's pattern names a price rather than a
 > cost. → `scripts/guard/records/check_decided_vocabulary.py`
 >
-> **What is a differentiator is no longer the axis — it is the free tier.** Every competitor pays
-> per token on every review, so their free tier is a trial with an expiry. Ours is not: the ranker
-> and the standards engine run without inference, so **Free costs us nothing per review and never
-> has to lapse.** That is the sentence none of them can write, and it survives the reversal intact.
+> **CORRECTED 2026-09-11 — THIS ARGUMENT DEPENDED ON A GATE THAT NO LONGER GATES.** It read: their
+> free tier expires because they pay per token, ours does not because the ranker and standards
+> engine run without inference. **`serve/review/review_delivery.py` calls the model on every
+> reviewable change**, with no tier check — `may_review` is binary and `runs_model` is global. So
+> either Free carries model COGS or the gate is unbuilt, and **the free-tier argument cannot be
+> made until that is decided.** What survives is narrower and still true: **the retrospective
+> replay is model-free**, so proving value on a prospect's own history costs us CPU and costs them
+> a full inference pass per historical change.
 >
 > **The margin swing that used to sit here is smaller than it looked, and it is measured now.** The
 > old arithmetic ran from 85% margin at 400 pull requests a month to 26% at 2,000, on an *estimated*
@@ -1287,7 +1316,7 @@ certainty nobody in this industry has — QA teams exist and production still br
 
 **The rejected findings are the product, not the waste.** A finding the gate drops is not "wrong",
 it is **"we cannot verify this from what we saw"** — which is a true and useful thing to tell a
-developer, and nobody else says it.
+developer, and it is a sentence a tool has to be built to be able to say.
 
 **"Decidable from the diff" must never become "settled by the diff".** A claim can involve nothing
 external and still be false, because the model failed to trace its own input — measured directly:
@@ -1441,8 +1470,8 @@ Every install yields four things joined together: the repository's history, **th
 attribution of which change actually caused which fix**, what the customer's existing reviewer
 said about each change, and what came back anyway.
 
-**That is a labelled dataset of which review findings mattered, across many organisations, and
-nobody else is accumulating it** — not because it is secret, but because collecting it requires
+**That is a labelled dataset of which review findings mattered, across many organisations** — and
+it is not cheap to start accumulating, not because it is secret, but because collecting it requires
 the corrected outcome rule, and building that means first publishing that the industry-standard
 rule is broken. A vendor whose own dashboards use the broken rule is poorly placed to lead with
 that.
@@ -1477,8 +1506,8 @@ inside it.
 **What we do not sell is the thing the pressure acts on.** The incentive is to make *findings* look
 worth the seat, and findings are not what the tier buys — it buys the standards enforced on every
 change, the check that fails, and the record of what was checked. **Those fire on every pull
-request, not on 10–12% of them**, so a quiet reviewer does not read as a quiet product. Firing on
-10–12% is the reviewer's rate, not the invoice's.
+request**, so a quiet reviewer does not read as a quiet product. The 8–13% figure is the share of
+changes clearing the percentile — a label on the ranking, **not the share we speak on**.
 
 **That is a weaker structural protection than the old one and it is stated as weaker.** Per-repository
 pricing made silence free by arithmetic; this makes it free by what we chose to put in the tier,
@@ -1533,7 +1562,7 @@ every file, including what nothing could decide, readable per repository. **Thos
 reproducible** — a customer can re-run them on the same commit and get the same answer, which is
 not a sentence any AI reviewer can say about its output.
 
-**That is also the more valuable market.** Semgrep charges $30 per contributor, SonarQube $40–50
+**That is also the more valuable market.** Semgrep charges $35 per contributor, SonarQube bills by lines of code rather than $40–50
 per developer, against $24–30 for AI review. The half of this product with reproducible verdicts
 belongs in the more expensive category, and the routing that makes it cheap to run is what lets the
 free tier exist at all.
@@ -1563,8 +1592,9 @@ Review did not get faster — it stopped happening. **The largest single reason 
 rejected is inactivity: 17.3%**, auto-closed because nobody got to them, and they merge at
 **32.7%** against **84.5%** for human-authored ones.
 
-Every incumbent answers that flood by generating more text into it. **We are the only entrant
-whose goal is to say less** — one change in ten — and to be right about the one thing it says: the
+Every incumbent answers that flood by generating more text into it. **Our goal is to say less** —
+measured at 3.6 comments per pull request against CodeRabbit's 5.9 on Martian's offline layer, 45%
+less noise per change — and to be right about the one thing it says: the
 **file** we point at is the one a later fix returns to, **22 points above its rate on everything
 else, replicated by an independent rater with no stake in the result**.
 
@@ -1585,8 +1615,8 @@ The second is a board question: *is the code our agents write getting worse?* Th
 because every dashboard they own attributes rework with a rule that is **wrong on 67.9% of its
 verdicts** — measured here, reproduced three times on separate corpora.
 
-We corrected that rule, and **we do not sell our findings**, so we are the only party who can
-answer the question and be believed. **The auditor cannot be the vendor.** No incumbent can
+We corrected that rule, and **we do not sell our findings**, so we can answer the question without
+grading our own work. **The auditor cannot be the vendor.** No incumbent can
 credibly publish its own miss rate, for the same reason no company audits its own books.
 
 ### Three properties that make it fundable rather than merely true
@@ -1597,11 +1627,12 @@ credibly publish its own miss rate, for the same reason no company audits its ow
   Neither is a model output; both are counts they can re-derive. **The same replay costs a
   model-per-diff reviewer a full inference pass per historical pull request. It costs us CPU.**
   They demo on a toy repository; we demo on the customer's actual code.
-- **A free tier that is structurally free**, not a trial. The half we lead with runs no model, so
-  Free never has to expire or degrade. Nobody paying per token can match that, and it is the top
-  of the funnel.
-- **Quiet enough to survive developers.** The model firing on 10% of changes is an adoption
-  strategy, not a limitation — and unlike a pure reviewer, quietness costs us no perceived value,
+- **A free tier we intend never to expire — and the cost basis for it is now an open question.**
+  **WITHDRAWN 2026-09-11 pending a decision.** The claim assumed Free runs no model. The code calls
+  one on every reviewable change with no tier gate, so Free either carries COGS or needs a gate
+  built. Do not pitch "structurally free" until that is settled.
+- **Quiet enough to survive developers.** Fewer comments per change than the incumbents, measured —
+  and unlike a pure reviewer, quietness costs us no perceived value,
   because the standards verdict lands on the other 90%.
 - **Falsifiable next month for the price of a pilot**, not a round.
 
@@ -1640,8 +1671,8 @@ and the only free tier that never has to expire."**
 > developer per month** against a $29 price — 4–7%. Letting a 5% input choose the pricing axis is
 > optimising the wrong variable.
 >
-> **Three things decided it instead.** The category prices per seat — Semgrep $30 per contributor,
-> SonarQube $40–50 per developer, CodeRabbit $24 — and a buyer who cannot compare us like-for-like
+> **Three things decided it instead.** The category prices per seat — Semgrep $35 per contributor,
+> SonarQube by lines of code, CodeRabbit $24 — and a buyer who cannot compare us like-for-like
 > assumes the worst. Per-repository pricing **punishes the microservice teams who are our best
 > fit**, charging a team with forty small repositories more than one with a monolith of the same
 > headcount. And a repository count is a number a customer can game by merging repositories, which
@@ -1677,7 +1708,8 @@ fit, and a repository count is gameable by merging repositories.
 
 **What survives from the per-repository argument is the free tier, and it is the strongest thing
 here.** Because the deterministic half runs without inference, Free costs nothing per review and
-**never has to expire** — no competitor paying per token can say that. **A team of ten pays
+**never has to expire** — **but see the 2026-09-11 correction above: the cost basis for that is
+now an open question, because the model runs on every reviewable change.** **A team of ten pays
 nothing, indefinitely, on unlimited repositories**, and gets the standards enforcement, the
 blocking check and the ranking.
 
@@ -1733,8 +1765,8 @@ annual review time. **It pays for itself at twenty minutes per developer per mon
 stated as a bar rather than a promise, because we have not measured a customer clearing it.
 
 **WHY $29 AND NOT $24.** The comparison a buyer reaches for is CodeRabbit at $24 and Qodo at $30 —
-AI review. **The half we sell is not in that category.** Semgrep charges $30 per contributor and
-SonarQube $40–50 per developer for custom rules, policy enforcement and quality gates, which is
+AI review. **The half we sell is not in that category.** Semgrep charges $35 per contributor and
+SonarQube bills by lines of code for custom rules, policy enforcement and quality gates, which is
 what the standards engine is. **$29 sits at the bottom of the enforcement category rather than the
 top of the review category**, and the free tier is what makes that defensible: a buyer who thinks
 we are overpriced can run the expensive half for nothing and decide.
@@ -2376,7 +2408,7 @@ this covers only claims about the outside world.
 | CodeRabbit scans commit history for files that frequently change together | **VERIFIED verbatim** | CodeRabbit engineering blog |
 | AI pull requests merge at 32.7% vs ~84.5% human; 8.1M PRs, ~4,800 teams | **VERIFIED** | LinearB 2026 Engineering Benchmarks |
 | Inactivity is the largest single rejection cause at 17.3% | **VERIFIED** | MSR 2026 paper on the AIDev dataset; 3,225 fix PRs, 46.4% rejected |
-| Senior engineers 8–12 hrs/week reviewing; 44% call review the top bottleneck | **VERIFIED** | Multiple industry analyses |
+| Senior engineers 8–12 hrs/week reviewing | **DOWNGRADED 2026-09-11 — no traceable primary source.** Stack Overflow puts ~75% of developers at **up to 5 hrs/week**; other studies give 6.4 and a median of ~3. **Use the AI-specific figure instead: 11.4 hrs/week reviewing AI-generated code against 9.8 writing, and 81% reviewing more since adopting AI** (Q1 2026 survey, ~3,000 respondents, REPORTED) | Was cited to "multiple industry analyses", which names nothing |
 | Datadog suspect commits: four stated criteria, ticket automation | **VERIFIED verbatim** | Datadog documentation |
 | Method-level change prediction wins when few recommendations are acceptable | **VERIFIED** | Peer-reviewed comparative evaluation, 15 open-source projects |
 | Change coupling from version histories dates to 2004 | **VERIFIED** | Zimmermann et al., ICSE 2004 |
@@ -2388,9 +2420,9 @@ anyone pays at volume.
 
 | Claim | Status | Source checked |
 |---|---|---|
-| Semgrep Code **$30 per contributor**, free up to 10 | **VERIFIED, dated 2026-08-31** | Vendor pricing page. **List price; enterprise deals are negotiated and lower** |
+| Semgrep Team **$35 per contributor** (bundle; **$30 per contributor per module**), free up to 10 | **RE-VERIFIED 2026-09-11** | Vendor pricing page. **Corrected from $30 — that is the per-module price, not the Team bundle.** List price; enterprise deals are negotiated and lower |
 | Semgrep full stack **$75 per user** | **VERIFIED, dated 2026-08-31** | Vendor pricing page |
-| SonarQube **~$40–50 per developer** at 200 developers | **VERIFIED, dated 2026-08-31** | Vendor pricing calculator. **Band, not a price — it steps with seat count** |
+| SonarQube Cloud is billed **by lines of code, not per developer** — free to 50K LOC, Team from ~EUR 30/month | **RE-VERIFIED 2026-09-11** | Vendor pricing page. **Corrected: the old $40-50/dev band came from a self-hosted calculator and is not a per-developer price.** It therefore does not anchor a per-developer argument |
 | Snyk Team **$25 per developer** | **VERIFIED, dated 2026-08-31** | Vendor pricing page |
 | Greptile **$30 per seat with 50 reviews included**, then per-review | **VERIFIED, dated 2026-08-31** | Vendor pricing page |
 | Qodo **$30 per user**; Qodo Merge free self-hosted or $19 per seat | **VERIFIED, dated 2026-08-31** | Vendor pricing page |

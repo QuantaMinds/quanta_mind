@@ -281,14 +281,19 @@ a hypothesis that measured to nothing, and it was killed rather than defended.
 
 ### Whether to speak at all
 
-`src/quantamind/rank/order.py` decides how much of the order gets funded and **whether we open our
-mouth**. A wrong order misses defects; a wrong threshold buries the customer in noise or goes
-silent for a month. Different failures, decided in different places.
+`src/quantamind/rank/order.py` decides how much of the order gets funded. **It no longer decides
+whether we open our mouth, and that changed deliberately** — `allocate/depth.py` says why: the old
+gate muted three-file changes, which are the cheapest possible deep read. The model now runs on
+every reviewable change, over the funded files only. **`fires()` survives as a label on `Ranking`
+and as the firing-rate estimate computed for a prospect before they install**, not as a mute
+button.
 
 **The firing rule is a percentile, not an absolute score.** An absolute threshold fired on 11% of
 one repository and 53% of another — the same rule an order of magnitude apart in volume, because a
 busy repository's ordinary file outscores a quiet repository's hottest one. Percentiles
-self-calibrate to 10–12% across an 80× velocity range.
+self-calibrate to 10–12% across an 80× velocity range. **That number is now the share of changes
+clearing the percentile, not the share we comment on** — `rank/firing.py` records that it ranges
+6.3% to 29.0% out-of-sample, so it is a property of the customer's repository either way.
 
 The module names its own weakness: the percentile is computed against *this change's own* scores,
 which on a two-file change is nearly meaningless. A repository-wide distribution would be better,
@@ -924,7 +929,13 @@ the charge module in six weeks, the dashboard shows that we had pointed at it.
 ### Not built
 
 - **Billing.** B3 and B7 are parked. Nobody can pay.
-- **IDE integration, SSO.** Deferred until a deal asks.
+- **SSO.** Deferred until a deal asks.
+
+**Built since this list was written, and it was wrong to leave here:** the editor surface. **E3
+shipped** — `.claude/commands/qm-review.md` runs `quantamind review . --json` over the working tree
+and hands the result to the agent in the editor, on top of **E1** (review before the pull request
+exists, uncommitted work and untracked files, no network call) and **E2** (`--json`). What is still
+absent is a native VS Code or JetBrains plugin, which is a different thing from "no IDE surface".
 - **SOC 2 Type II.** Months of external evidence collection; no code we write.
 - **Scheduled exports.** The compliance artefact is produced by a command somebody runs; nothing
   produces one periodically.
@@ -942,9 +953,38 @@ the charge module in six weeks, the dashboard shows that we had pointed at it.
   rehearsal works; the write has not been exercised against GitHub.
 - **Air-gapped has never run inside a real isolated network.** The refusals are tested and no module
   bypasses them, but "air-gapped works" is a claim about an environment we have not been in.
-- **The audit trail's persistence in production is new.** Until 2026-09-01 the store lived on a
-  container filesystem and was lost on every deploy. It now sits on a mounted bucket with a single
-  writer — and a review has not yet been recorded, redeployed, and read back.
+- **THE AUDIT TRAIL DOES NOT PERSIST IN PRODUCTION. CORRECTED 2026-09-11 AGAINST THE LIVE
+  SERVICE.** This entry claimed the store "now sits on a mounted bucket with a single writer".
+  `gcloud run services describe quantamind-reviewer` says otherwise, and it is the reader the
+  `justfile` itself names for service properties:
+
+  - the only volumes are **two secret volumes**, both mounting `quantamind-app-key`; one of them
+    (`quantamind-app-key-cev-cim`) is **not mounted by the container at all** — an orphan;
+  - the only `volumeMount` is `/run/secrets`. **There is no bucket and no disk;**
+  - **`QUANTAMIND_DATABASE_PATH` is not set**, so `types/settings.py` falls back to its default —
+    the relative path `quantamind.db`, on the container filesystem;
+  - `autoscaling.knative.dev/maxScale: '3'`, so up to three instances each write **their own**
+    file.
+
+  **So the trail was not merely lost on every deploy — it was split across instances while
+  running, and "a single writer" was false in both directions.**
+
+  **FIXED THE SAME DAY, AND THE LIMIT OF THE FIX IS STATED WITH IT.** `just storage-setup` now
+  mounts `gs://quantamind-oss-store` at `/data`, sets `QUANTAMIND_DATABASE_PATH=/data/stores` and
+  caps the service at **one instance** — which is a correctness setting, not a capacity one, because
+  Cloud Storage FUSE provides no file locking. `/health` reports
+  `{"ok": true, "detail": "no tenants yet under /data/stores; the root is writable at schema v7"}`.
+
+  **What that does NOT yet establish is persistence.** There are no tenants, so nothing has been
+  written, redeployed and read back. **Until the known-answer test in
+  `docs/plans/ops-store-persistence.md` has run, this is a configuration claim and not an observed
+  one** — and a fresh empty store passes any check that did not record a baseline first.
+
+  **The health check earned its design here.** The first run mounted the bucket but did not create
+  the `stores/` prefix inside it, and the service answered 503 rather than creating the root and
+  looking healthy: *"Creating it here would make a wrong path look healthy, so this refuses
+  instead."* A probe that had created it would have reported a working service serving rankings
+  over no history at all.
 
 ### The principles, if you remember nothing else
 

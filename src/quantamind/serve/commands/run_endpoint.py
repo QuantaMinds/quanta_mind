@@ -118,6 +118,10 @@ def run(port: int, host: str = "127.0.0.1") -> int:
         flush=True,
     )
     print(
+        "[serve] GET  /scan?repo=owner/name — what the first history walk found, as JSON",
+        flush=True,
+    )
+    print(
         "[serve] It REVIEWS: clone, rank, render. Posting is "
         + (
             "ON — comments are written to real pull requests."

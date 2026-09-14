@@ -298,6 +298,63 @@ pilot REPOS="10":
 # Env, secrets, service account and `--no-cpu-throttling` are properties of the SERVICE and a
 # source deploy preserves them; they are not repeated here, so this recipe cannot silently
 # disagree with what is running. `gcloud run services describe` is the reader for those.
+# **ONE-TIME, AND IT CHANGES A RUNNING SERVICE. READ `docs/plans/ops-store-persistence.md` FIRST.**
+# The audit trail is written to the container filesystem today and is destroyed on every deploy;
+# with maxScale 3 it is also split across instances. This mounts a bucket, points the store root at
+# it, and caps the service at one writer -- which is not a performance choice: Cloud Storage FUSE
+# provides NO file locking, so SQLite is safe there only when nothing else is writing.
+#
+# **`--update-env-vars`, NEVER `--set-env-vars`.** The latter replaces the whole set, and this
+# service's set includes the App id, the key path, the inference flags and the webhook secret ref.
+#
+# `gcloud run services describe` stays the reader for what is actually running.
+storage-setup:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    export PATH="/opt/homebrew/share/google-cloud-sdk/bin:$PATH"
+    PROJECT=quantamind-oss; REGION=us-central1; SERVICE=quantamind-reviewer
+    BUCKET=quantamind-oss-store
+
+    gcloud storage buckets create "gs://${BUCKET}" \
+        --project "$PROJECT" --location "$REGION" --uniform-bucket-level-access
+    gcloud storage buckets update "gs://${BUCKET}" --versioning
+
+    # **THE STORE ROOT IS PROVISIONED HERE BECAUSE `serve/health.py` REFUSES TO CREATE IT.** Its
+    # words: "Creating it here would make a wrong path look healthy." A bucket has no directories,
+    # so a zero-byte object under the prefix is what makes `/data/stores` exist to the mount.
+    # **THIS STEP WAS MISSING ON THE FIRST RUN AND THE SERVICE ANSWERED 503 UNTIL IT WAS ADDED** --
+    # which is the health check working, not failing.
+    printf '' | gcloud storage cp - "gs://${BUCKET}/stores/.keep"
+
+    # The service's identity, not ours. Empty means the default compute account.
+    SA=$(gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" \
+         --format='value(spec.template.spec.serviceAccountName)')
+    if [ -z "$SA" ]; then
+        NUM=$(gcloud projects describe "$PROJECT" --format='value(projectNumber)')
+        SA="${NUM}-compute@developer.gserviceaccount.com"
+    fi
+    echo "granting object access to ${SA}"
+    gcloud storage buckets add-iam-policy-binding "gs://${BUCKET}" \
+        --member="serviceAccount:${SA}" --role=roles/storage.objectAdmin
+
+    gcloud run services update "$SERVICE" --project "$PROJECT" --region "$REGION" \
+        --add-volume=name=store,type=cloud-storage,bucket="$BUCKET" \
+        --add-volume-mount=volume=store,mount-path=/data \
+        --update-env-vars=QUANTAMIND_DATABASE_PATH=/data/stores \
+        --max-instances=1
+
+    # **A MOUNT THAT SUCCEEDED AND A PATH THAT IS WRONG LOOK IDENTICAL FROM THE DEPLOY OUTPUT.**
+    just storage-check
+
+# What is actually mounted, where the store root points, and how many writers there can be.
+storage-check:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    export PATH="/opt/homebrew/share/google-cloud-sdk/bin:$PATH"
+    gcloud run services describe quantamind-reviewer \
+        --project quantamind-oss --region us-central1 \
+        --format='yaml(spec.template.spec.volumes, spec.template.spec.containers[].volumeMounts, spec.template.spec.containers[].env, spec.template.metadata.annotations)'
+
 deploy:
     #!/usr/bin/env bash
     set -euo pipefail

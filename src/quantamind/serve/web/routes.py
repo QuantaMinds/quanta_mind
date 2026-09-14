@@ -27,7 +27,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from quantamind.render import page
-from quantamind.serve.web import pages, signin
+from quantamind.serve.web import pages, scan_route, signin
 from quantamind.store import accounts, tenancy
 from quantamind.store.schema import open_store
 from quantamind.types.settings import Settings
@@ -40,7 +40,9 @@ STATE_SECONDS = 600
 that a stolen state value is worthless by the time anybody could use it."""
 
 REPO_PREFIX = "/r/"
+SCAN = "/scan"
 HTML = "text/html; charset=utf-8"
+JSON = "application/json"
 SIGN_IN_PAGE = (
     "<h1>QuantaMind</h1><p>A code reviewer that reports what it did not check.</p>"
     '<p><a href="/login">Sign in with GitHub</a></p>'
@@ -116,7 +118,7 @@ def get(path: str, cookies: str, settings: Settings, *, at: int | None = None) -
             ),
         )
 
-    if where == "/" or where.startswith(REPO_PREFIX):
+    if where == "/" or where == SCAN or where.startswith(REPO_PREFIX):
         # **NO ACCOUNT STORE MEANS NOBODY HAS SIGNED IN, WHICH IS AN ANSWER.** Before the first
         # installation the file does not exist, and opening it raised `sqlite3.OperationalError`
         # into the stdlib handler -- a browser at `/` got a dropped connection. Creating the store
@@ -135,6 +137,9 @@ def get(path: str, cookies: str, settings: Settings, *, at: int | None = None) -
             # a visitor, who gets the same page and the same link either way.
             return Reply(200, page.page("QuantaMind", SIGN_IN_PAGE), kind=HTML)
         root = Path(settings.database_path)
+        if where == SCAN:
+            status, payload = scan_route.answer(root, session.login, query)
+            return Reply(status, payload, kind=JSON)
         if where == "/":
             return Reply(200, pages.home(root, session.login), kind=HTML)
         body = pages.repository(root, session.login, where[len(REPO_PREFIX) :])

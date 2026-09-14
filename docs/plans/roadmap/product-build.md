@@ -316,6 +316,14 @@ Stripe.
       Verified end to end on a real repository: `eval` at line 3 → `failure`, `print` at line 2 →
       `warning`. 10 tests, 4 sabotages caught. It goes through D7f's `permit(GITHUB_API)`, so an
       air-gapped deployment refuses it like everything else.
+      **"VERIFIED END TO END ON A REAL REPOSITORY" MEANS REAL REPOSITORY DATA, NOT A POSTED CHECK
+      RUN — CHECKED 2026-09-11 AND WORTH SPELLING OUT, BECAUSE THIS SENTENCE READS THE OTHER WAY.**
+      The GitHub API was asked directly: the last ten commits on `main` and the head commits of
+      pull requests #94, #97, #98, #99 and #100 carry check runs from `github-actions` only —
+      `guards`, `types`, `phase0`, `lint`, `test`. **No check run from this App exists on this
+      repository.** `tests/live/` holds none either; `check_run.py`'s only test is a unit test. So
+      `HOW_IT_WORKS.md` is right that the write has never been exercised against GitHub, and this
+      row must not be read as evidence that it has.
 
 - [ ] **C3 IDE integration.** Only when a deal asks.
 - [ ] **C4 SSO.** Procurement gate — only when a deal asks.

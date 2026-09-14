@@ -46,6 +46,7 @@ REQUIRED = (
     "[serve] GET  /health",
     "[serve] GET  /         — the dashboard",
     "[serve] GET  /r/<owner>/<name>",
+    "[serve] GET  /scan?repo=owner/name",
     "[serve] It REVIEWS: clone, rank, render. Posting is",
     "[serve] http.server is not a hardened edge",
 )

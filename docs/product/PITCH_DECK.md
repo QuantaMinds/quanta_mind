@@ -1,284 +1,274 @@
 # QuantaMind
 
-### Your team already wrote the rules. We make sure nobody breaks them.
+### Write the rules once. We enforce them on every change — and prove the same answer twice.
 
-**Pre-seed · Raising $500K**
+**Pre-seed · $500K**
 
----
-
-> ## The 15-second version
+> **Eleven slides. The appendix is the data room, not slide twelve.**
 >
-> **Robots now write a lot of the code. Humans still have to check all of it. They can't keep up.**
->
-> Every team already wrote down how their code should be written. Nobody enforces it.
->
-> **We check every change against your team's own rules. If a change breaks one, it can't go in.**
->
-> And we tell you which parts we looked at — and which parts we did not.
-> **No other tool will tell you that.**
+> **This deck makes no claim about what a competitor lacks.** Six such claims were written here
+> and all six turned out false — rivals ship rules, dashboards, merge blocking, permanent free
+> tiers, and a fourth check outcome. They are listed at the end. **What is left i s what we can
+> demonstrate**, which is a smaller deck and a claim that does not expire when someone else ships.
 
 ---
 
 ## 1 · The Problem
 
-**Checking code is like marking homework. The pile just got three times bigger. The teachers did not.**
+# AI writes code faster than people can check it.
 
-| What is happening | The number |
+Changes pile up, go in unread, and the bugs land in production.
+
+| | |
 |---|---|
-| Code written by AI, today | **42%** — heading to **65%** next year |
-| Developers who don't fully trust AI code | **96%** |
-| AI-written changes that actually get accepted | **33%** — human-written ones: **84%** |
-| Top reason they get thrown away | **Nobody got to them in time** |
-| Senior engineer time spent checking code | **8–12 hours a week** |
+| **32.7%** | of AI changes merge — humans: **84.5%** |
+| **16 hrs** | before anyone picks one up — human work: **~200 min** |
+| **+243%** | incidents per change *(reported — see appendix)* |
 
-**So teams bought robot helpers to check the robot code. It got worse.**
+**Review isn't the slow part.** Once somebody starts, an AI change is read *faster* than a human
+one — 194 min against 252. **All of the delay is in getting picked up.**
 
-An independent audit of the biggest one found **36% of its comments were noise or nitpicking**.
-The pile went from 20 changes to 60, and each one now arrives buried in bot comments.
-
-> **The real problem is not finding bugs. It is attention.**
-> Every tool answers a flood by making more text. You cannot fix a "too much to read" problem
-> by writing more.
-
-**And there is a second problem underneath it.** Every team has a written guide — *"this is how
-we do things here."* It sits in a file nobody enforces. It is remembered by whoever happens to be
-looking that day. **And the AI writing most of your code has never read it.**
+*Merge rates, pickup and review time: LinearB, 2026 Benchmarks — 8.1M pull requests, ~4,800 teams.
+Incidents: Faros AI, 2026 — 22,000 developers, via secondary summary.*
 
 ---
 
 ## 2 · The Solution
 
-**We do two things. Both are boring. That is why they work.**
+# You write the rules once. A parser decides them, every change.
 
-### One — we enforce your rules
+### Enforce the rules your team wrote
+Break one and the change can't merge — **and the verdict is the same tomorrow.**
 
-We read the guide your team already wrote. We check every single change against it.
-**Break a rule, and the change cannot go in.** Not a comment. Not a suggestion. A locked door.
+### Publish what we couldn't check
+Which files we read, and which we did not. On every change.
 
-- You write nothing new. We read the files you already keep.
-- Same answer every time. Run it again on the same code, get the same result.
-- **Every check is written down** — including the ones we could not decide. Those are named, not
-  quietly counted as "fine."
-
-### Two — we say where to look, and where we did not look
-
-We tell a human which part of the change deserves their eyes first. Then we print a plain line
-saying **which files we read and which we did not.**
-
-> **Why that line matters, in one sentence:**
-> When a robot checker says nothing about a file, you cannot tell if it *looked and found nothing*
-> or *never looked at all*. Those are completely different. They look identical. So a careful
-> person re-reads it anyway — which is the work you paid the tool to remove.
-
-**We are honest about the other half.** We do **not** claim to find more bugs than anyone else.
-Nobody in this market has shown they do. We do not sell that, and nothing in our price depends on it.
+**Prose can't be enforced**, so judgement calls are labelled and never block.
+Today: Python, three rule kinds. **We don't claim to find more bugs than anyone else.**
 
 ---
 
-## 3 · Why Now
+## 3 · How It Works
 
-**Four things became true at the same time. None of them were true three years ago.**
-
-1. **Machines started writing the code.** 42% today, 65% next year. The thing writing your code
-   has never read your team's guide.
-2. **The pile tripled. The checkers didn't.** Work that was paid for now dies waiting — the single
-   biggest reason AI changes get thrown away is that nobody got to them.
-3. **The robot checkers made it noisier.** A third of what the market leader writes is not worth
-   reading. Everyone now knows this.
-4. **Somebody is about to be asked to prove it.** Auditors and customers are starting to ask
-   *"show me this code was actually checked."* Today, nobody can answer. **The answer is a record,
-   and a record only exists if you started keeping one.**
-
----
-
-## 4 · How It Works
-
-**Four steps. A developer sees only the last one.**
-
-```
-  Someone proposes a change
-        │
-   1 ▸  WE CHECK THE RULES          your team's own guide, every change, every time
-        │                           → passed · broken · couldn't tell · not our job
-        │                           → four answers, never two
-        │
-   2 ▸  WE PICK WHERE TO LOOK       using your repository's own history
-        │
-   3 ▸  WE READ, ONLY THERE         and a second, independent checker throws out
-        │                           anything it cannot confirm
-        │
-   4 ▸  WE ANSWER                   ✗ a locked door if a rule is broken
-                                    ▸ where a human should look first
-                                    ▸ and what we did NOT look at
-```
-
-**Step 1 never guesses.** A machine decides it, and you can run it again tomorrow and get the same
-answer. That is the part we sell.
-
-**"Couldn't tell" is a real answer.** If a file cannot be checked, we say so. We never count it as
-passing. Everyone else has two answers — pass or fail — so an unreadable file quietly becomes a
-tick. **An auditor who learns that once stops believing the whole report.**
-
-### The part that makes people say yes
-
-**We can show you your own answer before you install anything.**
-
-Give us a copy of your repository. We replay your last six months and show you what we would have
-said — on your code, your history, your team. No sign-up, no access, nothing leaves your machine.
-
-> *We do not publish a benchmark. Benchmarks are chosen by the vendor.
-> Give us a repository and we will run it on your own history, and you can check the answer yourself.*
-
----
-
-## 5 · Market Size — built from the bottom up
-
-**No "1% of a big number." We counted customers and multiplied by the price.**
-
-| | Who | Count | × price/year | Size |
-|---|---|---|---|---|
-| **TAM** | Every professional developer in the world | 28.7M | $348 | **$10.0B** |
-| **SAM** | US professional developers — our first market | 4.4M | $348 | **$1.5B** |
-| **SOM** | 1,500 companies, ~40 developers each, in 3 years | 60,000 | $348 | **$21M ARR** |
-
-*$348 = $29 per developer per month, our middle tier.*
-
-**Why we think 1,500 companies is real, not a wish:** every one of them can be shown their own
-answer before they pay anything. Our first market is teams already on GitHub with enough history
-to replay — which is most teams that have existed for two years.
-
----
-
-## 6 · Competition — how we are different
-
-| | CodeRabbit | Greptile | Qodo | **QuantaMind** |
-|---|---|---|---|---|
-| What it tells you | *this line is wrong* | *this is wrong architecturally* | *this is wrong, here's a test* | **this broke a rule you wrote** |
-| Enforces YOUR written rules | ✗ | ✗ | ✗ | **✓** |
-| Can it stop a bad change | it comments | it comments | it comments | **✓ a locked door** |
-| Same answer if you run it again | ✗ | ✗ | ✗ | **✓** |
-| Can you prove what was checked | ✗ | ✗ | ✗ | **✓ every rule, every file** |
-| Says what it could NOT check | ✗ | ✗ | ✗ | **✓** |
-| Free forever | trial | trial | credits | **✓ never expires** |
-
-**The one-line difference:**
-
-> **They all answer "is this code wrong?" — which is an opinion.
-> We answer "does this break a rule you already agreed to?" — which is a fact.**
-
-### Why a big company cannot just copy this in a month
-
-- **The scorer cannot be the player.** A tool that reviews your code cannot credibly tell you how
-  much it missed — the same reason no company audits its own books. Four vendors currently claim
-  to be #1 on the same scoreboard. Nobody publishes what they got wrong.
-- **You cannot add "what I missed" later.** Saying *what you could not check* means knowing it,
-  every step, from the first line of output. A tool not built that way from day one does not have
-  the information to start. And the first thing it would say, if it could, is how much of your code
-  its own reviewer never understood.
-- **They cannot give away what we give away.** Every review they run costs them money, so their
-  free tier is a trial with an end date and their demo is a toy project. **Ours doesn't expire,
-  and our demo is your actual code.**
-
-### What we are NOT better at — said before you ask
-
-CodeRabbit writes your tests, answers questions, scans for security holes, and has a bigger free
-tier. Greptile reads your whole codebase and answers questions about it. **We build none of that,
-and we are not better than either of them at finding bugs.** Nobody has shown they are better at
-that — them or us. **We sell the part that does not depend on a guess being right.**
-
----
-
-## 7 · Pricing
-
-**One number a buyer can compare: per developer, per month.**
-
-| | **Free** | **Team** | **Enterprise** |
-|---|---|---|---|
-| | **$0** | **$29** /dev/month | **from $60** /dev/month |
-| | up to 10 developers | unlimited | unlimited |
-| | Your rules, enforced | Everything, whole team, full history | Plus what procurement asks for |
-
-**The free tier never expires and never gets worse.** It is not a trial.
-
-**Why $29 is easy to say yes to:** one senior engineer spends **8–12 hours a week** checking code
-— roughly **$28,000–$42,000 a year**. At $348 a year, we pay for ourselves if we give back
-**twenty minutes per developer per month.** That is the bar. We would hold us to it too.
-
----
-
-## 8 · Team
-
-**Four people. Three of us have known each other seven years, since engineering school, and
-built systems projects together before this.**
+# A developer sees only step 4.
 
 | | | |
 |---|---|---|
-| **Dhanush G** | **CEO** | 2+ years in Systems Engineering — test engines, agent pipelines |
-| **Chirag V K** | **CTO** | 5+ years in backend, infrastructure and hardware testing |
-| **KN Gowri** | **CDO** | 3+ years as a Data Scientist — data pipelines, test sets, validation |
-| **Aanya Sampath** | **COO** | Operations and go-to-market |
+| **1** | **Check the rules** | Your rule file. No model. **Same commit, same verdict** |
+| **2** | **Rank the files** | From this repository's own history |
+| **3** | **Read the top** | The model reads only there |
+| **4** | **Answer** | Blocked, or where to look |
 
-**Why this team for this problem:** this is a testing and measurement company wearing a code-review
-coat. Between us we have spent years building **test engines, data pipelines and validation sets**
-— deciding whether a result is real. That is the entire job here. The hard part of this product was
-never writing the checker; it was proving the checker was right, and then proving it again on
-repositories we had never seen.
+**It also runs before the pull request exists** — `/qm-review` over uncommitted work, no network
+call. *"Blocked" means a commit status that fails; turning that into a wall is your host's setting,
+and GitHub reserves required checks for paid plans on private repos.*
 
 ---
 
-## 9 · The Ask
+## 4 · The Denominator
 
-# $500,000
+# The compliance number we report is one you can defend.
 
-**18 months of runway for four people, to turn a working product into a paying one.**
+Four outcomes: `passed` · `broken` · **`couldn't tell`** · `a machine can't settle it`.
+**Only the first two reach the rate.**
 
-| Where it goes | Why |
+**A file nothing could parse never becomes a tick.** If it did, a repository could read as 100%
+compliant with checks that never ran — and an auditor who finds one such row stops believing the
+whole table.
+
+**Conceded:** CodeRabbit ships an **Inconclusive** status for *"analysis that could not be
+completed."* **Having a fourth outcome is not ours.** What we do with it is: `UNCHECKABLE` is
+excluded from the denominator by construction, and every row is exportable with the commit that
+lets you re-run it.
+
+---
+
+## 5 · Team
+
+# We falsify our own claims. That is the method, and it is the product.
+
+| | | |
+|---|---|---|
+| **Dhanush G** · CEO | Systems engineering | Test engines, agent pipelines |
+| **Chirag V K** · CTO | Backend, infrastructure | DevOps, hardware testing |
+| **KN Gowri** · CDO | Data science | Pipelines, test sets, validation |
+| **Aanya Sampath** · COO | Operations | Go-to-market |
+
+**Seven years together, since engineering school.**
+
+**We pre-registered our first product idea, measured it, got a null — relative risk 1.040 against a
+1.5 threshold — and killed it rather than defend it.** The claim we build on now is the one that
+survived, and it reproduced on **six repositories we had never touched.**
+
+**This month we disproved six of our own competitive claims and wrote them into this deck.** It is
+the same instrument we point at a customer's code.
+
+---
+
+## 6 · Competition
+
+# Blocking a merge is table stakes now. What decides it isn't.
+
+| | CodeRabbit | Greptile | Qodo | **QuantaMind** |
+|---|---|---|---|---|
+| Deterministic rule engine | `ast-grep` | Opengrep | rules system | `.quantamind/rules.toml` |
+| What decides the **blocking** verdict | rules **and model-judged checks** | rules **and model review** | **an agent** | **a parser, only** |
+| Re-run proof published | — | — | — | **a 3-run digest, every build** |
+| Per developer / month | $24–30, **PR authors only** | $30 + $1/review | ~$30 | **$29, every developer** |
+
+**A model cannot be re-run to the same answer. A parser can — and we show it rather than assert it:**
+
+> **Three runs over the same commit: 4,282 rows, one digest — `4ae0422b7a18`.**
+
+**Rules, deterministic engines, dashboards, merge blocking and permanent free tiers all exist
+elsewhere** — this deck claimed otherwise six times and was wrong six times. **What is left is that
+nothing model-decided can reach our blocking verdict, and that we publish the proof.**
+
+*Rows checked against vendor documentation, September 2026.*
+
+---
+
+## 7 · Business Model
+
+# Per developer, per month.
+
+| **Free** | **Team** | **Enterprise** |
+|---|---|---|
+| **$0** | **$29** | **from $60** |
+| ≤ 10 developers | unlimited | unlimited |
+
+**Inference is 4–7% of the price** — $1.20–$2.00 per developer per month against $29, measured on
+68 billed requests. **The enforcement half runs no model at all.**
+
+*We do not quote a gross margin here. The figure we used to print assumed a fair-use cap on model
+reviews that **is not built** — the Ask names it. A margin resting on an unbuilt gate is a number we
+cannot defend, so it is out until the gate is.*
+
+**Break-even: 24 minutes per developer per month.** A senior engineer at $150K costs ~$72/hour —
+salary only; fully loaded it's nearer 17 minutes. **We quote the harder number.** We price into
+Semgrep at $35/contributor and SonarQube by lines of code, not the $24–30 AI-review band.
+
+---
+
+## 8 · Defensibility
+
+# Three claims, and none of them is something a rival lacks.
+
+**1 · A parser decides the block, and it re-runs.** Agent-decided verdicts can't. We measured the
+cost: the same reviewer, same 173 defects, twice — **91, then 84.** A ±4-point swing from
+nondeterminism alone. Ours is a digest you can watch reproduce.
+
+**2 · The replay is model-free.** Six months of a prospect's history costs us CPU and costs a
+model-per-change reviewer a full inference pass per historical change. **That's why we can hand it
+to everyone.**
+
+**3 · The method compounds, and no release note can falsify it.** Six competitive claims disproved
+and published in one month. **A team that will not ship a number it cannot defend is what a
+compliance buyer is actually purchasing.**
+
+**Copyable in a quarter:** rules, blocking, dashboards, coverage lines, a free tier. **This category
+ships those every month, and we don't sell them as a moat.**
+
+---
+
+## 9 · Go-to-Market
+
+# Your own repository is the demo — and you run it yourself.
+
+**Clone stays with you** → `quantamind retrospective` → **six months, replayed**
+
+**No sign-up. No install of ours on your servers. Nothing leaves your machine.**
+
+Their cost per prospect is a model call on every historical change. **Ours is CPU.**
+
+> *We don't publish a benchmark — benchmarks are chosen by the vendor.*
+
+---
+
+## 10 · Market
+
+# Only the bottom row is bottom-up. It's the one we're held to.
+
+| | | |
+|---|---|---|
+| **SOM** | **$21M ARR** | **1,500 companies × ~40 developers × $348** |
+| SAM | *not yet sized* | teams on GitHub with enough history to replay |
+| TAM | $10.0B | 28.7M developers × $348 — population × price, and nothing more |
+
+**28.7M is the most conservative count we found** (Evans Data); SlashData puts professionals at
+36.5M and all developers at 47.2M. **$29 × 40 developers = $14K a year per company.**
+
+---
+
+## 11 · The Ask
+
+# $500,000 · 18 months · four people
+
+| | | |
+|---|---|---|
+| **1** | **Take payments** | Revenue in weeks, not quarters |
+| **2** | **25 design partners** | Each replays their own history, free |
+| **3** | **More languages, more rules** | Widens who can buy |
+| **4** | **The audit report** | The artefact procurement pays for |
+
+**Where we start from.** No customers, no revenue, no checkout. A product running end to end, and a
+result that held on six repositories we'd never touched.
+
+**What it has to prove.** That teams pay to have their own rules enforced. **Four open questions —
+the cost model, an unbuilt tier gate, one deferred optimisation, and demand itself — are waiting on
+the same event: the first customer.** That is what the $500K buys, and design partners are the
+instrument, not a sales milestone.
+
+---
+---
+
+# Appendix — the data room
+
+*Confirmed = we read the primary source. Reported = a named secondary we did not confirm.*
+
+| Claim | Source | Status |
+|---|---|---|
+| 42% AI-written; 96% don't fully trust; 48% verify; 38% more effort | Sonar, *State of Code*, 8 Jan 2026 — 1,100+ devs, self-reported | **Confirmed** |
+| 32.7% vs 84.5% merge; 16+ hrs vs ~200 min pickup; 2.5× larger; 194 vs 252 min | LinearB, *2026 Benchmarks* — 8.1M PRs, ~4,800 teams, read on LinearB's page | **Confirmed** |
+| +98% PRs merged, +91% review time, +154% size, +9% bugs | Faros AI, 2025 — 10,000+ devs, 1,255 teams. **Re-attributed: we had credited LinearB** | **Confirmed** |
+| Incidents +243%; churn +861%; zero-review merges +31.3% | Faros AI, 2026 — 22,000 devs. PDF wouldn't parse; read from a secondary summary | **Reported** |
+| Qodo's Rule System; org-level rules; "Merged Violations" metric | Qodo 2.1 announcement, 17 Feb 2026, and `docs.qodo.ai` — beta, GitHub only | **Confirmed** |
+| Rivals block merges: CodeRabbit error mode, Qodo compliance gate | `docs.coderabbit.ai/pr-reviews/pre-merge-checks`; Qodo compliance docs | **Confirmed** |
+| **CodeRabbit reports Inconclusive — "analysis that could not be completed"** | `docs.coderabbit.ai/pr-reviews/pre-merge-checks`, read 2026-09-11 | **Confirmed** |
+| Greptile's analytics dashboard — and that it is *not* DORA or cycle time | greptile.com docs. A secondary source said otherwise and was wrong | **Confirmed** |
+| Competitor pricing; `ast-grep` custom rules; CodeRabbit counts PR authors as seats | Vendor pricing pages, `docs.coderabbit.ai` | **Confirmed** |
+| 28.7M professional developers | Evans Data; SlashData 36.5M / 47.2M. We use the lowest | **Confirmed** |
+| ±4-point nondeterminism floor; 3-run digest; margin; routing result | Corpus noise-floor run; `assert_deterministic.py`; 68 billed requests; six unseen repos | **Ours** |
+
+## Six claims we made and disproved
+
+**Every one was a claim about what a competitor lacked. All six were false.**
+
+| We said | They ship |
 |---|---|
-| **Let people pay us** | The product runs. There is no checkout. This is the shortest gap between us and revenue |
-| **First 25 design partners** | We can show each of them their own answer for free. Nobody has run that play yet |
-| **Widen what we can enforce** | More languages, more rule types — each one widens who can buy |
-| **The evidence product** | Turn the record we already keep into the report an auditor asks for |
+| "Nobody enforces the standards you wrote" | Qodo Rule System (Feb 2026); CodeRabbit `ast-grep` |
+| "You get back: comments" | All three ship analytics dashboards |
+| "Their free tier is a trial" | CodeRabbit and Greptile are permanent and uncapped |
+| "Everyone else leaves a comment; we stop the merge" | CodeRabbit error mode; Qodo's compliance gate |
+| "A check that couldn't run has nowhere else to go" | **CodeRabbit's Inconclusive status** |
+| "A parser decides it — theirs is a model" | **Greptile ships Opengrep pattern rules; CodeRabbit ships `ast-grep`** |
 
-### What you get
+**The lesson, and the reason this deck reads differently from the last version:** you cannot
+differentiate on absence in a category that ships a feature a month. **We now claim only what we can
+demonstrate.**
 
-- **A category nobody occupies.** Every competitor sells opinions about code. We sell proof about
-  process. That is closer to Semgrep and SonarQube than to a chatbot — and it carries their price,
-  not a chatbot's.
-- **A sales motion no competitor can run.** We hand a prospect their own six months of history
-  before they sign anything. For a tool that pays a model on every change, that demo costs them
-  real money per prospect. For us it is cheap.
-- **A team that kills its own ideas.** Our first product idea was tested, came back empty, and we
-  killed it rather than defend it. The thing we build now is the one claim that survived — and then
-  **reproduced on repositories it had never seen.** That is unusual, it is checkable, and it is why
-  the claims on this page are ones we will still stand behind in a year.
+## Other corrections during verification
 
-### Where we are honest
+A figure credited to LinearB is **Faros AI's**. "The pile tripled" was unsupported — the pile
+doubled; incidents tripled. Two unsourced review-hours figures were cut. "Their reviews cost tokens,
+ours cost CPU" was false — **the asymmetry is the replay, not the review.**
 
-**No customers yet. No revenue yet.** The product runs end to end and is tested against real
-repositories, not mock-ups. What we have not yet proven is that a buyer will pay for it — and the
-$500K is to find that out quickly, with the cheapest demo in the category.
+**A collision a diligence analyst will hit.** LinearB and a 2026 Faros write-up circulate identical
+figures to one decimal place from different samples. Both can't be primary. **We cite LinearB,
+which publishes its methodology.**
 
----
+## What we are not better at
 
-## Where these numbers come from
-
-**Every figure on this page is somebody else's published number or our own measured one. None is
-an estimate dressed as a fact.**
-
-| Claim | Source |
-|---|---|
-| 42% of code is AI-written, 65% by 2027; 96% don't fully trust it | Sonar, *State of Code*, 8 January 2026, 1,100+ developers |
-| AI changes accepted 33% vs 84%; top rejection reason is inactivity | LinearB *Engineering Benchmarks 2026*, 8.1M pull requests, ~4,800 teams |
-| 36% of the market leader's comments are noise or nitpicking | Independent audit of 28 pull requests, 32,784 lines, 693 files — reported, not confirmed by us |
-| 8–12 hours a week reviewing; $28,000–$42,000 a year | Industry figures at a $150K salary |
-| 28.7M professional developers worldwide; 4.4M in the US | Developer-population surveys, 2026 |
-| Our own routing result | Measured here, replicated on repositories the method had never seen. Numbers and full method on request |
-
-**What we deliberately do not put on a page:** our own accuracy, precision or recall. Two reasons —
-it tells a competitor what to optimise, and one number invites an argument about method.
-**We would rather hand you your own number, computed on your own repository.**
-
----
-
-*Company detail and every measurement behind these claims: `docs/product/QUANTAMIND.md`.
-What may and may not be said in public: `docs/product/publishing-rules.md`.*
+CodeRabbit writes your tests, answers questions, scans for vulnerabilities, holds **SOC 2 Type II**,
+and has a bigger free tier. Greptile indexes your whole codebase. **We build none of that, and we
+are not better than either at finding bugs.** Nobody in this market has shown they are — them or us.

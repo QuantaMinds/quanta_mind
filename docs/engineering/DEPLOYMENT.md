@@ -81,6 +81,33 @@ the deterministic half.
 container, and `quantamind compliance --repo <owner/name> --export trail.json` reads it back out
 whole for an auditor.
 
+**It is a ROOT DIRECTORY, not a file, and the name misleads.** `review_delivery.deliver()` passes it
+to `tenancy.store_for(root, owner, name)`, so what appears at that path is a directory holding
+`<owner>/<name>.db` per repository plus a shared accounts store. The default is the relative path
+`quantamind.db`, which is why an unconfigured deployment grows a *directory* of that name in its
+working directory.
+
+**ONE WRITER, OR SQLITE IS NOT SAFE THERE.** Cloud Storage FUSE provides no file locking at all —
+Google's own wording is that "the last write wins and all previous writes are lost" — and Cloud Run
+mounts NFS in no-lock mode. Both facts make the number of concurrent instances a correctness
+setting rather than a capacity one. If the volume is network storage, run one instance.
+
+### The hosted service — configured 2026-09-11, persistence still unproven
+
+`quantamind-reviewer` on Cloud Run now mounts `gs://quantamind-oss-store` at `/data` through the
+gcsfuse CSI driver, sets `QUANTAMIND_DATABASE_PATH=/data/stores`, and runs at **`maxScale: 1`**.
+`just storage-check` prints what is actually mounted; `just storage-setup` is the one-time recipe
+that put it there.
+
+**Before that change the service set no database path and mounted no data volume**, so the trail
+was written to the container filesystem and destroyed on every deploy, and `maxScale: 3` split it
+across instances.
+
+**Configured is not proven.** `/health` reports the root writable at schema v7 with no tenants yet.
+Nothing has been recorded, redeployed and read back, which is the known-answer test in
+`docs/plans/ops-store-persistence.md`. **Until it has run, do not describe the hosted trail as
+durable** — an empty store passes every check that did not take a baseline first.
+
 ### Air-gapped
 
 Identical, with two changes:

@@ -42,6 +42,23 @@ When someone asks for our benchmark:
 - **Say the thing, then stop.** No sentence exists to sound impressive. No "seamless",
   "revolutionise", "empower", "leverage".
 - **Never claim to catch more bugs.** We do not, and the first customer to test it will find out.
+- **Never claim to be the only one, the first, or the one nobody else can copy.** Say what the
+  product does and let the reader draw the comparison. Banned shapes: *"the only X"*, *"the first
+  to"*, *"no other tool"*, *"a category nobody occupies"*, *"no competitor can"*.
+  **The sentence that produced this rule** was a proposed tagline — *"The only AI code review that
+  gives you the same answer twice"* — and it was wrong on its own terms: a reproducible verdict is
+  what every linter, Semgrep and SonarQube already ship, so the line claimed a whole category's
+  property as ours. Three failures, in order of how fast they arrive: **it is usually already
+  false**, because somebody has done it and we cannot survey a market to find out; **it expires**
+  the day one competitor ships it, and nothing in the page will say so; and **one counterexample
+  in the room discredits every other claim beside it**, including the ones that are true. A
+  uniqueness claim is an unverifiable claim wearing a confident sentence, which is the defect the
+  rest of this file exists to stop.
+  **Two shapes are NOT uniqueness claims and stay.** *Absence of evidence*, where our own research
+  is the backing — *"nobody in this market has shown they catch more bugs, them or us"* — which
+  costs nothing if it is later disproven, because it was a statement about published evidence
+  rather than about us. And *statements about our own claims* — *"the only result here that
+  reproduced out-of-sample"* — which is a fact about this repository and checkable inside it.
 - **The routing number is sayable, out loud, with the control attached — and it is the only one
   that has ever replicated.** *"Ranking the changed files by prior fix history and reading the top
   three missed 1.21% of the changes a later fix returned to; alphabetical ordering missed 3.12%.

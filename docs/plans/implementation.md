@@ -44,9 +44,9 @@ three months stale.
 | `parse/` | **11** | `body_shape.py`, `change_effort.py`, `duplicate_bodies.py`, `importers.py`, `imports.py`, `languages.py`, `public_api.py`, `python_names.py`, `secret_scan.py`, `suite_reach.py`, `units.py` |
 | `rank/` | **6** | `baseline.py`, `events.py`, `firing.py`, `history_rates.py`, `order.py`, `score.py` |
 | `allocate/` | **1** | `depth.py` |
-| `infer/` | **7** | `change_review.py`, `change_summary.py`, `diff_cap.py`, `gemini.py`, `prompt_once.py`, `summary_prompt.py`, `vertex.py` |
+| `infer/` | **8** | `change_review.py`, `change_summary.py`, `diff_cap.py`, `gemini.py`, `history_digest.py`, `prompt_once.py`, `summary_prompt.py`, `vertex.py` |
 | `verify/` | **13** | `anchor.py`, `blocking.py`, `consumers.py`, `external_facts.py`, `judged_rule.py`, `pin_check.py`, `pin_mismatch.py`, `publishable.py`, `qualification.py`, `release_claims.py`, `releases.py`, `repeats.py`, `rule_check.py` |
-| `render/` | **11** | `audit_export.py`, `comment.py`, `compliance_table.py`, `config.py`, `dashboard.py`, `deep_report.py`, `json_report.py`, `mined_rules.py`, `page.py`, `replay_report.py`, `speaks.py` |
+| `render/` | **12** | `audit_export.py`, `comment.py`, `compliance_table.py`, `config.py`, `dashboard.py`, `deep_report.py`, `json_report.py`, `mined_rules.py`, `page.py`, `replay_report.py`, `scan_report.py`, `speaks.py` |
 | `serve/` | **10** | `blocking_status.py`, `cli.py`, `health.py`, `listener.py`, `onboarding.py`, `retrospective.py`, `rule_judge.py`, `settle.py`, `webhook_github.py`, `working_clone.py` |
 
 <!-- plan-state:end -->
@@ -87,8 +87,11 @@ a captured delivery stays valid forever; `store/deliveries.py` keys on `X-GitHub
 A redelivery REUSES that GUID, so `begin()`/`complete()` are separate: an unfinished attempt is
 retryable, a finished one is not.
 
-The reader stage is otherwise complete. Every layer from git to a
-rendered comment now exists; nothing yet listens for a pull request.
+The reader stage is otherwise complete. Every layer from git to a rendered comment now exists,
+**and the endpoint listens**: `serve/listener.py` serves `POST /webhook`, `webhook_github.py`
+decides which deliveries are ours, and `run_endpoint.work()` calls `review_delivery.deliver()`.
+**CORRECTED 2026-09-11 — this sentence read "nothing yet listens for a pull request" while the
+section above it, 28 lines earlier, said the endpoint reviews.**
 
 **The posting gap is closed.** `post()` has written a real comment, refused a duplicate on the same
 head, and posted again when the head moved — by hand, against our own repository, comments deleted

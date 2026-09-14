@@ -109,6 +109,9 @@ def build_parser() -> argparse.ArgumentParser:
         "--json", action="store_true", dest="as_json", help="print the review as JSON for a tool"
     )
     look.add_argument("--deep", metavar="GCP_PROJECT", default="", help=argparse.SUPPRESS)
+    first = subparsers.add_parser("scan", help="walk a clone's history; say where rework lands")
+    first.add_argument("clone", type=Path, help="a full clone; nothing is sent unless asked")
+    first.add_argument("--explain", metavar="GCP_PROJECT", default="", help=argparse.SUPPRESS)
     walk = subparsers.add_parser(
         "retrospective", help="replay the ranker over a clone's own history and report"
     )
@@ -149,6 +152,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         return review_commit(
             args.clone, args.repo, args.sha, deep_project=args.deep, as_json=args.as_json
         )
+
+    if args.command == "scan":
+        from quantamind.serve.commands.run_scan import run_scan
+
+        return run_scan(args.clone, explain=args.explain)
 
     if args.command == "retrospective":
         from quantamind.serve.commands.run_retrospective import run_retrospective

@@ -17,7 +17,7 @@ it are what to reach for **if** they push, not a script to recite.
 
 ## The one line, if there is time for nothing else
 
-> **We check every code change against the rules your team already wrote down. If a change breaks
+> **We check every code change against the rules your team wrote down. If a change breaks
 > one, it doesn't get in.**
 
 If they ask what makes that different: **every other tool in this category tells you what is
@@ -76,9 +76,9 @@ as overclaiming, pointing the other way, and it is the one this file actually co
 
 ## 1. "What is QuantaMind?"
 
-> **Every team has already written down how it works — a CONTRIBUTING file, a style guide, a wiki
-> page. None of it is enforced. We enforce it on every pull request, identically, and work that
-> breaks it does not merge.**
+> **Every team has written down how it works — a CONTRIBUTING file, a style guide, a wiki page.
+> None of it is enforced. You write the checkable parts down once as rules; we enforce them on
+> every pull request, identically, and work that breaks one does not merge.**
 
 If they want a second sentence:
 
@@ -108,7 +108,7 @@ entire codebase — and claiming it loses the comparison in one sentence.
 > Greptile reads your whole codebase. CodeRabbit reads your whole diff. We are not trying to beat
 > them on how much we look at. **None of them enforces anything** — every one of them produces a
 > comment, and a comment is advisory by construction. We hold the merge on the standards your team
-> already wrote, and we tell you what was looked at.
+> wrote down, and we tell you what was looked at.
 >
 > **Silence from a reviewer has two meanings and no tool separates them.** *Examined, nothing
 > wrong* and *never really read* arrive as the same blank space. You cannot act on that, so you
@@ -255,8 +255,10 @@ Then land it:
 > *A reviewer that tells you which parts it could not analyse is one you can build a process
 > around. One that stays quiet about them is a coin toss with a subscription.*
 
-**And be ready for the honest follow-up.** The **model** speaks on roughly one pull request in ten
-— measured at 8–15% on six of seven repositories, and computed from theirs before they install.
+**And be ready for the honest follow-up. DO NOT SAY THE MODEL SPEAKS ON ONE CHANGE IN TEN — it
+runs on every change.** `review_delivery.py` calls the model on every reviewable delivery, over the
+ranked files only. The 8–15% figure is the share of changes whose top file clears the percentile —
+a label, computed from their history before they install, and **not** our comment rate.
 On the rest there is a standards verdict and a coverage line, and no model finding. **Do not let
 that be heard as "the product is silent nine times in ten":** the standards engine runs on every
 pull request, every rule, every governed file. Nine times in ten we answered deterministically and
@@ -428,8 +430,8 @@ it is the same drift that put a superseded cost figure in three files.
 
 **Why this beats the confident version.** A VP who is told "30% faster reviews" tests it in one
 sprint. A VP who is told "we do not know, here is the run that would settle it, and here is what
-we can back today" has been given something no other vendor in this market will give them —
-which is the product's whole argument, made in the room before the product is installed.
+we can back today" has been handed the run itself — which is the product's whole argument, made in
+the room before the product is installed.
 
 ---
 

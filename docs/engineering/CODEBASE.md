@@ -518,6 +518,14 @@ hands it here. These six are one pipeline with one entry point: `review_delivery
 orchestrates, `change_facts.gather()` collects, `standards_step.applied()` enforces,
 `deep_review`/`pin_review` produce findings, `review_body.body_for()` assembles the text.
 
+**THE DETERMINISTIC HALF RUNS FIRST, CHANGED 2026-09-11.** `deliver()` called `examine()` — the
+model — before `applied()`, so the commit status that can block a merge waited on an inference call
+that could not change it. `applied()` takes clone, sha, changed paths, store, repo, number and
+settings, and **nothing the model produces**, so the old order bought only latency on the half we
+sell. It now runs first. **The defect was found by reading the pitch deck against the code**: both
+`docs/product/HOW_IT_WORKS.md` and the deck described rules as step one, they were describing the
+rendered comment's order rather than this function's, and no test noticed the two disagreeing.
+
 **`review_body.py` exists because two renderers were allowed to drift.** Written inline, the "does
 this comment say anything" check omitted `blind` and silently discarded the "I could not review
 this" banner — a refusal became silence, found by this product's own review of itself on
@@ -3603,6 +3611,41 @@ tests by name.
 
 `render/dashboard.py` renders both views because they are two readings of one population — the same
 `review` rows, once for what became of them and once for what they spent.
+
+### `quantamind scan` and `GET /scan` — the first history walk, and what it found
+
+**`serve/commands/run_scan.py`, `render/scan_report.py`, `infer/history_digest.py`, and `_scan` in
+`serve/web/routes.py`.** The CLI walks a clone's history into a scratch index and prints where
+rework has concentrated; the endpoint reports what `serve/onboarding.warm` already indexed for an
+installed repository. Both render through the same module, so the two surfaces cannot drift.
+
+**THE SCAN IS MODEL-FREE AND STAYS THAT WAY.** `docs/product/PITCH_DECK.md` sells the replay on one
+asymmetry — a prospect's history costs us CPU and costs a model-per-change reviewer an inference
+pass per change. **A narration that ran by default would delete that claim**, so `--explain` takes a
+GCP project by name, is `argparse.SUPPRESS`ed from `--help`, and the default path opens no socket.
+
+**ONLY PATHS AND COUNTS CROSS THE BOUNDARY, AND THE COMMAND SAYS SO BEFORE IT SENDS.** The scan
+holds the whole clone; transmitting source would be trivial and is refused. `ingest/context/
+egress.py` draws the same line for a ticket — reading and transmitting are two acts.
+
+**THE MODEL DESCRIBES THE DISTRIBUTION AND IS FORBIDDEN TO DIAGNOSE.** It is shown counts, never
+code, so any defect claim would be invention; `history_digest.PROMPT` bans naming a bug, a risk or
+a fix, and `render/scan_report` prints the paragraph **below** the table, labelled, with the 25.0%
+figure beside it. A transport failure returns a sentence naming the reason, never an exception —
+the table is the product and has already printed.
+
+**`store/touches.hotspots()` TAKES NO `as_of`, DELIBERATELY.** `counts()` refuses a missing bound
+because it scores a change against history that must not contain it. A scan describes a repository
+as it stands; nothing is being ranked, so there is no future to leak.
+
+**`GET /scan?repo=owner/name` REPORTS A SCAN, IT DOES NOT PERFORM ONE.** Cloning over HTTP would
+outlast any client and would hand anyone who can reach the port a way to make this process clone
+arbitrary repositories. A repository the account did not install answers as one that does not
+exist, and `scanned: false` separates "not indexed yet" from "no history".
+
+**A known limit the output makes visible:** a moved file reads as two rows — the real Flask scan
+lists `flask/app.py` at 354 and `src/flask/app.py` at 128. `docs/product/evidence-ledger.md`
+measures that blind spot and leaves it unfixed on purpose; the scan inherits it.
 
 ### `serve/commands/` — one module per thing the CLI can be asked to do
 

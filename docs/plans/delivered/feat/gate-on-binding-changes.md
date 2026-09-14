@@ -1,7 +1,9 @@
 # Speak only where the budget binds — product-readiness item 2
 
-**Branch:** `feat/gate-on-binding-changes`. **Status: PLAN.** Touches `rank/`, so this is written
-first. → `docs/plans/roadmap/product-readiness.md`, item 2.
+**Branch:** `feat/gate-on-binding-changes`. **Status: DELIVERED — the banner said PLAN while this
+file sat in `delivered/`.** Read what follows as the plan as written, in future tense, not as a
+description of what the product does now. Touches `rank/`, so it was written first.
+→ `docs/plans/roadmap/product-readiness.md`, item 2.
 
 ## The claim being acted on
 

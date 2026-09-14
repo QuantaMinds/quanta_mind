@@ -134,7 +134,13 @@ build.** What has failed repeatedly is building something clever.
 - **Whether CodeRabbit's sandbox runs customer tests** or only analysis tooling. This decides
   how thin the sandbox-execution gap really is, and it is the single most load-bearing
   unknown in this file.
-- **Lightrun's two pain figures** (43%, +242.7%) are vendor-sourced and unaudited.
+- **Lightrun's two pain figures** (43%, +242.7%) are vendor-sourced and unaudited. **AND THE SECOND
+  ONE COLLIDES — noted 2026-09-11.** Faros AI's 2026 report (*The Acceleration Whiplash*, 22,000
+  developers, 4,000 teams) carries **incidents per PR up 243%**, the same figure this file credits
+  to Lightrun. Two vendors cannot both have measured that independently to within a tenth of a
+  point, so **at least one attribution here is wrong** and neither should be quoted until the
+  primary is established. This is the second collision found in one verification pass — the other
+  put LinearB's name on Faros's +98%/+91% figures in the pitch deck.
 - **Graphite's 24h → 90min merge-time claim** is REPORTED, not independently confirmed.
 - **Whether any buyer pays for runtime evidence** as a separate line item, or treats it as an
   observability-budget extension.

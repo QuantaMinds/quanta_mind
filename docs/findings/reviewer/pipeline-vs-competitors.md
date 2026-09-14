@@ -29,7 +29,7 @@ allocation budget and no judge — deliberately, so it was comparable to how the
 | **5 · say** | ten-section walkthrough, sequence diagrams, grouped file tables, one-click fix, chat, IDE plugin | confidence 0–5 and P0/P1/P2 severities | severity-ranked findings | **one comment, or silence — plus the coverage line, always** |
 | **says what it could NOT analyse** | no | no | no | **yes, on every pull request** |
 
-### Where we are genuinely alone, and where we are not
+### What is ours, and what we must stop claiming as ours
 
 **A judge is not our differentiator. Qodo already ships one.** Saying "we verify our findings" as
 though it were novel would be a claim the first evaluator disproves in a minute.
