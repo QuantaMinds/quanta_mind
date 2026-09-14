@@ -1139,6 +1139,28 @@ Bar 1 passed: 0.0% removal on `qodo-extended-v2` against a 3.0% ceiling, while g
 
 ### `infer/` — the transport, the prompt, and the one truncation rule
 
+**A PROMPT'S BLOCK LABELS ARE CUSTOMER-VISIBLE VOCABULARY — changed 2026-09-14, issue #102.**
+`infer/summary_prompt.py` named its FACT blocks `[PR_DESCRIPTION]`, `[FILES_TOUCHED]`,
+`[PRIOR_FIXES]`, `[STATIC_IMPORTERS]`, `[TEAM_CONVENTIONS]`, and its task line asked for *"one
+sentence on the files in STATIC_IMPORTERS"*. On `QuantaMinds/quanta_mind#101` the model wrote
+**"The test files in STATIC_IMPORTERS will need to be updated"** onto a real pull request — an
+internal identifier in a sentence a developer reads, which `docs/product/comment-golden-rules.md`
+forbids. **A label is the only name the model has for a block; it is vocabulary, not structure.**
+Every label now reads as ordinary English if echoed.
+
+**And the label that did NOT leak was the more dangerous one.** `[PRIOR_FIXES] number of later
+commits that returned to each file` describes the ranking signal inside a prompt whose output is
+published, and `docs/product/publishing-rules.md` puts that first on the never-publish list. It is
+`[FILE HISTORY]` now — **here the vaguer label is the safer one**, which inverts this codebase's
+usual instinct, and no output field reads that block anyway.
+
+**`tests/unit/layers/infer/test_prompt_labels_are_sayable.py` checks the INPUT, because the output
+cannot be checked.** `tests/unit/layers/render/test_never_our_method.py` asserts on strings *we*
+write, rendered through `comment()`. This leak arrived inside a model's free text, which is not
+deterministic and no renderer test can pin. The rule is a **shape** — `UPPER_SNAKE` with an
+underscore — rather than a denylist of the four that leaked, which would pass on the fifth.
+
+
 `infer/vertex.py` holds the Vertex call: `MODEL`, `TIMEOUT_S`, `token`, `post`, and the two
 errors both halves raise. `infer/gemini.py` keeps the review prompt, its cap and the parse.
 They were one file until 2026-08-29, split for two reasons that had both been visible for a
