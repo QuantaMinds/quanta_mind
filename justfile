@@ -340,9 +340,18 @@ storage-setup:
     gcloud run services update "$SERVICE" --project "$PROJECT" --region "$REGION" \
         --add-volume=name=store,type=cloud-storage,bucket="$BUCKET" \
         --add-volume-mount=volume=store,mount-path=/data \
-        --update-env-vars=QUANTAMIND_DATABASE_PATH=/data/stores \
+        --update-env-vars=QUANTAMIND_DATABASE_PATH=/data/stores,QUANTAMIND_CLONE_ROOT=/tmp/clones \
         --max-instances=1
 
+    # **THE CLONE ROOT MUST COME OFF THE BUCKET, AND THE FIRST RUN OF THIS RECIPE DID NOT DO IT.**
+    # The Dockerfile puts BOTH roots under /data -- QUANTAMIND_DATABASE_PATH=/data/stores and
+    # QUANTAMIND_CLONE_ROOT=/data/clones -- so mounting a bucket at /data captured the clone root
+    # too. Git cannot clone onto gcsfuse: no chmod, no POSIX locks. The live symptom was
+    # `clone exited 128 ... chmod on .git/config.lock failed: Operation not permitted`, and every
+    # review failed while /health stayed green, because health checks the store and not the clones.
+    # Clones are rebuildable by design -- `working_clone.sweep()` deletes them -- so they belong on
+    # the instance's own filesystem, which is where they were before the bucket existed.
+    #
     # **A MOUNT THAT SUCCEEDED AND A PATH THAT IS WRONG LOOK IDENTICAL FROM THE DEPLOY OUTPUT.**
     just storage-check
 

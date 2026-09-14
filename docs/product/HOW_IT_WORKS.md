@@ -961,8 +961,12 @@ absent is a native VS Code or JetBrains plugin, which is a different thing from 
   - the only volumes are **two secret volumes**, both mounting `quantamind-app-key`; one of them
     (`quantamind-app-key-cev-cim`) is **not mounted by the container at all** — an orphan;
   - the only `volumeMount` is `/run/secrets`. **There is no bucket and no disk;**
-  - **`QUANTAMIND_DATABASE_PATH` is not set**, so `types/settings.py` falls back to its default —
-    the relative path `quantamind.db`, on the container filesystem;
+  - **`QUANTAMIND_DATABASE_PATH` carried no service-level override — CORRECTED 2026-09-14.** An
+    earlier version of this entry read "is not set, so settings falls back to `quantamind.db`".
+    That was wrong: `gcloud run services describe` shows only what the SERVICE overrides, and the
+    **Dockerfile sets `QUANTAMIND_DATABASE_PATH=/data/stores` in the image**. The store was at
+    `/data/stores` all along — on the container filesystem, so still lost on every deploy, which is
+    the finding that stands. Reading a `describe` as the whole environment is the mistake;
   - `autoscaling.knative.dev/maxScale: '3'`, so up to three instances each write **their own**
     file.
 
