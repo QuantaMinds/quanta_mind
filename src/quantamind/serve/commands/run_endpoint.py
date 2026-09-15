@@ -48,6 +48,10 @@ def run(port: int, host: str = "127.0.0.1") -> int:
     from quantamind.serve.working_clone import CloneFailed
 
     secret = os.environ.get(SECRET_VARIABLE, "")
+    # **READ HERE, NOT FROM `Settings`, FOR THE REASON THE WEBHOOK SECRET IS.** A credential in a
+    # settings object reaches a log the first time anybody prints one. Empty is a REFUSAL at the
+    # provisioning routes rather than an open door -- see `serve/web/provision_route.py`.
+    provision_secret = os.environ.get("QUANTAMIND_PROVISION_SECRET", "")
     accepted: list[Review] = []
 
     settings = load()
@@ -72,7 +76,9 @@ def run(port: int, host: str = "127.0.0.1") -> int:
         print(f"[serve] {review.repo}#{review.number}: {done.sentence()}", flush=True)
 
     try:
-        server = build(settings, secret, work, port=port, host=host)
+        server = build(
+            settings, secret, work, port=port, host=host, provision_secret=provision_secret
+        )
     except MisconfiguredSecret as exc:
         print(f"configuration error: {exc}\n\nSet {SECRET_VARIABLE} and try again.")
         return 1

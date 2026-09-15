@@ -275,12 +275,23 @@ Stripe.
       reviewing and returns a SEVENTH outcome, `NOT_ENTITLED`, rather than a flag on an existing
       one: folding "we chose not to review" into "there was nothing to review" would hide a
       withdrawn customer among unreadable pull requests.
-      **ONLY `REMOVED` REFUSES.** `UNKNOWN` reviews, because refusing it would silence every
-      installation predating the mapping to enforce a rule they were never told about. An
-      INELIGIBLE repository reviews too: the free-tier verdict is information for a human, and a
-      gate with no paid tier to fall back on is a dead end with no override. 10 tests; three
-      sabotages caught — UNKNOWN refusing, ineligible refusing, and a no-op withdrawal claiming
-      it removed one.
+      **`REMOVED` AND `INELIGIBLE` REFUSE; `UNKNOWN` AND `NULL` DO NOT — CHANGED 2026-09-15.**
+      This row read "an INELIGIBLE repository reviews too: the free-tier verdict is information for
+      a human, and **a gate with no paid tier to fall back on is a dead end with no override**".
+      **That premise expired when `serve/web/provision_route.py` shipped**: there is a paid tier to
+      fall back on now, and `POST /provision/team` is the override. **B8 recorded the free-tier
+      decision and said enforcement was B5's; this row was ticked while `may_review` read
+      `state is not REMOVED` and never looked at `eligible` at all.** The decision was made, stored
+      and ignored for as long as both rows claimed it was enforced.
+      **`eligible IS NULL` STILL REVIEWS, AND IT IS A DIFFERENT CASE.** NULL is "never assessed" —
+      an installation predating the table, or one whose facts GitHub would not serve. Only an
+      explicit refusal refuses; `onboarding.admit` says why: *"an outage at GitHub must not quietly
+      downgrade somebody's installation."*
+      **AND THE REFUSAL IS POSTED, NOT SWALLOWED.** `deliver()` returned `NOT_ENTITLED` and wrote
+      nothing, so "we will not review this" and "we found nothing" reached the pull request as the
+      same blank space — this product's own cardinal defect, committed by it. `render/
+      not_entitled.py` names the rule and the way past it.
+      The test that pinned the old behaviour was inverted rather than deleted, and says so.
 - [x] **B6 Posting ON.** Default in the Dockerfile, still False in `Settings`, so building the image is the act of asking while a test or CLI run can never write to a pull request. Real comments and an inline review posted to PRs #85 and #86 as `quanminds[bot]`. *Per-tenant switch still absent.* ~~`POSTING_ENABLED` is off by default and `POSTING_ENABLED` is off by default and
       the webhook path has never posted to a real pull request.
 

@@ -54,15 +54,24 @@ def test_an_installation_assessed_as_eligible_is_active(conn: sqlite3.Connection
     assert seat.may_review is True
 
 
-def test_an_ineligible_installation_is_still_reviewed(conn: sqlite3.Connection) -> None:
-    """The free-tier verdict is information for a human, not a gate. B5 refuses only REMOVED."""
+def test_an_ineligible_installation_is_refused(conn: sqlite3.Connection) -> None:
+    """**THIS TEST ASSERTED THE OPPOSITE UNTIL 2026-09-15, AND BOTH WERE RIGHT IN TURN.**
+
+    It read "an ineligible repository is still reviewed", pinning B5's decision that the free-tier
+    verdict was information rather than a gate -- because *"a gate with no paid tier to fall back on
+    is a dead end with no override"*. `serve/web/provision_route.py` shipped the paid tier, so the
+    dead end has an exit and the verdict becomes a gate.
+
+    **The refusal must still be VISIBLE**: `seat.why()` carries the reasons so the delivery can say
+    them, and `serve/review/review_delivery.py` posts rather than going quiet.
+    """
     record(conn, "acme", "acme/payments", at=NOW, eligible=False, reasons=("22 stars",))
 
     seat = entitled(conn, "acme/payments")
 
     assert seat.eligible is False
-    assert seat.may_review is True, "an ineligible repository was silently cut off"
-    assert "22 stars" in seat.why()
+    assert seat.may_review is False, "an ineligible repository was reviewed anyway"
+    assert "22 stars" in seat.why(), "a refusal a customer cannot act on is worse than silence"
 
 
 def test_an_installation_recorded_without_an_assessment_keeps_eligible_null(

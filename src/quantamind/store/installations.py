@@ -51,8 +51,26 @@ class Entitlement:
 
     @property
     def may_review(self) -> bool:
-        """**UNKNOWN REVIEWS.** Refusing it would silence every installation predating the table."""
-        return self.state is not State.REMOVED
+        """**UNKNOWN REVIEWS. ASSESSED-AND-REFUSED DOES NOT — CHANGED 2026-09-15.**
+
+        This read `state is not REMOVED`, so `eligible = 0` was recorded and ignored:
+        `product-build.md` B8 decided the free tier and said "enforcement is B5's", and B5 left the
+        gate open for a stated reason -- *"a gate with no paid tier to fall back on is a dead end
+        with no override"*.
+
+        **THAT PREMISE EXPIRED WHEN `serve/web/provision_route.py` SHIPPED.** There is now a paid
+        tier to fall back on, and `POST /provision/team` is the override. The old decision was right
+        when it was made and is wrong now, which is why this docstring records the change rather
+        than the conclusion.
+
+        **NULL STILL REVIEWS, AND THAT IS NOT THE SAME CASE.** `eligible is None` is "never
+        assessed" -- an installation predating the table, or one whose facts GitHub would not serve.
+        `onboarding.admit` says it plainly: *"an outage at GitHub must not quietly downgrade
+        somebody's installation."* Only an explicit `False` refuses.
+        """
+        if self.state is State.REMOVED:
+            return False
+        return self.eligible is not False
 
     def why(self) -> str:
         if self.state is State.UNKNOWN:

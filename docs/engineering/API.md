@@ -27,6 +27,7 @@ outcome there is.
 |---|---|---|---|
 | [`/webhook`](#post-webhook) | POST | HMAC signature | JSON |
 | [`/health`](#get-health) | GET | none | JSON |
+| [`/provision/{tier}`](#post-provisionfree--team--enterprise) | POST | bearer token | JSON |
 | [`/scan`](#get-scanrepoownername) | GET | session cookie | JSON |
 | [`/`](#get--the-dashboard-index) | GET | session cookie | HTML |
 | [`/r/<owner>/<name>`](#get-rownername) | GET | session cookie | HTML |
@@ -135,6 +136,109 @@ broken" the same alarm.
 `QUANTAMIND_DATABASE_PATH` produce a fresh empty store and a healthy verdict — a process pointed at
 the wrong place looking exactly like a working one. **This refusal caught a real misconfiguration
 on 2026-09-11**, when a bucket was mounted at `/data` without the `stores/` prefix inside it.
+
+---
+
+## `POST /provision/{free,team,enterprise}`
+
+**Validates a tier's criteria, then admits the repositories.** Intended to be called once a payment
+completes.
+
+> **NOTHING HERE READS A PAYMENT PROCESSOR.** Build rows **B3** (Stripe) and **B7** (BYOK) are
+> parked. `payment_ref` is **recorded, not verified**, and every paid reply carries
+> `payment_verified: false` so a caller cannot infer that we checked anything.
+
+### Request
+
+| | |
+|---|---|
+| Header | `Authorization: Bearer <QUANTAMIND_PROVISION_SECRET>` |
+| Body | JSON |
+
+```bash
+curl -X POST https://your-endpoint/provision/team \
+  -H "Authorization: Bearer $QUANTAMIND_PROVISION_SECRET" \
+  -d '{"account":"acme","repos":["acme/api","acme/web"],"seats":12,"payment_ref":"sub_123"}'
+```
+
+| Field | Free | Team | Enterprise |
+|---|:--:|:--:|:--:|
+| `account` — the GitHub login the installation belongs to | ✅ | ✅ | ✅ |
+| `repos` — `["owner/name", …]`, at most 200 | ✅ | ✅ | ✅ |
+| `seats` — developers being billed | — | ✅ | ✅ |
+| `payment_ref` — recorded, never verified | — | ✅ | ✅ |
+| `org` — the organisation holding shared standards | — | — | ✅ |
+
+**Free is the only tier with an eligibility gate**, and that is deliberate: stars, contributors,
+history length, recent activity and a cap of forty places exist because we give it away. A paying
+customer has already answered the question those rules ask.
+
+**`org` is Enterprise's one code-visible difference.** SSO, a DPA, residency and an SLA are contract
+terms, not validations. Inherited standards are read from an organisation's `.quantamind`
+repository, so without one the feature that distinguishes the tier has nowhere to read from.
+
+### Responses
+
+| Status | When |
+|---|---|
+| **`202`** | Accepted. Repositories provisioned; **warming has not happened yet** |
+| **`422`** | Not eligible. **Every** reason, never the first |
+| `400` | Body is not JSON, or `repos` is not a list of strings |
+| `401` | Bad or missing bearer token |
+| `404` | `{"error": "no such tier"}` — an unknown segment never falls through to one we sell |
+| **`503`** | `QUANTAMIND_PROVISION_SECRET` is unset. **The route refuses rather than opening** |
+
+**202, not 200.** Warming a repository is a clone plus an index — about 31 seconds on a large one —
+and no caller waits. The route validates and records synchronously and replies with what it
+accepted. Same acknowledge-then-work shape as the webhook.
+
+```jsonc
+// 202
+{
+  "tier": "team",
+  "eligible": true,
+  "account": "acme",
+  "provisioned": ["acme/api", "acme/web"],
+  "refused": [],
+  "warming": ["acme/api", "acme/web"],
+  "payment_verified": false,
+  "note": "payment_ref was recorded, not verified. Nothing in this product reads a payment processor…"
+}
+```
+
+```jsonc
+// 422
+{
+  "tier": "free",
+  "eligible": false,
+  "message": "You are not eligible for the free tier. Every reason is listed in `refused` — all of
+              them, not the first, so fixing one does not earn a second refusal.",
+  "provisioned": [],
+  "refused": ["acme/api: 22 stars, and the free tier needs at least 1000"]
+}
+```
+
+**`eligible` ships on both**, so a caller reads one key rather than inferring from the status.
+
+### Three refusals worth understanding
+
+**An unset secret answers `503`, not `200`.** "Not configured" and "no authentication required" are
+the same code path in most handlers and must not be here — this route grants a paid tier, and an
+unauthenticated POST setting `tier=enterprise` is a free upgrade for anyone who can reach the port.
+The token is compared with `hmac.compare_digest`; `==` on a secret leaks it one byte at a time.
+
+**Nothing is provisioned unless every repository passes.** A partial provision leaves a customer
+paying for repositories that were not admitted, and no reply shape makes that legible.
+
+**A repository whose eligibility could not be read is refused, not assumed eligible.** "We could not
+check" and "it qualifies" must never be the same value.
+
+### What being ineligible then means
+
+`installations.entitled().may_review` is **False** for an installation recorded `eligible = 0`, so
+the repository is not reviewed — and **the refusal is posted rather than swallowed**: the pull
+request gets a comment naming the rule and the way past it. `eligible IS NULL` — never assessed —
+still reviews.
 
 ---
 
@@ -299,6 +403,7 @@ Set as environment variables; `quantamind config` prints the resolved values.
 | Variable | Default | Effect |
 |---|---|---|
 | `QUANTAMIND_WEBHOOK_SECRET` | — | **Required by `/webhook`.** The HMAC secret |
+| `QUANTAMIND_PROVISION_SECRET` | — | Bearer token for `/provision/*`. **Unset refuses the routes**, it does not open them |
 | `QUANTAMIND_DATABASE_PATH` | `quantamind.db` | **A root directory, not a file** — `<root>/<owner>/<name>.db` per repository |
 | `QUANTAMIND_APP_ID` | — | GitHub App id |
 | `QUANTAMIND_APP_KEY_PATH` | — | PEM private key, for installation tokens |
