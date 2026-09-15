@@ -40,6 +40,7 @@ from quantamind.infer.change_review import explain
 from quantamind.ingest.diff import base_commit, changed_files
 from quantamind.ingest.github_api import token_for
 from quantamind.ingest.publish.github_reviews import publish
+from quantamind.render.not_entitled import not_entitled
 from quantamind.serve.commands.run_review import review as run_ranking
 from quantamind.serve.review.change_facts import gather
 from quantamind.serve.review.deep_review import examine
@@ -99,8 +100,15 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     finally:
         seat_conn.close()
     if not seat.may_review:
+        # **A REFUSAL IS POSTED, NOT SWALLOWED.** Returning silently made "we will not review this"
+        # and "there was nothing to say" the same blank space -- the defect this product exists to
+        # refuse, committed by it. An ineligible repository is the case an author CAN act on:
+        # `seat.why()` names the rule and a paid tier is the way past it.
         print(f"[serve] {delivery_repo} #{number}: not reviewed — {seat.why()}", flush=True)
-        return Delivered(Outcome.NOT_ENTITLED, (), (), None)
+        body = not_entitled(seat.why())
+        if settings.posting_enabled:
+            publish(delivery_repo, number, head_sha, body, ())
+        return Delivered(Outcome.NOT_ENTITLED, (), (), body)
     # **FETCHED ONCE, UNFILTERED, THEN FILTERED HERE.** The ranker must see only files we read;
     # `pin_check` must see the workflows, which the ranker's filter removes. Two calls would cost
     # a second page walk and could disagree if the pull request changed between them.

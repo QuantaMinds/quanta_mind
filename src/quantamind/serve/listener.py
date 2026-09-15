@@ -39,8 +39,9 @@ from pathlib import Path
 from typing import Any
 
 from quantamind.serve.health import health
+from quantamind.serve.installed_repos import provisioned
 from quantamind.serve.onboarding import admit
-from quantamind.serve.web import routes
+from quantamind.serve.web import provision_route, routes
 from quantamind.serve.web.http_io import read_body
 from quantamind.serve.webhook_github import (
     DELIVERY_HEADER,
@@ -59,6 +60,7 @@ from quantamind.store import deliveries, schema, tenancy
 MAX_BODY_BYTES = 25 * 1024 * 1024
 WEBHOOK_PATH = "/webhook"
 HEALTH_PATH = "/health"
+PROVISION_PREFIX = provision_route.PREFIX
 
 Work = Callable[[Review], None]
 
@@ -69,6 +71,7 @@ class _Handler(BaseHTTPRequestHandler):
 
     settings: Any
     secret: str
+    provision_secret: str = ""
     work: Work
 
     def _say(self, status: int, payload: dict[str, object]) -> None:
@@ -123,6 +126,9 @@ class _Handler(BaseHTTPRequestHandler):
             self._say(500, {"error": f"{type(exc).__name__}: {exc}"})
 
     def _post(self) -> None:
+        if self.path.startswith(PROVISION_PREFIX):
+            self._say(*provision_route.for_request(self))
+            return
         if self.path != WEBHOOK_PATH:
             self._say(404, {"error": "no such path"})
             return
@@ -156,15 +162,8 @@ class _Handler(BaseHTTPRequestHandler):
             return
 
         if isinstance(decision, Installed):
-            # `provision` makes the store FILE only. → `serve/onboarding.py` decides and warms.
-            made, refused = tenancy.provision(Path(self.settings.database_path), decision.repos)
-            for full in refused:
-                print(f"[serve] {full}: NOT provisioned", flush=True)
-            print(
-                f"[serve] install {decision.action!r} {decision.account}: "
-                f"provisioned {len(made)}/{len(decision.repos)}",
-                flush=True,
-            )
+            # Answer, THEN warm: `provisioned` makes store files only, `admit` clones and indexes.
+            made = provisioned(decision, self.settings)
             self._say(200, {"provisioned": made})
             admit(made, self.settings, decision.account)
             return

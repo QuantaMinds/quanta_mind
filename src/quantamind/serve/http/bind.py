@@ -25,7 +25,12 @@ LOOPBACK = "127.0.0.1"
 
 
 def build(
-    settings: Any, secret: str, work: Work, port: int = 7331, host: str = LOOPBACK
+    settings: Any,
+    secret: str,
+    work: Work,
+    port: int = 7331,
+    host: str = LOOPBACK,
+    provision_secret: str = "",
 ) -> ThreadingHTTPServer:
     """A server ready for `serve_forever()`. Binds immediately, so a port clash fails here.
 
@@ -47,6 +52,15 @@ def build(
     bound = type(
         "_Bound",
         (_Handler,),
-        {"settings": settings, "secret": secret, "work": staticmethod(work)},
+        {
+            "settings": settings,
+            "secret": secret,
+            "work": staticmethod(work),
+            # **EMPTY IS THE DEFAULT AND IT REFUSES.** Unlike the webhook secret this does not stop
+            # the bind: a deployment that never provisions over HTTP is normal, and the routes
+            # answer 503 rather than opening. `provision_route._authorised` returns False on an
+            # empty secret, so no bearer token can satisfy it.
+            "provision_secret": provision_secret,
+        },
     )
     return ThreadingHTTPServer((host, port), bound)

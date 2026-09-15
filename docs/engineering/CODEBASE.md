@@ -3634,6 +3634,45 @@ tests by name.
 `render/dashboard.py` renders both views because they are two readings of one population — the same
 `review` rows, once for what became of them and once for what they spent.
 
+### `POST /provision/{free,team,enterprise}` — and the free-tier gate that was never closed
+
+**`serve/web/provision_route.py`, `verify/tier_request.py`, `render/not_entitled.py`, and a changed
+`store/installations.Entitlement.may_review`.** Three routes validate a tier's criteria and admit its
+repositories; `serve/listener.py` dispatches to them through `for_request(handler)`, which takes the
+handler the way `serve/web/http_io.read_body` already does — the socket layer spends three lines on
+this route rather than twelve, and that module is at the 200-line cap.
+
+**THE CREDENTIAL IS NOT IN `Settings`.** `types/settings.py` refuses to hold the webhook secret for a
+stated reason — *"a credential in a settings object reaches a log or a config dump the first time
+anybody prints one"* — and this one is no different. `serve/commands/run_endpoint.py` reads
+`QUANTAMIND_PROVISION_SECRET` from the environment and `serve/http/bind.py` binds it onto the
+handler. **An unset secret refuses the routes with 503 rather than opening them**, because "not
+configured" and "no authentication required" must not be the same code path.
+
+**`payment_verified` IS ALWAYS FALSE AND THE TYPE REFUSES TO LET IT BE SET.** Build rows B3 and B7
+are parked; nothing here reads a payment processor. `Verdict.__post_init__` raises on
+`payment_verified=True`, so the field cannot be flipped by a future caller who means well.
+
+**FREE IS THE ONLY TIER WITH A REAL GATE, AND `verify/tier_request.py` SAYS SO RATHER THAN
+INVENTING ONE.** Eligibility rules exist because we give that tier away. Team and Enterprise differ
+in almost nothing a program can check — SSO, a DPA, residency and an SLA are contract terms — and the
+single exception is `org`, because `ingest/standards/inherited.py` reads shared standards from an
+organisation's `.quantamind` repository. Per-tier checks written so the table looks full would be
+validation for the shape of the documentation.
+
+**THE FREE-TIER DECISION WAS RECORDED AND IGNORED FOR AS LONG AS TWO BUILD ROWS CLAIMED IT WAS
+ENFORCED — changed 2026-09-15.** `product-build.md` B8 decided the free tier and said "enforcement is
+B5's"; B5 was ticked while `Entitlement.may_review` read `state is not REMOVED` and never looked at
+`eligible`. B5's stated reason was that *"a gate with no paid tier to fall back on is a dead end with
+no override"* — **that premise expired when these routes shipped.** `eligible = 0` now refuses;
+`eligible IS NULL`, meaning never assessed, still reviews, because an outage at GitHub must not
+quietly downgrade an installation.
+
+**AND THE REFUSAL IS POSTED.** `review_delivery.deliver()` returned `Outcome.NOT_ENTITLED` and wrote
+nothing, so "we will not review this" and "we found nothing" reached a pull request as the same blank
+space — this product's own cardinal defect, committed by it. `render/not_entitled.py` names the rule
+and the way past it, and carries no verdict on code nobody read.
+
 ### `quantamind scan` and `GET /scan` — the first history walk, and what it found
 
 **`serve/commands/run_scan.py`, `render/scan_report.py`, `infer/history_digest.py`, and `_scan` in
