@@ -30,6 +30,7 @@ from pathlib import Path
 
 from quantamind.ingest.publish.github_reviews import publish
 from quantamind.render.blocks.pin_block import block
+from quantamind.serve.blocking_status import announce
 from quantamind.types.review import Delivered, Outcome
 from quantamind.verify import pin_check
 
@@ -45,7 +46,19 @@ def pins_for(clone: Path, head_sha: str, every_file: Sequence[str]) -> str:
 
 
 def only(repo: str, number: int, head_sha: str, pins: str, *, enabled: bool) -> Delivered:
-    """The delivery for a change carrying no reviewable file. `pins` may still be worth posting."""
+    """The delivery for a change carrying no reviewable file. `pins` may still be worth posting.
+
+    **THE GATE IS ANNOUNCED FIRST, AND THAT IS THE WHOLE OF ISSUE #106.** This path returned before
+    any status was posted, so a documentation-only pull request left `quantamind/declared-rules`
+    permanently `pending` -- and `main` requires it. Every CI job on `QuantaMinds/quanta_mind#104`
+    was green and it could not merge. **A gate that sometimes declines to speak cannot be a required
+    check**, so the no-governed-file case is announced through the same `announce()` every other
+    delivery uses rather than a second path that has to be remembered.
+
+    `checks=()` folds to `Standing.NOT_DECLARED`, which now posts a success whose description says
+    no rule governed the change. **Naming the state is not asserting a pass.**
+    """
+    announce(repo, head_sha, (), enabled=enabled)
     if not pins:
         return Delivered(Outcome.NO_FILES, (), (), None)
     if not enabled:

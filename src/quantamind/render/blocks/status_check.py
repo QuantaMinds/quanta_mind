@@ -44,15 +44,26 @@ class Status:
     description: str
 
 
+NOTHING_GOVERNED = "no declared rule governed any file in this change"
+
+
 def render(gate: Gate) -> Status:
-    """The state and the sentence. Raises `NothingDeclared` when nothing was checked.
+    """The state and the sentence. Never raises: a gate that declines to speak cannot be required.
 
     **THE STATE COMES FROM `Standing`, NEVER FROM A COUNT RECOMPUTED HERE.** Re-deriving "is
     anything wrong" at the renderer is how two code paths come to disagree about one column -- the
     `+32` that read as judge drift was exactly that. The gate decided; this asks it.
     """
     if gate.standing is Standing.NOT_DECLARED:
-        raise NothingDeclared()
+        # **THIS RAISED UNTIL 2026-09-15, AND THE CALLER POSTED NOTHING.** The reasoning was sound
+        # while the status was advisory: a green tick where no rule applied asserts compliance with
+        # a standard nobody wrote. **Making the check REQUIRED swapped the cost of the two
+        # mistakes** -- silence stopped being a missing signal and became a deadlocked merge, shown
+        # as `pending` forever and indistinguishable from "still running". PR #104 sat there with
+        # every CI job green. The description is what keeps this from being the lie the old
+        # decision refused: it names the state rather than claiming a pass, exactly as
+        # `UNCHECKABLE` does in the compliance table. **Its text is pinned by a test.**
+        return Status("success", NOTHING_GOVERNED)
     parts: list[str] = []
     if gate.violations:
         first = gate.violations[0]
