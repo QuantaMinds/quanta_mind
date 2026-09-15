@@ -46,6 +46,11 @@ Which files we read, and which we did not. On every change.
 **Prose can't be enforced**, so judgement calls are labelled and never block.
 Today: Python, three rule kinds. **We don't claim to find more bugs than anyone else.**
 
+**And we don't claim blocking reduces defects.** DORA measured approval gates against change fail
+rate and found **no correlation**. What enforcement buys is that the rule is applied the same way
+every time and can be proved afterwards — not a lower bug count. *(The full objection, and why
+DORA's finding is about human approval boards rather than automation, is in the appendix.)*
+
 ---
 
 ## 3 · How It Works
@@ -238,7 +243,54 @@ instrument, not a sales milestone.
 | Greptile's analytics dashboard — and that it is *not* DORA or cycle time | greptile.com docs. A secondary source said otherwise and was wrong | **Confirmed** |
 | Competitor pricing; `ast-grep` custom rules; CodeRabbit counts PR authors as seats | Vendor pricing pages, `docs.coderabbit.ai` | **Confirmed** |
 | 28.7M professional developers | Evans Data; SlashData 36.5M / 47.2M. We use the lowest | **Confirmed** |
+| Approval by an external body: negative on lead time, deployment frequency and restore time; **no correlation with change fail rate**; 2.6× more likely to be low performers | DORA, *Accelerate State of DevOps* 2019, and `dora.dev` "Streamlining change approval" | **Confirmed** |
+| 35–91% of static analysis warnings are unactionable; alert fatigue is the documented consequence | Peer-reviewed static-analysis literature, incl. *Why Don't Software Developers Use Static Analysis Tools* (ICSE) | **Confirmed** |
+| SOC 2 CC8.1 asks for programmatic enforcement, and samples branch protection config and CI logs | SOC 2 control guidance, read 2026-09-15 | **Confirmed** |
 | ±4-point nondeterminism floor; 3-run digest; margin; routing result | Corpus noise-floor run; `assert_deterministic.py`; 68 billed requests; six unseen repos | **Ours** |
+
+## The strongest objection to this product, and our answer
+
+**DORA's research says change gates do not work, and a reader who knows it will raise it.** We would
+rather hand it over.
+
+> Formal change management requiring approval from an **external body** is negatively correlated
+> with lead time, deployment frequency and restore time, and has **no correlation with change fail
+> rate**. Respondents were **2.6× more likely to be low performers** — *"worse than having no change
+> approval process at all."*
+
+**Read literally, that is an argument against everything on slide two.** Three things about it
+matter, in order:
+
+**One — it is measuring a human bottleneck, not a gate.** The finding is about a board or a senior
+manager who was not involved in the work. **DORA's own recommended alternative is ours:** *"change
+approvals are best implemented through peer review during the development process, **supplemented by
+automation to detect, prevent, and correct bad changes early**."* A parser that runs in the pipeline
+and needs nobody's calendar is the thing they prescribe, not the thing they condemn.
+
+**Two — the "no correlation with change fail rate" half is the one that constrains us, and we accept
+it.** It is why this deck does not claim that blocking reduces defects. Enforcement buys
+**consistency and provability**; it does not buy a lower bug count, and any pitch that says
+otherwise is contradicting the best-known dataset in the field.
+
+**Three — a gate is softer than "cannot merge" sounds, and we say so on slide three.** A repository
+admin can bypass branch protection unless `enforce_admins` is set, approvals get rubber-stamped, and
+GitHub reserves required checks for paid plans on private repositories. **What we actually promise is
+a verdict that is recorded whether or not somebody overrides it** — and an override visible in the
+record is the more useful artefact anyway, because *"was this ever bypassed?"* is a question only a
+recorded gate can answer.
+
+## Why enforcement rather than better detection
+
+**Advisory does not degrade gracefully; it collapses.** The static-analysis literature puts
+**35–91% of warnings** in the unactionable range, and the documented consequence is alert fatigue —
+developers become desensitised and stop reading the channel, losing the fraction that was right along
+with the rest. It is the same shape as the 36% noise finding on the market leader, and as our own
+25%-correct measurement.
+
+**And enforcement is what an auditor can accept.** SOC 2 **CC8.1** asks for evidence that only
+approved changes reached production, and auditors sample **branch protection configuration, CI logs
+and per-deployment proof that a check passed before the merge**. A bot comment is not evidence. A
+recorded verdict is. That is the budget this is sold into.
 
 ## Six claims we made and disproved
 

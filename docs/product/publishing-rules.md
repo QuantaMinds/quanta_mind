@@ -42,6 +42,21 @@ When someone asks for our benchmark:
 - **Say the thing, then stop.** No sentence exists to sound impressive. No "seamless",
   "revolutionise", "empower", "leverage".
 - **Never claim to catch more bugs.** We do not, and the first customer to test it will find out.
+- **Never claim that blocking a merge reduces defects.** It is the obvious thing to say next to a
+  gate and the evidence is against it. **DORA measured approval against change fail rate and found
+  NO CORRELATION** — while the same research puts external-approval organisations at **2.6× more
+  likely to be low performers** on lead time, deployment frequency and restore time. A prospect's
+  platform lead may well know that dataset better than we do, and *"we block, so you ship fewer
+  bugs"* hands them the sentence that ends the meeting.
+  **What enforcement buys is consistency and provability**: the rule is applied the same way every
+  time, and it can be shown afterwards. That is a different and smaller claim, and it is the one
+  that survives.
+  **The distinction to have ready, because the objection is fair and the answer is precise:** DORA
+  is measuring an external human approver, and its own recommended alternative is *"peer review
+  during the development process, supplemented by automation to detect, prevent, and correct bad
+  changes early."* **A parser in the pipeline is the thing that research prescribes, not the thing
+  it condemns** — but only say so with the "no correlation" half attached, because quoting the
+  helpful half alone is the selective-source failure this file already bans elsewhere.
 - **Never claim to be the only one, the first, or the one nobody else can copy.** Say what the
   product does and let the reader draw the comparison. Banned shapes: *"the only X"*, *"the first
   to"*, *"no other tool"*, *"a category nobody occupies"*, *"no competitor can"*.
