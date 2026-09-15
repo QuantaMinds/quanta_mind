@@ -12,9 +12,7 @@ CONSUMED BY: `just check`.
 
 from __future__ import annotations
 
-import pytest
-
-from quantamind.render.blocks.status_check import NothingDeclared, render
+from quantamind.render.blocks.status_check import NOTHING_GOVERNED, render
 from quantamind.types.standards.checked import Checked, Outcome
 from quantamind.types.verdict import Reason, Site
 from quantamind.verify.blocking import decide
@@ -70,6 +68,19 @@ def test_a_deferred_row_is_named_so_a_pass_does_not_look_complete() -> None:
     )
 
 
-def test_a_change_no_rule_governed_has_no_sentence_at_all() -> None:
-    with pytest.raises(NothingDeclared):
-        render(decide([]))
+def test_a_change_no_rule_governed_says_so_rather_than_saying_nothing() -> None:
+    """**THIS ASSERTED `pytest.raises(NothingDeclared)` UNTIL 2026-09-15. Issue #106.**
+
+    Refusing to render was right while the status was advisory: a green tick where no rule applied
+    asserts compliance with a standard nobody wrote. **Once the check became REQUIRED on `main`, a
+    status that never arrives reads as `pending` forever** -- `QuantaMinds/quanta_mind#104` had
+    every CI job green and could not merge.
+
+    **The description is load-bearing and that is why it is pinned here.** It names the state; it
+    does not claim a pass. Shorten it to fit and the tick becomes the lie the old decision refused.
+    """
+    shown = render(decide([]))
+
+    assert (shown.state, shown.description) == ("success", NOTHING_GOVERNED)
+    assert "compliant" not in shown.description.lower(), "naming the state is not claiming a pass"
+    assert "no declared rule governed" in shown.description

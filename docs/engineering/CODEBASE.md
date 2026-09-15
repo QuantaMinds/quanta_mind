@@ -3634,6 +3634,33 @@ tests by name.
 `render/dashboard.py` renders both views because they are two readings of one population — the same
 `review` rows, once for what became of them and once for what they spent.
 
+### The gate must always speak, because it is a required check — issue #106
+
+**`render/blocks/status_check.py`, `serve/blocking_status.py`, `serve/review/pin_review.py`.**
+`main` requires `quantamind/declared-rules`. Two independent paths posted **no status at all**, and
+an absent status renders as `pending` forever — not a refusal a reader can act on, and not a merge
+that can ever happen. `QuantaMinds/quanta_mind#104` had five green CI jobs and sat `BLOCKED`.
+
+**Cause one: the documentation-only early return.** `review_delivery.deliver()` filters to
+`REVIEWABLE_SUFFIXES` and returned through `pin_review.only()` before the gate ran. That function
+now calls `announce()` first, so the no-governed-file case goes through the same path every other
+delivery uses rather than a second one that has to be remembered.
+
+**Cause two: `Standing.NOT_DECLARED` posted nothing on purpose.** `status_check.render()` raised
+`NothingDeclared` and the caller returned `Wrote.NOTHING_DECLARED`. The stated reason was sound:
+*"posting `success` where no rule applied puts a green tick against a standard nobody wrote."*
+
+**THAT REASONING WAS RIGHT WHILE THE STATUS WAS ADVISORY AND WRONG ONCE IT BECAME REQUIRED.** A
+missing signal used to cost a reader nothing; now it costs a deadlocked merge, and the two mistakes
+swapped places. `NOTHING_GOVERNED` — *"no declared rule governed any file in this change"* — names
+the state rather than claiming a pass, which is the same move `UNCHECKABLE` makes in the compliance
+table. **The description is load-bearing and its exact text is pinned by two tests**: shorten it to
+`compliant` and both fail.
+
+**Nothing about `BLOCKED` changed.** A violation is still `failure`, and only a parser's verdict can
+reach it. Three sabotages were run: shortening the description (2 named tests fail), restoring the
+early return (2 fail), and confirming a real violation still fails.
+
 ### `POST /provision/{free,team,enterprise}` — and the free-tier gate that was never closed
 
 **`serve/web/provision_route.py`, `verify/tier_request.py`, `render/not_entitled.py`, and a changed

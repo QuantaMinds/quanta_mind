@@ -71,11 +71,22 @@ def test_a_model_judged_rule_never_reaches_the_wire_as_a_failure(spy: _Spy) -> N
     )
 
 
-def test_a_change_no_rule_governed_posts_nothing_at_all(spy: _Spy) -> None:
+def test_a_change_no_rule_governed_posts_a_status_that_says_so(spy: _Spy) -> None:
+    """**THIS ASSERTED `posts_nothing_at_all` UNTIL 2026-09-15. Issue #106.**
+
+    The gate declining to speak was right while the status was advisory. As a REQUIRED check it
+    deadlocks the merge: `QuantaMinds/quanta_mind#104` had every CI job green and sat `BLOCKED`
+    because the status never arrived, which GitHub renders as `pending` forever.
+
+    **The standing is unchanged — it is still `NOT_DECLARED`.** Only what we do about it changed,
+    and the description is where the honesty now lives.
+    """
     done = blocking_status.announce("acme/widgets", HEAD, [], enabled=True)
 
-    assert (done.standing, done.wrote) == (Standing.NOT_DECLARED, Wrote.NOTHING_DECLARED)
-    assert spy.posted == [], "a green tick was posted against a standard nobody wrote"
+    assert (done.standing, done.wrote) == (Standing.NOT_DECLARED, Wrote.POSTED)
+    assert [(state, desc) for _r, _h, state, desc in spy.posted] == [
+        ("success", "no declared rule governed any file in this change")
+    ], "the tick must name the state, or it claims a compliance nobody declared"
 
 
 def test_a_rehearsal_decides_the_gate_and_writes_nothing(

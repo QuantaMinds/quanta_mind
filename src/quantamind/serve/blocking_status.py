@@ -77,12 +77,14 @@ def announce(repo: str, head_sha: str, checks: Sequence[Checked], *, enabled: bo
     **THE REFUSAL IS RETURNED AND PRINTED, NOT SWALLOWED.** A gate that silently stops publishing
     is a gate that reports success by saying nothing -- the failure this codebase exists to refuse.
 
-    **A CHANGE NOTHING GOVERNED GETS NO STATUS.** Posting `success` where no rule applied puts a
-    green tick against a standard nobody wrote.
+    **A CHANGE NOTHING GOVERNED NOW GETS A STATUS THAT SAYS SO — changed 2026-09-15, issue #106.**
+    This returned `Wrote.NOTHING_DECLARED` and posted nothing, because a green tick where no rule
+    applied asserts compliance with a standard nobody wrote. **That was right while the status was
+    advisory and wrong once it became a required check**: a status that never arrives reads as
+    `pending` forever, so a documentation-only pull request could never merge and nobody could see
+    why. `render/blocks/status_check.NOTHING_GOVERNED` carries the distinction in words.
     """
     gate = decide(checks)
-    if gate.standing is Standing.NOT_DECLARED:
-        return Announced(gate.standing, Wrote.NOTHING_DECLARED)
     shown = render(gate)
     if not enabled:
         print(f"[gate] rehearsed {shown.state}: {shown.description}", flush=True)
