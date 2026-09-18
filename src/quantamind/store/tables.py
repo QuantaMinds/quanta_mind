@@ -114,6 +114,23 @@ TABLES: tuple[str, ...] = (
     """CREATE TABLE IF NOT EXISTS delivery (
         delivery_id TEXT PRIMARY KEY, event TEXT NOT NULL, started_at INTEGER NOT NULL,
         completed_at INTEGER)""",
+    # B3. One row per subscription, written ONLY from an authenticated Stripe delivery.
+    # **`standing` IS A NAME AND NOT A BOOLEAN**: "they cancelled" and "their card failed on
+    # Tuesday" need different answers from us, and a column that cannot tell them apart forces a
+    # guess at exactly the moment a customer is deciding whether to stay. -> `types/billing.py`.
+    # **`event_at` IS STRIPE'S TIMESTAMP AND IT IS LOAD-BEARING.** Stripe does not guarantee
+    # delivery order, so `store/subscriptions.record` refuses to let an older event overwrite a
+    # newer one. Without this column that comparison cannot be made and a redelivered `canceled`
+    # switches off a live customer.
+    # **`amount_cents` IS RECORDED, NOT DERIVED FROM THE PRICE ID.** A price id pointing at the
+    # wrong product is configuration this product cannot detect; storing what Stripe actually
+    # charged makes it visible in the row rather than only on somebody's invoice.
+    """CREATE TABLE IF NOT EXISTS subscription (
+        account TEXT NOT NULL, subscription_id TEXT NOT NULL, customer_id TEXT NOT NULL,
+        price_id TEXT NOT NULL, standing TEXT NOT NULL, seats INTEGER NOT NULL DEFAULT 1,
+        amount_cents INTEGER NOT NULL DEFAULT 0, currency TEXT NOT NULL DEFAULT 'usd',
+        current_period_end INTEGER NOT NULL DEFAULT 0, event_at INTEGER NOT NULL,
+        PRIMARY KEY (account, subscription_id))""",
     # The touch index the ranker counts over. Written by store.touches from ingest.history.
     """CREATE TABLE IF NOT EXISTS touch (
         repo_id INTEGER NOT NULL REFERENCES repo(id), path TEXT NOT NULL,

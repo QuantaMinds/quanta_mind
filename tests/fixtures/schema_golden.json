@@ -1,5 +1,5 @@
 {
- "__version__": 7,
+ "__version__": 8,
  "account": {
   "columns": [
    [
@@ -935,6 +935,91 @@
    ]
   ],
   "sql": "CREATE TABLE shadow_pick (\n        review_id INTEGER NOT NULL REFERENCES review(id), ranker_name TEXT NOT NULL,\n        unit_path TEXT NOT NULL, rank INTEGER NOT NULL, score REAL NOT NULL, percentile REAL,\n        PRIMARY KEY (review_id, ranker_name, rank))"
+ },
+ "subscription": {
+  "columns": [
+   [
+    0,
+    "account",
+    "TEXT",
+    1,
+    null,
+    1
+   ],
+   [
+    1,
+    "subscription_id",
+    "TEXT",
+    1,
+    null,
+    2
+   ],
+   [
+    2,
+    "customer_id",
+    "TEXT",
+    1,
+    null,
+    0
+   ],
+   [
+    3,
+    "price_id",
+    "TEXT",
+    1,
+    null,
+    0
+   ],
+   [
+    4,
+    "standing",
+    "TEXT",
+    1,
+    null,
+    0
+   ],
+   [
+    5,
+    "seats",
+    "INTEGER",
+    1,
+    "1",
+    0
+   ],
+   [
+    6,
+    "amount_cents",
+    "INTEGER",
+    1,
+    "0",
+    0
+   ],
+   [
+    7,
+    "currency",
+    "TEXT",
+    1,
+    "'usd'",
+    0
+   ],
+   [
+    8,
+    "current_period_end",
+    "INTEGER",
+    1,
+    "0",
+    0
+   ],
+   [
+    9,
+    "event_at",
+    "INTEGER",
+    1,
+    null,
+    0
+   ]
+  ],
+  "sql": "CREATE TABLE subscription (\n        account TEXT NOT NULL, subscription_id TEXT NOT NULL, customer_id TEXT NOT NULL,\n        price_id TEXT NOT NULL, standing TEXT NOT NULL, seats INTEGER NOT NULL DEFAULT 1,\n        amount_cents INTEGER NOT NULL DEFAULT 0, currency TEXT NOT NULL DEFAULT 'usd',\n        current_period_end INTEGER NOT NULL DEFAULT 0, event_at INTEGER NOT NULL,\n        PRIMARY KEY (account, subscription_id))"
  },
  "touch": {
   "columns": [

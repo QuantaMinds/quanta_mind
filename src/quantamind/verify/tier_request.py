@@ -15,12 +15,17 @@ WHY:  **THE FREE TIER IS THE ONLY ONE WITH A REAL GATE, AND THAT IS NOT AN OVERS
       `ingest/standards/inherited.py` reads those from an organisation's `.quantamind` repository.
       Without an organisation named, the feature distinguishing the tier has nowhere to read from.
 
-      **`payment_ref` IS RECORDED, NEVER VERIFIED, AND THE TYPE CANNOT HIDE THAT.** Rows B3 and B7
-      of `docs/plans/roadmap/product-build.md` are parked, so nothing in this product talks to a
-      payment processor. A reference is a string a caller supplied. `Verdict.payment_verified` is
-      therefore always False here and is carried into the response rather than left for a reader to
-      infer -- a field that silently means "we took your word for it" is the shape this project
-      refuses everywhere else.
+      **`payment_ref` IS STILL NEVER VERIFIED, AND THAT IS NOW A DISTINCTION RATHER THAN A LIMIT.**
+      It is a string a caller typed. What CAN be verified is a `verify/paid_access.Access` built
+      from a subscription row this product wrote from an authenticated Stripe delivery -- two
+      different kinds of fact, and `payment_verified` is True for exactly one of them.
+
+      **UNTIL 2026-09-17 THIS TYPE REFUSED TO LET ANYBODY SET IT AT ALL**, because row B3 of
+      `docs/plans/roadmap/product-build.md` was parked and nothing here could read a payment
+      processor. That tripwire was right and is not simply deleted: `admissible()` will not set the
+      field from `payment_ref` under any circumstances, a refused verdict may not claim payment,
+      and passing no `access` still yields False. The only path to True runs through a signed
+      webhook delivery.
 
       **NOTHING IS ADMITTED UNLESS EVERY REPOSITORY IS.** A partial provision leaves a customer
       paying for repositories that were not admitted, and no reply shape makes that legible.
@@ -35,6 +40,7 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum
 
+from quantamind.verify.paid_access import Access
 from quantamind.verify.qualification import Verdict as RepoVerdict
 
 REPO = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*/[A-Za-z0-9][A-Za-z0-9._-]*$")
@@ -76,10 +82,12 @@ class Verdict:
             raise ValueError(f"admissible with reasons is not a verdict: {self.reasons}")
         if not self.admissible and not self.reasons:
             raise ValueError("refused without a reason; a caller cannot act on that")
-        if self.payment_verified:
+        if self.payment_verified and not self.admissible:
+            # A refusal that also claims the payment was verified is two answers at once, and a
+            # caller reading one field or the other would act on different facts.
             raise ValueError(
-                "payment_verified cannot be True: B3 is parked and nothing here reads a payment "
-                "processor. The field exists to carry that fact, not to be set."
+                "a refused verdict cannot report payment_verified: the request was not admitted, "
+                f"so nothing was granted against that payment. Reasons: {self.reasons}"
             )
 
 
@@ -102,10 +110,18 @@ def _shared(request: Request) -> list[str]:
     return reasons
 
 
-def _paid(request: Request, tier: Tier) -> list[str]:
-    """What Team and Enterprise add. **Deliberately short, because honestly it is short.**"""
+def _paid(request: Request, tier: Tier, access: Access | None) -> list[str]:
+    """What Team and Enterprise add. **Deliberately short, because honestly it is short.**
+
+    With an `access` in hand the payment reference is not asked for: a subscription we read from
+    our own store beats a string the caller typed, and demanding both would refuse a customer whose
+    payment we have actually verified because they did not repeat an id back to us.
+    """
     reasons: list[str] = []
-    if not request.payment_ref.strip():
+    if access is not None:
+        if not access.allowed:
+            reasons.append(f"the {tier.value} tier needs an open subscription: {access.reason}")
+    elif not request.payment_ref.strip():
         reasons.append(f"the {tier.value} tier needs a payment reference to record against")
     if request.seats <= 0:
         reasons.append(
@@ -115,7 +131,11 @@ def _paid(request: Request, tier: Tier) -> list[str]:
 
 
 def admissible(
-    tier: Tier, request: Request, *, free_verdicts: dict[str, RepoVerdict] | None = None
+    tier: Tier,
+    request: Request,
+    *,
+    free_verdicts: dict[str, RepoVerdict] | None = None,
+    access: Access | None = None,
 ) -> Verdict:
     """Every rule for this tier, with every failure named.
 
@@ -123,6 +143,12 @@ def admissible(
     `Tier.FREE`** -- this module performs no I/O, so the caller reads GitHub and passes the answers.
     Missing verdicts are a refusal, never an assumed pass: "we could not check" and "it qualifies"
     must not be the same value.
+
+    `access` is `verify/paid_access.decide()` over the subscription row we hold for this account.
+    **It is the ONLY thing that can make `payment_verified` True**, and it is passed in for the
+    same reason `free_verdicts` is: this module reads nothing. `None` means nobody looked, which
+    is reported as unverified rather than as unpaid -- those are different, and only one of them
+    is the customer's problem.
     """
     reasons = _shared(request)
 
@@ -135,11 +161,14 @@ def admissible(
             elif not verdict.eligible:
                 reasons.extend(f"{name}: {why}" for why in verdict.reasons)
     else:
-        reasons.extend(_paid(request, tier))
+        reasons.extend(_paid(request, tier, access))
         if tier is Tier.ENTERPRISE and not request.org.strip():
             reasons.append(
                 "no organisation was named. Enterprise sells one standard across every repository, "
                 "and inherited rules are read from an organisation's .quantamind repository"
             )
 
-    return Verdict(not reasons, tuple(reasons))
+    # **DERIVED FROM `access`, NEVER FROM `request`.** There is no branch here that reads
+    # `payment_ref`, and a test asserts that a request carrying one is still reported unverified.
+    verified = bool(access and access.allowed and not reasons and tier is not Tier.FREE)
+    return Verdict(not reasons, tuple(reasons), payment_verified=verified)

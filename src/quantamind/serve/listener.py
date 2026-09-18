@@ -1,8 +1,7 @@
 """The socket. Authenticate, claim the delivery, acknowledge inside ten seconds, then work.
 
-WHAT: `build(settings, secret, work)` returns a `ThreadingHTTPServer` serving two routes — `POST
-      /webhook` and `GET /health`. The handler verifies the signature, claims the delivery,
-      answers, and only then runs `work`.
+WHAT: the request handler. It owns `POST /webhook` — verify, claim, answer, then work — and hands
+      every other path to `serve/web/{get_reply,post_routes}.py`, which build replies as values.
 WHY:  **STDLIB, AND THE DEPENDENCY COUNT STAYS AT ZERO.** The plan calls this "a separate decision
       about whether to take a framework or use stdlib", and it is the first runtime dependency this
       project would ever take. What this endpoint needs is one POST route, an HMAC compare and a
@@ -26,7 +25,7 @@ WHY:  **STDLIB, AND THE DEPENDENCY COUNT STAYS AT ZERO.** The plan calls this "a
       ten. So the handler claims the delivery, answers **202**, and processes afterwards. If the
       process dies mid-work the row has no `completed_at`, and GitHub's redelivery — which reuses
       the GUID — is a legitimate retry rather than a replay.
-IMPORTS: serve.{health,webhook_github}, store.{deliveries,schema}. Rightmost layer.
+IMPORTS: serve.{webhook_github,web.*}, store.{deliveries,schema,tenancy}. Rightmost layer.
 CONSUMED BY: `serve/cli.py`.
 """
 
@@ -38,10 +37,9 @@ from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 from typing import Any
 
-from quantamind.serve.health import health
 from quantamind.serve.installed_repos import provisioned
 from quantamind.serve.onboarding import admit
-from quantamind.serve.web import provision_route, routes
+from quantamind.serve.web import get_reply, post_routes
 from quantamind.serve.web.http_io import read_body
 from quantamind.serve.webhook_github import (
     DELIVERY_HEADER,
@@ -59,8 +57,6 @@ from quantamind.store import deliveries, schema, tenancy
 # to anyone who can reach the port, and Content-Length is attacker-controlled.
 MAX_BODY_BYTES = 25 * 1024 * 1024
 WEBHOOK_PATH = "/webhook"
-HEALTH_PATH = "/health"
-PROVISION_PREFIX = provision_route.PREFIX
 
 Work = Callable[[Review], None]
 
@@ -72,6 +68,11 @@ class _Handler(BaseHTTPRequestHandler):
     settings: Any
     secret: str
     provision_secret: str = ""
+    stripe_api_key: str = ""
+    stripe_webhook_secret: str = ""
+    stripe_price_id: str = ""
+    billing_success_url: str = ""
+    billing_cancel_url: str = ""
     work: Work
 
     def _say(self, status: int, payload: dict[str, object]) -> None:
@@ -100,21 +101,17 @@ class _Handler(BaseHTTPRequestHandler):
             self._say(500, {"error": f"{type(exc).__name__}: {exc}"})
 
     def _get(self) -> None:
-        if self.path != HEALTH_PATH:
-            # Everything a BROWSER reaches. `routes.get` builds a reply rather than writing one,
-            # so a forged callback can be tested without a socket. Unknown paths 404 there.
-            reply = routes.get(self.path, self.headers.get("Cookie", ""), self.settings)
-            body = reply.body.encode()
-            self.send_response(reply.status)
-            for name, value in reply.headers:
-                self.send_header(name, value)
-            self.send_header("Content-Type", reply.kind)
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
-            return
-        verdict = health(self.settings.database_path)
-        self._say(200 if verdict.ok else 503, {"ok": verdict.ok, "detail": verdict.detail})
+        # Every GET, health included, comes back as a `Reply` that was built without a socket --
+        # so a forged callback is testable as a value. Unknown paths 404 there, not here.
+        reply = get_reply.reply_for(self.path, self.headers.get("Cookie", ""), self.settings)
+        body = reply.body.encode()
+        self.send_response(reply.status)
+        for name, value in reply.headers:
+            self.send_header(name, value)
+        self.send_header("Content-Type", reply.kind)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
     def do_POST(self) -> None:
         # As above, and GitHub records a dropped POST as a failed delivery with no status -- the
@@ -126,8 +123,12 @@ class _Handler(BaseHTTPRequestHandler):
             self._say(500, {"error": f"{type(exc).__name__}: {exc}"})
 
     def _post(self) -> None:
-        if self.path.startswith(PROVISION_PREFIX):
-            self._say(*provision_route.for_request(self))
+        # Provisioning, checkout and the Stripe webhook. `None` means this is not one of them --
+        # `/webhook` below is still the listener's, because it alone is answered before it is
+        # worked. -> `serve/web/post_routes.py`.
+        posted = post_routes.route(self)
+        if posted is not None:
+            self._say(*posted)
             return
         if self.path != WEBHOOK_PATH:
             self._say(404, {"error": "no such path"})

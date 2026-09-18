@@ -32,6 +32,7 @@ import pytest
 
 from quantamind.serve import listener
 from quantamind.serve.http import bind
+from quantamind.serve.web import get_reply
 from quantamind.serve.webhook_github import MisconfiguredSecret, Review, sign
 
 SECRET = "a-real-secret"
@@ -170,7 +171,7 @@ def test_a_delivery_with_no_guid_is_refused_rather_than_treated_as_fresh(server:
 
 def test_health_reports_the_store_and_an_unknown_path_is_a_404(server: _Server) -> None:
     conn = http.client.HTTPConnection("127.0.0.1", server.port, timeout=10)
-    conn.request("GET", listener.HEALTH_PATH)
+    conn.request("GET", get_reply.HEALTH_PATH)
     health = conn.getresponse()
     health_status, health_body = health.status, json.loads(health.read())
     conn.request("GET", "/elsewhere")

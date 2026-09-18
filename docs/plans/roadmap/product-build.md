@@ -28,7 +28,8 @@ by decision, not by difficulty.
 | **13** | **C1** web dashboard | A surface over 7. |
 | **14** | **D2c/D2e** duplicate logic, architectural drift | Real, and neither blocks anything else. |
 | **15** | **D3a/D3b** cross-repo by declaration | **Not before a design partner has more than one repository that matters.** |
-| ⏸ | **B3/B7** Stripe, BYOK | Parked by decision 2026-08-27: product and traffic first. |
+| ✅ | **B3** Stripe | **UNPARKED AND BUILT 2026-09-17.** Checkout, a signed subscription webhook, and the first `payment_verified: true`. `docs/engineering/STRIPE.md`. |
+| ⏸ | **B7** BYOK | Still parked by the decision of 2026-08-27. B3 no longer blocks it; nothing has been built for it. |
 | ⏸ | **D7e** SOC 2 Type II | External, months, and no code substitutes for it. |
 
 **When picking up work: take the lowest number that is not ticked.** If it is blocked, say why in
@@ -39,7 +40,8 @@ describing the product.
 
 **ROWS 12 THROUGH 30 WERE RE-VERIFIED AGAINST THE CODE ON 2026-08-31, AND THE COUNT DID NOT MOVE.**
 Nine unticked rows in that range were checked for work already done and **none of them was
-tickable**: no Stripe code exists outside one comment in `webhook_github.py` (B3); `Settings` holds
+tickable**: no Stripe code existed outside one comment in `webhook_github.py` (**B3 — no longer
+true as of 2026-09-17, see its row below**); `Settings` holds
 one global `inference_project` and no per-tenant credential (B7); no rule-mining exists (D1d);
 `rules_file.py` reads one per-repository `.quantamind/rules.toml` with no inheritance of any kind
 (D1e); `store/tables.py` has no `dependency` table (D2b). Ten ticked rows were confirmed built.
@@ -187,9 +189,10 @@ blocks Half B in production, and it was invisible until the deep half ran for th
 
 ## Phase B — make it buyable  ⏸ **PAYMENTS PARKED 2026-08-27**
 
-**Parked:** B3 (Stripe), B7 (BYOK billing). **Not parked:** the items below that produce TRAFFIC,
-which need no payment rail — a free tier is free, so onboarding real repositories does not wait on
-Stripe.
+**B3 WAS UNPARKED AND BUILT ON 2026-09-17.** The heading above still says PAYMENTS PARKED because
+B7 still is; B3 is not. **Still parked:** B7 (BYOK billing). **Never parked:** the items below that
+produce TRAFFIC, which need no payment rail — a free tier is free, so onboarding real repositories
+never waited on Stripe.
 
 - [x] **B1 Background warm-up worker.** `serve/warm.py`. On an installation event the handler
       answers **200 first**, then clones and indexes each provisioned repository — the same
@@ -221,7 +224,25 @@ Stripe.
       and the error page never echoes the callback.
       **NOT DONE HERE:** nothing is shown to a signed-in user yet. `whose()` answers who a cookie
       belongs to and no page consumes it — the dashboards from 7 and 13 are what would.
-- [ ] **B3 Stripe checkout + subscription webhooks.** ⏸ PARKED. 🔑 *needs `claude mcp login plugin:stripe:stripe` run in a REAL terminal (my Bash tool has no tty), and a `STRIPE_WEBHOOK_SECRET`, absent from `.env`. Present: `STRIPE_Publishable_key`, `STRIPE_Secret_key`, `STRIPE_LIVE_SECRET_KEY`, `STRIPE_LIVE_PUBLISHABLE_KEY`.*
+- [x] **B3 Stripe checkout + subscription webhooks.** Built 2026-09-17. `POST /billing/checkout`
+  creates a session for the signed-in account; `POST /billing/webhook` verifies Stripe's HMAC and a
+  300s signed timestamp, refuses a replay through `store/deliveries.py`, and records the
+  subscription. `verify/paid_access.py` turns that row into open-or-blocked with a named verdict,
+  and `verify/tier_request.py`'s `payment_verified` tripwire was narrowed so only a signed delivery
+  can set it. **No SDK** — `dependencies = []` still holds. Full reference:
+  `docs/engineering/STRIPE.md`; design record: `docs/plans/feat-stripe-checkout-and-entitlement.md`.
+
+  **THREE THINGS THIS ROW DOES NOT CLAIM.** `tests/live/` does not cover Stripe — the end-to-end run
+  against the sandbox was manual and is recorded in `docs/engineering/STRIPE.md` under "What was
+  verified against real Stripe, and what was not". `store/installations.py:Entitlement.may_review`
+  is **unchanged**, so a lapsed subscription does not yet stop a review. And the LIVE account still
+  carries a $39/month price against a decision of $29, which no code here touches.
+
+  🔑 *`QUANTAMIND_STRIPE_API_KEY` and `QUANTAMIND_STRIPE_WEBHOOK_SECRET` are read from the
+  environment by `serve/commands/run_endpoint.py` and are absent from `.env`. The four names that
+  ARE in `.env` — `STRIPE_Publishable_key`, `STRIPE_Secret_key`, `STRIPE_LIVE_SECRET_KEY`,
+  `STRIPE_LIVE_PUBLISHABLE_KEY` — **are read by nothing**, and a variable nothing reads is worse
+  than an absent one because it looks configured.*
 - [ ] **B7 BYOK — the customer brings their own model key.** ⏸ PARKED with B3. Inference cost moves to them, which
       makes per-review cost somebody else's ceiling rather than our margin. Needs per-tenant
       credentials rather than one `inference_project`, and a stored key is a liability: it belongs
@@ -915,7 +936,7 @@ the right place to find out whether the findings are worth anything.
 
 | when | what |
 |---|---|
-| **B3** | A **Stripe account** (test-mode keys are enough to build against): publishable key, secret key, and a webhook signing secret. Say the word and I'll list the exact steps. |
+| ~~B3~~ | ~~A **Stripe account**~~ — **DONE 2026-09-17.** Sandbox `acct_1U9FQPGY5MuBVWoy` exists and a real delivery has been verified end to end against it. What is still needed before LIVE money moves is the six-item list at the end of `docs/engineering/STRIPE.md`. |
 | **B2/C1** | A **domain** and somewhere to host — the endpoint is a container today, reachable only through a temporary tunnel. |
 | ~~now~~ | ~~GitHub public-read token~~ — **DONE.** In the gitignored root `.env`; limit is
 5,000/hour and `just verify` runs 42/42 with none skipped. `config` reports it `set`, never its

@@ -4254,3 +4254,134 @@ a guard that gets switched off. Measured after the change: the same 1,763 files 
 **A pre-existing test asserted `"data" in EXCLUDED_DIRS`** and caught the change. It was updated
 to assert the scoped behaviour — pruned under `research/`, walked under `src/` — rather than
 loosened to pass.
+
+---
+
+## Billing — Stripe checkout, subscription deliveries, and what they entitle
+
+**The full reference is `docs/engineering/STRIPE.md`**: every call, every field, every response,
+and the end-to-end flow. This section is the codebase map — what each directory owns and what it
+must not do. Build row **B3** of `docs/plans/roadmap/product-build.md`, unparked 2026-09-17; the
+design record is `docs/plans/feat-stripe-checkout-and-entitlement.md`.
+
+### `types/billing/` — what a subscription IS
+
+| file | owns |
+|---|---|
+| `types/billing/subscription.py` | `Standing` (Stripe's status as a name), `standing()` which refuses an unknown one, and `Subscription`, one account's subscription as we last heard it |
+
+**It must not** grow a boolean `active`. "They cancelled" and "their card failed on Tuesday" need
+different answers from us and different emails to them, and a column that cannot tell them apart
+forces a guess at the moment a customer is deciding whether to stay. **An unrecognised status
+raises** rather than defaulting: reading a new Stripe status as unpaid cuts off a paying customer
+on the day Stripe ships it, and reading it as paid keeps serving one who stopped.
+
+### `store/billing/` — what Stripe has told us about who is paying
+
+| file | owns |
+|---|---|
+| `store/billing/subscriptions.py` | `record()` writes one row and returns what it did; `current()` reads the newest; `paid()` answers with a sentence, never a bare bool |
+
+**It must not** accept a subscription assembled from a request body. It takes a
+`types/billing.Subscription`, which is a record built from an authenticated delivery — a store
+module that knew Stripe's payload shape would be where somebody later writes a row from a POST.
+
+**The ordering guard is the load-bearing line.** Stripe does not guarantee delivery order, so
+`record()` refuses to let an event older than the stored one overwrite it, and **returns why**.
+Without the refusal a retried `canceled` arriving after the `active` that superseded it switches
+off a live customer, and nothing downstream can tell that from a real cancellation.
+
+### `ingest/payments/` — the only outbound calls to Stripe
+
+| file | owns |
+|---|---|
+| `ingest/payments/stripe_api.py` | `call()` — one authenticated form-encoded request, `Stripe-Version` pinned, `permit()` first, raises on every non-2xx; `encode()` is Stripe's bracket form encoding |
+| `ingest/payments/checkout.py` | `open_session()` — one Checkout Session for one account, one price and a seat count |
+
+**It must not** take the Stripe SDK. `pyproject.toml` declares `dependencies = []`, and what this
+needs is a form-encoded POST and an HMAC compare. The cost of that decision is named and paid:
+`API_VERSION` is pinned explicitly because no SDK is doing it for us, and
+`tests/unit/layers/ingest/test_stripe_encoding.py` exists because nothing else checks the bytes.
+
+**It must not** open a socket without `types/deployment.permit(Destination.PAYMENTS)`.
+`scripts/guard/runtime/check_network_chokepoint.py` fails the build if that line is removed —
+an outbound call to a payment processor from inside a bank's network is a finding against us
+whether or not it succeeds.
+
+### `serve/webhook_stripe.py` and `serve/stripe_event.py` — authenticate, then read
+
+Split deliberately. `webhook_stripe.py` proves bytes came from Stripe and parses no JSON at all;
+`stripe_event.py` reads a body that has already been authenticated. Keeping deserialisation out of
+the module that authenticates removes the standing invitation to parse before verifying.
+
+**Stripe signs a timestamp and GitHub does not**, which is the one thing this path can do that
+`serve/webhook_github.py` says in its own docstring it cannot: a captured GitHub delivery stays
+valid forever, a captured Stripe one expires. The tolerance is 300s, it is checked on the
+ABSOLUTE skew — `now - t < TOLERANCE` admits every future timestamp — and a breach names the
+measured difference, because a clock six minutes out looks exactly like a wrong secret and an
+operator would otherwise rotate the secret, change nothing, and still be down.
+
+**Every `v1` in the header is compared**, not the first. Stripe sends two during a secret
+rotation, and reading only the first breaks rotation silently and only in production.
+
+### `serve/web/checkout_route.py`, `stripe_hook.py`, `provision_payment.py`
+
+| file | owns |
+|---|---|
+| `serve/web/checkout_route.py` | `POST /billing/checkout` — the signed-in account, a seat count from the body, a Stripe session URL back |
+| `serve/web/stripe_hook.py` | `POST /billing/webhook` — verify, claim against the replay ledger, record, complete |
+| `serve/web/provision_payment.py` | what `provision_route.py` knows about the money, and the sentence its reply carries |
+
+**The account comes from the session cookie and never from the body.** A route that billed
+whichever account the request named would attach a subscription to the wrong login.
+
+**The seat count DOES come from the body.** `docs/product/pricing.md` bills per developer who
+opened a pull request and nothing measures that at checkout time; a number we derived would put a
+claim about their team on their card statement.
+
+**`provision_payment.access_for` will not open a store that does not exist.** It read the
+subscription through `open_store` in the first version of this branch, which CREATES the file —
+so every refused provisioning request left a database behind. A test that had been passing for
+weeks caught it. Same argument `serve/web/routes.py` already makes: a read must not provision the
+thing it is reading.
+
+### `verify/paid_access.py` — whether the paid product is open
+
+`decide(subscription, at, grace_days)` → `Access`, carrying a `Verdict` naming which rule decided.
+
+**It answers "did they pay", NOT "may we review".** `docs/product/pricing.md` sells a free tier
+that *"does not expire and it does not degrade"*, so `NO_SUBSCRIPTION` closes the PAID product and
+says nothing about the free one. Collapsing the two here would turn every free-tier customer off
+with one import.
+
+**`STALE_RECORD` is the verdict worth reading twice.** Stripe moves a subscription out of `active`
+when it stops being paid, so `active` with a period that ended weeks ago means WE MISSED A
+DELIVERY. Reading it as paid grants free service forever on a stale row; reading it as unpaid cuts
+off a customer who has paid. It stays open through the grace window, then blocks with a reason
+pointing at our webhook rather than at their card. A clean "still active" months after a period
+ended is exactly the shape `AGENTS.md` rule 14 is about.
+
+**`may_review` IS NOT WIRED TO THIS, AND THAT IS A DECISION.** `store/installations.py:
+Entitlement.may_review` is unchanged: the subscription state is recorded and reported and does not
+yet gate a review. The gate is one line and its blast radius is every paying customer, so the
+honest order is to record the state, watch it agree with Stripe's dashboard on real deliveries,
+and close the gate in a change that can be reverted alone.
+
+### `verify/tier_request.py` — the tripwire that was narrowed rather than removed
+
+Until 2026-09-17 `Verdict.__post_init__` refused `payment_verified=True` outright, because nothing
+in this product could read a payment processor. It now refuses two narrower things: a REFUSED
+verdict may not claim a payment, and `admissible()` contains no branch that reads `payment_ref`
+when setting the field. **The only path to True runs through an HMAC over Stripe's bytes.**
+
+A `payment_ref` in a request body is a string the caller typed. It still admits a paid tier — an
+Enterprise customer invoiced against a signed order is a real case — and it is still reported
+`payment_verified: false`, with the reply saying which of the two happened.
+
+### The schema
+
+`subscription`, added at `SCHEMA_VERSION` 8 by `store/migrations.py:_to_8`. **Nothing is
+backfilled: a backfilled row is an invented payment.** `amount_cents` is the one cents column in
+the database and `tests/unit/layers/test_store_schema.py` exempts it by NAME PAIR, not by table —
+what we spend is derived from tokens and must not be stored, what Stripe charged is a recorded
+external fact that cannot be re-derived from anything here.

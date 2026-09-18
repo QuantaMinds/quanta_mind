@@ -110,12 +110,32 @@ def _to_4(conn: sqlite3.Connection) -> None:
             conn.execute(statement)
 
 
+def _to_8(conn: sqlite3.Connection) -> None:
+    """Add `subscription`. **Nothing is backfilled: a backfilled row is an invented payment.**
+
+    No account had a subscription before this step, because nothing in this product had ever spoken
+    to a payment processor -- `verify/tier_request.py` refused to let a verdict even claim one. So
+    there is no prior state to carry forward, and writing any row here would be this product
+    asserting that somebody paid us on the strength of a migration having run.
+
+    An account with no row is reported as having no subscription, which is true of every account
+    that existed when this step ran.
+
+    Created from `TABLES` rather than written out again, so a migrated store is byte-identical to a
+    fresh one -- which `tests/unit/layers/store/test_schema_golden.py` asserts.
+    """
+    for statement in TABLES:
+        if "subscription" in statement:
+            conn.execute(statement)
+
+
 STEPS: dict[int, Callable[[sqlite3.Connection], None]] = {
     3: _to_3,
     4: _to_4,
     5: _to_5,
     6: _to_6,
     7: _to_7,
+    8: _to_8,
 }
 
 

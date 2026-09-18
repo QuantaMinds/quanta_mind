@@ -34,8 +34,8 @@ import pytest
 from test_listener import PAYLOAD, SECRET, _headers, _post, _Server, _Settings
 from test_listener import server as server
 
-from quantamind.serve import listener
 from quantamind.serve.http import bind
+from quantamind.serve.web import get_reply
 from quantamind.serve.webhook_github import MisconfiguredSecret, sign, verify
 
 
@@ -109,7 +109,10 @@ def test_a_get_that_raises_answers_500_rather_than_dropping_the_connection(
     def _explode(*_: object, **__: object) -> object:
         raise RuntimeError("the route blew up")
 
-    monkeypatch.setattr(listener.routes, "get", _explode)
+    # The route moved behind `serve/web/get_reply.py` when `listener.py` hit the 200-line cap.
+    # Patched at the same seam it was always patched at -- the function that builds the reply --
+    # so this still proves the HANDLER catches the fault, not that the route avoids it.
+    monkeypatch.setattr(get_reply, "get", _explode)
 
     conn = http.client.HTTPConnection("127.0.0.1", server.port, timeout=10)
     conn.request("GET", "/")
