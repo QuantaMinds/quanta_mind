@@ -27,14 +27,16 @@ from __future__ import annotations
 
 HEADER = "### QuantaMind"
 
+PRICING = "https://quantamind.co/pricing"
+
 BODY = """{header}
 
-**Not reviewed.** {why}
+**This change was not reviewed.** {why}
 
-Nothing below is a verdict on your code — there is nothing below, because this change was not read.
+Nothing below is a verdict on your code — there is nothing below, because nothing was read.
 
-_If this repository should be covered, a paid plan removes the eligibility rules entirely; the free
-tier is the one with conditions on it._"""
+**Private repositories are on a paid plan.** The free tier covers public repositories. Private ones
+start with a 14-day trial and nothing is charged until it ends — [see the plans]({pricing})."""
 
 
 def not_entitled(why: str) -> str:
@@ -47,4 +49,4 @@ def not_entitled(why: str) -> str:
         raise ValueError(
             "a refusal must carry its reason; an unexplained one is silence with a header"
         )
-    return BODY.format(header=HEADER, why=why.strip())
+    return BODY.format(header=HEADER, why=why.strip(), pricing=PRICING)

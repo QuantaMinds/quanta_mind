@@ -70,6 +70,26 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
     # every test passed, because a developer's machine has a credential helper and a container
     # does not. The token is minted only when an App is configured: an endpoint without one can
     # still read public repositories, and `token_for` would refuse rather than return nothing.
+    # **THE SEAT IS READ BEFORE THE CLONE, AND THAT ORDER IS NOT AN OPTIMISATION.** It ran after,
+    # so a repository we were about to refuse was cloned first — a full copy of somebody's private
+    # source pulled onto our disk and kept, for a review we then declined to do. `pricing.md`
+    # promises "one working copy of your repository... used for reviewing and nothing else", and a
+    # clone of a repository we refused makes that false. `entitled()` needs only the name.
+    seat_conn = open_store(tenancy.shared(Path(settings.database_path), tenancy.ACCOUNTS))
+    try:
+        seat = installations.entitled(seat_conn, delivery_repo)
+    finally:
+        seat_conn.close()
+    if not seat.may_review:
+        # **A REFUSAL IS POSTED, NOT SWALLOWED.** Returning silently made "we will not review this"
+        # and "there was nothing to say" the same blank space -- the defect this product exists to
+        # refuse, committed by it. `seat.why()` names the rule and the comment names the way past.
+        print(f"[serve] {delivery_repo} #{number}: not reviewed — {seat.why()}", flush=True)
+        body = not_entitled(seat.why())
+        if settings.posting_enabled:
+            publish(delivery_repo, number, head_sha, body, ())
+        return Delivered(Outcome.NOT_ENTITLED, (), (), body)
+
     app = bool(settings.app_id and settings.app_key_path)
     clone = ensure(
         delivery_repo,
@@ -89,26 +109,6 @@ def deliver(delivery_repo: str, number: int, head_sha: str, settings: Settings) 
 
     store = tenancy.store_for(Path(settings.database_path), *delivery_repo.split("/", 1))
 
-    # **B5. THE ONLY STATE THAT REFUSES IS `REMOVED`**, and that is deliberate. `UNKNOWN` means no
-    # installation row -- every repository installed before the mapping existed -- and refusing it
-    # would silence real customers to enforce a rule they were never told about. An INELIGIBLE
-    # repository is still reviewed: the free-tier verdict is information for a human, and turning
-    # it into a gate without a paid tier to fall back to is a dead end with no override.
-    seat_conn = open_store(tenancy.shared(Path(settings.database_path), tenancy.ACCOUNTS))
-    try:
-        seat = installations.entitled(seat_conn, delivery_repo)
-    finally:
-        seat_conn.close()
-    if not seat.may_review:
-        # **A REFUSAL IS POSTED, NOT SWALLOWED.** Returning silently made "we will not review this"
-        # and "there was nothing to say" the same blank space -- the defect this product exists to
-        # refuse, committed by it. An ineligible repository is the case an author CAN act on:
-        # `seat.why()` names the rule and a paid tier is the way past it.
-        print(f"[serve] {delivery_repo} #{number}: not reviewed — {seat.why()}", flush=True)
-        body = not_entitled(seat.why())
-        if settings.posting_enabled:
-            publish(delivery_repo, number, head_sha, body, ())
-        return Delivered(Outcome.NOT_ENTITLED, (), (), body)
     # **FETCHED ONCE, UNFILTERED, THEN FILTERED HERE.** The ranker must see only files we read;
     # `pin_check` must see the workflows, which the ranker's filter removes. Two calls would cost
     # a second page walk and could disagree if the pull request changed between them.
