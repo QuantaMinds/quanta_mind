@@ -1,7 +1,7 @@
-"""The store files an installation needs, made before anything is warmed.
+"""Everything an installation needs written BEFORE the delivery is answered.
 
-WHAT: `provisioned(decision, settings)` creates one store file per repository in an installation
-      and returns the ones it made, printing the refusals.
+WHAT: `provisioned(decision, settings)` creates one store file per repository and returns the
+      ones it made; `claim(repos, settings, account)` writes their `installation` rows.
 WHY:  **IT ANSWERS BEFORE IT WARMS, SO THIS DELIBERATELY STOPS SHORT.** GitHub needs a 2XX inside
       ten seconds and a clone does not finish in ten. Folding `onboarding.admit()` in here would put
       the slow half in front of the reply and reintroduce the timeout the acknowledge-then-work
@@ -18,16 +18,30 @@ WHY:  **IT ANSWERS BEFORE IT WARMS, SO THIS DELIBERATELY STOPS SHORT.** GitHub n
       **A REFUSED REPOSITORY IS PRINTED, NOT COUNTED.** `tenancy.provision` refuses a name it cannot
       turn into a safe path, and "provisioned 3/5" without the two names is not something an
       operator can act on.
-IMPORTS: store.tenancy, stdlib pathlib/typing. Leftward only.
+      **THE TWO ARE ONE CONCERN: THE FAST HALF.** Both are one write and neither touches the
+      network, which is what makes them safe in front of GitHub's ten-second reply window —
+      `onboarding.admit()` is the slow half and stays there. They sit together because the reason
+      they run here is the same reason, and splitting them would invite the next person to move
+      one of them back.
+
+      **`claim()` EXISTS BECAUSE THE ROWS USED TO BE WRITTEN TOO LATE.** `admit()` recorded them
+      after four GitHub calls and a ~31s clone-and-index per repository. A removal arriving inside
+      that window found no rows, withdrew nothing, and reported success — seen against a live
+      endpoint, not reasoned about. It is also the ONLY caller that may `reinstate`, because an
+      installation event is the one thing that states a repository is covered.
+IMPORTS: store.{installations,schema,tenancy}, types.settings, stdlib pathlib/time/typing.
 CONSUMED BY: `serve/listener.py`.
 """
 
 from __future__ import annotations
 
+import time
 from pathlib import Path
 from typing import Any
 
-from quantamind.store import tenancy
+from quantamind.store import installations, tenancy
+from quantamind.store.schema import open_store
+from quantamind.types.settings import Settings
 
 
 def provisioned(decision: Any, settings: Any) -> list[str]:
@@ -50,3 +64,27 @@ def provisioned(decision: Any, settings: Any) -> list[str]:
         flush=True,
     )
     return made
+
+
+def claim(repos: list[str], settings: Settings, account: str) -> None:
+    """Write the installation rows NOW, before the delivery is answered.
+
+    **THIS IS THE FAST HALF, AND SPLITTING IT OUT IS THE POINT.** `admit()` records too, but only
+    after four GitHub calls and a clone per repository — so until this existed, a removal arriving
+    during a warm-up found no rows to remove and said it had removed nothing. Writing the row is
+    one INSERT; nothing here touches the network.
+
+    **IT IS THE ONE CALLER THAT MAY REINSTATE.** An installation event states that a repository is
+    covered, which is exactly the claim that clears `removed_at`. `admit()`'s later write does not
+    get to make that claim — see `store/installations.record`.
+    """
+    if not repos:
+        return
+    conn = open_store(tenancy.shared(Path(settings.database_path), tenancy.ACCOUNTS))
+    try:
+        now = int(time.time())
+        for repo in repos:
+            owner = repo.split("/", 1)[0]
+            installations.record(conn, account or owner, repo, at=now, reinstate=True)
+    finally:
+        conn.close()

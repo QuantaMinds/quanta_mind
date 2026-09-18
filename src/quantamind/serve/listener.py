@@ -37,21 +37,18 @@ from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 from typing import Any
 
-from quantamind.serve.installed_repos import provisioned
-from quantamind.serve.onboarding import admit
+from quantamind.serve.installation_event import settle
 from quantamind.serve.web import get_reply, post_routes
 from quantamind.serve.web.http_io import read_body
 from quantamind.serve.webhook_github import (
     DELIVERY_HEADER,
     EVENT_HEADER,
     SIGNATURE_HEADER,
-    Ignore,
-    Installed,
-    Review,
     interpret,
     verify,
 )
 from quantamind.store import deliveries, schema, tenancy
+from quantamind.types.forge.delivery import Ignore, Installed, Review, Withdrawn
 
 # GitHub's documented maximum payload is 25 MB. A read with no ceiling is memory exhaustion handed
 # to anyone who can reach the port, and Content-Length is attacker-controlled.
@@ -162,11 +159,9 @@ class _Handler(BaseHTTPRequestHandler):
             self._say(200, {"ignored": decision.reason})
             return
 
-        if isinstance(decision, Installed):
-            # Answer, THEN warm: `provisioned` makes store files only, `admit` clones and indexes.
-            made = provisioned(decision, self.settings)
-            self._say(200, {"provisioned": made})
-            admit(made, self.settings, decision.account)
+        if isinstance(decision, Installed | Withdrawn):
+            # Answers in the middle: provisioning is fast, warming a repository is not.
+            settle(decision, self.settings, self._say)
             return
 
         # **THE DELIVERY LEDGER IS ITS OWN STORE, BESIDE THE TENANTS AND NOT INSIDE ONE.**

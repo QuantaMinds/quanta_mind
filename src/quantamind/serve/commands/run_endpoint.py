@@ -49,8 +49,9 @@ def run(port: int, host: str = "127.0.0.1") -> int:
     from quantamind.ingest.publish.github_comments import CommentFailed
     from quantamind.serve.http.bind import build
     from quantamind.serve.review.review_delivery import deliver
-    from quantamind.serve.webhook_github import MisconfiguredSecret, Review
+    from quantamind.serve.webhook_github import MisconfiguredSecret
     from quantamind.serve.working_clone import CloneFailed
+    from quantamind.types.forge.delivery import Review
 
     secret = credential(SECRET_VARIABLE)
     # **READ HERE, NOT FROM `Settings`, FOR THE REASON THE WEBHOOK SECRET IS.** A credential in a

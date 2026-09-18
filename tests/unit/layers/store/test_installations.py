@@ -116,11 +116,34 @@ def test_a_redelivered_installation_does_not_move_first_seen(conn: sqlite3.Conne
 
 
 def test_reinstalling_after_removal_clears_the_removal(conn: sqlite3.Connection) -> None:
+    """**INVERTED, NOT DELETED — the `reinstate=True` is new and it is the whole point.**
+
+    This test passed without it, because `record()` cleared `removed_at` on EVERY write. That made
+    any bookkeeping write resurrect a repository the customer had removed, and it was unreachable
+    until `withdraw()` gained a caller. A live endpoint then showed it: install, remove, and the
+    install's own slow warm-up landed afterwards and silently undid the removal.
+
+    The behaviour this test was written to protect — a genuine reinstall works — is still true and
+    still asserted. What changed is that the caller now has to SAY it is a reinstall.
+    """
+    record(conn, "acme", "acme/payments", at=NOW, eligible=True)
+    withdraw(conn, "acme/payments", at=NOW + 10)
+    record(conn, "acme", "acme/payments", at=NOW + 20, eligible=True, reinstate=True)
+
+    assert entitled(conn, "acme/payments").state is State.ACTIVE
+
+
+def test_an_ordinary_write_does_not_resurrect_a_removal(conn: sqlite3.Connection) -> None:
+    """The other half of the same rule, and the half that was the defect.
+
+    A warm-up refreshing eligibility is not a statement that the repository is covered. Only an
+    installation event makes that claim, so only it passes `reinstate`.
+    """
     record(conn, "acme", "acme/payments", at=NOW, eligible=True)
     withdraw(conn, "acme/payments", at=NOW + 10)
     record(conn, "acme", "acme/payments", at=NOW + 20, eligible=True)
 
-    assert entitled(conn, "acme/payments").state is State.ACTIVE
+    assert entitled(conn, "acme/payments").state is State.REMOVED
 
 
 def test_an_installation_needs_an_account_and_a_full_name(conn: sqlite3.Connection) -> None:

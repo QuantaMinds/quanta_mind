@@ -1,7 +1,7 @@
 """Verify a GitHub webhook, decide whether it is ours to act on, and say what to do with it.
 
 WHAT: `verify()` authenticates a delivery against the shared secret, and `interpret()` turns an
-      authenticated payload into a decision — review this pull request, or ignore it and why.
+      authenticated payload into one of four outcomes — review, installed, withdrawn, or ignored.
 WHY:  **This is the only untrusted input the product accepts.** Everything else comes from git or
       from a repository we were pointed at; this arrives from the network from anyone who finds the
       URL. So the two dangerous decisions — is this really GitHub, and is this ours to act on —
@@ -29,7 +29,7 @@ WHY:  **This is the only untrusted input the product accepts.** Everything else 
       odd length, non-hex — each is a distinct reason, returned rather than collapsed into False,
       because "someone is probing us" and "our own secret is misconfigured" need different
       responses from an operator.
-IMPORTS: types (Settings). Nothing to its right; this is the rightmost layer.
+IMPORTS: types.forge.delivery — the four outcomes, shared with the Bitbucket parser. Leftward only.
 CONSUMED BY: the HTTP binding, and nothing else — the decisions here are testable without one.
 """
 
@@ -38,9 +38,13 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
-from dataclasses import dataclass
 from enum import Enum
 from typing import Any
+
+# The four outcomes live in `types/` because a second forge produces the same ones from a
+# payload that shares no field names with GitHub's. This module PARSES them; it does not own
+# them, and it does not re-export them — every consumer imports them from their one home.
+from quantamind.types.forge.delivery import Ignore, Installed, Review, Withdrawn
 
 SIGNATURE_HEADER = "X-Hub-Signature-256"
 DELIVERY_HEADER = "X-GitHub-Delivery"
@@ -67,42 +71,6 @@ class MisconfiguredSecret(RuntimeError):
     missing is an open command channel, and every test that supplies a secret passes anyway — which
     is why this is an exception and not a `False`.
     """
-
-
-@dataclass(frozen=True, slots=True)
-class Review:
-    """A delivery we should act on."""
-
-    repo: str
-    number: int
-    head_sha: str
-
-
-@dataclass(frozen=True, slots=True)
-class Installed:
-    """An App installation, or a change to which repositories it covers.
-
-    **A THIRD OUTCOME, NOT AN `Ignore` WITH A FLAG.** Until now `interpret` answered "review this"
-    or "not ours", and an installation is neither: nothing is being reviewed, and it is very much
-    ours to act on. Folding it into `Ignore` would make the reason string load-bearing, which is
-    how a log line becomes a control flow.
-
-    `repos` is what the installation covers NOW, not what changed. GitHub sends
-    `installation_repositories` with `repositories_added` and `repositories_removed`, but acting on
-    a delta means a missed delivery leaves a tenant permanently unprovisioned; acting on the full
-    list is idempotent and self-healing.
-    """
-
-    account: str
-    repos: tuple[str, ...]
-    action: str
-
-
-@dataclass(frozen=True, slots=True)
-class Ignore:
-    """A delivery that authenticated and is not ours to act on. Carries why, for the log."""
-
-    reason: str
 
 
 def verify(secret: str, body: bytes, signature: str | None) -> Rejected | None:
@@ -137,26 +105,61 @@ def sign(secret: str, body: bytes) -> str:
 INSTALL_EVENTS = ("installation", "installation_repositories")
 
 
-def _installed(payload: dict[str, Any]) -> Installed | Ignore:
-    """An installation delivery, or why it could not be read."""
-    account = str(((payload.get("installation") or {}).get("account") or {}).get("login", ""))
-    if not account:
-        return Ignore("installation payload names no account")
-    listed: list[str] = []
-    for key in ("repositories", "repositories_added"):
+# Actions after which the installation can do nothing. **`suspend` BELONGS HERE AND `removed` DOES
+# NOT.** A suspended installation still exists and its token still fails, so leaving it covered
+# turns every later delivery into a clone that cannot authenticate -- which a customer reads as us
+# being broken rather than as us being switched off. `removed` is per-repository and leaves the
+# installation alive, so it is a smaller fact and rides on `Installed.no_longer_covered`.
+GONE_ACTIONS = frozenset({"deleted", "suspend"})
+
+
+def _named(payload: dict[str, Any]) -> tuple[str, int, int, str]:
+    """Who this installation belongs to. A zero or empty field means the delivery did not say."""
+    seat = payload.get("installation") or {}
+    who = seat.get("account") or {}
+    return (
+        str(who.get("login", "")),
+        int(seat.get("id") or 0),
+        int(who.get("id") or 0),
+        str(who.get("type", "")),
+    )
+
+
+def _listed(payload: dict[str, Any], *keys: str) -> tuple[str, ...]:
+    """Every `full_name` under these payload keys, deduplicated and ordered."""
+    found: list[str] = []
+    for key in keys:
         for entry in payload.get(key) or []:
             if isinstance(entry, dict) and entry.get("full_name"):
-                listed.append(str(entry["full_name"]))
+                found.append(str(entry["full_name"]))
+    return tuple(sorted(set(found)))
+
+
+def _installed(payload: dict[str, Any]) -> Installed | Withdrawn | Ignore:
+    """An installation delivery, or why it could not be read."""
+    account, installation_id, account_id, kind = _named(payload)
+    if not account:
+        return Ignore("installation payload names no account")
     action = str(payload.get("action", ""))
-    if not listed and action not in ("deleted", "removed"):
+    if action in GONE_ACTIONS:
+        # **NO REPOSITORY LIST IS READ HERE, AND THAT IS NOT AN OVERSIGHT.** GitHub omits it on
+        # `deleted`, and every repository under the account stops being covered at the same moment
+        # anyway, so naming a subset would describe less than what happened.
+        return Withdrawn(account, action, installation_id)
+    covered = _listed(payload, "repositories", "repositories_added")
+    dropped = _listed(payload, "repositories_removed")
+    if not covered and not dropped and action != "removed":
         # **AN INSTALLATION THAT LISTS NOTHING IS NOT A TENANT WITH NO REPOSITORIES.** GitHub omits
         # the list on some actions, and provisioning from an empty list would look identical to a
         # customer who selected none. Said, not assumed away.
         return Ignore(f"installation {action!r} for {account} lists no repositories")
-    return Installed(account, tuple(sorted(set(listed))), action)
+    # **BOTH DIRECTIONS RIDE ON ONE VALUE.** One `installation_repositories` delivery can add and
+    # remove in the same payload; returning only one of them would silently drop half of what the
+    # customer just told us.
+    return Installed(account, covered, action, dropped, installation_id, account_id, kind)
 
 
-def interpret(event: str | None, body: bytes) -> Review | Installed | Ignore:
+def interpret(event: str | None, body: bytes) -> Review | Installed | Withdrawn | Ignore:
     """What to do with an AUTHENTICATED delivery. Never called before `verify()` returns None.
 
     Returns `Ignore` with a reason rather than raising: a ping, a label change and a comment are all

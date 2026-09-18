@@ -93,11 +93,23 @@ def record(
     tier: str = "free",
     eligible: bool | None = None,
     reasons: tuple[str, ...] = (),
+    reinstate: bool = False,
 ) -> None:
     """Write or refresh one repository's installation. Idempotent — GitHub redelivers.
 
     **`first_seen` IS NOT MOVED BY A REDELIVERY.** It is when we first saw them, and an
     installation event replayed a month later must not rewrite that.
+
+    **`reinstate` DEFAULTS TO FALSE, AND THAT DEFAULT IS THE BUG THIS PARAMETER FIXES.** This
+    upsert used to clear `removed_at` unconditionally, so ANY write resurrected a repository the
+    customer had removed. It was unreachable while `withdraw()` had no caller; wiring the
+    uninstall path made it live, and a run against a real endpoint showed it: install, remove,
+    then the install's own slow warm-up lands and the removal is silently undone.
+
+    Only an installation EVENT states that a repository is covered, so only that caller passes
+    `reinstate=True`. Everything else — a warm-up, an eligibility refresh — is bookkeeping about a
+    repository whose coverage it is not entitled to assert, and the safe default is the one where
+    forgetting the argument cannot revive a customer who left.
     """
     if not account.strip() or "/" not in repo:
         raise ValueError(
@@ -106,8 +118,8 @@ def record(
     conn.execute(
         "INSERT INTO installation (account, repo, tier, eligible, reasons, first_seen, removed_at)"
         " VALUES (?, ?, ?, ?, ?, ?, NULL) ON CONFLICT(account, repo) DO UPDATE SET"
-        " tier = excluded.tier, eligible = excluded.eligible, reasons = excluded.reasons,"
-        " removed_at = NULL",
+        " tier = excluded.tier, eligible = excluded.eligible, reasons = excluded.reasons"
+        + (", removed_at = NULL" if reinstate else ""),
         (account, repo, tier, eligible, "\n".join(reasons), at),
     )
     conn.commit()
@@ -120,6 +132,35 @@ def withdraw(conn: sqlite3.Connection, repo: str, *, at: int) -> int:
     )
     conn.commit()
     return int(cursor.rowcount)
+
+
+def accounts(conn: sqlite3.Connection) -> tuple[str, ...]:
+    """Every account with at least one repository we still cover, ordered.
+
+    **IT EXCLUDES ACCOUNTS WHOSE EVERY ROW IS ALREADY WITHDRAWN**, because reconciliation asks the
+    forge one question per account and an account that left last year is a request that can only
+    confirm what we already know. A withdrawn row is kept — "never a customer" and "left" are
+    different answers to an auditor — but it is not a reason to go asking again.
+    """
+    rows = conn.execute(
+        "SELECT DISTINCT account FROM installation WHERE removed_at IS NULL ORDER BY account"
+    ).fetchall()
+    return tuple(str(row[0]) for row in rows)
+
+
+def covered(conn: sqlite3.Connection, account: str) -> tuple[str, ...]:
+    """Every repository this account still covers, ordered.
+
+    **IT EXISTS SO AN UNINSTALL CAN NAME WHAT IT REMOVED.** `withdraw()` takes one repository, and
+    an `installation.deleted` delivery carries no repository list at all — GitHub omits it. Without
+    this the caller would have to guess, and a whole-account removal that silently marked nothing
+    is the shape `withdraw()`'s own rowcount return exists to make visible.
+    """
+    rows = conn.execute(
+        "SELECT repo FROM installation WHERE account = ? AND removed_at IS NULL ORDER BY repo",
+        (account,),
+    ).fetchall()
+    return tuple(str(row[0]) for row in rows)
 
 
 def entitled(conn: sqlite3.Connection, repo: str) -> Entitlement:
