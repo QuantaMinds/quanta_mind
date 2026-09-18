@@ -1,6 +1,6 @@
-"""Verification that a failed card, a cancellation and our own missed webhook get three answers.
+"""Verification that a failed card, a cancellation and our own missed push get three answers.
 
-WHAT: Drives `verify/paid_access.decide` across every standing and across both sides of every
+WHAT: Drives `verify/paid_access.decide` across every state and across both sides of every
       boundary it has — the period end, the grace end, and the two of them one second apart.
 WHY:  **THE BOUNDARIES ARE THE WHOLE MODULE.** `decide` is a pile of comparisons against `at`, and
       a test that only ever asks "clearly inside" and "clearly outside" would pass against `<`
@@ -11,15 +11,18 @@ WHY:  **THE BOUNDARIES ARE THE WHOLE MODULE.** `decide` is a pile of comparisons
       would make every branch below unreachable: there is no way to ask a function "what would you
       say in nine days" if it reads the clock itself.
 
-      **AN ACTIVE SUBSCRIPTION WITH AN ENDED PERIOD IS OUR BUG AND MUST NOT READ AS PAID.** It
-      means a delivery was missed. `AGENTS.md` rule 14: a check whose output is the same whether
-      the mechanism works or not is not a check, and "still active" forever on a stale row is
-      exactly that shape.
+      **ACTIVE COVERAGE WITH AN ENDED PERIOD IS OUR BUG AND MUST NOT READ AS PAID.** It means a
+      push was missed. `AGENTS.md` rule 14: a check whose output is the same whether the mechanism
+      works or not is not a check, and "still active" forever on a stale row is exactly that shape.
 
-      **NO SUBSCRIPTION IS THE FREE TIER, NOT A REFUSAL.** `docs/product/pricing.md` sells a free
-      tier that does not expire. A test that accepted `allowed is False` without reading the
-      verdict would let somebody later make this mean "blocked" and turn the free tier off.
-IMPORTS: pytest, quantamind.types.billing, quantamind.verify.paid_access.
+      **NO COVERAGE IS THE FREE TIER, NOT A REFUSAL.** `docs/product/pricing.md` sells a free tier
+      that does not expire. A test that accepted `allowed is False` without reading the verdict
+      would let somebody later make this mean "blocked" and turn the free tier off.
+
+      **EVERY `State` IS EXERCISED, BECAUSE `_SETTLED` IS A TABLE LOOKUP.** A state missing from it
+      raises `KeyError` inside a review rather than returning a wrong verdict — which is the right
+      failure, but only if something reaches it before a customer does.
+IMPORTS: pytest, quantamind.store.billing.entitlement, quantamind.verify.paid_access.
 CONSUMED BY: `just check`.
 """
 
@@ -27,32 +30,30 @@ from __future__ import annotations
 
 import pytest
 
-from quantamind.types.billing import Standing, Subscription
+from quantamind.store.billing.entitlement import Coverage, State
 from quantamind.verify.paid_access import DAY_S, GRACE_DAYS, Access, Verdict, decide
 
 PERIOD_END = 1_700_000_000
 GRACE_END = PERIOD_END + GRACE_DAYS * DAY_S
 
 
-def sub(standing: Standing, *, ends: int = PERIOD_END) -> Subscription:
-    """One subscription in a given standing. Only `standing` and the period end matter here."""
-    return Subscription(
-        account="octocat",
-        subscription_id="sub_1",
-        customer_id="cus_1",
-        price_id="price_1",
-        standing=standing,
-        seats=3,
-        amount_cents=2900,
-        currency="usd",
-        current_period_end=ends,
-        event_at=PERIOD_END - DAY_S,
+def cover(state: State, *, ends: int | None = PERIOD_END, stale: bool = False) -> Coverage:
+    """One account's coverage. Only the state and the period end matter here."""
+    return Coverage(
+        tier="team",
+        state=state,
+        seats_included=3,
+        reason="",
+        as_of=PERIOD_END - DAY_S,
+        valid_through=ends,
+        grace_until=None,
+        stale=stale,
     )
 
 
-def test_no_subscription_is_the_free_tier_and_says_so() -> None:
+def test_no_coverage_is_the_free_tier_and_says_so() -> None:
     """**Not a refusal.** The caller decides whether it was asking about the paid product."""
-    access = decide(None, at=PERIOD_END)
+    access = decide(cover(State.NONE), at=PERIOD_END)
 
     assert access.verdict is Verdict.NO_SUBSCRIPTION
     assert access.allowed is False
@@ -60,40 +61,40 @@ def test_no_subscription_is_the_free_tier_and_says_so() -> None:
     assert access.paid_through == 0
 
 
-@pytest.mark.parametrize("standing", [Standing.ACTIVE, Standing.TRIALING])
-def test_paid_up_to_and_including_the_final_second(standing: Standing) -> None:
+@pytest.mark.parametrize("state", [State.ACTIVE, State.TRIALING])
+def test_paid_up_to_and_including_the_final_second(state: State) -> None:
     """`at == ends` is still paid. A `<` here bills someone for a period it then denies them."""
-    assert decide(sub(standing), at=PERIOD_END).verdict is Verdict.PAID
-    assert decide(sub(standing), at=PERIOD_END - 1).verdict is Verdict.PAID
-    assert decide(sub(standing), at=PERIOD_END).paid_through == PERIOD_END
+    assert decide(cover(state), at=PERIOD_END).verdict is Verdict.PAID
+    assert decide(cover(state), at=PERIOD_END - 1).verdict is Verdict.PAID
+    assert decide(cover(state), at=PERIOD_END).paid_through == PERIOD_END
 
 
-def test_active_one_second_past_the_period_is_a_missed_delivery_not_a_payment() -> None:
-    """Stripe moves a subscription out of `active` when it stops being paid. So this is ours."""
-    access = decide(sub(Standing.ACTIVE), at=PERIOD_END + 1)
+def test_active_one_second_past_the_period_is_a_missed_push_not_a_payment() -> None:
+    """Billing moves an account out of `active` when it stops being paid. So this is ours."""
+    access = decide(cover(State.ACTIVE), at=PERIOD_END + 1)
 
     assert access.verdict is Verdict.STALE_RECORD
     assert access.allowed is True, "our own outage must not cut off a paying customer"
-    assert "we missed a delivery" in access.reason
-    assert "webhook endpoint" in access.reason
+    assert "a push never arrived" in access.reason
+    assert "entitlement drain" in access.reason
 
 
 def test_a_stale_active_record_stops_being_believed_after_the_grace_window() -> None:
     """Held open for the window, then blocked with a reason pointing at us, not at them."""
-    assert decide(sub(Standing.ACTIVE), at=GRACE_END).verdict is Verdict.STALE_RECORD
+    assert decide(cover(State.ACTIVE), at=GRACE_END).verdict is Verdict.STALE_RECORD
 
-    lapsed = decide(sub(Standing.ACTIVE), at=GRACE_END + 1)
+    lapsed = decide(cover(State.ACTIVE), at=GRACE_END + 1)
     assert lapsed.verdict is Verdict.EXPIRED
     assert lapsed.allowed is False
-    assert "re-read the subscription from Stripe" in lapsed.reason
+    assert "re-push the entitlement" in lapsed.reason
 
 
 def test_past_due_keeps_access_through_the_grace_window_and_not_one_second_longer() -> None:
     """A bank's fraud hold must not take down their CI on the first failed charge."""
-    assert decide(sub(Standing.PAST_DUE), at=PERIOD_END + 1).verdict is Verdict.IN_GRACE
-    assert decide(sub(Standing.PAST_DUE), at=GRACE_END).verdict is Verdict.IN_GRACE
+    assert decide(cover(State.PAST_DUE), at=PERIOD_END + 1).verdict is Verdict.IN_GRACE
+    assert decide(cover(State.PAST_DUE), at=GRACE_END).verdict is Verdict.IN_GRACE
 
-    closed = decide(sub(Standing.PAST_DUE), at=GRACE_END + 1)
+    closed = decide(cover(State.PAST_DUE), at=GRACE_END + 1)
     assert closed.verdict is Verdict.EXPIRED
     assert closed.allowed is False
 
@@ -102,22 +103,21 @@ def test_the_grace_window_is_measured_from_the_period_end_not_from_now() -> None
     """A window measured from the moment we ask never closes, because every call restarts it."""
     long_after = GRACE_END + 400 * DAY_S
 
-    assert decide(sub(Standing.PAST_DUE), at=long_after).verdict is Verdict.EXPIRED
+    assert decide(cover(State.PAST_DUE), at=long_after).verdict is Verdict.EXPIRED
 
 
 def test_a_shorter_grace_moves_the_boundary_so_the_number_is_not_decoration() -> None:
-    """**The constant is exercised, not merely present.** `just check` counts 95 of 130 product
-    constants as changeable with every test still green; this is one that is not."""
+    """**The constant is exercised, not merely present.**"""
     two_days = PERIOD_END + 2 * DAY_S
 
-    assert decide(sub(Standing.PAST_DUE), at=two_days, grace_days=7).verdict is Verdict.IN_GRACE
-    assert decide(sub(Standing.PAST_DUE), at=two_days, grace_days=1).verdict is Verdict.EXPIRED
+    assert decide(cover(State.PAST_DUE), at=two_days, grace_days=7).verdict is Verdict.IN_GRACE
+    assert decide(cover(State.PAST_DUE), at=two_days, grace_days=1).verdict is Verdict.EXPIRED
 
 
 def test_cancelled_is_not_expired_because_nobody_s_card_failed() -> None:
     """Two blocked accounts needing two different emails and two different conversations."""
-    left = decide(sub(Standing.CANCELED), at=PERIOD_END + 1)
-    failed = decide(sub(Standing.UNPAID), at=PERIOD_END + 1)
+    left = decide(cover(State.CANCELLED), at=PERIOD_END + 1)
+    failed = decide(cover(State.UNPAID), at=PERIOD_END + 1)
 
     assert left.verdict is Verdict.CANCELED
     assert failed.verdict is Verdict.EXPIRED
@@ -125,28 +125,57 @@ def test_cancelled_is_not_expired_because_nobody_s_card_failed() -> None:
     assert "worth a human contacting them" in failed.reason
 
 
-@pytest.mark.parametrize("standing", [Standing.INCOMPLETE, Standing.INCOMPLETE_EXPIRED])
-def test_a_checkout_that_never_paid_is_not_a_lapsed_customer(standing: Standing) -> None:
+def test_a_checkout_that_never_paid_is_not_a_lapsed_customer() -> None:
     """They were never a customer. Dunning them is a letter about a debt that does not exist."""
-    access = decide(sub(standing), at=PERIOD_END)
+    access = decide(cover(State.INCOMPLETE), at=PERIOD_END)
 
     assert access.verdict is Verdict.NEVER_PAID
     assert "must not be dunned like one" in access.reason
 
 
 def test_paused_is_its_own_verdict_and_not_folded_into_cancelled() -> None:
-    access = decide(sub(Standing.PAUSED), at=PERIOD_END)
+    access = decide(cover(State.PAUSED), at=PERIOD_END)
 
     assert access.verdict is Verdict.PAUSED
     assert access.allowed is False
 
 
-def test_a_subscription_with_no_period_is_open_rather_than_instantly_expired() -> None:
-    """`current_period_end` is 0 on a subscription Stripe sent no period for. Zero is not 1970."""
-    access = decide(sub(Standing.ACTIVE, ends=0), at=PERIOD_END)
+@pytest.mark.parametrize("state", [one for one in State if one is not State.NONE])
+def test_every_state_reaches_a_verdict_rather_than_a_KeyError(state: State) -> None:
+    """`_SETTLED` is a table, and a `State` added without an entry raises INSIDE a review.
 
-    assert access.verdict is Verdict.PAID
-    assert "no period on the record" in access.reason
+    Parametrised over the enum rather than over a written-out list, so adding a member to `State`
+    adds a case here automatically instead of leaving the gap for a customer to find.
+    """
+    assert decide(cover(state), at=PERIOD_END).verdict in Verdict
+
+
+def test_coverage_with_no_period_is_open_rather_than_instantly_expired() -> None:
+    """`valid_through` is None when the push carried no period. None is not 1970."""
+    for ends in (None, 0):
+        access = decide(cover(State.ACTIVE, ends=ends), at=PERIOD_END)
+
+        assert access.verdict is Verdict.PAID
+        assert "no period on the record" in access.reason
+
+
+def test_a_quiet_billing_service_is_named_without_closing_access() -> None:
+    """`stale` is our failure to push, not their failure to pay — it degrades, it does not refuse.
+
+    Asserting the verdict AND the sentence: without the sentence an operator sees a working
+    account and never learns the drain stopped, which is the state this flag exists to surface.
+    """
+    quiet = decide(cover(State.ACTIVE, ends=PERIOD_END + DAY_S, stale=True), at=PERIOD_END)
+    fresh = decide(cover(State.ACTIVE, ends=PERIOD_END + DAY_S), at=PERIOD_END)
+
+    assert quiet.verdict is Verdict.PAID
+    assert quiet.allowed is True, "a quiet drain is our fault; it must not close a paid account"
+    # The first version of this test asserted only the verdict, and passed against a `decide` that
+    # never mentioned the quiet drain at all on the PAID path — an account reading as healthy while
+    # the thing keeping it healthy had stopped. The two reasons must differ.
+    assert "has not pushed since its grace window closed" in quiet.reason
+    assert "has not pushed" not in fresh.reason
+    assert quiet.reason != fresh.reason
 
 
 def test_the_flag_and_the_verdict_cannot_be_made_to_disagree() -> None:

@@ -46,6 +46,22 @@ class State(enum.Enum):
     """A payment failed. Still a customer — Stripe retries for weeks."""
 
     CANCELLED = "cancelled"
+    """They chose to leave."""
+
+    # **THE NEXT THREE EXIST SO THE BILLING SERVICE DOES NOT HAVE TO ROUND.** Without them it maps
+    # Stripe's `unpaid`, `paused` and `incomplete` onto `cancelled`, and three customers who need
+    # three different emails arrive here as one. `unpaid` is a card that never recovered and nobody
+    # chose; `paused` is collection deliberately stopped; `incomplete` never paid a first invoice
+    # and is not a lapsed customer at all. Rounding them was information thrown away at the wire,
+    # where no test on either side could see it.
+    UNPAID = "unpaid"
+    """Every retry failed and Stripe gave up. **Nobody chose this** — worth a human."""
+
+    PAUSED = "paused"
+    """Collection is paused. Not a lapse."""
+
+    INCOMPLETE = "incomplete"
+    """Checkout finished, the first payment did not. They have never paid us."""
 
 
 _BY_VALUE = {one.value: one for one in State}

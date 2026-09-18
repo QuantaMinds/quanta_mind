@@ -57,6 +57,10 @@ from quantamind.store.schema import open_store
 from quantamind.verify import qualification
 from quantamind.verify.tier_request import Tier, admissible
 
+GITHUB = "github"
+"""The only forge that has ever reached this route. Named rather than inlined so a second one
+changes a constant and a call site, not a string buried in an argument list."""
+
 # **DEFINED ONCE, IN THE MODULE THAT READS THEM.** `PREFIX` is re-exported because
 # `serve/web/post_routes.py` dispatches on it and has always imported it from here; a second
 # literal in two files is how the URL and the parser that strips it drift apart.
@@ -119,7 +123,12 @@ def answer(
     # **READ BEFORE ANYTHING IS CREATED.** `access_for` will not open a store that does not exist,
     # so a refused request still leaves no database behind. The first version of this branch opened
     # it here and a test that had been passing for weeks caught it immediately.
-    access = access_for(root, parsed.account, tier, at=now)
+    # **THE FORGE IS A CONSTANT HERE AND THAT IS THE THING BITBUCKET CHANGES.** Entitlement is
+    # keyed `(forge, account)`; provisioning requests carry no forge because every account that
+    # has ever reached this route is a GitHub one. Passing it explicitly rather than defaulting it
+    # inside `access_for` is what makes this line the place a second forge has to be handled,
+    # instead of a silent wrong read against a GitHub row.
+    access = access_for(root, parsed.account, tier, at=now, forge=GITHUB)
     verdict = admissible(tier, parsed, free_verdicts=verdicts, access=access)
     if not verdict.admissible:
         return _refused(tier, verdict.reasons)

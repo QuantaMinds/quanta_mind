@@ -1,38 +1,32 @@
-"""Whether an account's paid subscription is open right now, and the sentence saying how we know.
+"""Whether an account's paid entitlement is open right now, and the sentence saying how we know.
 
-WHAT: `Access`, and `decide(subscription, at, grace_days)` -> `Access`. Given the subscription row
-      we last heard from Stripe and the current time, it answers open or blocked, and names which
-      rule decided it. No I/O, no clock read, no store.
-WHY:  **"DID THEY PAY" AND "MAY WE REVIEW" ARE DIFFERENT QUESTIONS AND THIS MODULE ANSWERS THE
-      FIRST.** `docs/product/pricing.md` sells a free tier that *"does not expire and it does not
-      degrade"*, so an account with no subscription is not a blocked account -- it is a free one.
-      `NO_SUBSCRIPTION` therefore closes the PAID product and says nothing about the free one, and
-      the caller is the only thing that knows which it is asking about. Collapsing the two here
-      would turn every free-tier customer off with one import.
+WHAT: `Access`, and `decide(coverage, at, grace_days)` -> `Access`. Given the coverage the billing
+      service last pushed and the current time, it answers open or blocked, and names which rule
+      decided it. No I/O, no clock read, no store.
+WHY:  **IT READS THE PUSHED ENTITLEMENT, NOT A STRIPE SUBSCRIPTION ROW.** `server/` owns the
+      Stripe relationship and pushes the result over `POST /entitlement`; this layer never sees a
+      Stripe object. Recorded in `docs/engineering/STRIPE.md`: money lives in Postgres where a
+      ledger can be transactional, and the reviewer holds a cache it can read while billing is down.
 
-      **AN EXPIRED PERIOD IS NOT THE SAME AS A CANCELLED SUBSCRIPTION, AND NEITHER IS A RETRY.**
-      Three different customers: one who left, one whose card failed this morning, and one whose
-      renewal we simply have not heard about yet. They need three answers, three emails and three
-      different amounts of patience, so `Verdict` names which one it is rather than returning a
-      boolean anybody downstream would have to re-derive.
+      **"DID THEY PAY" AND "MAY WE REVIEW" ARE DIFFERENT QUESTIONS AND THIS ANSWERS THE FIRST.**
+      `docs/product/pricing.md` sells a free tier that *"does not expire and it does not degrade"*,
+      so an account with no coverage is free, not blocked. `NO_SUBSCRIPTION` closes the PAID
+      product and says nothing about the free one; the caller knows which it was asking about.
 
-      **A `past_due` CUSTOMER KEEPS ACCESS THROUGH THE GRACE WINDOW, AND THAT IS A DECISION.**
-      Stripe retries a failed card for days. Cutting off a customer at the first failed charge
-      means a bank's fraud hold takes down their CI, and the recovery rate on those retries is the
-      reason dunning exists at all. `GRACE_DAYS` is the number, it is stated, and it is a
-      parameter so a test can prove the boundary rather than trusting it.
+      **AN EXPIRED PERIOD, A CANCELLATION AND A FAILING RETRY ARE THREE CUSTOMERS, NOT ONE**, so
+      `Verdict` names which rather than returning a boolean anybody downstream would re-derive. A
+      `past_due` customer keeps access for `GRACE_DAYS`: Stripe retries a failed card for days, and
+      cutting them off at the first failure means a bank's fraud hold takes down their CI.
 
-      **AN `active` SUBSCRIPTION WHOSE PERIOD ENDED IS OUR BUG, NOT THEIRS, AND IT IS NAMED.**
-      Stripe moves a subscription out of `active` when it stops being paid, so `active` with a
-      period that ended weeks ago means we MISSED A DELIVERY -- the webhook was down, the secret
-      was wrong, the endpoint 500ed. Reading it as paid grants free service forever on a stale row;
-      reading it as unpaid cuts off a customer who has paid. It is `STALE_RECORD`, it stays open
-      through the grace window so nobody is cut off by our own outage, and after that it blocks
-      with a reason that points at us. **A clean "still active" months after a period ended is the
-      shape `AGENTS.md` rule 14 is about: the same output whether the mechanism works or not.**
-IMPORTS: stdlib only, plus `types/billing.py`. Nothing to its right, and nothing that reads a clock
-      -- `at` is passed in, so every boundary in here is reachable from a test.
-CONSUMED BY: `serve/web/billing_route.py`, and whatever later decides `may_review`.
+      **AN `active` COVERAGE WHOSE PERIOD ENDED IS OUR BUG, NOT THEIRS, AND IT IS NAMED.** Billing
+      moves an account out of `active` when it stops being paid, so `active` with a period that
+      ended weeks ago means A PUSH NEVER ARRIVED. Reading it as paid grants free service forever on
+      a stale row; reading it as unpaid cuts off a customer who has paid. `STALE_RECORD` stays open
+      through the grace window, then blocks with a reason pointing at us. **A clean "still active"
+      months after a period ended is `AGENTS.md` rule 14: the same output whether it works or not.**
+IMPORTS: stdlib only, plus `store/billing/entitlement.py`. Nothing reads a clock -- `at` is passed
+      in, so every boundary in here is reachable from a test.
+CONSUMED BY: `serve/web/provision_payment.py`, and whatever later decides `may_review`.
 """
 
 from __future__ import annotations
@@ -40,12 +34,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 
-from quantamind.types.billing import Standing, Subscription
+from quantamind.store.billing.entitlement import Coverage, State
 
 GRACE_DAYS = 7
-"""How long a failed renewal keeps access. **Chosen, not measured**, and stated so it can be
-argued with: Stripe's default retry schedule runs to about a week, so this is "until Stripe itself
-gives up" rather than a number picked to look generous."""
+"""How long a failed renewal keeps access. **Chosen, not measured**: Stripe's retry schedule runs
+to about a week, so this is "until Stripe gives up" rather than a number picked to look generous."""
 
 DAY_S = 86_400
 
@@ -60,7 +53,7 @@ class Verdict(Enum):
     """A renewal is failing and Stripe is still retrying. **A customer, not an ex-customer.**"""
 
     STALE_RECORD = "stale_record"
-    """Active, but the period ended and no newer delivery arrived. **Our missed webhook.**"""
+    """Active, but the period ended and no newer push arrived. **Our missed delivery.**"""
 
     EXPIRED = "expired"
     """The paid period ended and the grace window with it."""
@@ -73,7 +66,7 @@ class Verdict(Enum):
 
     PAUSED = "paused"
     NO_SUBSCRIPTION = "no_subscription"
-    """No row at all. **This is the free tier, not a refusal** -- see the module docstring."""
+    """No coverage. **This is the free tier, not a refusal** -- see the module docstring."""
 
 
 OPEN = frozenset({Verdict.PAID, Verdict.IN_GRACE, Verdict.STALE_RECORD})
@@ -103,92 +96,105 @@ class Access:
             raise ValueError("an access decision without a reason cannot be shown to anybody")
 
 
-def _grace_end(subscription: Subscription, grace_days: int) -> int:
-    """When patience runs out. **From the period end, not from now** -- a window measured from
-    the moment we happen to ask would never close, because every call restarts it."""
-    return subscription.current_period_end + grace_days * DAY_S
+_SETTLED = {
+    State.CANCELLED: (
+        Verdict.CANCELED,
+        "the subscription was cancelled",
+    ),
+    State.UNPAID: (
+        Verdict.EXPIRED,
+        "every retry failed and Stripe stopped. **Nobody chose this** -- it is a card that never "
+        "recovered, and it is worth a human contacting them",
+    ),
+    State.PAUSED: (
+        Verdict.PAUSED,
+        "collection is paused",
+    ),
+    State.INCOMPLETE: (
+        Verdict.NEVER_PAID,
+        "the first payment never completed, so this account has never paid us. It is not a lapsed "
+        "customer and must not be dunned like one",
+    ),
+}
+"""States that need no date arithmetic. **Held as a table so a new `State` fails at import with a
+KeyError rather than falling through to a default** -- a default here would be a verdict nobody
+chose, applied to a paying customer."""
 
 
-def decide(subscription: Subscription | None, *, at: int, grace_days: int = GRACE_DAYS) -> Access:
+def _quiet(coverage: Coverage) -> str:
+    """The extra sentence when the billing service itself has gone quiet, or nothing."""
+    if not coverage.stale:
+        return ""
+    return (
+        ". Separately, the billing service has not pushed since its grace window closed, so this "
+        "row may not reflect what Stripe says now -- check the entitlement drain"
+    )
+
+
+def decide(coverage: Coverage, *, at: int, grace_days: int = GRACE_DAYS) -> Access:
     """Whether the paid product is open for this account at this instant.
 
     `at` is a parameter and not a `time.time()` call: every boundary this function has is a
     comparison against it, and a clock read inside would make all of them unreachable from a test.
     """
-    if subscription is None:
+    if coverage.state is State.NONE:
         return Access(
             False,
             Verdict.NO_SUBSCRIPTION,
-            "no subscription on record. **This is the free tier, not a refusal** -- the caller "
+            "no coverage on record. **This is the free tier, not a refusal** -- the caller "
             "decides whether it was asking about the paid product or about access at all",
         )
 
-    ends = subscription.current_period_end
+    ends = coverage.valid_through or 0
     through = f"paid through {ends}" if ends else "no period on the record"
+    # When patience runs out. **From the period end, not from now** -- a window measured from the
+    # moment we happen to ask would never close, because every call restarts it.
+    patience = ends + grace_days * DAY_S
 
-    if subscription.standing in (Standing.ACTIVE, Standing.TRIALING):
+    # `Coverage.paid` is the store's own definition; repeating the tuple would let them disagree.
+    if coverage.paid:
         if ends == 0 or at <= ends:
+            # `_quiet` belongs here too: an account still inside its period otherwise reads as
+            # healthy while the drain keeping it healthy has stopped -- which is exactly when
+            # somebody can still fix it before anyone is cut off.
             return Access(
-                True,
-                Verdict.PAID,
-                f"{subscription.standing.value}, {through}",
-                paid_through=ends,
+                True, Verdict.PAID, f"{coverage.state.value}, {through}" + _quiet(coverage), ends
             )
-        # Active with a period that ended: see STALE_RECORD in the module docstring.
-        if at <= _grace_end(subscription, grace_days):
+        if at <= patience:
             return Access(
                 True,
                 Verdict.STALE_RECORD,
-                f"Stripe last said {subscription.standing.value} but the period ended at {ends}, "
-                f"{(at - ends) // DAY_S}d ago. **That means we missed a delivery, not that they "
-                f"stopped paying** -- access is held open for {grace_days}d. Check the webhook "
-                f"endpoint and the signing secret before touching this account",
-                paid_through=ends,
+                f"billing last said {coverage.state.value} but the period ended at {ends}, "
+                f"{(at - ends) // DAY_S}d ago. **That means a push never arrived, not that they "
+                f"stopped paying** -- access is held open for {grace_days}d. Check the entitlement "
+                f"drain and the provisioning secret before touching this account"
+                + _quiet(coverage),
+                ends,
             )
         return Access(
             False,
             Verdict.EXPIRED,
-            f"Stripe last said {subscription.standing.value} at {ends}, more than {grace_days}d "
-            f"ago, and nothing newer arrived. The record is stale and cannot be relied on; "
-            f"re-read the subscription from Stripe rather than trusting this row",
-            paid_through=ends,
+            f"billing last said {coverage.state.value} at {ends}, more than {grace_days}d ago, "
+            f"and nothing newer arrived. The row is stale and cannot be relied on; re-push the "
+            f"entitlement rather than trusting it" + _quiet(coverage),
+            ends,
         )
 
-    if subscription.standing is Standing.PAST_DUE:
-        if at <= _grace_end(subscription, grace_days):
+    if coverage.state is State.PAST_DUE:
+        if at <= patience:
             return Access(
                 True,
                 Verdict.IN_GRACE,
                 f"a renewal failed and Stripe is still retrying; {through}, access held for "
-                f"{grace_days}d past that",
-                paid_through=ends,
+                f"{grace_days}d past that" + _quiet(coverage),
+                ends,
             )
         return Access(
             False,
             Verdict.EXPIRED,
             f"the renewal failed and the {grace_days}d grace window closed; {through}",
-            paid_through=ends,
+            ends,
         )
 
-    if subscription.standing is Standing.CANCELED:
-        return Access(
-            False, Verdict.CANCELED, f"the subscription was cancelled; {through}", paid_through=ends
-        )
-    if subscription.standing is Standing.UNPAID:
-        return Access(
-            False,
-            Verdict.EXPIRED,
-            f"every retry failed and Stripe stopped; {through}. **Nobody chose this** -- it is a "
-            f"card that never recovered, and it is worth a human contacting them",
-            paid_through=ends,
-        )
-    if subscription.standing is Standing.PAUSED:
-        return Access(False, Verdict.PAUSED, f"collection is paused; {through}", paid_through=ends)
-    # INCOMPLETE and INCOMPLETE_EXPIRED: checkout finished, the first payment did not.
-    return Access(
-        False,
-        Verdict.NEVER_PAID,
-        f"{subscription.standing.value}: the first payment never completed, so this account has "
-        f"never paid us. It is not a lapsed customer and must not be dunned like one",
-        paid_through=ends,
-    )
+    verdict, why = _SETTLED[coverage.state]
+    return Access(False, verdict, f"{why}; {through}" + _quiet(coverage), ends)
