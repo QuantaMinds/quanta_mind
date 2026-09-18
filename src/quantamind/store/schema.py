@@ -42,7 +42,7 @@ from quantamind.store import drift
 from quantamind.store.tables import TABLES
 
 # Bump on ANY change to the DDL below, and write a migration. There is no in-place edit.
-SCHEMA_VERSION = 8
+SCHEMA_VERSION = 9
 
 # `finding` and `claim` exist because adding a table later is a migration, and the schema is
 # append-only. NOTHING WRITES TO THEM: `infer/` is closed on evidence and publishes no findings.
@@ -100,3 +100,27 @@ def open_store(path: Path) -> sqlite3.Connection:
         conn.close()
         raise drift.SchemaDrift(path, differences)
     return conn
+
+
+def statements_for(*names: str) -> tuple[str, ...]:
+    """The DDL for exactly these tables, matched on the NAME and never a substring of the text.
+
+    **MIGRATION STEPS USED TO MATCH A SUBSTRING**, so `_to_6`'s `"installation" in statement` also
+    caught `forge_installation` — a table added six versions later. That survived only because
+    every statement is `IF NOT EXISTS` and `store/drift.py` compares the end state against a fresh
+    store. The next collision would not have to be so lucky, and a migration that creates the
+    wrong table is not something a passing test would reveal.
+
+    **A NAME THAT MATCHES NOTHING RAISES.** AGENTS.md rule 14: a filter admitting nothing must
+    raise. Returning `()` would let a step stamp its version having created no table, leaving a
+    store whose version says one thing and whose tables say another — and `open_store` would then
+    refuse every tenant with a message about drift rather than about the typo that caused it.
+    """
+    found: list[str] = []
+    for name in names:
+        prefix = f"CREATE TABLE IF NOT EXISTS {name} ("
+        matched = [one for one in TABLES if one.startswith(prefix)]
+        if not matched:
+            raise ValueError(f"no DDL named {name!r}; this would create nothing and say nothing")
+        found.extend(matched)
+    return tuple(found)

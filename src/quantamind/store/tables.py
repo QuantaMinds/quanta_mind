@@ -11,8 +11,9 @@ WHY:  **IT LEFT `schema.py` WHEN THAT FILE HIT THE 200-LINE CAP AND THE NEXT TAB
       digest is computed over the extracted `CREATE` statements, so this move did not change it —
       and it refuses outright if it finds no `CREATE` statement, which is what stops it quietly
       watching the wrong file after a move like this one.
-IMPORTS: nothing. Text only.
-CONSUMED BY: `store/schema.py`, `store/migrations.py`, `store/drift.py`, and the schema golden.
+IMPORTS: nothing. Text only — this file names no connection and executes nothing, so it
+      still needs no database handle and stays testable without one.
+CONSUMED BY: `store/schema.py`, `store/migrations/steps.py`, `store/drift.py`, and the golden.
 """
 
 from __future__ import annotations
@@ -131,6 +132,38 @@ TABLES: tuple[str, ...] = (
         amount_cents INTEGER NOT NULL DEFAULT 0, currency TEXT NOT NULL DEFAULT 'usd',
         current_period_end INTEGER NOT NULL DEFAULT 0, event_at INTEGER NOT NULL,
         PRIMARY KEY (account, subscription_id))""",
+    # **THE NEXT THREE ARE KEYED `(forge, account)`, AND THAT IS NOT PREMATURE.** A Bitbucket
+    # workspace `acme` and a GitHub organisation `acme` are different customers who may both
+    # install us. Adding the column later means a second migration plus a window in which every
+    # row is ambiguous about whose it is, so it is here from the first row written.
+    #
+    # What the billing service last told us about an account. `as_of` is when it last spoke and
+    # `grace_until` is how long a paid account keeps its tier when it has not spoken since --
+    # a push that never arrived is our failure, and charging the customer for it by withdrawing
+    # their reviews is the wrong way round. Never deleted: a lapsed account keeps its row.
+    """CREATE TABLE IF NOT EXISTS entitlement (
+        forge TEXT NOT NULL, account TEXT NOT NULL, tier TEXT NOT NULL, state TEXT NOT NULL,
+        seats_included INTEGER, payment_ref TEXT NOT NULL DEFAULT '',
+        reason TEXT NOT NULL DEFAULT '', as_of INTEGER NOT NULL, valid_through INTEGER,
+        grace_until INTEGER, PRIMARY KEY (forge, account))""",
+    # One row per developer per billing period. **`actor_hash` IS A SALTED HASH AND NEVER A
+    # LOGIN.** `docs/plans/design/commercial-surface.md`: "a tool that measures where code needs
+    # rework must never become a tool that measures which developer causes it". A seat count does
+    # not need an identity, and holding one would make this table answer a question nobody asked.
+    """CREATE TABLE IF NOT EXISTS seat_use (
+        forge TEXT NOT NULL, account TEXT NOT NULL, period TEXT NOT NULL,
+        actor_hash TEXT NOT NULL, repo TEXT NOT NULL, first_seen INTEGER NOT NULL,
+        PRIMARY KEY (forge, account, period, actor_hash))""",
+    # The installation itself, which `installation` (keyed account,repo) never held.
+    # **`installation_ref` IS TEXT, NOT INTEGER**: GitHub's installation id is a number and a
+    # Forge installation context is not, and a column that fits one forge is a column the second
+    # forge has to work around. `seat_salt` is persisted rather than read from the environment --
+    # a salt that rotates on deploy makes every developer look new and overbills the customer.
+    """CREATE TABLE IF NOT EXISTS forge_installation (
+        forge TEXT NOT NULL, account TEXT NOT NULL, installation_ref TEXT NOT NULL,
+        account_id TEXT NOT NULL DEFAULT '', kind TEXT NOT NULL DEFAULT '',
+        seat_salt TEXT NOT NULL, first_seen INTEGER NOT NULL, removed_at INTEGER,
+        PRIMARY KEY (forge, account))""",
     # The touch index the ranker counts over. Written by store.touches from ingest.history.
     """CREATE TABLE IF NOT EXISTS touch (
         repo_id INTEGER NOT NULL REFERENCES repo(id), path TEXT NOT NULL,

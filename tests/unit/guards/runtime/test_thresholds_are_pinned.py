@@ -73,7 +73,10 @@ RECORDED: dict[str, int] = {
     "records/check_documented_commands.py::FLOOR": 2,
     "records/check_documented_recipes.py::RECIPE_FLOOR": 20,
     "records/check_no_vague_refs.py::MARKDOWN_FLOOR": 40,
-    "records/check_schema_shape.py::RECORDED_VERSION": 8,
+    # 9 since 2026-09-18: `entitlement`, `seat_use` and `forge_installation` on top of
+    # version 8's `subscription`. Four new tables across two steps, no existing column
+    # touched — the golden diff shows `__version__` 7 -> 9 and not one changed `sql` line.
+    "records/check_schema_shape.py::RECORDED_VERSION": 9,
     "records/check_withdrawn_amendments.py::AMENDMENT_FLOOR": 20,
 }
 

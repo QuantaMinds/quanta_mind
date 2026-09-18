@@ -58,8 +58,43 @@ VERSIONED = "src/quantamind/store/schema.py"
 # place to describe version 5, which left a comment naming `_to_5` under a heading that said
 # version 4 and destroyed the only record of what the version-4 bump did. The digest line moves
 # once per bump; the reasons it moved are the thing worth keeping.
-RECORDED_DIGEST = "a628bd92213a36d8"
-RECORDED_VERSION = 8
+#
+# Updated on 2026-09-17 for version 8: `entitlement`, `seat_use` and `forge_installation`, the
+# store side of subscriptions. Same order and the same evidence — SCHEMA_VERSION bumped, `_to_8`
+# written, golden regenerated AND ITS DIFF READ: three new tables, `__version__` 7 -> 8, and NO
+# existing table's `sql` line changed at all, which is the property a new-tables-only migration
+# has to have and the one nothing else here can see.
+#
+# **TWO THINGS WERE WRONG BENEATH THIS GUARD AND THIS BUMP FOUND THEM, WHICH IS WORTH RECORDING
+# BECAUSE THE GUARD ITSELF DID NOT.** First, the migration steps match a SUBSTRING of the DDL
+# text — `_to_6` fires on `"installation" in statement` — so `forge_installation` would have been
+# created by step 6 as well as step 8. Harmless here only because every statement is
+# `IF NOT EXISTS` and `drift.differences()` compares the end state; `_to_8` uses a new `_create()`
+# that matches the table NAME and raises when a name matches nothing.
+#
+# Second, and worse: `test_schema_golden.V2_TABLES` removed only what version 3 added, so the
+# "version 2" store it migrated from already contained every table through version 7. Steps 4
+# through 7 ran as no-ops against tables that were already there, and DELETING ANY OF THEM LEFT
+# THE TEST GREEN — confirmed by deleting `_to_8` and watching it pass. The exclusion list is now
+# per-table and the migration is genuinely exercised. The guard fired correctly every time; what
+# it could not see is that the artefact it demanded had stopped proving what it claimed.
+#
+# Updated on 2026-09-18 for version 9: `entitlement`, `seat_use` and `forge_installation`, on top
+# of version 8's `subscription`. Same order and the same evidence — SCHEMA_VERSION bumped, `_to_9`
+# written, golden regenerated AND ITS DIFF READ: three new tables, `__version__` 7 -> 9, and NO
+# existing table's `sql` line changed at all, which is the property a new-tables-only migration
+# has to have and the one nothing else here can see.
+#
+# The paragraph above was written when these three tables were themselves version 8, on a branch
+# that did not yet have `subscription`. **IT IS LEFT AS IT WAS RATHER THAN CORRECTED**, because
+# this block is a log and a log that is edited to match what happened later stops being evidence.
+# The two defects it names were real and are fixed; only the version number it gives them moved.
+#
+# `_to_8` now also selects by table NAME rather than by a substring of the DDL. It created
+# `subscription` correctly either way — no other table's text contains that word — so this is a
+# repair to the mechanism and not to a wrong outcome, and a store already at 8 is unaffected.
+RECORDED_DIGEST = "a009880819fcd246"
+RECORDED_VERSION = 9
 
 
 def ddl_of(text: str) -> str:

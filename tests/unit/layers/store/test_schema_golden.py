@@ -30,6 +30,21 @@ from quantamind.store.tables import TABLES
 
 GOLDEN = pathlib.Path(__file__).resolve().parents[4] / "tests" / "fixtures" / "schema_golden.json"
 
+# Every table added after version 2, and the version that adds it.
+#
+# **THIS USED TO REMOVE ONLY WHAT VERSION 3 ADDED, AND THAT MADE THE MIGRATION TEST BELOW PROVE
+# ALMOST NOTHING.** The "old" store was built with `touch_watermark`, `rule_check`, `installation`,
+# `account` and `session` already present, so steps 4 through 7 ran as no-ops against tables that
+# were already there. Deleting any one of those steps would have left the final shape identical and
+# this test green — a check whose output is the same whether the thing it checks works or not,
+# which is the failure AGENTS.md rule 14 names. Verified by deleting a step and watching it pass.
+#
+# **MATCHED ON THE TABLE NAME, NEVER A SUBSTRING.** `installation` and `forge_installation` are
+# different tables added three versions apart, and `name in statement` strips both when asked for
+# either — which would quietly put the migration test back where it started.
+#
+# **NAMED PER VERSION SO THE NEXT ONE IS ADDED HERE OR NOT AT ALL.** The step-count assertion below
+# breaks on every bump, which is what sends somebody to this list.
 ADDED_AFTER_2 = (
     "lifecycle",
     "prod_signal",  # version 3
@@ -39,21 +54,20 @@ ADDED_AFTER_2 = (
     "account",
     "session",  # version 7
     "subscription",  # version 8
+    "entitlement",
+    "seat_use",
+    "forge_installation",  # version 9
 )
-"""Every table this build has that a version-2 store did not.
 
-**IT LISTED ONLY VERSION 3'S FOR FIVE VERSIONS, AND THAT MADE FOUR MIGRATION STEPS UNTESTED.**
-Every step creates its tables with `CREATE TABLE IF NOT EXISTS`, so against a "version 2" store
-that already contained them, steps 4 through 7 ran, created nothing, and passed. The test went
-green whether the step worked or not -- `AGENTS.md` rule 14's exact question, asked of this file
-and answered wrong. Caught when version 8 was added and the same hole was about to widen.
-
-**NAMED PER VERSION SO THE NEXT ONE IS ADDED HERE OR NOT AT ALL.** The step-count assertion below
-breaks on every bump, which is what sends somebody to this list."""
-
-# The DDL of version 2: this build's, minus every table added since. A migration is then exercised
-# from a real older store rather than from one this build made and then declared old.
-V2_TABLES = tuple(t for t in TABLES if not any(name in t for name in ADDED_AFTER_2))
+# The DDL of version 2, derived from this build's by removing everything added since, so a
+# migration is exercised from a real older store rather than one this build made and then damaged.
+V2_TABLES = tuple(
+    statement
+    for statement in TABLES
+    if not any(
+        statement.startswith(f"CREATE TABLE IF NOT EXISTS {name} (") for name in ADDED_AFTER_2
+    )
+)
 
 
 def shape_of(conn: sqlite3.Connection) -> dict[str, object]:
@@ -106,8 +120,8 @@ def test_a_store_migrated_from_version_2_is_identical_to_a_fresh_one() -> None:
     # Hardcoded, not derived from the ledger: deriving it would make the test agree with whatever
     # `STEPS` says, including a step that was forgotten. The next schema bump breaks this line on
     # purpose, so somebody has to look at the migration path from a real old store.
-    assert done.steps == (3, 4, 5, 6, 7, 8), (
-        f"expected steps 3 through 8, got {done.steps}. Hardcoded on purpose: a "
+    assert done.steps == (3, 4, 5, 6, 7, 8, 9), (
+        f"expected steps 3 through 9, got {done.steps}. Hardcoded on purpose: a "
         "schema bump breaks this line so somebody looks at the path from a REAL old store."
     )
     assert normalise(shape_of(old)) == normalise(golden()), (

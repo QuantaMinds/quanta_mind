@@ -1,5 +1,5 @@
 {
- "__version__": 8,
+ "__version__": 9,
  "account": {
   "columns": [
    [
@@ -119,6 +119,91 @@
   ],
   "sql": "CREATE TABLE delivery (\n        delivery_id TEXT PRIMARY KEY, event TEXT NOT NULL, started_at INTEGER NOT NULL,\n        completed_at INTEGER)"
  },
+ "entitlement": {
+  "columns": [
+   [
+    0,
+    "forge",
+    "TEXT",
+    1,
+    null,
+    1
+   ],
+   [
+    1,
+    "account",
+    "TEXT",
+    1,
+    null,
+    2
+   ],
+   [
+    2,
+    "tier",
+    "TEXT",
+    1,
+    null,
+    0
+   ],
+   [
+    3,
+    "state",
+    "TEXT",
+    1,
+    null,
+    0
+   ],
+   [
+    4,
+    "seats_included",
+    "INTEGER",
+    0,
+    null,
+    0
+   ],
+   [
+    5,
+    "payment_ref",
+    "TEXT",
+    1,
+    "''",
+    0
+   ],
+   [
+    6,
+    "reason",
+    "TEXT",
+    1,
+    "''",
+    0
+   ],
+   [
+    7,
+    "as_of",
+    "INTEGER",
+    1,
+    null,
+    0
+   ],
+   [
+    8,
+    "valid_through",
+    "INTEGER",
+    0,
+    null,
+    0
+   ],
+   [
+    9,
+    "grace_until",
+    "INTEGER",
+    0,
+    null,
+    0
+   ]
+  ],
+  "sql": "CREATE TABLE entitlement (\n        forge TEXT NOT NULL, account TEXT NOT NULL, tier TEXT NOT NULL, state TEXT NOT NULL,\n        seats_included INTEGER, payment_ref TEXT NOT NULL DEFAULT '',\n        reason TEXT NOT NULL DEFAULT '', as_of INTEGER NOT NULL, valid_through INTEGER,\n        grace_until INTEGER, PRIMARY KEY (forge, account))"
+ },
  "finding": {
   "columns": [
    [
@@ -187,6 +272,75 @@
    ]
   ],
   "sql": "CREATE TABLE finding (\n        id INTEGER PRIMARY KEY, review_id INTEGER NOT NULL REFERENCES review(id),\n        unit_path TEXT NOT NULL, kind TEXT NOT NULL, body TEXT NOT NULL,\n        published INTEGER NOT NULL DEFAULT 0, confidence TEXT NOT NULL,\n        provenance TEXT NOT NULL)"
+ },
+ "forge_installation": {
+  "columns": [
+   [
+    0,
+    "forge",
+    "TEXT",
+    1,
+    null,
+    1
+   ],
+   [
+    1,
+    "account",
+    "TEXT",
+    1,
+    null,
+    2
+   ],
+   [
+    2,
+    "installation_ref",
+    "TEXT",
+    1,
+    null,
+    0
+   ],
+   [
+    3,
+    "account_id",
+    "TEXT",
+    1,
+    "''",
+    0
+   ],
+   [
+    4,
+    "kind",
+    "TEXT",
+    1,
+    "''",
+    0
+   ],
+   [
+    5,
+    "seat_salt",
+    "TEXT",
+    1,
+    null,
+    0
+   ],
+   [
+    6,
+    "first_seen",
+    "INTEGER",
+    1,
+    null,
+    0
+   ],
+   [
+    7,
+    "removed_at",
+    "INTEGER",
+    0,
+    null,
+    0
+   ]
+  ],
+  "sql": "CREATE TABLE forge_installation (\n        forge TEXT NOT NULL, account TEXT NOT NULL, installation_ref TEXT NOT NULL,\n        account_id TEXT NOT NULL DEFAULT '', kind TEXT NOT NULL DEFAULT '',\n        seat_salt TEXT NOT NULL, first_seen INTEGER NOT NULL, removed_at INTEGER,\n        PRIMARY KEY (forge, account))"
  },
  "installation": {
   "columns": [
@@ -845,6 +999,59 @@
    ]
   ],
   "sql": "CREATE TABLE rule_check (\n        review_id INTEGER NOT NULL REFERENCES review(id), rule_id TEXT NOT NULL,\n        path TEXT NOT NULL, line INTEGER NOT NULL DEFAULT 0, outcome TEXT NOT NULL,\n        evidence TEXT NOT NULL DEFAULT '', reason TEXT, provenance TEXT NOT NULL,\n        PRIMARY KEY (review_id, rule_id, path))"
+ },
+ "seat_use": {
+  "columns": [
+   [
+    0,
+    "forge",
+    "TEXT",
+    1,
+    null,
+    1
+   ],
+   [
+    1,
+    "account",
+    "TEXT",
+    1,
+    null,
+    2
+   ],
+   [
+    2,
+    "period",
+    "TEXT",
+    1,
+    null,
+    3
+   ],
+   [
+    3,
+    "actor_hash",
+    "TEXT",
+    1,
+    null,
+    4
+   ],
+   [
+    4,
+    "repo",
+    "TEXT",
+    1,
+    null,
+    0
+   ],
+   [
+    5,
+    "first_seen",
+    "INTEGER",
+    1,
+    null,
+    0
+   ]
+  ],
+  "sql": "CREATE TABLE seat_use (\n        forge TEXT NOT NULL, account TEXT NOT NULL, period TEXT NOT NULL,\n        actor_hash TEXT NOT NULL, repo TEXT NOT NULL, first_seen INTEGER NOT NULL,\n        PRIMARY KEY (forge, account, period, actor_hash))"
  },
  "session": {
   "columns": [
