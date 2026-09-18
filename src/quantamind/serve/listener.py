@@ -65,11 +65,6 @@ class _Handler(BaseHTTPRequestHandler):
     settings: Any
     secret: str
     provision_secret: str = ""
-    stripe_api_key: str = ""
-    stripe_webhook_secret: str = ""
-    stripe_price_id: str = ""
-    billing_success_url: str = ""
-    billing_cancel_url: str = ""
     work: Work
 
     def _say(self, status: int, payload: dict[str, object]) -> None:

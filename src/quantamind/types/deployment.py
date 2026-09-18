@@ -22,7 +22,7 @@ WHY:  **D7f. AN OUTBOUND CALL THAT FAILS QUIETLY IN A BANK IS A FINDING AGAINST 
       `scripts/guard/check_network_chokepoint.py` is what makes forgetting fail the build.
 IMPORTS: stdlib enum only. Nothing from any layer, because every layer must be able to ask.
 CONSUMED BY: `ingest/{github_api,app_auth,google_auth,context.elsewhere}`, `infer/vertex`,
-      `verify/releases`, `serve/{web.signin,working_clone}`, `ingest/payments/stripe_api`.
+      `verify/releases`, `serve/{web.signin,working_clone}`.
 """
 
 from __future__ import annotations
@@ -64,14 +64,11 @@ class Destination(Enum):
     PACKAGE_INDEX = "package_index"
     """PyPI and friends, read by the release oracle to check a version claim."""
 
-    PAYMENTS = "payments"
-    """Stripe. Checkout sessions go out; subscription deliveries arrive at our own socket.
-
-    **AIR-GAPPED REFUSES IT AND ON-PREM DOES NOT, WHICH IS A DECISION.** An on-premises instance
-    still has to know what its operator is entitled to. An air-gapped one is billed against a
-    signed order and never asks: an outbound call to a payment processor from inside a bank's
-    network is a finding against us whether or not it succeeds, which is this module's whole
-    argument applied to the one destination that involves money."""
+    # **THERE IS NO `PAYMENTS` DESTINATION, AND ITS ABSENCE IS THE POINT.** This service made
+    # outbound calls to Stripe until the billing service took ownership of that relationship; it
+    # is now TOLD what an account holds over an inbound `POST /entitlement` and initiates nothing.
+    # A destination nothing reaches would read as a capability this deployment has, which is the
+    # opposite of what this enum is for. See `docs/engineering/STRIPE.md`.
 
 
 PERMITTED: dict[Shape, frozenset[Destination]] = {

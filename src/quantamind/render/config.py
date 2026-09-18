@@ -47,13 +47,10 @@ def render_config(settings: Settings) -> str:
         f"oauth_client_secret        {'set' if settings.oauth_client_secret else '(unset)'}",
         f"public_read_token          {'set' if settings.public_read_token else '(unset)'}",
         f"posting_enabled            {settings.posting_enabled}",
-        # **PRINTED IN FULL, BECAUSE A PRICE ID IS NOT A CREDENTIAL.** It is public the moment a
-        # customer sees a checkout page, and the whole reason it is on `Settings` rather than read
-        # at use is so an operator can see WHAT IS BEING SOLD before a customer does. The Stripe
-        # API key and signing secret are deliberately absent from this object and from this list.
-        f"stripe_price_id            {settings.stripe_price_id or '(unset)'}",
-        f"billing_success_url        {settings.billing_success_url or '(unset)'}",
-        f"billing_cancel_url         {settings.billing_cancel_url or '(unset)'}",
+        # **NO STRIPE ROWS, BECAUSE THIS SERVICE HAS NO STRIPE CONFIGURATION.** A price id and
+        # two return URLs lived here while it sold subscriptions itself. The billing service owns
+        # that now and this one is told the result; printing an empty Stripe row would suggest a
+        # value an operator should go and set.
         "",
         f"runs a model on a review:  {settings.runs_model}",
     ]

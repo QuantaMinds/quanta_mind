@@ -61,17 +61,6 @@ def run(port: int, host: str = "127.0.0.1") -> int:
     accepted: list[Review] = []
 
     settings = load()
-    # **THE STRIPE KEY AND SIGNING SECRET ARE READ HERE FOR THE SAME REASON**, and they are the two
-    # credentials in this process that can move money. An empty value refuses its route with a 503
-    # naming the variable -- it never opens one. The PRICE ID is on `Settings` instead: it is
-    # public the moment a customer sees a checkout page, and `quantamind config` should show it.
-    billing = {
-        "api_key": credential("QUANTAMIND_STRIPE_API_KEY"),
-        "webhook_secret": credential("QUANTAMIND_STRIPE_WEBHOOK_SECRET"),
-        "price_id": settings.stripe_price_id,
-        "success_url": settings.billing_success_url,
-        "cancel_url": settings.billing_cancel_url,
-    }
 
     def work(review: Review) -> None:
         accepted.append(review)
@@ -100,7 +89,6 @@ def run(port: int, host: str = "127.0.0.1") -> int:
             port=port,
             host=host,
             provision_secret=provision_secret,
-            billing=billing,
         )
     except MisconfiguredSecret as exc:
         print(f"configuration error: {exc}\n\nSet {SECRET_VARIABLE} and try again.")
@@ -159,26 +147,15 @@ def run(port: int, host: str = "127.0.0.1") -> int:
         ),
         flush=True,
     )
-    # **THE BANNER STATES WHAT BILLING WILL ACTUALLY DO, COMPUTED FROM THE VALUES.** The line above
-    # it about posting was wrong for months because it was written as a claim rather than read from
-    # a setting, and an operator checking one line at startup read the one that lied.
-    sellable = bool(billing["api_key"] and billing["price_id"])
+    # **THE BANNER STATES WHAT THE ROUTE WILL ACTUALLY DO, COMPUTED FROM THE VALUE.** The line
+    # above it about posting was wrong for months because it was written as a claim rather than
+    # read from a setting, and an operator checking one line at startup read the one that lied.
     print(
-        "[serve] POST /billing/checkout — "
+        "[serve] POST /entitlement — "
         + (
-            f"creates a Stripe session against {billing['price_id']}"
-            if sellable
-            else "503: no QUANTAMIND_STRIPE_API_KEY and/or QUANTAMIND_STRIPE_PRICE_ID, so it "
-            "refuses rather than opening"
-        ),
-        flush=True,
-    )
-    print(
-        "[serve] POST /billing/webhook  — "
-        + (
-            "verifies Stripe's signature and a 300s timestamp, then records the subscription"
-            if billing["webhook_secret"]
-            else "503: no QUANTAMIND_STRIPE_WEBHOOK_SECRET, so no delivery can be authenticated"
+            "records what the billing service says an account holds, and reads it back"
+            if provision_secret
+            else "503: no QUANTAMIND_PROVISION_SECRET, so no push can be authenticated"
         ),
         flush=True,
     )
