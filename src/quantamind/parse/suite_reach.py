@@ -21,7 +21,7 @@ WHY:  **THIS IS THE HONEST ANSWER TO "WOULD THIS PRODUCT SERVE YOU WELL".** `doc
       `git ls-tree HEAD` still listed 154 Python files — and reporting that as 0% would describe
       this instrument rather than the repository.
 IMPORTS: stdlib only. Nothing to its right.
-CONSUMED BY: `serve/onboarding.py`, after a clone exists.
+CONSUMED BY: `serve/installation/onboarding.py`, after a clone exists.
 SEE ALSO: `research/phase0/external/covered_source.py` is its twin, kept because research runs on
       a different interpreter and asks a different question — the share across a CANDIDATE CORPUS
       rather than for one customer. An edit to either is a prompt to look at the other.

@@ -18,7 +18,7 @@ WHY:  **THE DANGEROUS DIRECTION IS THE ONE WITHOUT A CUSTOMER TO COMPLAIN.** Fai
 
       Sabotage to check this file works: make `stale()` compare bare names against full names and
       `test_a_dropped_removal_is_healed` fails.
-IMPORTS: quantamind.serve.reconcile, quantamind.ingest.installation_scope,
+IMPORTS: quantamind.serve.installation.reconcile, quantamind.ingest.installation_scope,
       quantamind.store.{installations,schema,tenancy},
       quantamind.types.settings.
 CONSUMED BY: `just check`.
@@ -32,7 +32,7 @@ from pathlib import Path
 import pytest
 
 from quantamind.ingest.installation_scope import NotInstalled
-from quantamind.serve.reconcile import reconcile, stale
+from quantamind.serve.installation.reconcile import reconcile, stale
 from quantamind.store import installations, schema, tenancy
 from quantamind.types.settings import Settings
 

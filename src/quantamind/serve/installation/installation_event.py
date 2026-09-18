@@ -16,7 +16,8 @@ WHY:  **IT TAKES THE ANSWERING FUNCTION BECAUSE THE REPLY HAS TO HAPPEN BETWEEN 
       first silently dropped the other half.
 
       **IT IS NOT IN `serve/listener.py` BECAUSE IT IS INSTALLATION WORK, NOT SOCKET WORK** — the
-      argument `serve/installed_repos.py` already makes about itself, and the 200-line cap is again
+      argument `serve/installation/installed_repos.py` already makes about itself, and the 200-line
+      cap is again
       what said so out loud when a fourth outcome needed room.
 IMPORTS: serve.{installed_repos,onboarding,withdrawal}, types.forge.delivery,
       types.settings.
@@ -28,9 +29,9 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Any
 
-from quantamind.serve.installed_repos import claim, provisioned
-from quantamind.serve.onboarding import admit
-from quantamind.serve.withdrawal import withdraw
+from quantamind.serve.installation.installed_repos import claim, provisioned
+from quantamind.serve.installation.onboarding import admit
+from quantamind.serve.installation.withdrawal import withdraw
 from quantamind.types.forge.delivery import Installed, Withdrawn
 from quantamind.types.settings import Settings
 

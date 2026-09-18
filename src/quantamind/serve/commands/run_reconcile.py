@@ -19,7 +19,7 @@ CONSUMED BY: `serve/commands/dispatch.py`.
 from __future__ import annotations
 
 from quantamind.ingest.installation_scope import covers
-from quantamind.serve.reconcile import reconcile
+from quantamind.serve.installation.reconcile import reconcile
 from quantamind.types.settings import SettingsError, load
 
 

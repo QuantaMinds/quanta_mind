@@ -18,7 +18,7 @@ WHY:  **D1f SHIPPED AGAINST AN APP THAT COULD NOT POST A STATUS, AND EVERY TEST 
       without a line in `NEEDED` is invisible to this check, which is the one thing this module
       cannot detect about itself -- said plainly because it is the next hole.
 IMPORTS: stdlib only. Nothing from this project, so any layer may ask it.
-CONSUMED BY: `serve/onboarding.py`, at install time.
+CONSUMED BY: `serve/installation/onboarding.py`, at install time.
 """
 
 from __future__ import annotations

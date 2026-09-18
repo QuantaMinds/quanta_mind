@@ -15,7 +15,8 @@ WHY:  **`listener.py` CLAIMED THIS WAS ALREADY HANDLED AND IT WAS NOT.** The lin
       **AND A FAILED WARM-UP MUST NOT FAIL THE INSTALLATION.** It runs after the endpoint has
       answered 200; an exception escaping would kill a worker thread over something that costs
       nothing worse than a slow first review.
-IMPORTS: pytest, quantamind.serve.onboarding, quantamind.store.schema, quantamind.types.settings.
+IMPORTS: pytest, quantamind.serve.installation.onboarding, quantamind.store.schema,
+quantamind.types.settings.
 CONSUMED BY: `just check`.
 """
 
@@ -26,9 +27,9 @@ from pathlib import Path
 
 import pytest
 
-from quantamind.serve import onboarding as onboarding_module
-from quantamind.serve import onboarding as warm_module
-from quantamind.serve.onboarding import warm, warm_all
+from quantamind.serve.installation import onboarding as onboarding_module
+from quantamind.serve.installation import onboarding as warm_module
+from quantamind.serve.installation.onboarding import warm, warm_all
 from quantamind.store import tenancy
 from quantamind.store.schema import open_store
 from quantamind.types.settings import Settings

@@ -14,7 +14,7 @@ WHY:  **THE DANGEROUS DIRECTION IS THE ONE WITH NO CUSTOMER TO COMPLAIN.** Faili
 
       Sabotage to check this file works: make `_one` withdraw on `CouldNotAsk` and
       `test_an_outage_withdraws_nothing` fails.
-IMPORTS: quantamind.serve.reconcile, quantamind.ingest.installation_scope,
+IMPORTS: quantamind.serve.installation.reconcile, quantamind.ingest.installation_scope,
       quantamind.store.{installations,schema,tenancy}, quantamind.types.settings.
 CONSUMED BY: `just check`.
 """
@@ -25,7 +25,7 @@ import sqlite3
 from pathlib import Path
 
 from quantamind.ingest.installation_scope import CouldNotAsk
-from quantamind.serve.reconcile import reconcile
+from quantamind.serve.installation.reconcile import reconcile
 from quantamind.store import installations, schema, tenancy
 from quantamind.types.settings import Settings
 

@@ -21,9 +21,6 @@ from __future__ import annotations
 import io
 import json
 from pathlib import Path
-from typing import Any
-
-import pytest
 
 from quantamind.serve.web import post_routes
 from quantamind.types.settings import Settings
@@ -76,11 +73,33 @@ def test_a_query_string_does_not_lose_the_route(tmp_path: Path) -> None:
     assert got[0] == 200
 
 
-@pytest.mark.parametrize("path", ["/entitlements", "/entitlement/extra", "/ENTITLEMENT", "/"])
-def test_a_path_that_is_not_the_route_is_not_claimed(path: str, tmp_path: Path) -> None:
-    # Without this the test above passes for a `route()` that claims everything — including
-    # `/webhook`, which the listener owns and must keep.
-    assert post_routes.route(_Handler(path, _body(), tmp_path)) is None, (
-        f"{path} was claimed by the entitlement route; `/webhook` is matched the same way and "
-        "swallowing it would take the GitHub path with it"
-    )
+def test_exactly_one_path_is_claimed_and_it_is_the_right_one(tmp_path: Path) -> None:
+    """The whole matching decision as one value, so both ways of getting it wrong are visible.
+
+    Asserting only that `/entitlement` routes would pass for a `route()` that claims EVERYTHING —
+    including `/webhook`, which `serve/listener.py` owns and whose loss would take the GitHub path
+    down with it. Asserting only that neighbours are refused would pass for a route that was never
+    registered. The map is both at once.
+    """
+    paths = [
+        "/entitlement",
+        "/entitlement?trace=abc",
+        "/entitlements",
+        "/entitlement/extra",
+        "/ENTITLEMENT",
+        "/webhook",
+        "/",
+    ]
+    claimed = {
+        path: post_routes.route(_Handler(path, _body(), tmp_path)) is not None for path in paths
+    }
+
+    assert claimed == {
+        "/entitlement": True,
+        "/entitlement?trace=abc": True,
+        "/entitlements": False,
+        "/entitlement/extra": False,
+        "/ENTITLEMENT": False,
+        "/webhook": False,
+        "/": False,
+    }

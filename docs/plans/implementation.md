@@ -39,7 +39,7 @@ three months stale.
 | layer | modules | files |
 |---|---|---|
 | `types/` | **15** | `change.py`, `commit.py`, `deep.py`, `deployment.py`, `dotenv.py`, `env_values.py`, `finding.py`, `pooled_outcome.py`, `ranking.py`, `replay_outcome.py`, `review.py`, `settings.py`, `spend.py`, `touch.py`, `verdict.py` |
-| `store/` | **15** | `accounts.py`, `calibration.py`, `compliance.py`, `costs.py`, `deliveries.py`, `drift.py`, `installations.py`, `lifecycle.py`, `migrations.py`, `reviews.py`, `rule_checks.py`, `schema.py`, `tables.py`, `tenancy.py`, `touches.py` |
+| `store/` | **14** | `accounts.py`, `calibration.py`, `compliance.py`, `costs.py`, `deliveries.py`, `drift.py`, `installations.py`, `lifecycle.py`, `reviews.py`, `rule_checks.py`, `schema.py`, `tables.py`, `tenancy.py`, `touches.py` |
 | `ingest/` | **14** | `app_auth.py`, `blob.py`, `change_shape.py`, `commits.py`, `diff.py`, `git_credentials.py`, `github_api.py`, `google_auth.py`, `history.py`, `installation_scope.py`, `pull_refs.py`, `reachability.py`, `review_window.py`, `worktree.py` |
 | `parse/` | **11** | `body_shape.py`, `change_effort.py`, `duplicate_bodies.py`, `importers.py`, `imports.py`, `languages.py`, `public_api.py`, `python_names.py`, `secret_scan.py`, `suite_reach.py`, `units.py` |
 | `rank/` | **6** | `baseline.py`, `events.py`, `firing.py`, `history_rates.py`, `order.py`, `score.py` |
@@ -47,7 +47,7 @@ three months stale.
 | `infer/` | **8** | `change_review.py`, `change_summary.py`, `diff_cap.py`, `gemini.py`, `history_digest.py`, `prompt_once.py`, `summary_prompt.py`, `vertex.py` |
 | `verify/` | **15** | `anchor.py`, `blocking.py`, `consumers.py`, `external_facts.py`, `judged_rule.py`, `paid_access.py`, `pin_check.py`, `pin_mismatch.py`, `publishable.py`, `qualification.py`, `release_claims.py`, `releases.py`, `repeats.py`, `rule_check.py`, `tier_request.py` |
 | `render/` | **13** | `audit_export.py`, `comment.py`, `compliance_table.py`, `config.py`, `dashboard.py`, `deep_report.py`, `json_report.py`, `mined_rules.py`, `not_entitled.py`, `page.py`, `replay_report.py`, `scan_report.py`, `speaks.py` |
-| `serve/` | **16** | `blocking_status.py`, `cli.py`, `health.py`, `installation_event.py`, `installed_repos.py`, `listener.py`, `onboarding.py`, `reconcile.py`, `retrospective.py`, `rule_judge.py`, `settle.py`, `stripe_event.py`, `webhook_github.py`, `webhook_stripe.py`, `withdrawal.py`, `working_clone.py` |
+| `serve/` | **11** | `blocking_status.py`, `cli.py`, `health.py`, `listener.py`, `retrospective.py`, `rule_judge.py`, `settle.py`, `stripe_event.py`, `webhook_github.py`, `webhook_stripe.py`, `working_clone.py` |
 
 <!-- plan-state:end -->
 

@@ -4,7 +4,8 @@ WHAT: `covers(probe, settings)` returns every repository the installation coveri
       `NotInstalled` when the forge says the App is gone; `CouldNotAsk` for everything else.
 WHY:  **THE TWO FAILURES ARE DIFFERENT FACTS AND THE CALLER ACTS ON ONLY ONE.** "The App is not
       installed" is the forge telling us about the customer; a timeout, a rate limit and a 500 tell
-      us about the network. `serve/reconcile.py` withdraws entitlement on the first and nothing at
+      us about the network. `serve/installation/reconcile.py` withdraws entitlement on the first and
+      nothing at
       all on the second, so collapsing them into one exception would make an outage look like a
       mass uninstall — with no error anywhere, because the run would have succeeded.
 
@@ -20,7 +21,7 @@ WHY:  **THE TWO FAILURES ARE DIFFERENT FACTS AND THE CALLER ACTS ON ONLY ONE.** 
       withdraw the 31st — a correct-looking answer that deprovisions a customer for owning too
       many repositories. Past the page ceiling this raises rather than returning what it has.
 IMPORTS: ingest.{app_auth,github_api}, types.settings. Leftward only.
-CONSUMED BY: `serve/reconcile.py`.
+CONSUMED BY: `serve/installation/reconcile.py`.
 """
 
 from __future__ import annotations

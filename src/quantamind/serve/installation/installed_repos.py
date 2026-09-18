@@ -11,7 +11,8 @@ WHY:  **IT ANSWERS BEFORE IT WARMS, SO THIS DELIBERATELY STOPS SHORT.** GitHub n
       module was provisioning store files and formatting two log lines about it, and its 200-line
       cap is what said so out loud when a POST route needed room.
 
-      **AND IT IS NOT IN `serve/onboarding.py`, WHICH IS WHERE IT BELONGS.** That module is also at
+      **AND IT IS NOT IN `serve/installation/onboarding.py`, WHICH IS WHERE IT BELONGS.** That
+      module is also at
       the cap. This is a seam the file-length rule chose rather than a reader would have, and saying
       so is cheaper than leaving the next person to wonder.
 

@@ -119,7 +119,7 @@ told three reasons, so you do not fix one and get rejected again.
 
 ### Warming up
 
-`src/quantamind/serve/onboarding.py`. The first review on a repository is expensive: a full clone
+`src/quantamind/serve/installation/onboarding.py`. The first review on a repository is expensive: a full clone
 plus building the index of which files have historically needed fixes — about 31 seconds on a
 115,776-commit repository. Onboarding does it **once, at install time**, so the first pull request
 does not wait for it.

@@ -19,7 +19,8 @@ WHY:  **THE INSTALL FLOW PROVISIONED A STORE AND DID NOT KNOW WHOSE IT WAS.** `p
       **IT TAKES PRIMITIVES, NOT A `Verdict`.** `verify/` sits to the RIGHT of `store/`, so this
       layer cannot import the type that produced the decision. The caller flattens it.
 IMPORTS: stdlib only. The store layer.
-CONSUMED BY: `serve/onboarding.py` on installation, `serve/review_delivery.py` at delivery.
+CONSUMED BY: `serve/installation/onboarding.py` on installation, `serve/review_delivery.py` at
+delivery.
 """
 
 from __future__ import annotations

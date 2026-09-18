@@ -88,7 +88,7 @@ So the route answers **202** with what it accepted, not **200** with work it has
 than writing to a socket. **`do_POST` has no equivalent** — it handles `/webhook` inline and 404s
 everything else — and the file is **at the 200-line cap**, so the branch cannot simply be added.
 
-**The `Installed` branch moves to `serve/onboarding.py`, where it belongs anyway.** It provisions
+**The `Installed` branch moves to `serve/installation/onboarding.py`, where it belongs anyway.** It provisions
 store files, prints two lines and calls `admit()` — installation work sitting in the socket layer.
 Moving it frees the lines the dispatch needs and puts the code beside the function it already calls.
 

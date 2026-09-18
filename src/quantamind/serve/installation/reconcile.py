@@ -6,7 +6,8 @@ WHY:  **`installation_repositories` SENDS A DELTA, AND A DELTA IS NOT SELF-HEALI
       carries the full list on an `installation` event, which is idempotent — re-provisioning six
       existing tenants does nothing. Removals have no such property: one dropped delivery and a
       repository stays entitled forever, reviewed and billed, with nothing anywhere recording that
-      we are wrong. `serve/installation_event.py` handles the delivery that arrives; this is the
+      we are wrong. `serve/installation/installation_event.py` handles the delivery that arrives;
+      this is the
       only thing that notices the one that did not.
 
       **AN OUTAGE MUST NEVER DEPROVISION A CUSTOMER, AND THAT IS THE WHOLE DESIGN.** A timeout, a

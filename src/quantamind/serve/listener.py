@@ -37,7 +37,7 @@ from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 from typing import Any
 
-from quantamind.serve.installation_event import settle
+from quantamind.serve.installation.installation_event import settle
 from quantamind.serve.web import get_reply, post_routes
 from quantamind.serve.web.http_io import read_body
 from quantamind.serve.webhook_github import (

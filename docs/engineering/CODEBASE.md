@@ -701,9 +701,42 @@ an echo answers `team`, a read-back answers `free`, and only then do the two dif
 back as `NONE`, so storing one would put a paid account on Free with a 200 already sent and nothing
 recording why.
 
+### `store/migrations/` — one function per schema version, and the ledger that runs them
+
+`steps.py` holds `_to_3` through `_to_9` and the `STEPS` map; `__init__.py` holds `migrate()`,
+`pending()` and the drift check that rolls a half-applied migration back. **Split when version 9
+put the single file past the 200-line cap** — AGENTS.md rule 4 says split rather than raise it,
+and the two halves are read at different times: a step is written once and thereafter read only as
+history, while `migrate()` is read by whoever is holding a store that will not open.
+
+**A step selects its tables by NAME, through `schema.statements_for`, never by a substring of the
+DDL.** `_to_6` matched `"installation" in statement` and therefore also caught `forge_installation`
+three versions later; it survived only because every statement is `IF NOT EXISTS`. A name that
+matches nothing raises, so a renamed table fails the build instead of stamping a version onto a
+store it did not change.
+
+**It must not open a store, and it must not be reached automatically.** `open_store()` refuses a
+store at the wrong version rather than migrating it: migration is an operator's decision made once
+against a backup, not something a process does to production data because it happened to start.
+
+### `serve/installation/` — everything that happens to an installation, not to a pull request
+
+`installation_event.settle` answers the delivery and then does the slow half; `installed_repos`
+records what an account covers; `onboarding.admit` clones and indexes; `withdrawal.withdraw` takes
+coverage away; `reconcile` asks the forge what is still true when a webhook never arrived.
+
+**`serve/` hit the fifteen-file fanout cap when the uninstall path met the Stripe work on main**,
+and the concern that split out is the one with its own lifetime — an installation is created,
+changed and removed on the forge's schedule, while everything left in `serve/` happens because a
+pull request moved.
+
+**This is where a second forge lands.** Bitbucket installs and uninstalls through different events
+carrying the same four outcomes, which `types/forge/delivery.py` already names. Putting the
+GitHub-shaped versions here is what keeps that from becoming a second copy of `serve/`.
+
 ### `store/billing/` — what the billing service last told us, and how stale it is
 
-**Schema v8 adds three tables, all keyed `(forge, account)`:** `entitlement` (the pushed coverage),
+**Schema v9 adds three tables, all keyed `(forge, account)`:** `entitlement` (the pushed coverage),
 `seat_use` (one row per developer per period, `actor_hash` only — never a login), and
 `forge_installation` (the installation itself, which `installation` keyed on `(account, repo)` never
 held). **The forge column is there from the first row written**, because a Bitbucket workspace
@@ -738,13 +771,13 @@ migrated from already held every table through v7 — steps 4 to 7 ran as no-ops
 them left the test green. Confirmed by deleting `_to_8` and watching it pass. The exclusion list is
 now per-table.
 
-### `serve/reconcile.py` + `ingest/installation_scope.py` — the removal nobody delivered
+### `serve/installation/reconcile.py` + `ingest/installation_scope.py` — the removal nobody delivered
 
 **`installation_repositories` sends a DELTA, and a delta is not self-healing.** An `installation`
 event carries the full list, so re-provisioning six existing tenants does nothing and a dropped
 delivery costs nothing. Removals have no such property: one missed webhook and a repository stays
 entitled forever — reviewed, and on a paid plan billed — with nothing anywhere recording that we
-are wrong. `serve/installation_event.py` handles the delivery that arrives; **`quantamind
+are wrong. `serve/installation/installation_event.py` handles the delivery that arrives; **`quantamind
 reconcile` is the only thing that notices the one that did not.**
 
 **Only an answer withdraws.** `ingest/installation_scope.covers()` raises `NotInstalled` when the
@@ -1185,7 +1218,7 @@ were sabotage-checked after the move.
 `reach(clone)` returns modules, reached and a sentence a prospect can read. B8 asks for
 eligibility to be "a measured answer about their repository instead of a sales rule", and a
 repository whose suite imports little of its own source is one where a review has less to stand
-on. `serve/onboarding.py` prints it after warming, where a clone already exists. **Reported,
+on. `serve/installation/onboarding.py` prints it after warming, where a clone already exists. **Reported,
 never enforced.**
 
 **It counts imports, not mentions, and that difference was 12 to 43 points** across nineteen
@@ -1220,7 +1253,7 @@ one, since the criteria exist to select repositories the ranker can serve. A cei
 COST control, which is a different rule. `MAX_PUSHED_DAYS_AGO` is 30 because "recent" was
 undefined, and a number in a constant is arguable where a number in nobody's head is not.
 
-### `serve/onboarding.py` — what happens when a repository is installed
+### `serve/installation/onboarding.py` — what happens when a repository is installed
 
 `admit()` qualifies each newly provisioned repository and warms the ones that pass; the listener
 answers **200 first**, because a clone will not finish inside GitHub's ten seconds. It does not

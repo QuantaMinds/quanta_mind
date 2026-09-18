@@ -26,8 +26,8 @@ import json
 from pathlib import Path
 from typing import Any
 
-from quantamind.serve import onboarding as warm_module
-from quantamind.serve.installation_event import settle
+from quantamind.serve.installation import onboarding as warm_module
+from quantamind.serve.installation.installation_event import settle
 from quantamind.serve.webhook_github import interpret
 from quantamind.store import installations, schema, tenancy
 from quantamind.types.forge.delivery import Installed, Withdrawn

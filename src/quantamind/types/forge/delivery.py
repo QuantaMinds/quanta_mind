@@ -27,7 +27,8 @@ WHY:  **THEY LIVE HERE RATHER THAN IN THE PARSER BECAUSE A SECOND FORGE IS COMIN
       it as an identifier.
 IMPORTS: stdlib only (dataclasses). Leftmost layer; imports nothing from this project.
 CONSUMED BY: `serve/webhook_github.py` (which re-exports them), `serve/listener.py`,
-      `serve/withdrawal.py`, `serve/installed_repos.py`, `serve/commands/run_endpoint.py`.
+      `serve/installation/withdrawal.py`, `serve/installation/installed_repos.py`,
+      `serve/commands/run_endpoint.py`.
 """
 
 from __future__ import annotations
