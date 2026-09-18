@@ -70,9 +70,13 @@ needs no new price — only a quantity above 1, which `POST /billing/checkout` a
 
 ## 3. Configuration: every variable, what reads it, and what happens when it is unset
 
+**All five are read from the process environment first and the repository `.env` second**, the
+same precedence `types/settings.load()` uses. An exported variable always wins, so nothing a
+deployment sets can be overridden by a file in a working tree.
+
 | variable | read by | absent means |
 |---|---|---|
-| `QUANTAMIND_STRIPE_API_KEY` | `serve/commands/run_endpoint.py`, passed to `build(billing=…)` | `POST /billing/checkout` answers **503** naming the variable |
+| `QUANTAMIND_STRIPE_API_KEY` | `serve/commands/run_endpoint.py` via `types/dotenv.credential`, passed to `build(billing=…)` | `POST /billing/checkout` answers **503** naming the variable |
 | `QUANTAMIND_STRIPE_WEBHOOK_SECRET` | same | `POST /billing/webhook` answers **503**; no delivery can be authenticated |
 | `QUANTAMIND_STRIPE_PRICE_ID` | `types/settings.py` → `Settings.stripe_price_id` | checkout answers **503** |
 | `QUANTAMIND_BILLING_SUCCESS_URL` | `Settings.billing_success_url` | Stripe returns the browser to an empty URL — set it |
@@ -81,8 +85,15 @@ needs no new price — only a quantity above 1, which `POST /billing/checkout` a
 **The two credentials are NOT on `Settings` and that is not an oversight.** `types/settings.py`
 states the rule for the GitHub webhook secret — *"a credential in a settings object reaches a log
 or a config dump the first time anybody prints one"* — and `quantamind config` prints that object.
-They are read from the environment in `serve/commands/run_endpoint.py`, beside
-`QUANTAMIND_WEBHOOK_SECRET`, and passed down as parameters.
+They are read in `serve/commands/run_endpoint.py`, beside `QUANTAMIND_WEBHOOK_SECRET`, and passed
+down as parameters.
+
+**They are read through `types/dotenv.credential` rather than `os.environ`, and that is a repair.**
+Until 2026-09-18 `run_endpoint.py` read the process environment directly while
+`types/dotenv.from_file` deliberately never writes to it — so **a `.env` holding
+`QUANTAMIND_WEBHOOK_SECRET` produced "no webhook secret: refusing to bind"**. Three credentials in
+that file were read by nothing, and no test could see it because every test that exercised the
+endpoint supplied the value some other way. Found by running the command with nothing exported.
 
 **The price id IS on `Settings`, deliberately.** It is public the moment a customer sees a checkout
 page, and the whole point of holding it there is that `quantamind config` can show an operator what

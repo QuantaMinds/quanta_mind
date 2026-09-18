@@ -4378,6 +4378,26 @@ A `payment_ref` in a request body is a string the caller typed. It still admits 
 Enterprise customer invoiced against a signed order is a real case — and it is still reported
 `payment_verified: false`, with the reply saying which of the two happened.
 
+### `types/dotenv.py:credential` — the reason any of this is configurable at all
+
+`credential(name)` reads one secret from the process environment first and the repository `.env`
+second — the same two sources and the same precedence as `types/settings.load()`.
+
+**It exists because three credentials in `.env` were read by nothing.**
+`serve/commands/run_endpoint.py` read `os.environ` directly, and `types/dotenv.from_file` states in
+its own docstring that it does not touch the process environment. So `QUANTAMIND_WEBHOOK_SECRET`
+sat in the file while the endpoint refused to bind for want of it, and the same would have been
+true of both Stripe secrets. **The file looked configured and was not.**
+
+**No test could see it**, because every test that exercised the endpoint supplied the value some
+other way — `AGENTS.md` rule 14's question, asked of configuration: the output was the same whether
+the mechanism worked or not. It was found by running the command with nothing exported.
+`tests/unit/layers/types/test_dotenv_credential.py` pins the file-only case first, and the
+precedence separately — inverting it would silently point a deployment at a developer's key.
+
+**It is a function and not a field on `Settings`** for the reason `Settings` gives: that object is
+printed by `quantamind config`.
+
 ### The schema
 
 `subscription`, added at `SCHEMA_VERSION` 8 by `store/migrations.py:_to_8`. **Nothing is
