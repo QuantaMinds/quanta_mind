@@ -19,6 +19,7 @@ because that is how a runbook comes to report work it never did.
 | [`--version`](#quantamind---version) | the package version |
 | [`config`](#quantamind-config) | the resolved configuration, before anything runs |
 | [`migrate`](#quantamind-migrate) | bring an existing store up to this build's schema |
+| [`reconcile`](#quantamind-reconcile---account-name) | correct stored entitlement against the forge |
 | [`scan`](#quantamind-scan-clone---explain-gcp_project) | walk a clone's history; say where rework lands |
 | [`review`](#quantamind-review-clone---repo-r---sha-sha---json) | rank one change and print what we would say |
 | [`retrospective`](#quantamind-retrospective-clone-clone----repo-name) | replay the ranker over a clone's own history |
@@ -113,6 +114,40 @@ migrated would rewrite a customer's audit trail as a side effect of somebody ope
 
 **Expected:** one line per migration applied, or a line saying the store is already at the current
 version. Exits 1 if the store cannot be read at all.
+
+---
+
+## `quantamind reconcile [--account NAME]`
+
+**Syntax:** `quantamind reconcile` · `quantamind reconcile --account acme`
+
+**What:** asks the forge which repositories each installation still covers, and marks removed any
+we hold that it no longer lists. With no argument it walks every account holding at least one
+live repository; `--account` narrows it to one.
+
+**Why it exists:** `installation_repositories` sends a **delta**, not a list. An `installation`
+event carries the full set and is therefore self-healing — re-provisioning six existing tenants
+does nothing — but a dropped *removal* delivery leaves a repository entitled forever, reviewed and
+billed, with nothing recording that we are wrong. This is the only thing that notices.
+
+**What it will not do:** withdraw anything on a failure. A timeout, a rate limit, a 500 and a
+revoked key all mean *we could not ask*, which is not the fact *the forge says this is gone*. Only
+an answer withdraws, and an installation that lists **no** repositories at all is read as a shape
+we misunderstood rather than as an instruction — obeying it would empty an account on a parsing
+mistake.
+
+**Expected:** one line per account and a total. **Exits 1 when any account could not be asked**,
+because a run that reached nothing and a run that confirmed everything both withdraw zero and both
+print a total — on a schedule the exit code is the only difference a human ever sees.
+
+```
+acme: withdrew 1/4 — acme/gadget
+zeta: 2 repository(ies), all still covered
+2 account(s): withdrew 1, could not ask about 0
+```
+
+**Run it on a schedule.** Nothing invokes it automatically; a scheduler calling it is an
+operator's decision, the same argument `migrate` makes.
 
 ---
 

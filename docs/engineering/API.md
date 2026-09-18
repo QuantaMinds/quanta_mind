@@ -1,6 +1,6 @@
 # The HTTP API
 
-**Every endpoint this product serves, what it answers, and what it refuses.** There are seven
+**Every endpoint this product serves, what it answers, and what it refuses.** There are eight
 paths and one of them is a catch-all. If a route is not listed here it does not exist, and the
 endpoint answers `404 {"error": "no such path"}` rather than closing the socket.
 
@@ -28,6 +28,7 @@ outcome there is.
 | [`/webhook`](#post-webhook) | POST | HMAC signature | JSON |
 | [`/health`](#get-health) | GET | none | JSON |
 | [`/provision/{tier}`](#post-provisionfree--team--enterprise) | POST | bearer token | JSON |
+| [`/entitlement`](#post-entitlement) | POST | bearer token | JSON |
 | [`/scan`](#get-scanrepoownername) | GET | session cookie | JSON |
 | [`/`](#get--the-dashboard-index) | GET | session cookie | HTML |
 | [`/r/<owner>/<name>`](#get-rownername) | GET | session cookie | HTML |
@@ -239,6 +240,56 @@ check" and "it qualifies" must never be the same value.
 the repository is not reviewed — and **the refusal is posted rather than swallowed**: the pull
 request gets a comment naming the rule and the way past it. `eligible IS NULL` — never assessed —
 still reviews.
+
+---
+
+## `POST /entitlement`
+
+**The billing service telling us what an account is entitled to.** `server/` owns Stripe; this
+route is how the result reaches the reviewer. It writes entitlement and nothing else — no
+provisioning, no warming, no clone, because a push arrives on every subscription change and a route
+that cloned on each would turn a billing webhook into a fleet of git operations.
+
+**Auth:** `Authorization: Bearer <QUANTAMIND_PROVISION_SECRET>`, compared with
+`hmac.compare_digest`. The same secret `/provision/{tier}` uses — one secret, one rotation. **An
+unset secret answers 503, never 200:** "not configured" and "no authentication required" must not
+be the same answer.
+
+### Request
+
+```json
+{"forge":"github","account":"acme","tier":"team","state":"active",
+ "seats_included":25,"payment_ref":"sub_1234","as_of":1758067200,
+ "valid_through":1760659200,"grace_until":1761868800}
+```
+
+`forge`, `account`, `tier`, `state` and `as_of` are required. **`state` must be one of `none`,
+`active`, `trialing`, `past_due`, `cancelled`** — an unrecognised one is refused at the door rather
+than stored, because `covering()` would read it back as `none` and silently put a paid account on
+Free with a 200 already sent.
+
+### Response — **the row is READ BACK, never echoed**
+
+```json
+{"forge":"github","account":"acme",
+ "stored":{"tier":"team","state":"active","seats_included":25,
+           "as_of":1758067200,"valid_through":1760659200,"grace_until":1761868800}}
+```
+
+**`stored` comes out of the database after the write, not from the request.** The store is SQLite
+on a Cloud Storage FUSE mount with no file locking, and during a revision rollout two instances
+briefly both write — Google's own wording is that "the last write wins and all previous writes are
+lost". A push can therefore be acknowledged and then vanish. Echoing the request would confirm
+nothing; echoing what the database now holds lets the caller compare and re-queue, which is exactly
+what `server/src/billing/pushEntitlement.ts` does before marking a push delivered.
+
+| status | when |
+|---|---|
+| 200 | recorded; `stored` carries the row as it now is |
+| 400 | unreadable body, missing field, unknown `state`, or an account keyed on nothing |
+| 401 | bad or missing bearer token |
+| 411 | no readable body |
+| 503 | `QUANTAMIND_PROVISION_SECRET` is unset — the route refuses rather than opening |
 
 ---
 

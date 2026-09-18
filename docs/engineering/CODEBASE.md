@@ -678,6 +678,133 @@ reader to scroll past it. Importing `subprocess` is the signal that distinguishe
 
 Operator documentation: `docs/engineering/DEPLOYMENT.md`.
 
+### `serve/web/entitlement_route.py` — how a subscription reaches the reviewer
+
+**`POST /entitlement`, and it is `provision_route.py`'s twin on purpose:** the same bearer check
+through `hmac.compare_digest`, the same refusal when the secret is unset, the same
+`answer`/`for_request` split so every rule is testable without a socket. One shape for both.
+
+**The reply is READ BACK out of the store, never echoed.** That is what makes the push verifiable
+rather than merely acknowledged. The billing service
+(`server/src/billing/pushEntitlement.ts`) compares the echoed `tier`, `state` and `seats_included`
+against what it sent and only then marks the outbox row delivered — so a write lost on the
+lock-free gcsfuse mount during a rollout leaves the row pending and gets retried, instead of
+disappearing behind a 200.
+
+**Proving the read-back needed the write to fail.** The first version of the test wrote two forges
+and asserted the rows stayed separate — a *store* property that holds whether the reply comes from
+the database or from the request. Replacing `covering(...)` with the parsed request left all 18
+tests green. `entitlement/test_records.py` now neuters `record` to stand in for a swallowed write:
+an echo answers `team`, a read-back answers `free`, and only then do the two differ.
+
+**An unknown `state` is refused at the door, not stored.** `covering()` reads an unrecognised value
+back as `NONE`, so storing one would put a paid account on Free with a 200 already sent and nothing
+recording why.
+
+### `store/billing/` — what the billing service last told us, and how stale it is
+
+**Schema v8 adds three tables, all keyed `(forge, account)`:** `entitlement` (the pushed coverage),
+`seat_use` (one row per developer per period, `actor_hash` only — never a login), and
+`forge_installation` (the installation itself, which `installation` keyed on `(account, repo)` never
+held). **The forge column is there from the first row written**, because a Bitbucket workspace
+`acme` and a GitHub organisation `acme` are different customers who may both install us, and adding
+the column later means a second migration plus a window where every row is ambiguous about whose
+it is.
+
+**`store/` is at the fifteen-file cap, so this is a package.** The cap asked the question; the
+answer is right anyway — these modules are read together and by nothing else.
+
+**An absent entitlement row is Free.** Not paid, not refused, and nothing backfills one. Reading
+absence as paid grants a tier nobody bought; reading it as refused switches off every customer who
+installed before billing existed. Free is the only reading that invents nothing.
+
+**An unrecognised `state` string is not `ACTIVE`.** A value this build does not know came from a
+newer billing service, and reading it as paid hands out the paid tier on a typo.
+
+**`stale` is a fact, not a verdict.** `covering()` reports that the billing service has not spoken
+since `grace_until`; `gate.py` decides, and it degrades rather than refusing — a push that never
+arrived is our failure, and withdrawing a paying customer's reviews to punish our own outage is the
+wrong way round.
+
+**`tables.statements_for()` selects DDL by table NAME, never a substring.** The migration steps
+match `"installation" in statement`, so `forge_installation` would have been created by `_to_6` as
+well as `_to_8` — survivable only because every statement is `IF NOT EXISTS` and `drift` compares
+the end state. A name matching nothing raises, because a step that stamps its version having
+created no table leaves a store whose version says one thing and whose tables say another.
+
+**The v8 bump also repaired the test that was supposed to prove it.**
+`test_schema_golden.V2_TABLES` removed only what version 3 added, so the "version 2" store it
+migrated from already held every table through v7 — steps 4 to 7 ran as no-ops and deleting any of
+them left the test green. Confirmed by deleting `_to_8` and watching it pass. The exclusion list is
+now per-table.
+
+### `serve/reconcile.py` + `ingest/installation_scope.py` — the removal nobody delivered
+
+**`installation_repositories` sends a DELTA, and a delta is not self-healing.** An `installation`
+event carries the full list, so re-provisioning six existing tenants does nothing and a dropped
+delivery costs nothing. Removals have no such property: one missed webhook and a repository stays
+entitled forever — reviewed, and on a paid plan billed — with nothing anywhere recording that we
+are wrong. `serve/installation_event.py` handles the delivery that arrives; **`quantamind
+reconcile` is the only thing that notices the one that did not.**
+
+**Only an answer withdraws.** `ingest/installation_scope.covers()` raises `NotInstalled` when the
+forge states the App is gone and `CouldNotAsk` for everything else — a timeout, a rate limit, a
+500, a revoked key. The first is a fact about the customer; the second is a fact about the network,
+and acting on it would turn an outage into a mass uninstall that *succeeds*, leaving no error
+anywhere while paying customers silently stop being reviewed.
+
+**The two failure kinds live in the layer that produces them**, so `serve/` imports them leftward
+and there is one definition of "gone" rather than two that drift.
+
+**An installation listing NO repositories is refused, not obeyed.** The forge lists at least the
+repository we authenticated against, so `()` is far more likely to be a shape we misread than a
+customer who removed everything at once — and obeying it would empty the estate in one run on a
+parsing mistake. `reconcile/test_refuses.py` is longer than the file for the happy path for exactly
+this reason.
+
+**The token is minted before the listing, and that IS the probe.** `ingest/github_api.call` falls
+back to an *unauthenticated* request when no installation token can be minted — correct for a
+public repository, useless here, because the listing would return 401 and "we are not installed"
+would be indistinguishable from "our key is wrong". `AuthFailed` gained a `status` field so the
+404 is structural rather than a string search for `"404"` that would also match a quoted body.
+
+**It exits non-zero when any account could not be asked.** A run that reached nothing and a run
+that confirmed everything both withdraw zero and both print a total; on a schedule the exit code is
+the only difference a human sees.
+
+### `serve/commands/dispatch.py` — which implementation a parsed command runs
+
+Split out when `reconcile` pushed `serve/cli.py` past the 200-line cap. The parser changes once per
+command; the branch chain grows every time, so they are different rates of change. **Every import
+stays inside its branch** — that is not tidiness, it is what keeps `quantamind config` answering
+when a layer below is broken, which is exactly when an operator reaches for it. `run()` returns
+`None` when nothing matched, because "no branch matched" is how `config` is reached and returning
+`0` would make an unknown command look like a successful one.
+
+### `types/forge/` — what a forge told us, independent of which forge told us
+
+**`delivery.py` holds the four outcomes an authenticated delivery can carry:** `Review`,
+`Installed`, `Withdrawn`, `Ignore`. They were defined inside `serve/webhook_github.py`, which made
+them GitHub's vocabulary by accident of where they sat. Bitbucket arrives through a Forge app
+rather than a signed webhook and shares no field names with GitHub's payload, but it means one of
+these same four things — so naming them once is what lets `serve/review/review_delivery.deliver()`
+stay one function instead of two that drift. **`webhook_github` parses them and does not own them**;
+every consumer imports them from here, and there is no re-export to go stale.
+
+**`Withdrawn` IS A FOURTH OUTCOME, NOT A FLAG.** Same argument the third was added under: "the
+installation is gone" and "the installation covers these repositories" are opposite instructions,
+and folding them together would make an action string load-bearing.
+
+**Removals ride on `Installed` TOO, and that is not a contradiction.** One
+`installation_repositories` delivery can carry `repositories_added` AND `repositories_removed`;
+returning only one outcome for it would silently drop half of what the customer just said. So
+`Installed.no_longer_covered` carries per-repository removals and `Withdrawn` carries the case
+where there is nothing left to cover. **`serve/installation_event.settle()` is the one entry point
+that acts on both**, and it takes the answering function because the 2XX has to happen between
+provisioning (fast) and warming (~31s per repository).
+
+**Must not:** parse, open a socket, or import anything from this project. Leftmost layer.
+
 ### `types/standards/` — a declared rule, and the two kinds of verdict it can receive
 
 **D1c. `rule.py` is the declaration, `checked.py` is what a PARSER decided, `judged.py` is what a
