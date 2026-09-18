@@ -22,12 +22,17 @@ CONSUMED BY: `serve/cli.py`.
 
 from __future__ import annotations
 
-import os
-
+from quantamind.types.dotenv import credential
 from quantamind.types.settings import load
 
-# The webhook secret is read from the environment at serve time and never from `Settings`, so it
-# cannot reach `quantamind config` and be printed into a terminal scrollback or a CI log.
+# The webhook secret is read at serve time and never from `Settings`, so it cannot reach
+# `quantamind config` and be printed into a terminal scrollback or a CI log.
+#
+# **IT IS READ THROUGH `credential()` AND NOT THE PROCESS ENVIRONMENT DIRECTLY, BECAUSE THIS FILE
+# HELD THAT BUG.** `types/dotenv.from_file` deliberately never writes to the process environment,
+# so a `.env` carrying QUANTAMIND_WEBHOOK_SECRET produced "refusing to bind" while looking
+# perfectly configured. Every other setting in this product has read that file since the day it
+# existed; these four did not. An exported value still wins, so no deployment changes meaning.
 SECRET_VARIABLE = "QUANTAMIND_WEBHOOK_SECRET"
 
 
@@ -47,11 +52,11 @@ def run(port: int, host: str = "127.0.0.1") -> int:
     from quantamind.serve.webhook_github import MisconfiguredSecret, Review
     from quantamind.serve.working_clone import CloneFailed
 
-    secret = os.environ.get(SECRET_VARIABLE, "")
+    secret = credential(SECRET_VARIABLE)
     # **READ HERE, NOT FROM `Settings`, FOR THE REASON THE WEBHOOK SECRET IS.** A credential in a
     # settings object reaches a log the first time anybody prints one. Empty is a REFUSAL at the
     # provisioning routes rather than an open door -- see `serve/web/provision_route.py`.
-    provision_secret = os.environ.get("QUANTAMIND_PROVISION_SECRET", "")
+    provision_secret = credential("QUANTAMIND_PROVISION_SECRET")
     accepted: list[Review] = []
 
     settings = load()
@@ -60,8 +65,8 @@ def run(port: int, host: str = "127.0.0.1") -> int:
     # naming the variable -- it never opens one. The PRICE ID is on `Settings` instead: it is
     # public the moment a customer sees a checkout page, and `quantamind config` should show it.
     billing = {
-        "api_key": os.environ.get("QUANTAMIND_STRIPE_API_KEY", ""),
-        "webhook_secret": os.environ.get("QUANTAMIND_STRIPE_WEBHOOK_SECRET", ""),
+        "api_key": credential("QUANTAMIND_STRIPE_API_KEY"),
+        "webhook_secret": credential("QUANTAMIND_STRIPE_WEBHOOK_SECRET"),
         "price_id": settings.stripe_price_id,
         "success_url": settings.billing_success_url,
         "cancel_url": settings.billing_cancel_url,
