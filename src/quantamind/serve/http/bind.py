@@ -31,6 +31,7 @@ def build(
     port: int = 7331,
     host: str = LOOPBACK,
     provision_secret: str = "",
+    billing: dict[str, str] | None = None,
 ) -> ThreadingHTTPServer:
     """A server ready for `serve_forever()`. Binds immediately, so a port clash fails here.
 
@@ -38,6 +39,10 @@ def build(
     a ranking, and it never reaches rightward into a pipeline it has no business knowing about.
 
     `host` defaults to loopback and must be asked for to leave it -- see `LOOPBACK`.
+
+    `billing` carries the Stripe API key, signing secret, price id and return URLs. **It is a
+    mapping and not five parameters** because every one of them is read in the same place, set in
+    the same deployment step, and absent together on every deployment that does not sell anything.
     """
     if not secret.strip():
         raise MisconfiguredSecret(
@@ -61,6 +66,17 @@ def build(
             # answer 503 rather than opening. `provision_route._authorised` returns False on an
             # empty secret, so no bearer token can satisfy it.
             "provision_secret": provision_secret,
+            # **THE BILLING CREDENTIALS ARRIVE AS A MAPPING, AND EVERY ONE DEFAULTS TO EMPTY.**
+            # Empty refuses the route with a 503 naming the variable, the same way an empty
+            # provisioning secret does -- "not configured" and "no payment required" must never be
+            # the same code path. They are attributes on the handler rather than fields on
+            # `Settings` because `quantamind config` prints that object, and an API key printed
+            # into a terminal scrollback is a rotated key.
+            "stripe_api_key": (billing or {}).get("api_key", ""),
+            "stripe_webhook_secret": (billing or {}).get("webhook_secret", ""),
+            "stripe_price_id": (billing or {}).get("price_id", ""),
+            "billing_success_url": (billing or {}).get("success_url", ""),
+            "billing_cancel_url": (billing or {}).get("cancel_url", ""),
         },
     )
     return ThreadingHTTPServer((host, port), bound)

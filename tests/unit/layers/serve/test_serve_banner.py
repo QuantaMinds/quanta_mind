@@ -48,6 +48,8 @@ REQUIRED = (
     "[serve] GET  /r/<owner>/<name>",
     "[serve] GET  /scan?repo=owner/name",
     "[serve] It REVIEWS: clone, rank, render. Posting is",
+    "[serve] POST /billing/checkout —",
+    "[serve] POST /billing/webhook  —",
     "[serve] http.server is not a hardened edge",
 )
 """**THE READ WINDOW BELOW IS SIZED FROM THIS TUPLE**, so a banner line added without a line here

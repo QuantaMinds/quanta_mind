@@ -48,13 +48,55 @@ def test_shadow_pick_stores_a_ranked_list_not_a_top_pick(tmp_path: Path) -> None
     assert got == 3, f"a ranked list of three must persist as three rows, got {got}"
 
 
+RECORDED_NOT_DERIVED = {("subscription", "amount_cents")}
+"""The one cents column, and it is not a cost.
+
+**WHAT WE SPEND AND WHAT A CUSTOMER WAS CHARGED ARE DIFFERENT FACTS WITH DIFFERENT FAILURE
+MODES.** `store/schema.py` bans stored cents for OUR spend and gives the reason: prices change,
+token counts do not, and cents cannot separate a cache read from fresh input. Every word of that is
+about a number we DERIVE.
+
+`subscription.amount_cents` is a number Stripe SENT us about a charge that already happened. It
+cannot be re-derived from anything in this database, it does not change when a price changes --
+that is the whole point of recording it -- and it is the only way a price id pointing at the wrong
+product becomes visible in a row rather than only on somebody's invoice.
+
+**IT IS A PAIR AND NOT A TABLE NAME**, so the exemption cannot widen to a `cost_cents` column on
+the same table next month without somebody adding it here on purpose."""
+
+
 def test_cost_is_not_stored_as_cents_anywhere(tmp_path: Path) -> None:
     """Prices change and token counts do not, and cents cannot separate a cache read."""
     conn = schema.open_store(tmp_path / "s.db")
     tables = [r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")]
     # "cent" as a substring also matches `percentile`; the column being banned is cents.
-    offenders = {t: c for t in tables for c in _columns(conn, t) if "cents" in c or "cost" in c}
-    assert offenders == {}, f"cost must be derived from tokens, found {offenders}"
+    offenders = {
+        (t, c)
+        for t in tables
+        for c in _columns(conn, t)
+        if ("cents" in c or "cost" in c) and (t, c) not in RECORDED_NOT_DERIVED
+    }
+    assert offenders == set(), f"cost must be derived from tokens, found {sorted(offenders)}"
+
+
+def test_the_cents_exemption_names_a_column_that_exists(tmp_path: Path) -> None:
+    """**AN EXEMPTION FOR A COLUMN NOBODY HAS IS A HOLE WITH NOTHING IN IT.**
+
+    If `amount_cents` is ever renamed, this fails and the exemption is removed with it rather than
+    sitting in the file granting a pass to a name that no longer means anything.
+    """
+    conn = schema.open_store(tmp_path / "s.db")
+
+    for table, column in RECORDED_NOT_DERIVED:
+        assert column in _columns(conn, table), f"{table}.{column} is exempted and does not exist"
+
+
+def test_the_subscription_table_stores_no_derived_cost(tmp_path: Path) -> None:
+    """The exemption is for what Stripe charged. It is not a door for our own spend."""
+    columns = _columns(schema.open_store(tmp_path / "s.db"), "subscription")
+
+    assert {c for c in columns if "cost" in c} == set(), "our spend does not belong on a customer"
+    assert "amount_cents" in columns, "what Stripe charged must be on the record"
 
 
 def test_request_records_cache_reads_so_a_persistent_zero_is_visible(tmp_path: Path) -> None:

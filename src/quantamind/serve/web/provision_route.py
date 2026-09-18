@@ -13,10 +13,16 @@ WHY:  **THIS ROUTE GRANTS A PAID TIER, SO IT AUTHENTICATES BEFORE IT READS.** An
       shape as `types/deployment.permit()`, which refuses an unrecognised deployment rather than
       reading it as the permissive one.
 
-      **`payment_verified` IS ALWAYS FALSE AND SHIPS IN THE REPLY.** Rows B3 and B7 of
-      `docs/plans/roadmap/product-build.md` are parked; nothing in this product talks to a payment
-      processor. The reference is recorded, not checked. A caller who cannot see that distinction
-      will build on the assumption that we verified something.
+      **`payment_verified` IS NOW SOMETIMES TRUE, AND ONLY EVER FROM A SIGNED DELIVERY.** Row B3 of
+      `docs/plans/roadmap/product-build.md` shipped 2026-09-17. For a paid tier this route reads the
+      subscription we hold for the account -- written by `serve/web/stripe_hook.py` from a delivery
+      whose HMAC matched -- and asks `verify/paid_access.decide()`. A `payment_ref` in the body is
+      still only a string the caller typed and still verifies nothing; the two facts are different
+      and the reply distinguishes them.
+
+      **NO SUBSCRIPTION ON RECORD STILL ADMITS ON A REFERENCE, REPORTED UNVERIFIED.** A customer
+      invoiced outside Stripe is a real case, and refusing them would make this route unusable for
+      exactly the Enterprise tier it serves. What it must never do is call that verified.
 
       **IT ANSWERS 202, NOT 200.** Warming a repository is a clone plus an index -- about 31 seconds
       on a large one -- and no caller waits. The route validates and records synchronously, replies
@@ -33,21 +39,28 @@ CONSUMED BY: `serve/listener.py`.
 
 from __future__ import annotations
 
-import hmac
-import json
 import time
 from pathlib import Path
 from typing import Any
 
 from quantamind.serve.web.http_io import read_body
+from quantamind.serve.web.provision_payment import access_for, note
+from quantamind.serve.web.provision_request import (
+    AUTH_HEADER,
+    PREFIX,
+    authorised,
+    parse,
+    tier_named,
+)
 from quantamind.store import installations, tenancy
 from quantamind.store.schema import open_store
 from quantamind.verify import qualification
-from quantamind.verify.tier_request import Request, Tier, admissible
+from quantamind.verify.tier_request import Tier, admissible
 
-PREFIX = "/provision/"
-AUTH_HEADER = "Authorization"
-BEARER = "Bearer "
+# **DEFINED ONCE, IN THE MODULE THAT READS THEM.** `PREFIX` is re-exported because
+# `serve/web/post_routes.py` dispatches on it and has always imported it from here; a second
+# literal in two files is how the URL and the parser that strips it drift apart.
+__all__ = ["PREFIX", "answer", "for_request"]
 
 NOT_CONFIGURED = (
     "provisioning is not configured on this deployment: QUANTAMIND_PROVISION_SECRET is unset. "
@@ -59,47 +72,6 @@ NOT_ELIGIBLE = (
     "You are not eligible for the {tier} tier. Every reason is listed in `refused` -- all of them, "
     "not the first, so fixing one does not earn a second refusal."
 )
-
-UNVERIFIED = (
-    "payment_ref was recorded, not verified. Nothing in this product reads a payment processor "
-    "(build rows B3 and B7 are parked), so this endpoint takes the reference on trust."
-)
-
-
-def _tier(path: str) -> Tier | None:
-    """The tier from the URL, or None. An unknown segment is a 404, never a default."""
-    wanted = path.partition("?")[0][len(PREFIX) :].strip("/")
-    return next((tier for tier in Tier if tier.value == wanted), None)
-
-
-def _authorised(header: str | None, secret: str) -> bool:
-    """Constant-time bearer check. **False when the secret is unset**, never True by omission."""
-    if not secret.strip():
-        return False
-    given = header or ""
-    if not given.startswith(BEARER):
-        return False
-    return hmac.compare_digest(given[len(BEARER) :], secret)
-
-
-def _parse(body: bytes) -> Request | str:
-    """A `Request`, or one sentence saying why the body is not one."""
-    try:
-        raw: Any = json.loads(body)
-    except json.JSONDecodeError as exc:
-        return f"body is not JSON: {exc}"
-    if not isinstance(raw, dict):
-        return f"body is {type(raw).__name__}, not an object"
-    repos = raw.get("repos")
-    if not isinstance(repos, list) or not all(isinstance(name, str) for name in repos):
-        return "repos must be a list of 'owner/name' strings"
-    return Request(
-        account=str(raw.get("account") or ""),
-        repos=tuple(repos),
-        seats=int(raw.get("seats") or 0),
-        payment_ref=str(raw.get("payment_ref") or ""),
-        org=str(raw.get("org") or ""),
-    )
 
 
 def _free_verdicts(repos: tuple[str, ...], root: Path) -> dict[str, qualification.Verdict]:
@@ -128,38 +100,33 @@ def answer(
     request value hidden inside a configuration object is how a handler comes to look authenticated
     while reading nothing the caller sent.
     """
-    tier = _tier(path)
+    tier = tier_named(path)
     if tier is None:
         return 404, {"error": "no such tier"}
 
     if not secret.strip():
         return 503, {"error": NOT_CONFIGURED}
-    if not _authorised(authorization, secret):
+    if not authorised(authorization, secret):
         return 401, {"error": "bad or missing bearer token"}
 
-    parsed = _parse(body)
+    parsed = parse(body)
     if isinstance(parsed, str):
         return 400, {"error": parsed}
 
     root = Path(settings.database_path)
     verdicts = _free_verdicts(parsed.repos, root) if tier is Tier.FREE else None
-    verdict = admissible(tier, parsed, free_verdicts=verdicts)
+    now = int(time.time())
+    # **READ BEFORE ANYTHING IS CREATED.** `access_for` will not open a store that does not exist,
+    # so a refused request still leaves no database behind. The first version of this branch opened
+    # it here and a test that had been passing for weeks caught it immediately.
+    access = access_for(root, parsed.account, tier, at=now)
+    verdict = admissible(tier, parsed, free_verdicts=verdicts, access=access)
     if not verdict.admissible:
-        # **EVERY REASON, NOT THE FIRST.** A caller told one reason fixes it and is refused again.
-        # **THE ANSWER IS A SENTENCE, NOT ONLY A LIST.** A caller that reads `refused[0]` and shows
-        # it to a user shows them a rule, not a decision. `eligible` is the machine-readable half.
-        return 422, {
-            "tier": tier.value,
-            "eligible": False,
-            "message": NOT_ELIGIBLE.format(tier=tier.value),
-            "provisioned": [],
-            "refused": list(verdict.reasons),
-        }
+        return _refused(tier, verdict.reasons)
 
     made, refused = tenancy.provision(root, list(parsed.repos))
     conn = open_store(tenancy.shared(root, tenancy.ACCOUNTS))
     try:
-        now = int(time.time())
         for name in made:
             installations.record(conn, parsed.account, name, at=now, tier=tier.value, eligible=True)
     finally:
@@ -173,7 +140,23 @@ def answer(
         "refused": refused,
         "warming": made,
         "payment_verified": verdict.payment_verified,
-        "note": UNVERIFIED if tier is not Tier.FREE else "",
+        "note": note(tier, verdict.payment_verified, access),
+    }
+
+
+def _refused(tier: Tier, reasons: tuple[str, ...]) -> tuple[int, dict[str, Any]]:
+    """The 422. Split out so `answer()` can return it from inside the store's `try`/`finally`.
+
+    **EVERY REASON, NOT THE FIRST.** A caller told one reason fixes it and is refused again.
+    **THE ANSWER IS A SENTENCE, NOT ONLY A LIST.** A caller that reads `refused[0]` and shows it to
+    a user shows them a rule, not a decision. `eligible` is the machine-readable half.
+    """
+    return 422, {
+        "tier": tier.value,
+        "eligible": False,
+        "message": NOT_ELIGIBLE.format(tier=tier.value),
+        "provisioned": [],
+        "refused": list(reasons),
     }
 
 

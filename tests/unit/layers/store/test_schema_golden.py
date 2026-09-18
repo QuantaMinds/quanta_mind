@@ -30,9 +30,30 @@ from quantamind.store.tables import TABLES
 
 GOLDEN = pathlib.Path(__file__).resolve().parents[4] / "tests" / "fixtures" / "schema_golden.json"
 
-# The DDL of version 2, derived from this build's by removing what version 3 added, so a migration
-# is exercised from a real older store rather than one this build made and then damaged.
-V2_TABLES = tuple(t for t in TABLES if "lifecycle" not in t and "prod_signal" not in t)
+ADDED_AFTER_2 = (
+    "lifecycle",
+    "prod_signal",  # version 3
+    "touch_watermark",  # version 4
+    "rule_check",  # version 5
+    "installation",  # version 6
+    "account",
+    "session",  # version 7
+    "subscription",  # version 8
+)
+"""Every table this build has that a version-2 store did not.
+
+**IT LISTED ONLY VERSION 3'S FOR FIVE VERSIONS, AND THAT MADE FOUR MIGRATION STEPS UNTESTED.**
+Every step creates its tables with `CREATE TABLE IF NOT EXISTS`, so against a "version 2" store
+that already contained them, steps 4 through 7 ran, created nothing, and passed. The test went
+green whether the step worked or not -- `AGENTS.md` rule 14's exact question, asked of this file
+and answered wrong. Caught when version 8 was added and the same hole was about to widen.
+
+**NAMED PER VERSION SO THE NEXT ONE IS ADDED HERE OR NOT AT ALL.** The step-count assertion below
+breaks on every bump, which is what sends somebody to this list."""
+
+# The DDL of version 2: this build's, minus every table added since. A migration is then exercised
+# from a real older store rather than from one this build made and then declared old.
+V2_TABLES = tuple(t for t in TABLES if not any(name in t for name in ADDED_AFTER_2))
 
 
 def shape_of(conn: sqlite3.Connection) -> dict[str, object]:
@@ -85,14 +106,36 @@ def test_a_store_migrated_from_version_2_is_identical_to_a_fresh_one() -> None:
     # Hardcoded, not derived from the ledger: deriving it would make the test agree with whatever
     # `STEPS` says, including a step that was forgotten. The next schema bump breaks this line on
     # purpose, so somebody has to look at the migration path from a real old store.
-    assert done.steps == (3, 4, 5, 6, 7), (
-        f"expected steps 3 through 7, got {done.steps}. Hardcoded on purpose: a "
+    assert done.steps == (3, 4, 5, 6, 7, 8), (
+        f"expected steps 3 through 8, got {done.steps}. Hardcoded on purpose: a "
         "schema bump breaks this line so somebody looks at the path from a REAL old store."
     )
     assert normalise(shape_of(old)) == normalise(golden()), (
         "a migrated store differs from a freshly created one. This is the failure that produces "
         "a database whose version says one thing and whose tables say another."
     )
+
+
+def test_a_version_2_store_really_lacks_the_tables_the_migration_must_create() -> None:
+    """**THE TEST ABOVE IS WORTH NOTHING IF THE "OLD" STORE ALREADY HAS EVERYTHING.**
+
+    Every step creates with `IF NOT EXISTS`, so a step given a table that already exists does
+    nothing and passes. This asserts the starting state is genuinely missing each one, which is
+    the only thing that makes the migration above a test of the migration.
+    """
+    old = sqlite3.connect(":memory:")
+    for statement in V2_TABLES:
+        old.execute(statement)
+    present = {str(r[0]) for r in old.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+
+    assert present & set(ADDED_AFTER_2) == set(), (
+        f"a version-2 store must not already contain {sorted(present & set(ADDED_AFTER_2))}; "
+        "the migration test would create nothing and pass"
+    )
+    fresh = sqlite3.connect(":memory:")
+    create(fresh)
+    made = {str(r[0]) for r in fresh.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    assert set(ADDED_AFTER_2) <= made, "the list names a table this build does not create"
 
 
 def test_migrating_an_up_to_date_store_does_nothing() -> None:

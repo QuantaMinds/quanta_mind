@@ -17,6 +17,8 @@ from __future__ import annotations
 
 import pytest
 
+from quantamind.verify.paid_access import Access
+from quantamind.verify.paid_access import Verdict as AccessVerdict
 from quantamind.verify.qualification import Verdict as RepoVerdict
 from quantamind.verify.tier_request import MAX_REPOS, Request, Tier, Verdict, admissible
 
@@ -24,6 +26,7 @@ OK = RepoVerdict(True, ())
 NO = RepoVerdict(False, ("12 stars, and the free tier needs at least 1000",))
 
 PAID = Request(account="acme", repos=("acme/api",), seats=12, payment_ref="sub_123")
+OPEN_SUBSCRIPTION = Access(True, AccessVerdict.PAID, "active, paid through 1800000000")
 
 
 def test_team_admits_with_a_reference_and_a_seat_count() -> None:
@@ -121,10 +124,67 @@ def test_the_repository_ceiling_is_enforced() -> None:
     )
 
 
-def test_payment_verified_cannot_be_set_true() -> None:
-    """**THE TYPE REFUSES THE LIE.** B3 is parked; nothing here reads a payment processor."""
-    with pytest.raises(ValueError, match="payment_verified cannot be True"):
-        Verdict(True, (), payment_verified=True)
+def test_a_payment_reference_alone_never_verifies_a_payment() -> None:
+    """**THE TRIPWIRE THIS REPLACED, NARROWED RATHER THAN REMOVED.**
+
+    Until row B3 shipped, the type refused `payment_verified=True` outright because nothing here
+    could read a payment processor. Now something can — and the distinction that matters is
+    between a string the caller typed and a subscription we wrote from a signed delivery. A
+    `payment_ref` is the first. It admits the request; it verifies nothing, forever.
+    """
+    verdict = admissible(Tier.TEAM, PAID)
+
+    assert verdict.admissible is True
+    assert verdict.payment_verified is False, (
+        "a caller-supplied reference is not a verified payment"
+    )
+
+
+def test_only_an_open_subscription_makes_payment_verified_true() -> None:
+    """The one path to True, and it starts at an HMAC over Stripe's bytes."""
+    verdict = admissible(Tier.TEAM, PAID, access=OPEN_SUBSCRIPTION)
+
+    assert verdict.admissible is True
+    assert verdict.payment_verified is True
+
+
+def test_a_lapsed_subscription_refuses_the_tier_and_names_stripe_s_reason() -> None:
+    lapsed = Access(False, AccessVerdict.CANCELED, "the subscription was cancelled; paid through 1")
+
+    out = admissible(Tier.TEAM, PAID, access=lapsed)
+
+    assert out.admissible is False
+    assert out.payment_verified is False
+    assert any("the subscription was cancelled" in why for why in out.reasons)
+
+
+def test_an_open_subscription_removes_the_need_for_a_payment_reference() -> None:
+    """A subscription we read from our own store beats an id the caller repeated back to us."""
+    no_ref = Request(account="acme", repos=("acme/api",), seats=12)
+
+    verdict = admissible(Tier.TEAM, no_ref, access=OPEN_SUBSCRIPTION)
+
+    assert verdict.admissible is True
+    assert verdict.payment_verified is True
+
+
+def test_the_free_tier_is_never_reported_as_a_verified_payment() -> None:
+    """Nobody paid for it. A True here would put a payment on a record that had none."""
+    verdict = admissible(
+        Tier.FREE,
+        Request(account="acme", repos=("acme/api",)),
+        free_verdicts={"acme/api": OK},
+        access=OPEN_SUBSCRIPTION,
+    )
+
+    assert verdict.admissible is True
+    assert verdict.payment_verified is False
+
+
+def test_a_refused_verdict_may_not_claim_a_verified_payment() -> None:
+    """Two answers at once: a caller reading one field and a log reading the other disagree."""
+    with pytest.raises(ValueError, match="a refused verdict cannot report payment_verified"):
+        Verdict(False, ("no account was named",), payment_verified=True)
 
 
 def test_a_refusal_without_a_reason_is_refused() -> None:

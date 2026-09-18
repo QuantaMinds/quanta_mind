@@ -28,8 +28,8 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 
-from quantamind.serve import listener
 from quantamind.serve.http import bind
+from quantamind.serve.web import get_reply
 from quantamind.serve.webhook_github import Review
 from quantamind.store import tenancy
 
@@ -60,7 +60,7 @@ def _serving(root: Path) -> Iterator[int]:
 
 def _health(port: int) -> tuple[int, dict[str, object]]:
     conn = http.client.HTTPConnection("127.0.0.1", port, timeout=10)
-    conn.request("GET", listener.HEALTH_PATH)
+    conn.request("GET", get_reply.HEALTH_PATH)
     response = conn.getresponse()
     status, raw = response.status, response.read()
     conn.close()

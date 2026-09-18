@@ -101,6 +101,21 @@ class Settings:
     secret is read in `serve/commands/run_endpoint.py` rather than stored: a credential in a
     settings object reaches a log or a config dump the first time anybody prints one."""
 
+    stripe_price_id: str = ""
+    """The recurring price a checkout session is created against. **Configuration, not a
+    credential** -- a price id is public the moment a customer sees a checkout page, and it is the
+    one Stripe value that belongs here so `quantamind config` can show what is being sold. The API
+    key and the signing secret are NOT here: see `serve/commands/run_endpoint.py`.
+
+    **NOTHING VALIDATES THAT IT NAMES THE $29 PRICE.** A price id pointing at the wrong product is
+    a misconfiguration this product cannot detect, which is why `store/billing/subscriptions.py`
+    records the amount Stripe actually charged."""
+
+    billing_success_url: str = ""
+    billing_cancel_url: str = ""
+    """Where Stripe returns the browser. Empty refuses the checkout route rather than sending a
+    customer to a blank page after they have paid."""
+
     posting_enabled: bool = False
     """**False on purpose, and it is the one default that writes to somebody else's project.**
     With it off the endpoint runs the whole pipeline and prints the comment it would have posted,
@@ -160,6 +175,9 @@ def load(env: Mapping[str, str] | None = None) -> Settings:
         subprocess_timeout_seconds=read_int(source, "SUBPROCESS_TIMEOUT_SECONDS", 30),
         clone_root=source.get(PREFIX + "CLONE_ROOT", ".quantamind-clones"),
         posting_enabled=read_bool(source, "POSTING_ENABLED", False),
+        stripe_price_id=source.get(PREFIX + "STRIPE_PRICE_ID", ""),
+        billing_success_url=source.get(PREFIX + "BILLING_SUCCESS_URL", ""),
+        billing_cancel_url=source.get(PREFIX + "BILLING_CANCEL_URL", ""),
         app_id=source.get(PREFIX + "APP_ID", ""),
         app_key_path=source.get(PREFIX + "APP_KEY_PATH", ""),
         oauth_client_id=source.get(PREFIX + "OAUTH_CLIENT_ID", ""),
