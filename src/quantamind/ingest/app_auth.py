@@ -56,11 +56,18 @@ REFRESH_MARGIN_S = 60
 
 
 class AuthFailed(RuntimeError):
-    """Carries the step that failed and what GitHub said. Never a bare failure."""
+    """Carries the step that failed and what GitHub said. Never a bare failure.
 
-    def __init__(self, step: str, reason: str) -> None:
+    **`status` IS A FIELD BECAUSE ONE CODE MEANS SOMETHING DIFFERENT FROM THE REST.** A 404 on the
+    installation lookup is the forge stating that the App is not installed — a fact about the
+    customer. Every other code, and every timeout, means we did not get an answer. A caller that
+    told those apart by searching `reason` for "404" would also match a 404 quoted inside a message
+    body. Zero means the failure never reached HTTP.
+    """
+
+    def __init__(self, step: str, reason: str, status: int = 0) -> None:
         super().__init__(f"{step}: {reason}")
-        self.step, self.reason = step, reason
+        self.step, self.reason, self.status = step, reason, status
 
 
 _cache: dict[str, tuple[str, float]] = {}
@@ -117,7 +124,7 @@ def _call(path: str, bearer: str, method: str = "GET") -> Any:
             return json.loads(reply.read() or b"null")
     except urllib.error.HTTPError as exc:
         body = (exc.read() or b"").decode("utf-8", "replace")[:160]
-        raise AuthFailed(f"{method} {path}", f"HTTP {exc.code}: {body}") from None
+        raise AuthFailed(f"{method} {path}", f"HTTP {exc.code}: {body}", exc.code) from None
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
         raise AuthFailed(f"{method} {path}", str(exc)[:160]) from None
 

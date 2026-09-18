@@ -13,8 +13,8 @@ WHY:  The CLI is not a convenience. It runs the retrospective, it is how a scept
       verified here is not what runs there.
 IMPORTS: stdlib (argparse, pathlib) and types.settings at module scope. Every command's
       implementation is imported INSIDE the branch that needs it, so `--version` and `config`
-      still answer when a layer below is broken — and every command now lives in
-      `serve/commands/`, which `retrospective` did not until it pushed this file over the cap.
+      still answer when a layer below is broken. The branch that chooses between them moved to
+      `serve/commands/dispatch.py` when `reconcile` pushed this file over the cap.
 CONSUMED BY: the `quantamind` entry point in pyproject.toml, and tests/unit.
 """
 
@@ -25,6 +25,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from quantamind import __version__
+from quantamind.serve.commands import dispatch
 from quantamind.types.settings import SettingsError, load
 
 # Commands named in AGENTS.md that have no implementation behind them yet. They parse and
@@ -44,6 +45,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     subparsers.add_parser("config", help="print the resolved configuration and exit")
     subparsers.add_parser("migrate", help="bring an existing store up to this build's schema")
+    mend = subparsers.add_parser(
+        "reconcile", help="ask the forge what it still covers; withdraw what it no longer lists"
+    )
+    mend.add_argument("--account", default="", help="one account; default is every live one")
     show = subparsers.add_parser(
         "dashboard", help="what we commented on, whether it merged, what production said"
     )
@@ -141,52 +146,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         return 2
 
-    if args.command == "serve":
-        from quantamind.serve.commands.run_endpoint import run
-
-        return run(args.port, args.host)
-
-    if args.command == "review":
-        from quantamind.serve.commands.run_commit import review_commit
-
-        return review_commit(
-            args.clone, args.repo, args.sha, deep_project=args.deep, as_json=args.as_json
-        )
-
-    if args.command == "scan":
-        from quantamind.serve.commands.run_scan import run_scan
-
-        return run_scan(args.clone, explain=args.explain)
-
-    if args.command == "retrospective":
-        from quantamind.serve.commands.run_retrospective import run_retrospective
-
-        return run_retrospective(args.clone, args.repo)
-
-    if args.command == "migrate":
-        from quantamind.serve.commands.run_migrate import run_migrate
-
-        return run_migrate()
-
-    if args.command == "standards":
-        from quantamind.serve.commands.run_standards import run_standards
-
-        return run_standards(args.repo, args.pulls)
-
-    if args.command == "compliance":
-        from quantamind.serve.commands.run_report import run_compliance
-
-        return run_compliance(args.repo, args.export)
-
-    if args.command == "cost":
-        from quantamind.serve.commands.run_report import run_cost
-
-        return run_cost(args.repo)
-
-    if args.command == "dashboard":
-        from quantamind.serve.commands.run_report import run_dashboard
-
-        return run_dashboard(args.repo, args.limit)
+    handled = dispatch.run(args)
+    if handled is not None:
+        return handled
 
     try:
         settings = load()
