@@ -105,15 +105,28 @@ never falls back to a default silently.
 
 **Syntax:** `quantamind migrate`
 
-**What:** brings an existing store up to this build's `SCHEMA_VERSION`. Exits 0 when the store is
-already current.
+**What:** brings **every store under `QUANTAMIND_DATABASE_PATH`** up to this build's
+`SCHEMA_VERSION` — `accounts.db`, `deliveries.db` and one `<owner>/<name>.db` per repository. Exits
+0 when they are all already current. A variable pointing at a single FILE migrates that file, which
+is the normal development setup.
 
 **Why it is a separate command and not automatic:** `store/schema.open_store()` **refuses** a
 database this build would corrupt rather than migrating it in place. A read path that silently
 migrated would rewrite a customer's audit trail as a side effect of somebody opening a dashboard.
 
-**Expected:** one line per migration applied, or a line saying the store is already at the current
-version. Exits 1 if the store cannot be read at all.
+**Expected:** one line per store, then a count. Exits 1 if ANY store did not move, naming each —
+a deploy script reads the exit code and never the log, and a partial migration that exits 0 is a
+service that starts, refuses the stores that did not move, and reports it nowhere.
+
+**It migrated one file until 2026-09-18, and production is a directory.** The deployed service sets
+`QUANTAMIND_DATABASE_PATH=/data/stores`, so the command ran `sqlite3.connect()` against a DIRECTORY
+and died with an unhandled `OperationalError`. Every test passed a single file, so nothing saw it.
+
+```
+[migrate] /data/stores/accounts.db: applied step(s) 9; store is at version 9
+[migrate] /data/stores/QuantaMinds/QuantaMind.db: applied step(s) 9; store is at version 9
+[migrate] 2/2 store(s) at this build's schema.
+```
 
 ---
 
