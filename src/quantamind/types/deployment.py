@@ -22,7 +22,8 @@ WHY:  **D7f. AN OUTBOUND CALL THAT FAILS QUIETLY IN A BANK IS A FINDING AGAINST 
       `scripts/guard/check_network_chokepoint.py` is what makes forgetting fail the build.
 IMPORTS: stdlib enum only. Nothing from any layer, because every layer must be able to ask.
 CONSUMED BY: `ingest/{github_api,app_auth,google_auth,context.elsewhere}`, `infer/vertex`,
-      `verify/releases`, `serve/{web.signin,working_clone}`, `ingest/payments/stripe_api`.
+      `verify/releases`, `serve/{web.signin,working_clone}`, `ingest/payments/stripe_api`,
+      `ingest/notify/resend_api`.
 """
 
 from __future__ import annotations
@@ -72,6 +73,15 @@ class Destination(Enum):
     signed order and never asks: an outbound call to a payment processor from inside a bank's
     network is a finding against us whether or not it succeeds, which is this module's whole
     argument applied to the one destination that involves money."""
+
+    NOTIFICATIONS = "notifications"
+    """Transactional email, through Resend. Outbound only; nothing arrives back on this route.
+
+    **PERMITTED ON-PREM FOR THE SAME REASON `PAYMENTS` IS, AND IT IS THE WEAKER CASE.** An
+    on-premises operator still has to be told when a review failed. But mail leaves through a
+    third party rather than through their own GitHub, so an operator who considers that egress
+    unacceptable has one lever: run the air-gapped shape, where this is refused by name before
+    the socket opens rather than discovered in their logs afterwards."""
 
 
 PERMITTED: dict[Shape, frozenset[Destination]] = {
